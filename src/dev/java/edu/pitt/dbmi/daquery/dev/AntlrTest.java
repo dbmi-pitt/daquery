@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.ddaquery.dev;
+package edu.pitt.dbmi.daquery.dev;
 
 //import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
