@@ -8,7 +8,7 @@
         </encoder>
     </appender>
 
-    <logger name="edu.pitt.dbmi.ddaquery.ui.model.account">
+    <logger name="edu.pitt.dbmi.daquery.ui.model.account">
         <level value="debug"/>
     </logger>
 

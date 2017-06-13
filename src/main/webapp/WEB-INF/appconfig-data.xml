@@ -22,7 +22,7 @@
     <!-- Configure the entity manager factory bean -->
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="packagesToScan" value="edu.pitt.dbmi.ddaquery.ui"/>
+        <property name="packagesToScan" value="edu.pitt.dbmi.daquery.ui"/>
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
         </property>
@@ -48,6 +48,6 @@
       repository interfaces
     -->
 
-    <jpa:repositories base-package="edu.pitt.dbmi.ddaquery.ui.repository"/>
+    <jpa:repositories base-package="edu.pitt.dbmi.daquery.ui.repository"/>
 
 </beans>

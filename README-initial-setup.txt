@@ -10,4 +10,4 @@
 
 --build with: mvn install
 
---deploy target/ddaquery-1.0-SNAPSHOT.war in Tomcat as ddaquery.war
+--deploy target/daquery-1.0-SNAPSHOT.war in Tomcat as daquery.war
