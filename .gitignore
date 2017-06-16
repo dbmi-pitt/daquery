@@ -4,6 +4,9 @@ target
 
 *~
 
+.metadata
+RemoteSystemsTempFiles
+
 # Compiled class file
 *.class
 
