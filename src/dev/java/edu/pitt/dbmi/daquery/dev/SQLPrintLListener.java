@@ -13,6 +13,7 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser;
 public class SQLPrintLListener extends AbstractSQLListener
 {
 
+	long pc = 0;
 	List<SQLFragment> chunks = new ArrayList<SQLFragment>();
 
 	private void addChunk(String val)
@@ -42,15 +43,25 @@ public class SQLPrintLListener extends AbstractSQLListener
 	@Override
 	public void enterSql_stmt(SQLiteParser.Sql_stmtContext ctx)
 	{
-		addChunk("Sql_stmt:" + ctx.getText());
+		addChunk("Sql_stmt:" + ctx.getText() + " DEPTH:" + ctx.depth());
 	}
-	
+
+	@Override
+	public void exitSql_stmt(SQLiteParser.Sql_stmtContext ctx)
+	{
+		addChunk("EXIT: Sql_stmt:" + ctx.getText() + " DEPTH:" + ctx.depth());
+	}
+		
 	@Override
 	public void enterSelect_stmt(SQLiteParser.Select_stmtContext ctx)
 	{
-		addChunk("Select_stmt:" + ctx.getText());
+		addChunk("Select_stmt:" + ctx.getText() + " DEPTH:" + ctx.depth());
 	}
-
+	@Override
+	public void exitSelect_stmt(SQLiteParser.Select_stmtContext ctx)
+	{
+		addChunk("EXIT: Select_stmt:" + ctx.getText() + " DEPTH:" + ctx.depth());
+	}
 	@Override
 	public void enterSimple_select_stmt(SQLiteParser.Simple_select_stmtContext ctx)
 	{
