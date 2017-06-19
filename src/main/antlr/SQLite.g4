@@ -319,9 +319,8 @@ expr
  | expr ( '+' | '-' ) expr
  | expr ( '<<' | '>>' | '&' | '|' ) expr
  | expr ( '<' | '<=' | '>' | '>=' ) expr
- | expr ( '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | K_IN | K_LIKE | K_GLOB | K_MATCH | K_REGEXP ) expr
- | expr K_AND expr
- | expr K_OR expr
+ | expr ( comparison_operator ) expr
+ | expr and_or expr
  | count_function
  | function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
  | '(' expr ')'
@@ -339,6 +338,10 @@ expr
  | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'
  | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END
  | raise_function
+ ;
+
+comparison_operator
+ : '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | in_keyword | like_keyword | K_GLOB | K_MATCH | K_REGEXP
  ;
 
 foreign_key_clause
@@ -616,6 +619,30 @@ count_function
  : K_COUNT '(' ( distinct_keyword? column_name | '*' )? ')'
  ;
 
+and_keyword
+ : K_AND
+ ;
+
+or_keyword
+ : K_OR
+ ;
+
+and_or
+ : K_OR | K_AND
+ ;
+
+not_keyword
+ : K_NOT
+ ;
+
+in_keyword
+ : K_IN
+ ;
+
+like_keyword
+ : K_LIKE
+ ;
+ 
 distinct_keyword
  : K_DISTINCT
  ;

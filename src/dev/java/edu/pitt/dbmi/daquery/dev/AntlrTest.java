@@ -19,7 +19,8 @@ public class AntlrTest
 	{
 		//printParse("select count(distinct lmno) as lkjjl from blech;\nselect imzat(abcd) from gef;");
 		//printParse("select distinct a.val as cnt, b.value bv, c.value as cv from TA a, TB b, (select bid, value from TC) c where b.AID = a.AID and c.bid = b.bid order by b.value;");
-		printParse("select a from b, (select z from d, (select l from o));");
+		//printParse("select a from b, (select z from d, (select l from o));");
+		printParse("select col1 as alias1, col2 alias2 from tableA aliasA where col2 = 7 and (col3 = '5' or col4 = 6)");
 	}
 	
 	private static void printParse(String sql) {
@@ -35,6 +36,7 @@ public class AntlrTest
 
         SQLPrintVisitor classVisitor = new SQLPrintVisitor();
         classVisitor.visit(parser.sql_stmt_list());
+        classVisitor.printTree();
         	
 	}
 }
