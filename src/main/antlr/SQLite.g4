@@ -312,7 +312,7 @@ conflict_clause
 expr
  : literal_value
  | BIND_PARAMETER
- | ( ( database_name '.' )? table_name '.' )? column_name
+ | dbColumnExpr
  | unary_operator expr
  | expr '||' expr
  | expr ( '*' | '/' | '%' ) expr
@@ -340,6 +340,10 @@ expr
  | raise_function
  ;
 
+dbColumnExpr
+ :
+ | ( ( database_name '.' )? table_name '.' )? column_name
+ ;
 comparison_operator
  : '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | in_keyword | like_keyword | K_GLOB | K_MATCH | K_REGEXP
  ;
