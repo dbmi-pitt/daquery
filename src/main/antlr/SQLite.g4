@@ -410,6 +410,7 @@ result_column
  : '*'
  | table_name '.' '*'
  | dbColumnExpr
+ | count_function
  ;
 
 table_or_subquery
@@ -628,7 +629,7 @@ name
  ;
 
 count_function
- : K_COUNT '(' ( distinct_keyword? column_name | '*' )? ')'
+ : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' )? ')'
  ;
 
 and_keyword
