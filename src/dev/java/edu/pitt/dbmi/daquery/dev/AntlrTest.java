@@ -18,7 +18,7 @@ public class AntlrTest
 		//printParse("delete from tbl");
 		//printParse("update table set a = b");		
 		//printParse("select aliasA.col1 as alias1, tableA.col2 alias2 from tableA aliasA, where mySchema.tableA.col2 = 7 and (aliasA.col3 = '5' or col4 = 6)");
-		printParse("select a from b where x = 1.2;");
+		printParse("select schemaA.tableA.fieldA as fa, tb.fieldB as fb from schemaA.tableA, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc';");
 	}
 	
 	private static void printParse(String sql) {

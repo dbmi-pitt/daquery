@@ -142,16 +142,20 @@ create_virtual_table_stmt
  ;
 
 delete_stmt
- : with_clause? K_DELETE K_FROM qualified_table_name 
+ : with_clause? K_DELETE single_from_clause
    ( K_WHERE expr )?
  ;
 
 delete_stmt_limited
- : with_clause? K_DELETE K_FROM qualified_table_name 
+ : with_clause? K_DELETE single_from_clause
    ( K_WHERE expr )?
    ( ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
      K_LIMIT expr ( ( K_OFFSET | ',' ) expr )?
    )?
+ ;
+
+single_from_clause
+ : K_FROM qualified_table_name
  ;
 
 detach_stmt
@@ -234,7 +238,7 @@ select_stmt
 
 select_or_values
  : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
-   ( K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause ) )?
+   ( multi_from_clause )?
    ( K_WHERE expr )?
    ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
  | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
@@ -342,7 +346,7 @@ expr
 
 dbColumnExpr
  :
- | ( ( database_name '.' )? table_name '.' )? column_name
+ | ( ( database_name '.' )? table_name '.' )? column_name ( K_AS? column_alias )?
  ;
 comparison_operator
  : '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | in_keyword | like_keyword | K_GLOB | K_MATCH | K_REGEXP
@@ -405,7 +409,7 @@ common_table_expression
 result_column
  : '*'
  | table_name '.' '*'
- | expr ( K_AS? column_alias )?
+ | dbColumnExpr
  ;
 
 table_or_subquery
@@ -434,10 +438,14 @@ join_constraint
 
 select_core
  : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
-   ( K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause ) )?
+   ( multi_from_clause )?
    ( K_WHERE expr )?
    ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
  | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
+ ;
+
+multi_from_clause
+ : K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause )
  ;
 
 compound_operator

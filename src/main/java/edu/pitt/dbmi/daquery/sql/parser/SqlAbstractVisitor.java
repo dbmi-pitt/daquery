@@ -573,5 +573,19 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		visitChildren(ctx);
 		return null;
 	}
+	
+	@Override public Object visitSingle_from_clause(SQLiteParser.Single_from_clauseContext ctx)
+	{
+		addToTree(ctx);
+		visitChildren(ctx);
+		return null;
+	}
+	
+	@Override public Object visitMulti_from_clause(SQLiteParser.Multi_from_clauseContext ctx)
+	{
+		addToTree(ctx);
+		visitChildren(ctx);
+		return null;
+	}
 }
 
