@@ -1,5 +1,5 @@
 Sql_stmt_listContext
-  Sql_stmtContext - only a single one allowed and must be a single one.  No other children allowed for Sql_stmt_listContext
+  Sql_stmtContext - only a single one allowed and must be a single one.  No other children allowed for Sql_stmt_listContexte
 
 Result_columnContxt
   DbColumnExprContext
