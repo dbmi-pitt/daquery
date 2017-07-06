@@ -9,8 +9,34 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteBaseVisitor;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser;
 
 public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
-{	
-	protected abstract void addToTree(ParserRuleContext ctx);
+{
+	protected TreeNode topNode = null;
+	protected Hashtable<ParserRuleContext, TreeNode> nodes = new Hashtable<ParserRuleContext, TreeNode>();
+
+	protected abstract void handleNode(TreeNode node);
+	
+	protected void addToTree(ParserRuleContext ctx)
+	{
+		ParserRuleContext parentCTX = ctx.getParent();
+		String cName = ctx.getClass().getSimpleName();
+		if(parentCTX == null && topNode != null)
+		{
+			System.err.println("ERROR: Two top level nodes found second node is: " + cName);
+			System.exit(1);
+		}
+		TreeNode myNode = new TreeNode();
+		myNode.self = ctx;
+		nodes.put(ctx, myNode);
+		if(topNode == null)
+			topNode = myNode;
+		if(parentCTX != null)
+		{
+			myNode.parent = nodes.get(parentCTX);
+			myNode.parent.children.add(myNode);
+		}
+		
+		handleNode(myNode);
+	}
 	
 	@Override public Object visitParse(SQLiteParser.ParseContext ctx)
 	{

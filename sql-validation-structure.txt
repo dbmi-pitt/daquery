@@ -20,7 +20,6 @@ Result_columnContext
 Table_or_subqueryContext
   Database_nameContext
   Table_nameContext
-
   Table_aliasContext
 
 Table_or_subqueryContext

@@ -17,9 +17,9 @@ public class AntlrTest
 		//printParse("select a from b, (select z from d, (select l from o));");
 		//printParse("delete from tbl");
 		//printParse("update table set a = b");
-		printParse("insert into tbl (c1, c2, c3) values (v1, v2, v3)");
+		//printParse("insert into tbl (c1, c2, c3) values (v1, v2, v3)");
 		//printParse("select aliasA.col1 as alias1, tableA.col2 alias2 from tableA aliasA, where mySchema.tableA.col2 = 7 and (aliasA.col3 = '5' or col4 = 6)");
-		//printParse("select count(distinct abcd.xycd.blec as mmmmm) from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc';");
+		printParse("select count(distinct abcd.xycd.blec as mmmmm) from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc';");
 	}
 	
 	private static void printParse(String sql) {
