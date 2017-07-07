@@ -1,0 +1,46 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-solid box-default">
+            <div class="box-header">New Query</div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="datatype">Data Type</label>
+                            <label class="radio-inline"><input type="radio" name="datatype">Aggregate</label>
+                            <label class="radio-inline"><input type="radio" name="datatype">Data</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="query">SQL</label>
+                            <tabset>
+                                <tab heading="Oracle Query">
+                                    <textarea class="form-control" rows="5" id="oracle_query"></textarea>
+                                </tab>
+                                <tab heading="SQL Server Query">
+                                    <textarea class="form-control" rows="5" id="sql_query"></textarea>
+                                </tab>
+                            </tabset>
+                        </div>
+                        <div class="form-group">
+                            <label for="sites">Site to Query</label>
+                            <div class="checkbox">
+                                <label class="checkbox-inline"><input type="checkbox" value="">PITT</label><br /> 
+                                <label class="checkbox-inline"><input type="checkbox" value="">PSU</label><br />
+                                <label class="checkbox-inline"><input type="checkbox" value="">Geisinger</label><br />
+                                <label class="checkbox-inline"><input type="checkbox" value="">Temple</label><br />
+                                <label class="checkbox-inline"><input type="checkbox" value="">Utah</label><br />
+                                <label class="checkbox-inline"><input type="checkbox" value="">JHU</label>
+                            </div>
+                        </div>
+                        <button class="btn btn-default">Test Local</button>
+                        <button class="btn btn-primary">Run Query</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

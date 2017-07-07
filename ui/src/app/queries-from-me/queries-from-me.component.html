@@ -1,0 +1,16 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h1 class="page-header">Queries from me</h1>
+
+  <div class="row placeholders">
+    <app-widget></app-widget>
+    <app-widget></app-widget>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 placeholder">
+        <button class="btn btn-primary" (click)="showNewQuery=!showNewQuery">New Query</button>
+    </div>
+  </div>
+  <app-new-query *ngIf="showNewQuery"></app-new-query>
+  <app-queries-from-me-list></app-queries-from-me-list>
+</div>
