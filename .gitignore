@@ -12,6 +12,7 @@ RemoteSystemsTempFiles
 
 # Config Files Containing Passwords
 hibernate.cfg.xml
+persistence.xml
 
 # Log file
 *.log

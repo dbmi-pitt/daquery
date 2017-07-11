@@ -2,13 +2,16 @@ package edu.pitt.dbmi.daquery.rest;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import edu.pitt.dbmi.daquery.domain.User;
+import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
 import edu.pitt.dbmi.daquery.util.PasswordUtils;
+//import edu.pitt.dbmi.daquery.persistence.HibernateUtil;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
@@ -16,6 +19,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import javax.persistence.Query;
+import org.hibernate.Session;
+
 import java.security.Key;
 //works for Java 1.8
 //import java.time.LocalDateTime;
@@ -26,10 +33,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+
+//import edu.pitt.dbmi.daquery.persistence.PersistenceManager;
+import org.hibernate.*;
+import edu.pitt.dbmi.daquery.domain.Site_User;
 
 /**
  * @author Antonio Goncalves
@@ -56,24 +66,23 @@ public class UserEndpoint {
     // =          Business methods          =
     // ======================================
 
-    @POST
+    @GET
     @Path("/login")
-    @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response authenticateUser(@FormParam("login") String login,
-                                     @FormParam("password") String password) {
+    public Response authenticateUser(@QueryParam("login") String login,
+                                     @QueryParam("password") String password) {
 
         try {
 
             logger.info("#### login/password : " + login + "/" + password);
 
             // Authenticate the user using the credentials provided
-            //authenticate(login, password);
+            authenticate(login, password);
             
             
-            if (!login.equalsIgnoreCase("demo") ||
+            /*if (!login.equalsIgnoreCase("demo") ||
             		!password.equalsIgnoreCase("demouser")) {
             	throw new Exception("invalid username/password");
-            }
+            }*/
 
             // Issue a token for the user
             String token = issueToken(login);
@@ -87,13 +96,17 @@ public class UserEndpoint {
     }
 
     private void authenticate(String login, String password) throws Exception {
-        TypedQuery<User> query = null;//em.createNamedQuery(User.FIND_BY_LOGIN_PASSWORD, User.class);
+    	logger.info("searching for #### login/password : " + login + "/" + password);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-example");
+        EntityManager em = emf.createEntityManager();
+        Query query = em.createQuery("SELECT u FROM Site_User u WHERE u.login = :login AND u.password = :password");
         query.setParameter("login", login);
         query.setParameter("password", PasswordUtils.digestPassword(password));
-        User user = query.getSingleResult();
+        Site_User user = (Site_User)query.getSingleResult();
 
         if (user == null)
             throw new SecurityException("Invalid user/password");
+            
     }
 
     private String issueToken(String login) {
@@ -117,15 +130,34 @@ public class UserEndpoint {
     }
 
     @POST
-    public Response create(User user) {
-        //em.persist(user);
-        return Response.created(uriInfo.getAbsolutePathBuilder().path(user.getId()).build()).build();
+    @Path("/newuser")
+    public Response create(@QueryParam("login") String login,
+                           @QueryParam("password") String password) {
+
+    	String loggermsg = "login=" + login + " password=" + password;
+        logger.info("Trying to create user with: " + loggermsg);
+        //EntityManager em = PersistenceManager.INSTANCE.getEntityManager();\
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-example");
+        EntityManager em = emf.createEntityManager();
+
+        em.getTransaction().begin();
+
+        Site_User newUser = new Site_User(login, password);
+        em.persist(newUser);
+
+        em.getTransaction().commit();
+
+        em.close();
+       
+        logger.info("Done trying to create user: " + newUser.toString());
+        
+        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
     }
 
     @GET
     @Path("/{id}")
     public Response findById(@PathParam("id") String id) {
-        User user = null;//em.find(User.class, id);
+        Site_User user = null;//em.find(User.class, id);
 
         if (user == null)
             return Response.status(NOT_FOUND).build();
@@ -135,14 +167,18 @@ public class UserEndpoint {
 
     @GET
     public Response findAllUsers() {
-        TypedQuery<User> query = null;//em.createNamedQuery(User.FIND_ALL, User.class);
-        List<User> allUsers = query.getResultList();
+/*    	Session session = HibernateUtil.getSessionFactory().openSession();
+    	Query query = session.createQuery("SELECT u FROM SITE_USER u ORDER BY u.lastName DESC");
+        //TypedQuery<User> query = null;//em.createNamedQuery(User.FIND_ALL, User.class);
+        List<User> allUsers = query.list();
 
         if (allUsers == null)
             return Response.status(NOT_FOUND).build();
 
         return Response.ok(allUsers).build();
-    }
+        
+*/      return null;
+    	}
 
     @DELETE
     @Path("/{id}")
