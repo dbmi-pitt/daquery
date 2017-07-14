@@ -1,33 +1,42 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { HttpModule } from '@angular/http';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 
 import { AppComponent } from './app.component';
-import { NavbarComponent } from './navbar/navbar.component';
-import { SidebarComponent } from './sidebar/sidebar.component';
-import { WidgetComponent } from './widget/widget.component';
-import { QueriesToMeComponent } from './queries-to-me/queries-to-me.component';
-import { QueriesToMeListComponent } from './queries-to-me/queries-to-me-list/queries-to-me-list.component';
-import { appRoutes } from '../routes';
-import { QueriesFromMeComponent } from './queries-from-me/queries-from-me.component';
-import { SitesComponent } from './sites/sites.component';
-import { UsersComponent } from './users/users.component';
-import { QueriesFromMeListComponent } from './queries-from-me/queries-from-me-list/queries-from-me-list.component';
-import { SiteComponent } from './sites/site/site.component';
-import { LocalUserComponent } from './users/local-user/local-user.component';
-import { AddUserComponent } from './users/add-user/add-user.component';
-import { AddSiteComponent } from './sites/add-site/add-site.component';
-import { NewQueryComponent } from './queries-from-me/new-query/new-query.component';
-import { ReviewQueryComponent } from './queries-to-me/review-query/review-query.component';
-import { SampleDataComponent } from './queries-to-me/review-query/sample-data/sample-data.component';
-import { ManageUsersComponent } from './sites/site/manage-users/manage-users.component';
-import { RemoteUserComponent } from './sites/site/manage-users/remote-user/remote-user.component';
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { WidgetComponent } from './components/widget/widget.component';
+import { QueriesToMeComponent } from './components/queries-to-me/queries-to-me.component';
+import { QueriesToMeListComponent } from './components/queries-to-me/queries-to-me-list/queries-to-me-list.component';
+import { routing }        from './app.routing';
+import { QueriesFromMeComponent } from './components/queries-from-me/queries-from-me.component';
+import { SitesComponent } from './components/sites/sites.component';
+import { UsersComponent } from './components/users/users.component';
+import { QueriesFromMeListComponent } from './components/queries-from-me/queries-from-me-list/queries-from-me-list.component';
+import { SiteComponent } from './components/sites/site/site.component';
+import { LocalUserComponent } from './components/users/local-user/local-user.component';
+import { AddUserComponent } from './components/users/add-user/add-user.component';
+import { AddSiteComponent } from './components/sites/add-site/add-site.component';
+import { NewQueryComponent } from './components/queries-from-me/new-query/new-query.component';
+import { ReviewQueryComponent } from './components/queries-to-me/review-query/review-query.component';
+import { SampleDataComponent } from './components/queries-to-me/review-query/sample-data/sample-data.component';
+import { ManageUsersComponent } from './components/sites/site/manage-users/manage-users.component';
+import { RemoteUserComponent } from './components/sites/site/manage-users/remote-user/remote-user.component';
+import { LoginComponent } from './components/login/login.component';
 
-import { QueryService } from './shared/query.service';
-import { SiteService } from './shared/site.service';
-import { UserService } from './shared/user.service';
+import { AuthGuard } from './_guards/auth.guard';
+import { AuthenticationService } from './services/authentication.service';
+import { QueryService } from './services/query.service';
+import { SiteService } from './services/site.service';
+import { UserService } from './services/user.service';
+
+// used to create fake backend
+import { fakeBackendProvider } from './_helpers/fake-backend';
+import { MockBackend, MockConnection } from '@angular/http/testing';
+import { BaseRequestOptions } from '@angular/http';
 
 @NgModule({
   declarations: [
@@ -50,14 +59,26 @@ import { UserService } from './shared/user.service';
     SampleDataComponent,
     ManageUsersComponent,
     RemoteUserComponent,
+    LoginComponent,
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    RouterModule.forRoot(appRoutes),
+    HttpModule,
+    ReactiveFormsModule,
+    routing,
     TabsModule.forRoot(),
   ],
-  providers: [QueryService, SiteService, UserService],
+  providers: [AuthGuard, 
+              AuthenticationService,
+              QueryService,
+              SiteService,
+              UserService,
+              // providers used to create fake backend
+              // fakeBackendProvider,
+              // MockBackend,
+              // BaseRequestOptions
+             ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

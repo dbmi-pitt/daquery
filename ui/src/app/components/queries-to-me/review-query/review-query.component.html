@@ -1,0 +1,45 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h1 class="page-header">Query 1 </h1>
+
+  <div class="row placeholder">
+      <div class="col-md-12">
+          <tabset>
+            <tab heading="Oracle Query">
+                <pre>SELECT * FROM Table1 WHERE Col1='1'; DROP ALL TABLES;</pre>
+            </tab>
+            <tab heading="SQL Server Query">
+                <pre>SELECT * FROM Table1 WHERE Col1='1'; DROP ALL TABLES;</pre>
+            </tab>
+          </tabset>
+      </div>
+  </div>
+
+  <div class="row placeholder">
+      <div class="col-md-12">
+          <div class="box box-solid box-danger">
+              <div class="box-header">Improve it</div>
+              <div class="box-body">
+                <div class="form-group">
+                    <textarea class="form-control" rows="5" id="improve_query"></textarea> 
+                </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="row placeholder">
+      <div class="col-md-12">
+          <app-sample-data></app-sample-data>
+      </div>
+  </div>
+
+  <div class="row placeholder">
+      <div class="col-md-12">
+        <div class="pull-right">
+          <a class="mr-20" [routerLink]="['/queries-to-me']">Back</a>
+          <button class="btn btn-danger">Deny</button>
+          <button class="btn btn-success">Approve</button>
+        </div>
+      </div>
+  </div>
+</div>

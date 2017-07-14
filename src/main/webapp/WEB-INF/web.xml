@@ -23,7 +23,13 @@
 
 	<servlet-mapping>
 		<servlet-name>daquery</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/ws/*</url-pattern>
 	</servlet-mapping>
+	
+	<welcome-file-list>
+        <welcome-file>ui/index.html</welcome-file>
+        <welcome-file>ui/index.htm</welcome-file>
+        <welcome-file>ui/index.jsp</welcome-file>
+    </welcome-file-list>
 
 </web-app>

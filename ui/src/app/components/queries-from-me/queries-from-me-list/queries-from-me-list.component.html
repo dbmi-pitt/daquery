@@ -1,0 +1,40 @@
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Query Name</th>
+        <th>Type</th>
+        <th>Date/Time</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody *ngFor="let query of queries">
+      <tr>
+        <td><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !query.active, 'fa-minus-square-o': query.active}" (click)="query.active = !query.active"></i> {{query.name}}</td>
+        <td>{{query.type}}</td>
+        <td>{{query.datetime}}</td>
+        <td>{{createQueryStatusSummary(query)}}</td>
+      </tr>
+      <tr *ngIf="query.active">
+        <td colspan="4">
+          <table class="table table-condensed table-striped">
+            <thead>
+              <tr>
+                <th>Site</th>
+                <th>Status</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let response of query.responses">
+                <td>{{response.site}}</td>
+                <td>{{response.status}}</td>
+                <td>{{response.result}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

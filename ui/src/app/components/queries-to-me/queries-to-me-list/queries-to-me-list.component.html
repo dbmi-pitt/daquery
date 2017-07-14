@@ -1,0 +1,32 @@
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Study Name</th>
+        <th>Query Name</th>
+        <th>Type</th>
+        <th>From</th>
+        <th>Date/Time</th>
+        <th>Status</th>
+
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let query of queries">
+        <td>{{query.studyName}}</td>
+        <td><a [routerLink]="['/review-query', 1]">{{query.name}}</a></td>
+        <td>{{query.type}}</td>
+        <td>{{query.site}}-{{query.username}}</td>
+        <td>{{query.datetime}}</td>
+        <td>{{query.status}}</td>
+        <td *ngIf="query.status === 'pending'">
+          <button class="btn btn-success">Approve</button>
+          <button class="btn btn-danger">Deny</button>
+        </td>
+        <td *ngIf="query.status !== 'pending'">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

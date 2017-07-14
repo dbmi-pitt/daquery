@@ -1,0 +1,58 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-solid box-default">
+      <div class="box-header">New Query</div>
+      <div class="box-body">
+        <div class="row">
+          <div class="col-md-12">
+            <form [formGroup]="queryForm" (submit)="onSubmit()">
+              <div class="form-group radio">
+                <label for="dataType">Data Type</label>
+                <label class="radio-inline"><input type="radio" formControlName="dataType" value="aggregate">Aggregate</label>
+                <label class="radio-inline"><input type="radio" formControlName="dataType" value="data">Data</label>
+              </div>
+              <div class="form-group">
+                <label for="name">Query Name</label>
+                <input type="text" class="form-control" id="query-name" formControlName="queryName">
+              </div>
+              <div class="form-group">
+                <label for="name">Study Name</label>
+                <input type="text" class="form-control" id="study-name" formControlName="studyName">
+              </div>
+              <div class="form-group">
+                <label for="name">Query Description</label>
+                <input type="text" class="form-control" id="query-description" formControlName="queryDescription">
+              </div>
+              <div class="form-group">
+                <label for="query">SQL</label>
+                <tabset>
+                  <tab heading="Oracle Query">
+                    <textarea class="form-control" rows="5" id="oracle_query" formControlName="oracleQuery"></textarea>
+                  </tab>
+                  <tab heading="SQL Server Query">
+                    <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery"></textarea>
+                  </tab>
+                </tabset>
+              </div>
+              <!-- <div formArrayName="sitesToQuery" class="well well-lg">
+                <div class="form-group">
+                  <label for="sites">Site to Query</label>
+                  <div class="checkbox">
+                    <ul class="unstyle-list">
+                      <li *ngFor="let site of sitesToQuery.controls; let i=index" [formGroupName]="i">
+                        <label class="checkbox-inline"><input type="checkbox" value="" formControlName="check">#{{i+1}} {{site.name}}</label>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div> -->
+              <button class="btn btn-default">Test Local</button>
+              <button class="btn btn-primary">Run Query</button>
+              <p>{{ queryForm.value | json }}</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
