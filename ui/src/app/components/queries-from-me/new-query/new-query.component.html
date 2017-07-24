@@ -34,18 +34,18 @@
                   </tab>
                 </tabset>
               </div>
-              <!-- <div formArrayName="sitesToQuery" class="well well-lg">
+              <div formArrayName="sitesToQuery" class="well well-lg">
                 <div class="form-group">
                   <label for="sites">Site to Query</label>
                   <div class="checkbox">
-                    <ul class="unstyle-list">
+                    <ul class="list-unstyled">
                       <li *ngFor="let site of sitesToQuery.controls; let i=index" [formGroupName]="i">
-                        <label class="checkbox-inline"><input type="checkbox" value="" formControlName="check">#{{i+1}} {{site.name}}</label>
+                        <label class="checkbox-inline"><input type="checkbox" value="" formControlName="check">{{site.controls.name._value}}</label>
                       </li>
                     </ul>
                   </div>
                 </div>
-              </div> -->
+              </div>
               <button class="btn btn-default">Test Local</button>
               <button class="btn btn-primary">Run Query</button>
               <p>{{ queryForm.value | json }}</p>

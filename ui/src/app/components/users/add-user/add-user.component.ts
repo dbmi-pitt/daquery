@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, FormGroup, Validators } from '@angular/forms';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-add-user',
@@ -7,8 +9,65 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AddUserComponent implements OnInit {
 
-  constructor() { }
+  userForm: FormGroup;
+  @Output()
+  showAddUser = new EventEmitter<boolean>();
+  @Output()
+  newUser = new EventEmitter<any>();
+  constructor(private fb: FormBuilder, private userService: UserService) { }
 
   ngOnInit() {
+    this.createForm();
+  }
+
+  createForm() {
+    this.userForm = this.fb.group({
+      username: [null, Validators.required],
+      password: [null, Validators.required],
+      password_confirmation: [null, Validators.required]
+    });
+
+    this.userForm.valueChanges.subscribe(data => this.onValueChange(data));
+  }
+
+  onValueChange(data?: any) {
+    if(!this.userForm) { return; }
+    const form = this.userForm;
+
+    for (const field in this.formErrors) {
+      this.formErrors[field] = '';
+      const control = form.get(field);
+
+      if(control && control.dirty && !control.valid) {
+        const messages = this.validationMessages[field];
+        for(const key in control.errors) {
+          this.formErrors[field] += messages[key] + ' ';
+        }
+      }
+    }
+  }
+
+  onSubmit() {
+    this.userService.createUser(this.userForm.value)
+                    .subscribe(res => this.newUser.emit(res));
+    this.showAddUser.emit(false);
+  }
+
+  formErrors = {
+    'username': '',
+    'password': '',
+    'password_confirmation': ''
+  }
+
+  validationMessages = {
+    'username': {
+      'required': 'Username is required'
+    },
+    'password': {
+      'required': 'Password is required'
+    },
+    'password_confirmation': {
+      'required': 'Password Confirmation is required'
+    }
   }
 }

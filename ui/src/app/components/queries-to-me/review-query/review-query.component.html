@@ -1,14 +1,14 @@
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-  <h1 class="page-header">Query 1 </h1>
+  <h1 class="page-header">{{ query.name }}</h1>
 
   <div class="row placeholder">
       <div class="col-md-12">
           <tabset>
             <tab heading="Oracle Query">
-                <pre>SELECT * FROM Table1 WHERE Col1='1'; DROP ALL TABLES;</pre>
+                <pre>{{ query.oracleQuery }}</pre>
             </tab>
             <tab heading="SQL Server Query">
-                <pre>SELECT * FROM Table1 WHERE Col1='1'; DROP ALL TABLES;</pre>
+                <pre>{{ query.sqlQuery }}</pre>
             </tab>
           </tabset>
       </div>

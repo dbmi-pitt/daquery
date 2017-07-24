@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { Site } from '../../../models/site.model';
 
 @Component({
   selector: 'app-site',
@@ -9,7 +10,7 @@ export class SiteComponent implements OnInit {
   showManageUser = false;
 
   @Input()
-  site: any;
+  site: Site;
 
   constructor() { }
 

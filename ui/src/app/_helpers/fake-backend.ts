@@ -2,74 +2,205 @@ import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } fr
 import { MockBackend, MockConnection } from '@angular/http/testing';
 
 export let fakeBackendProvider = {
-    // use fake backend in place of Http service for backend-less development
-    provide: Http,
-    useFactory: (backend: MockBackend, options: BaseRequestOptions) => {
-        // configure fake backend
-        backend.connections.subscribe((connection: MockConnection) => {
-            let testUser = { username: 'test', password: 'test', firstName: 'Test', lastName: 'User' };
+  // use fake backend in place of Http service for backend-less development
+  provide: Http,
+  useFactory: (backend: MockBackend, options: BaseRequestOptions) => {
+    // configure fake backend
+    backend.connections.subscribe((connection: MockConnection) => {
+      let testUser = { username: 'test', password: 'test', firstName: 'Test', lastName: 'User' };
 
-            // wrap in timeout to simulate server api call
-            setTimeout(() => {
+      // wrap in timeout to simulate server api call
+      setTimeout(() => {
 
-                // fake authenticate api end point
-                if (connection.request.url.endsWith('/daquery/ws/users/login') && connection.request.method === RequestMethod.Post) {
-                    // get parameters from post request
-                    let params = JSON.parse(connection.request.getBody());
+        // authenticate user
+        if (connection.request.url.endsWith('/daquery/ws/users/login') && connection.request.method === RequestMethod.Post) {
+          // get parameters from post request
+          let params = JSON.parse(connection.request.getBody());
 
-                    // check user credentials and return fake jwt token if valid
-                    if (params.username === testUser.username && params.password === testUser.password) {
-                        connection.mockRespond(new Response(
-                            new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
-                        ));
-                    } else {
-                        connection.mockRespond(new Response(
-                            new ResponseOptions({ status: 200 })
-                        ));
-                    }
-                }
+          // check user credentials and return fake jwt token if valid
+          if (params.username === testUser.username && params.password === testUser.password) {
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
+            ));
+          } else {
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200 })
+            ));
+          }
+        }
 
-                // fake users api end point
-                if (connection.request.url.endsWith('/daquery/ws/queries-from-me') && connection.request.method === RequestMethod.Get) {
-                    // check for fake auth token in header and return test users if valid, this security is implemented server side
-                    // in a real application
-                    if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-                        connection.mockRespond(new Response(
-                            new ResponseOptions({ status: 200, body: QUERIES_FROM_ME })
-                        ));
-                    } else {
-                        // return 401 not authorised if token is null or invalid
-                        connection.mockRespond(new Response(
-                            new ResponseOptions({ status: 401 })
-                        ));
-                    }
-                }
+        // get queries from me
+        if (connection.request.url.endsWith('/daquery/ws/queries-from-me') && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: QUERIES_FROM_ME })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
 
-                // fake users api end point
-                if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Get) {
-                    // check for fake auth token in header and return test users if valid, this security is implemented server side
-                    // in a real application
-                    if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-                        connection.mockRespond(new Response(
-                            new ResponseOptions({ status: 200, body: [testUser] })
-                        ));
-                    } else {
-                        // return 401 not authorised if token is null or invalid
-                        connection.mockRespond(new Response(
-                            new ResponseOptions({ status: 401 })
-                        ));
-                    }
-                }
+        // get queries to me
+        if (connection.request.url.endsWith('/daquery/ws/queries-to-me') && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: QUERIES_TO_ME })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
+
+        // get query to me by id
+        if (/\/daquery\/ws\/query-to-me\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            let id = +connection.request.url.substring(connection.request.url.lastIndexOf('/') + 1);
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: QUERIES_TO_ME.filter(query => query.id === id)[0] })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
+
+        // get sites
+        if (connection.request.url.endsWith('/daquery/ws/sites') && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: SITES })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
+
+        // get users
+        if (connection.request.url.endsWith('/daquery/ws/users') && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: USERS })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
+
+        // get remote users by site
+        if (connection.request.url.includes('/daquery/ws/remote-site-users?') && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: REMOTE_SITE_USERS.filter(rsu => rsu.site === 'PITT')[0].users })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
+
+        // add user
+        if (connection.request.url.endsWith('/daquery/ws/users') && connection.request.method === RequestMethod.Post) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            let entity = JSON.parse(connection.request.getBody());
+            USERS.push({"id": 4, "username": entity.username, "signupAt": "2017-07-03T10:12:44.321Z",
+                        "roles": {
+                          "is_admin": false,
+                          "is_steward": false,
+                          "is_viewer": true,
+                        }});
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: USERS[USERS.length - 1] })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
+
+        // update user roles
+        if (/\/daquery\/ws\/users\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Patch) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            console.log(connection.request.getBody());
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: {} })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
+
+        // fake users api end point
+        if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Get) {
+          // check for fake auth token in header and return test users if valid, this security is implemented server side
+          // in a real application
+          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: [testUser] })
+            ));
+          } else {
+            // return 401 not authorised if token is null or invalid
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 401 })
+            ));
+          }
+        }
 
 
-            }, 500);
+      }, 500);
 
-        });
+    });
 
-        return new Http(backend, options);
-    },
-    deps: [MockBackend, BaseRequestOptions]
+    return new Http(backend, options);
+  },
+  deps: [MockBackend, BaseRequestOptions]
 };
+
+const QUERIES_TO_ME = [
+  {"id" : 1, "studyName": "Diabetes", "name": "Query 1", "type": "Data", "site": "PITT", "username": "desheng", "datetime": "2017-07-01T18:25:42.123Z", "status": "pending", "oracleQuery": "SELECT * FROM Table1; DROP ALL Tables;", "sqlQuery": "SELECT * FROM Table1; DROP ALL Tables;"},
+  {"id" : 2, "studyName": "Diabetes", "name": "Query 2", "type": "Data", "site": "JSH", "username": "desheng", "datetime": "2017-07-01T18:25:42.123Z", "status": "done", "oracleQuery": "SELECT * FROM Table2; DROP ALL Tables;", "sqlQuery": "SELECT * FROM Table2; DROP ALL Tables;"},
+  {"id" : 3, "studyName": "Diabetes", "name": "Query 3", "type": "Aggregate", "site": "Utah", "username": "desheng", "datetime": "2017-07-01T18:25:42.123Z", "status": "processing", "oracleQuery": "SELECT * FROM Table3; DROP ALL Tables;", "sqlQuery": "SELECT * FROM Table3; DROP ALL Tables;"},
+  {"id" : 4, "studyName": "Diabetes", "name": "Query 4", "type": "Data", "site": "PITT", "username": "desheng", "datetime": "2017-07-01T18:25:42.123Z", "status": "pending", "oracleQuery": "SELECT * FROM Table4; DROP ALL Tables;", "sqlQuery": "SELECT * FROM Table4; DROP ALL Tables;"},
+  {"id" : 5, "studyName": "Diabetes", "name": "Query 5", "type": "Aggregate", "site": "Temple", "username": "desheng", "datetime": "2017-07-01T18:25:42.123Z", "status": "done", "oracleQuery": "SELECT * FROM Table5; DROP ALL Tables;", "sqlQuery": "SELECT * FROM Table5; DROP ALL Tables;"},
+  {"id" : 6, "studyName": "Diabetes", "name": "Query 6", "type": "Data", "site": "PSU", "username": "desheng", "datetime": "2017-07-01T18:25:42.123Z", "status": "done", "oracleQuery": "SELECT * FROM Table6; DROP ALL Tables;", "sqlQuery": "SELECT * FROM Table6; DROP ALL Tables;"},
+  {"id" : 7, "studyName": "Diabetes", "name": "Query 7", "type": "Aggregate", "site": "Geisinger", "username": "desheng", "datetime": "2017-07-01T18:25:42.123Z", "status": "pending", "oracleQuery": "SELECT * FROM Table7; DROP ALL Tables;", "sqlQuery": "SELECT * FROM Table7; DROP ALL Tables;"}
+]
 
 const QUERIES_FROM_ME = [
   {"id" : 1, "name": "Query 1", "type": "Data", "datetime": "2017-07-01T18:25:42.123Z",
@@ -126,4 +257,88 @@ const QUERIES_FROM_ME = [
    },
    ]
   },
+]
+
+const SITES = [
+  {"id" : 1, "name": "PITT", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 2, "name": "PSU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 3, "name": "JHU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 4, "name": "Utah", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+];
+
+const USERS = [
+  {"id": 1, "username": "desheng", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
+    "is_admin": true,
+    "is_steward": false,
+    "is_viewer": false,
+  }},
+  {"id": 2, "username": "bill", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
+    "is_admin": false,
+    "is_steward": true,
+    "is_viewer": false,
+  }},
+  {"id": 3, "username": "chuck", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
+    "is_admin": false,
+    "is_steward": false,
+    "is_viewer": true,
+  }},
+]
+
+const REMOTE_SITE_USERS = [
+  {"site": "PITT", "users": [
+    {"username": "desheng", "rights": {
+      "aggregate": true,
+      "data": true,
+    }},
+    {"username": "nickie", "rights": {
+      "aggregate": true,
+      "data": false,
+    }},
+    {"username": "chuck", "rights": {
+      "aggregate": false,
+      "data": false,
+    }},
+  ]},
+  {"site": "PSU", "users": [
+    {"username": "psu-desheng", "rights": {
+      "aggregate": true,
+      "data": true,
+    }},
+    {"username": "psu-nickie", "rights": {
+      "aggregate": true,
+      "data": false,
+    }},
+    {"username": "psu-chuck", "rights": {
+      "aggregate": false,
+      "data": false,
+    }},
+  ]},
+  {"site": "JHU", "users": [
+    {"username": "jhu-desheng", "rights": {
+      "aggregate": true,
+      "data": true,
+    }},
+    {"username": "jhu-nickie", "rights": {
+      "aggregate": true,
+      "data": false,
+    }},
+    {"username": "jhu-chuck", "rights": {
+      "aggregate": false,
+      "data": false,
+    }},
+  ]},
+  {"site": "Utah", "users": [
+    {"username": "utah-desheng", "rights": {
+      "aggregate": true,
+      "data": true,
+    }},
+    {"username": "utah-nickie", "rights": {
+      "aggregate": true,
+      "data": false,
+    }},
+    {"username": "utah-chuck", "rights": {
+      "aggregate": false,
+      "data": false,
+    }},
+  ]}
 ]

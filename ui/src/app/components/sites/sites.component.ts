@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { SiteService } from '../../services/site.service';
+import { Site } from '../../models/site.model';
+
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-sites',
@@ -9,12 +12,17 @@ import { SiteService } from '../../services/site.service';
 export class SitesComponent implements OnInit {
   showAddSite = false;
 
-  sites: any[] = [];
+  sites: Site[];
   constructor(private siteService: SiteService) { 
-    this.sites = this.siteService.getSites();
   }
 
   ngOnInit() {
+    this.getSites();
+  }
+
+  getSites() {
+    this.siteService.getSites()
+                    .subscribe(sites => this.sites = sites);
   }
 
 }

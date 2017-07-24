@@ -16,7 +16,12 @@ export class ManageUsersComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.users = this.userService.getUsersBySite(this.site.name);
+    this.getRemoteUsers();
+  }
+
+  getRemoteUsers() {
+    this.userService.getUsersBySite(this.site.name)
+                    .subscribe(users => this.users = users);
   }
 
 }

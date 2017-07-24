@@ -22,7 +22,6 @@ export class QueriesFromMeListComponent implements OnInit {
   getQueriesFromMe() {
     this.queryService.getQueriesFromMe()
                      .subscribe(queries => this.queries = queries);
-    debugger;
   }
 
   createQueryStatusSummary(query: any): string{

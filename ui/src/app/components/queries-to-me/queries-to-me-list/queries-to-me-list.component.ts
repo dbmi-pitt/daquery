@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { QueryService } from '../../../services/query.service';
+import { QueryToMe } from '../../../models/query-to-me.model';
+
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-queries-to-me-list',
@@ -8,12 +11,17 @@ import { QueryService } from '../../../services/query.service';
 })
 export class QueriesToMeListComponent implements OnInit {
 
-  queries: any[] = [];
+  queries: QueryToMe[];
   constructor(private queryService: QueryService) {
-  	this.queries = this.queryService.getQueriesToMe();
+
   }
 
   ngOnInit() {
+    this.getQueriesToMe();
   }
 
+  getQueriesToMe() {
+    this.queryService.getQueriesToMe()
+                     .subscribe(queries => this.queries = queries);
+  }
 }

@@ -15,7 +15,7 @@
     <tbody>
       <tr *ngFor="let query of queries">
         <td>{{query.studyName}}</td>
-        <td><a [routerLink]="['/review-query', 1]">{{query.name}}</a></td>
+        <td><a [routerLink]="['/review-query', query.id]">{{query.name}}</a></td>
         <td>{{query.type}}</td>
         <td>{{query.site}}-{{query.username}}</td>
         <td>{{query.datetime}}</td>

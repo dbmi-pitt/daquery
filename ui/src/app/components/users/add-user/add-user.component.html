@@ -1,24 +1,33 @@
 <div class="row">
-    <div class="col-md-8">
-        <div class="box box-solid box-default">
-            <div class="box-header">Add User</div>
-            <div class="box-body">
-                <form>
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" placeholder="Username">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" placeholder="Password">
-                    </div>
-                    <div class="form-group">
-                        <label for="password_confirm">Password Confirm</label>
-                        <input type="password" class="form-control" id="password_confirm" placeholder="Password Comfirm">
-                    </div>
-                    <button type="submit" class="btn btn-default">Submit</button>
-                </form>
+  <div class="col-md-8">
+    <div class="box box-solid box-default">
+      <div class="box-header">Add User</div>
+      <div class="box-body">
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" placeholder="Username" formControlName="username" required>
+            <div *ngIf="formErrors.username" class="alert alert-danger">
+              {{ formErrors.username }}
             </div>
-        </div>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Password" formControlName="password" required>
+            <div *ngIf="formErrors.password" class="alert alert-danger">
+              {{ formErrors.password }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="password_confirmation">Password Confirm</label>
+            <input type="password" class="form-control" id="password_confirmation" placeholder="Password Comfirm" formControlName="password_confirmation" required>
+            <div *ngIf="formErrors.password_confirmation" class="alert alert-danger">
+              {{ formErrors.password_confirmation }}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-default" [disabled]="!userForm.valid">Submit</button>
+        </form>
+      </div>
     </div>
+  </div>
 </div>

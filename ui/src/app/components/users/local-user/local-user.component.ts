@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-local-user',
@@ -10,9 +11,18 @@ export class LocalUserComponent implements OnInit {
   @Input()
   user: any;
 
-  constructor() { }
+  constructor(private userService: UserService) { }
 
   ngOnInit() {
   }
 
+  toggleRole(event: any, role: string){
+    let user = `{"id": ${event.target.id}, 
+                 "roles": {
+                   "${role}": ${event.target.checked}
+                 } 
+                }`;
+    this.userService.toggleUserRole(user)
+                    .subscribe(res => console.log(res));
+  }
 }

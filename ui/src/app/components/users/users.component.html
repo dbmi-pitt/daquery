@@ -6,7 +6,7 @@
           <button class="btn btn-primary" (click)="showAddUser=!showAddUser">Add User</button>
       </div>
   </div>
-  <app-add-user *ngIf="showAddUser"></app-add-user>
+  <app-add-user *ngIf="showAddUser" (showAddUser)="toggleShowAddUser($event)" (newUser)="addNewUser($event)"></app-add-user>
   <div *ngFor="let user of users">
     <app-local-user [user]="user"></app-local-user>
   </div>

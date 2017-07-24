@@ -7,9 +7,9 @@
             </div>
             <div class="box-body">
                 <ul class="list-unstyled">
-                    <li><input type="checkbox" [(ngModel)]="user.roles.is_admin"/> Admin</li>
-                    <li><input type="checkbox" [(ngModel)]="user.roles.is_steward"/> Steward</li>
-                    <li><input type="checkbox" [(ngModel)]="user.roles.is_viewer"/> Viewer</li>
+                    <li><input type="checkbox" data-id="{{user.id}}" [(ngModel)]="user.roles.is_admin" (change)="toggleRole($event, 'is_admin')"/> Admin</li>
+                    <li><input type="checkbox" data-id="{{user.id}}" [(ngModel)]="user.roles.is_steward" (change)="toggleRole($event, 'is_steward')"/> Steward</li>
+                    <li><input type="checkbox" data-id="{{user.id}}" [(ngModel)]="user.roles.is_viewer" (change)="toggleRole($event, 'is_viewer')"/> Viewer</li>
                 </ul>
             </div>
         </div>

@@ -75,9 +75,9 @@ import { BaseRequestOptions } from '@angular/http';
               SiteService,
               UserService,
               // providers used to create fake backend
-              // fakeBackendProvider,
-              // MockBackend,
-              // BaseRequestOptions
+              fakeBackendProvider,
+              MockBackend,
+              BaseRequestOptions
              ],
   bootstrap: [AppComponent]
 })

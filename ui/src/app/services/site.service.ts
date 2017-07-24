@@ -1,19 +1,26 @@
 import { Injectable } from '@angular/core';
+import { Http, Headers, RequestOptions, Response } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import { Site } from '../models/site.model';
+import { AuthenticationService } from './authentication.service';
+
+// Import RxJs required methods
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/catch';
 
 @Injectable()
 export class SiteService {
 
-  constructor() { }
+  constructor(private http: Http,
+              private authenticationService: AuthenticationService) { }
 
   sites = [];
-  getSites() {
-    return this.sites = SITES.slice(0);
+  getSites(): Observable<Site[]> {
+    //return this.sites = SITES.slice(0);
+    return this.http.get('/daquery/ws/sites', this.authenticationService.jwt())
+                    .map((response: Response) => <Site>response.json())
+                    .catch(error => {
+                      return Observable.throw(error.json().error || 'Server error');
+                    });
   }
 }
-
-const SITES = [
-  {"id" : 1, "name": "PITT", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
-  {"id" : 2, "name": "PSU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
-  {"id" : 3, "name": "JHU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
-  {"id" : 4, "name": "Utah", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
-];
