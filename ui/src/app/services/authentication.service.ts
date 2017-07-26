@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers, RequestOptions, Response } from '@angular/http';
+import { Http, Headers, Response, RequestOptions, URLSearchParams } from '@angular/http';
+
 import { Observable } from 'rxjs';
 import 'rxjs/add/operator/map'
 
@@ -14,7 +15,16 @@ export class AuthenticationService {
   }
 
   login(username: string, password: string): Observable<boolean> {
-    return this.http.post('/daquery/ws/users/login', JSON.stringify({ username: username, password: password }))
+    let encodedCreds = "Basic" + btoa(username + ":" + password);
+    let headers = new Headers();
+    headers.append('Authorization', encodedCreds);
+    headers.append('Content-Type', 'text/plain');
+    headers.append('Accept', 'application/json');
+    let params = new URLSearchParams();
+    params.set('param1', 'yes');
+    
+    let options = new RequestOptions({headers: headers, search: params});
+    return this.http.get('/daquery/ws/users/auth', options )
                     .map((response: Response) => {
                       // login successful if there's a jwt token in the response
                       let token = response.json() && response.json().token;

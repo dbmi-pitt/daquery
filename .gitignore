@@ -36,3 +36,5 @@ hs_err_pid*
 
 # angular transpile code
 src/main/webapp/ui/
+
+.settings/
