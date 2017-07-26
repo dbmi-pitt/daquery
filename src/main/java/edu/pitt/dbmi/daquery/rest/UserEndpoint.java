@@ -66,6 +66,13 @@ public class UserEndpoint {
     // =          Business methods          =
     // ======================================
 
+    /**
+     * This method is used to authenticate user. If username and password are match in the database
+     * It would return a JSON web token (jwt), that UI can make API call with.  
+     * @param login username
+     * @param password password
+     * @return javax.ws.rs.core.Response This returns with jwt in the header.
+     */
     @GET
     @Path("/login")
     public Response authenticateUser(@QueryParam("login") String login,

@@ -39,6 +39,14 @@ export class UserService {
                     });
   }
 
+  getLocalRoles(): Observable<string[]> {
+    return this.http.get('/daquery/ws/local-roles', this.authenticationService.jwt())
+                    .map((response: Response) => response.json())
+                    .catch(error => {
+                      return Observable.throw(error.json().error || 'Server error');
+                    });
+  }
+
   createUser(user: any): Observable<User>{
     return this.http.post('/daquery/ws/users', JSON.stringify(user), this.authenticationService.jwt())
                     .map((response: Response) => response.json())

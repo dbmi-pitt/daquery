@@ -2,14 +2,19 @@
     <div class="col-md-12">
         <div class="box box-default">
             <div class="box-header with-border">
-                <h3>{{user.username}}</h3>
+                <h3>{{user.email}}</h3>
                 <span>sign up at:{{user.signupAt}}</span>
             </div>
             <div class="box-body">
                 <ul class="list-unstyled">
-                    <li><input type="checkbox" data-id="{{user.id}}" [(ngModel)]="user.roles.is_admin" (change)="toggleRole($event, 'is_admin')"/> Admin</li>
-                    <li><input type="checkbox" data-id="{{user.id}}" [(ngModel)]="user.roles.is_steward" (change)="toggleRole($event, 'is_steward')"/> Steward</li>
-                    <li><input type="checkbox" data-id="{{user.id}}" [(ngModel)]="user.roles.is_viewer" (change)="toggleRole($event, 'is_viewer')"/> Viewer</li>
+                    <li *ngFor="let role of local_roles">
+                        <div class="checkbox">
+                            <label>
+                                <input *ngIf="!showSpin" id="{{user.id+'_'+role[0]}}" type="checkbox" attr.data-userid="{{user.id}}" [(ngModel)]="user.roles[role[1]]" (change)="toggleRole($event, role[1])" >
+                                <i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>{{role[0]}}
+                            </label>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>

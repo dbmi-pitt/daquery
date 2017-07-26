@@ -1,194 +1,212 @@
 import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 
+export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOptions) {
+  // configure fake backend
+  backend.connections.subscribe((connection: MockConnection) => {
+    let testUser = { username: 'test', password: 'test', firstName: 'Test', lastName: 'User' };
+
+    // wrap in timeout to simulate server api call
+    setTimeout(() => {
+
+      // authenticate user
+      if (connection.request.url.endsWith('/daquery/ws/users/login') && connection.request.method === RequestMethod.Post) {
+        // get parameters from post request
+        let params = JSON.parse(connection.request.getBody());
+
+        // check user credentials and return fake jwt token if valid
+        if (params.username === testUser.username && params.password === testUser.password) {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
+          ));
+        } else {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200 })
+          ));
+        }
+      }
+
+      // get queries from me
+      if (connection.request.url.endsWith('/daquery/ws/queries-from-me') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: QUERIES_FROM_ME })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get queries to me
+      if (connection.request.url.endsWith('/daquery/ws/queries-to-me') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: QUERIES_TO_ME })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get query to me by id
+      if (/\/daquery\/ws\/query-to-me\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let id = +connection.request.url.substring(connection.request.url.lastIndexOf('/') + 1);
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: QUERIES_TO_ME.filter(query => query.id === id)[0] })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get sites
+      if (connection.request.url.endsWith('/daquery/ws/sites') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: SITES })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get users
+      if (connection.request.url.endsWith('/daquery/ws/users') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: USERS })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get roles
+      if (connection.request.url.endsWith('/daquery/ws/local-roles') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: LOCAL_ROLES })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get remote users by site
+      if (connection.request.url.includes('/daquery/ws/remote-site-users?') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: REMOTE_SITE_USERS.filter(rsu => rsu.site === 'PITT')[0].users })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // add user
+      if (connection.request.url.endsWith('/daquery/ws/users') && connection.request.method === RequestMethod.Post) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let entity = JSON.parse(connection.request.getBody());
+          USERS.push({"id": 4, "email": entity.email, "signupAt": "2017-07-03T10:12:44.321Z",
+                      "roles": {
+                        "is_admin": false,
+                        "is_steward": false,
+                        "is_viewer": true,
+                      }});
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: USERS[USERS.length - 1] })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // update user roles
+      if (/\/daquery\/ws\/users\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Patch) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          console.log(connection.request.getBody());
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: {} })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // fake users api end point
+      if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: [testUser] })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+
+    }, 500);
+
+  });
+
+  return new Http(backend, options);
+}
+
 export let fakeBackendProvider = {
   // use fake backend in place of Http service for backend-less development
   provide: Http,
-  useFactory: (backend: MockBackend, options: BaseRequestOptions) => {
-    // configure fake backend
-    backend.connections.subscribe((connection: MockConnection) => {
-      let testUser = { username: 'test', password: 'test', firstName: 'Test', lastName: 'User' };
-
-      // wrap in timeout to simulate server api call
-      setTimeout(() => {
-
-        // authenticate user
-        if (connection.request.url.endsWith('/daquery/ws/users/login') && connection.request.method === RequestMethod.Post) {
-          // get parameters from post request
-          let params = JSON.parse(connection.request.getBody());
-
-          // check user credentials and return fake jwt token if valid
-          if (params.username === testUser.username && params.password === testUser.password) {
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
-            ));
-          } else {
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200 })
-            ));
-          }
-        }
-
-        // get queries from me
-        if (connection.request.url.endsWith('/daquery/ws/queries-from-me') && connection.request.method === RequestMethod.Get) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: QUERIES_FROM_ME })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-        // get queries to me
-        if (connection.request.url.endsWith('/daquery/ws/queries-to-me') && connection.request.method === RequestMethod.Get) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: QUERIES_TO_ME })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-        // get query to me by id
-        if (/\/daquery\/ws\/query-to-me\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Get) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            let id = +connection.request.url.substring(connection.request.url.lastIndexOf('/') + 1);
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: QUERIES_TO_ME.filter(query => query.id === id)[0] })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-        // get sites
-        if (connection.request.url.endsWith('/daquery/ws/sites') && connection.request.method === RequestMethod.Get) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: SITES })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-        // get users
-        if (connection.request.url.endsWith('/daquery/ws/users') && connection.request.method === RequestMethod.Get) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: USERS })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-        // get remote users by site
-        if (connection.request.url.includes('/daquery/ws/remote-site-users?') && connection.request.method === RequestMethod.Get) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: REMOTE_SITE_USERS.filter(rsu => rsu.site === 'PITT')[0].users })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-        // add user
-        if (connection.request.url.endsWith('/daquery/ws/users') && connection.request.method === RequestMethod.Post) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            let entity = JSON.parse(connection.request.getBody());
-            USERS.push({"id": 4, "username": entity.username, "signupAt": "2017-07-03T10:12:44.321Z",
-                        "roles": {
-                          "is_admin": false,
-                          "is_steward": false,
-                          "is_viewer": true,
-                        }});
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: USERS[USERS.length - 1] })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-        // update user roles
-        if (/\/daquery\/ws\/users\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Patch) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            console.log(connection.request.getBody());
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: {} })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-        // fake users api end point
-        if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Get) {
-          // check for fake auth token in header and return test users if valid, this security is implemented server side
-          // in a real application
-          if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 200, body: [testUser] })
-            ));
-          } else {
-            // return 401 not authorised if token is null or invalid
-            connection.mockRespond(new Response(
-              new ResponseOptions({ status: 401 })
-            ));
-          }
-        }
-
-
-      }, 500);
-
-    });
-
-    return new Http(backend, options);
-  },
+  useFactory: fakeBackendFactory,
   deps: [MockBackend, BaseRequestOptions]
 };
 
@@ -267,17 +285,17 @@ const SITES = [
 ];
 
 const USERS = [
-  {"id": 1, "username": "desheng", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
+  {"id": 1, "email": "desheng@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
     "is_admin": true,
     "is_steward": false,
     "is_viewer": false,
   }},
-  {"id": 2, "username": "bill", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
+  {"id": 2, "email": "bill@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
     "is_admin": false,
     "is_steward": true,
     "is_viewer": false,
   }},
-  {"id": 3, "username": "chuck", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
+  {"id": 3, "email": "chuck@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
     "is_admin": false,
     "is_steward": false,
     "is_viewer": true,
@@ -341,4 +359,8 @@ const REMOTE_SITE_USERS = [
       "data": false,
     }},
   ]}
+]
+
+const LOCAL_ROLES = [
+  "admin", "steward", "viewer"
 ]

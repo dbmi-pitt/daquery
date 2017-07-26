@@ -2,5 +2,6 @@ export class Site {
   id: number;
   name: string;
   url: string;
-  lastPingAt: string;
+  lastTest: string;
+  status: string;
 }

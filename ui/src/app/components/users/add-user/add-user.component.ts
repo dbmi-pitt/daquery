@@ -22,7 +22,7 @@ export class AddUserComponent implements OnInit {
 
   createForm() {
     this.userForm = this.fb.group({
-      username: [null, Validators.required],
+      email: [null, Validators.required],
       password: [null, Validators.required],
       password_confirmation: [null, Validators.required]
     });
@@ -54,14 +54,14 @@ export class AddUserComponent implements OnInit {
   }
 
   formErrors = {
-    'username': '',
+    'email': '',
     'password': '',
     'password_confirmation': ''
   }
 
   validationMessages = {
-    'username': {
-      'required': 'Username is required'
+    'email': {
+      'required': 'Email is required'
     },
     'password': {
       'required': 'Password is required'
