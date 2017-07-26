@@ -74,6 +74,45 @@ public class UserEndpoint {
      * @return javax.ws.rs.core.Response This returns with jwt in the header.
      */
     @GET
+    @Path("/auth")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Response auth(@HeaderParam("Authorization") String authString) {
+
+	try {
+
+	    if(!authString.toUpperCase().startsWith("BASIC"))
+		return Response.status(UNAUTHORIZED).build();
+
+	    String encoded = authString.substring(5);
+	    encoded = encoded.trim();
+	    String userAndPass = Base64.decodeAsString(encoded);
+	    int colonPos = userAndPass.indexOf(':');
+	    if(colonPos <= 0)
+		return Response.status(UNAUTHORIZED).build();
+	    String username = userAndPass.substring(0, colonPos);
+	    String password = userAndPass.substring(colonPos + 1);
+	    // Authenticate the user using the credentials provided
+	    authenticate(username, password);
+
+
+	    /*if (!login.equalsIgnoreCase("demo") ||
+            		!password.equalsIgnoreCase("demouser")) {
+            	throw new Exception("invalid username/password");
+            }*/
+
+	    // Issue a token for the user
+	    String token = issueToken(username);
+
+	    // Return the token on the response
+	    return Response.ok().header(AUTHORIZATION, "Bearer " + token).build();
+
+	} catch (Exception e) {
+	    return Response.status(UNAUTHORIZED).build();
+	}
+    }    
+
+    
+    @GET
     @Path("/login")
     public Response authenticateUser(@QueryParam("login") String login,
                                      @QueryParam("password") String password) {
