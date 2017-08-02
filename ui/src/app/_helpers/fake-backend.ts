@@ -8,22 +8,24 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
 
     // wrap in timeout to simulate server api call
     setTimeout(() => {
-
+      
       // authenticate user
-      if (connection.request.url.endsWith('/daquery/ws/users/login') && connection.request.method === RequestMethod.Post) {
+      if (connection.request.url.endsWith('/daquery/ws/users/auth') && connection.request.method === RequestMethod.Get) {
         // get parameters from post request
-        let params = JSON.parse(connection.request.getBody());
-
+        // let params = JSON.parse(connection.request.getBody());
         // check user credentials and return fake jwt token if valid
-        if (params.username === testUser.username && params.password === testUser.password) {
-          connection.mockRespond(new Response(
-            new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
-          ));
-        } else {
-          connection.mockRespond(new Response(
-            new ResponseOptions({ status: 200 })
-          ));
-        }
+        // if (params.username === testUser.username && params.password === testUser.password) {
+        //   connection.mockRespond(new Response(
+        //     new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
+        //   ));
+        // } else {
+        //   connection.mockRespond(new Response(
+        //     new ResponseOptions({ status: 200 })
+        //   ));
+        // }
+        connection.mockRespond(new Response(
+          new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
+        ));
       }
 
       // get queries from me
@@ -75,6 +77,39 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         }
       }
 
+      // get networks
+      if (connection.request.url.endsWith('/daquery/ws/networks') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: NETWORKS })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get network by id
+      if (/\/daquery\/ws\/network\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let id = +connection.request.url.substring(connection.request.url.lastIndexOf('/') + 1);
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: NETWORKS.filter(query => query.id === id)[0] })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
       // get sites
       if (connection.request.url.endsWith('/daquery/ws/sites') && connection.request.method === RequestMethod.Get) {
         // check for fake auth token in header and return test users if valid, this security is implemented server side
@@ -83,6 +118,32 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
           connection.mockRespond(new Response(
             new ResponseOptions({ status: 200, body: SITES })
           ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get in/out/waiting Sites
+      if (connection.request.url.includes('/daquery/ws/sites?') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          if(connection.request.url.includes('type=in')){
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: IN_SITES })
+            ));
+          } else if (connection.request.url.includes('type=out')){
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: OUT_SITES })
+            ));
+          } else if (connection.request.url.includes('type=waiting')){
+            connection.mockRespond(new Response(
+              new ResponseOptions({ status: 200, body: WAITING_SITES })
+            ));
+          }
         } else {
           // return 401 not authorised if token is null or invalid
           connection.mockRespond(new Response(
@@ -282,6 +343,32 @@ const SITES = [
   {"id" : 2, "name": "PSU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
   {"id" : 3, "name": "JHU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
   {"id" : 4, "name": "Utah", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+];
+
+
+const IN_SITES = [
+  {"id" : 1, "name": "PITT", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 2, "name": "PSU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 3, "name": "JHU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 4, "name": "Utah", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+];
+
+const OUT_SITES = [
+  {"id" : 1, "name": "PITT", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 2, "name": "PSU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 3, "name": "JHU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+  {"id" : 4, "name": "Utah", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+];
+
+const WAITING_SITES = [
+  {"id" : 1, "name": "Geisinger", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
+];
+
+const NETWORKS = [
+  {"id" : 1, "name": "PaTH"},
+  {"id" : 2, "name": "ACT"},
+  {"id" : 3, "name": "Diabetes"},
+  {"id" : 4, "name": "ICU"},
 ];
 
 const USERS = [

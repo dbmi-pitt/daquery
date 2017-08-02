@@ -1,13 +1,14 @@
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-  <h1 class="page-header">Sites Configuration</h1>
-  
+<section class="content-header">
+  <h1>User Configuration <small>local users</small></h1>
+</section>
+<section class="content">
   <div class="row">
-      <div class="col-sm-12 col-md-4 placeholder">
-          <button class="btn btn-primary" (click)="showAddUser=!showAddUser">Add User</button>
+    <div class="col-sm-12 col-md-4 placeholder">
+      <button class="btn btn-primary" (click)="showAddUser=!showAddUser">Add User</button>
       </div>
   </div>
   <app-add-user *ngIf="showAddUser" (showAddUser)="toggleShowAddUser($event)" (newUser)="addNewUser($event)"></app-add-user>
   <div *ngFor="let user of users">
     <app-local-user [user]="user"></app-local-user>
   </div>
-</div>
+</section>

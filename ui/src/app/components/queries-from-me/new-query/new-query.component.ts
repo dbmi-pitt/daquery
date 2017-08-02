@@ -37,11 +37,11 @@ export class NewQueryComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.siteService.getSites()
-                    .subscribe(sites => {
-                        this.sites = sites;
-                        this.createForm();
-                      });
+    // this.siteService.getSites()
+    //                 .subscribe(sites => {
+    //                     this.sites = sites;
+    //                     this.createForm();
+    //                   });
   }
 
   onSubmit() {

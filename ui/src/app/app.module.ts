@@ -32,11 +32,15 @@ import { AuthenticationService } from './services/authentication.service';
 import { QueryService } from './services/query.service';
 import { SiteService } from './services/site.service';
 import { UserService } from './services/user.service';
+import { NetworkService } from './services/network.service';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fake-backend';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 import { BaseRequestOptions } from '@angular/http';
+import { NetworksComponent } from './components/networks/networks.component';
+import { NetworkComponent } from './components/networks/network/network.component';
+import { AddNetworkComponent } from './components/networks/add-network/add-network.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +64,9 @@ import { BaseRequestOptions } from '@angular/http';
     ManageUsersComponent,
     RemoteUserComponent,
     LoginComponent,
+    NetworksComponent,
+    NetworkComponent,
+    AddNetworkComponent,
   ],
   imports: [
     BrowserModule,
@@ -74,6 +81,7 @@ import { BaseRequestOptions } from '@angular/http';
               QueryService,
               SiteService,
               UserService,
+              NetworkService,
               // providers used to create fake backend
               fakeBackendProvider,
               MockBackend,
