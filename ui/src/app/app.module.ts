@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
-import { TabsModule } from 'ngx-bootstrap/tabs';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
@@ -73,8 +72,7 @@ import { AddNetworkComponent } from './components/networks/add-network/add-netwo
     FormsModule,
     HttpModule,
     ReactiveFormsModule,
-    routing,
-    TabsModule.forRoot(),
+    routing
   ],
   providers: [AuthGuard, 
               AuthenticationService,

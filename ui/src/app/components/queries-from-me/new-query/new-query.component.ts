@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { TabsetComponent } from 'ngx-bootstrap';
 import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { NewQuery } from '../../../models/new-query.model';
 import { SiteService } from '../../../services/site.service';
