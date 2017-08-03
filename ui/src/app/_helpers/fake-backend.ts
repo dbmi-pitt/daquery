@@ -126,8 +126,24 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         }
       }
 
+      // get sites
+      if (connection.request.url.includes('/daquery/ws/sites?network=') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: SITES })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
       // get in/out/waiting Sites
-      if (connection.request.url.includes('/daquery/ws/sites?') && connection.request.method === RequestMethod.Get) {
+      if (connection.request.url.includes('/daquery/ws/sites?type=') && connection.request.method === RequestMethod.Get) {
         // check for fake auth token in header and return test users if valid, this security is implemented server side
         // in a real application
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {

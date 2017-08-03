@@ -7,6 +7,8 @@ import { ReviewQueryComponent } from "./components/queries-to-me/review-query/re
 import { LoginComponent } from "./components/login/login.component";
 import { NetworksComponent } from "./components/networks/networks.component";
 import { NetworkComponent } from "./components/networks/network/network.component";
+import { SiteComponent } from "./components/sites/site/site.component";
+import { AddSiteComponent } from "./components/sites/add-site/add-site.component";
 import { AuthGuard } from './_guards/auth.guard';
 
 const appRoutes:Routes = [
@@ -15,6 +17,8 @@ const appRoutes:Routes = [
     { path: "review-query/:id", component: ReviewQueryComponent },
     { path: "networks", component: NetworksComponent },
     { path: "network/:id", component: NetworkComponent },
+    { path: "add-site", component: AddSiteComponent },
+    { path: "site/:id", component: SiteComponent },
     { path: "users", component: UsersComponent },
     { path: "login", component: LoginComponent },
     { path: "", redirectTo: "/login", pathMatch: 'full' },
