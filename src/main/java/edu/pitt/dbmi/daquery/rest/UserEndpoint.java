@@ -9,6 +9,9 @@ import edu.pitt.dbmi.daquery.util.PasswordUtils;
 //import edu.pitt.dbmi.daquery.persistence.HibernateUtil;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -122,6 +125,8 @@ public class UserEndpoint {
      */
     @GET
     @Path("/login")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response authenticateUser(@QueryParam("login") String login,
                                      @QueryParam("password") String password) {
 
@@ -138,8 +143,14 @@ public class UserEndpoint {
             // Issue a token for the user
             String token = issueToken(login);
 
-            // Return the token on the response
-            return Response.ok().header(AUTHORIZATION, "Bearer " + token).build();
+            // Return the token to the response
+            JsonBuilderFactory jFactory = Json.createBuilderFactory(null);
+            JsonObject jsonData = jFactory.createObjectBuilder()
+            		.add("token", token)
+            		.build();
+
+            //String json = "{\"token\" : \"" + token + "\"}";
+            return Response.ok(200).entity(jsonData).build();
 
         } catch (Exception e) {
             return Response.status(UNAUTHORIZED).build();
