@@ -1,7 +1,9 @@
 <div class="row">
   <div class="col-md-8">
-    <div class="box box-solid box-default">
-      <div class="box-header">Add User</div>
+    <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">New User</h3>
+      </div>
       <div class="box-body">
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
           <div class="form-group">
@@ -25,7 +27,7 @@
               {{ formErrors.password_confirmation }}
             </div>
           </div>
-          <button type="submit" class="btn btn-default" [disabled]="!userForm.valid">Submit</button>
+          <button type="submit" class="btn btn-primary" [disabled]="!userForm.valid">Submit</button>
         </form>
       </div>
     </div>
