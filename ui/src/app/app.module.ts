@@ -83,9 +83,9 @@ import { AddNetworkComponent } from './components/networks/add-network/add-netwo
               NetworkService,
               NotificationService,
               // providers used to create fake backend
-              fakeBackendProvider,
-              MockBackend,
-              BaseRequestOptions
+              //fakeBackendProvider,
+              //MockBackend,
+              //BaseRequestOptions
              ],
   bootstrap: [AppComponent]
 })

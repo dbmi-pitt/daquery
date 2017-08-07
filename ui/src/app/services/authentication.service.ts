@@ -20,11 +20,13 @@ export class AuthenticationService {
     headers.append('Authorization', encodedCreds);
     headers.append('Content-Type', 'text/plain');
     headers.append('Accept', 'application/json');
-    // let params = new URLSearchParams();
-    // params.set('param1', 'yes');
+    let params = new URLSearchParams();
+    params.set('login', username);
+    params.set('password', password);
     
-    let options = new RequestOptions({headers: headers});
-    return this.http.get('/daquery/ws/users/auth', options )
+    let options = new RequestOptions({headers: headers, search: params});
+    //return this.http.get('/daquery/ws/users/auth', options )
+    return this.http.get('/daquery/ws/users/login/', options )
                     .map((response: Response) => {
                       // login successful if there's a jwt token in the response
                       let token = response.json() && response.json().token;

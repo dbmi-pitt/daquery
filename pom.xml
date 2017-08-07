@@ -107,13 +107,18 @@
             <version>${jersey.version}</version>
         </dependency>
 		
-		
+		<dependency>
+		  <groupId>org.glassfish</groupId>
+		  <artifactId>javax.json</artifactId>
+		  <version>1.0.4</version>
+		</dependency>
+				
 		<dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
             <version>${jaxrs.version}</version>
         </dependency>
-
+		
 		<dependency>
 		    <groupId>io.jsonwebtoken</groupId>
 		    <artifactId>jjwt</artifactId>
@@ -195,8 +200,8 @@
 	        <groupId>org.hibernate</groupId>
 	        <artifactId>hibernate-ehcache</artifactId>
 	        <version>${hibernate.version}</version>
-	    </dependency>
-  	        
+	    </dependency>  	    
+  	    
     </dependencies>
     <build>
         <plugins>
