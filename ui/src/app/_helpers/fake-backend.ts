@@ -100,7 +100,24 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
           let id = +connection.request.url.substring(connection.request.url.lastIndexOf('/') + 1);
           connection.mockRespond(new Response(
-            new ResponseOptions({ status: 200, body: NETWORKS.filter(query => query.id === id)[0] })
+            new ResponseOptions({ status: 200, body: NETWORKS.filter(network => network.id === id)[0] })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+       // get site by id
+      if (/\/daquery\/ws\/site\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          let id = +connection.request.url.substring(connection.request.url.lastIndexOf('/') + 1);
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: SITES.filter(site => site.id === id)[0] })
           ));
         } else {
           // return 401 not authorised if token is null or invalid
@@ -127,7 +144,9 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
       }
 
       // get sites
-      if (connection.request.url.includes('/daquery/ws/sites?network=') && connection.request.method === RequestMethod.Get) {
+      if (connection.request.url.includes('/daquery/ws/sites?') &&
+          connection.request.url.includes('network=') && 
+          !connection.request.url.includes('type=') && connection.request.method === RequestMethod.Get) {
         // check for fake auth token in header and return test users if valid, this security is implemented server side
         // in a real application
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
@@ -143,7 +162,9 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
       }
 
       // get in/out/waiting Sites
-      if (connection.request.url.includes('/daquery/ws/sites?type=') && connection.request.method === RequestMethod.Get) {
+      if (connection.request.url.includes('/daquery/ws/sites?') &&
+          connection.request.url.includes('network=') && 
+          connection.request.url.includes('type=') && connection.request.method === RequestMethod.Get) {
         // check for fake auth token in header and return test users if valid, this security is implemented server side
         // in a real application
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
@@ -206,7 +227,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         // in a real application
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
           connection.mockRespond(new Response(
-            new ResponseOptions({ status: 200, body: REMOTE_SITE_USERS.filter(rsu => rsu.site === 'PITT')[0].users })
+            new ResponseOptions({ status: 200, body: REMOTE_SITE_USERS.filter(rsu => rsu.site_id === 1)[0].users })
           ));
         } else {
           // return 401 not authorised if token is null or invalid
@@ -247,6 +268,22 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
           console.log(connection.request.getBody());
           connection.mockRespond(new Response(
             new ResponseOptions({ status: 200, body: {} })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get notifications
+      if (connection.request.url.includes('/daquery/ws/notifications') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: NOTIFICATIONS})
           ));
         } else {
           // return 401 not authorised if token is null or invalid
@@ -406,58 +443,58 @@ const USERS = [
 ]
 
 const REMOTE_SITE_USERS = [
-  {"site": "PITT", "users": [
-    {"username": "desheng", "rights": {
+  {"site_id": 1, "site": "PITT", "users": [
+    {"id": 1, "email": "desheng@dbmi.edu", "rights": {
       "aggregate": true,
       "data": true,
     }},
-    {"username": "nickie", "rights": {
+    {"id": 2, "email": "nickie@dbmi.edu", "rights": {
       "aggregate": true,
       "data": false,
     }},
-    {"username": "chuck", "rights": {
+    {"id": 3, "email": "chuck@dbmi.edu", "rights": {
       "aggregate": false,
       "data": false,
     }},
   ]},
-  {"site": "PSU", "users": [
-    {"username": "psu-desheng", "rights": {
+  {"site_id": 2, "site": "PSU", "users": [
+    {"id": 4, "email": "psu-desheng@dbmi.edu", "rights": {
       "aggregate": true,
       "data": true,
     }},
-    {"username": "psu-nickie", "rights": {
+    {"id": 5, "email": "psu-nickie@dbmi.edu", "rights": {
       "aggregate": true,
       "data": false,
     }},
-    {"username": "psu-chuck", "rights": {
+    {"id": 6, "email": "psu-chuck@dbmi.edu", "rights": {
       "aggregate": false,
       "data": false,
     }},
   ]},
-  {"site": "JHU", "users": [
-    {"username": "jhu-desheng", "rights": {
+  {"site_id": 3, "site": "JHU", "users": [
+    {"id": 7, "email": "jhu-desheng@dbmi.edu", "rights": {
       "aggregate": true,
       "data": true,
     }},
-    {"username": "jhu-nickie", "rights": {
+    {"id": 8, "email": "jhu-nickie@dbmi.edu", "rights": {
       "aggregate": true,
       "data": false,
     }},
-    {"username": "jhu-chuck", "rights": {
+    {"id": 9, "email": "jhu-chuck@dbmi.edu", "rights": {
       "aggregate": false,
       "data": false,
     }},
   ]},
-  {"site": "Utah", "users": [
-    {"username": "utah-desheng", "rights": {
+  {"site_id": 4, "site": "Utah", "users": [
+    {"id": 10, "email": "utah-desheng@dbmi.edu", "rights": {
       "aggregate": true,
       "data": true,
     }},
-    {"username": "utah-nickie", "rights": {
+    {"id": 11, "email": "utah-nickie@dbmi.edu", "rights": {
       "aggregate": true,
       "data": false,
     }},
-    {"username": "utah-chuck", "rights": {
+    {"id": 12, "email": "utah-chuck@dbmi.edu", "rights": {
       "aggregate": false,
       "data": false,
     }},
@@ -466,4 +503,11 @@ const REMOTE_SITE_USERS = [
 
 const LOCAL_ROLES = [
   "admin", "steward", "viewer"
+]
+
+const NOTIFICATIONS = [
+  {"id": 1,
+   "message": "Utah is waiting for approval."},
+  {"id": 2,
+   "message": "PSU is waiting for approval."}
 ]

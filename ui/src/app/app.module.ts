@@ -32,6 +32,7 @@ import { QueryService } from './services/query.service';
 import { SiteService } from './services/site.service';
 import { UserService } from './services/user.service';
 import { NetworkService } from './services/network.service';
+import { NotificationService } from './services/notification.service';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fake-backend';
@@ -80,6 +81,7 @@ import { AddNetworkComponent } from './components/networks/add-network/add-netwo
               SiteService,
               UserService,
               NetworkService,
+              NotificationService,
               // providers used to create fake backend
               fakeBackendProvider,
               MockBackend,
