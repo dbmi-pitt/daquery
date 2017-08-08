@@ -134,7 +134,9 @@ public class InboundQueryEndpoint {
 	            		.add("sqlQuery", "SELECT * FROM SQLTableX" ) )
             		.build();
             
-             return Response.ok(200).entity(jsonArray).build();
+            logger.info("JSON String:" + jsonArray.toString());
+            
+             return Response.ok(200).entity(jsonArray.toString()).build();
 
         } catch (Exception e) {
             return Response.status(UNAUTHORIZED).build();
