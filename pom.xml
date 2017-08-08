@@ -29,6 +29,8 @@
         <cdi.version>2.0</cdi.version> 
         <hibernate.version>4.3.6.Final</hibernate.version>
         <oraclejdbc.version>11.1.0.7.0</oraclejdbc.version>
+        <joda.version>2.9.9</joda.version>
+        <joda-time.version>1.4</joda-time.version>
         <transaction.version>1.2</transaction.version> 
         <jpa.version>1.0.0.Final</jpa.version>   
         <entitymanager.version>4.3.6.Final</entitymanager.version>
@@ -164,6 +166,20 @@
 			<groupId>com.oracle</groupId>
 			<artifactId>ojdbc6</artifactId>
 			<version>${oraclejdbc.version}</version>
+		</dependency>
+		
+		<!-- Let's try a sane date/time Java implementation, shall we? -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>${joda.version}</version>
+		</dependency>
+		
+		<!-- JODA support for hibernate -->
+		<dependency>
+		    <groupId>joda-time</groupId>
+		    <artifactId>joda-time-hibernate</artifactId>
+		    <version>${joda-time.version}</version>
 		</dependency>
 
 		<dependency>

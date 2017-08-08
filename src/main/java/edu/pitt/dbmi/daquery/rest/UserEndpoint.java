@@ -68,7 +68,6 @@ public class UserEndpoint {
     @Context
     private UriInfo uriInfo;
 
-    // assumes the current class is called MyLogger
     private final static Logger logger = Logger.getLogger(UserEndpoint.class.getName());
         
     // ======================================

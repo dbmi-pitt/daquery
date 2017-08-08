@@ -20,6 +20,30 @@ To install node/npm follow these steps:
 To run through node (will run standalone in Tomcat without node via the war produced by mvn install)
   in daquery/ui/ run "npm start", attach to UI with http://locahost:4200
 
+Oracle Database Connection Steps:
+NOTE regarding Maven and Oracle:
+Unfortunately due the binary license there is no public repository with the Oracle Driver JAR. This happens with many dependencies but is not Maven's fault. 
+
+This post helps: https://stackoverflow.com/questions/1074869/find-oracle-jdbc-driver-in-maven-repository
+
+Step 1: Download the odbc.jar file.  http://www.oracle.com/technetwork/database/enterprise-edition/jdbc-111060-084321.html
+
+Step 2: copy the file (ojdbc6.jar) to a different directory.  Run the maven command from that directory.
+
+Step 3: install on maven: mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.1.0.7.0 -Dpackaging=jar -Dfile=ojdbc6.jar -DgeneratePom=true
+NOTE: the -Dfile references the file within the current directory.
+
+Step 4: add the following entry to the pom.xml file:
+<dependency>
+	<groupId>com.oracle</groupId>
+	<artifactId>ojdbc6</artifactId>
+	<version>${oraclejdbc.version}</version>
+</dependency>
+
+
+
+
+
 Database Deployment Steps:
 1. Open a database connection and run /src/main/resources/database_setup_oracle.sql in the database to create the tables, sequences, etc.
 2. Copy src/main/resources/META-INF/persistence.xml.example as src/main/resources/META-INF/persistence.xml
