@@ -1,6 +1,5 @@
 package edu.pitt.dbmi.daquery.domain;
 
-import edu.pitt.dbmi.daquery.rest.UserEndpoint;
 import edu.pitt.dbmi.daquery.util.PasswordUtils;
 
 import javax.persistence.Entity;
