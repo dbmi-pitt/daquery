@@ -10,7 +10,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
     setTimeout(() => {
       
       // authenticate user
-      if (connection.request.url.endsWith('/daquery/ws/users/auth') && connection.request.method === RequestMethod.Get) {
+      if (connection.request.url.includes('/daquery/ws/users/login') && connection.request.method === RequestMethod.Get) {
         // get parameters from post request
         // let params = JSON.parse(connection.request.getBody());
         // check user credentials and return fake jwt token if valid

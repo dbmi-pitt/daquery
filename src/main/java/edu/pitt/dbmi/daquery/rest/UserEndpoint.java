@@ -149,7 +149,7 @@ public class UserEndpoint {
             		.build();
 
             //String json = "{\"token\" : \"" + token + "\"}";
-            return Response.ok(200).entity(jsonData).build();
+            return Response.ok(200).entity(jsonData.toString()).build();
 
         } catch (Exception e) {
             return Response.status(UNAUTHORIZED).build();
