@@ -16,6 +16,8 @@ import java.util.logging.Logger;
 import org.hibernate.annotations.Type;
 import org.joda.time.*;
 
+import com.google.gson.Gson;
+
 /**
  * @author Antonio Goncalves
  *         http://www.antoniogoncalves.org
@@ -32,7 +34,7 @@ import org.joda.time.*;
 
 @Entity
 @Table(name = "Inbound_Query")
-public class Inbound_Query {
+public class Inbound_Query extends BaseObject {
 
     // ======================================
     // =             Constants              =
@@ -65,7 +67,7 @@ public class Inbound_Query {
     private String userName; //TODO: should this be userid?  If they create a query, we
     //should check to make sure we have their id in our own records
     @Column(name="LASTUPDATE", length = 500)
-    @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
+    @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     private DateTime lastUpdate;
     //TODO: coordinate the status list with Desheng
     @Column(name="STATUS", length = 500)
@@ -210,6 +212,7 @@ public class Inbound_Query {
 				+ queryType + ", site=" + site + ", userName=" + userName + ", lastUpdate=" + lastUpdate + ", status="
 				+ status + ", oracleQuery=" + oracleQuery + ", sqlQuery=" + sqlQuery + "]";
 	}
+	
 
 
 }

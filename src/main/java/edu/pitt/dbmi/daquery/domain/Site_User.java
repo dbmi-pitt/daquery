@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 @Entity
 @Table(name = "Site_User")
-public class Site_User {
+public class Site_User extends BaseObject {
 
     // ======================================
     // =             Constants              =
