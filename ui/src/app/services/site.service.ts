@@ -16,6 +16,14 @@ export class SiteService {
               private authenticationService: AuthenticationService) { }
 
   sites = [];
+  getSite(id: number): Observable<Site> {
+    return this.http.get(`/daquery/ws/site/${id}`, this.authenticationService.jwt())
+                    .map((response: Response) => <Network>response.json())
+                    .catch(error => {
+                      return Observable.throw(error.json().error || 'Server error');
+                    })
+  }
+
   getSites(network: Network): Observable<Site[]> {
     let urlSearchParams: URLSearchParams = new URLSearchParams();
     urlSearchParams.set('network', network.name);

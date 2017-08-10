@@ -1,4 +1,5 @@
 import { Routes, RouterModule } from "@angular/router";
+import { DashboardComponent } from "./components/dashboard/dashboard.component";
 import { QueriesToMeComponent } from "./components/queries-to-me/queries-to-me.component";
 import { QueriesFromMeComponent } from "./components/queries-from-me/queries-from-me.component";
 import { SitesComponent } from "./components/sites/sites.component";
@@ -12,16 +13,19 @@ import { AddSiteComponent } from "./components/sites/add-site/add-site.component
 import { AuthGuard } from './_guards/auth.guard';
 
 const appRoutes:Routes = [
-    { path: "queries-to-me", component: QueriesToMeComponent },
-    { path: "queries-from-me", component: QueriesFromMeComponent, canActivate: [AuthGuard] },
-    { path: "review-query/:id", component: ReviewQueryComponent },
-    { path: "networks", component: NetworksComponent },
-    { path: "network/:id", component: NetworkComponent },
-    { path: "add-site", component: AddSiteComponent },
-    { path: "site/:id", component: SiteComponent },
-    { path: "users", component: UsersComponent },
-    { path: "login", component: LoginComponent },
-    { path: "", redirectTo: "/login", pathMatch: 'full' },
+  { path: "login", component: LoginComponent },
+  { path: '', component: DashboardComponent, 
+    children: [
+      { path: "queries-to-me", component: QueriesToMeComponent, canActivate: [AuthGuard] },
+      { path: "queries-from-me", component: QueriesFromMeComponent, canActivate: [AuthGuard] },
+      { path: "review-query/:id", component: ReviewQueryComponent, canActivate: [AuthGuard] },
+      { path: "networks", component: NetworksComponent, canActivate: [AuthGuard] },
+      { path: "network/:id", component: NetworkComponent, canActivate: [AuthGuard] },
+      { path: "add-site", component: AddSiteComponent, canActivate: [AuthGuard] },
+      { path: "site/:id", component: SiteComponent, canActivate: [AuthGuard] },
+      { path: "users", component: UsersComponent, canActivate: [AuthGuard] },
+    ]
+  }
 ]
 
 export const routing = RouterModule.forRoot(appRoutes);

@@ -32,6 +32,7 @@ import { QueryService } from './services/query.service';
 import { SiteService } from './services/site.service';
 import { UserService } from './services/user.service';
 import { NetworkService } from './services/network.service';
+import { NotificationService } from './services/notification.service';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fake-backend';
@@ -40,6 +41,7 @@ import { BaseRequestOptions } from '@angular/http';
 import { NetworksComponent } from './components/networks/networks.component';
 import { NetworkComponent } from './components/networks/network/network.component';
 import { AddNetworkComponent } from './components/networks/add-network/add-network.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
@@ -66,6 +68,7 @@ import { AddNetworkComponent } from './components/networks/add-network/add-netwo
     NetworksComponent,
     NetworkComponent,
     AddNetworkComponent,
+    DashboardComponent,
   ],
   imports: [
     BrowserModule,
@@ -80,10 +83,11 @@ import { AddNetworkComponent } from './components/networks/add-network/add-netwo
               SiteService,
               UserService,
               NetworkService,
+              NotificationService,
               // providers used to create fake backend
-              //fakeBackendProvider,
-              //MockBackend,
-              //BaseRequestOptions
+              fakeBackendProvider,
+              MockBackend,
+              BaseRequestOptions
              ],
   bootstrap: [AppComponent]
 })

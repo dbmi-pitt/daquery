@@ -25,8 +25,7 @@ export class AuthenticationService {
     params.set('password', password);
     
     let options = new RequestOptions({headers: headers, search: params});
-    //return this.http.get('/daquery/ws/users/auth', options )
-    return this.http.get('/daquery/ws/users/login/', options )
+    return this.http.get('/daquery/ws/users/login', options )
                     .map((response: Response) => {
                       // login successful if there's a jwt token in the response
                       let token = response.json() && response.json().token;

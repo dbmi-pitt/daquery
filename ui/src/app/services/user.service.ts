@@ -16,19 +16,17 @@ export class UserService {
 
   users = [];
   getUsers(): Observable<User[]> {
-  	//return this.users = USERS.slice(0);
     return this.http.get('/daquery/ws/users', this.authenticationService.jwt())
-                    .map((response: Response) => <User>response.json())
+                    .map((response: Response) => <User[]>response.json())
                     .catch(error => {
                       return Observable.throw(error.json().error || 'Server error');
                     });
   }
 
   remote_users = [];
-  getUsersBySite(site: string): Observable<any[]>{
-    //return this.remote_users = REMOTE_SITE_USERS.find(s => s.sitename === site).users;
+  getUsersBySite(site_id: number): Observable<any[]>{
     let urlSearchParams: URLSearchParams = new URLSearchParams();
-    urlSearchParams.set('site', site);
+    urlSearchParams.set('site_id', site_id.toString());
 
     let requestOptions = this.authenticationService.jwt();
     requestOptions.search = urlSearchParams;
@@ -56,6 +54,15 @@ export class UserService {
   }
 
   toggleUserRole(user: any) {
+    let userObj = JSON.parse(user);
+    return this.http.patch(`/daquery/ws/users/${userObj.id}`, user, this.authenticationService.jwt())
+                    .map((response: Response) => response.json())
+                    .catch(error => {
+                      return Observable.throw(error.json().error || 'Server error');
+                    });
+  }
+
+  toggleUserRight(user: any) {
     let userObj = JSON.parse(user);
     return this.http.patch(`/daquery/ws/users/${userObj.id}`, user, this.authenticationService.jwt())
                     .map((response: Response) => response.json())
