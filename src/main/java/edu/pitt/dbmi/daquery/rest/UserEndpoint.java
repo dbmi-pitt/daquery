@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.rest;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
@@ -30,6 +31,7 @@ import javax.persistence.Query;
 import org.hibernate.Session;
 
 import java.security.Key;
+import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
@@ -59,7 +61,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 @Transactional
-public class UserEndpoint {
+public class UserEndpoint extends AbstractEndpoint {
 
     // ======================================
     // =          Injection Points          =
@@ -74,45 +76,6 @@ public class UserEndpoint {
     // =          Business methods          =
     // ======================================
 
-    /**
-     * This method is used to authenticate user. If username and password are match in the database
-     * It would return a JSON web token (jwt), that UI can make API call with.  
-     * @param login username
-     * @param password password
-     * @return javax.ws.rs.core.Response This returns with jwt in the header.
-     */
-    @GET
-    @Path("/auth")
-    @Consumes(MediaType.TEXT_PLAIN)
-    public Response auth(@HeaderParam("Authorization") String authString) {
-
-		try {
-	
-		    if(!authString.toUpperCase().startsWith("BASIC"))
-			return Response.status(UNAUTHORIZED).build();
-	
-		    String encoded = authString.substring(5);
-		    encoded = encoded.trim();
-		    String userAndPass = Base64.decodeAsString(encoded);
-		    int colonPos = userAndPass.indexOf(':');
-		    if(colonPos <= 0)
-			return Response.status(UNAUTHORIZED).build();
-		    String username = userAndPass.substring(0, colonPos);
-		    String password = userAndPass.substring(colonPos + 1);
-		    // Authenticate the user using the credentials provided
-		    authenticate(username, password);
-		
-		    // Issue a token for the user
-		    String token = issueToken(username);
-	
-		    // Return the token on the response
-		    return Response.ok().header(AUTHORIZATION, "Bearer " + token).build();
-	
-		} catch (Exception e) {
-		    return Response.status(UNAUTHORIZED).build();
-		}
-	
-    }    
 
     /**
      * This method uses login information to authenticate a user.  It generates a new JWT
@@ -166,13 +129,12 @@ public class UserEndpoint {
     private void authenticate(String login, String password) throws Exception {
     	logger.info("searching for #### login/password : " + login + "/" + password);
     	try {
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-example");
-	        EntityManager em = emf.createEntityManager();
-	        Query query = em.createNamedQuery(Site_User.FIND_BY_LOGIN_PASSWORD);
-	        query.setParameter("login", login);
-	        query.setParameter("password", PasswordUtils.digestPassword(password));
-	        Site_User user = (Site_User)query.getSingleResult();
-	
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piUser = new ParameterItem("login", login);
+    		pList.add(piUser);
+    		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
+    		pList.add(piPassword);
+	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_LOGIN_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
 	    		logger.info("Invalid user/password");

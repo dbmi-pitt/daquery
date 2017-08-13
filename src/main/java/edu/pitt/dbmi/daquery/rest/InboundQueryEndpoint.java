@@ -26,6 +26,7 @@ import org.hibernate.Session;
 import org.joda.time.DateTime;
 
 import java.security.Principal;
+import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
@@ -47,6 +48,7 @@ import org.glassfish.jersey.internal.util.Base64;
 import org.hibernate.*;
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Site_User;
+import edu.pitt.dbmi.daquery.rest.AbstractEndpoint.ParameterItem;
 import edu.pitt.dbmi.daquery.util.PasswordUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -56,7 +58,7 @@ import com.google.gson.Gson;
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 @Transactional
-public class InboundQueryEndpoint {
+public class InboundQueryEndpoint extends AbstractEndpoint {
 
     // ======================================
     // =          Injection Points          =
@@ -87,13 +89,13 @@ public class InboundQueryEndpoint {
      *  /inboundqueries/- lists all the inboundqueries, not filtered, ordered by lastUpdate time
      *  /inboundqueries/newquery - create a new inbound query
      *  /inboundqueries/:id - return a single inbound query
-     *  /inboundqueries/byStudy/:studyId- lists all the inboundqueries for a specific study
-     *  /inboundqueries/byStudy/:studyId/pending- lists all the inboundqueries for a specific study where status=ending
-     *  /inboundqueries/byUsername/:userName- lists all the inboundqueries for a specific user* note,
+     *  /inboundqueries/study/:studyId- lists all the inboundqueries for a specific study
+     *  /inboundqueries/study/:studyId/pending- lists all the inboundqueries for a specific study where status=ending
+     *  /inboundqueries/username/:userName- lists all the inboundqueries for a specific user* note,
      *      we need to determine if we pass the id or username
-     *  /inboundqueries/byUsername/:userName/pending- lists all the inboundqueries for a specific user* where status=pending note,
+     *  /inboundqueries/username/:userName/pending- lists all the inboundqueries for a specific user* where status=pending note,
      *      we need to determine if we pass the id or username
-     *  /inboundqueries/byStatus/:statusName- lists all the inboundqueries for a specific status
+     *  /inboundqueries/status/:statusName- lists all the inboundqueries for a specific status
    
      * 
      */
@@ -104,8 +106,10 @@ public class InboundQueryEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database.
+     * example URL: daquery/ws/inboundqueries/
      * @return a JSON array containing all the inbound queries
-     * returns a 500 error on failure
+     * returns a 404 error if no queries are found,
+     *   a 500 error on failure
      */
     public Response getAllInboundQueries() {
     	
@@ -123,9 +127,8 @@ public class InboundQueryEndpoint {
                 return Response.status(NOT_FOUND).build();
             }
 
-            Gson gson = new Gson();
-            String json = gson.toJson(queries);
-            return Response.ok(200).entity(json).build();
+            String jsonString = toJsonArray(queries);
+            return Response.ok(200).entity(jsonString).build();
 
     	} catch (NoResultException nre) {
     		return Response.status(NOT_FOUND).build();
@@ -142,8 +145,10 @@ public class InboundQueryEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database.
-     * @return a JSON array containing all the inbound queries
-     * returns a 401 error on failure
+     * example URL: daquery/ws/inboundqueries/1
+     * @return a JSON object containing single inbound query
+     * returns a 404 error if no queries are found,
+     *   a 500 error on failure
      */
     public Response getInboundQueryByID(@PathParam("id") long id) {
     	
@@ -171,15 +176,173 @@ public class InboundQueryEndpoint {
         }
     }
 
+    @GET
+    @Secured
+    @Path("/status/{statusType}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    /**
+     * This method returns all the inbound queries found in the database for a given status.
+     * example URL: daquery/ws/inboundqueries/status/pending
+     * @return a JSON object containing a list of matching inbound queries
+     * returns a 404 error if no queries are found,
+     *   a 500 error on failure
+     */
+    public Response getInboundQueryByStatus(@PathParam("statusType") String statusType) {
+    	
+    	try {
+
+            logger.info("#### returning  inbound query by status=" + statusType);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+                        
+            List<Inbound_Query> queries = queryInboundQueriesByStatus(statusType);
+            
+            if (queries == null) {
+                return Response.status(NOT_FOUND).build();
+            }
+
+            String jsonString = toJsonArray(queries);
+            return Response.ok(200).entity(jsonString).build();
+
+    	} catch (NoResultException nre) {
+    		return Response.status(NOT_FOUND).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GET
+    @Secured
+    @Path("/site/{siteName}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    /**
+     * This method returns all the inbound queries found in the database sent from a given site.
+     * example URL: daquery/ws/inboundqueries/site/Pitt
+     * @return a JSON object containing a list of matching inbound queries
+     * returns a 404 error if no queries are found,
+     *   a 500 error on failure
+     */
+    public Response getInboundQueryBySite(@PathParam("siteName") String siteName) {
+    	
+    	try {
+
+            logger.info("#### returning  inbound query by site=" + siteName);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+                        
+            List<Inbound_Query> queries = queryInboundQueriesBySite(siteName);
+            
+            if (queries == null) {
+                return Response.status(NOT_FOUND).build();
+            }
+
+            String jsonString = toJsonArray(queries);
+            return Response.ok(200).entity(jsonString).build();
+
+    	} catch (NoResultException nre) {
+    		return Response.status(NOT_FOUND).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GET
+    @Secured
+    @Path("/site/{siteName}/status/{statusType}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    /**
+     * This method returns all the inbound queries found in the database sent from a given site.
+     * example URL: daquery/ws/inboundqueries/site/Pitt/status/pending
+     * @return a JSON object containing a list of matching inbound queries
+     * returns a 404 error if no queries are found,
+     *   a 500 error on failure
+     */
+    public Response getInboundQueryBySiteStatus(@PathParam("siteName") String siteName, @PathParam("statusType") String statusType) {
+    	
+    	try {
+
+            logger.info("#### returning  inbound query by site=" + siteName + " and status =" + statusType);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+                        
+            List<Inbound_Query> queries = queryInboundQueriesBySiteAndStatus(siteName, statusType);
+            
+            if (queries == null) {
+                return Response.status(NOT_FOUND).build();
+            }
+
+            String jsonString = toJsonArray(queries);
+            return Response.ok(200).entity(jsonString).build();
+
+    	} catch (NoResultException nre) {
+    		return Response.status(NOT_FOUND).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GET
+    @Secured
+    @Path("/site/{userName}/status/{statusType}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    /**
+     * This method returns all the inbound queries found in the database sent from a given site.
+     * example URL: daquery/ws/inboundqueries/site/user1/status/pending
+     * @return a JSON object containing a list of matching inbound queries
+     * returns a 404 error if no queries are found,
+     *   a 500 error on failure
+     */
+    public Response getInboundQueryByUserStatus(@PathParam("userName") String userName, @PathParam("statusType") String statusType) {
+    	
+    	try {
+
+            logger.info("#### returning  inbound query by user=" + userName + " and status =" + statusType);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+                        
+            List<Inbound_Query> queries = queryInboundQueriesByUserAndStatus(userName, statusType);
+            
+            if (queries == null) {
+                return Response.status(NOT_FOUND).build();
+            }
+
+            String jsonString = toJsonArray(queries);
+            return Response.ok(200).entity(jsonString).build();
+
+    	} catch (NoResultException nre) {
+    		return Response.status(NOT_FOUND).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    
+    
+    
+    // ======================================
+    // =          PRIVATE METHODS           =
+    // ======================================
+    
+    
     private Inbound_Query queryInboundQuery(long id) throws Exception {
     	logger.info("searching for #### single Inbound_Query id= " +id);
     	try {
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-example");
-	        EntityManager em = emf.createEntityManager();
-	        Query query = em.createNamedQuery(Inbound_Query.FIND_BY_ID);
-	        query.setParameter("id", id);
-	        Inbound_Query iq = null;
-	        iq = (Inbound_Query)query.getSingleResult();		        
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piId = new ParameterItem("id", id);
+    		pList.add(piId);
+    		Inbound_Query iq = executeQueryReturnSingle(Inbound_Query.FIND_BY_ID, pList, logger);
 	        return iq;
 	    
         } catch (PersistenceException e) {
@@ -190,15 +353,44 @@ public class InboundQueryEndpoint {
             
     }
 
-    
+    //TODO: I would like to create a single, generic method that returns a list
+    //of Inbound_Query objects.  This method should take a List<JPQL parameters>,
+    //and a query name.  We may want to move this to a generic class
     private List<Inbound_Query> queryAllInboundQueries() throws Exception {
-    	logger.info("searching for #### all Inbound_Queries");
+    	try { 		
+    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_ALL, null, logger);
+	        return queries;
+	    
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+            
+    }
+    
+    private List<Inbound_Query> queryInboundQueriesByStatus(String status) throws Exception {
     	try {
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-example");
-	        EntityManager em = emf.createEntityManager();
-	        Query query = em.createNamedQuery(Inbound_Query.FIND_ALL);
-	        List<Inbound_Query> queries = null;
-	        queries = (List<Inbound_Query>)query.getResultList();
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piStatus = new ParameterItem("status", status);
+    		pList.add(piStatus);
+    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_STATUS, pList, logger);
+	        return queries;
+	    
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+            
+    }
+    
+    private List<Inbound_Query> queryInboundQueriesByStudy(String study) throws Exception {
+    	try {
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piStudy = new ParameterItem("study", study);
+    		pList.add(piStudy);
+    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_STUDY, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -209,5 +401,75 @@ public class InboundQueryEndpoint {
             
     }
 
+    private List<Inbound_Query> queryInboundQueriesBySite(String site) throws Exception {
+    	try {
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piSite = new ParameterItem("site", site);
+    		pList.add(piSite);
+    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_SITE, pList, logger);
+	        return queries;
+	    
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+            
+    }
+
+    private List<Inbound_Query> queryInboundQueriesBySiteAndStatus(String site, String status) throws Exception {
+    	try {
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piSite = new ParameterItem("site", site);
+    		pList.add(piSite);
+    		ParameterItem piStatus = new ParameterItem("status", status);
+    		pList.add(piStatus);
+    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_SITE_STATUS, pList, logger);
+	        return queries;
+	    
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+            
+    }
+
+    private List<Inbound_Query> queryInboundQueriesByUserAndStatus(String username, String status) throws Exception {
+    	try {
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piUser = new ParameterItem("username", username);
+    		pList.add(piUser);
+    		ParameterItem piStatus = new ParameterItem("status", status);
+    		pList.add(piStatus);
+    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_USER_STATUS, pList, logger);
+	        return queries;
+	    
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+            
+    }
+
+
+
+/*
+ *      *  /inboundqueries/- lists all the inboundqueries, not filtered, ordered by lastUpdate time
+     *  /inboundqueries/newquery - create a new inbound query
+     *  /inboundqueries/:id - return a single inbound query
+     *  /inboundqueries/bystudy/:studyId- lists all the inboundqueries for a specific study
+     *  /inboundqueries/bystudy/:studyId/pending- lists all the inboundqueries for a specific study where status=ending
+     *  /inboundqueries/byusername/:userName- lists all the inboundqueries for a specific user* note,
+     *      we need to determine if we pass the id or username
+     *  /inboundqueries/byusername/:userName/pending- lists all the inboundqueries for a specific user* where status=pending note,
+     *      we need to determine if we pass the id or username
+     *  /inboundqueries/bystatus/:statusName- lists all the inboundqueries for a specific status
+
+ * 
+ */
+    
+    
 
 }
