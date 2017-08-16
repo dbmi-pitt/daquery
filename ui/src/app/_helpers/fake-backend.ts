@@ -293,6 +293,22 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         }
       }
 
+      // get roles by user_id
+      if (connection.request.url.includes('/daquery/ws/roles?') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: ROLES.find(r => r.user_id === 1).roles })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
       // fake users api end point
       if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Get) {
         // check for fake auth token in header and return test users if valid, this security is implemented server side
@@ -398,7 +414,6 @@ const SITES = [
   {"id" : 4, "name": "Utah", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
 ];
 
-
 const IN_SITES = [
   {"id" : 1, "name": "PITT", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
   {"id" : 2, "name": "PSU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
@@ -440,6 +455,18 @@ const USERS = [
     "is_steward": false,
     "is_viewer": true,
   }},
+]
+
+const ROLES = [
+  {"user_id": 1,
+   "roles": ["viewer"]
+  },
+  {"user_id": 2,
+   "roles": ["steward"]
+  },
+  {"user_id": 3,
+   "roles": ["viewer"]
+  }
 ]
 
 const REMOTE_SITE_USERS = [

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
+import { RoleGuard } from '../../_guards/role.guard';
 
 @Component({
   selector: 'app-sidebar',
@@ -10,7 +11,8 @@ import { Location } from '@angular/common';
 export class SidebarComponent implements OnInit {
   location: Location;
 
-  constructor(location: Location) {
+  constructor(location: Location,
+              private roleGuard: RoleGuard) {
     this.location = location;
   }
 
@@ -19,6 +21,12 @@ export class SidebarComponent implements OnInit {
 
   isActive(path){
       return this.location.path().indexOf(path) > -1;
+  }
+
+  async canActive(allowedRoles: string[]) {
+    await this.roleGuard.allowed(allowedRoles).then((r) => {
+      return r;
+    });
   }
   
 }
