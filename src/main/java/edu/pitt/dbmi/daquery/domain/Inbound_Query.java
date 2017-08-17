@@ -16,23 +16,30 @@ import java.util.logging.Logger;
 import org.hibernate.annotations.Type;
 import org.joda.time.*;
 
-/**
- * @author Antonio Goncalves
- *         http://www.antoniogoncalves.org
- *         --
- */
+import com.google.gson.Gson;
 
+/**
+ * 
+ * @author devuser
+ *
+ */
 
 @NamedQueries({
         @NamedQuery(name = Inbound_Query.FIND_ALL, query = "SELECT u FROM Inbound_Query u ORDER BY u.lastUpdate DESC"),
         @NamedQuery(name = Inbound_Query.FIND_BY_ID, query = "SELECT u FROM Inbound_Query u WHERE u.id = :id"),
         @NamedQuery(name = Inbound_Query.COUNT_ALL, query = "SELECT COUNT(u) FROM Inbound_Query u"),
+        @NamedQuery(name = Inbound_Query.FIND_BY_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.status = :status"),
+        @NamedQuery(name = Inbound_Query.FIND_BY_SITE, query = "SELECT u FROM Inbound_Query u WHERE u.site = :site"),
+        @NamedQuery(name = Inbound_Query.FIND_BY_STUDY, query = "SELECT u FROM Inbound_Query u WHERE u.studyname = :studyname"),
+        @NamedQuery(name = Inbound_Query.FIND_BY_SITE_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.site = :site AND u.status = :status"),
+        @NamedQuery(name = Inbound_Query.FIND_BY_USER_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.username = :username AND u.status = :status"),
+ //       @NamedQuery(name = Inbound_Query.FIND_BY_USERNAME, query = "SELECT u FROM Inbound_Query u WHERE u.username = :username"),
 })
 
 
 @Entity
 @Table(name = "Inbound_Query")
-public class Inbound_Query {
+public class Inbound_Query extends DaqueryObject {
 
     // ======================================
     // =             Constants              =
@@ -41,6 +48,12 @@ public class Inbound_Query {
     public static final String FIND_ALL = "Inbound_Query.findAll";
     public static final String COUNT_ALL = "Inbound_Query.countAll";
     public static final String FIND_BY_ID = "Inbound_Query.findById";
+    public static final String FIND_BY_STATUS = "Inbound_Query.findByStatus";
+    public static final String FIND_BY_SITE = "Inbound_Query.findBySite";
+    public static final String FIND_BY_STUDY = "Inbound_Query.findByStudy";
+    public static final String FIND_BY_SITE_STATUS = "Inbound_Query.findBySiteStatus";
+    public static final String FIND_BY_USER_STATUS = "Inbound_Query.findByUserStatus";
+   // public static final String FIND_BY_USERNAME = "Inbound_Query.findByUsername";
 
     private final static Logger logger = Logger.getLogger(Inbound_Query.class.getName());
     
@@ -65,7 +78,7 @@ public class Inbound_Query {
     private String userName; //TODO: should this be userid?  If they create a query, we
     //should check to make sure we have their id in our own records
     @Column(name="LASTUPDATE", length = 500)
-    @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
+    @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     private DateTime lastUpdate;
     //TODO: coordinate the status list with Desheng
     @Column(name="STATUS", length = 500)
@@ -210,6 +223,7 @@ public class Inbound_Query {
 				+ queryType + ", site=" + site + ", userName=" + userName + ", lastUpdate=" + lastUpdate + ", status="
 				+ status + ", oracleQuery=" + oracleQuery + ", sqlQuery=" + sqlQuery + "]";
 	}
+	
 
 
 }
