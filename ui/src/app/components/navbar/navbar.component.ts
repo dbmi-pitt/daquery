@@ -19,15 +19,15 @@ export class NavbarComponent implements OnInit {
               private authGuard: AuthGuard) { }
 
   ngOnInit() {
-    if(this.authGuard.canActivate()) {
-      this.getNotifications();
-    }
+    this.getNotifications();
   }
 
   getNotifications(){
     Observable.interval(5000)
-              .switchMap(() => {  
+              .switchMap(() => {
                             return this.notificationService.getNotification() })
-              .subscribe(notifications => this.notifications = notifications);
+              .subscribe(notifications => {
+                this.notifications = notifications;
+              });
   }
 }

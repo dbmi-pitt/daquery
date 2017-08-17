@@ -24,7 +24,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         //   ));
         // }
         connection.mockRespond(new Response(
-          new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
+          new ResponseOptions({ status: 200, body: { user_id: 1, roles: ["steward"], token: 'fake-jwt-token' } })
         ));
       }
 
@@ -244,11 +244,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
           let entity = JSON.parse(connection.request.getBody());
           USERS.push({"id": 4, "email": entity.email, "signupAt": "2017-07-03T10:12:44.321Z",
-                      "roles": {
-                        "is_admin": false,
-                        "is_steward": false,
-                        "is_viewer": true,
-                      }});
+                      "roles": ["viewer"]});
           connection.mockRespond(new Response(
             new ResponseOptions({ status: 200, body: USERS[USERS.length - 1] })
           ));
@@ -440,26 +436,17 @@ const NETWORKS = [
 ];
 
 const USERS = [
-  {"id": 1, "email": "desheng@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
-    "is_admin": true,
-    "is_steward": false,
-    "is_viewer": false,
-  }},
-  {"id": 2, "email": "bill@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
-    "is_admin": false,
-    "is_steward": true,
-    "is_viewer": false,
-  }},
-  {"id": 3, "email": "chuck@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
-    "is_admin": false,
-    "is_steward": false,
-    "is_viewer": true,
-  }},
+  {"id": 1, "email": "desheng@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", 
+   "roles": ["admin"]},
+  {"id": 2, "email": "bill@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", 
+   "roles": ["steward"]},
+  {"id": 3, "email": "chuck@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", 
+   "roles": ["viewer"]},
 ]
 
 const ROLES = [
   {"user_id": 1,
-   "roles": ["viewer"]
+   "roles": ["admin"]
   },
   {"user_id": 2,
    "roles": ["steward"]

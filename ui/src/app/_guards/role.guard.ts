@@ -4,14 +4,15 @@ import { UserService } from '../services/user.service';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  currentUserRoles: string[];
+  currentUserRoles: string[] = JSON.parse(localStorage.getItem('currentUser')).roles;
   constructor(private router: Router,
-              private userService: UserService) { }
+              private userService: UserService) {
+   this.getCurrentUserRoles();
+  }
 
   async canActivate(route: ActivatedRouteSnapshot,
               state: RouterStateSnapshot) {
     let allowedRoles = route.data["roles"] as Array<string>;
-    await this.getCurrentUserRoles();
     if(this.userRolePermitted(allowedRoles, this.currentUserRoles)){
       return true;
     } else {
@@ -20,19 +21,18 @@ export class RoleGuard implements CanActivate {
     }
   }
 
-  async allowed(allowedRoles: string[]) {
-    await this.getCurrentUserRoles();
+  allowed(allowedRoles: string[]) {
     return this.userRolePermitted(allowedRoles, this.currentUserRoles);
   }
 
-  getCurrentUserRoles(): Promise<any>{
+  getCurrentUserRoles(): Promise<boolean>{
     return new Promise((resolve, reject) => {
-      this.userService.getRoles(JSON.parse(localStorage.getItem('currentUser')).user_id)
-                      .subscribe(roles => {
-                        this.currentUserRoles = roles;
-                        resolve();
-                      });
-    });
+          this.userService.getRoles(JSON.parse(localStorage.getItem('currentUser')).user_id)
+                          .subscribe(roles => {
+                            this.currentUserRoles = roles;
+                            resolve();
+                          })
+                        });
   }
 
   userRolePermitted(allowedRoles: Array<string>, currentUserRoles: Array<string>): boolean{

@@ -11,22 +11,27 @@ import { RoleGuard } from '../../_guards/role.guard';
 export class SidebarComponent implements OnInit {
   location: Location;
 
+  showNetworkConfiguration = false;
+  showUserManagement = false;
+
   constructor(location: Location,
               private roleGuard: RoleGuard) {
     this.location = location;
   }
 
   ngOnInit() {
+    if(this.canActive(["admin"])) {
+      this.showUserManagement = true;
+      this.showNetworkConfiguration = true;
+    }
   }
 
   isActive(path){
       return this.location.path().indexOf(path) > -1;
   }
 
-  async canActive(allowedRoles: string[]) {
-    await this.roleGuard.allowed(allowedRoles).then((r) => {
-      return r;
-    });
+  canActive(allowedRoles: string[]): boolean {
+    return this.roleGuard.allowed(allowedRoles);
   }
   
 }

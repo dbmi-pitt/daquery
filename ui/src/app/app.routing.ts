@@ -22,7 +22,7 @@ const appRoutes:Routes = [
       { path: "queries-to-me", component: QueriesToMeComponent, canActivate: [AuthGuard] },
       { path: "queries-from-me", component: QueriesFromMeComponent, canActivate: [AuthGuard] },
       { path: "review-query/:id", component: ReviewQueryComponent, canActivate: [AuthGuard] },
-      { path: "networks", component: NetworksComponent, canActivate: [AuthGuard] },
+      { path: "networks", component: NetworksComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "network/:id", component: NetworkComponent, canActivate: [AuthGuard] },
       { path: "add-site", component: AddSiteComponent, canActivate: [AuthGuard] },
       { path: "site/:id", component: SiteComponent, canActivate: [AuthGuard] },
