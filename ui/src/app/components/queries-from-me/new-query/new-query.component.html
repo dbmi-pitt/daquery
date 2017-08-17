@@ -1,7 +1,9 @@
 <div class="row">
   <div class="col-md-12">
-    <div class="box box-solid box-default">
-      <div class="box-header">New Query</div>
+    <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">New Query</h3>
+      </div>
       <div class="box-body">
         <div class="row">
           <div class="col-md-12">
@@ -25,14 +27,24 @@
               </div>
               <div class="form-group">
                 <label for="query">SQL</label>
-                <tabset>
-                  <tab heading="Oracle Query">
-                    <textarea class="form-control" rows="5" id="oracle_query" formControlName="oracleQuery"></textarea>
-                  </tab>
-                  <tab heading="SQL Server Query">
-                    <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery"></textarea>
-                  </tab>
-                </tabset>
+                <div class="nav-tabs-custom">
+                  <ul class="nav nav-tabs">
+                    <li class="active">
+                      <a href="#tab_1" data-toggle="tab" aria-expanded="true">Oracle Query</a>
+                    </li>
+                    <li>
+                      <a href="#tab_2" data-toggle="tab" aria-expanded="true">SQL Server Query</a>
+                    </li>
+                  </ul>
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1">
+                      <textarea class="form-control" rows="5" id="oracle_query" formControlName="oracleQuery"></textarea>
+                    </div>
+                    <div class="tab-pane" id="tab_2">
+                      <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery"></textarea>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div formArrayName="sitesToQuery" class="well well-lg">
                 <div class="form-group">

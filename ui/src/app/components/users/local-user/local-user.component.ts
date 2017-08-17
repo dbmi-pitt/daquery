@@ -37,7 +37,6 @@ export class LocalUserComponent implements OnInit {
                 }`;
     this.userService.toggleUserRole(user)
                     .subscribe(res => {
-                      console.log(res);
                       this.showSpin = false;
                     });
   }

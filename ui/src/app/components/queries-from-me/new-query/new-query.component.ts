@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { TabsetComponent } from 'ngx-bootstrap';
 import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { NewQuery } from '../../../models/new-query.model';
 import { SiteService } from '../../../services/site.service';
@@ -37,11 +36,11 @@ export class NewQueryComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.siteService.getSites()
-                    .subscribe(sites => {
-                        this.sites = sites;
-                        this.createForm();
-                      });
+    // this.siteService.getSites()
+    //                 .subscribe(sites => {
+    //                     this.sites = sites;
+    //                     this.createForm();
+    //                   });
   }
 
   onSubmit() {

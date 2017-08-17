@@ -1,0 +1,76 @@
+<section class="content-header">
+  <h1><i class="fa fa-share-alt"></i> {{ network.name }} <small>patient empowered research</small></h1>
+</section>
+<section class="content">
+  <div *ngIf="waitingSites.length > 0" class="row">
+    <div class="col-lg-12 col-sm-12 placeholder">
+      <div class="box box-solid">
+        <div class="box-header with-border">
+          <h3 class="box-title"><i class="fa fa-tasks"></i> Waiting response</h3>
+        </div>
+        <div class="box-body">
+          <ul class="list-unstyled">
+            <li *ngFor="let ws of waitingSites">
+              <div class="callout callout-warning clearfix">
+                <p class="pull-right">
+                  <button class="btn btn-success">Accept</button>
+                  <button class="btn btn-danger">Deny</button>
+                </p>
+                <p>{{ ws.name }} wants to access your data. Please respond!</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-offset-3 col-lg-6 col-md-6 col-sm-12">
+      <a class="btn btn-block btn-info" [routerLink]="['/add-site']" [queryParams]="{network: network.id}">Connect Site</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-6 col-md-12">
+      <div class="box box-solid">
+        <div class="box-header with-border">
+          <h3 class="box-title"><i class="fa fa-cloud-upload"></i> Out Sites</h3>
+        </div>
+        <div class="box-body">
+          <ul class="list-unstyled">
+            <li *ngFor="let os of outSites">
+              <div class="box box-success">
+                <div class="box-body">
+                  <p class="pull-right">
+                    <small class="label pull-right bg-green">on</small>
+                  </p>
+                  <h4>{{ os.name }}</h4>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-12">
+      <div class="box box-solid">
+        <div class="box-header with-border">
+          <h3 class="box-title"><i class="fa fa-cloud-download"></i> In Sites</h3>
+        </div>
+        <div class="box-body">
+          <ul class="list-unstyled">
+            <li *ngFor="let is of inSites">
+              <div class="box box-info">
+                <div class="box-body">
+                  <p class="pull-right">
+                    <small class="label pull-right bg-green">on</small>
+                  </p>
+                  <h4><a [routerLink]="['/site', is.id]">{{ is.name }}</a></h4>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

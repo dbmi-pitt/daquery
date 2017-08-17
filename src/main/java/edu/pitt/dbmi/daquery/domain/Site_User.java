@@ -1,6 +1,5 @@
 package edu.pitt.dbmi.daquery.domain;
 
-import edu.pitt.dbmi.daquery.rest.UserEndpoint;
 import edu.pitt.dbmi.daquery.util.PasswordUtils;
 
 import javax.persistence.Entity;
@@ -20,18 +19,18 @@ import java.util.logging.Logger;
  *         http://www.antoniogoncalves.org
  *         --
  */
-/*
+
 
 @NamedQueries({
-        @NamedQuery(name = Site_User.FIND_ALL, query = "SELECT u FROM SITE_USER u ORDER BY u.lastName DESC"),
-        @NamedQuery(name = Site_User.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM SITE_USER u WHERE u.login = :login AND u.password = :password"),
-        @NamedQuery(name = Site_User.COUNT_ALL, query = "SELECT COUNT(u) FROM SITE_USER u")
+        @NamedQuery(name = Site_User.FIND_ALL, query = "SELECT u FROM Site_User u ORDER BY u.lastName DESC"),
+        @NamedQuery(name = Site_User.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.login = :login AND u.password = :password"),
+        @NamedQuery(name = Site_User.COUNT_ALL, query = "SELECT COUNT(u) FROM Site_User u")
 })
-*/
+
 
 @Entity
-@Table(name = "SITE_USER")
-public class Site_User {
+@Table(name = "Site_User")
+public class Site_User extends DaqueryObject {
 
     // ======================================
     // =             Constants              =
