@@ -24,7 +24,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         //   ));
         // }
         connection.mockRespond(new Response(
-          new ResponseOptions({ status: 200, body: { token: 'fake-jwt-token' } })
+          new ResponseOptions({ status: 200, body: { user_id: 1, roles: ["steward"], token: 'fake-jwt-token' } })
         ));
       }
 
@@ -244,11 +244,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
           let entity = JSON.parse(connection.request.getBody());
           USERS.push({"id": 4, "email": entity.email, "signupAt": "2017-07-03T10:12:44.321Z",
-                      "roles": {
-                        "is_admin": false,
-                        "is_steward": false,
-                        "is_viewer": true,
-                      }});
+                      "roles": ["viewer"]});
           connection.mockRespond(new Response(
             new ResponseOptions({ status: 200, body: USERS[USERS.length - 1] })
           ));
@@ -284,6 +280,22 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
           connection.mockRespond(new Response(
             new ResponseOptions({ status: 200, body: NOTIFICATIONS})
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // get roles by user_id
+      if (connection.request.url.includes('/daquery/ws/roles?') && connection.request.method === RequestMethod.Get) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: ROLES.find(r => r.user_id === 1).roles })
           ));
         } else {
           // return 401 not authorised if token is null or invalid
@@ -398,7 +410,6 @@ const SITES = [
   {"id" : 4, "name": "Utah", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
 ];
 
-
 const IN_SITES = [
   {"id" : 1, "name": "PITT", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
   {"id" : 2, "name": "PSU", "status": "On", "lastTest": "2017-07-01T18:25:42.123Z"},
@@ -425,21 +436,24 @@ const NETWORKS = [
 ];
 
 const USERS = [
-  {"id": 1, "email": "desheng@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
-    "is_admin": true,
-    "is_steward": false,
-    "is_viewer": false,
-  }},
-  {"id": 2, "email": "bill@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
-    "is_admin": false,
-    "is_steward": true,
-    "is_viewer": false,
-  }},
-  {"id": 3, "email": "chuck@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", "roles": {
-    "is_admin": false,
-    "is_steward": false,
-    "is_viewer": true,
-  }},
+  {"id": 1, "email": "desheng@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", 
+   "roles": ["admin"]},
+  {"id": 2, "email": "bill@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", 
+   "roles": ["steward"]},
+  {"id": 3, "email": "chuck@dbmi.com", "signupAt": "2017-05-03T10:12:44.321Z", 
+   "roles": ["viewer"]},
+]
+
+const ROLES = [
+  {"user_id": 1,
+   "roles": ["admin"]
+  },
+  {"user_id": 2,
+   "roles": ["steward"]
+  },
+  {"user_id": 3,
+   "roles": ["viewer"]
+  }
 ]
 
 const REMOTE_SITE_USERS = [

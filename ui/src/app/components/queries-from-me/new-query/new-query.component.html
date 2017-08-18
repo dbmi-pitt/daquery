@@ -8,10 +8,33 @@
         <div class="row">
           <div class="col-md-12">
             <form [formGroup]="queryForm" (submit)="onSubmit()">
-              <div class="form-group radio">
+              <div class="form-group">
+                <label for="network">Network</label>
+                <select formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
+                  <option value="">-Select-</option>
+                  <option *ngFor="let network of networks">
+                    {{ network.name }}
+                  </option>
+                </select>
+              </div>
+              <div *ngIf="queryForm.controls.network.dirty" formArrayName="sitesToQuery" class="well well-lg">
+                <div class="form-group">
+                  <label for="sites">Site to Query</label>
+                  <div class="checkbox">
+                    <ul class="list-unstyled">
+                      <li *ngFor="let site of queryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
+                        <label class="checkbox-inline"><input type="checkbox" value="" formControlName="check">{{site.controls.name._value}}</label>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div> 
+              <div class="form-group">
                 <label for="dataType">Data Type</label>
-                <label class="radio-inline"><input type="radio" formControlName="dataType" value="aggregate">Aggregate</label>
-                <label class="radio-inline"><input type="radio" formControlName="dataType" value="data">Data</label>
+                <div class="radio">
+                  <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="aggregate">Aggregate</label>
+                  <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="data">Data</label>
+                </div>
               </div>
               <div class="form-group">
                 <label for="name">Query Name</label>
@@ -43,18 +66,6 @@
                     <div class="tab-pane" id="tab_2">
                       <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery"></textarea>
                     </div>
-                  </div>
-                </div>
-              </div>
-              <div formArrayName="sitesToQuery" class="well well-lg">
-                <div class="form-group">
-                  <label for="sites">Site to Query</label>
-                  <div class="checkbox">
-                    <ul class="list-unstyled">
-                      <li *ngFor="let site of sitesToQuery.controls; let i=index" [formGroupName]="i">
-                        <label class="checkbox-inline"><input type="checkbox" value="" formControlName="check">{{site.controls.name._value}}</label>
-                      </li>
-                    </ul>
                   </div>
                 </div>
               </div>

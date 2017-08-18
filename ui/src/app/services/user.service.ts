@@ -23,6 +23,19 @@ export class UserService {
                     });
   }
 
+  getRoles(user_id: number): Observable<string[]> {
+    let urlSearchParams: URLSearchParams = new URLSearchParams();
+    urlSearchParams.set('user_id', user_id.toString());
+
+    let requestOptions = this.authenticationService.jwt();
+    requestOptions.search = urlSearchParams;
+    return this.http.get('/daquery/ws/roles', requestOptions)
+                    .map((response: Response) => response.json())
+                    .catch(error => {
+                      return Observable.throw(error.json().error || 'Server error');
+                    });
+  }
+
   remote_users = [];
   getUsersBySite(site_id: number): Observable<any[]>{
     let urlSearchParams: URLSearchParams = new URLSearchParams();

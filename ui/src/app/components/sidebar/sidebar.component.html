@@ -22,10 +22,10 @@
       <li [class.active]="isActive('/queries-from-me')">
         <a [routerLink]="['/queries-from-me']"><i class="fa fa-cloud-upload"></i><span>Queries from me</span></a>
       </li>
-      <li [class.active]="isActive('/networks')">
+      <li *ngIf="showNetworkConfiguration" [class.active]="isActive('/networks')">
         <a [routerLink]="['/networks']"><i class="fa fa-share-alt"></i><span>Network configuration</span></a>
       </li>
-      <li [class.active]="isActive('/users')">
+      <li *ngIf="showUserManagement" [class.active]="isActive('/users')">
         <a [routerLink]="['/users']"><i class="fa fa-users"></i><span>User management</span></a>
       </li>
     </ul>

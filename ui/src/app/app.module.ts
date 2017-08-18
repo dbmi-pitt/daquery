@@ -27,6 +27,7 @@ import { RemoteUserComponent } from './components/sites/site/manage-users/remote
 import { LoginComponent } from './components/login/login.component';
 
 import { AuthGuard } from './_guards/auth.guard';
+import { RoleGuard } from './_guards/role.guard';
 import { AuthenticationService } from './services/authentication.service';
 import { QueryService } from './services/query.service';
 import { SiteService } from './services/site.service';
@@ -42,6 +43,8 @@ import { NetworksComponent } from './components/networks/networks.component';
 import { NetworkComponent } from './components/networks/network/network.component';
 import { AddNetworkComponent } from './components/networks/add-network/add-network.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { Error404Component } from './components/error-404/error-404.component';
+import { Error401Component } from './components/error-401/error-401.component';
 
 @NgModule({
   declarations: [
@@ -69,6 +72,8 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
     NetworkComponent,
     AddNetworkComponent,
     DashboardComponent,
+    Error404Component,
+    Error401Component,
   ],
   imports: [
     BrowserModule,
@@ -78,6 +83,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
     routing
   ],
   providers: [AuthGuard, 
+              RoleGuard,
               AuthenticationService,
               QueryService,
               SiteService,
