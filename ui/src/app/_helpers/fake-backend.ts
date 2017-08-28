@@ -12,7 +12,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
       // get setup flag
       if (connection.request.url.includes('/daquery/ws/setup') && connection.request.method === RequestMethod.Get) {
         connection.mockRespond(new Response(
-          new ResponseOptions({ status: 200, body: false})
+          new ResponseOptions({ status: 200, body: true })
         ));
       }
 
@@ -66,6 +66,22 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
           connection.mockRespond(new Response(
             new ResponseOptions({ status: 200, body: QUERIES_FROM_ME })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // post query from me
+      if (connection.request.url.endsWith('/daquery/ws/queries-from-me') && connection.request.method === RequestMethod.Post) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: {} })
           ));
         } else {
           // return 401 not authorised if token is null or invalid
