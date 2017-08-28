@@ -1,0 +1,34 @@
+<div class="login-box">
+  <div class="login-logo">
+    <b>Daquery</b><i class="fa fa-glass"></i>
+  </div>
+  <div class="login-box-body">
+    <p class="login-box-msg">Application Initial Setup (Step 3/3)</p>
+
+    <form name="form" (ngSubmit)="submit()" #f="ngForm" novalidate>
+      <div class="form-group has-feedback">
+        <div class="radio">
+          <label>
+            <input [disabled]="key_store" type="radio" name="keytype" id="keytype1" value="1" [(ngModel)]="model.keytype" #keytype="ngModel">
+            Use current SHRINE key store.
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="keytype" id="keytype2" value="2" [(ngModel)]="model.keytype" #keytype="ngModel">
+            Use new generated Public/Private Key pair.
+          </label>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-offset-4 col-xs-4">
+          <button [disabled]="loading" class="btn btn-primary btn-block btn-flat">
+            {{ loading ? '...' : 'Done' }}
+          </button>
+        </div>
+      </div>
+      <div *ngIf="error" class="alert alert-danger">{{error}}</div>
+    </form>
+
+  </div>
+</div>

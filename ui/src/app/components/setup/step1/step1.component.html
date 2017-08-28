@@ -1,0 +1,35 @@
+<div class="login-box">
+  <div class="login-logo">
+    <b>Daquery</b><i class="fa fa-glass"></i>
+  </div>
+  <div class="login-box-body">
+    <p class="login-box-msg">Application Initial Setup (Step 1/3)</p>
+
+    <form name="form" (ngSubmit)="f.form.valid && next()" #f="ngForm" novalidate>
+      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !sitename.valid }">
+        <input type="text" class="form-control" name="sitename" placeholder="Site Name" [(ngModel)]="model.sitename" #sitename="ngModel" required />
+        <span class="fa fa-sitemap form-control-feedback"></span>
+        <div *ngIf="f.submitted && !sitename.valid" class="help-block">Site Name is required</div>
+      </div>
+      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !key.valid }">
+        <input type="text" class="form-control" name="key" placeholder="Key" [(ngModel)]="model.key" #key="ngModel" required />
+        <span class="fa fa-key form-control-feedback"></span>
+        <div *ngIf="f.submitted && !key.valid" class="help-block">Key is required</div>
+      </div>
+      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !url.valid }">
+        <input type="text" class="form-control" name="url" placeholder="URL" [(ngModel)]="model.url" #url="ngModel" required />
+        <span class="fa fa-link form-control-feedback"></span>
+        <div *ngIf="f.submitted && !url.valid" class="help-block">URL is required</div>
+      </div>
+      <div class="row">
+        <div class="col-xs-offset-4 col-xs-4">
+          <button [disabled]="loading" class="btn btn-primary btn-block btn-flat">
+            {{ loading ? '...' : 'Next' }}
+          </button>
+        </div>
+      </div>
+      <div *ngIf="error" class="alert alert-danger">{{error}}</div>
+    </form>
+
+  </div>
+</div>

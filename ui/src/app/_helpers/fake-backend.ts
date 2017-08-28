@@ -9,6 +9,37 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
     // wrap in timeout to simulate server api call
     setTimeout(() => {
       
+      // get setup flag
+      if (connection.request.url.includes('/daquery/ws/setup') && connection.request.method === RequestMethod.Get) {
+        connection.mockRespond(new Response(
+          new ResponseOptions({ status: 200, body: false})
+        ));
+      }
+
+      // get keystore flag
+      if (connection.request.url.includes('/daquery/ws/keystore') && connection.request.method === RequestMethod.Get) {
+        connection.mockRespond(new Response(
+          new ResponseOptions({ status: 200, body: false})
+        ));
+      }
+
+      // post keytype
+      if (connection.request.url.includes('/daquery/ws/keytype') && connection.request.method === RequestMethod.Post) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          console.log(connection.request.getBody());
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 200, body: {} })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
       // authenticate user
       if (connection.request.url.includes('/daquery/ws/users/login') && connection.request.method === RequestMethod.Get) {
         // get parameters from post request

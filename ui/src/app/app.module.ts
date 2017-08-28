@@ -34,6 +34,7 @@ import { SiteService } from './services/site.service';
 import { UserService } from './services/user.service';
 import { NetworkService } from './services/network.service';
 import { NotificationService } from './services/notification.service';
+import { SetupService } from './services/setup.service';
 
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers/fake-backend';
@@ -45,6 +46,11 @@ import { AddNetworkComponent } from './components/networks/add-network/add-netwo
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { Error404Component } from './components/error-404/error-404.component';
 import { Error401Component } from './components/error-401/error-401.component';
+import { Error403Component } from './components/error-403/error-403.component';
+import { SetupComponent } from './components/setup/setup.component';
+import { Step1Component } from './components/setup/step1/step1.component';
+import { Step2Component } from './components/setup/step2/step2.component';
+import { Step3Component } from './components/setup/step3/step3.component';
 
 @NgModule({
   declarations: [
@@ -74,6 +80,11 @@ import { Error401Component } from './components/error-401/error-401.component';
     DashboardComponent,
     Error404Component,
     Error401Component,
+    Error403Component,
+    SetupComponent,
+    Step1Component,
+    Step2Component,
+    Step3Component,
   ],
   imports: [
     BrowserModule,
@@ -90,6 +101,7 @@ import { Error401Component } from './components/error-401/error-401.component';
               UserService,
               NetworkService,
               NotificationService,
+              SetupService,
               // providers used to create fake backend
               fakeBackendProvider,
               MockBackend,

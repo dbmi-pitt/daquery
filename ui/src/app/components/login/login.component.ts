@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { SetupService } from '../../services/setup.service';
 import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
@@ -15,9 +15,17 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private setupService: SetupService,
     private authenticationService: AuthenticationService) { }
 
   ngOnInit() {
+    // get setup flag. if not setup, redirect to setup page
+    this.setupService.getSetup()
+                     .subscribe(setup => {
+                        if(!setup){
+                          this.router.navigate(['./setup/step1']);
+                        }
+                      });
     // reset login status
     this.authenticationService.logout();
   }
