@@ -55,7 +55,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         //   ));
         // }
         connection.mockRespond(new Response(
-          new ResponseOptions({ status: 200, body: { user_id: 1, roles: ["steward"], token: 'fake-jwt-token' } })
+          new ResponseOptions({ status: 200, body: { user_id: 1, roles: ["admin"], token: 'fake-jwt-token' } })
         ));
       }
 

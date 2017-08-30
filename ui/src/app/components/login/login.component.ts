@@ -27,8 +27,7 @@ export class LoginComponent implements OnInit {
                         }
                       });
     // reset login status
-    debugger;
-    this.authenticationService.logout();
+    //this.authenticationService.logout();
   }
 
   login() {

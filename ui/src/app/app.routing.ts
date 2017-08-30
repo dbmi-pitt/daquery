@@ -24,8 +24,9 @@ const appRoutes:Routes = [
   { path: 'setup/step1', component: Step1Component },
   { path: 'setup/step2', component: Step2Component },
   { path: 'setup/step3', component: Step3Component },
+  { path: "", component: LoginComponent },
   { path: "login", component: LoginComponent },
-  { path: '', component: LoginComponent, 
+  { path: '', component: DashboardComponent,
     children: [
       { path: "queries-to-me", component: QueriesToMeComponent, canActivate: [AuthGuard] },
       { path: "queries-from-me", component: QueriesFromMeComponent, canActivate: [AuthGuard] },
