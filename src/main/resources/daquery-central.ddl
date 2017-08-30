@@ -1,0 +1,1 @@
+create table properties (property_id int, name varchar(256), value varchar(256));
