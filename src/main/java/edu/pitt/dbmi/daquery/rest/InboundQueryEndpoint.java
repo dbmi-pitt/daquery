@@ -50,6 +50,7 @@ import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.rest.AbstractEndpoint.ParameterItem;
 import edu.pitt.dbmi.daquery.util.PasswordUtils;
+import edu.pitt.dbmi.daquery.util.UserRoles;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.Gson;
@@ -101,7 +102,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
      */
     
     @GET
-    @Secured
+    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     /**
@@ -139,7 +140,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
     
     @GET
-    @Secured
+    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
     @Path("/{id}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -177,7 +178,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     }
 
     @GET
-    @Secured
+    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
     @Path("/status/{statusType}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -215,7 +216,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     }
 
     @GET
-    @Secured
+    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
     @Path("/site/{siteName}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -252,7 +253,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
         }
     }
 
-    @GET
+/*    @GET
     @Secured
     @Path("/site/{siteName}/status/{statusType}")
     @Consumes(MediaType.TEXT_PLAIN)
@@ -264,7 +265,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
-    public Response getInboundQueryBySiteStatus(@PathParam("siteName") String siteName, @PathParam("statusType") String statusType) {
+/*    public Response getInboundQueryBySiteStatus(@PathParam("siteName") String siteName, @PathParam("statusType") String statusType) {
     	
     	try {
 
@@ -289,7 +290,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
-
+/*
     @GET
     @Secured
     @Path("/site/{userName}/status/{statusType}")
@@ -302,7 +303,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
-    public Response getInboundQueryByUserStatus(@PathParam("userName") String userName, @PathParam("statusType") String statusType) {
+/*    public Response getInboundQueryByUserStatus(@PathParam("userName") String userName, @PathParam("statusType") String statusType) {
     	
     	try {
 
@@ -327,7 +328,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+ */   
     
     
     
@@ -353,9 +354,6 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
             
     }
 
-    //TODO: I would like to create a single, generic method that returns a list
-    //of Inbound_Query objects.  This method should take a List<JPQL parameters>,
-    //and a query name.  We may want to move this to a generic class
     private List<Inbound_Query> queryAllInboundQueries() throws Exception {
     	try { 		
     	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_ALL, null, logger);

@@ -25,7 +25,7 @@ import com.google.gson.Gson;
  */
 
 @NamedQueries({
-        @NamedQuery(name = Inbound_Query.FIND_ALL, query = "SELECT u FROM Inbound_Query u ORDER BY u.lastUpdate DESC"),
+        @NamedQuery(name = Inbound_Query.FIND_ALL, query = "SELECT u FROM Inbound_Query u ORDER BY u.lastupdate DESC"),
         @NamedQuery(name = Inbound_Query.FIND_BY_ID, query = "SELECT u FROM Inbound_Query u WHERE u.id = :id"),
         @NamedQuery(name = Inbound_Query.COUNT_ALL, query = "SELECT COUNT(u) FROM Inbound_Query u"),
         @NamedQuery(name = Inbound_Query.FIND_BY_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.status = :status"),
@@ -67,26 +67,26 @@ public class Inbound_Query extends DaqueryObject {
     @Column(name="ID", unique = true, nullable = false)
     private long id;
     @Column(name="STUDYNAME", length = 500)
-    private String studyName;
+    private String studyname;
     @Column(name="QUERYNAME", length = 500)
-    private String queryName;
+    private String queryname;
     @Column(name="QUERYTYPE", length = 500)
-    private String queryType;
+    private String querytype;
     @Column(name="SITE", length = 500)
     private String site;    
     @Column(name="USERNAME", length = 500)
-    private String userName; //TODO: should this be userid?  If they create a query, we
+    private String username; //TODO: should this be userid?  If they create a query, we
     //should check to make sure we have their id in our own records
     @Column(name="LASTUPDATE", length = 500)
     @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-    private DateTime lastUpdate;
+    private DateTime lastupdate;
     //TODO: coordinate the status list with Desheng
     @Column(name="STATUS", length = 500)
     private String status;
     @Column(name="ORACLEQUERY", length = 500)
-    private String oracleQuery;
+    private String oraclequery;
     @Column(name="SQLQUERY", length = 500)
-    private String sqlQuery;
+    private String sqlquery;
 
     // ======================================
     // =            Constructors            =
@@ -101,15 +101,15 @@ public class Inbound_Query extends DaqueryObject {
 			DateTime lastUpdate, String status, String oracleQuery, String sqlQuery) {
 		super();
 		this.id = id;
-		this.studyName = studyName;
-		this.queryName = queryName;
-		this.queryType = queryType;
+		this.studyname = studyName;
+		this.queryname = queryName;
+		this.querytype = queryType;
 		this.site = site;
-		this.userName = userName;
-		this.lastUpdate = lastUpdate;
+		this.username = userName;
+		this.lastupdate = lastUpdate;
 		this.status = status;
-		this.oracleQuery = oracleQuery;
-		this.sqlQuery = sqlQuery;
+		this.oraclequery = oracleQuery;
+		this.sqlquery = sqlQuery;
 	}
 
 
@@ -127,27 +127,27 @@ public class Inbound_Query extends DaqueryObject {
 	}
 
 	public String getStudyName() {
-		return studyName;
+		return studyname;
 	}
 
 	public void setStudyName(String studyName) {
-		this.studyName = studyName;
+		this.studyname = studyName;
 	}
 
 	public String getQueryName() {
-		return queryName;
+		return queryname;
 	}
 
 	public void setQueryName(String queryName) {
-		this.queryName = queryName;
+		this.queryname = queryName;
 	}
 
 	public String getQueryType() {
-		return queryType;
+		return querytype;
 	}
 
 	public void setQueryType(String queryType) {
-		this.queryType = queryType;
+		this.querytype = queryType;
 	}
 
 	public String getSite() {
@@ -159,19 +159,19 @@ public class Inbound_Query extends DaqueryObject {
 	}
 
 	public String getUserName() {
-		return userName;
+		return username;
 	}
 
 	public void setUserName(String userName) {
-		this.userName = userName;
+		this.username = userName;
 	}
 
 	public DateTime getLastUpdate() {
-		return lastUpdate;
+		return lastupdate;
 	}
 
 	public void setLastUpdate(DateTime lastUpdate) {
-		this.lastUpdate = lastUpdate;
+		this.lastupdate = lastUpdate;
 	}
 
 	public String getStatus() {
@@ -183,19 +183,19 @@ public class Inbound_Query extends DaqueryObject {
 	}
 
 	public String getOracleQuery() {
-		return oracleQuery;
+		return oraclequery;
 	}
 
 	public void setOracleQuery(String oracleQuery) {
-		this.oracleQuery = oracleQuery;
+		this.oraclequery = oracleQuery;
 	}
 
 	public String getSqlQuery() {
-		return sqlQuery;
+		return sqlquery;
 	}
 
 	public void setSqlQuery(String sqlQuery) {
-		this.sqlQuery = sqlQuery;
+		this.sqlquery = sqlQuery;
 	}
 
 
@@ -219,9 +219,9 @@ public class Inbound_Query extends DaqueryObject {
 
 	@Override
 	public String toString() {
-		return "Inbound_Query [id=" + id + ", studyName=" + studyName + ", queryName=" + queryName + ", queryType="
-				+ queryType + ", site=" + site + ", userName=" + userName + ", lastUpdate=" + lastUpdate + ", status="
-				+ status + ", oracleQuery=" + oracleQuery + ", sqlQuery=" + sqlQuery + "]";
+		return "Inbound_Query [id=" + id + ", studyName=" + studyname + ", queryName=" + queryname + ", queryType="
+				+ querytype + ", site=" + site + ", userName=" + username + ", lastUpdate=" + lastupdate + ", status="
+				+ status + ", oracleQuery=" + oraclequery + ", sqlQuery=" + sqlquery + "]";
 	}
 	
 

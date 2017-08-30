@@ -1,8 +1,11 @@
 package edu.pitt.dbmi.daquery.rest;
 
 import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.security.Key;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -17,9 +20,12 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+import javax.ws.rs.container.ResourceInfo;
 
+import edu.pitt.dbmi.daquery.rest.AbstractEndpoint.ParameterItem;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
+import edu.pitt.dbmi.daquery.util.UserRoles;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,12 +34,26 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import edu.pitt.dbmi.daquery.domain.Inbound_Query;
+import edu.pitt.dbmi.daquery.util.UserStatuses;
+import edu.pitt.dbmi.daquery.util.UserRoles;
+import edu.pitt.dbmi.daquery.domain.Site_User;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
+
 
 /**
  * This class comes from this thread: https://stackoverflow.com/questions/26777083/best-practice-for-rest-token-based-authentication-with-jax-rs-and-jersey
  * This class is used by other REST endpoint classes annotating methods with the @Secured
  * annotation.  The class will authenticate all JWTs for the REST endpoints.
+ * The Role permissions piece is described in the same stackoverflow thread. 
  * @author cborromeo
  *
  */
@@ -45,9 +65,18 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private final static Logger logger = Logger.getLogger(AuthenticationFilter.class.getName());
 
+    @Context
+    private ResourceInfo resourceInfo;
+    
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
+    	//TODO: Reject any communication coming across anything other than HTTPS:
+    	//here is the check:
+    	/*if (requestContext.getUriInfo().getRequestUri().getScheme() != "https") {
+            throw new NotAuthorizedException("You must access web services using https");    		
+    	}*/
+    	
         // Get the HTTP Authorization header from the request
         String authorizationHeader = 
             requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -57,6 +86,16 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             throw new NotAuthorizedException("Authorization header must be provided");
         }
 
+        // Get the resource class which matches with the requested URL
+        // Extract the roles declared by it
+        Class<?> resourceClass = resourceInfo.getResourceClass();
+        List<UserRoles> classRoles = extractRoles(resourceClass);
+
+        // Get the resource method which matches with the requested URL
+        // Extract the roles declared by it
+        Method resourceMethod = resourceInfo.getResourceMethod();
+        List<UserRoles> methodRoles = extractRoles(resourceMethod);
+
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
@@ -64,6 +103,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
             // Validate the token
             final String tokenUsername = validateToken(token);
+            if (!isUserValid(tokenUsername)) {
+            	throw new Exception("User account is not valid");
+            }
+            
+            
             /*got this approach from:
             * https://stackoverflow.com/questions/26777083/best-practice-for-rest-token-based-authentication-with-jax-rs-and-jersey
             * Basically this code allows all the REST calls to inherit a common SecurityContext object.
@@ -136,9 +180,13 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     /**
      * Validate a JWT token
-     * @param token
-     * @return - the username extracted from the token
-     * @throws Exception
+     * @param JWT token
+     * @return - the UUID extracted from the token
+     * @throws ExpiredJwtException if the token is expired
+     * ClaimJwtException if the validation of an JTW claim failed
+     * MalformedJwtException if the JWT if malformed
+     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
+     * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
      */
     private String validateToken(String token) throws Exception {
         // Check if it was issued by the server and if it's not expired
@@ -169,5 +217,76 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 	    }
 
      }
+    
+    /**
+     * Query the database to find the current user (represented by UUID).
+     * Determine: a) if the user has a valid account and b) if the user's status is active
+     * @param uuid- The user's UUID
+     * @return- True is the UUID represents a valid AND active account,
+     * return False otherwise
+     * @throws PersistenceException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    private boolean isUserValid(String uuid) throws Exception {
+    	logger.info("checking if user: " + uuid + " is valid");
+    	EntityManagerFactory emf = null;
+    	EntityManager em = null;
+    	try {
+	        emf = Persistence.createEntityManagerFactory("jpa-example");
+	        em = emf.createEntityManager();
+	        Query query = em.createNamedQuery(Site_User.FIND_BY_UUID);
+	        query.setParameter("uuid", uuid);
+	        Site_User user = null;
+	        user = (Site_User)query.getSingleResult();
+	        return user.getUserStatus() == UserStatuses.ACTIVE;
+	    
+        } catch (PersistenceException pe) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(pe.getLocalizedMessage());
+            throw pe;
+        } catch (Exception e) {
+    		logger.info(e.getLocalizedMessage());
+        	throw e;
+        }
+    	finally {
+    		if (em != null) {
+    			em.close();
+    		}
+    		if (emf != null) {
+    			emf.close();
+    		}
+    		
+    	}
+            
+    }
+
+    /**
+     * Extract the roles granting permission to an annotated web service call.
+     * For example, if a method is annotated like this:
+     * @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.VIEWER})
+     * This method would return a List of: (UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.VIEWER)
+     * @param annotatedElement an annotated web service call
+     * @return a List of the valid UserRoles for the web service call or 
+     * an empty list if no UserRoles are assigned to the web service call 
+     */
+    private List<UserRoles> extractRoles(AnnotatedElement annotatedElement) {
+        if (annotatedElement == null) {
+            return new ArrayList<UserRoles>();
+        } else {
+            Secured secured = annotatedElement.getAnnotation(Secured.class);
+            if (secured == null) {
+                return new ArrayList<UserRoles>();
+            } else {
+                UserRoles[] allowedRoles = secured.value();
+                return Arrays.asList(allowedRoles);
+            }
+        }
+    }
+
+    private void checkPermissions(List<UserRoles> allowedRoles, String uuid) throws Exception {
+    	//TODO: run a database query to check this.
+        // Check if the user contains one of the allowed roles
+        // Throw an Exception if the user has not permission to execute the method
+    }
 
 }
