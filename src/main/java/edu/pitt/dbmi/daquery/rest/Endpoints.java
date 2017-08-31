@@ -272,22 +272,9 @@ public class Endpoints extends AbstractEndpoint {
     
     /**
      * Get all local roles
+     * If userId present, return roles for that specific user.
      * example url: daquery/ws/roles
-     * @return 200 OK			List of roles
-     * @throws 400 Bad Request	error message
-     * @throws 401 Unauthorized	
-     */
-    @GET
-    @Path("/roles")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response retrieveRoles() {
-    	return null;
-    }
-    
-    /**
-     * Get roles by userId
-     * example url: daquery/ws/roles?userId=21
+     *              daquery/ws/roles?userid=21
      * @param  userId
      * @return 200 OK			List of roles
      * @throws 400 Bad Request	error message
@@ -297,9 +284,10 @@ public class Endpoints extends AbstractEndpoint {
     @Path("/roles")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response retrieveRolesByUserId(@QueryParam("userId") String userId) {
+    public Response retrieveRoles(@QueryParam("userId") String userId) {
     	return null;
     }
+    
     
     /**
      * Get all remote users by site

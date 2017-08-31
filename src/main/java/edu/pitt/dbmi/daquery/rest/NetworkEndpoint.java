@@ -89,6 +89,6 @@ public class NetworkEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworkByID(@PathParam("id") String id) {
-
+    	return null;
     }
 }
