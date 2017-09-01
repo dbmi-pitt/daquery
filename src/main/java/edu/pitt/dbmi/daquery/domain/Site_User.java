@@ -20,6 +20,14 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import edu.pitt.dbmi.daquery.util.UserStatuses;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
+
 /**
  * @author Antonio Goncalves
  *         http://www.antoniogoncalves.org
@@ -198,5 +206,20 @@ public class Site_User extends DaqueryObject {
                 ", login='" + login + '\'' +
                 ", password='" + passwordSet + '\'' +
                 '}';
+    }
+    
+    /**
+     * The toJson method in DaqueryObject needs to be overriden
+     * The user's encrypted password needs to be removed from the Json string
+     */
+    @Override
+	public String toJson() {
+    	//we gotta hide the password
+    	//1-2-3-4-5? That's the stupidest combination I've ever heard of in my life! That's the kinda thing an idiot would have on his luggage!
+    	String initialJson = super.toJson();    	
+    	String pattern = ",\"password\"\\:\".*\"";    	    	
+    	String json = initialJson.replaceAll(pattern, "");
+    	return json;
+
     }
 }
