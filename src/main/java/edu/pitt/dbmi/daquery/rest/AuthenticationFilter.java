@@ -11,42 +11,34 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
-import javax.ws.rs.container.ResourceInfo;
 
-import edu.pitt.dbmi.daquery.rest.AbstractEndpoint.ParameterItem;
+import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
 import edu.pitt.dbmi.daquery.util.UserRoles;
+import edu.pitt.dbmi.daquery.util.UserStatuses;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import edu.pitt.dbmi.daquery.util.UserStatuses;
-import edu.pitt.dbmi.daquery.util.UserRoles;
-import edu.pitt.dbmi.daquery.domain.Site_User;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
 
 
 /**

@@ -10,7 +10,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import edu.pitt.dbmi.daquery.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 
 public class AbstractEndpoint {
 

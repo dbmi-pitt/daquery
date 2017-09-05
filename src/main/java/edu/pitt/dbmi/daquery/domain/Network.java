@@ -1,18 +1,12 @@
 package edu.pitt.dbmi.daquery.domain;
 
-import edu.pitt.dbmi.daquery.util.PasswordUtils;
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Id;
-import javax.persistence.Column;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import java.util.Objects;
-import java.util.logging.Logger;
 
 
 @Entity
