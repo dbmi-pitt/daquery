@@ -280,16 +280,27 @@ public class UserEndpoint extends AbstractEndpoint {
 	    }
     }
     
+    /**
+     * Get a JSON string representing a user given the user's UUID
+     * @param uuid- the user's UUID
+     * @return
+     */
     @GET
-    @Secured
-    @Path("/{id}")
-    public Response findById(@PathParam("id") String id) {
-        Site_User user = null;//em.find(User.class, id);
-
-        if (user == null)
-            return Response.status(NOT_FOUND).build();
-
-        return Response.ok(user).build();
+    //@Secured
+    @Path("/{uuid}")
+    public Response findById(@PathParam("uuid") String uuid) {
+    	try {
+			List<ParameterItem> pList = new ArrayList<ParameterItem>();
+			ParameterItem piUser = new ParameterItem("uuid", uuid);
+			pList.add(piUser);
+	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_UUID, pList, logger);	
+	        if (user == null)
+	            return Response.status(NOT_FOUND).build();
+	        String json = user.toJson();	
+	        return Response.ok(200).entity(json).build();
+    	} catch (Exception e) {
+	        return Response.serverError().build();    		
+    	}
     }
 
 
@@ -356,7 +367,7 @@ public class UserEndpoint extends AbstractEndpoint {
      * A back-end call that uses the uuid/password combination to find the user's
      * account in the database.  Throws an error if the account cannot be verified.
      * @param uuid- the uuid for the account.  This value must not be empty.
-     * @param password- the password for the account.  This value must not be empty.
+     * @param password- the plaintext password for the account.  This value must not be empty.
      * @throws SecurityException on authentication failure
      */
     private void authenticate(String uuid, String password) throws Exception {
@@ -370,7 +381,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_UUID_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
-	    		logger.info("Invalid user/password");
+	    		logger.info("Invalid user/password.  Tried to login using: " + uuid + " / " + password);
 	            throw new SecurityException("Invalid user/password");
 	        }
 	    
