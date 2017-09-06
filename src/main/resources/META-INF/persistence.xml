@@ -3,16 +3,23 @@
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
              http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
              version="2.1">
-  <persistence-unit name="derby">
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-		<properties>
-			<property name="hibernate.archive.autodetection" value="class" />
-			<property name="hibernate.dialect" value="com.mysema.query.jpa.support.ExtendedDerbyDialect" />
-			<property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.EmbeddedDriver" />
-			<property name="hibernate.connection.url" value="jdbc:derby:target/=daquery-db;create=true" />
-			<!-- <property name="hibernate.show_sql" value="true"/> -->
-			<property name="hibernate.flushMode" value="FLUSH_AUTO" />
-			<property name="hibernate.hbm2ddl.auto" value="update" />
-		</properties>
-	</persistence-unit>
+  <persistence-unit name="jpa-example">
+  <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+  <properties>
+    <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@//dbmi-db-dev-01.dbmi.pitt.edu:1521/dbmi03.dbmi.pitt.edu" />
+    <property name="javax.persistence.jdbc.user" value="chb69" />
+    <property name="javax.persistence.jdbc.password" value="test01" />
+    <property name="javax.persistence.jdbc.driver" value="oracle.jdbc.driver.OracleDriver" />
+    <property name="hibernate.show_sql" value="true" />
+    <property name="hibernate.format_sql" value="true" />
+    <property name="hibernate.dialect" value="org.hibernate.dialect.OracleDialect" />
+    <property name="hibernate.hbm2ddl.auto" value="validate" />
+    <!-- Configuring Connection Pool -->
+    <property name="hibernate.c3p0.min_size" value="5" />
+    <property name="hibernate.c3p0.max_size" value="20" />
+    <property name="hibernate.c3p0.timeout" value="500" />
+    <property name="hibernate.c3p0.max_statements" value="50" />
+    <property name="hibernate.c3p0.idle_test_period" value="2000" />
+    </properties>
+  </persistence-unit>
 </persistence>
