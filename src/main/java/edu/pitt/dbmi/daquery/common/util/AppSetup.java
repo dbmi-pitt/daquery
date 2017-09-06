@@ -25,7 +25,7 @@ public class AppSetup
 	
 	public static void main(String [] args)
 	{
-		System.setProperty("catalina.home", "/opt/apache-tomcat-7.0.78/");
+		System.setProperty("catalina.home", "C:\\Users\\del20\\Documents\\GitHub\\daquery-ws\\target");
 		initialize();
 		if(erroredSetup)
 			System.err.println(setupErrorMessage);
@@ -67,7 +67,7 @@ public class AppSetup
 			return(false);
 		}
 		
-		if(isSetupComplete())
+		if(isValidSetup())
 		{
 			validSetup = true;
 			return(true);
@@ -259,7 +259,7 @@ public class AppSetup
 	{
 		return(setupErrorMessage);
 	}
-	private static boolean isSetupComplete()
+	public static boolean isValidSetup()
 	{
 		return(validSetup);
 	}
