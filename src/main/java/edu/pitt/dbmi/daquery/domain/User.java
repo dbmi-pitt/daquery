@@ -3,8 +3,6 @@ package edu.pitt.dbmi.daquery.domain;
 import java.io.Serializable;
 import javax.persistence.*;
 import java.util.List;
-import edu.pitt.dbmi.daquery.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.util.UserStatuses;
 
 /**
  * The persistent class for the USERS database table.
