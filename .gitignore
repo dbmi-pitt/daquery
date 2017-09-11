@@ -40,4 +40,5 @@ src/main/webapp/ui/
 
 .settings/
 
-conf/ # Desheng's Derby database location
+# Desheng's Derby database location
+conf/
