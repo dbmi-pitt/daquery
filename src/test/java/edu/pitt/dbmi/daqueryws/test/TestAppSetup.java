@@ -6,7 +6,7 @@ public class TestAppSetup
 {
 	public static void main(String [] args)
 	{
-		System.setProperty("catalina.home", "/Users/bill/daquery-data");
+		System.setProperty("catalina.home", "/home/devuser/daquery-data");
 		AppSetup.initialize();
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
