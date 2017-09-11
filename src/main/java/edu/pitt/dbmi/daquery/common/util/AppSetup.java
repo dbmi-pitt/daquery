@@ -2,10 +2,14 @@ package edu.pitt.dbmi.daquery.common.util;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,15 +17,23 @@ public class AppSetup
 {
 	private static Logger log = Logger.getLogger(AppSetup.class.getName());
 	
-	private static boolean validSetup = false;
+	//private static boolean validDatabaseSetup = false;
 	private static boolean erroredSetup = false;
 	private static String setupErrorMessage = "";
+	private static boolean isValidSetup = false;
+	private static boolean firstUserCreated = false;
+	private static String firstUserDetails = "";
 	
 	private static final int DBSTATUS_EMPTY = 1;
 	private static final int DBSTATUS_ALL_GOOD = 2;
 	private static final int DBSTATUS_OLD_VERSION = 3;
 	private static final int DBSTATUS_NEWER_VERSION = 4;
 	private static final int DBSTATUS_INDETERMINATE = 5;
+	private static final int DBSTATUS_UNKNOWN = 6;
+	
+	private static int dbStatus = DBSTATUS_UNKNOWN;
+	
+	
 	
 	public static void main(String [] args)
 	{
@@ -29,7 +41,7 @@ public class AppSetup
 		initialize();
 		if(erroredSetup)
 			System.err.println(setupErrorMessage);
-		else if(validSetup)
+		else if(dbStatus == DBSTATUS_ALL_GOOD)
 			System.out.println("All Good");
 		else
 			System.out.println("Invalid setup, but no error reported");
@@ -37,7 +49,7 @@ public class AppSetup
 	
 	public static void initialize()
 	{
-		validSetup = checkSetup();
+		checkDatabaseSetup();
 	}
 	
 	/**
@@ -48,7 +60,7 @@ public class AppSetup
 	 * 
 	 * If JavaDB was never created do it now.
 	 */
-	private static boolean checkSetup()
+	private static boolean checkDatabaseSetup()
 	{
 		if(PropertiesHelper.getHomeDirectory() == null)
 		{
@@ -63,32 +75,39 @@ public class AppSetup
 		
 		if(! isConfDirWritable())
 		{
-			setErroredSetup("Tomcat Configuration Dir: " + PropertiesHelper.getConfDirectory() + " is not writable."); 
-			return(false);
+			if(! mkConfDir())
+			{	
+				setErroredSetup("Tomcat Configuration Dir: " + PropertiesHelper.getConfDirectory() + " is not writable."); 
+				return(false);
+			}
 		}
 		
-		if(isValidSetup())
-		{
-			validSetup = true;
-			return(true);
-		}
-
 		if(! dbExists())
 		{
 			if(! createDatabase())
 			{
 				setErroredSetup("Unable to create the application database. Check the application logs for more information.");
 				return(false);
-			}				
+			}
 		}
 		
-		int dbStatus = checkDB();
+		dbStatus = checkDB();
 		if(dbStatus == AppSetup.DBSTATUS_ALL_GOOD)
 			return(true);
 		else if(dbStatus == AppSetup.DBSTATUS_EMPTY)
 		{
 			if(initializeDB())
+			{
+				if(PropertiesHelper.setupAdminUser())
+				{
+					if(! setupAdminUser())
+					{
+						setErroredSetup("Unable to create the initial admin user.  Check the application logs for more information.");
+						return(false);
+					}
+				}
 				return(true);
+			}
 			else
 			{
 				setErroredSetup("Unable to initialize the database.  Check the application logs for more information.");
@@ -105,6 +124,44 @@ public class AppSetup
 		return(false);
 		
 	}
+	private static boolean setupAdminUser()
+	{
+		Connection conn = null;
+		Statement stat = null;
+		ResultSet rs = null;
+		try
+		{
+			conn = ApplicationDBHelper.getConnection();
+			stat = conn.createStatement();
+			rs = stat.executeQuery("select count(*) from site_user where lower(username) = 'admin'");
+			int adminCount = 0;
+			if(rs.next())
+				adminCount = rs.getInt(1);
+			if(adminCount > 0)
+			{
+				log.log(Level.SEVERE, "An admin user already exists while trying to add the first admin user.");
+				return(false);
+			}
+			UUID uuid = UUID.randomUUID();
+		    String uuidStr = uuid.toString();
+		    String pwd = PasswordUtils.randomPassword();
+			String hashedPwd = PasswordUtils.digestPassword(pwd);
+			stat.executeUpdate("insert into site_user (id, username, password) values ('"  + uuidStr + "', 'admin', '" + hashedPwd + "')");
+			firstUserDetails = "Initial admin user create with password: " + pwd;
+			firstUserCreated = true;
+			return(true);
+		}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "An error occured while trying to create the first admin user.", t);
+			setErroredSetup("An error occured while trying to create the first admin user.  Check the application logs for more information.");
+			return(false);
+		}
+		finally
+		{
+			ApplicationDBHelper.closeConnection(conn, stat, rs);
+		}
+	}
 	private static void setErroredSetup(String msg)
 	{
 		log.severe(msg);
@@ -115,6 +172,17 @@ public class AppSetup
 	{
 		File f = new File(PropertiesHelper.getConfDirectory());
 		return(f.canWrite());
+	}
+
+	private static boolean mkConfDir()
+	{
+		try
+		{
+			Path p = Paths.get(PropertiesHelper.getConfDirectory());
+			Files.createDirectories(p);
+		}
+		catch(Throwable t){return(false);}
+		return(true);
 	}
 	
 	private static boolean initializeDB()
@@ -139,7 +207,7 @@ public class AppSetup
 			}
 			catch(Throwable t)
 			{
-				log.log(Level.SEVERE, "Error while inserting version number into application database.");
+				log.log(Level.SEVERE, "Error while inserting version number into application database.", t);
 				return(false);
 			}
 			finally
@@ -224,6 +292,7 @@ public class AppSetup
 		{
 			conn = ApplicationDBHelper.getConnection();
 			state = conn.createStatement();
+			
 			rs = state.executeQuery("select value from properties where name = 'current.version'");
 			String version = null;
 			if(rs.next())
@@ -259,8 +328,22 @@ public class AppSetup
 	{
 		return(setupErrorMessage);
 	}
+	public static boolean isValidDatabaseSetup()
+	{
+		return(dbStatus == DBSTATUS_ALL_GOOD);
+	}
+	
 	public static boolean isValidSetup()
 	{
-		return(validSetup);
+		return(isValidSetup);
 	}
+	public static boolean wasFirstUserCreated()
+	{
+		return(firstUserCreated);
+	}
+	public static String getFirstUserDetails()
+	{
+		return(firstUserDetails);
+	}
+	
 }

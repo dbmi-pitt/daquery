@@ -57,4 +57,12 @@ public class PropertiesHelper
 	{
 		return(ApplicationProperties.getProps().getProperty("initialization.ddl.file"));
 	}
+	
+	public static boolean setupAdminUser()
+	{
+		String doit = ApplicationProperties.getProps().getProperty("setup.admin.user");
+		if(doit == null) return(false);
+		doit = doit.toLowerCase().trim();
+		return(doit.equals("1") || doit.equals("true") || doit.equals("yes"));
+	}
 }
