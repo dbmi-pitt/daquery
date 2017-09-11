@@ -7,13 +7,25 @@ import java.util.Objects;
 
 
 /**
- * The persistent class for the NETWORKS database table.
+ * The persistent class for the SITES database table.
  * 
  */
 @Entity
-@Table(name="NETWORKS")
-@NamedQuery(name="Network.findAll", query="SELECT n FROM Network n")
-public class Network extends DaqueryObject implements Serializable {
+@Table(name="SITES")
+@NamedQueries({
+	@NamedQuery(name=Site.FIND_ALL, query="SELECT s FROM Site s"),
+	@NamedQuery(name=Site.FIND_BY_TYPE, query="SELECT s FROM Site s WHERE s.type = :type"),
+	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
+})
+public class Site extends DaqueryObject implements Serializable {
+	// ======================================
+    // =             Constants              =
+    // ======================================
+
+    public static final String FIND_ALL = "Site.findAll";
+    public static final String COUNT_ALL = "Site.countAll";
+    public static final String FIND_BY_TYPE = "Site.findByType";
+
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -24,19 +36,23 @@ public class Network extends DaqueryObject implements Serializable {
 	@Column(nullable=false, length=100)
 	private String name;
 
+	@Column(nullable=false, length=100)
+	private String type;
+
 	//bi-directional many-to-one association to InboundQuery
-	@OneToMany(mappedBy="network")
+	@OneToMany(mappedBy="site")
 	private List<InboundQuery> inboundQueries;
 
 	//bi-directional many-to-one association to OutboundQuery
-	@OneToMany(mappedBy="network")
+	@OneToMany(mappedBy="site")
 	private List<OutboundQuery> outboundQueries;
 
-	//bi-directional many-to-one association to Site
-	@OneToMany(mappedBy="network")
-	private List<Site> sites;
+	//bi-directional many-to-one association to Network
+	@ManyToOne
+	@JoinColumn(name="NETWORK_ID", nullable=false)
+	private Network network;
 
-	public Network() {
+	public Site() {
 	}
 
 	public long getId() {
@@ -65,14 +81,14 @@ public class Network extends DaqueryObject implements Serializable {
 
 	public InboundQuery addInboundQuery(InboundQuery inboundQuery) {
 		getInboundQueries().add(inboundQuery);
-		inboundQuery.setNetwork(this);
+		inboundQuery.setSite(this);
 
 		return inboundQuery;
 	}
 
 	public InboundQuery removeInboundQuery(InboundQuery inboundQuery) {
 		getInboundQueries().remove(inboundQuery);
-		inboundQuery.setNetwork(null);
+		inboundQuery.setSite(null);
 
 		return inboundQuery;
 	}
@@ -87,38 +103,24 @@ public class Network extends DaqueryObject implements Serializable {
 
 	public OutboundQuery addOutboundQuery(OutboundQuery outboundQuery) {
 		getOutboundQueries().add(outboundQuery);
-		outboundQuery.setNetwork(this);
+		outboundQuery.setSite(this);
 
 		return outboundQuery;
 	}
 
 	public OutboundQuery removeOutboundQuery(OutboundQuery outboundQuery) {
 		getOutboundQueries().remove(outboundQuery);
-		outboundQuery.setNetwork(null);
+		outboundQuery.setSite(null);
 
 		return outboundQuery;
 	}
 
-	public List<Site> getSites() {
-		return this.sites;
+	public Network getNetwork() {
+		return this.network;
 	}
 
-	public void setSites(List<Site> sites) {
-		this.sites = sites;
-	}
-
-	public Site addSite(Site site) {
-		getSites().add(site);
-		site.setNetwork(this);
-
-		return site;
-	}
-
-	public Site removeSite(Site site) {
-		getSites().remove(site);
-		site.setNetwork(null);
-
-		return site;
+	public void setNetwork(Network network) {
+		this.network = network;
 	}
 	
 	// ======================================
@@ -129,8 +131,8 @@ public class Network extends DaqueryObject implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Network network = (Network) o;
-        return Objects.equals(id, network.id);
+        Site site = (Site) o;
+        return Objects.equals(id, site.id);
     }
 
     @Override
@@ -140,7 +142,7 @@ public class Network extends DaqueryObject implements Serializable {
 
     @Override
     public String toString() {
-        return "Network {" +
+        return "Site {" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 '}';
