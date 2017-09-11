@@ -10,11 +10,12 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import edu.pitt.dbmi.daquery.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.util.UserStatuses;
+import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
+import edu.pitt.dbmi.daquery.util.UserStatus;
 
 
 /**
@@ -26,7 +27,7 @@ import edu.pitt.dbmi.daquery.util.UserStatuses;
 
 @NamedQueries({
         @NamedQuery(name = Site_User.FIND_ALL, query = "SELECT u FROM Site_User u ORDER BY u.lastName DESC"),
-        @NamedQuery(name = Site_User.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.login = :login AND u.password = :password"),
+        @NamedQuery(name = Site_User.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.username = :login AND u.password = :password"),
         @NamedQuery(name = Site_User.FIND_BY_UUID_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.uuid = :uuid AND u.password = :password"),
         @NamedQuery(name = Site_User.FIND_BY_UUID, query = "SELECT u FROM Site_User u WHERE u.uuid = :uuid"),
         @NamedQuery(name = Site_User.COUNT_ALL, query = "SELECT COUNT(u) FROM Site_User u")
@@ -63,12 +64,12 @@ public class Site_User extends DaqueryObject {
     private String lastName;
     @Column(name="FIRSTNAME", length = 500)
     private String firstName;
-    @Column(name="LOGIN", unique = true, length = 500, nullable = false)
-    private String login;
+    @Column(name="USERNAME", unique = true, length = 500, nullable = false)
+    private String username;
     @Column(name="PASSWORD", length = 500, nullable = false)
     private String password;
-    @Column(name="STATUS", length = 10)
-    private String status;
+    @Column(name="STATUS")
+    private int status;
 
     // ======================================
     // =            Constructors            =
@@ -81,7 +82,7 @@ public class Site_User extends DaqueryObject {
         this.uuid = id;
         this.lastName = lastName;
         this.firstName = firstName;
-        this.login = login;
+        this.username = login;
         this.setPassword(password);
     }
 
@@ -89,14 +90,14 @@ public class Site_User extends DaqueryObject {
         this.uuid = id;
         this.lastName = "";
         this.firstName = "";
-        this.login = login;
+        this.username = login;
         this.setPassword(password);
     }
 
     public Site_User(String login, String password) {
         this.lastName = "";
         this.firstName = "";
-        this.login = login;
+        this.username = login;
         this.setPassword(password);
     }
     
@@ -129,12 +130,12 @@ public class Site_User extends DaqueryObject {
         this.firstName = firstName;
     }
 
-    public String getLogin() {
-        return login;
+    public String getUsername() {
+        return username;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setUsername(String login) {
+        this.username = login;
     }
 
     public String getPassword() {
@@ -151,18 +152,22 @@ public class Site_User extends DaqueryObject {
     	return password.length() > 0;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
     
-    public UserStatuses getUserStatus() {
-    	//TODO: write code to translate the status String
-    	//to an enum
-    	return UserStatuses.ACTIVE;
+    @Transient
+    public UserStatus getStatusEnum()
+    {
+    	return UserStatus.fromInt(status);
+    }
+    public void setStatusEnum(UserStatus stat)
+    {
+    	setStatus(status);
     }
     
     // ======================================
@@ -192,7 +197,7 @@ public class Site_User extends DaqueryObject {
                 "id='" + uuid + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", firstName='" + firstName + '\'' +
-                ", login='" + login + '\'' +
+                ", login='" + username + '\'' +
                 ", password='" + passwordSet + '\'' +
                 '}';
     }

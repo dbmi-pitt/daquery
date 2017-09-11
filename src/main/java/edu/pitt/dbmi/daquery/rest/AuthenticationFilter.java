@@ -31,7 +31,7 @@ import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
 import edu.pitt.dbmi.daquery.util.UserRoles;
-import edu.pitt.dbmi.daquery.util.UserStatuses;
+import edu.pitt.dbmi.daquery.util.UserStatus;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -177,7 +177,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      * @throws ExpiredJwtException if the token is expired
      * ClaimJwtException if the validation of an JTW claim failed
      * MalformedJwtException if the JWT if malformed
-     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
+	     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
      * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
      */
     private String validateToken(String token) throws Exception {
@@ -230,7 +230,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 	        query.setParameter("uuid", uuid);
 	        Site_User user = null;
 	        user = (Site_User)query.getSingleResult();
-	        return user.getUserStatus() == UserStatuses.ACTIVE;
+	        return user.getStatusEnum() == UserStatus.ACTIVE;
 	    
         } catch (PersistenceException pe) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
