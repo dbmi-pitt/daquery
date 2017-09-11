@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src/dev/java"/>
 	<classpathentry kind="src" path="src/test/java"/>
-	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry excluding="edu/pitt/dbmi/daquery/domain/Inbound_Query.java|edu/pitt/dbmi/daquery/domain/Site_User.java" kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
@@ -11,5 +11,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.datatools.connectivity.jdt.DRIVERLIBRARY/Derby Embedded JDBC Driver"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

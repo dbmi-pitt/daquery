@@ -2,8 +2,12 @@ package edu.pitt.dbmi.daquery.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.util.List;
 import java.util.logging.Logger;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,8 +17,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import edu.pitt.dbmi.daquery.domain.Network;
 
-@Path("/networks")
+
+@Path("/")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 @Transactional
@@ -34,8 +40,23 @@ public class NetworkEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworks() {
-    	
-    	return Response.ok().build();
+		try {
+		    EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
+		    EntityManager em = emf.createEntityManager();
+				
+			@SuppressWarnings("rawtypes")
+			List networks = em.createNamedQuery("Network.findAll").getResultList();
+		
+		    em.close();
+		   
+		    logger.info("Done trying to get all networks");
+		    
+		    //TODO: build some JSON into the response.  Return the new UUID
+		    
+		    return Response.ok().entity(networks).build();
+		} catch (Exception e) {
+		    return Response.serverError().build();
+		}
     }
     
     /**
@@ -50,6 +71,21 @@ public class NetworkEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworkByID(@PathParam("id") String id) {
-    	return null;
+    	try {
+		    EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
+		    EntityManager em = emf.createEntityManager();
+		    
+		    Network network = em.find(Network.class, Integer.parseInt(id));
+		
+		    em.close();
+		   
+		    logger.info("Done trying to get network: " + network.toString());
+		    
+		    //TODO: build some JSON into the response.  Return the new UUID
+		    
+		    return Response.ok().entity(network).build();
+		} catch (Exception e) {
+		    return Response.serverError().build();
+		}
     }
 }

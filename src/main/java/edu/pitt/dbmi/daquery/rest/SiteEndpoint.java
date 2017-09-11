@@ -3,6 +3,8 @@ package edu.pitt.dbmi.daquery.rest;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
+import edu.pitt.dbmi.daquery.domain.Network;
+import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
@@ -53,11 +55,75 @@ import edu.pitt.dbmi.daquery.domain.Site_User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 
-@Path("/sites")
+@Path("/")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 @Transactional
 public class SiteEndpoint extends AbstractEndpoint {
 
 	private final static Logger logger = Logger.getLogger(SiteEndpoint.class.getName());
+	
+	/**
+     * Get all sites by type
+     * example url: daquery/ws/sites?type=inbound
+     * @param  type inbound, outbound or pending 
+     * @return 200 OK			List of sites
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
+     */
+    @GET
+    @Path("/sites")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response retrieveNetworks(@QueryParam("type") String type) {
+		try {
+		    EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
+		    EntityManager em = emf.createEntityManager();
+			
+		    @SuppressWarnings("rawtypes")
+			List sites = em.createNamedQuery(Site.FIND_BY_TYPE)
+					       .setParameter("type", type)
+					       .getResultList();
+		
+		    em.close();
+		   
+		    logger.info("Done trying to get all sites");
+		    
+		    //TODO: build some JSON into the response.  Return the new UUID
+		    
+		    return Response.ok().entity(sites).build();
+		} catch (Exception e) {
+		    return Response.serverError().build();
+		}
+    }
+    
+    /**
+     * Get specific site by Id
+     * example url: daquery/ws/site/1
+     * @return 200 OK			Site
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
+     */
+    @GET
+    @Path("/sites/{id}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response retrieveNetworkByID(@PathParam("id") String id) {
+    	try {
+		    EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
+		    EntityManager em = emf.createEntityManager();
+		    
+		    Site site = em.find(Site.class, Integer.parseInt(id));
+		
+		    em.close();
+		   
+		    logger.info("Done trying to get site: " + site.toString());
+		    
+		    //TODO: build some JSON into the response.  Return the new UUID
+		    
+		    return Response.ok().entity(site).build();
+		} catch (Exception e) {
+		    return Response.serverError().build();
+		}
+    }
 }

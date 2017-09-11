@@ -6,7 +6,7 @@ public class TestAppSetup
 {
 	public static void main(String [] args)
 	{
-		System.setProperty("catalina.home", "C:\\Users\\del20\\Documents\\GitHub\\daquery-ws\\target");
+		System.setProperty("catalina.home", "C:\\Users\\del20\\Documents\\GitHub\\daquery-ws");
 		AppSetup.initialize();
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
