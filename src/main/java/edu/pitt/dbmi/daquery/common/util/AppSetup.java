@@ -49,7 +49,7 @@ public class AppSetup
 	
 	public static void initialize()
 	{
-		checkDatabaseSetup();
+		isValidSetup = checkDatabaseSetup();
 	}
 	
 	/**
