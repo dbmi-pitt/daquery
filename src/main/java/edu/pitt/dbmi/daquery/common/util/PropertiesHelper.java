@@ -65,4 +65,16 @@ public class PropertiesHelper
 		doit = doit.toLowerCase().trim();
 		return(doit.equals("1") || doit.equals("true") || doit.equals("yes"));
 	}
+	
+	public static boolean isDebugMode()
+	{
+		boolean retValue = false;
+		String sDebug = ApplicationProperties.getProps().getProperty("debug.flag");
+		if ((sDebug != null) && (sDebug.compareToIgnoreCase("true") == 0)) {
+			retValue = true;
+		}
+		return retValue;
+		
+	}
+
 }
