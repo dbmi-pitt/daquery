@@ -37,9 +37,9 @@ import { NotificationService } from './services/notification.service';
 import { SetupService } from './services/setup.service';
 
 // used to create fake backend
-import { fakeBackendProvider } from './_helpers/fake-backend';
+import { fakeBackendFactory, fakeBackendProvider } from './_helpers/fake-backend';
 import { MockBackend, MockConnection } from '@angular/http/testing';
-import { BaseRequestOptions } from '@angular/http';
+import { Http, BaseRequestOptions } from '@angular/http';
 
 import { NetworksComponent } from './components/networks/networks.component';
 import { NetworkComponent } from './components/networks/network/network.component';
@@ -107,8 +107,9 @@ import { environment } from '../environments/environment';
               SetupService,
               // providers used to create fake backend
               {
-                provide: fakeBackendProvider,
+                provide: Http,
                 useFactory: fakeBackendProviderLoader,
+                deps: [MockBackend, BaseRequestOptions]
               },
               {
                 provide: MockBackend,
@@ -124,11 +125,11 @@ import { environment } from '../environments/environment';
 
 export class AppModule { }
 
-export function fakeBackendProviderLoader(){
+export function fakeBackendProviderLoader(backend: MockBackend, options: BaseRequestOptions){
   if(environment.production){
     return null;
   } else {
-    return fakeBackendProvider;
+    return fakeBackendFactory(backend, options);
   }
 }
 
