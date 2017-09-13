@@ -40,6 +40,7 @@ import { SetupService } from './services/setup.service';
 import { fakeBackendProvider } from './_helpers/fake-backend';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 import { BaseRequestOptions } from '@angular/http';
+
 import { NetworksComponent } from './components/networks/networks.component';
 import { NetworkComponent } from './components/networks/network/network.component';
 import { AddNetworkComponent } from './components/networks/add-network/add-network.component';
@@ -51,6 +52,8 @@ import { SetupComponent } from './components/setup/setup.component';
 import { Step1Component } from './components/setup/step1/step1.component';
 import { Step2Component } from './components/setup/step2/step2.component';
 import { Step3Component } from './components/setup/step3/step3.component';
+
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -103,10 +106,44 @@ import { Step3Component } from './components/setup/step3/step3.component';
               NotificationService,
               SetupService,
               // providers used to create fake backend
-              fakeBackendProvider,
-              MockBackend,
-              BaseRequestOptions
-             ],
+              {
+                provide: fakeBackendProvider,
+                useFactory: fakeBackendProviderLoader,
+              },
+              {
+                provide: MockBackend,
+                useFactory: MockBackendLoader
+              },
+              {
+                provide: BaseRequestOptions,
+                useFactory: BaseRequestOptionsLoader
+              }
+  ],
   bootstrap: [AppComponent]
 })
+
 export class AppModule { }
+
+export function fakeBackendProviderLoader(){
+  if(environment.production){
+    return null;
+  } else {
+    return fakeBackendProvider;
+  }
+}
+
+export function MockBackendLoader(){
+  if(environment.production){
+    return null;
+  } else {
+    return MockBackend;
+  }
+}
+
+export function BaseRequestOptionsLoader(){
+  if(environment.production){
+    return null;
+  } else {
+    return BaseRequestOptions;
+  }
+}

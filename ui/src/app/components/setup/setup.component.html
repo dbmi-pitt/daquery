@@ -6,20 +6,20 @@
     <p class="login-box-msg">Application Initial Setup (Step 1/3)</p>
 
     <form name="form" (ngSubmit)="f.form.valid && submit()" #f="ngForm" novalidate>
-      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !sitename.valid }">
+      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !model.sitename.valid }">
         <input type="text" class="form-control" name="sitename" placeholder="Site Name" [(ngModel)]="model.sitename" #email="ngModel" required />
         <span class="fa fa-sitemap form-control-feedback"></span>
-        <div *ngIf="f.submitted && !sitename.valid" class="help-block">Site Name is required</div>
+        <div *ngIf="f.submitted && !model.sitename.valid" class="help-block">Site Name is required</div>
       </div>
-      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !key.valid }">
+      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !model.key.valid }">
         <input type="text" class="form-control" name="key" placeholder="Key" [(ngModel)]="model.key" #key="ngModel" required />
         <span class="fa fa-key form-control-feedback"></span>
-        <div *ngIf="f.submitted && !key.valid" class="help-block">Password is required</div>
+        <div *ngIf="f.submitted && !model.key.valid" class="help-block">Password is required</div>
       </div>
-      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !url.valid }">
+      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !model.url.valid }">
         <input type="text" class="form-control" name="url" placeholder="URL" [(ngModel)]="model.url" #url="ngModel" required />
         <span class="fa fa-link form-control-feedback"></span>
-        <div *ngIf="f.submitted && !url.valid" class="help-block">Password is required</div>
+        <div *ngIf="f.submitted && !model.url.valid" class="help-block">Password is required</div>
       </div>
       <div class="row">
         <div class="col-xs-offset-4 col-xs-4">
