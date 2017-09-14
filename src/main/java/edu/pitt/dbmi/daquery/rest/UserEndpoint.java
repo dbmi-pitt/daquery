@@ -42,6 +42,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
@@ -109,13 +111,13 @@ public class UserEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
                         
-            List<Inbound_Query> queries = queryAllUsers();
+            List<Site_User> user_list = queryAllUsers();
             
-            if (queries == null) {
+            if (user_list == null) {
                 return Response.status(NOT_FOUND).build();
             }
 
-            String jsonString = toJsonArray(queries);
+            String jsonString = toJsonArray(user_list);
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (NoResultException nre) {
@@ -143,6 +145,15 @@ public class UserEndpoint extends AbstractEndpoint {
 
     	if (uuid.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
+    	
+    	//TODO: Reject any communication coming across anything other than HTTPS:
+    	//here is the check:
+    	if (!PropertiesHelper.isDebugMode()) {
+    	
+	    	if (uriInfo.getRequestUri().getScheme() != "https") {
+	            throw new NotAuthorizedException("You must access web services using https");    		
+	    	}
+    	}
     	
     	try {
 
@@ -315,10 +326,10 @@ public class UserEndpoint extends AbstractEndpoint {
      * @return- a List of all the query users
      * @throws Exception- throw any errors encountered back to the calling method
      */
-    private List<Inbound_Query> queryAllUsers() throws Exception {
+    private List<Site_User> queryAllUsers() throws Exception {
     	try { 		
-    	    List<Inbound_Query> queries = executeQueryReturnList(Site_User.FIND_ALL, null, logger);
-	        return queries;
+    	    List<Site_User> user_list = executeQueryReturnList(Site_User.FIND_ALL, null, logger);
+	        return user_list;
 	    
         } catch (PersistenceException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
