@@ -42,3 +42,6 @@ src/main/webapp/ui/
 
 # Desheng's Derby database location
 conf/
+
+# Web app generated code
+src/main/webapp/*.*
