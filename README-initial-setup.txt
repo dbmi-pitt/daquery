@@ -1,12 +1,13 @@
---Set up a mysql database to use:
- Replace dbasename/password/myuser in the script below to create a database and user
-   create database dbasename;
-   create user myuser identified by 'password';
-   grant all privileges on dbasename.* to myuser;
+Pull the daquery-common project to the same location as this project.
+Run mvn install in daquery-common.
 
---connect to (use) the newly created database in mysql and run sql/db.sql to create a database
-
---update the url, username, password in src/main/resources/application.properties to match the database that was just created
+Pull the daquery repository to the same location as this project.
+  
+To create a local application database for development purposes
+run the standalone Java program edu.pitt.dbmi.daqueryws.test.TestAppSetup.
+Make sure to change the "catalina.home" property to the directory where
+your Tomcat instance is installed.  Make sure this directory exists and is
+writable with a subdirectory of conf/
 
 --build with: mvn install
 
