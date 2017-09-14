@@ -5,6 +5,10 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
 
+@NamedQueries({
+    @NamedQuery(name = Network.FIND_ALL, query = "SELECT u FROM Network u ORDER BY u.name DESC"),
+    @NamedQuery(name = Network.FIND_BY_ID, query = "SELECT u FROM Network u WHERE u.id = :id"),
+})
 
 /**
  * The persistent class for the NETWORKS database table.
@@ -15,6 +19,9 @@ import java.util.Objects;
 @NamedQuery(name="Network.findAll", query="SELECT n FROM Network n")
 public class Network extends DaqueryObject implements Serializable {
 	private static final long serialVersionUID = 1L;
+    public static final String FIND_ALL = "Network.findAll";
+    public static final String FIND_BY_ID = "Network.findByID";
+
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)

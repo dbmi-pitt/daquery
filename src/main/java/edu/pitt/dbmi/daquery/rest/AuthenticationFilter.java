@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
+import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
@@ -65,10 +66,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     	//TODO: Reject any communication coming across anything other than HTTPS:
     	//here is the check:
-    	/*if (requestContext.getUriInfo().getRequestUri().getScheme() != "https") {
-            throw new NotAuthorizedException("You must access web services using https");    		
-    	}*/
+    	if (!PropertiesHelper.isDebugMode()) {
     	
+	    	if (requestContext.getUriInfo().getRequestUri().getScheme() != "https") {
+	            throw new NotAuthorizedException("You must access web services using https");    		
+	    	}
+    	}
         // Get the HTTP Authorization header from the request
         String authorizationHeader = 
             requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -177,7 +180,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      * @throws ExpiredJwtException if the token is expired
      * ClaimJwtException if the validation of an JTW claim failed
      * MalformedJwtException if the JWT if malformed
-	     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
+     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
      * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
      */
     private String validateToken(String token) throws Exception {

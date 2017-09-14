@@ -54,13 +54,15 @@ import edu.pitt.dbmi.daquery.domain.Site_User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 
-@Path("/")
+@Path("/sites")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 @Transactional
 public class SiteEndpoint extends AbstractEndpoint {
 
 	private final static Logger logger = Logger.getLogger(SiteEndpoint.class.getName());
+	
+	//TODO: Add a select all sites method...
 	
 	/**
      * Get all sites by type
@@ -71,10 +73,10 @@ public class SiteEndpoint extends AbstractEndpoint {
      * @throws 401 Unauthorized	
      */
     @GET
-    @Path("/sites")
+    @Path("/types/{type}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response retrieveNetworks(@QueryParam("type") String type) {
+    public Response retrieveSites(@QueryParam("type") String type) {
 		try {
 		    EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
 		    EntityManager em = emf.createEntityManager();
@@ -104,7 +106,7 @@ public class SiteEndpoint extends AbstractEndpoint {
      * @throws 401 Unauthorized	
      */
     @GET
-    @Path("/sites/{id}")
+    @Path("/{id}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworkByID(@PathParam("id") String id) {

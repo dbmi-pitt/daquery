@@ -70,6 +70,10 @@ public class AbstractEndpoint {
 	 * null if no data is returned.
 	 * @throws Exception
 	 */
+	
+	//TODO: Add LIMIT and OFFSET options for query
+	//check to see how to manage this in JPA
+	//try this: https://stackoverflow.com/questions/25008472/pagination-in-spring-data-jpa-limit-and-offset
     protected <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
     	EntityManagerFactory emf = null;
