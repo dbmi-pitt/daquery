@@ -1,9 +1,10 @@
 import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } from '@angular/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
+import { environment } from '../../environments/environment';
 
 export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOptions) {
   // configure fake backend
-  backend.connections.subscribe((connection: MockConnection) => {
+   backend.connections.subscribe((connection: MockConnection) => {
     let testUser = { username: 'test', password: 'test', firstName: 'Test', lastName: 'User' };
 
     // wrap in timeout to simulate server api call
@@ -157,7 +158,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         }
       }
 
-       // get site by id
+      // get site by id
       if (/\/daquery\/ws\/site\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Get) {
         // check for fake auth token in header and return test users if valid, this security is implemented server side
         // in a real application
