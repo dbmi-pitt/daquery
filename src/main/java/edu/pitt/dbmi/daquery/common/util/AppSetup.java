@@ -13,6 +13,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.domain.UserStatus;
+
 public class AppSetup
 {
 	private static Logger log = Logger.getLogger(AppSetup.class.getName());
@@ -34,18 +36,6 @@ public class AppSetup
 	private static int dbStatus = DBSTATUS_UNKNOWN;
 	
 	
-	
-	public static void main(String [] args)
-	{
-		System.setProperty("catalina.home", "C:\\Users\\del20\\Documents\\GitHub\\daquery-ws\\target");
-		initialize();
-		if(erroredSetup)
-			System.err.println(setupErrorMessage);
-		else if(dbStatus == DBSTATUS_ALL_GOOD)
-			System.out.println("All Good");
-		else
-			System.out.println("Invalid setup, but no error reported");
-	}
 	
 	public static void initialize()
 	{
@@ -146,7 +136,9 @@ public class AppSetup
 		    String uuidStr = uuid.toString();
 		    String pwd = PasswordUtils.randomPassword();
 			String hashedPwd = PasswordUtils.digestPassword(pwd);
-			stat.executeUpdate("insert into site_user (id, username, password) values ('"  + uuidStr + "', 'admin', '" + hashedPwd + "')");
+			String insertSQL = "insert into site_user (id, username, password, status) values ('"  + uuidStr + "', 'admin', '" + hashedPwd + "', " + UserStatus.PWD_EXPIRED.getValue() + ")";
+			log.info("User inserted with: " + insertSQL);
+			stat.executeUpdate(insertSQL);
 			firstUserDetails = "Initial admin user create with password: " + pwd;
 			firstUserCreated = true;
 			return(true);
@@ -254,6 +246,7 @@ public class AppSetup
 			Class.forName(driver);
 			String url = ApplicationDBHelper.getDBURL() + ";create=true";
 			conn = DriverManager.getConnection(url);
+			log.log(Level.INFO, "database created with: " + url);
 			return(true);
 		}
 		catch(Throwable t)

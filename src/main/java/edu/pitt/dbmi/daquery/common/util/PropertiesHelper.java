@@ -5,15 +5,27 @@ import java.io.File;
 public class PropertiesHelper
 {
 	private static final String confDir = "conf";
+	private static String devHomeDir = null;
+	
+	public static void setDevHomeDir(String val)
+	{
+		devHomeDir = val;
+	}
 	
 	public static String getHomeDirectory()
 	{
-		if (System.getProperty("catalina.home") == null)
+		String rVal = null;
+		if(devHomeDir != null)
 		{
-			return(System.getenv("CATALINA_HOME"));
+			rVal = devHomeDir;
+		}
+		else if (System.getProperty("catalina.home") == null)
+		{
+			rVal = System.getenv("CATALINA_HOME");
 		}
 		else 
-			return(System.getProperty("catalina.home"));
+			rVal = System.getProperty("catalina.home");
+		return(rVal);
 	}
 	
 	public static String getConfDirectory()
@@ -25,10 +37,17 @@ public class PropertiesHelper
 	
 	public static String getDBDir() throws Exception
 	{
+		String sep = File.separator;
 		if (getHomeDirectory() == null)
 			return(null);
 		else
-			return(getConfDirectory() + File.separator + getDBName() + File.separator);
+		{
+			String confDir = getConfDirectory();
+			if(confDir.trim().endsWith(File.separator))
+				sep = "";
+				
+		}
+			return(getConfDirectory() + sep + getDBName() + File.separator);
 	}
 	
 	public static String getCurrentVersion()
