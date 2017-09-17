@@ -27,12 +27,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
+import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
 import edu.pitt.dbmi.daquery.util.UserRoles;
-import edu.pitt.dbmi.daquery.util.UserStatus;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

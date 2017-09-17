@@ -1,22 +1,24 @@
 package edu.pitt.dbmi.daqueryws.test;
 
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
+import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 
 public class TestAppSetup
 {
 	public static void main(String [] args)
 	{
-		System.setProperty("catalina.home", "/home/devuser/daquery-data");
+		PropertiesHelper.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		AppSetup.initialize();
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
 		else if(AppSetup.isValidSetup())
 		{
-			System.out.println("All Good");
 			if(AppSetup.wasFirstUserCreated())
-				System.out.println(AppSetup.getFirstUserDetails());
+				System.out.println(AppSetup.getFirstUserDetails());			
+			System.out.println("All Good");
 		}
 		else
 			System.out.println("Invalid setup, but no error reported");
 	}
+	
 }
