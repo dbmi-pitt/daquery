@@ -6,6 +6,9 @@
   <packaging>jar</packaging>
   <version>1.0</version>
   <name>daquery common utilities</name>
+  <properties>
+  	<jaxrs.version>2.0.1</jaxrs.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.derby</groupId>
@@ -16,6 +19,21 @@
       <groupId>com.mchange</groupId>
       <artifactId>c3p0</artifactId>
       <version>0.9.5.2</version>
+    </dependency>
+	<dependency>
+	    <groupId>io.jsonwebtoken</groupId>
+	    <artifactId>jjwt</artifactId>
+	    <version>0.7.0</version>
+	</dependency>
+	<dependency>
+		<groupId>org.glassfish</groupId>
+		<artifactId>javax.json</artifactId>
+		<version>1.0.4</version>
+	</dependency>	
+	<dependency>
+    	<groupId>javax.ws.rs</groupId>
+        <artifactId>javax.ws.rs-api</artifactId>
+        <version>${jaxrs.version}</version>
     </dependency>
   </dependencies>
   <build>
