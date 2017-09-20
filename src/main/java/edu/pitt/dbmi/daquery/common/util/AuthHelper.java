@@ -48,7 +48,7 @@ public class AuthHelper {
     
     
     /**
-     * Returns a web response of 201 with a subcode of 201.2, which stands for
+     * Returns a web response of 401 with a subcode of 401.2, which stands for
      * expired password.
      * 
      * @param name the user/authentication name
