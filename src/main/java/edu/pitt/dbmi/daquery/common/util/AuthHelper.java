@@ -57,7 +57,7 @@ public class AuthHelper {
      */
     public static Response expiredPasswordResponse(String name, UriInfo uriInfo)
     {
-    	return(getTokenResponse(201, 2, name, uriInfo, null));
+    	return(getTokenResponse(401, 2, name, uriInfo, null));
     }
     
     public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, String> additionalReturnValues)
