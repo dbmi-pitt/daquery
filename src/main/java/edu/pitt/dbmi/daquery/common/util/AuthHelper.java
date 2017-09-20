@@ -59,6 +59,19 @@ public class AuthHelper {
     {
     	return(getTokenResponse(401, 2, name, uriInfo, null));
     }
+
+    /**
+     * Returns a web response of 401 with a subcode of 401.4, which stands for
+     * expired token.
+     * 
+     * @param name the user/authentication name
+     * @param uriInfo the URI information from the parent ws call
+     * @return A ws Response object
+     */
+    public static Response expiredTokenResponse(String name, UriInfo uriInfo)
+    {
+    	return(getTokenResponse(401, 4, name, uriInfo, null));
+    }
     
     public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, String> additionalReturnValues)
     {
