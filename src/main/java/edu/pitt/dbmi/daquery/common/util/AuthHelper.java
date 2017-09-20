@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObjectBuilder;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -105,5 +106,10 @@ public class AuthHelper {
         }
         
         return Response.status(responseCode).entity(jsonData.build().toString()).build();    	
-    }    
+    }
+    
+    public static Response getBasicResponse(int responseCode, String message)
+    {
+    	return(Response.status(responseCode).type(MediaType.TEXT_PLAIN).entity(message).build());
+    }
 }
