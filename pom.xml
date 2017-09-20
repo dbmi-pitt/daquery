@@ -9,6 +9,9 @@
   <properties>
   	<!-- <jersey.version>1.19.4</jersey.version> -->
   	  <jersey.version>2.25.1</jersey.version>
+  	  <jackson.version>2.5.2</jackson.version>
+  	  <maven.compiler.source>1.7</maven.compiler.source>
+      <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
   <dependencies>
 <!-- 	<dependency>
@@ -54,6 +57,32 @@
 		<artifactId>daquery-common</artifactId>
 		<version>1.0</version>
 	</dependency>	
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt</artifactId>
+		    <version>0.7.0</version>
+		</dependency>
+		
+		<!-- The Jackson files are needed at runtime for JWT 
+		If you don't keep JWT and Jackson in sync, you will get runtime ClassNotFound errors
+		when building JWT tokens.-->
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-annotations</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>	
   </dependencies>
   <build>
     <finalName>daquery-central</finalName>
