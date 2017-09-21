@@ -56,7 +56,7 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         //   ));
         // }
         connection.mockRespond(new Response(
-          new ResponseOptions({ status: 200, body: { user_id: 1, roles: ["admin"], token: 'fake-jwt-token' } })
+          new ResponseOptions({ status: 200, body: { user: {id: 1, roles: ["admin"]}, jwt: 'fake-jwt-token' } })
         ));
       }
 
@@ -352,6 +352,28 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
           ));
         }
       }
+
+      // change password
+      if (/\/daquery\/ws\/users\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Put) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        debugger;
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          console.log(connection.request.getBody());
+          // connection.mockRespond(new Response(
+          //   new ResponseOptions({ status: 200, body: { } })
+          // ));
+           connection.mockError(<any>new Response(
+            new ResponseOptions({ status: 401, body: { error: 401.2, message: "401.2" }})
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401, body: { error: 401.2, message: "401.2" }})
+          ));
+        }
+      }
+
 
       // fake users api end point
       if (connection.request.url.endsWith('/api/users') && connection.request.method === RequestMethod.Get) {

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, Headers, Response, RequestOptions, URLSearchParams } from '@angular/http';
-
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import 'rxjs/add/operator/map'
 
@@ -8,7 +8,8 @@ import 'rxjs/add/operator/map'
 export class AuthenticationService {
   public token: string;
 
-  constructor(private http: Http) {
+  constructor(private http: Http,
+              private router: Router) {
     // set token if saved in local storage
     var currentUser = JSON.parse(localStorage.getItem('currentUser'));
     this.token = currentUser && currentUser.token;
@@ -28,13 +29,14 @@ export class AuthenticationService {
     return this.http.get('/daquery/ws/users/login', options )
                     .map((response: Response) => {
                       // login successful if there's a jwt token in the response
-                      let token = response.json() && response.json().token;
+                      let token = response.json() && response.json().jwt;
                       if (token) {
                         // set token property
                         this.token = token;
 
                         // store username and jwt token in local storage to keep user logged in between page refreshes
-                        localStorage.setItem('currentUser', JSON.stringify(response["_body"]));
+                        localStorage.setItem('currentUser', JSON.stringify(response.json().user));
+                        localStorage.setItem('jwt', JSON.stringify(token));
 
                         // return true to indicate successful login
                         return true;
@@ -49,13 +51,14 @@ export class AuthenticationService {
     // clear token remove user from local storage to log user out
     this.token = null;
     localStorage.removeItem('currentUser');
+     this.router.navigate(['./login']);
   }
 
   jwt() {
     // create authorization header with jwt token
-    let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser && currentUser.token) {
-      let headers = new Headers({ 'Authorization': 'Bearer ' + currentUser.token });
+    let jwt = JSON.parse(localStorage.getItem('jwt'));
+    if (jwt) {
+      let headers = new Headers({ 'Authorization': 'Bearer ' + jwt });
       return new RequestOptions({ headers: headers });
     }
   }

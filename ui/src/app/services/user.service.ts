@@ -83,4 +83,13 @@ export class UserService {
                       return Observable.throw(error.json().error || 'Server error');
                     });
   }
+
+  changePassword(user: any): Observable<boolean> {
+    return this.http.put(`/daquery/ws/users/${user.id}`, user, this.authenticationService.jwt())
+                    .map((response: Response) => <boolean>response.json())
+                    .catch(error => {
+                      debugger;
+                        return Observable.throw(error.json().error || 'Server error');
+                    })
+  }
 }

@@ -27,7 +27,7 @@ export class RoleGuard implements CanActivate {
 
   getCurrentUserRoles(): Promise<boolean>{
     return new Promise((resolve, reject) => {
-          this.userService.getRoles(JSON.parse(localStorage.getItem('currentUser')).user_id)
+          this.userService.getRoles(JSON.parse(localStorage.getItem('currentUser')).id)
                           .subscribe(roles => {
                             this.currentUserRoles = roles;
                             resolve();

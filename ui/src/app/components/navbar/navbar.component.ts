@@ -30,4 +30,8 @@ export class NavbarComponent implements OnInit {
                 this.notifications = notifications;
               });
   }
+
+  logout(){
+    this.authenticationService.logout();
+  }
 }
