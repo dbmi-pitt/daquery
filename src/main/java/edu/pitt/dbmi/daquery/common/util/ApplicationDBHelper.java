@@ -136,7 +136,8 @@ public class ApplicationDBHelper
 	            	String l2 = line.trim();
 	            	if(l2.endsWith(";"))
 	            		l2 = l2.substring(0, l2.length() - 1);
-	                st.execute(l2);
+	                try{st.execute(l2);}
+	                catch(Throwable t){System.err.println("Error executing the following DDL \n" + l2); t.printStackTrace();}
 	            }
 	        }
 	        return(true);

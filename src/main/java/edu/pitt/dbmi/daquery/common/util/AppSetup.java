@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,21 +27,31 @@ public class AppSetup
 	private static boolean isValidSetup = false;
 	private static boolean firstUserCreated = false;
 	private static String firstUserDetails = "";
+	private static String firstUserPwd = "";
 	
-	private static final int DBSTATUS_EMPTY = 1;
-	private static final int DBSTATUS_ALL_GOOD = 2;
-	private static final int DBSTATUS_OLD_VERSION = 3;
-	private static final int DBSTATUS_NEWER_VERSION = 4;
-	private static final int DBSTATUS_INDETERMINATE = 5;
-	private static final int DBSTATUS_UNKNOWN = 6;
+	public static final int DBSTATUS_EMPTY = 1;
+	public static final int DBSTATUS_ALL_GOOD = 2;
+	public static final int DBSTATUS_OLD_VERSION = 3;
+	public static final int DBSTATUS_NEWER_VERSION = 4;
+	public static final int DBSTATUS_INDETERMINATE = 5;
+	public static final int DBSTATUS_UNKNOWN = 6;
 	
-	private static int dbStatus = DBSTATUS_UNKNOWN;
+	private static Integer dbStatus = null;
 	
-	
-	
-	public static void initialize()
+	public static void main(String [] args)
 	{
-		isValidSetup = checkDatabaseSetup();
+		for(int i = 0; i < 1; i++ )
+		{
+			UUID uuid = UUID.randomUUID();
+		    String uuidStr = uuid.toString();
+		    System.out.println(uuidStr);
+		}
+	}
+	
+	public static boolean initialize()
+	{
+		isValidSetup = initializeDB();
+		return(isValidSetup);
 	}
 	
 	/**
@@ -50,7 +62,7 @@ public class AppSetup
 	 * 
 	 * If JavaDB was never created do it now.
 	 */
-	private static boolean checkDatabaseSetup()
+	private static boolean initializeDB()
 	{
 		if(PropertiesHelper.getHomeDirectory() == null)
 		{
@@ -86,7 +98,7 @@ public class AppSetup
 			return(true);
 		else if(dbStatus == AppSetup.DBSTATUS_EMPTY)
 		{
-			if(initializeDB())
+			if(initializeDBData())
 			{
 				if(PropertiesHelper.setupAdminUser())
 				{
@@ -139,7 +151,8 @@ public class AppSetup
 			String insertSQL = "insert into site_user (id, username, password, status) values ('"  + uuidStr + "', 'admin', '" + hashedPwd + "', " + UserStatus.PWD_EXPIRED.getValue() + ")";
 			log.info("User inserted with: " + insertSQL);
 			stat.executeUpdate(insertSQL);
-			firstUserDetails = "Initial admin user create with password: " + pwd;
+			firstUserDetails = "Initial admin user created with password: " + pwd;
+			firstUserPwd = pwd;
 			firstUserCreated = true;
 			return(true);
 		}
@@ -177,7 +190,7 @@ public class AppSetup
 		return(true);
 	}
 	
-	private static boolean initializeDB()
+	private static boolean initializeDBData()
 	{
 		InputStream is = ApplicationProperties.class.getResourceAsStream("/" + PropertiesHelper.getInitializationDDL());
 		if(! ApplicationDBHelper.executeDDL(is))
@@ -191,9 +204,11 @@ public class AppSetup
 			Statement st = null;
 			try
 			{
+				String currentDateTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
 				conn = ApplicationDBHelper.getConnection();
 				st = conn.createStatement();
-				st.executeUpdate("insert into properties (property_id, name, value) values (1, 'current.version', '" + PropertiesHelper.getCurrentVersion() + "')");
+				st.executeUpdate("insert into property (id, name, value) values (1, 'current.version', '" + PropertiesHelper.getCurrentVersion() + "')");
+				st.executeUpdate("insert into property (id, name, value) values (2, 'initial.setup', '" + currentDateTime + "')");
 				conn.commit();
 				return(true);
 			}
@@ -209,7 +224,7 @@ public class AppSetup
 			
 		}
 	}
-	private static boolean dbExists()
+	public static boolean dbExists()
 	{
 		Connection conn = null;
 		try
@@ -266,7 +281,7 @@ public class AppSetup
 			}
 		}
 	}
-	public static int checkDB()
+	private static int checkDB()
 	{
 		int tableCount = ApplicationDBHelper.getTableCount();
 		if(tableCount == 0)
@@ -286,7 +301,7 @@ public class AppSetup
 			conn = ApplicationDBHelper.getConnection();
 			state = conn.createStatement();
 			
-			rs = state.executeQuery("select value from properties where name = 'current.version'");
+			rs = state.executeQuery("select value from property where name = 'current.version'");
 			String version = null;
 			if(rs.next())
 				version = rs.getString(1);
@@ -298,6 +313,20 @@ public class AppSetup
 			if(version == null || ! version.trim().equals(PropertiesHelper.getCurrentVersion().trim()))
 			{
 				log.log(Level.SEVERE, "The applicationcurrent version does not match the configured version.");
+				return(DBSTATUS_INDETERMINATE);
+			}
+			rs.close();
+			rs = state.executeQuery("select value from property where name = 'initial.setup'");
+			if(!rs.next())
+			{
+				log.log(Level.SEVERE, "Unable to get initial setup date from the database, can't validate a complete setup.");
+				return(DBSTATUS_INDETERMINATE);
+			}
+			rs.close();
+			rs = state.executeQuery("select id from site_user where lcase(username) = 'admin'");
+			if(!rs.next())
+			{
+				log.log(Level.SEVERE, "Unable to find the initial admin user, can't validate a complete setup.");
 				return(DBSTATUS_INDETERMINATE);
 			}
 		}
@@ -325,7 +354,11 @@ public class AppSetup
 	{
 		return(dbStatus == DBSTATUS_ALL_GOOD);
 	}
-	
+	public static int getDBStatus()
+	{
+		if(dbStatus == null) dbStatus = checkDB();
+		return(dbStatus);
+	}
 	public static boolean isValidSetup()
 	{
 		return(isValidSetup);
@@ -338,5 +371,10 @@ public class AppSetup
 	{
 		return(firstUserDetails);
 	}
-	
+	public static String getFirstUserPwd()
+	{
+		String rVal = firstUserPwd;
+		firstUserPwd = "";
+		return(rVal);
+	}
 }
