@@ -139,6 +139,13 @@
 		    <version>${jjwt.version}</version>
 		</dependency>
 		
+		<!-- This is for converting POJOs to JSON -->
+		<dependency>
+	        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+	        <artifactId>jackson-jaxrs-json-provider</artifactId>
+	        <version>${jackson.version}</version>
+		</dependency>		
+		
 		<!-- The Jackson files are needed at runtime for JWT 
 		If you don't keep JWT and Jackson in sync, you will get runtime ClassNotFound errors
 		when building JWT tokens.-->

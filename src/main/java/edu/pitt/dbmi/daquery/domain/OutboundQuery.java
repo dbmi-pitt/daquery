@@ -53,7 +53,7 @@ public class OutboundQuery extends DaqueryObject implements Serializable {
 	//bi-directional many-to-one association to User
 	@ManyToOne
 	@JoinColumn(name="USER_ID")
-	private User user;
+	private Site_User user;
 
 	public OutboundQuery() {
 	}
@@ -138,11 +138,11 @@ public class OutboundQuery extends DaqueryObject implements Serializable {
 		this.site = site;
 	}
 
-	public User getUser() {
+	public Site_User getUser() {
 		return this.user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(Site_User user) {
 		this.user = user;
 	}
 

@@ -11,6 +11,10 @@ import javax.persistence.Query;
 
 import edu.pitt.dbmi.daquery.domain.DaqueryObject;
 
+
+//TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"
+//, and create new object calls.  Try a factory to do this.  The factory takes 
+//a class.  The class will convert the object name to the /{objectname} @Path item
 public class AbstractEndpoint {
 
     /**
@@ -79,7 +83,7 @@ public class AbstractEndpoint {
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
     	try {
-	        emf = Persistence.createEntityManagerFactory("jpa-example");
+	        emf = Persistence.createEntityManagerFactory("derby");
 	        em = emf.createEntityManager();
 	        Query query = em.createNamedQuery(namedQuery);
 	        if (params != null && !params.isEmpty()) {
@@ -101,10 +105,9 @@ public class AbstractEndpoint {
         }
     	finally {
     		if (em != null) {
-    			em.close();
-    		}
-    		if (emf != null) {
-    			emf.close();
+    			//TODO: solve this issue where closing the derby connection throws:
+    			//org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role
+    			//em.close();
     		}
     		
     	}
@@ -127,7 +130,7 @@ public class AbstractEndpoint {
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
     	try {
-	        emf = Persistence.createEntityManagerFactory("jpa-example");
+	        emf = Persistence.createEntityManagerFactory("derby");
 	        em = emf.createEntityManager();
 	        Query query = em.createNamedQuery(namedQuery);
 	        if (params != null && !params.isEmpty()) {
@@ -149,12 +152,10 @@ public class AbstractEndpoint {
         }
     	finally {
     		if (em != null) {
-    			em.close();
+    			//TODO: solve this issue where closing the derby connection throws:
+    			//org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role
+    			//em.close();
     		}
-    		if (emf != null) {
-    			emf.close();
-    		}
-    		
     	}
             
     }
