@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.daqueryws.test;
+package edu.pitt.dbmi.daquery.dev;
 
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;

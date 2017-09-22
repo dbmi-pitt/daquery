@@ -43,12 +43,11 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.AuthHelper;
+import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Site_User;
-import edu.pitt.dbmi.daquery.util.KeyGenerator;
-//import edu.pitt.dbmi.daquery.persistence.HibernateUtil;
-import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -157,28 +156,28 @@ public class UserEndpoint extends AbstractEndpoint {
     	
     	try {
 
-            logger.info("#### uuid/password : " + uuid + "/" + password);
+            logger.info("#### uuid/password : " + uuid);
 
             // Authenticate the user using the credentials provided
             authenticate(uuid, password);
             
-            // Issue a token for the user
-            String token = issueToken(uuid);
-
-            // Return the token to the response
-            JsonBuilderFactory jFactory = Json.createBuilderFactory(null);
-            JsonObject jsonData = jFactory.createObjectBuilder()
-            		.add("token", token)
-            		.build();
-
-            //String json = "{\"token\" : \"" + token + "\"}";
-            return Response.ok(200).entity(jsonData.toString()).build();
+            if(expiredPassword(uuid))
+            	return(AuthHelper.expiredPasswordResponse(uuid, uriInfo));
+            
+            Response rVal = AuthHelper.getTokenResponse(200, null, uuid, uriInfo, null);
+            
+            return rVal;
 
         } catch (Exception e) {
             return Response.status(UNAUTHORIZED).build();
         }
     }
 
+    //TODO implement this method, probably move to a helper class..
+    private boolean expiredPassword(String uuid)
+    {
+    	return false;
+    }
     /**
      * Create a new user account with the given login and password combination.
      * example URL: daquery/ws/users/newuser?login=sample4&password=demouser
@@ -400,31 +399,6 @@ public class UserEndpoint extends AbstractEndpoint {
         }
             
     }
-
-    /**
-     * Create a JWT based on a user's uuid.  The JWT is set to expire in 15 minutes.
-     * @param uuid- a user's uuid
-     * @return a String representing the JWT for the user set to expire in 15 minutes.
-     */
-    private String issueToken(String uuid) {
-    	KeyGenerator kg = new SimpleKeyGenerator();
-        Key key = kg.generateKey();
-        Calendar date = Calendar.getInstance();
-        long t=date.getTimeInMillis();
-        //add fifteen minutes to current time to create
-        //a token that expires in 15 minutes (15 * 60 milliseconds)
-        Date fifteenMinuteExpiry = new Date(t + (15 * 60000));
-        String jwtToken = Jwts.builder()
-                .setSubject(uuid)
-                .setIssuer(uriInfo.getAbsolutePath().toString())
-                .setIssuedAt(new Date())
-                .setExpiration(fifteenMinuteExpiry)
-                .signWith(SignatureAlgorithm.HS512, key)
-                .compact();
-        logger.info("#### generating token for a key : " + jwtToken + " - " + key);
-        return jwtToken;
-
-    }
     
     /**
      * Validate a JWT token used to create the initial admin account for a site
@@ -440,7 +414,7 @@ public class UserEndpoint extends AbstractEndpoint {
         // Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
     	logger.info("Trying to validate this admin token: " + token);
-    	KeyGenerator kg = new SimpleKeyGenerator();
+    	KeyGenerator kg = new KeyGenerator();
         Key key = kg.generateKey();
         try {
 	        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();

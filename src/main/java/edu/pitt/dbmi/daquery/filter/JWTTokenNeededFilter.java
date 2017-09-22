@@ -1,7 +1,6 @@
 package edu.pitt.dbmi.daquery.filter;
 
 import io.jsonwebtoken.Jwts;
-import edu.pitt.dbmi.daquery.util.KeyGenerator;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -12,6 +11,9 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+
+import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
+
 import java.io.IOException;
 import java.security.Key;
 import java.util.logging.Logger;
