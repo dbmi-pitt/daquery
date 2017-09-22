@@ -30,7 +30,23 @@ public class DBHelper
 					return(false);
 			}
 			else
-				return(false);
+			{
+				results.close();
+				stat.close();
+				stat = conn.createStatement();
+				results = stat.executeQuery("select access_key from site where id = " + sitename);
+				if(results.next())
+				{
+					if(sitekey.equals(results.getString(1)))
+						return(true);
+					else
+						return(false);
+				}
+				else
+				{
+					return(false);
+				}
+			}
 		}
 		catch(Throwable t)
 		{
@@ -42,7 +58,7 @@ public class DBHelper
 		
 	}
 	
-	public static boolean isSiteKeyTemp(String sitename) throws DaqueryCentralException
+	public static boolean isSiteKeyTemp(String site) throws DaqueryCentralException
 	{
 		Connection conn = null;
 		Statement stat = null;
@@ -72,6 +88,35 @@ public class DBHelper
 		finally{ApplicationDBHelper.closeConnection(conn, stat, results);}
 	}
 	
+	public static String getSiteId(String sitename) throws DaqueryCentralException
+	{
+		Connection conn = null;
+		Statement stat = null;
+		ResultSet results = null;
+		try
+		{
+			conn = ApplicationDBHelper.getConnection();
+			stat = conn.createStatement();
+			results = stat.executeQuery("select id from site where ucase(name) = " + sitename.trim().toUpperCase());
+			if(results.next())
+			{
+				return(results.getString(1));
+			}
+			else
+				throw new DaqueryCentralException("Site: " + sitename + " not found while looking up a site id by name.");
+		}
+		catch(Throwable t)
+		{
+			if(t instanceof DaqueryCentralException)
+				throw (DaqueryCentralException) t;
+			else
+			{
+				log.log(Level.SEVERE, "An error occured while checking if a site key is temporary when accessing the daquery-central application database.", t);
+				throw new DaqueryCentralException("An unexpeced error occured while looking up a site id by name.", t);
+			}
+		}
+		finally{ApplicationDBHelper.closeConnection(conn, stat, results);}		
+	}
 	public static String getNewSiteKey(String sitename) throws DaqueryCentralException
 	{
 		Connection conn = null;
@@ -90,6 +135,7 @@ public class DBHelper
 				stat.close();
 				stat = conn.createStatement();
 				stat.executeUpdate("update site set access_key = '" + newKey + "', tempkey = false where id = " + siteId);
+				conn.commit();
 				return(newKey);
 			}
 			else

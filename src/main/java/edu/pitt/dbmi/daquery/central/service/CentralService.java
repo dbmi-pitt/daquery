@@ -24,12 +24,20 @@ public class CentralService {
     @Context
     private UriInfo uriInfo;
 	
-	
+	/**
+	 * Authenticate a site/key pair.  On success a jwt will be sent back.  If the site key
+	 * is flagged as temporary a new key is generated and sent back along with the site id
+	 * in addition to the site jwt.  The site parameter can be either the site name or the 
+	 * site id.
+	 * @param site  The name or site id of the site.
+	 * @param key The private key used to access information for the site.
+	 * @return 200 with info specified above, 401 if authentication fails or 400/500 on error.
+	 */
 	@GET
 	@Path("authenticatSite/")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)	
-	public Response authenticateSite(@QueryParam("sitename") String sitename, @QueryParam("key") String key)
+	public Response authenticateSite(@QueryParam("site") String sitename, @QueryParam("key") String key)
 	{
 		if(StringHelper.isEmpty(sitename) || StringHelper.isEmpty(key))
 			return(AuthHelper.getBasicResponse(400, "sitename and key parameters required"));
@@ -49,6 +57,7 @@ public class CentralService {
 					throw new DaqueryCentralException("An unknown error while trying to generate a new site key. Check the central server log files for more information.");
 				additionalVals = new HashMap<String, String>();
 				additionalVals.put("new-site-key", newKey);
+				additionalVals.put("site-id", DBHelper.getSiteId(sitename));
 			}
 		}
 		catch(DaqueryCentralException dce)
