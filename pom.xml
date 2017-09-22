@@ -42,7 +42,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <ui_project.Directory>../daquery/ui</ui_project.Directory>
     </properties>
-
+	
     <dependencies>
     
     <!-- https://mvnrepository.com/artifact/org.antlr/antlr4-runtime -->
@@ -379,7 +379,223 @@
 		        </plugins>
 		    </build>
 		</profile>
-    </profiles>
+	  	<profile>
+	  	<id>unix</id>
+	    <activation>
+	      <os>
+	        <family>!windows</family>
+	      </os>
+	    </activation>
+	    <build>
+	      <plugins>
+	        <plugin>
+         		<groupId>org.codehaus.mojo</groupId>
+         		<artifactId>exec-maven-plugin</artifactId>
+         		<executions>
+         			<execution>
+         				<id>rm-app.module.ts</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>rm</executable>
+         					<arguments>
+         						<argument>./src/app/app.module.ts</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>cp-app.module.ts.prod</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cp</executable>
+         					<arguments>
+         						<argument>./src/app/app.module.ts.prod</argument>
+         						<argument>./src/app/app.module.ts</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>npm-install-angular-cli@1.4.2</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>npm</executable>
+         					<arguments>
+         						<argument>install</argument>
+         						<argument>-g</argument>
+         						<argument>@angular/cli@1.4.2</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>npm-install</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>npm</executable>
+         					<arguments>
+         						<argument>install</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>ng-build</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>ng</executable>
+         					<arguments>
+         						<argument>build</argument>
+         						<argument>--prod</argument>
+         						<argument>--bh=/daquery/</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>cp-builded-ui</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cp</executable>
+         					<arguments>
+         						<argument>./dist/*.*</argument>
+         						<argument>${project.basedir}/src/main/webapp/</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         		</executions>
+         	</plugin>
+	      </plugins>
+	    </build>
+	  </profile>
+	  	<profile>
+	  	<id>windows</id>
+	    <activation>
+	      <os>
+	        <family>windows</family>
+	      </os>
+	    </activation>
+	    <build>
+	      <plugins>
+	        <plugin>
+         		<groupId>org.codehaus.mojo</groupId>
+         		<artifactId>exec-maven-plugin</artifactId>
+         		<executions>
+         			<execution>
+         				<id>rm-app.module.ts</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cmd</executable>
+         					<arguments>
+         						<arguments>/C</arguments>
+         						<argument>del ".\src\app\app.module.ts"</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>cp-app.module.ts.prod</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cmd</executable>
+         					<arguments>
+         						<argument>/C</argument>
+         						<argument>copy ".\src\app\app.module.ts.prod" ".\src\app\app.module.ts"</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>npm-install-angular-cli@1.4.2</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cmd</executable>
+         					<arguments>
+         						<argument>/C</argument>
+         						<argument>npm install -g @angular/cli@1.4.2</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>npm-install</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cmd</executable>
+         					<arguments>
+         						<argument>/C</argument>
+         						<argument>npm install</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>ng-build</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cmd</executable>
+         					<arguments>
+         						<argument>/C</argument>
+         						<argument>ng build --prod --bh=/daquery/</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         			<execution>
+         				<id>cp-builded-ui</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cmd</executable>
+         					<arguments>
+         						<argument>/C</argument>
+         						<argument>copy ".\dist\*.*" "${project.basedir}\src\main\webapp\"</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         		</executions>
+         	</plugin>
+	      </plugins>
+	    </build>
+	  </profile>
+	</profiles>
     <build>
 	    <finalName>daquery-ws</finalName>
         <plugins>
@@ -425,24 +641,7 @@
 	                <failOnMissingWebXml>false</failOnMissingWebXml>
 	            </configuration>
 	        </plugin>
-	        <plugin>
-           <artifactId>maven-antrun-plugin</artifactId>
-           <executions>
-             <execution>
-               <phase>generate-sources</phase>
-               <goals>
-                 <goal>run</goal>
-               </goals>
-               <configuration>
-                 <tasks>
-                   <delete file="${ui_project.Directory}/src/app/app.module.ts"/>
-                   <copy file="${ui_project.Directory}/src/app/app.module.ts.prod"
-                         tofile="${ui_project.Directory}/src/app/app.module.ts"/>
-                 </tasks>
-               </configuration>
-             </execution>
-           </executions>
-         </plugin>
+
         </plugins>
         <pluginManagement>
         	<plugins>
@@ -457,16 +656,16 @@
         						<pluginExecution>
         							<pluginExecutionFilter>
         								<groupId>
-        									org.apache.maven.plugins
+        									org.codehaus.mojo
         								</groupId>
         								<artifactId>
-        									maven-antrun-plugin
+        									exec-maven-plugin
         								</artifactId>
         								<versionRange>
-        									[1.3,)
+        									[1.6.0,)
         								</versionRange>
         								<goals>
-        									<goal>run</goal>
+        									<goal>exec</goal>
         								</goals>
         							</pluginExecutionFilter>
         							<action>
