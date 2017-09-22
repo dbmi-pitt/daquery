@@ -466,17 +466,17 @@
          				<goals>
          					<goal>exec</goal>
          				</goals>
-         			</execution>
+                    </execution>
          			<execution>
          				<id>cp-builded-ui</id>
          				<phase>generate-sources</phase>
          				<configuration>
          					<workingDirectory>${ui_project.Directory}</workingDirectory>
-         					<executable>cp</executable>
-         					<arguments>
-         						<argument>./dist/*.*</argument>
-         						<argument>${project.basedir}/src/main/webapp/</argument>
-         					</arguments>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>cp dist/* ${project.basedir}/src/main/webapp/</argument>
+                            </arguments>
          				</configuration>
          				<goals>
          					<goal>exec</goal>
