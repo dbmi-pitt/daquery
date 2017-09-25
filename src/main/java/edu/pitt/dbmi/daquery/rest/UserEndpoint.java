@@ -43,7 +43,7 @@ import javax.ws.rs.core.UriInfo;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
-import edu.pitt.dbmi.daquery.common.util.AuthHelper;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
@@ -160,25 +160,25 @@ public class UserEndpoint extends AbstractEndpoint {
             authenticate(id, password);
 
             if(expiredPassword(id))
-                return(AuthHelper.expiredPasswordResponse(id, uriInfo));
+                return(ResponseHelper.expiredPasswordResponse(id, uriInfo));
             
             if (accountDisabled(id))
-                return(AuthHelper.accountDisabledResponse(id, uriInfo));
+                return(ResponseHelper.accountDisabledResponse(id, uriInfo));
             	
             
             if(expiredPassword(id))
-            	return(AuthHelper.expiredPasswordResponse(id, uriInfo));
+            	return(ResponseHelper.expiredPasswordResponse(id, uriInfo));
             Site_User currentUser = queryUserByID(id);
 	    Map<String, Object> extraObjs = new HashMap<String, Object>();
 	    extraObjs.put("user", currentUser);
             
-            Response rVal = AuthHelper.getTokenResponse(200, null, id, uriInfo, extraObjs);
+            Response rVal = ResponseHelper.getTokenResponse(200, null, id, uriInfo, extraObjs);
 
             return rVal;
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-            return(AuthHelper.expiredTokenResponse(id, uriInfo));
+            return(ResponseHelper.expiredTokenResponse(id, uriInfo));
         } catch (Exception e) {
         	e.printStackTrace();
             return Response.status(UNAUTHORIZED).build();
@@ -297,7 +297,7 @@ public class UserEndpoint extends AbstractEndpoint {
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
         	//TODO: This needs to be reported back to the UI so it can handle it
-            return(AuthHelper.expiredTokenResponse(login, uriInfo));
+            return(ResponseHelper.expiredTokenResponse(login, uriInfo));
         } catch (Exception e) {
 	        return Response.serverError().build();
 	    }
@@ -338,7 +338,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        //step 2: check if account is disabled
 	        if (accountDisabled(user.getId())) {
-	            return(AuthHelper.accountDisabledResponse(user.getId(), uriInfo));	        	
+	            return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));	        	
 	        }
 	        
 	        //step 3: check if this is a password change
@@ -354,7 +354,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        //step 4: is the user's password expired?
 	        if (expiredPassword(user.getId())) {
-	            return(AuthHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
+	            return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
 	        }
 	        
 	        //if you passed all the checks then update the User

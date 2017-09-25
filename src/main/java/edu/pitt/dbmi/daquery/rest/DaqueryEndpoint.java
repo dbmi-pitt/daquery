@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.AuthHelper;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 
 @Path("/")
 public class DaqueryEndpoint
@@ -21,11 +21,11 @@ public class DaqueryEndpoint
 	{
 		int dbStatus = AppSetup.getDBStatus();
 		if(dbStatus == AppSetup.DBSTATUS_ALL_GOOD)
-			return(AuthHelper.getBasicResponse(200, "Y"));
+			return(ResponseHelper.getBasicResponse(200, "Y"));
 		else if(dbStatus == AppSetup.DBSTATUS_EMPTY)
-			return(AuthHelper.getBasicResponse(200, "N"));
+			return(ResponseHelper.getBasicResponse(200, "N"));
 		else
-			return(AuthHelper.getBasicResponse(500, "The application database is in an indeterminate state.  Check the application error logs for more information."));
+			return(ResponseHelper.getBasicResponse(500, "The application database is in an indeterminate state.  Check the application error logs for more information."));
 	}
     @GET
     @Path("/available-networks")
