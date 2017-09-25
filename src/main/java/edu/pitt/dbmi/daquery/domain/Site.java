@@ -5,6 +5,8 @@ import javax.persistence.*;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+
 import java.util.List;
 import java.util.Objects;
 

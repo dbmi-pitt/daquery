@@ -12,17 +12,11 @@ import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.HashMap;
 
-import javax.json.Json;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -54,8 +48,7 @@ import edu.pitt.dbmi.daquery.common.util.AuthHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.Inbound_Query;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 
 
@@ -64,7 +57,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
