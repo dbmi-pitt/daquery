@@ -58,9 +58,6 @@ import edu.pitt.dbmi.daquery.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 
-//import edu.pitt.dbmi.daquery.persistence.HibernateUtil;
-import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
-import edu.pitt.dbmi.daquery.common.util.AuthHelper;
 
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
@@ -207,7 +204,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	
     	try {
 
-            logger.info("#### uuid/password : " + uuid);
+            logger.info("#### uuid/password : " + id);
 
             // Authenticate the user using the credentials provided
             authenticate(id, password);
@@ -219,13 +216,13 @@ public class UserEndpoint extends AbstractEndpoint {
                 return(AuthHelper.accountDisabledResponse(id, uriInfo));
             	
             
-            if(expiredPassword(uuid))
-            	return(AuthHelper.expiredPasswordResponse(uuid, uriInfo));
+            if(expiredPassword(id))
+            	return(AuthHelper.expiredPasswordResponse(id, uriInfo));
             Site_User currentUser = queryUserByID(id);
 	    Map<String, Object> extraObjs = new HashMap<String, Object>();
 	    extraObjs.put("user", currentUser);
             
-            Response rVal = AuthHelper.getTokenResponse(200, null, uuid, uriInfo, currentUser);
+            Response rVal = AuthHelper.getTokenResponse(200, null, id, uriInfo, extraObjs);
 
             return rVal;
 
@@ -581,13 +578,6 @@ public class UserEndpoint extends AbstractEndpoint {
 
      }
     
-    //TODO implement this method, probably move to a helper class..
-    //Do we want to pass in the Site_User object instead of the id?
-    private boolean expiredPassword(String id)
-    {
-                return false;
-    }
-
     //TODO implement this method, probably move to a helper class..
     //Do we want to pass in the Site_User object instead of the id?
     private boolean accountDisabled(String id)
