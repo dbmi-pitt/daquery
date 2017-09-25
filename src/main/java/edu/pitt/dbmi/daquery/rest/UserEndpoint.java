@@ -90,48 +90,6 @@ public class UserEndpoint extends AbstractEndpoint {
     private final static Logger logger = Logger.getLogger(UserEndpoint.class.getName());
        
     
-    //this class is a workaround for the JSON serializer
-    //the serializer works best on a single class of data
-    //it does not allow programmers to insert additional 
-    //data outside of a single object or array of objects
-    //This class provides a method for including the JWT with the Site_User object
-    private class UserToken extends DaqueryObject {
-    	@Expose
-    	private String token = "";
-    	
-    	@Expose
-    	private Site_User user = null;
-    	
-    	public UserToken() {
-    		
-    	}
-    	
-    	public UserToken(String newToken, Site_User newUser) {
-    		this.token = newToken;
-    		this.user = newUser;
-    	}
-    	
-    	public String getToken() {
-    		return this.token;
-    	}
-    	
-    	public void setToken(String newToken) {
-    		this.token = newToken;
-    	}
-    	
-    	public Site_User getUser() {
-    		return this.user;
-    	}
-    	
-    	public void setUser(Site_User newUser) {
-    		this.user = newUser;
-    	}
-    	
-    }
-    // ======================================
-    // =          Business methods          =
-    // ======================================
-
     /**
      * Return a list of all the users.
      * example URL: daquery/ws/users/
