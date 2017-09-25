@@ -22,8 +22,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 /**
  * Methods to help with returning web service responsed related to user authentication
  */
-public class AuthHelper {
-	private static Logger logger = Logger.getLogger(AuthHelper.class.getName());
+public class ResponseHelper {
+	private static Logger logger = Logger.getLogger(ResponseHelper.class.getName());
     /**
      * Create a JWT based on a user's uuid.  The JWT is set to expire in 15 minutes.
      * @param uuid- a user's uuid
@@ -91,7 +91,7 @@ public class AuthHelper {
     public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, Object> additionalReturnValues)
     {
         // Issue a token for the user
-        String token = AuthHelper.issueToken(name, uriInfo);
+        String token = ResponseHelper.issueToken(name, uriInfo);
         HashMap<String, Object> vals = new HashMap<String, Object>();
         vals.put("token", token);
         if(additionalReturnValues != null)
