@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -87,7 +88,7 @@ public class AuthHelper {
     	return(getTokenResponse(401, 3, name, uriInfo, null));
     }
     
-    public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, String> additionalReturnValues)
+    public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, Object> additionalReturnValues)
     {
         // Issue a token for the user
         String token = AuthHelper.issueToken(name, uriInfo);
@@ -127,13 +128,18 @@ public class AuthHelper {
         {
         	for(String key : additionalResponseValues.keySet())
         	{
-        		jsonData.add(key, additionalResponseValues.get(key).toString());
+        		Object obj = additionalResponseValues.get(key);
+        		if(obj instanceof DaqueryObject)
+        		{
+        			jsonData.add(key, ((DaqueryObject) obj).toJson());
+        		}
+        		else
+        			jsonData.add(key, additionalResponseValues.get(key).toString());
         	}
         }
-        
         return Response.status(responseCode).entity(jsonData.build().toString()).build();    	
     }
-    
+        
     public static Response getBasicResponse(int responseCode, String message)
     {
     	return(Response.status(responseCode).type(MediaType.TEXT_PLAIN).entity(message).build());
