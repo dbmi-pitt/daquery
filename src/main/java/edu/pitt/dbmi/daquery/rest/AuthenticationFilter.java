@@ -166,6 +166,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     return "Bearer";
                 }
             });
+        } catch (ExpiredJwtException expired) {
+        	logger.info("Expired token: " + expired.getLocalizedMessage());
+        	requestContext.abortWith(
+        		Response.status(419).build());
         } catch (Exception e) {
             requestContext.abortWith(
                 Response.status(Response.Status.UNAUTHORIZED).build());
@@ -221,18 +225,20 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      * @throws PersistenceException if the database is incorrectly configured
      * Exception for any other issue
      */
-    private boolean isUserValid(String uuid) throws Exception {
-    	logger.info("checking if user: " + uuid + " is valid");
+    private boolean isUserValid(String id) throws Exception {
+    	logger.info("checking if user: " + id + " is valid");
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
     	try {
-	        emf = Persistence.createEntityManagerFactory("jpa-example");
+	        emf = Persistence.createEntityManagerFactory("derby");
 	        em = emf.createEntityManager();
-	        Query query = em.createNamedQuery(Site_User.FIND_BY_UUID);
-	        query.setParameter("uuid", uuid);
+	        Query query = em.createNamedQuery(Site_User.FIND_BY_ID);
+	        query.setParameter("id", id);
 	        Site_User user = null;
 	        user = (Site_User)query.getSingleResult();
-	        return user.getStatusEnum() == UserStatus.ACTIVE;
+	        return true;
+	        //TODO: compare with status
+	        //return user.getStatusEnum() == UserStatus.ACTIVE;
 	    
         } catch (PersistenceException pe) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
@@ -245,9 +251,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     	finally {
     		if (em != null) {
     			em.close();
-    		}
-    		if (emf != null) {
-    			emf.close();
     		}
     		
     	}

@@ -74,7 +74,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
      */
     
     @GET
-    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
+    //@Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     /**
@@ -90,9 +90,9 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning all inbound queries");
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            //Principal principal = securityContext.getUserPrincipal();
+            //String username = principal.getName();
+            //logger.info("Responding to request from: " + username);
                         
             List<Inbound_Query> queries = queryAllInboundQueries();
             
@@ -106,6 +106,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     	} catch (NoResultException nre) {
     		return Response.status(NOT_FOUND).build();
         } catch (Exception e) {
+        	e.printStackTrace();
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -129,9 +130,9 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning  inbound query by id=" + id);
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            //Principal principal = securityContext.getUserPrincipal();
+            //String username = principal.getName();
+            //logger.info("Responding to request from: " + username);
             
             Inbound_Query iq = queryInboundQuery(id);
             
@@ -167,9 +168,9 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning  inbound query by status=" + statusType);
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            //Principal principal = securityContext.getUserPrincipal();
+            //String username = principal.getName();
+            //logger.info("Responding to request from: " + username);
                         
             List<Inbound_Query> queries = queryInboundQueriesByStatus(statusType);
             
@@ -205,9 +206,9 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning  inbound query by site=" + siteName);
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            //Principal principal = securityContext.getUserPrincipal();
+            //String username = principal.getName();
+            //logger.info("Responding to request from: " + username);
                         
             List<Inbound_Query> queries = queryInboundQueriesBySite(siteName);
             

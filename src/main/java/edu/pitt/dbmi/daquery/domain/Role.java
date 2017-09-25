@@ -3,6 +3,7 @@ package edu.pitt.dbmi.daquery.domain;
 import java.io.Serializable;
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -28,7 +29,7 @@ public class Role extends DaqueryObject implements Serializable {
 
 	//bi-directional many-to-many association to User
 	@ManyToMany(mappedBy="roles")
-	private List<User> users;
+	private List<Site_User> users;
 
 	public Role() {
 	}
@@ -57,12 +58,30 @@ public class Role extends DaqueryObject implements Serializable {
 		this.type = type;
 	}
 
-	public List<User> getUsers() {
+	public List<Site_User> getUsers() {
 		return this.users;
 	}
 
-	public void setUsers(List<User> users) {
+	public void setUsers(List<Site_User> users) {
 		this.users = users;
 	}
 
+	
+    // ======================================
+    // =   Methods hash, equals, toString   =
+    // ======================================
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Role role = (Role) o;
+        return Objects.equals(id, role.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+	
 }

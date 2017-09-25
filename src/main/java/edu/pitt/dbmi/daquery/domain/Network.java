@@ -2,6 +2,9 @@ package edu.pitt.dbmi.daquery.domain;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import com.google.gson.annotations.Expose;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -16,24 +19,25 @@ import java.util.Objects;
  */
 @Entity
 @Table(name="NETWORKS")
-@NamedQuery(name="Network.findAll", query="SELECT n FROM Network n")
 public class Network extends DaqueryObject implements Serializable {
 	private static final long serialVersionUID = 1L;
     public static final String FIND_ALL = "Network.findAll";
     public static final String FIND_BY_ID = "Network.findByID";
 
 
+	@Expose
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(unique=true, nullable=false)
 	private long id;
 
+	@Expose
 	@Column(nullable=false, length=100)
 	private String name;
 
 	//bi-directional many-to-one association to InboundQuery
 	@OneToMany(mappedBy="network")
-	private List<InboundQuery> inboundQueries;
+	private List<Inbound_Query> inboundQueries;
 
 	//bi-directional many-to-one association to OutboundQuery
 	@OneToMany(mappedBy="network")
@@ -62,22 +66,22 @@ public class Network extends DaqueryObject implements Serializable {
 		this.name = name;
 	}
 
-	public List<InboundQuery> getInboundQueries() {
+	public List<Inbound_Query> getInboundQueries() {
 		return this.inboundQueries;
 	}
 
-	public void setInboundQueries(List<InboundQuery> inboundQueries) {
+	public void setInboundQueries(List<Inbound_Query> inboundQueries) {
 		this.inboundQueries = inboundQueries;
 	}
 
-	public InboundQuery addInboundQuery(InboundQuery inboundQuery) {
+	public Inbound_Query addInboundQuery(Inbound_Query inboundQuery) {
 		getInboundQueries().add(inboundQuery);
 		inboundQuery.setNetwork(this);
 
 		return inboundQuery;
 	}
 
-	public InboundQuery removeInboundQuery(InboundQuery inboundQuery) {
+	public Inbound_Query removeInboundQuery(Inbound_Query inboundQuery) {
 		getInboundQueries().remove(inboundQuery);
 		inboundQuery.setNetwork(null);
 
@@ -153,13 +157,5 @@ public class Network extends DaqueryObject implements Serializable {
                 '}';
     }
     
-    /**
-     * The toJson method in DaqueryObject needs to be overriden
-     * The user's encrypted password needs to be removed from the Json string
-     */
-    @Override
-	public String toJson() {
-    	return super.toJson();    	
-    }
 
 }

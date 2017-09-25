@@ -14,6 +14,17 @@
             <param-value>edu.pitt.dbmi.daquery.rest</param-value>
 -->
         </init-param>
+        <!-- I need these two settings to deserialize JSON objects -->
+	    <init-param>
+	        <param-name>jersey.config.server.provider.packages</param-name>
+	        <param-value>com.fasterxml.jackson.jaxrs</param-value>
+	    </init-param>
+	    <init-param>
+	        <param-name>jersey.config.server.provider.classnames</param-name>
+	        <param-value>org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>
+	    </init-param>
+
+
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 

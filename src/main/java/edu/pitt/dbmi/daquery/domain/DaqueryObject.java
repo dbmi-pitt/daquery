@@ -17,10 +17,17 @@ import com.google.gson.JsonSerializer;
  * @author devuser
  *
  */
+
+//Note: This method is used in conjunction with the @Expose annotation
+//the @Expose is used to prevent the Gson code from entering an infinite loop
+//by trying to serialize all the nested objects.  The @Expose annotation
+//should be used to exclude nested objects that reference one another
+//and cause circular references within the JSON.
 public abstract class DaqueryObject {
 	
 	public String toJson() {
         Gson gson = new GsonBuilder()
+        		.excludeFieldsWithoutExposeAnnotation()
                 .registerTypeAdapter(DateTime.class, new JsonSerializer<DateTime>() {
                     @Override
                     public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
@@ -29,5 +36,4 @@ public abstract class DaqueryObject {
                 }).create();
 		return gson.toJson(this);
 	}
-	
 }

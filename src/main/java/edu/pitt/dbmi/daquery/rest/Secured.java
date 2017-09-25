@@ -22,6 +22,8 @@ import edu.pitt.dbmi.daquery.util.UserRoles;
  *
  */
 
+
+//TODO: Change the Role type from UserRoles[] to String[]
 @NameBinding
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})
