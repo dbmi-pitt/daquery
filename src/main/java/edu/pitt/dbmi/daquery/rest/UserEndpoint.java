@@ -185,10 +185,10 @@ public class UserEndpoint extends AbstractEndpoint {
     @Path("/login")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response authenticateUser(@QueryParam("id") String id,
+    public Response authenticateUser(@QueryParam("email") String email,
                                      @QueryParam("password") String password) {
 
-    	if (id.isEmpty() || password.isEmpty()) 
+    	if (email.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
     	
     	//TODO: Reject any communication coming across anything other than HTTPS:
@@ -200,33 +200,34 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	}
     	}
     	
+    	Site_User user = null;
     	try {
 
-            logger.info("#### id/password : " + id + "/" + password);
+            logger.info("#### email/password : " + email + "/" + password);
 
             // Authenticate the user using the credentials provided
-            authenticate(id, password);
+            user = authenticate(email, password);
 
-            if(expiredPassword(id))
-                return(AuthHelper.expiredPasswordResponse(id, uriInfo));
+            if(expiredPassword(user.getId()))
+                return(AuthHelper.expiredPasswordResponse(user.getId(), uriInfo));
             
-            if (accountDisabled(id))
-                return(AuthHelper.accountDisabledResponse(id, uriInfo));
+            if (accountDisabled(user.getId()))
+                return(AuthHelper.accountDisabledResponse(user.getId(), uriInfo));
             	
             
             // Issue a token for the user
-            String token = AuthHelper.issueToken(id, uriInfo);
+            String token = AuthHelper.issueToken(user.getId(), uriInfo);
             
-            Site_User currentUser = queryUserByID(id);
+            // Site_User currentUser = queryUserByID(user.getId();
             
             // Return the token and user to the response
-            UserToken tu = new UserToken(token, currentUser);
+            UserToken tu = new UserToken(token, user);
 
             return Response.ok(200).entity(tu.toJson()).build();
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-            return(AuthHelper.expiredTokenResponse(id, uriInfo));
+            return(AuthHelper.expiredTokenResponse(user.getId(), uriInfo));
         } catch (Exception e) {
         	e.printStackTrace();
             return Response.status(UNAUTHORIZED).build();
@@ -501,21 +502,22 @@ public class UserEndpoint extends AbstractEndpoint {
      * @throws SecurityException on authentication failure
      * NoResultException if no user is found
      */
-    private void authenticate(String id, String password) throws SecurityException, PersistenceException, Exception {
-    	logger.info("searching for #### uuid/password : " + id + "/" + password);
+    private Site_User authenticate(String email, String password) throws SecurityException, PersistenceException, Exception {
+    	logger.info("searching for #### email/password : " + email + "/" + password);
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piUser = new ParameterItem("id", id);
+    		ParameterItem piUser = new ParameterItem("email", email);
     		pList.add(piUser);
     		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
     		pList.add(piPassword);
 	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_ID_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
-	    		logger.info("Invalid user/password.  Tried to login using: " + id + " / " + password);
-	            throw new SecurityException("Invalid user/password");
+	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / " + password);
+	            throw new SecurityException("Invalid email/password");
 	        }
-	    
+	        
+	        return user;
     	} catch (NoResultException e) {
     		logger.info("Invalid user/password");
     		throw new SecurityException("Invalid user/password");
