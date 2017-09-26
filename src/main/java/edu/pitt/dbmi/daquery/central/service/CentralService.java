@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import edu.pitt.dbmi.daquery.common.util.AuthHelper;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.pitt.daquery.central.util.DBHelper;
 import edu.pitt.dbmi.pitt.daquery.central.util.DaqueryCentralException;
@@ -37,35 +37,37 @@ public class CentralService {
 	@Path("authenticatSite/")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)	
-	public Response authenticateSite(@QueryParam("site") String sitename, @QueryParam("key") String key)
+	public Response authenticateSite(@QueryParam("site") String site, @QueryParam("key") String key)
 	{
-		if(StringHelper.isEmpty(sitename) || StringHelper.isEmpty(key))
-			return(AuthHelper.getBasicResponse(400, "sitename and key parameters required"));
+		if(StringHelper.isEmpty(site) || StringHelper.isEmpty(key))
+			return(ResponseHelper.getBasicResponse(400, "sitename and key parameters required"));
 		
 		//TODO: check the sender ip/site name as an extra verification step
-		if(! DBHelper.authenticateSite(sitename, key))
-			return(AuthHelper.getBasicResponse(401, sitename + " is not authorized to use this server.  Possibly a bad key or site name was provided."));
+		if(! DBHelper.authenticateSite(site, key))
+			return(ResponseHelper.getBasicResponse(401, site + " is not authorized to use this server.  Possibly a bad key or site name was provided."));
 
-		Map<String, String> additionalVals = null;
+		Map<String, Object> additionalVals = null;
 		
 		try
 		{
-			if(DBHelper.isSiteKeyTemp(sitename))
+			if(DBHelper.isSiteKeyTemp(site))
 			{
-				String newKey = DBHelper.getNewSiteKey(sitename);
+				String newKey = DBHelper.getNewSiteKey(site);
 				if(newKey == null)
 					throw new DaqueryCentralException("An unknown error while trying to generate a new site key. Check the central server log files for more information.");
-				additionalVals = new HashMap<String, String>();
+				additionalVals = new HashMap<String, Object>();
 				additionalVals.put("new-site-key", newKey);
-				additionalVals.put("site-id", DBHelper.getSiteId(sitename));
+				additionalVals.put("site-id", DBHelper.getSiteId(site));
 			}
 		}
 		catch(DaqueryCentralException dce)
 		{			
-			return(AuthHelper.getBasicResponse(500, dce.getMessage()));
+			return(ResponseHelper.getBasicResponse(500, dce.getMessage()));
 		}
 		
-		return(AuthHelper.getTokenResponse(200, null, sitename, uriInfo, additionalVals));
+		return(ResponseHelper.getTokenResponse(200, null, site, uriInfo, additionalVals));
 			
 	}
+
+
 }
