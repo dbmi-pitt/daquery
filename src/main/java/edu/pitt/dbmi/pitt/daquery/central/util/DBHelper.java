@@ -2,16 +2,33 @@ package edu.pitt.dbmi.pitt.daquery.central.util;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
-import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
+import edu.pitt.dbmi.daquery.common.util.*;
+import edu.pitt.dbmi.daquery.common.domain.*;
 
 public class DBHelper
 {
+	public static void main(String [] args) throws Exception
+	{
+		//for testing set the location of the application database
+		PropertiesHelper.setDevHomeDir("/home/devuser/daquery-data");
+		List<NetworkInfo> netInfo = getAllowedNetworks("20b23b5c-61ad-44eb-8eef-886adcced18e");
+		for(NetworkInfo net : netInfo)
+		{
+			System.out.println(net.name + ":" + net.id);
+			for(SiteInfo site : net.allowedSites)
+			{
+				System.out.println("\t" + site.siteName + ":" + site.siteURL + ":" + site.id);
+			}
+		}
+		
+	}
+	
 	private static Logger log = Logger.getLogger(DBHelper.class.getName());
 	
 	/**
@@ -172,26 +189,70 @@ public class DBHelper
 	}
 	
 	/**
-	 * A helper class to hold site information.
-	 *
+	 * Get a list of networks and associated sites that a given site is
+	 * allowed to query from.
+	 * 
+	 * @param siteId The id for the site who's networks are being requested.
+	 * @return a list of networks with associated sites.
+	 * @throws DaqueryCentralException
 	 */
-	private static class SiteInfo
+	public static List<NetworkInfo> getAllowedNetworks(String siteId) throws DaqueryCentralException
 	{
-		String id;
-		String accessKey;
-		boolean tempKey;
-		String siteName;
-		boolean emailAccess;
-		
-		SiteInfo(){}
-		
-		SiteInfo(ResultSet rs) throws SQLException
+		String sql = "select site_id, network_name, network_membership.network_id, site.name as site_name, site_url " +
+		                                  "from network_membership, " +
+                                                "(select id as network_id, name as network_name from network " +
+                                                          "where id in " + 
+                                                                 "(select network_id from network_membership " +
+                                                                                "where site_id = '" + siteId +"')) as inn, " +
+                                                 "site " +
+                                           "where network_membership.network_id = inn.network_id and " +
+                                                 "site.id = network_membership.site_id " +
+                                           "order by network_membership.network_id";
+		List<NetworkInfo> networks = new ArrayList<NetworkInfo>();
+		Connection conn = null;
+		Statement s = null;
+		ResultSet rs = null;
+		try
 		{
-			id = rs.getString("id");
-			accessKey = rs.getString("access_key");
-			tempKey = rs.getBoolean("tempkey");
-			siteName = rs.getString("name");
-			emailAccess = rs.getBoolean("email_access");
+			conn = ApplicationDBHelper.getConnection();
+			s = conn.createStatement();
+			rs = s.executeQuery(sql);
+			String currentNetworkId = "";
+			NetworkInfo currentNetInfo = null;
+			//this only works because the query is ordered by network_id
+			while(rs.next())
+			{
+				String netId = rs.getString("network_id");
+				String netName = rs.getString("network_name");
+				String site_Id = rs.getString("site_id");
+				String siteName = rs.getString("site_name");
+				String siteURL = rs.getString("site_url");
+				if(!currentNetworkId.equals(netId))
+				{
+					currentNetworkId = netId;
+					currentNetInfo = new NetworkInfo();
+					currentNetInfo.id = netId;
+					currentNetInfo.name = netName;
+					networks.add(currentNetInfo);
+				}
+				SiteInfo nextSite = new SiteInfo();
+				nextSite.id = site_Id;
+				nextSite.siteName = siteName;
+				nextSite.siteURL = siteURL;
+				currentNetInfo.allowedSites.add(nextSite);
+			}
+			return(networks);	
 		}
+		catch(Throwable t)
+		{
+			String msg = "An unexpected error occurred while looking up the available networks/sites for site with id: " + siteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		}
+		finally
+		{
+			ApplicationDBHelper.closeConnection(conn, s, rs);
+		}
+		
 	}
 }

@@ -1,7 +1,10 @@
 package edu.pitt.dbmi.daquery.central.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.pitt.daquery.central.util.DBHelper;
@@ -20,6 +24,8 @@ import edu.pitt.dbmi.pitt.daquery.central.util.DaqueryCentralException;
 
 @Path("/")
 public class CentralService {
+	
+	private static Logger log = Logger.getLogger(CentralService.class.getName());
 	
     @Context
     private UriInfo uriInfo;
@@ -65,9 +71,25 @@ public class CentralService {
 			return(ResponseHelper.getBasicResponse(500, dce.getMessage()));
 		}
 		
-		return(ResponseHelper.getTokenResponse(200, null, site, uriInfo, additionalVals));
-			
+		return(ResponseHelper.getTokenResponse(200, null, site, uriInfo, additionalVals));	
 	}
-
-
+	
+	@GET
+	@Path("availableNetworks/")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)	
+	public Response availableNetworks(@QueryParam("site-id") String siteId)
+	{
+		try
+		{
+			List<NetworkInfo> networks = DBHelper.getAllowedNetworks(siteId);
+			return ResponseHelper.getJsonResponse(200, null, networks);
+		}
+		catch(Throwable t)
+		{
+			String msg = "An error occurred while looking up allowed networks for site with id:" + siteId;
+			log.log(Level.SEVERE, msg, t);
+			ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information.");
+		}
+	}
 }
