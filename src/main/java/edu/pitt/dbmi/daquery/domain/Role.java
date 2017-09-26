@@ -2,6 +2,9 @@ package edu.pitt.dbmi.daquery.domain;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+
 import java.util.List;
 import java.util.Objects;
 

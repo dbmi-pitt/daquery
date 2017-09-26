@@ -9,7 +9,7 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
-import edu.pitt.dbmi.daquery.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
 
 //TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"
