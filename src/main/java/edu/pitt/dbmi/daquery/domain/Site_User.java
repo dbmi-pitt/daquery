@@ -27,14 +27,6 @@ import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 
-
-/**
- * @author Antonio Goncalves
- *         http://www.antoniogoncalves.org
- *         --
- */
-
-
 @NamedQueries({
         @NamedQuery(name = Site_User.FIND_ALL, query = "SELECT u FROM Site_User u ORDER BY u.realName DESC"),
         @NamedQuery(name = Site_User.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.username = :login AND u.password = :password"),
