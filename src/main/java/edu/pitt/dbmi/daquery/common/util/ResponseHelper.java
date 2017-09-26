@@ -107,8 +107,10 @@ public class ResponseHelper {
      * @param responseCode The HTTP status code for this response.
      * @param subCode OPTIONAL: An integer specifying a subcode that will be tacked onto the
      * 				  main code and returned in the json payload under "subcode".
-     * @param additionalResponseValues OPTIONAL: Any additional key/value pairs to be sent
-     *                                 in the json payload.
+     * @param additionalResponseValues OPTIONAL: Any additional objects whose data will be included in the json payload.
+     *                                 valid object types are DaqueryObject, List<DaqueryObject> or Map<String, Object)
+     *                                 where the String/Object types on map are attribute name/data (toString, used)
+     *                                 
      * @return A web service response object.
      */
     public static Response getJsonResponse(int responseCode, Integer subCode, Map<String, Object> additionalResponseValues)
