@@ -32,27 +32,32 @@ public class JSONHelper
 			if(vals.size() == 0)
 				return("{}");
 			Set keys = vals.keySet();
-	        JsonBuilderFactory jFactory = Json.createBuilderFactory(null);
-	        JsonObjectBuilder jsonData = jFactory.createObjectBuilder();
 
+			String rJson = "{";
+			boolean first = true;
+			String comma = "";
 			for(Object key : keys)
 			{
 				if(key instanceof String)
 				{
 	        		Object obj = vals.get(key);
 	        		if(obj instanceof DaqueryObject)
-	        			jsonData.add((String) key, ((DaqueryObject) obj).toJson());
+	        			rJson = rJson + comma + "\"" + (String) key + "\":" + ((DaqueryObject) obj).toJson();
 	        		else if(obj instanceof List)
-	        			jsonData.add((String)key, toJSON(obj));
+	        			rJson = rJson + "\"" + comma + (String) key + "\":" + toJSON(obj);
 	        		else
-	        		{	String rTxt = obj.toString().trim();
-	        			jsonData.add((String) key, rTxt);
+	        			rJson = comma + rJson + comma + "\"" + (String) key + "\":\"" + obj.toString() + "\"";
+	        		if(first)
+	        		{
+	        			first = false;
+	        			comma = ",";
 	        		}
 				}
 				else
 					throw new DaqueryException("A non-String attribute name was found in a Map being converted to JSON");
 			}
-			return(StringHelper.unEscapeQuotes(jsonData.build().toString()));
+			rJson = rJson + "}";
+			return(rJson);
 		}
 		else if(value instanceof DaqueryObject)
 			return((DaqueryObject) value).toJson();
