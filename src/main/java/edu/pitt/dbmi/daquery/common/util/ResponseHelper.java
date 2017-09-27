@@ -113,7 +113,7 @@ public class ResponseHelper {
      *                                 
      * @return A web service response object.
      */
-    public static Response getJsonResponse(int responseCode, Integer subCode, Map<String, Object> additionalResponseValues)
+    public static Response getJsonResponse(int responseCode, Integer subCode, Object additionalResponseValues)
     {
     	if(subCode == null && additionalResponseValues == null)
     	{
@@ -128,16 +128,7 @@ public class ResponseHelper {
         
         if(additionalResponseValues != null)
         {
-        	for(String key : additionalResponseValues.keySet())
-        	{
-        		Object obj = additionalResponseValues.get(key);
-        		if(obj instanceof DaqueryObject)
-        		{
-        			jsonData.add(key, ((DaqueryObject) obj).toJson());
-        		}
-        		else
-        			jsonData.add(key, additionalResponseValues.get(key).toString());
-        	}
+        	jsonData.
         }
         return Response.status(responseCode).entity(jsonData.build().toString()).build();    	
     }
