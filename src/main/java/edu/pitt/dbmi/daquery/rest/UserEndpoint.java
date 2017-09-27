@@ -12,15 +12,11 @@ import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.HashMap;
 
-import javax.json.Json;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -47,22 +43,20 @@ import javax.ws.rs.core.UriInfo;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
-import edu.pitt.dbmi.daquery.common.util.AuthHelper;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+
+import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
+
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.Inbound_Query;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.domain.Site_User;
-import edu.pitt.dbmi.daquery.util.KeyGenerator;
-//import edu.pitt.dbmi.daquery.persistence.HibernateUtil;
-import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
-import edu.pitt.dbmi.daquery.common.util.AuthHelper;
+
 
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
@@ -96,48 +90,6 @@ public class UserEndpoint extends AbstractEndpoint {
     private final static Logger logger = Logger.getLogger(UserEndpoint.class.getName());
        
     
-    //this class is a workaround for the JSON serializer
-    //the serializer works best on a single class of data
-    //it does not allow programmers to insert additional 
-    //data outside of a single object or array of objects
-    //This class provides a method for including the JWT with the Site_User object
-    private class UserToken extends DaqueryObject {
-    	@Expose
-    	private String token = "";
-    	
-    	@Expose
-    	private Site_User user = null;
-    	
-    	public UserToken() {
-    		
-    	}
-    	
-    	public UserToken(String newToken, Site_User newUser) {
-    		this.token = newToken;
-    		this.user = newUser;
-    	}
-    	
-    	public String getToken() {
-    		return this.token;
-    	}
-    	
-    	public void setToken(String newToken) {
-    		this.token = newToken;
-    	}
-    	
-    	public Site_User getUser() {
-    		return this.user;
-    	}
-    	
-    	public void setUser(Site_User newUser) {
-    		this.user = newUser;
-    	}
-    	
-    }
-    // ======================================
-    // =          Business methods          =
-    // ======================================
-
     /**
      * Return a list of all the users.
      * example URL: daquery/ws/users/
@@ -202,37 +154,42 @@ public class UserEndpoint extends AbstractEndpoint {
     	
     	try {
 
-            logger.info("#### id/password : " + id + "/" + password);
+            logger.info("#### uuid/password : " + id);
 
             // Authenticate the user using the credentials provided
             authenticate(id, password);
 
             if(expiredPassword(id))
-                return(AuthHelper.expiredPasswordResponse(id, uriInfo));
+                return(ResponseHelper.expiredPasswordResponse(id, uriInfo));
             
             if (accountDisabled(id))
-                return(AuthHelper.accountDisabledResponse(id, uriInfo));
+                return(ResponseHelper.accountDisabledResponse(id, uriInfo));
             	
             
-            // Issue a token for the user
-            String token = AuthHelper.issueToken(id, uriInfo);
-            
+            if(expiredPassword(id))
+            	return(ResponseHelper.expiredPasswordResponse(id, uriInfo));
             Site_User currentUser = queryUserByID(id);
+	    Map<String, Object> extraObjs = new HashMap<String, Object>();
+	    extraObjs.put("user", currentUser);
             
-            // Return the token and user to the response
-            UserToken tu = new UserToken(token, currentUser);
+            Response rVal = ResponseHelper.getTokenResponse(200, null, id, uriInfo, extraObjs);
 
-            return Response.ok(200).entity(tu.toJson()).build();
+            return rVal;
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-            return(AuthHelper.expiredTokenResponse(id, uriInfo));
+            return(ResponseHelper.expiredTokenResponse(id, uriInfo));
         } catch (Exception e) {
         	e.printStackTrace();
             return Response.status(UNAUTHORIZED).build();
         }
     }
 
+    //TODO implement this method, probably move to a helper class..
+    private boolean expiredPassword(String uuid)
+    {
+    	return false;
+    }
     /**
      * Create a new user account with the given login and password combination.
      * example URL: daquery/ws/users/newuser?login=sample4&password=demouser
@@ -347,7 +304,7 @@ public class UserEndpoint extends AbstractEndpoint {
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
         	//TODO: This needs to be reported back to the UI so it can handle it
-            return(AuthHelper.expiredTokenResponse(login, uriInfo));
+            return(ResponseHelper.expiredTokenResponse(login, uriInfo));
         } catch (Exception e) {
 	        return Response.serverError().build();
 	    } finally {
@@ -395,7 +352,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        //step 2: check if account is disabled
 	        if (accountDisabled(user.getId())) {
-	            return(AuthHelper.accountDisabledResponse(user.getId(), uriInfo));	        	
+	            return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));	        	
 	        }
 	        
 	        //step 3: check if this is a password change
@@ -411,7 +368,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        //step 4: is the user's password expired?
 	        if (expiredPassword(user.getId())) {
-	            return(AuthHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
+	            return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
 	        }
 	        
 	        //if you passed all the checks then update the User
@@ -559,7 +516,7 @@ public class UserEndpoint extends AbstractEndpoint {
         // Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
     	logger.info("Trying to validate this admin token: " + token);
-    	KeyGenerator kg = new SimpleKeyGenerator();
+    	KeyGenerator kg = new KeyGenerator();
         Key key = kg.generateKey();
         try {
 	        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
@@ -588,13 +545,6 @@ public class UserEndpoint extends AbstractEndpoint {
 
      }
     
-    //TODO implement this method, probably move to a helper class..
-    //Do we want to pass in the Site_User object instead of the id?
-    private boolean expiredPassword(String id)
-    {
-                return false;
-    }
-
     //TODO implement this method, probably move to a helper class..
     //Do we want to pass in the Site_User object instead of the id?
     private boolean accountDisabled(String id)

@@ -5,6 +5,8 @@ import javax.persistence.*;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+
 import java.sql.Timestamp;
 import java.util.Objects;
 
