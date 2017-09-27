@@ -29,7 +29,6 @@ public class DaqueryEndpoint
 	}
     @GET
     @Path("/available-networks")
-
     @Produces(MediaType.APPLICATION_JSON)
     public Response availableNetworks() {
     	return(null);
