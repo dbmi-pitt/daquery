@@ -32,6 +32,7 @@ import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
         @NamedQuery(name = Site_User.FIND_ALL, query = "SELECT u FROM Site_User u ORDER BY u.realName DESC"),
         @NamedQuery(name = Site_User.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.username = :login AND u.password = :password"),
         @NamedQuery(name = Site_User.FIND_BY_ID_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.id = :id AND u.password = :password"),
+        @NamedQuery(name = Site_User.FIND_BY_EMAIL_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.email = :email AND u.password = :password"),
         @NamedQuery(name = Site_User.FIND_BY_ID, query = "SELECT u FROM Site_User u WHERE u.id = :id"),
         @NamedQuery(name = Site_User.COUNT_ALL, query = "SELECT COUNT(u) FROM Site_User u")
 })
@@ -49,6 +50,7 @@ public class Site_User extends DaqueryObject {
     public static final String COUNT_ALL = "Site_User.countAll";
     public static final String FIND_BY_LOGIN_PASSWORD = "Site_User.findByLoginAndPassword";
     public static final String FIND_BY_ID_PASSWORD = "Site_User.findByIDAndPassword";
+    public static final String FIND_BY_EMAIL_PASSWORD = "Site_User.findByEmailAndPassword";
     public static final String FIND_BY_ID = "Site_User.findByID";
 
     // assumes the current class is called MyLogger

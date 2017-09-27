@@ -468,11 +468,10 @@
          				<phase>generate-sources</phase>
          				<configuration>
          					<workingDirectory>${ui_project.Directory}</workingDirectory>
-         					<executable>ng</executable>
+         					<executable>npm</executable>
          					<arguments>
-         						<argument>build</argument>
-         						<argument>--prod</argument>
-         						<argument>--bh=/daquery/</argument>
+         						<argument>run</argument>
+         						<argument>prod</argument>
          					</arguments>
          				</configuration>
          				<goals>
@@ -580,7 +579,7 @@
          					<executable>cmd</executable>
          					<arguments>
          						<argument>/C</argument>
-         						<argument>ng build --prod --bh=/daquery/</argument>
+         						<argument>npm run prod</argument>
          					</arguments>
          				</configuration>
          				<goals>
