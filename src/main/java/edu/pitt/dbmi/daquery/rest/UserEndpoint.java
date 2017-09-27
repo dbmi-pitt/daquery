@@ -13,6 +13,7 @@ import java.util.ArrayList;
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.HashMap;
@@ -40,15 +41,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import com.google.gson.annotations.Expose;
-
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 
 
@@ -60,20 +58,19 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
-/**
- * @author Antonio Goncalves
- *         http://www.antoniogoncalves.org
- *         --
- */
+
 @Path("/users")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 @Transactional
 public class UserEndpoint extends AbstractEndpoint {
 
-    // ======================================
-    // =          Injection Points          =
-    // ======================================
+	public static void main(String [] args)
+	{
+		PropertiesHelper.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		UserEndpoint ue = new UserEndpoint();
+		ue.authenticateUser("d99cf756-9619-4a59-a36f-b9ca8f47b80d", "");
+	}
 
     @Context
     private UriInfo uriInfo;
@@ -140,6 +137,7 @@ public class UserEndpoint extends AbstractEndpoint {
     public Response authenticateUser(@QueryParam("id") String id,
                                      @QueryParam("password") String password) {
 
+    	
     	if (id.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
     	
@@ -165,12 +163,9 @@ public class UserEndpoint extends AbstractEndpoint {
             if (accountDisabled(id))
                 return(ResponseHelper.accountDisabledResponse(id, uriInfo));
             	
-            
-            if(expiredPassword(id))
-            	return(ResponseHelper.expiredPasswordResponse(id, uriInfo));
             Site_User currentUser = queryUserByID(id);
-	    Map<String, Object> extraObjs = new HashMap<String, Object>();
-	    extraObjs.put("user", currentUser);
+            Map<String, Object> extraObjs = new HashMap<String, Object>();
+            extraObjs.put("user", currentUser);
             
             Response rVal = ResponseHelper.getTokenResponse(200, null, id, uriInfo, extraObjs);
 
@@ -178,7 +173,13 @@ public class UserEndpoint extends AbstractEndpoint {
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-            return(ResponseHelper.expiredTokenResponse(id, uriInfo));
+            try{return(ResponseHelper.expiredTokenResponse(id, uriInfo));}
+            catch(Throwable t)
+            {
+            	String msg = "Unexpected error while generating an expired token response.";
+            	logger.log(Level.SEVERE, msg, t);
+            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            }
         } catch (Exception e) {
         	e.printStackTrace();
             return Response.status(UNAUTHORIZED).build();
@@ -297,7 +298,13 @@ public class UserEndpoint extends AbstractEndpoint {
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
         	//TODO: This needs to be reported back to the UI so it can handle it
-            return(ResponseHelper.expiredTokenResponse(login, uriInfo));
+            try{return(ResponseHelper.expiredTokenResponse(login, uriInfo));}
+            catch(Throwable t)
+            {
+            	String msg = "Unexpected error while generating an expired token response.";
+            	logger.log(Level.SEVERE, msg, t);
+            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            }
         } catch (Exception e) {
 	        return Response.serverError().build();
 	    }
