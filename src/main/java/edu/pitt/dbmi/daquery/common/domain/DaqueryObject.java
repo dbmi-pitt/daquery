@@ -2,6 +2,8 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 import java.lang.reflect.Type;
 
+import javax.json.JsonValue;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -11,6 +13,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 /**
  * This class provides common methods for all the daquery domain objects
@@ -34,6 +38,8 @@ public abstract class DaqueryObject {
                         return new JsonPrimitive(ISODateTimeFormat.dateTime().print(src));
                     }
                 }).create();
-		return gson.toJson(this);
+		return StringHelper.unEscapeQuotes(gson.toJson(this));
 	}
+	
+	
 }

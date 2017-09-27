@@ -148,7 +148,7 @@ public class AppSetup
 		    String uuidStr = uuid.toString();
 		    String pwd = PasswordUtils.randomPassword();
 			String hashedPwd = PasswordUtils.digestPassword(pwd);
-			String insertSQL = "insert into site_user (id, username, password, status) values ('"  + uuidStr + "', 'admin', '" + hashedPwd + "', " + UserStatus.PWD_EXPIRED.getValue() + ")";
+			String insertSQL = "insert into site_user (id, username, password, status) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', " + UserStatus.PWD_EXPIRED.getValue() + ")";
 			log.info("User inserted with: " + insertSQL);
 			stat.executeUpdate(insertSQL);
 			firstUserDetails = "Initial admin user created with password: " + pwd;

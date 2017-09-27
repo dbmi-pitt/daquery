@@ -29,6 +29,8 @@ public class JSONHelper
 		if(value instanceof Map)
 		{
 			Map vals = (Map) value;
+			if(vals.size() == 0)
+				return("{}");
 			Set keys = vals.keySet();
 	        JsonBuilderFactory jFactory = Json.createBuilderFactory(null);
 	        JsonObjectBuilder jsonData = jFactory.createObjectBuilder();
@@ -43,17 +45,20 @@ public class JSONHelper
 	        		else if(obj instanceof List)
 	        			jsonData.add((String)key, toJSON(obj));
 	        		else
-	        			jsonData.add((String) key, vals.get(key).toString());
+	        		{	String rTxt = obj.toString().trim();
+	        			jsonData.add((String) key, rTxt);
+	        		}
 				}
 				else
 					throw new DaqueryException("A non-String attribute name was found in a Map being converted to JSON");
 			}
-			return(jsonData.build().toString());
+			return(StringHelper.unEscapeQuotes(jsonData.build().toString()));
 		}
 		else if(value instanceof DaqueryObject)
 			return((DaqueryObject) value).toJson();
 		else if(value instanceof List)
 		{
+			if(((List) value).size() == 0) return("[]");
 			String rVal = "[";
 			String comma = "";
 			boolean first = false;

@@ -36,9 +36,14 @@ public class ResponseHelper {
         //add fifteen minutes to current time to create
         //a token that expires in 15 minutes (15 * 60 milliseconds)
         Date fifteenMinuteExpiry = new Date(t + (15 * 60000));
+        String issuer;
+        if(uriInfo == null)
+        	issuer = "local-context";
+        else
+        	issuer = uriInfo.getAbsolutePath().toString();
         String jwtToken = Jwts.builder()
                 .setSubject(uuid)
-                .setIssuer(uriInfo.getAbsolutePath().toString())
+                .setIssuer(issuer)
                 .setIssuedAt(new Date())
                 .setExpiration(fifteenMinuteExpiry)
                 .signWith(SignatureAlgorithm.HS512, key)
@@ -57,7 +62,7 @@ public class ResponseHelper {
      * @param uriInfo the URI information from the parent ws call
      * @return A ws Response object
      */
-    public static Response expiredPasswordResponse(String name, UriInfo uriInfo)
+    public static Response expiredPasswordResponse(String name, UriInfo uriInfo) throws DaqueryException
     {
     	return(getTokenResponse(401, 2, name, uriInfo, null));
     }
@@ -70,7 +75,7 @@ public class ResponseHelper {
      * @param uriInfo the URI information from the parent ws call
      * @return A ws Response object
      */
-    public static Response expiredTokenResponse(String name, UriInfo uriInfo)
+    public static Response expiredTokenResponse(String name, UriInfo uriInfo) throws DaqueryException
     {
     	return(getTokenResponse(401, 4, name, uriInfo, null));
     }
@@ -83,12 +88,12 @@ public class ResponseHelper {
      * @param uriInfo the URI information from the parent ws call
      * @return A ws Response object
      */
-    public static Response accountDisabledResponse(String name, UriInfo uriInfo)
+    public static Response accountDisabledResponse(String name, UriInfo uriInfo) throws DaqueryException
     {
     	return(getTokenResponse(401, 3, name, uriInfo, null));
     }
     
-    public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, Object> additionalReturnValues)
+    public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, Object> additionalReturnValues) throws DaqueryException
     {
         // Issue a token for the user
         String token = ResponseHelper.issueToken(name, uriInfo);
@@ -113,26 +118,44 @@ public class ResponseHelper {
      *                                 
      * @return A web service response object.
      */
-    public static Response getJsonResponse(int responseCode, Integer subCode, Object additionalResponseValues)
+    public static Response getJsonResponse(int responseCode, Integer subCode, HashMap<String, Object> additionalResponseValues) throws DaqueryException
     {
     	if(subCode == null && additionalResponseValues == null)
     	{
     		return Response.status(responseCode).build();
     	}
-    	
-        JsonBuilderFactory jFactory = Json.createBuilderFactory(null);
-        JsonObjectBuilder jsonData = jFactory.createObjectBuilder();
+
+    	HashMap<String, Object> jsonResponses = new HashMap<String, Object>();
 
         if(subCode != null)
-        	jsonData.add("subcode", Integer.toString(responseCode) + "." + subCode);
+        	jsonResponses.put("subcode", Integer.toString(responseCode) + "." + subCode);
         
         if(additionalResponseValues != null)
         {
-        	jsonData.
+        	jsonResponses.putAll(additionalResponseValues);
         }
-        return Response.status(responseCode).entity(jsonData.build().toString()).build();    	
-    }
         
+        return(getJsonResponseGen(responseCode, jsonResponses));
+   	
+    }
+
+    /**
+     * Given an HTTP status code and extra information for a json response,
+     * construct a web response object with a json payload.
+     * 
+     * @param responseCode The HTTP status code for this response.
+     * @param additionalResponseValues OPTIONAL: Any additional objects whose data will be included in the json payload.
+     *                                 valid object types are DaqueryObject, List<DaqueryObject> or Map<String, Object)
+     *                                 where the String/Object types on map are attribute name/data (toString, used)
+     *                                 
+     * @return A web service response object.
+     */    
+    public static Response getJsonResponseGen(int responseCode, Object additionalResponseValues) throws DaqueryException
+    {
+        String returnedJSON = JSONHelper.toJSON(additionalResponseValues);
+        
+        return Response.status(responseCode).entity(returnedJSON).build(); 
+    }
     public static Response getBasicResponse(int responseCode, String message)
     {
     	return(Response.status(responseCode).type(MediaType.TEXT_PLAIN).entity(message).build());
