@@ -43,7 +43,7 @@ import javax.ws.rs.core.UriInfo;
 
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
@@ -65,11 +65,18 @@ import io.jsonwebtoken.UnsupportedJwtException;
 @Transactional
 public class UserEndpoint extends AbstractEndpoint {
 
-	public static void main(String [] args)
+	public static void main(String [] args) throws Exception
 	{
-		PropertiesHelper.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		UserEndpoint ue = new UserEndpoint();
-		ue.authenticateUser("d99cf756-9619-4a59-a36f-b9ca8f47b80d", "");
+		Site_User user = new Site_User();
+		user.setEmail("me@email.com");
+		user.setId("id123");
+		user.setRealName("My Name");
+		Map<String, Object> extras = new HashMap<String, Object>();
+		extras.put("token", "abcdefghijklm");
+		extras.put("user", user);
+		String val = JSONHelper.toJSON(extras);
+		System.out.println(val);
+		System.out.println(user.toJson());
 	}
 
     @Context
@@ -152,6 +159,10 @@ public class UserEndpoint extends AbstractEndpoint {
     	Site_User user = null;
     	try {
 
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piUser = new ParameterItem("id", email);
+    		pList.add(piUser);
+	        user = executeQueryReturnSingle(Site_User.FIND_BY_ID, pList, logger);
             logger.info("#### email : " + email);
             
             // Authenticate the user using the credentials provided
@@ -161,11 +172,8 @@ public class UserEndpoint extends AbstractEndpoint {
                 return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
             
             if (accountDisabled(user.getId()))
-                return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
-            	
-            
-            if(expiredPassword(user.getId()))
-            	return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
+                return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));            
+      	
             Site_User currentUser = queryUserByID(user.getId());
             Map<String, Object> extraObjs = new HashMap<String, Object>();
             extraObjs.put("user", currentUser);
