@@ -155,11 +155,13 @@ public class Site_User extends DaqueryObject {
     // ======================================
 
     public String getId() {
-        return id;
+    	if(id == null) return(null);
+        return id.trim();
     }
 
     public void setId(String id) {
-        this.id = id;
+    	if(id == null) this.id = null;
+        this.id = id.trim();
     }
 
 	public String getRealName() {

@@ -26,6 +26,7 @@ CREATE TABLE "APP"."SITE"
    TYPE varchar(100) NOT NULL
 )
 ;
+
 CREATE TABLE "APP"."INBOUND_QUERY"
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
@@ -34,7 +35,7 @@ CREATE TABLE "APP"."INBOUND_QUERY"
    QUERYTYPE varchar(50),
    NETWORK_ID bigint,
    SITE_ID bigint,
-   USER_ID char(16),
+   USER_ID varchar(16),
    LASTUPDATE timestamp,
    STATUS varchar(500),
    ORACLEQUERY varchar(500),
@@ -48,28 +49,13 @@ CREATE TABLE "APP"."OUTBOUND_QUERY"
    QUERYTYPE varchar(50),
    NETWORK_ID bigint,
    SITE_ID bigint,
-   USER_ID char(16),
+   USER_ID varchar(16),
    LASTUPDATE timestamp,
    STATUS varchar(500),
    ORACLEQUERY varchar(500),
    SQLQUERY varchar(500)
 );
-create table "APP"."PROPERTY" 
-(
-	id int, name varchar(256), 
-	value varchar(256)
-);
-CREATE TABLE "APP"."SITE_USER" 
-(
-	ID char(100) NOT NULL,
-	USERNAME varchar(50),
-	EMAIL varchar(100),
-	PASSWORD varchar(100),
-	REAL_NAME varchar(100),
-	STATUS int
-);
-CREATE TABLE "APP"."USER_ROLE" 
-(
-	USER_ID char(16) NOT NULL, 
-	ROLE_ID bigint NOT NULL
-);
+
+create table property (id int, name varchar(256), value varchar(256));
+CREATE TABLE SITE_USER (ID varchar(100) NOT NULL,USERNAME varchar(50),EMAIL varchar(100),PASSWORD varchar(100),REAL_NAME varchar(100),STATUS int);
+CREATE TABLE USER_ROLE (USER_ID varchar(16) NOT NULL, ROLE_ID bigint NOT NULL);
