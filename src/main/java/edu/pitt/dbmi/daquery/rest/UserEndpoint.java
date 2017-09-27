@@ -134,11 +134,10 @@ public class UserEndpoint extends AbstractEndpoint {
     @Path("/login")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response authenticateUser(@QueryParam("id") String id,
+    public Response authenticateUser(@QueryParam("email") String email,
                                      @QueryParam("password") String password) {
 
-    	
-    	if (id.isEmpty() || password.isEmpty()) 
+    	if (email.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
     	
     	//TODO: Reject any communication coming across anything other than HTTPS:
@@ -150,30 +149,34 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	}
     	}
     	
+    	Site_User user = null;
     	try {
 
-            logger.info("#### uuid/password : " + id);
-
-            // Authenticate the user using the credentials provided
-            authenticate(id, password);
-
-            if(expiredPassword(id))
-                return(ResponseHelper.expiredPasswordResponse(id, uriInfo));
+            logger.info("#### email : " + email);
             
-            if (accountDisabled(id))
-                return(ResponseHelper.accountDisabledResponse(id, uriInfo));
+            // Authenticate the user using the credentials provided
+            user = authenticate(email, password);
+
+            if(expiredPassword(user.getId()))
+                return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
+            
+            if (accountDisabled(user.getId()))
+                return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
             	
-            Site_User currentUser = queryUserByID(id);
+            
+            if(expiredPassword(user.getId()))
+            	return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
+            Site_User currentUser = queryUserByID(user.getId());
             Map<String, Object> extraObjs = new HashMap<String, Object>();
             extraObjs.put("user", currentUser);
             
-            Response rVal = ResponseHelper.getTokenResponse(200, null, id, uriInfo, extraObjs);
+            Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), uriInfo, extraObjs);
 
             return rVal;
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-            try{return(ResponseHelper.expiredTokenResponse(id, uriInfo));}
+            try{return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));}
             catch(Throwable t)
             {
             	String msg = "Unexpected error while generating an expired token response.";
@@ -211,9 +214,11 @@ public class UserEndpoint extends AbstractEndpoint {
     	String loggermsg = "login=" + login + " password=" + password;
         logger.info("Trying to create user with: " + loggermsg);
         
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
         try {
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
-	        EntityManager em = emf.createEntityManager();
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
 	
 	        em.getTransaction().begin();
 	
@@ -222,7 +227,6 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	        em.getTransaction().commit();
 	
-	        em.close();
 	       
 	        logger.info("Done trying to create user: " + newUser.toString());
 	        
@@ -231,6 +235,11 @@ public class UserEndpoint extends AbstractEndpoint {
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
         } catch (Exception e) {
 	        return Response.serverError().build();
+	    } finally {
+	    	if (em != null) {
+	    		em.close();
+	    	}
+	    	
 	    }
     }
 
@@ -250,6 +259,9 @@ public class UserEndpoint extends AbstractEndpoint {
 
         Principal principal = securityContext.getUserPrincipal();
         String username = principal.getName();
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+        
         try {
         	//extract the token sent by the central server
             // Get the HTTP Authorization header from the request
@@ -276,8 +288,8 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	String loggermsg = "login=" + login + " password=" + password;
 	        logger.info("Trying to create ADMIN user with: " + loggermsg);
         
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
-	        EntityManager em = emf.createEntityManager();
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
 	
 	        em.getTransaction().begin();
 	
@@ -288,8 +300,6 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	        em.getTransaction().commit();
 	
-	        em.close();
-	       
 	        logger.info("Done trying to create admin user: " + newUser.toString());
 	        
 	        //TODO: build some JSON into the response.  Return the new UUID
@@ -307,6 +317,10 @@ public class UserEndpoint extends AbstractEndpoint {
             }
         } catch (Exception e) {
 	        return Response.serverError().build();
+	    } finally {
+	    	if (em != null) {
+	    		em.close();
+	    	}
 	    }
     }
     
@@ -335,6 +349,9 @@ public class UserEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateUser(Site_User updatedUser) {
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+
     	try {
     		
 	        Site_User user = queryUserByID(updatedUser.getId());	
@@ -373,17 +390,15 @@ public class UserEndpoint extends AbstractEndpoint {
 	     
 	        
 	        //persist changes
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
-	        EntityManager em = emf.createEntityManager();
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
 	
 	        em.getTransaction().begin();
 	
 	        em.merge(user);
 	        
 	        em.getTransaction().commit();
-	
-	        em.close();
-	        
+
 	        return Response.ok(200).build();
 	        
     	} catch (Exception e) {
@@ -391,6 +406,11 @@ public class UserEndpoint extends AbstractEndpoint {
     		e.printStackTrace();
     		return Response.status(UNAUTHORIZED).build();	        		
 
+    	} finally {
+    		if (em != null) {
+    			em.close();
+    		}
+    		
     	}
     	
     }
@@ -465,21 +485,22 @@ public class UserEndpoint extends AbstractEndpoint {
      * @throws SecurityException on authentication failure
      * NoResultException if no user is found
      */
-    private void authenticate(String id, String password) throws SecurityException, PersistenceException, Exception {
-    	logger.info("searching for #### uuid/password : " + id + "/" + password);
+    private Site_User authenticate(String email, String password) throws SecurityException, PersistenceException, Exception {
+    	logger.info("searching for #### email/password : " + email + "/" + password);
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piUser = new ParameterItem("id", id);
+    		ParameterItem piUser = new ParameterItem("email", email);
     		pList.add(piUser);
     		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
     		pList.add(piPassword);
 	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_ID_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
-	    		logger.info("Invalid user/password.  Tried to login using: " + id + " / " + password);
-	            throw new SecurityException("Invalid user/password");
+	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / " + password);
+	            throw new SecurityException("Invalid email/password");
 	        }
-	    
+	        
+	        return user;
     	} catch (NoResultException e) {
     		logger.info("Invalid user/password");
     		throw new SecurityException("Invalid user/password");

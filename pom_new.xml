@@ -38,7 +38,6 @@
         <jackson.version>2.5.2</jackson.version>
         <gson.version>2.6.2</gson.version>
         <jadira.version>3.1.0.GA</jadira.version>
-        <c3p0.version>0.9.1.2</c3p0.version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <ui_project.Directory>../daquery/ui</ui_project.Directory>
@@ -250,17 +249,6 @@
 	    </dependency>
 	    
 	    <dependency>
-			<groupId>c3p0</groupId>
-			<artifactId>c3p0</artifactId>
-			<version>${c3p0.version}</version> 
-		</dependency> 
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-c3p0</artifactId>
-			<version>${hibernate.version}</version> 
-		</dependency>
-	    
-	    <dependency>
 		   	<groupId>edu.pitt.dbmi.daquery</groupId>
 			<artifactId>daquery-common</artifactId>
 			<version>1.0</version>
@@ -468,26 +456,27 @@
          				<phase>generate-sources</phase>
          				<configuration>
          					<workingDirectory>${ui_project.Directory}</workingDirectory>
-         					<executable>npm</executable>
+         					<executable>ng</executable>
          					<arguments>
-         						<argument>run</argument>
-         						<argument>prod</argument>
+         						<argument>build</argument>
+         						<argument>--prod</argument>
+         						<argument>--bh=/daquery/</argument>
          					</arguments>
          				</configuration>
          				<goals>
          					<goal>exec</goal>
          				</goals>
-                    </execution>
+         			</execution>
          			<execution>
          				<id>cp-builded-ui</id>
          				<phase>generate-sources</phase>
          				<configuration>
          					<workingDirectory>${ui_project.Directory}</workingDirectory>
-                            <executable>bash</executable>
-                            <arguments>
-                                <argument>-c</argument>
-                                <argument>cp dist/* ${project.basedir}/src/main/webapp/</argument>
-                            </arguments>
+         					<executable>cp</executable>
+         					<arguments>
+         						<argument>./dist/*.*</argument>
+         						<argument>${project.basedir}/src/main/webapp/</argument>
+         					</arguments>
          				</configuration>
          				<goals>
          					<goal>exec</goal>
@@ -579,7 +568,7 @@
          					<executable>cmd</executable>
          					<arguments>
          						<argument>/C</argument>
-         						<argument>npm run prod</argument>
+         						<argument>ng build --prod --bh=/daquery/</argument>
          					</arguments>
          				</configuration>
          				<goals>
