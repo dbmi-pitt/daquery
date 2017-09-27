@@ -105,9 +105,7 @@ public class AbstractEndpoint {
         }
     	finally {
     		if (em != null) {
-    			//TODO: solve this issue where closing the derby connection throws:
-    			//org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role
-    			//em.close();
+    			em.close();
     		}
     		
     	}
@@ -152,9 +150,7 @@ public class AbstractEndpoint {
         }
     	finally {
     		if (em != null) {
-    			//TODO: solve this issue where closing the derby connection throws:
-    			//org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role
-    			//em.close();
+    			em.close();
     		}
     	}
             

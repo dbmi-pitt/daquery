@@ -253,9 +253,11 @@ public class UserEndpoint extends AbstractEndpoint {
     	String loggermsg = "login=" + login + " password=" + password;
         logger.info("Trying to create user with: " + loggermsg);
         
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
         try {
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
-	        EntityManager em = emf.createEntityManager();
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
 	
 	        em.getTransaction().begin();
 	
@@ -264,7 +266,6 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	        em.getTransaction().commit();
 	
-	        em.close();
 	       
 	        logger.info("Done trying to create user: " + newUser.toString());
 	        
@@ -273,6 +274,11 @@ public class UserEndpoint extends AbstractEndpoint {
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
         } catch (Exception e) {
 	        return Response.serverError().build();
+	    } finally {
+	    	if (em != null) {
+	    		em.close();
+	    	}
+	    	
 	    }
     }
 
@@ -292,6 +298,9 @@ public class UserEndpoint extends AbstractEndpoint {
 
         Principal principal = securityContext.getUserPrincipal();
         String username = principal.getName();
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+        
         try {
         	//extract the token sent by the central server
             // Get the HTTP Authorization header from the request
@@ -318,8 +327,8 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	String loggermsg = "login=" + login + " password=" + password;
 	        logger.info("Trying to create ADMIN user with: " + loggermsg);
         
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
-	        EntityManager em = emf.createEntityManager();
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
 	
 	        em.getTransaction().begin();
 	
@@ -330,8 +339,6 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	        em.getTransaction().commit();
 	
-	        em.close();
-	       
 	        logger.info("Done trying to create admin user: " + newUser.toString());
 	        
 	        //TODO: build some JSON into the response.  Return the new UUID
@@ -343,6 +350,10 @@ public class UserEndpoint extends AbstractEndpoint {
             return(AuthHelper.expiredTokenResponse(login, uriInfo));
         } catch (Exception e) {
 	        return Response.serverError().build();
+	    } finally {
+	    	if (em != null) {
+	    		em.close();
+	    	}
 	    }
     }
     
@@ -371,6 +382,9 @@ public class UserEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateUser(Site_User updatedUser) {
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+
     	try {
     		
 	        Site_User user = queryUserByID(updatedUser.getId());	
@@ -409,17 +423,15 @@ public class UserEndpoint extends AbstractEndpoint {
 	     
 	        
 	        //persist changes
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
-	        EntityManager em = emf.createEntityManager();
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
 	
 	        em.getTransaction().begin();
 	
 	        em.merge(user);
 	        
 	        em.getTransaction().commit();
-	
-	        em.close();
-	        
+
 	        return Response.ok(200).build();
 	        
     	} catch (Exception e) {
@@ -427,6 +439,11 @@ public class UserEndpoint extends AbstractEndpoint {
     		e.printStackTrace();
     		return Response.status(UNAUTHORIZED).build();	        		
 
+    	} finally {
+    		if (em != null) {
+    			em.close();
+    		}
+    		
     	}
     	
     }
