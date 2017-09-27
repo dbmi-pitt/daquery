@@ -170,8 +170,8 @@ public class UserEndpoint extends AbstractEndpoint {
             if(expiredPassword(user.getId()))
             	return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
             Site_User currentUser = queryUserByID(user.getId());
-	    Map<String, Object> extraObjs = new HashMap<String, Object>();
-	    extraObjs.put("user", currentUser);
+            Map<String, Object> extraObjs = new HashMap<String, Object>();
+            extraObjs.put("user", currentUser);
             
             Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), uriInfo, extraObjs);
 

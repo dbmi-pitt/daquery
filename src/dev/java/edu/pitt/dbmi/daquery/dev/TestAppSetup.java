@@ -7,7 +7,7 @@ public class TestAppSetup
 {
 	public static void main(String [] args)
 	{
-		PropertiesHelper.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		PropertiesHelper.setDevHomeDir("C:\\Users\\del20\\Documents\\GitHub\\daquery-ws");
 		AppSetup.initialize();
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
