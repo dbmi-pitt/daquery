@@ -113,7 +113,7 @@ public class Site_User extends DaqueryObject {
 	        CascadeType.MERGE
 	})
 	@JoinTable(
-		name="USERS_ROLES"
+		name="USER_ROLE"
 		, joinColumns={
 			@JoinColumn(name="USER_ID", nullable=false)
 			}

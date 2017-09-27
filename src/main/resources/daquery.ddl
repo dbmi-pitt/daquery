@@ -56,7 +56,6 @@ CREATE TABLE "APP"."OUTBOUND_QUERY"
    SQLQUERY varchar(500)
 );
 
-
 create table property (id int, name varchar(256), value varchar(256));
 CREATE TABLE SITE_USER (ID varchar(100) NOT NULL,USERNAME varchar(50),EMAIL varchar(100),PASSWORD varchar(100),REAL_NAME varchar(100),STATUS int);
 CREATE TABLE USER_ROLE (USER_ID varchar(16) NOT NULL, ROLE_ID bigint NOT NULL);

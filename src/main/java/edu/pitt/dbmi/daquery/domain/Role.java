@@ -14,7 +14,7 @@ import java.util.Objects;
  * 
  */
 @Entity
-@Table(name="ROLES")
+@Table(name="ROLE")
 @NamedQuery(name="Role.findAll", query="SELECT r FROM Role r")
 public class Role extends DaqueryObject implements Serializable {
 	private static final long serialVersionUID = 1L;
