@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -110,7 +111,8 @@ public class Site_User extends DaqueryObject {
     //we want Site_User to manage its user role updates (we could manage it separately)
 	//bi-directional many-to-many association to Role
     @Expose
-	@ManyToMany(cascade = { 
+	@ManyToMany(fetch = FetchType.EAGER,
+			cascade = { 			
 	        CascadeType.PERSIST, 
 	        CascadeType.MERGE
 	})
