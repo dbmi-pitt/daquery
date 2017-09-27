@@ -467,7 +467,7 @@ public class UserEndpoint extends AbstractEndpoint {
     		pList.add(piUser);
     		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
     		pList.add(piPassword);
-	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_ID_PASSWORD, pList, logger);
+	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_EMAIL_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
 	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / " + password);
