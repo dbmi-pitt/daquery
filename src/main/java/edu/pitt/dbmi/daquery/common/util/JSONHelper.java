@@ -4,10 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.json.Json;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObjectBuilder;
-
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
 public class JSONHelper
@@ -66,10 +62,10 @@ public class JSONHelper
 			if(((List) value).size() == 0) return("[]");
 			String rVal = "[";
 			String comma = "";
-			boolean first = false;
+			boolean first = true;
 			for(Object obj : (List) value)
 			{
-				rVal = rVal + comma + "{" + toJSON(obj) + "}";
+				rVal = rVal + comma + toJSON(obj);
 				if(first)
 				{
 					first = false;
