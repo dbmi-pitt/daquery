@@ -7,7 +7,7 @@ public class RunAppSetup
 {
 	public static void main(String [] args)
 	{
-		PropertiesHelper.setDevHomeDir("/home/devuser/daquery-data");
+		PropertiesHelper.setDevHomeDir("/Users/bill/daquery-data");
 		AppSetup.initialize();
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
