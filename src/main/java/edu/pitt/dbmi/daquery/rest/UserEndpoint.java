@@ -72,11 +72,14 @@ public class UserEndpoint extends AbstractEndpoint {
 		user.setId("id123");
 		user.setRealName("My Name");
 		Map<String, Object> extras = new HashMap<String, Object>();
-		extras.put("token", "abcdefghijklm");
+		//extras.put("token", "abcdefghijklm");
 		extras.put("user", user);
-		String val = JSONHelper.toJSON(extras);
-		System.out.println(val);
-		System.out.println(user.toJson());
+		ResponseHelper.getTokenResponse(200, null, user.getId(), null, extras);
+		//String val = JSONHelper.toJSON(extras);
+		//System.out.println(val);
+		//System.out.println(user.toJson());
+		
+		
 	}
 
     @Context
@@ -542,7 +545,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        logger.info(claims.toString());
 	        
 	        //TODO: add code to validate the token
-	        
+	        //      this will make a call to the Central server to authenticate
 	        return true;
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
