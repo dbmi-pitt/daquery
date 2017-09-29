@@ -158,11 +158,6 @@ public class UserEndpoint extends AbstractEndpoint {
     	
     	Site_User user = null;
     	try {
-
-    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piUser = new ParameterItem("id", email);
-    		pList.add(piUser);
-	        user = executeQueryReturnSingle(Site_User.FIND_BY_ID, pList, logger);
             logger.info("#### email : " + email);
             
             // Authenticate the user using the credentials provided
