@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.pitt.daquery.central.util;
+package edu.pitt.dbmi.daquery.central.util;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
