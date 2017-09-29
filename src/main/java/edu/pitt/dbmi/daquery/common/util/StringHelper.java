@@ -1,5 +1,7 @@
 package edu.pitt.dbmi.daquery.common.util;
 
+import java.io.File;
+
 public class StringHelper
 {
 	public static void main(String [] args)
@@ -20,5 +22,16 @@ public class StringHelper
 			return(null);
 		String rVal = val.replace("\\\"", "\"");
 		return(rVal);
+	}
+	
+	public static String ensureTrailingSlash(String path)
+	{
+		if(path == null) return(null);
+		String tPath = path.trim();
+		if(! tPath.endsWith(File.separator))
+		{
+			tPath = tPath + File.separator;
+		}
+		return(tPath);
 	}
 }

@@ -24,6 +24,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
  */
 public class ResponseHelper {
 	private static Logger logger = Logger.getLogger(ResponseHelper.class.getName());
+	
     /**
      * Create a JWT based on a user's uuid.  The JWT is set to expire in 15 minutes.
      * @param uuid- a user's uuid

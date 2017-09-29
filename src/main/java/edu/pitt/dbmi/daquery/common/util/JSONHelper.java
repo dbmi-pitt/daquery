@@ -42,7 +42,7 @@ public class JSONHelper
 	        		else if(obj instanceof List)
 	        			rJson = rJson + "\"" + comma + (String) key + "\":" + toJSON(obj);
 	        		else
-	        			rJson = comma + rJson + comma + "\"" + (String) key + "\":\"" + obj.toString() + "\"";
+	        			rJson = rJson + comma + "\"" + (String) key + "\":" + jsonValue(obj);
 	        		if(first)
 	        		{
 	        			first = false;
@@ -78,5 +78,17 @@ public class JSONHelper
 		}
 		else
 			throw new DaqueryException("JSON conversion is only supported for types Map<String, Object>, DaqueryObject and List<DaqueryObject>.  An object of type " + value.getClass().getSimpleName() +  " found"); 
-	} 
+	}
+	
+	private static String jsonValue(Object obj)
+	{
+		if(obj instanceof Integer || obj instanceof Double || obj instanceof Float || obj instanceof Long)
+		{
+			return(obj.toString());
+		}
+		else
+		{
+			return("\"" + obj.toString() + "\"");
+		}
+	}
 }

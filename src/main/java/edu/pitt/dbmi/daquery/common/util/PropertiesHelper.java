@@ -95,5 +95,16 @@ public class PropertiesHelper
 		return retValue;
 		
 	}
+	
+	public static String getCentralServerURL()
+	{
+		String propertyName = ".central.server.url";
+		if(isDebugMode())
+			propertyName = "dev" + propertyName;
+		else
+			propertyName = "prod" + propertyName;
+		
+		return(ApplicationProperties.getProps().getProperty(propertyName));
+	}
 
 }
