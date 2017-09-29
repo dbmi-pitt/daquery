@@ -65,13 +65,14 @@ public class CentralService {
 				additionalVals.put("new-site-key", newKey);
 				additionalVals.put("site-id", DBHelper.getSiteId(site));
 			}
+			return(ResponseHelper.getTokenResponse(200, null, site, uriInfo, additionalVals));	
 		}
-		catch(DaqueryCentralException dce)
+		catch(Throwable dce)
 		{			
 			return(ResponseHelper.getBasicResponse(500, dce.getMessage()));
 		}
 		
-		return(ResponseHelper.getTokenResponse(200, null, site, uriInfo, additionalVals));	
+		
 	}
 	
 	@GET
@@ -83,13 +84,13 @@ public class CentralService {
 		try
 		{
 			List<NetworkInfo> networks = DBHelper.getAllowedNetworks(siteId);
-			return ResponseHelper.getJsonResponse(200, null, networks);
+			return ResponseHelper.getJsonResponseGen(200, networks);
 		}
 		catch(Throwable t)
 		{
 			String msg = "An error occurred while looking up allowed networks for site with id:" + siteId;
 			log.log(Level.SEVERE, msg, t);
-			ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information.");
+			return(ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
 		}
 	}
 }
