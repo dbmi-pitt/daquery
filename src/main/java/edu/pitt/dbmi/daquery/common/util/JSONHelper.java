@@ -43,6 +43,7 @@ public class JSONHelper
 	        			rJson = rJson + "\"" + comma + (String) key + "\":" + toJSON(obj);
 	        		else
 	        			rJson = rJson + comma + "\"" + (String) key + "\":" + jsonValue(obj);
+
 	        		if(first)
 	        		{
 	        			first = false;
