@@ -1,0 +1,1 @@
+UPDATE SITE_USER SET email='admin@pitt.edu', password='pmWkWSBCL51Bfkhn79xPuKBKHz//H6B+mY6G9/eieuM=' where username='admin';

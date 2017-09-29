@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.pitt.dbmi</groupId>
-    <artifactId>daquery-ws</artifactId>
+    <artifactId>daquery</artifactId>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>Distributed Data Query Application</name>
@@ -274,7 +274,7 @@
 		      <activeByDefault>true</activeByDefault>
 		    </activation>		 
 		    <build>
-			    <finalName>daquery-ws</finalName>
+			    <finalName>daquery</finalName>
 		        <plugins>
 		        <plugin>
 		           <artifactId>maven-antrun-plugin</artifactId>
@@ -334,7 +334,7 @@
 	    <profile>
 		    <id>test</id>
 		    <build>
-			    <finalName>daquery-ws</finalName>
+			    <finalName>daquery</finalName>
 		        <plugins>
 		        <plugin>
 		           <artifactId>maven-antrun-plugin</artifactId>
@@ -608,7 +608,7 @@
 	  </profile>
 	</profiles>
     <build>
-	    <finalName>daquery-ws</finalName>
+	    <finalName>daquery</finalName>
         <plugins>
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
