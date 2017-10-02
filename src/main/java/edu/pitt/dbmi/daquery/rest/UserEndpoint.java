@@ -349,15 +349,16 @@ public class UserEndpoint extends AbstractEndpoint {
     
     @PUT
     @Secured
+    @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(Site_User updatedUser) {
+    public Response updateUser(@PathParam("id") String id, Site_User updatedUser) {
         EntityManagerFactory emf = null;
         EntityManager em = null;
 
     	try {
     		
-	        Site_User user = queryUserByID(updatedUser.getId());	
+	        Site_User user = queryUserByID(id);	
 	        
 	        //step 1: make sure this is a valid user id
 	        if (user == null)
@@ -371,9 +372,13 @@ public class UserEndpoint extends AbstractEndpoint {
 	        //step 3: check if this is a password change
 	        if (updatedUser.getOldPassword() != null && updatedUser.getNewPassword() != null) {
 	        	try {
-	        		authenticate(user.getId(), updatedUser.getOldPassword());
-	        		//everything is ok, so change the password
-	        		user.setPassword(updatedUser.getNewPassword());
+	        		if(user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getOldPassword()))) {
+		        		//everything is ok, so change the password
+		        		user.setPassword(updatedUser.getNewPassword());
+	        		} else {
+	        			logger.info("Invalid password");
+	            		throw new SecurityException("Invalid password");
+	        		}
 	        	} catch (SecurityException se) {
 		    		return Response.status(UNAUTHORIZED).build();	        		
 	        	}
@@ -386,10 +391,15 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        //if you passed all the checks then update the User
 	        
-	        user.setRealName(updatedUser.getRealName());
-	        user.setRoles(updatedUser.getRoles());
-	        user.setStatus(updatedUser.getStatus());
-	        user.setEmail(updatedUser.getEmail());
+	        
+	        if(updatedUser.getRealName() != null)
+	        	user.setRealName(updatedUser.getRealName());
+	        if(updatedUser.getRoles() != null)
+	        	user.setRoles(updatedUser.getRoles());
+	        if(updatedUser.getStatus() != -1)
+	        	user.setStatus(updatedUser.getStatus());
+	        if(updatedUser.getEmail() != null)
+	        	user.setEmail(updatedUser.getEmail());
 	     
 	        
 	        //persist changes
@@ -483,7 +493,7 @@ public class UserEndpoint extends AbstractEndpoint {
     /**
      * A back-end call that uses the id/password combination to find the user's
      * account in the database.  Throws an error if the account cannot be verified.
-     * @param id- the id for the account.  This value must not be empty.
+     * @param email- the email for the account.  This value must not be empty.
      * @param password- the plaintext password for the account.  This value must not be empty.
      * @throws SecurityException on authentication failure
      * NoResultException if no user is found
@@ -492,8 +502,8 @@ public class UserEndpoint extends AbstractEndpoint {
     	logger.info("searching for #### email/password : " + email + "/" + password);
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piUser = new ParameterItem("email", email);
-    		pList.add(piUser);
+			ParameterItem piEmail = new ParameterItem("email", email);
+			pList.add(piEmail);
     		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
     		pList.add(piPassword);
 	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_EMAIL_PASSWORD, pList, logger);
@@ -514,8 +524,7 @@ public class UserEndpoint extends AbstractEndpoint {
         }
             
     }
-
-    
+  
     /**
      * Validate a JWT token used to create the initial admin account for a site
      * @param JWT token with sitename and sitekey in the payload
