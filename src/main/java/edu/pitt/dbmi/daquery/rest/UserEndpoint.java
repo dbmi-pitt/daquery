@@ -13,6 +13,7 @@ import java.util.ArrayList;
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import javax.ws.rs.core.UriInfo;
 
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
@@ -56,20 +58,26 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
-/**
- * @author Antonio Goncalves
- *         http://www.antoniogoncalves.org
- *         --
- */
+
 @Path("/users")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 @Transactional
 public class UserEndpoint extends AbstractEndpoint {
 
-    // ======================================
-    // =          Injection Points          =
-    // ======================================
+	public static void main(String [] args) throws Exception
+	{
+		Site_User user = new Site_User();
+		user.setEmail("me@email.com");
+		user.setId("id123");
+		user.setRealName("My Name");
+		Map<String, Object> extras = new HashMap<String, Object>();
+		extras.put("token", "abcdefghijklm");
+		extras.put("user", user);
+		String val = JSONHelper.toJSON(extras);
+		System.out.println(val);
+		System.out.println(user.toJson());
+	}
 
     @Context
     private UriInfo uriInfo;
@@ -152,7 +160,6 @@ public class UserEndpoint extends AbstractEndpoint {
     	
     	Site_User user = null;
     	try {
-
             logger.info("#### email : " + email);
             
             // Authenticate the user using the credentials provided
@@ -184,6 +191,13 @@ public class UserEndpoint extends AbstractEndpoint {
         		logger.info(e.toString());
                 return Response.status(INTERNAL_SERVER_ERROR).build();
         	}
+            try{return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));}
+            catch(Throwable t)
+            {
+            	String msg = "Unexpected error while generating an expired token response.";
+            	logger.log(Level.SEVERE, msg, t);
+            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            }
         } catch (Exception e) {
         	e.printStackTrace();
             return Response.status(UNAUTHORIZED).build();
@@ -314,6 +328,14 @@ public class UserEndpoint extends AbstractEndpoint {
         		logger.info(e.toString());
                 return Response.status(INTERNAL_SERVER_ERROR).build();
         	}
+        	//TODO: This needs to be reported back to the UI so it can handle it
+            try{return(ResponseHelper.expiredTokenResponse(login, uriInfo));}
+            catch(Throwable t)
+            {
+            	String msg = "Unexpected error while generating an expired token response.";
+            	logger.log(Level.SEVERE, msg, t);
+            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            }
         } catch (Exception e) {
 	        return Response.serverError().build();
 	    } finally {
@@ -373,6 +395,8 @@ public class UserEndpoint extends AbstractEndpoint {
             String username = principal.getName();
 
 	        Site_User user = queryUserByID(updatedUser.getId());	
+
+	        Site_User user = queryUserByID(id);	
 	        
 	        //step 1: make sure this is a valid user id
 	        if (user == null)
@@ -386,9 +410,13 @@ public class UserEndpoint extends AbstractEndpoint {
 	        //step 3: check if this is a password change
 	        if (updatedUser.getOldPassword() != null && updatedUser.getNewPassword() != null) {
 	        	try {
-	        		authenticate(user.getId(), updatedUser.getOldPassword());
-	        		//everything is ok, so change the password
-	        		user.setPassword(updatedUser.getNewPassword());
+	        		if(user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getOldPassword()))) {
+		        		//everything is ok, so change the password
+		        		user.setPassword(updatedUser.getNewPassword());
+	        		} else {
+	        			logger.info("Invalid password");
+	            		throw new SecurityException("Invalid password");
+	        		}
 	        	} catch (SecurityException se) {
 		    		return Response.status(UNAUTHORIZED).build();	        		
 	        	}
@@ -401,10 +429,15 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        //if you passed all the checks then update the User
 	        
-	        user.setRealName(updatedUser.getRealName());
-	        user.setRoles(updatedUser.getRoles());
-	        user.setStatus(updatedUser.getStatus());
-	        user.setEmail(updatedUser.getEmail());
+	        
+	        if(updatedUser.getRealName() != null)
+	        	user.setRealName(updatedUser.getRealName());
+	        if(updatedUser.getRoles() != null)
+	        	user.setRoles(updatedUser.getRoles());
+	        if(updatedUser.getStatus() != -1)
+	        	user.setStatus(updatedUser.getStatus());
+	        if(updatedUser.getEmail() != null)
+	        	user.setEmail(updatedUser.getEmail());
 	     
 	        
 	        //persist changes
@@ -502,7 +535,7 @@ public class UserEndpoint extends AbstractEndpoint {
     /**
      * A back-end call that uses the id/password combination to find the user's
      * account in the database.  Throws an error if the account cannot be verified.
-     * @param id- the id for the account.  This value must not be empty.
+     * @param email- the email for the account.  This value must not be empty.
      * @param password- the plaintext password for the account.  This value must not be empty.
      * @throws SecurityException on authentication failure
      * NoResultException if no user is found
@@ -511,8 +544,8 @@ public class UserEndpoint extends AbstractEndpoint {
     	logger.info("searching for #### email/password : " + email + "/" + password);
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piUser = new ParameterItem("email", email);
-    		pList.add(piUser);
+			ParameterItem piEmail = new ParameterItem("email", email);
+			pList.add(piEmail);
     		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
     		pList.add(piPassword);
 	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_EMAIL_PASSWORD, pList, logger);
@@ -539,7 +572,7 @@ public class UserEndpoint extends AbstractEndpoint {
     {
     	return false;
     }
-    
+
     /**
      * Validate a JWT token used to create the initial admin account for a site
      * @param JWT token with sitename and sitekey in the payload
