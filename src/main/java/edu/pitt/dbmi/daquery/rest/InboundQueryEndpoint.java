@@ -5,7 +5,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -79,7 +78,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database.
-     * example URL: daquery/ws/inboundqueries/
+     * example URL: daquery-ws/ws/inboundqueries/
      * @return a JSON array containing all the inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -119,7 +118,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database.
-     * example URL: daquery/ws/inboundqueries/1
+     * example URL: daquery-ws/ws/inboundqueries/1
      * @return a JSON object containing single inbound query
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -157,7 +156,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database for a given status.
-     * example URL: daquery/ws/inboundqueries/status/pending
+     * example URL: daquery-ws/ws/inboundqueries/status/pending
      * @return a JSON object containing a list of matching inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -195,7 +194,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database sent from a given site.
-     * example URL: daquery/ws/inboundqueries/site/Pitt
+     * example URL: daquery-ws/ws/inboundqueries/site/Pitt
      * @return a JSON object containing a list of matching inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -233,7 +232,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database sent from a given site.
-     * example URL: daquery/ws/inboundqueries/site/Pitt/status/pending
+     * example URL: daquery-ws/ws/inboundqueries/site/Pitt/status/pending
      * @return a JSON object containing a list of matching inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -271,7 +270,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database sent from a given site.
-     * example URL: daquery/ws/inboundqueries/site/user1/status/pending
+     * example URL: daquery-ws/ws/inboundqueries/site/user1/status/pending
      * @return a JSON object containing a list of matching inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure

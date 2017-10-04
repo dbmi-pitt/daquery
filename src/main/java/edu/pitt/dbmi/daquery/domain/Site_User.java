@@ -2,7 +2,6 @@ package edu.pitt.dbmi.daquery.domain;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -53,8 +52,6 @@ public class Site_User extends DaqueryObject {
     public static final String FIND_BY_EMAIL_PASSWORD = "Site_User.findByEmailAndPassword";
     public static final String FIND_BY_ID = "Site_User.findByID";
 
-    // assumes the current class is called MyLogger
-    private final static Logger logger = Logger.getLogger(Site_User.class.getName());
     
     // ======================================
     // =             Attributes             =
@@ -131,15 +128,8 @@ public class Site_User extends DaqueryObject {
     public Site_User() {
     }
 
-    public Site_User(String id, String realName, String login, String password) {
-        this.id = id;
+    public Site_User(String realName, String login, String password) {
         this.realName = realName;
-        this.username = login;
-        this.setPassword(password);
-    }
-
-    public Site_User(String id, String login, String password) {
-        this.id = id;
         this.username = login;
         this.setPassword(password);
     }
