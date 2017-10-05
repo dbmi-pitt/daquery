@@ -1,22 +1,11 @@
 package edu.pitt.dbmi.daquery.rest;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
-import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
-import edu.pitt.dbmi.daquery.domain.Site_User;
-
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -31,6 +20,8 @@ import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -41,7 +32,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.util.UserRoles;
 
 
@@ -67,11 +57,11 @@ public class SiteEndpoint extends AbstractEndpoint {
 	
     @GET
     @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the sites found in the database.
-     * example URL: daquery/ws/sites/
+     * example URL: daquery-ws/ws/sites/
      * @return a JSON array containing all the sites
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -105,15 +95,16 @@ public class SiteEndpoint extends AbstractEndpoint {
 	
 	/**
      * Get all sites by type
-     * example url: daquery/ws/sites/type/inbound
+     * example url: daquery-ws/ws/sites/type/inbound
      * @param  type inbound, outbound or pending 
      * @return 200 OK			List of sites
      * @throws 400 Bad Request	error message
      * @throws 401 Unauthorized	
      */
     @GET
+    @Secured
     @Path("/type/{type}")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveSites(@QueryParam("type") String type) {
 		try {
@@ -130,16 +121,18 @@ public class SiteEndpoint extends AbstractEndpoint {
 		}
     }
     
+    //TODO: Do we need a call that retrieves a site by UUID?
     /**
      * Get specific site by Id
-     * example url: daquery/ws/site/1
+     * example url: daquery-ws/ws/site/1
      * @return 200 OK			Site
      * @throws 400 Bad Request	error message
      * @throws 401 Unauthorized	
      */
     @GET
+    @Secured
     @Path("/{id}")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworkByID(@PathParam("id") String id) {
     	try {
@@ -159,11 +152,126 @@ public class SiteEndpoint extends AbstractEndpoint {
 		}
     }
 
+    /**
+     * 
+     * example url: daquery-ws/ws/sites?networkid=a3477419-657d-4ddd-8750-c014e2033937
+     * @param networkid- The UUID for a network
+     * @param newSite- A JSON Object representing the site information
+     * @return 201 Created			Site
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
+     */
+    @POST
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createSite(@QueryParam("networkid") String networkid, Site newSite) {
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+
+    	try {
+    		
+	        Network currentNetwork = queryNetwork(networkid);
+            if (currentNetwork == null) {
+                return Response.status(NOT_FOUND).build();
+            }	        
+	        newSite.setNetwork(currentNetwork);
+	        //persist changes
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
+	
+	        em.getTransaction().begin();
+	
+	        em.persist(newSite);
+	        
+	        em.getTransaction().commit();
+
+	        return Response.ok(201).entity(newSite).build();
+	        
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		e.printStackTrace();
+    		return Response.status(UNAUTHORIZED).build();	        		
+
+    	} finally {
+    		if (em != null) {
+    			em.close();
+    		}
+    		
+    	}
+    	
+    }
+    
+    
+    @PUT
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateSite(Site updatedSite) {
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+
+    	try {
+    		
+	        Site site = querySiteByID(updatedSite.getId());	
+	        
+	        //step 1: make sure this is a valid site
+	        if (site == null)
+	            return Response.status(NOT_FOUND).build();
+	        	        	     
+	        
+	        //persist changes
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
+	
+	        em.getTransaction().begin();
+	
+	        em.merge(updatedSite);
+	        
+	        em.getTransaction().commit();
+
+	        return Response.ok(201).entity(updatedSite).build();
+	        
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		e.printStackTrace();
+    		return Response.status(UNAUTHORIZED).build();	        		
+
+    	} finally {
+    		if (em != null) {
+    			em.close();
+    		}
+    		
+    	}
+    	
+    }
+
+    
+    
     // ======================================
     // =          PRIVATE METHODS           =
     // ======================================
     
-    
+
+    //TODO: see if this should be a generic method avaiable from one place
+    //this is duplicated in the NwtowrkEndpoint class
+    private Network queryNetwork(String uuid) throws Exception {
+    	logger.info("searching for #### single Inbound_Query id= " +uuid);
+    	try {
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		ParameterItem piId = new ParameterItem("uuid", uuid);
+    		pList.add(piId);
+    		Network network = executeQueryReturnSingle(Network.FIND_BY_UUID, pList, logger);
+	        return network;
+	    
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+            
+    }
+
     private List<Site> queryAllSites() throws Exception {
     	try { 		
     	    List<Site> site_list = executeQueryReturnList(Site.FIND_ALL, null, logger);
@@ -177,6 +285,19 @@ public class SiteEndpoint extends AbstractEndpoint {
             
     }
 
+    private Site querySiteByID(long id) throws Exception {
+    	try {
+			List<ParameterItem> pList = new ArrayList<ParameterItem>();
+			ParameterItem piSite = new ParameterItem("id", id);
+			pList.add(piSite);
+	        Site site = executeQueryReturnSingle(Site.FIND_BY_ID, pList, logger);	
+	        return site;
+    	} catch (Exception e) {
+	        throw e;    		
+    	}
+    	
+    }
+    
     private List<Site> querySitesByType(String type) throws Exception {
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();

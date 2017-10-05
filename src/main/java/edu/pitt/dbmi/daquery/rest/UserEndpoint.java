@@ -96,13 +96,15 @@ public class UserEndpoint extends AbstractEndpoint {
     
     /**
      * Return a list of all the users.
-     * example URL: daquery/ws/users/
+     * example URL: daquery-ws/ws/users/
      * @return a JSON object containing a list of all users
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
     @GET
     @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response findAllUsers() {
     	try {
 
@@ -131,7 +133,7 @@ public class UserEndpoint extends AbstractEndpoint {
     /**
      * This method uses login information to authenticate a user.  It generates a new JWT
      * (JSON Web Token) if the user's information is valid.
-     * example URL: daquery/ws/users/login?uuid=d2dd12f4-6b2e-430a-90db-dfe0c1617a48&password=demouser
+     * example URL: daquery-ws/ws/users/login?uuid=d2dd12f4-6b2e-430a-90db-dfe0c1617a48&password=demouser
      * @param uuid- the uuid for the account.  This value must not be empty.
      * @param password- the password for the account.  This value must not be empty.
      * @return javax.ws.rs.core.Response containing a status of OK plus the JWT for a valid login/password combination
@@ -139,7 +141,7 @@ public class UserEndpoint extends AbstractEndpoint {
      */
     @GET
     @Path("/login")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response authenticateUser(@QueryParam("email") String email,
                                      @QueryParam("password") String password) {
@@ -167,8 +169,11 @@ public class UserEndpoint extends AbstractEndpoint {
                 return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
             
             if (accountDisabled(user.getId()))
-                return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));            
-      	
+                return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
+            	
+            
+            if(expiredPassword(user.getId()))
+            	return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
             Site_User currentUser = queryUserByID(user.getId());
             Map<String, Object> extraObjs = new HashMap<String, Object>();
             extraObjs.put("user", currentUser);
@@ -179,9 +184,9 @@ public class UserEndpoint extends AbstractEndpoint {
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-            try{return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));}
-            catch(Throwable t)
-            {
+            try {
+            	return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));
+            } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);
             	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
@@ -192,21 +197,18 @@ public class UserEndpoint extends AbstractEndpoint {
         }
     }
 
-    //TODO implement this method, probably move to a helper class..
-    private boolean expiredPassword(String uuid)
-    {
-    	return false;
-    }
     /**
      * Create a new user account with the given login and password combination.
-     * example URL: daquery/ws/users/newuser?login=sample4&password=demouser
+     * example URL: daquery-ws/ws/users/newuser?login=sample4&password=demouser
      * @param login- a new user login
      * @param password- the password for the new account
      * @return either a javax.ws.rs.core.Response confirming the account creation
      * (a 201 response) or a SERVER ERROR if there was a problem. 
      */
     @POST
-    @Secured
+    //@Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/newuser")
     public Response create(@QueryParam("login") String login,
                            @QueryParam("password") String password) {
@@ -248,7 +250,7 @@ public class UserEndpoint extends AbstractEndpoint {
 
     /**
      * Create a new user admin account with the given login.
-     * Example URL: daquery/ws/users/firstadmin?login=adminuser&password=demouser
+     * Example URL: daquery-ws/ws/users/firstadmin?login=adminuser&password=demouser
      * @param login- a new user login
      * @return either a javax.ws.rs.core.Response confirming the account creation
      * or a SERVER ERROR if there was a problem. 
@@ -256,6 +258,8 @@ public class UserEndpoint extends AbstractEndpoint {
     
     @POST
     @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/firstadmin")
     public Response createFirstAdmin(@Context HttpHeaders httpheaders, @QueryParam("login") String login,
     		@QueryParam("password") String password) {
@@ -311,9 +315,9 @@ public class UserEndpoint extends AbstractEndpoint {
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
         	//TODO: This needs to be reported back to the UI so it can handle it
-            try{return(ResponseHelper.expiredTokenResponse(login, uriInfo));}
-            catch(Throwable t)
-            {
+            try{
+            	return(ResponseHelper.expiredTokenResponse(login, uriInfo));
+            } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);
             	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
@@ -329,11 +333,16 @@ public class UserEndpoint extends AbstractEndpoint {
     
     /**
      * Get a JSON string representing a user given the user's UUID
-     * @param uuid- the user's UUID
-     * @return
+     * example url: daquery-ws/ws/users/507f5c77-265c-4fc2-bed7-986bf3182786
+     * @param id- the user's UUID
+     * @return 200 OK			A JSON object representing the user
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
      */
     @GET
     @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public Response findById(@PathParam("id") String id) {
     	try {
@@ -347,19 +356,32 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     }
     
+    /**
+     * This method will allow the user to be updated.
+     * @param updatedUser- a JSON object representing the updated user
+     * example url: daquery-ws/ws/users
+     * @return 200 OK
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized
+     * @throws 404 Not found	
+     */
+    //TODO: the security on this method should only allow for EITHER: an admin or the user themselves to update the
+    //user account
     @PUT
     @Secured
-    @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(@PathParam("id") String id, Site_User updatedUser) {
+    public Response updateUser(Site_User updatedUser) {
         EntityManagerFactory emf = null;
         EntityManager em = null;
 
     	try {
-    		
-	        Site_User user = queryUserByID(id);	
-	        
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+
+	        Site_User user = queryUserByID(updatedUser.getId());	
+
 	        //step 1: make sure this is a valid user id
 	        if (user == null)
 	            return Response.status(NOT_FOUND).build();
@@ -428,15 +450,19 @@ public class UserEndpoint extends AbstractEndpoint {
     	
     }
 
-
+/*
+ * Remove the DELETE methods until we discuss how to "delete" something in
+ * this project
     @DELETE
     @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public Response remove(@PathParam("id") String id) {
         //em.remove(em.getReference(User.class, id));
         return Response.noContent().build();
     }
-    
+  */  
     // ======================================
     // =          PRIVATE METHODS           =
     // ======================================
@@ -524,7 +550,13 @@ public class UserEndpoint extends AbstractEndpoint {
         }
             
     }
-  
+
+    //TODO implement this method, probably move to a helper class..
+    private boolean expiredPassword(String uuid)
+    {
+    	return false;
+    }
+
     /**
      * Validate a JWT token used to create the initial admin account for a site
      * @param JWT token with sitename and sitekey in the payload

@@ -25,11 +25,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.UserRoles;
 import io.jsonwebtoken.ClaimJwtException;
@@ -59,11 +60,28 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Context
     private ResourceInfo resourceInfo;
+
+    @Context
+    private UriInfo uriInfo;
+
+    /*This take a little explaining.
+     * The securityContext is created during the AuthenticationFilter.filter method.
+     * This annotations allows the class to extract the username from the securityContext.
+     * The username is extracted from the JWT passed to these methods.
+     */
+    @Context
+    SecurityContext securityContext;
+
     
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-    	//TODO: Reject any communication coming across anything other than HTTPS:
+        Principal principal = securityContext.getUserPrincipal();
+        String username = "";
+        if (principal != null) 
+        	username = principal.getName();
+
+        //TODO: Reject any communication coming across anything other than HTTPS:
     	//here is the check:
     	if (!PropertiesHelper.isDebugMode()) {
     	
@@ -168,8 +186,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             });
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-        	requestContext.abortWith(
-        		Response.status(419).build());
+        	try {
+        		requestContext.abortWith(ResponseHelper.expiredTokenResponse(username, uriInfo));
+        	} catch (Exception e) {
+        		//if there are any problems, just throw an UNAUTHORIZED error
+        		Response.status(Response.Status.UNAUTHORIZED).build();
+        	}
         } catch (Exception e) {
             requestContext.abortWith(
                 Response.status(Response.Status.UNAUTHORIZED).build());
