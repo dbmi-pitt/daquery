@@ -184,16 +184,9 @@ public class UserEndpoint extends AbstractEndpoint {
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-        	try {
-        		return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));
-        	} catch (Exception e) {
-        		logger.info("Error responding to expired token");
-        		logger.info(e.toString());
-                return Response.status(INTERNAL_SERVER_ERROR).build();
-        	}
-            try{return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));}
-            catch(Throwable t)
-            {
+            try {
+            	return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));
+            } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);
             	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
@@ -321,17 +314,10 @@ public class UserEndpoint extends AbstractEndpoint {
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
-        	try {
-        		return(ResponseHelper.expiredTokenResponse(username, uriInfo));
-        	} catch (Exception e) {
-        		logger.info("Error responding to expired token");
-        		logger.info(e.toString());
-                return Response.status(INTERNAL_SERVER_ERROR).build();
-        	}
         	//TODO: This needs to be reported back to the UI so it can handle it
-            try{return(ResponseHelper.expiredTokenResponse(login, uriInfo));}
-            catch(Throwable t)
-            {
+            try{
+            	return(ResponseHelper.expiredTokenResponse(login, uriInfo));
+            } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);
             	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
@@ -396,8 +382,6 @@ public class UserEndpoint extends AbstractEndpoint {
 
 	        Site_User user = queryUserByID(updatedUser.getId());	
 
-	        Site_User user = queryUserByID(id);	
-	        
 	        //step 1: make sure this is a valid user id
 	        if (user == null)
 	            return Response.status(NOT_FOUND).build();
