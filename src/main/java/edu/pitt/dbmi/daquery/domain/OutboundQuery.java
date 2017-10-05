@@ -13,7 +13,7 @@ import java.sql.Timestamp;
  * 
  */
 @Entity
-@Table(name="OUTBOUND_QUERIES")
+@Table(name="Outbound_Query")
 @NamedQuery(name="OutboundQuery.findAll", query="SELECT o FROM OutboundQuery o")
 public class OutboundQuery extends DaqueryObject implements Serializable {
 	private static final long serialVersionUID = 1L;
