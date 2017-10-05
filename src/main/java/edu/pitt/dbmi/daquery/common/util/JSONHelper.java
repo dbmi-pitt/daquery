@@ -46,7 +46,7 @@ public class JSONHelper
 	        		else if(obj instanceof List)
 	        			rJson = rJson + "\"" + comma + (String) key + "\":" + toJSON(obj);
 	        		else
-	        			rJson = comma + rJson + comma + "\"" + (String) key + "\":\"" + obj.toString() + "\"";
+	        			rJson = rJson + comma + "\"" + (String) key + "\":\"" + obj.toString() + "\"";
 	        		if(first)
 	        		{
 	        			first = false;
@@ -66,7 +66,7 @@ public class JSONHelper
 			if(((List) value).size() == 0) return("[]");
 			String rVal = "[";
 			String comma = "";
-			boolean first = false;
+			boolean first = true;
 			for(Object obj : (List) value)
 			{
 				rVal = rVal + comma + "{" + toJSON(obj) + "}";
