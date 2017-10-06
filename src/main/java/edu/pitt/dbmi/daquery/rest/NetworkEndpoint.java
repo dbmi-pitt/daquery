@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
 
 
@@ -73,7 +74,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
                         
-            List<Network> networks = queryAllNetworks();
+            List<Network> networks = NetworkDAO.queryAllNetworks();
             
             if (networks == null) {
                 return Response.status(NOT_FOUND).build();
@@ -110,7 +111,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            Network network = queryNetwork(uuid);
+            Network network = NetworkDAO.queryNetwork(uuid);
             
             if (network == null) {
                 return Response.status(NOT_FOUND).build();
@@ -178,40 +179,5 @@ public class NetworkEndpoint extends AbstractEndpoint {
     	
     }
     
-    // ======================================
-    // =          PRIVATE METHODS           =
-    // ======================================
-    
-    
-    private Network queryNetwork(String uuid) throws Exception {
-    	logger.info("searching for #### single Network uuid= " +uuid);
-    	try {
-    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piId = new ParameterItem("uuid", uuid);
-    		pList.add(piId);
-    		Network network = executeQueryReturnSingle(Network.FIND_BY_UUID, pList, logger);
-	        return network;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-
-    private List<Network> queryAllNetworks() throws Exception {
-    	try { 		
-    	    List<Network> networks = executeQueryReturnList(Network.FIND_ALL, null, logger);
-	        return networks;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-
 
 }

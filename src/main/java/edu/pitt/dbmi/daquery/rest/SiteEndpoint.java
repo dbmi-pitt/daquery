@@ -1,5 +1,7 @@
 package edu.pitt.dbmi.daquery.rest;
 
+import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -76,7 +78,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
                         
-            List<Site> site_list = queryAllSites();
+            List<Site> site_list = SiteDAO.queryAllSites();
             
             if (site_list == null) {
                 return Response.status(NOT_FOUND).build();
@@ -108,7 +110,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveSites(@QueryParam("type") String type) {
 		try {
-            List<Site> site_list = querySitesByType(type);
+            List<Site> site_list = SiteDAO.querySitesByType(type);
             
             if (site_list == null) {
                 return Response.status(NOT_FOUND).build();
@@ -171,7 +173,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 
     	try {
     		
-	        Network currentNetwork = queryNetwork(networkid);
+	        Network currentNetwork = NetworkDAO.queryNetwork(networkid);
             if (currentNetwork == null) {
                 return Response.status(NOT_FOUND).build();
             }	        
@@ -213,7 +215,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 
     	try {
     		
-	        Site site = querySiteByID(updatedSite.getId());	
+	        Site site = SiteDAO.querySiteByID(updatedSite.getId());	
 	        
 	        //step 1: make sure this is a valid site
 	        if (site == null)
@@ -248,71 +250,6 @@ public class SiteEndpoint extends AbstractEndpoint {
 
     
     
-    // ======================================
-    // =          PRIVATE METHODS           =
-    // ======================================
-    
-
-    //TODO: see if this should be a generic method avaiable from one place
-    //this is duplicated in the NwtowrkEndpoint class
-    private Network queryNetwork(String uuid) throws Exception {
-    	logger.info("searching for #### single Inbound_Query id= " +uuid);
-    	try {
-    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piId = new ParameterItem("uuid", uuid);
-    		pList.add(piId);
-    		Network network = executeQueryReturnSingle(Network.FIND_BY_UUID, pList, logger);
-	        return network;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-
-    private List<Site> queryAllSites() throws Exception {
-    	try { 		
-    	    List<Site> site_list = executeQueryReturnList(Site.FIND_ALL, null, logger);
-	        return site_list;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-
-    private Site querySiteByID(long id) throws Exception {
-    	try {
-			List<ParameterItem> pList = new ArrayList<ParameterItem>();
-			ParameterItem piSite = new ParameterItem("id", id);
-			pList.add(piSite);
-	        Site site = executeQueryReturnSingle(Site.FIND_BY_ID, pList, logger);	
-	        return site;
-    	} catch (Exception e) {
-	        throw e;    		
-    	}
-    	
-    }
-    
-    private List<Site> querySitesByType(String type) throws Exception {
-    	try {
-    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piType = new ParameterItem("type", type);
-    		pList.add(piType);
-    	    List<Site> sites = executeQueryReturnList(Site.FIND_BY_TYPE, pList, logger);
-	        return sites;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
     
 
 }

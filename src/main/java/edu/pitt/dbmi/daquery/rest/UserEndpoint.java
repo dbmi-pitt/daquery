@@ -47,7 +47,10 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
+import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.Site_User;
+
+import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
 
 
 import io.jsonwebtoken.ClaimJwtException;
@@ -114,7 +117,7 @@ public class UserEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
                         
-            List<Site_User> user_list = queryAllUsers();
+            List<Site_User> user_list = Site_UserDAO.queryAllUsers();
             
             if (user_list == null) {
                 return Response.status(NOT_FOUND).build();
@@ -165,16 +168,16 @@ public class UserEndpoint extends AbstractEndpoint {
             // Authenticate the user using the credentials provided
             user = authenticate(email, password);
 
-            if(expiredPassword(user.getId()))
+            if(Site_UserDAO.expiredPassword(user.getId()))
                 return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
             
-            if (accountDisabled(user.getId()))
+            if (Site_UserDAO.accountDisabled(user.getId()))
                 return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
             	
             
-            if(expiredPassword(user.getId()))
+            if(Site_UserDAO.expiredPassword(user.getId()))
             	return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
-            Site_User currentUser = queryUserByID(user.getId());
+            Site_User currentUser = Site_UserDAO.queryUserByID(user.getId());
             Map<String, Object> extraObjs = new HashMap<String, Object>();
             extraObjs.put("user", currentUser);
             
@@ -346,7 +349,7 @@ public class UserEndpoint extends AbstractEndpoint {
     @Path("/{id}")
     public Response findById(@PathParam("id") String id) {
     	try {
-	        Site_User user = queryUserByID(id);	
+	        Site_User user = Site_UserDAO.queryUserByID(id);	
 	        if (user == null)
 	            return Response.status(NOT_FOUND).build();
 	        String json = user.toJson();	
@@ -380,18 +383,43 @@ public class UserEndpoint extends AbstractEndpoint {
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
 
-	        Site_User user = queryUserByID(updatedUser.getId());	
+	        Site_User user = Site_UserDAO.queryUserByID(updatedUser.getId());
+	        
+	        Site_User loggedInUser = Site_UserDAO.queryUserByID(username);
 
 	        //step 1: make sure this is a valid user id
 	        if (user == null)
 	            return Response.status(NOT_FOUND).build();
 	        
-	        //step 2: check if account is disabled
-	        if (accountDisabled(user.getId())) {
+	        //step 2: prevent unauthorized users from updating this account
+	        //the update can continue only if the current user is either:
+	        //1.  has an admin role
+	        // -OR-
+	        //2.  is the same person represented by the updatedUser
+	        List<Role> roleList = loggedInUser.getRoles();
+	        boolean hasAdminRole = false;
+	        for (Role r : roleList) {
+	        	if (r.getType().equalsIgnoreCase("admin")) {
+	        		hasAdminRole = true;
+	        		break;
+	        	}
+	        }
+	        boolean isMatchingUser = loggedInUser.getId().equalsIgnoreCase(user.getId());
+	        //if the current user does not match, return a 401
+	        if ((hasAdminRole || isMatchingUser) == false) {
+	        	return Response.status(UNAUTHORIZED).build();
+	        }
+
+	        
+	        
+	        //step 3: check if account is disabled
+	        //TODO: this code prevents us from re-enabling the account...
+	        //we may want to remove this code
+	        if (Site_UserDAO.accountDisabled(user.getId())) {
 	            return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));	        	
 	        }
 	        
-	        //step 3: check if this is a password change
+	        //step 4: check if this is a password change
 	        if (updatedUser.getOldPassword() != null && updatedUser.getNewPassword() != null) {
 	        	try {
 	        		if(user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getOldPassword()))) {
@@ -406,8 +434,8 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	}
 	        }
 	        
-	        //step 4: is the user's password expired?
-	        if (expiredPassword(user.getId())) {
+	        //step 5: is the user's password expired?
+	        if (Site_UserDAO.expiredPassword(user.getId())) {
 	            return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
 	        }
 	        
@@ -466,40 +494,6 @@ public class UserEndpoint extends AbstractEndpoint {
     // ======================================
     // =          PRIVATE METHODS           =
     // ======================================
-
-    /**
-     * Return a list of all the Site_Users for the current site.
-     * @return- a List of all the query users
-     * @throws Exception- throw any errors encountered back to the calling method
-     */
-    private List<Site_User> queryAllUsers() throws Exception {
-    	try { 		
-    	    List<Site_User> user_list = executeQueryReturnList(Site_User.FIND_ALL, null, logger);
-	        return user_list;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-    
-    private Site_User queryUserByID(String id) throws Exception {
-    	try {
-			List<ParameterItem> pList = new ArrayList<ParameterItem>();
-			ParameterItem piUser = new ParameterItem("id", id);
-			pList.add(piUser);
-	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_ID, pList, logger);	
-	        return user;
-    	} catch (Exception e) {
-	        throw e;    		
-    	}
-    	
-    }
-    
-    /**
-     */
     
     /**
      * This method detects if the request for an admin account was sent from the
@@ -551,12 +545,6 @@ public class UserEndpoint extends AbstractEndpoint {
             
     }
 
-    //TODO implement this method, probably move to a helper class..
-    private boolean expiredPassword(String uuid)
-    {
-    	return false;
-    }
-
     /**
      * Validate a JWT token used to create the initial admin account for a site
      * @param JWT token with sitename and sitekey in the payload
@@ -599,14 +587,5 @@ public class UserEndpoint extends AbstractEndpoint {
 	    }
 
      }
-    
-    //TODO implement this method, probably move to a helper class..
-    //Do we want to pass in the Site_User object instead of the id?
-    private boolean accountDisabled(String id)
-    {
-                return false;
-    }
-        
-
 
 }
