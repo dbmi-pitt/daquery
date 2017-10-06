@@ -28,8 +28,7 @@ CREATE TABLE "APP"."SITE_USER"
 CREATE TABLE "APP"."ROLE"
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
-   NAME varchar(50) NOT NULL,
-   TYPE varchar(50) NOT NULL
+   NAME varchar(50) NOT NULL
 )
 ;
 
@@ -54,7 +53,6 @@ CREATE TABLE "APP"."SITE"
    REQUEST_REPLIED timestamp
 )
 ;
-
 CREATE TABLE "APP"."INBOUND_QUERY"
 (
    ID bigint PRIMARY KEY NOT NULL,
@@ -87,4 +85,7 @@ CREATE TABLE "APP"."OUTBOUND_QUERY"
 )
 ;
 
-create table property (id int, name varchar(256), value varchar(256));
+CREATE TABLE PROPERTY (id int, name varchar(256), value varchar(256));
+CREATE TABLE SITE_USER (ID varchar(100) NOT NULL,USERNAME varchar(50),EMAIL varchar(100),PASSWORD varchar(100),REAL_NAME varchar(100),STATUS int);
+CREATE TABLE USER_ROLE (USER_ID varchar(100) NOT NULL, ROLE_ID bigint NOT NULL);
+
