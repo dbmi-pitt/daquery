@@ -120,10 +120,7 @@ public class Site_UserDAO extends AbstractDAO {
     {
     	try {
     		Site_User currentUser = queryUserByID(uuid);
-    		return (UserStatus.PWD_EXPIRED == UserStatus.fromInt(currentUser.getStatus())
-    				|| UserStatus.DELETED == UserStatus.fromInt(currentUser.getStatus())
-    				|| UserStatus.SUSPENDED == UserStatus.fromInt(currentUser.getStatus())
-    				);
+    		return UserStatus.DISABLED == UserStatus.fromInt(currentUser.getStatus());
         } catch (PersistenceException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());

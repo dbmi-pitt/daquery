@@ -152,8 +152,6 @@ public class UserEndpoint extends AbstractEndpoint {
     	if (email.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
     	
-    	//TODO: Reject any communication coming across anything other than HTTPS:
-    	//here is the check:
     	if (!PropertiesHelper.isDebugMode()) {
     	
 	    	if (uriInfo.getRequestUri().getScheme() != "https") {
@@ -235,8 +233,6 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	       
 	        logger.info("Done trying to create user: " + newUser.toString());
-	        
-	        //TODO: build some JSON into the response.  Return the new UUID
 	        
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
         } catch (Exception e) {
@@ -366,8 +362,6 @@ public class UserEndpoint extends AbstractEndpoint {
      * @throws 401 Unauthorized
      * @throws 404 Not found	
      */
-    //TODO: the security on this method should only allow for EITHER: an admin or the user themselves to update the
-    //user account
     @PUT
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
