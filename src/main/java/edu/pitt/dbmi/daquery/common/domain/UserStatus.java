@@ -2,7 +2,7 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 
 public enum UserStatus {
-	ACTIVE(1), DELETED(2), SUSPENDED(3), PWD_EXPIRED(4);
+	ACTIVE(1), DISABLED(2), PWD_EXPIRED(3);
 	
 	int intValue = 0;
 	UserStatus(int val)
