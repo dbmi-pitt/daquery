@@ -22,6 +22,7 @@ import javax.transaction.Transactional;
 
 import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
@@ -59,10 +60,17 @@ public class Site_UserDAO extends AbstractDAO {
             
     }
     
-    public static Site_User queryUserByID(String id) throws Exception {
+    /**
+     * Return an object representing the user matching the given UUID
+     * @param uuid- the UUID of the user to find 
+     * @return- a Site_User object representing the UUID
+     * @throws PersistenceException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static Site_User queryUserByID(String uuid) throws Exception {
     	try {
 			List<ParameterItem> pList = new ArrayList<ParameterItem>();
-			ParameterItem piUser = new ParameterItem("id", id);
+			ParameterItem piUser = new ParameterItem("id", uuid);
 			pList.add(piUser);
 	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_ID, pList, logger);	
 	        return user;
@@ -76,18 +84,53 @@ public class Site_UserDAO extends AbstractDAO {
     	
     }
 
-    //TODO implement this method, probably move to a helper class..
-    public static boolean expiredPassword(String uuid)
+    /**
+     * Return a boolean indicating if the user's account has an expired password
+     * @param uuid the User's UUID to check
+     * @return true if the user's status matches an expired password
+     *         false otherwise
+     * @throws PersistenceException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static boolean expiredPassword(String uuid) throws Exception
     {
-    	return false;
+    	try {
+    		Site_User currentUser = queryUserByID(uuid);
+    		return UserStatus.PWD_EXPIRED == UserStatus.fromInt(currentUser.getStatus());
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+    	} catch (Exception e) {
+	        throw e;    		
+    	}
     }
 
     
-    //TODO implement this method, probably move to a helper class..
-    //Do we want to pass in the Site_User object instead of the id?
-    public static boolean accountDisabled(String id)
+    /**
+     * Return a boolean indicating if the user's account has been set to one of the
+     * "disabled" statuses
+     * @param uuid the User's UUID to check
+     * @return true if the user's status matches one of the disabled statuses
+     *         false otherwise
+     * @throws PersistenceException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static boolean accountDisabled(String uuid) throws Exception
     {
-                return false;
+    	try {
+    		Site_User currentUser = queryUserByID(uuid);
+    		return (UserStatus.PWD_EXPIRED == UserStatus.fromInt(currentUser.getStatus())
+    				|| UserStatus.DELETED == UserStatus.fromInt(currentUser.getStatus())
+    				|| UserStatus.SUSPENDED == UserStatus.fromInt(currentUser.getStatus())
+    				);
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+    	} catch (Exception e) {
+	        throw e;    		
+    	}
     }
         
     
@@ -111,9 +154,7 @@ public class Site_UserDAO extends AbstractDAO {
 	        query.setParameter("id", id);
 	        Site_User user = null;
 	        user = (Site_User)query.getSingleResult();
-	        return true;
-	        //TODO: compare with status
-	        //return user.getStatusEnum() == UserStatus.ACTIVE;
+    		return UserStatus.ACTIVE == UserStatus.fromInt(user.getStatus());
 	    
         } catch (PersistenceException pe) {
     		logger.info("Error unable to connect to database.  Please check database settings.");

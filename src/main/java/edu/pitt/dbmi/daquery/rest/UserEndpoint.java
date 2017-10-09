@@ -175,8 +175,6 @@ public class UserEndpoint extends AbstractEndpoint {
                 return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
             	
             
-            if(Site_UserDAO.expiredPassword(user.getId()))
-            	return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
             Site_User currentUser = Site_UserDAO.queryUserByID(user.getId());
             Map<String, Object> extraObjs = new HashMap<String, Object>();
             extraObjs.put("user", currentUser);
