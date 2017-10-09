@@ -402,16 +402,14 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	return Response.status(UNAUTHORIZED).build();
 	        }
 
-	        
-	        
 	        //step 3: check if account is disabled
-	        //TODO: this code prevents us from re-enabling the account...
-	        //we may want to remove this code
-	        if (Site_UserDAO.accountDisabled(user.getId())) {
+	        //Do NOT allow a disabled user account to be updated if
+	        //the user is trying to update their own disabled account
+	        if (Site_UserDAO.accountDisabled(user.getId()) && isMatchingUser) {
 	            return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));	        	
 	        }
 	        
-	        //step 4: check if this is a password change
+	        //step 4: check if this is an user initiated password change
 	        if (updatedUser.getOldPassword() != null && updatedUser.getNewPassword() != null) {
 	        	try {
 	        		if(user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getOldPassword()))) {
@@ -424,9 +422,12 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	} catch (SecurityException se) {
 		    		return Response.status(UNAUTHORIZED).build();	        		
 	        	}
+	        //step 5: check if this is an admin initiated password change	        
+	        } else if (hasAdminRole && updatedUser.getNewPassword() != null) {
+	        	user.setPassword(updatedUser.getNewPassword());
 	        }
 	        
-	        //step 5: is the user's password expired?
+	        //step 6: is the user's password expired?
 	        if (Site_UserDAO.expiredPassword(user.getId())) {
 	            return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
 	        }
