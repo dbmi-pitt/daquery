@@ -27,9 +27,6 @@ public class Role extends DaqueryObject implements Serializable {
 	@Column(nullable=false, length=50)
 	private String name;
 
-	@Column(nullable=false, length=50)
-	private String type;
-
 	//bi-directional many-to-many association to User
 	@ManyToMany(mappedBy="roles")
 	private List<Site_User> users;
@@ -51,14 +48,6 @@ public class Role extends DaqueryObject implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getType() {
-		return this.type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public List<Site_User> getUsers() {

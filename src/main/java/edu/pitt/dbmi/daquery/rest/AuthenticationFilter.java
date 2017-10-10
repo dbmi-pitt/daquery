@@ -33,7 +33,7 @@ import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
 import edu.pitt.dbmi.daquery.domain.Site_User;
-import edu.pitt.dbmi.daquery.util.UserRoles;
+
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -105,12 +105,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         // Get the resource class which matches with the requested URL
         // Extract the roles declared by it
         Class<?> resourceClass = resourceInfo.getResourceClass();
-        List<UserRoles> classRoles = extractRoles(resourceClass);
+        List<String> classRoles = extractRoles(resourceClass);
 
         // Get the resource method which matches with the requested URL
         // Extract the roles declared by it
         Method resourceMethod = resourceInfo.getResourceMethod();
-        List<UserRoles> methodRoles = extractRoles(resourceMethod);
+        List<String> methodRoles = extractRoles(resourceMethod);
 
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
@@ -265,21 +265,21 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      * @return a List of the valid UserRoles for the web service call or 
      * an empty list if no UserRoles are assigned to the web service call 
      */
-    private List<UserRoles> extractRoles(AnnotatedElement annotatedElement) {
+    private List<String> extractRoles(AnnotatedElement annotatedElement) {
         if (annotatedElement == null) {
-            return new ArrayList<UserRoles>();
+            return new ArrayList<String>();
         } else {
             Secured secured = annotatedElement.getAnnotation(Secured.class);
             if (secured == null) {
-                return new ArrayList<UserRoles>();
+                return new ArrayList<String>();
             } else {
-                UserRoles[] allowedRoles = secured.value();
+                String[] allowedRoles = secured.value();
                 return Arrays.asList(allowedRoles);
             }
         }
     }
 
-    private void checkPermissions(List<UserRoles> allowedRoles, String uuid) throws Exception {
+    private void checkPermissions(List<String> allowedRoles, String uuid) throws Exception {
     	//TODO: run a database query to check this.
         // Check if the user contains one of the allowed roles
         // Throw an Exception if the user has not permission to execute the method
