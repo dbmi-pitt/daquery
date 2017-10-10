@@ -391,7 +391,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        List<Role> roleList = loggedInUser.getRoles();
 	        boolean hasAdminRole = false;
 	        for (Role r : roleList) {
-	        	if (r.getType().equalsIgnoreCase("admin")) {
+	        	if (r.getName().equalsIgnoreCase("admin")) {
 	        		hasAdminRole = true;
 	        		break;
 	        	}
