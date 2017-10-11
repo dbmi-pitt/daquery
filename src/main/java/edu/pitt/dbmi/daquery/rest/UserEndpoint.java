@@ -364,9 +364,10 @@ public class UserEndpoint extends AbstractEndpoint {
      */
     @PUT
     @Secured
+    @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(Site_User updatedUser) {
+    public Response updateUser(@PathParam("id") String id, Site_User updatedUser) {
         EntityManagerFactory emf = null;
         EntityManager em = null;
 
@@ -375,7 +376,7 @@ public class UserEndpoint extends AbstractEndpoint {
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
 
-	        Site_User user = Site_UserDAO.queryUserByID(updatedUser.getId());
+	        Site_User user = Site_UserDAO.queryUserByID(id);
 	        
 	        Site_User loggedInUser = Site_UserDAO.queryUserByID(username);
 
