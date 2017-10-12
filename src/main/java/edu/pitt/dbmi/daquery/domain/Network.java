@@ -59,6 +59,10 @@ public class Network extends DaqueryObject implements Serializable {
 	@Column(name = "DATA_MODEL", nullable=true, length=100)
 	private String data_model;
 
+	@Expose
+	@Column(name = "DATA_MDOEL_NAME", nullable=false, length=200)
+	private String data_model_name;
+	
 	//bi-directional many-to-one association to InboundQuery
 	@Transient
 	@OneToMany(mappedBy="network")

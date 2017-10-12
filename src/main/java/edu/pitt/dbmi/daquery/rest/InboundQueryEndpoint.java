@@ -24,7 +24,6 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
-import edu.pitt.dbmi.daquery.util.UserRoles;
 
 @Path("/inboundqueries")
 @Produces(APPLICATION_JSON)
@@ -112,7 +111,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
     
     @GET
-    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
     @Path("/{id}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -150,7 +149,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     }
 
     @GET
-    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
     @Path("/status/{statusType}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -188,7 +187,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     }
 
     @GET
-    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
     @Path("/site/{siteName}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
