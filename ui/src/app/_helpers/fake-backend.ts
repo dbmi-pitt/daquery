@@ -1,4 +1,5 @@
 import { Http, BaseRequestOptions, Response, ResponseOptions, RequestMethod } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { MockBackend, MockConnection } from '@angular/http/testing';
 import { environment } from '../../environments/environment';
 
@@ -55,8 +56,15 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
         //     new ResponseOptions({ status: 200 })
         //   ));
         // }
-        connection.mockRespond(new Response(
-          new ResponseOptions({ status: 200, body: { user: {id: 1, roles: ["admin"]}, jwt: 'fake-jwt-token' } })
+        
+        // connection.mockRespond(new Response(
+        //   new ResponseOptions({ status: 200, body: { user: {id: 1, roles: ["admin"]}, token: 'fake-jwt-token' } })
+        // ));
+        // connection.mockError(<any>new Response(
+        //   new ResponseOptions({ status: 401, body: { message: "Invalid user login" }})
+        // ));
+        connection.mockRespond(<any>new Response(
+          new ResponseOptions({ status: 401, body: { message: "Invalid user login" }})
         ));
       }
 
@@ -149,6 +157,22 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
           let id = +connection.request.url.substring(connection.request.url.lastIndexOf('/') + 1);
           connection.mockRespond(new Response(
             new ResponseOptions({ status: 200, body: NETWORKS.filter(network => network.id === id)[0] })
+          ));
+        } else {
+          // return 401 not authorised if token is null or invalid
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 401 })
+          ));
+        }
+      }
+
+      // post networks
+      if (connection.request.url.endsWith('/daquery/ws/networks') && connection.request.method === RequestMethod.Post) {
+        // check for fake auth token in header and return test users if valid, this security is implemented server side
+        // in a real application
+        if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
+          connection.mockRespond(new Response(
+            new ResponseOptions({ status: 201, body: NETWORKS[0] })
           ));
         } else {
           // return 401 not authorised if token is null or invalid
@@ -357,19 +381,18 @@ export function fakeBackendFactory(backend: MockBackend, options: BaseRequestOpt
       if (/\/daquery\/ws\/users\/\d/.test(connection.request.url) && connection.request.method === RequestMethod.Put) {
         // check for fake auth token in header and return test users if valid, this security is implemented server side
         // in a real application
-        debugger;
         if (connection.request.headers.get('Authorization') === 'Bearer fake-jwt-token') {
           console.log(connection.request.getBody());
           // connection.mockRespond(new Response(
           //   new ResponseOptions({ status: 200, body: { } })
           // ));
            connection.mockError(<any>new Response(
-            new ResponseOptions({ status: 401, body: { error: 401.2, message: "401.2" }})
+            new ResponseOptions({ status: 401, body: { subcode: 401.2, message: "401.2" }})
           ));
         } else {
           // return 401 not authorised if token is null or invalid
           connection.mockRespond(new Response(
-            new ResponseOptions({ status: 401, body: { error: 401.2, message: "401.2" }})
+            new ResponseOptions({ status: 401, body: { subcode: 401.2, message: "401.2" }})
           ));
         }
       }

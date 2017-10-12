@@ -34,7 +34,6 @@ export class QueryService {
   }
 
   getQueriesFromMe(): Observable<QueryFromMe[]> {
-    // return this.queriesFromMe = QUERIES_FROM_ME.slice(0);
     return this.http.get('/daquery/ws/queries-from-me', this.jwt())
                     .map((response: Response) => <QueryFromMe[]>response.json())
                     .catch(error => {

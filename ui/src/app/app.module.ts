@@ -2,9 +2,13 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
 import { MomentModule } from 'angular2-moment';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { JWTInterceptor } from './services/interceptors/jwt-interceptor'
+import { ResInterceptor } from './services/interceptors/res-interceptor'
+import { MockHttpInterceptor } from './services/interceptors/mockup-interceptor';
 
 import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
@@ -48,6 +52,7 @@ import { LoginComponent } from './components/login/login.component';
 import { NetworksComponent } from './components/networks/networks.component';
 import { NetworkComponent } from './components/networks/network/network.component';
 import { AddNetworkComponent } from './components/networks/add-network/add-network.component';
+import { CreateNetworkComponent } from './components/networks/create-network/create-network.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { Error404Component } from './components/error-404/error-404.component';
 import { Error401Component } from './components/error-401/error-401.component';
@@ -57,6 +62,18 @@ import { Step1Component } from './components/setup/step1/step1.component';
 import { Step2Component } from './components/setup/step2/step2.component';
 import { Step3Component } from './components/setup/step3/step3.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
+
+import { environment } from '../environments/environment';
+
+let mockupInterceptor = [{
+  provide: HTTP_INTERCEPTORS,
+  useClass: MockHttpInterceptor,
+  multi: true,
+}];
+
+if(environment.production){
+  mockupInterceptor = [];
+}
 
 @NgModule({
   declarations: [
@@ -84,6 +101,7 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
     NetworksComponent,
     NetworkComponent,
     AddNetworkComponent,
+    CreateNetworkComponent,
     DashboardComponent,
     Error404Component,
     Error401Component,
@@ -97,7 +115,7 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule,
+    HttpClientModule,
     ReactiveFormsModule,
     routing,
     MomentModule,
@@ -112,6 +130,17 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
               NetworkService,
               NotificationService,
               SetupService,
+              {
+                provide: HTTP_INTERCEPTORS,
+                useClass: JWTInterceptor,
+                multi: true,
+              },
+              {
+                provide: HTTP_INTERCEPTORS,
+                useClass: ResInterceptor,
+                multi: true,
+              },
+              ...mockupInterceptor,
               // providers used to create fake backend
               fakeBackendProvider,
               MockBackend,

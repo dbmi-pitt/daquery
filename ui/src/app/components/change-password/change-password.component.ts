@@ -11,6 +11,7 @@ export class ChangePasswordComponent implements OnInit {
   model: any = {};
   loading = false;
   error = '';
+  success = false;
 
   constructor(private userService: UserService) { }
 
@@ -18,15 +19,26 @@ export class ChangePasswordComponent implements OnInit {
   }
 
   changePasswod(){
+    this.loading = true;
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const user = {
       id: currentUser.id,
-      password: this.model.new_password,
-      old_password: this.model.old_password
+      newPassword: this.model.new_password,
+      oldPassword: this.model.old_password
     };
     this.userService.changePassword(user)
                     .subscribe(res => {
-                      
+                      if(res == true){
+                        this.error = '';
+                        this.loading = false;
+                        this.success = true;
+                        setTimeout(() => {
+                          this.success = false;
+                        }, 3000);
+                      } else {
+                        this.error = 'Your password is incorrect';
+                        this.loading = false;
+                      }
                     });
   }
 

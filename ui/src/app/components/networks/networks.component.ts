@@ -9,10 +9,11 @@ import { Network } from '../../models/network.model';
   styleUrls: ['./networks.component.css']
 })
 export class NetworksComponent implements OnInit {
-  showAddNetwork = false;
+  showJoinNetwork = false;
+  showCreateNetwork = false;
 
   networks: Network[];
-  constructor(private networkService: NetworkService) { 
+    constructor(private networkService: NetworkService) { 
   }
 
   ngOnInit() {
@@ -22,6 +23,22 @@ export class NetworksComponent implements OnInit {
   getNetworks() {
     this.networkService.getNetworks()
                        .subscribe(networks => this.networks = networks);
+  }
+
+  toggleJoinNetwork(){
+    this.showJoinNetwork=!this.showJoinNetwork;
+    this.showCreateNetwork=false;
+  }
+
+  toggleCreateNetwork(){
+    this.showCreateNetwork=!this.showCreateNetwork;
+    this.showJoinNetwork=false;
+  }
+
+  addNewNetwork(network: Network){
+    this.showCreateNetwork = false;
+    this.showJoinNetwork = false;
+    this.networks.push(network);
   }
 
 }

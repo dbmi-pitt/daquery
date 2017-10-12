@@ -23,12 +23,13 @@ export class NavbarComponent implements OnInit {
   }
 
   getNotifications(){
-    Observable.interval(5000)
-              .switchMap(() => {
-                            return this.notificationService.getNotification() })
-              .subscribe(notifications => {
-                this.notifications = notifications;
-              });
+    // temperary turn down notificaition
+    // Observable.interval(5000)
+    //           .switchMap(() => {
+    //                         return this.notificationService.getNotification() })
+    //           .subscribe(notifications => {
+    //             this.notifications = notifications;
+    //           });
   }
 
   logout(){

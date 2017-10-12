@@ -7,26 +7,36 @@
       <h3 class="box-title">{{ network.name }}</h3>
     </div>
     <div class="box-body">
-      <form>
+      <form [formGroup]="form" (submit)="onSubmit()">
         <div class="form-group">
           <label for="sitename">Site Name</label>
-          <select class="form-control" id="sitename">
-            <option *ngFor="let site of sites">
+          <select #sitename class="form-control" formControlName="sitename" id="sitename">
+            <option>
+
+            </option>
+            <option *ngFor="let site of sites" [value]="site.name">
               {{ site.name }}
             </option>
+            <option value="new">
+              --New Site--
+            </option>
           </select>
+        </div>
+        <div *ngIf="sitename.value == 'new'" class="form-group">
+          <label for="siteurl">URL</label>
+          <input type="text" formControlName="siteurl" class="form-control" id="siteurl" placeholder="URL">
         </div>
         <div class="form-group">
           <label for="siteoption">Option</label>
           <div class="radio">
             <label>
-              <input type="radio" name="siteoptions">Query data
+              <input type="radio" formControlName="siteoptions" name="siteoptions">Query data
             </label><br />
             <label>
-              <input type="radio" name="siteoptions">Share data
+              <input type="radio" formControlName="siteoptions" name="siteoptions">Share data
             </label><br />
             <label>
-              <input type="radio" name="siteoptions">Both
+              <input type="radio" formControlName="siteoptions" name="siteoptions">Both
             </label>
           </div>
         </div>

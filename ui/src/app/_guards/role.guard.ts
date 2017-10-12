@@ -4,7 +4,7 @@ import { UserService } from '../services/user.service';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  currentUserRoles: string[] = JSON.parse(localStorage.getItem('currentUser')).roles;
+  currentUserRoles: string[] = JSON.parse(localStorage.getItem('currentUser')).roles.map(r => r.name.toLowerCase());
   constructor(private router: Router,
               private userService: UserService) {
    this.getCurrentUserRoles();
