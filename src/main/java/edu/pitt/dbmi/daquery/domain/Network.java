@@ -46,6 +46,18 @@ public class Network extends DaqueryObject implements Serializable {
 	@Expose
 	@Column(name = "NAME", nullable=false, length=100)
 	private String name;
+	
+	@Column(name = "DATABASE_URL", nullable=true, length=500)
+	private String database_url;
+	
+	@Column(name = "DATABASE_USERNAME", nullable=true, length=100)
+	private String database_username;
+	
+	@Column(name = "DATABASE_PASSWORD", nullable=true, length=100)
+	private String database_password;
+	
+	@Column(name = "DATA_MODEL", nullable=true, length=100)
+	private String data_model;
 
 	//bi-directional many-to-one association to InboundQuery
 	@Transient
@@ -91,6 +103,38 @@ public class Network extends DaqueryObject implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getDatabase_url() {
+		return database_url;
+	}
+
+	public void setDatabase_url(String database_url) {
+		this.database_url = database_url;
+	}
+
+	public String getDatabase_username() {
+		return database_username;
+	}
+
+	public void setDatabase_username(String database_username) {
+		this.database_username = database_username;
+	}
+
+	public String getDatabase_password() {
+		return database_password;
+	}
+
+	public void setDatabase_password(String database_password) {
+		this.database_password = database_password;
+	}
+
+	public String getData_model() {
+		return data_model;
+	}
+
+	public void setData_model(String data_model) {
+		this.data_model = data_model;
 	}
 
 	public List<Inbound_Query> getInboundQueries() {

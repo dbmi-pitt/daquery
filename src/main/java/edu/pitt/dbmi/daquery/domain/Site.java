@@ -64,6 +64,10 @@ public class Site extends DaqueryObject implements Serializable {
 	@Column(name= "NAME", nullable=false, length=100)
 	private String name;
 
+	/**
+	 * in: Sites which can query this site
+	 * out: Sites which this site can query
+	 */
 	@Expose
 	@Column(name= "TYPE", nullable=false, length=100)
 	private String type;
