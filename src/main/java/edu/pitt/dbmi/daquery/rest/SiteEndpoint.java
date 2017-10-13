@@ -11,6 +11,7 @@ import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -61,12 +62,12 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the sites found in the database.
-     * example URL: daquery-ws/ws/sites/
+     * example URL: daquery-ws/ws/sites?network_id=1
      * @return a JSON array containing all the sites
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
-    public Response getAllSites() {
+    public Response getAllSites(@QueryParam("network_id") long network_id) {
     	
     	try {
 
@@ -76,7 +77,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
                         
-            List<Site> site_list = SiteDAO.queryAllSites();
+            List<Site> site_list = SiteDAO.querySiteByNetworkId(network_id);
             
             if (site_list == null) {
                 return Response.status(NOT_FOUND).build();
@@ -163,30 +164,35 @@ public class SiteEndpoint extends AbstractEndpoint {
      */
     @POST
     @Secured
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createSite(@QueryParam("networkid") String networkid, Site newSite) {
+    //@Consumes(MediaType.APPLICATION_JSON)
+    //@Produces(MediaType.APPLICATION_JSON)
+    public Response createSite(LinkedHashMap<?, ?> newSite) {
         EntityManagerFactory emf = null;
         EntityManager em = null;
 
     	try {
-    		
-	        Network currentNetwork = NetworkDAO.queryNetwork(networkid);
+    		String network_id = (String) newSite.get("network_id"); 		
+	        Network currentNetwork = NetworkDAO.queryNetwork(network_id);
+	        Site site = new Site((String)newSite.get("name"),
+	        					 (String)newSite.get("url"),
+	        					 (String)newSite.get("admin_email"),
+	        					 (String)newSite.get("type"));
+	        
             if (currentNetwork == null) {
                 return Response.status(NOT_FOUND).build();
             }	        
-	        newSite.setNetwork(currentNetwork);
+	        site.setNetwork(currentNetwork);
 	        //persist changes
 	        emf = Persistence.createEntityManagerFactory("derby");
 	        em = emf.createEntityManager();
 	
 	        em.getTransaction().begin();
 	
-	        em.persist(newSite);
+	        em.persist(site);
 	        
 	        em.getTransaction().commit();
 
-	        return Response.ok(201).entity(newSite).build();
+	        return Response.ok(201).entity(site).build();
 	        
     	} catch (Exception e) {
     		logger.info(e.getMessage());

@@ -1,6 +1,9 @@
 package edu.pitt.dbmi.daquery.domain;
 
 import java.io.Serializable;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,6 +18,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.GenericGenerator;
 
 import com.google.gson.annotations.Expose;
 
@@ -33,6 +38,7 @@ import java.util.Objects;
 	@NamedQuery(name=Site.FIND_ALL, query="SELECT s FROM Site s"),
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
 	@NamedQuery(name=Site.FIND_BY_TYPE, query="SELECT s FROM Site s WHERE s.type = :type"),
+	@NamedQuery(name=Site.FIND_BY_NETWORK, query="SELECT s FROM Site s WHERE s.network.id = :network_id"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
 
@@ -46,6 +52,7 @@ public class Site extends DaqueryObject implements Serializable {
     public static final String FIND_ALL = "Site.findAll";
     public static final String FIND_BY_ID = "Site.findId";
     public static final String COUNT_ALL = "Site.countAll";
+    public static final String FIND_BY_NETWORK = "Site.findByNetwork";
     public static final String FIND_BY_TYPE = "Site.findByType";
 
 	private static final long serialVersionUID = 1L;
@@ -57,6 +64,8 @@ public class Site extends DaqueryObject implements Serializable {
 	private long id;
 
 	@Expose
+	@GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "SITE_ID", unique = true, length=50)
 	private String site_id;
 
@@ -96,9 +105,9 @@ public class Site extends DaqueryObject implements Serializable {
     @Transient
 	@OneToMany(mappedBy="site")
 	private List<OutboundQuery> outboundQueries;
-
+    
 	//bi-directional many-to-one association to Network
-	@Expose
+    @Expose
 	@ManyToOne
 	@JoinColumn(name="NETWORK_ID", nullable=false)
 	private Network network;
@@ -112,6 +121,13 @@ public class Site extends DaqueryObject implements Serializable {
 	private java.util.Date request_replied;
 	
 	public Site() {
+	}
+	
+	public Site(String name, String url, String admin_email, String type) {
+		this.name = name;
+		this.url = url;
+		this.admin_email = admin_email;
+		this.type = type;
 	}
 	
 	//TODO: I need some more constructors

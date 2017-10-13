@@ -56,12 +56,9 @@ public class Network extends DaqueryObject implements Serializable {
 	@Column(name = "DATABASE_PASSWORD", nullable=true, length=100)
 	private String database_password;
 	
+	@Expose
 	@Column(name = "DATA_MODEL", nullable=true, length=100)
 	private String data_model;
-
-	@Expose
-	@Column(name = "DATA_MDOEL_NAME", nullable=false, length=200)
-	private String data_model_name;
 	
 	//bi-directional many-to-one association to InboundQuery
 	@Transient
@@ -74,8 +71,8 @@ public class Network extends DaqueryObject implements Serializable {
 	private List<OutboundQuery> outboundQueries;
 
 	//bi-directional many-to-one association to Site
-	@Transient
-	@OneToMany(mappedBy="network")
+	//@Transient
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy="network")
 	private List<Site> sites;
 
 	public Network() {
