@@ -71,6 +71,7 @@ public class Network extends DaqueryObject implements Serializable {
 	private List<OutboundQuery> outboundQueries;
 
 	//bi-directional many-to-one association to Site
+	//@Expose
 	//@Transient
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy="network")
 	private List<Site> sites;
