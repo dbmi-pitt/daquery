@@ -28,7 +28,7 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 @Path("/")
-public class CentralService {
+public class CentralService extends javax.ws.rs.core.Application{
 	
 	private static Logger log = Logger.getLogger(CentralService.class.getName());
 	
