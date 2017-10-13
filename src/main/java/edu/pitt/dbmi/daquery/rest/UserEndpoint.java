@@ -257,7 +257,7 @@ public class UserEndpoint extends AbstractEndpoint {
      * or a SERVER ERROR if there was a problem. 
      */
     
-    @POST
+/*    @POST
     @Secured
     @Path("/firstadmin")
     public Response createFirstAdmin(@Context HttpHeaders httpheaders, @QueryParam("login") String login,
@@ -328,7 +328,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	    		em.close();
 	    	}
 	    }
-    }
+    } */
     
     /**
      * Get a JSON string representing a user given the user's UUID
