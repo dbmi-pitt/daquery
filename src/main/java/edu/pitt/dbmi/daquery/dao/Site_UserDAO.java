@@ -20,7 +20,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;

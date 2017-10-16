@@ -30,7 +30,6 @@ import javax.ws.rs.ext.Provider;
 
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 
 import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
