@@ -45,7 +45,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
     SecurityContext securityContext;
 
 	
-	private final static Logger logger = Logger.getLogger(NetworkEndpoint.class.getName());
+    private final static Logger logger = Logger.getLogger(NetworkEndpoint.class.getName());
 	
 	/**
      * Get all joined networks
@@ -140,19 +140,4 @@ public class NetworkEndpoint extends AbstractEndpoint {
         }
             
     }
-
-    private List<Network> queryAllNetworks() throws Exception {
-    	try { 		
-    	    List<Network> networks = executeQueryReturnList(Network.FIND_ALL, null, logger);
-	        return networks;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-
-
 }

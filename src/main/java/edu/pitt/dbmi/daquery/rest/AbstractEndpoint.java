@@ -10,6 +10,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.domain.Network;
 
 
 //TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"
@@ -17,6 +18,8 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 //a class.  The class will convert the object name to the /{objectname} @Path item
 public class AbstractEndpoint {
 
+	private final static Logger absLog = Logger.getLogger(AbstractEndpoint.class.getName());
+	
     /**
      * This inner class holds the database query parameter pairing for 
      * queries.  Each pairing is a string and object.
@@ -156,4 +159,17 @@ public class AbstractEndpoint {
             
     }
 
+    
+    protected List<Network> queryAllNetworks() throws Exception {
+    	try { 		
+    	    List<Network> networks = executeQueryReturnList(Network.FIND_ALL, null, absLog);
+	        return networks;
+	    
+        } catch (PersistenceException e) {
+    		absLog.info("Error unable to connect to database.  Please check database settings.");
+    		absLog.info(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+    
 }
