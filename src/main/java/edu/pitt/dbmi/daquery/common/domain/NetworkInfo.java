@@ -12,5 +12,7 @@ public class NetworkInfo extends DaqueryObject
 	@Expose
 	public String name;
 	@Expose
+	public String dataModel;
+	@Expose
 	public List<SiteInfo> allowedSites = new ArrayList<SiteInfo>();		
 }
