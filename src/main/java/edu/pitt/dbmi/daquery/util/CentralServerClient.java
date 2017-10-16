@@ -6,7 +6,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 public class CentralServerClient
@@ -28,7 +28,7 @@ public class CentralServerClient
 	private String baseURL()
 	{
 		if(baseUrl == null)
-			baseUrl = StringHelper.ensureTrailingSlash(PropertiesHelper.getCentralServerURL()) + StringHelper.ensureTrailingSlash(centralTopPath);
+			baseUrl = StringHelper.ensureTrailingSlash(AppProperties.getCentralServerURL()) + StringHelper.ensureTrailingSlash(centralTopPath);
 		return(baseUrl);
 	}
 }

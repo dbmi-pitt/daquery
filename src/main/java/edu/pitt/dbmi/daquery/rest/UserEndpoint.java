@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
@@ -152,7 +152,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	
     	//TODO: Reject any communication coming across anything other than HTTPS:
     	//here is the check:
-    	if (!PropertiesHelper.isDebugMode()) {
+    	if (!AppProperties.isDebugMode()) {
     	
 	    	if (uriInfo.getRequestUri().getScheme() != "https") {
 	            throw new NotAuthorizedException("You must access web services using https");    		

@@ -5,12 +5,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
@@ -20,8 +17,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.util.UserRoles;
 
@@ -29,6 +29,17 @@ import edu.pitt.dbmi.daquery.util.UserRoles;
 public class DaqueryEndpoint
 {
 	private final static Logger log = Logger.getLogger(DaqueryEndpoint.class.getName());
+
+	public static void main (String [] args) throws Exception
+	{
+		AppProperties.setDevHomeDir("/usr/local/apache-tomcat-6.0.53");
+		Map<String, String> idParam = new HashMap<String, String>();
+		idParam.put("site-id", AppProperties.getDBProperty("site.id"));
+		Response resp = callCentralServer("availableNetworks",  idParam);
+		String json = resp.readEntity(String.class);
+		Map<String, String> vals = JSONHelper.toMap(json);
+		System.out.println(vals);
+	}
 	
     @Context
     private UriInfo uriInfo;
@@ -63,31 +74,53 @@ public class DaqueryEndpoint
 	 */
 	@Secured(UserRoles.ADMIN)
     @GET
-    @Path("/available-networks/{siteid}")
+    @Path("/available-networks/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response availableNetworks(@PathParam("siteid") String id) {
+    public Response availableNetworks() {
     	
     	return(null);
     	
     }
 	
+	
+	/**
+	 * Set up the application database for a local site and registers the site with the central server.
+	 * Requires a site name and key to authenticate against the DaqueryCentral server.  
+	 * 
+	 * @param siteName DaqueryCentral registered site name.
+	 * @param siteKey DaqueryCentral key that matches 
+	 * 
+	 * @return On success a 200 http response with the site-id encoded in json.  On failure a 500 http response.
+	 */
 	@GET
 	@Path("setupSite")
 	public Response setupSite(@DefaultValue("") @QueryParam("site-name") String siteName, @DefaultValue("") @QueryParam("site-key") String siteKey)
 	{
 		try
 		{
-	    	if (! PropertiesHelper.isDebugMode() && uriInfo.getRequestUri().getScheme() != "https") {
+	    	if (! AppProperties.isDebugMode() && uriInfo.getRequestUri().getScheme() != "https") {
 	            return(ResponseHelper.getBasicResponse(500, "This service must be accessed via https only"));    		
 	    	}
 	    	
-	    	callCentralServer("authenticateSite", siteName, siteKey, null);
+
 	    	
 			int dbStatus = AppSetup.getDBStatus();
 			if(dbStatus == AppSetup.DBSTATUS_EMPTY)
 			{
+				Response resp = callCentralServerAuth(siteName, siteKey);
+		    	if(resp.getStatus() != 200)
+		    		return(ResponseHelper.getBasicResponse(401, "Authentication Failed"));
+		    	
+				String jsonval = resp.readEntity(String.class);
+				Map<String, String> jmap = JSONHelper.toMap(jsonval);
+				String key = jmap.get("new-site-key");
+				String siteId = jmap.get("site-id");		    	
+		    	AppProperties.setDBProperty("central.site.key", key);
+		    	AppProperties.setDBProperty("site.id", siteId);
+		    	AppProperties.setDBProperty("site.name", siteName);
 				if(AppSetup.initialize())
 				{
+					
 					String adminPwd = AppSetup.getFirstUserPwd();
 					HashMap<String, String> adminDetails = new HashMap<String, String>();
 					adminDetails.put("username", "admin");
@@ -109,19 +142,46 @@ public class DaqueryEndpoint
 		}
 	}
 	
-	private Response callCentralServer(String serviceName, String siteName, String siteKey, Map<String, String> additionalParameters)
+	private static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
-		String url = PropertiesHelper.getCentralServerURL() + "/daquery-central/serviceName?site=" +siteName + "&key=" + siteKey;
+		String siteId = AppProperties.getDBProperty("site.id");
+		String siteKey = AppProperties.getDBProperty("central.site.id");
+		Response auth = callCentralServerAuth(siteId, siteKey);
+		if(auth.getStatus() != 200)
+			return(auth);
+		//TODO grab the token from the auth response and send it along with the call
+		String url = AppProperties.getCentralServerURL() + "/daquery-central/" +  serviceName;
 		if(additionalParameters != null)
 		{
+			String paramDivider = "?";
+			if(url.contains("?"))
+				paramDivider = "&";			
+			boolean firstParam = true;
 			for(String key :additionalParameters.keySet())
 			{
-				url = url + "&" + key + "=" + additionalParameters.get(key);
+				url = url + paramDivider + key + "=" + additionalParameters.get(key);
+				if(firstParam)
+				{
+					paramDivider = "&";
+					firstParam = false;
+				}
 			}
 		}
 		
 		Client client = ClientBuilder.newClient();
 		
+		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
+		return(rVal);
+		
+	}
+	
+	private static Response callCentralServerAuth(String siteName, String siteKey) throws DaqueryException
+	{
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("site", siteName);
+		params.put("key", siteKey);
+		Client client = ClientBuilder.newClient();
+		String url = AppProperties.getCentralServerURL() + "/daquery-central/authenticateSite?site=" +siteName + "&key=" + siteKey;
 		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
 		return(rVal);
 	}

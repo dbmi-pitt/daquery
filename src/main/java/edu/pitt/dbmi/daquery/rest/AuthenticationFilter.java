@@ -29,7 +29,7 @@ import javax.ws.rs.ext.Provider;
 
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 import edu.pitt.dbmi.daquery.util.UserRoles;
 import io.jsonwebtoken.ClaimJwtException;
@@ -65,7 +65,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     	//TODO: Reject any communication coming across anything other than HTTPS:
     	//here is the check:
-    	if (!PropertiesHelper.isDebugMode()) {
+    	if (!AppProperties.isDebugMode()) {
     	
 	    	if (requestContext.getUriInfo().getRequestUri().getScheme() != "https") {
 	            throw new NotAuthorizedException("You must access web services using https");    		
