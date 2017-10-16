@@ -1,13 +1,34 @@
 package edu.pitt.dbmi.daquery.common.util;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
 public class JSONHelper
 {
+	
+    private static Gson gson = new GsonBuilder()
+    		.excludeFieldsWithoutExposeAnnotation()
+            .registerTypeAdapter(DateTime.class, new JsonSerializer<DateTime>() {
+                
+                public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
+                    return new JsonPrimitive(ISODateTimeFormat.dateTime().print(src));
+                }
+            }).create();
 	/**
 	 * Convert an object to JSON.
      * @param value An object to convert to JSON. Valid object types are
@@ -81,6 +102,18 @@ public class JSONHelper
 			throw new DaqueryException("JSON conversion is only supported for types Map<String, Object>, DaqueryObject and List<DaqueryObject>.  An object of type " + value.getClass().getSimpleName() +  " found"); 
 	}
 	
+	/**
+	 * Convert json formatted text to a HashMap
+	 * 
+	 * @param json
+	 * @return
+	 */
+	public static Map<String, String> toMap(String json)
+	{
+		Type type = new TypeToken<Map<String, String>>(){}.getType();
+		Map<String, String> rVal = gson.fromJson(json, type);
+		return(rVal);
+	}
 	private static String jsonValue(Object obj)
 	{
 		if(obj instanceof Integer || obj instanceof Double || obj instanceof Float || obj instanceof Long)

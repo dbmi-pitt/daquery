@@ -47,7 +47,7 @@ public class ApplicationDBHelper
 	
 	public static String getDBURL() throws Exception
 	{
-		return("jdbc:derby:" + PropertiesHelper.getDBDir());
+		return("jdbc:derby:" + AppProperties.getDBDir());
 	}
 	
 	public static void printResult(ResultSet rs)

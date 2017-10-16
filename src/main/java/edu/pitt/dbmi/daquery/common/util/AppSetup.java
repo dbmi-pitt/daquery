@@ -64,12 +64,12 @@ public class AppSetup
 	 */
 	private static boolean initializeDB()
 	{
-		if(PropertiesHelper.getHomeDirectory() == null)
+		if(AppProperties.getHomeDirectory() == null)
 		{
 			setErroredSetup("Unable to find the Tomcat home directory.  Make sure the environment variable, CATALINA_HOME, is set and points to the root of your Tomcat installation directory.");
 			return(false);
 		}
-		if(PropertiesHelper.getConfDirectory() == null)
+		if(AppProperties.getConfDirectory() == null)
 		{
 			setErroredSetup("Unable to find the Tomcat configuration directory.  Make sure the environment variable, CATALINA_HOME, is set and points to the root of your Tomcat installation directory.");
 			return(false);
@@ -79,7 +79,7 @@ public class AppSetup
 		{
 			if(! mkConfDir())
 			{	
-				setErroredSetup("Tomcat Configuration Dir: " + PropertiesHelper.getConfDirectory() + " is not writable."); 
+				setErroredSetup("Tomcat Configuration Dir: " + AppProperties.getConfDirectory() + " is not writable."); 
 				return(false);
 			}
 		}
@@ -100,7 +100,7 @@ public class AppSetup
 		{
 			if(initializeDBData())
 			{
-				if(PropertiesHelper.setupAdminUser())
+				if(AppProperties.setupAdminUser())
 				{
 					if(! setupAdminUser())
 					{
@@ -175,7 +175,7 @@ public class AppSetup
 	}
 	private static boolean isConfDirWritable()
 	{
-		File f = new File(PropertiesHelper.getConfDirectory());
+		File f = new File(AppProperties.getConfDirectory());
 		return(f.canWrite());
 	}
 
@@ -183,7 +183,7 @@ public class AppSetup
 	{
 		try
 		{
-			Path p = Paths.get(PropertiesHelper.getConfDirectory());
+			Path p = Paths.get(AppProperties.getConfDirectory());
 			Files.createDirectories(p);
 		}
 		catch(Throwable t){return(false);}
@@ -192,7 +192,7 @@ public class AppSetup
 	
 	private static boolean initializeDBData()
 	{
-		InputStream is = ApplicationProperties.class.getResourceAsStream("/" + PropertiesHelper.getInitializationDDL());
+		InputStream is = ApplicationPropertiesFile.class.getResourceAsStream("/" + AppProperties.getInitializationDDL());
 		if(! ApplicationDBHelper.executeDDL(is))
 		{
 			setErroredSetup("An error occured while trying to initialize the application database.  Check the application logs for more information.");
@@ -207,7 +207,7 @@ public class AppSetup
 				String currentDateTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
 				conn = ApplicationDBHelper.getConnection();
 				st = conn.createStatement();
-				st.executeUpdate("insert into property (id, name, value) values (1, 'current.version', '" + PropertiesHelper.getCurrentVersion() + "')");
+				st.executeUpdate("insert into property (id, name, value) values (1, 'current.version', '" + AppProperties.getCurrentVersion() + "')");
 				st.executeUpdate("insert into property (id, name, value) values (2, 'initial.setup', '" + currentDateTime + "')");
 				conn.commit();
 				return(true);
@@ -231,7 +231,7 @@ public class AppSetup
 		{
 			String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 			Class.forName(driver);
-			String url = "jdbc:derby:" + PropertiesHelper.getDBDir();
+			String url = "jdbc:derby:" + AppProperties.getDBDir();
 			conn = DriverManager.getConnection(url);
 			return(true);
 		}
@@ -288,7 +288,7 @@ public class AppSetup
 		{
 			return(AppSetup.DBSTATUS_EMPTY);
 		}
-		else if(tableCount != PropertiesHelper.getCurrentTableCount())
+		else if(tableCount != AppProperties.getCurrentTableCount())
 		{
 			log.log(Level.SEVERE, "The application database table count does not match the current model.");
 			return(AppSetup.DBSTATUS_INDETERMINATE);
@@ -310,7 +310,7 @@ public class AppSetup
 				log.log(Level.SEVERE, "Unable to get application version number from the application database.");;
 				return(DBSTATUS_INDETERMINATE);
 			}
-			if(version == null || ! version.trim().equals(PropertiesHelper.getCurrentVersion().trim()))
+			if(version == null || ! version.trim().equals(AppProperties.getCurrentVersion().trim()))
 			{
 				log.log(Level.SEVERE, "The applicationcurrent version does not match the configured version.");
 				return(DBSTATUS_INDETERMINATE);
