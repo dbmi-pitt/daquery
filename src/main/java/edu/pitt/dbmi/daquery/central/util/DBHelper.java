@@ -16,7 +16,7 @@ public class DBHelper
 	public static void main(String [] args) throws Exception
 	{
 		//for testing set the location of the application database
-		PropertiesHelper.setDevHomeDir("/home/devuser/daquery-data");
+		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
 		List<NetworkInfo> netInfo = getAllowedNetworks("20b23b5c-61ad-44eb-8eef-886adcced18e");
 		for(NetworkInfo net : netInfo)
 		{
@@ -124,7 +124,8 @@ public class DBHelper
 			{
 				conn = ApplicationDBHelper.getConnection();
 				stat = conn.createStatement();
-				stat.executeUpdate("update site set access_key = '" + newKey + "', tempkey = false where id = " + info.id);
+				String sql = "update site set access_key = '" + newKey + "', tempkey = false where id = '" + info.id + "'";
+				stat.executeUpdate(sql);
 				conn.commit();
 				return(newKey);
 			}

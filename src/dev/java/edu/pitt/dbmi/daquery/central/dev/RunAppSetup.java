@@ -1,13 +1,13 @@
 package edu.pitt.dbmi.daquery.central.dev;
 
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 
 public class RunAppSetup
 {
 	public static void main(String [] args)
 	{
-		PropertiesHelper.setDevHomeDir("/Users/bill/daquery-data");
+		AppProperties.setDevHomeDir("/usr/local/apache-tomcat-6.0.53");
 		AppSetup.initialize();
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());

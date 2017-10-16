@@ -23,12 +23,12 @@ import edu.pitt.dbmi.daquery.central.util.DBHelper;
 import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
 import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 @Path("/")
-public class CentralService extends javax.ws.rs.core.Application{
+public class CentralService{
 	
 	private static Logger log = Logger.getLogger(CentralService.class.getName());
 	
@@ -37,7 +37,7 @@ public class CentralService extends javax.ws.rs.core.Application{
 	
     public static void main(String [] args) throws Exception
     {
-    	PropertiesHelper.setDevHomeDir("/Users/bill/daquery-data");
+    	AppProperties.setDevHomeDir("/Users/bill/daquery-data");
     	Gson gson = new GsonBuilder().create();
     	String jsonTxt = "[{\"id\":\"9dc38074-a153-4183-a36f-2b64cf75c13c\",\"name\":\"devCandB\",\"allowedSites\":[{\"id\":\"0f2378ec-d9ce-489a-b338-c8f82e567f40\",\"siteName\":\"chuck-dev\",\"siteURL\":\"http://borromeo-lp.dbmi.pitt.edu:8080/\"},{\"id\":\"20b23b5c-61ad-44eb-8eef-886adcced18e\",\"siteName\":\"bill-dev\",\"siteURL\":\"http://shirey-dt-032.dbmi.pitt.edu:8080/\"}]}, {\"id\":\"afff8323-176c-4cb0-9d2c-cccc03fff101\",\"name\":\"devDandB\",\"allowedSites\":[{\"id\":\"bcfdd450-3dd8-4ced-9599-c65de7c9f115\",\"siteName\":\"desheng-dev\",\"siteURL\":\"http://del20-dt.univ.pitt.edu:8080/\"},{\"id\":\"20b23b5c-61ad-44eb-8eef-886adcced18e\",\"siteName\":\"bill-dev\",\"siteURL\":\"http://shirey-dt-032.dbmi.pitt.edu:8080/\"}]}, {\"id\":\"fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823\",\"name\":\"devALL\",\"allowedSites\":[{\"id\":\"bcfdd450-3dd8-4ced-9599-c65de7c9f115\",\"siteName\":\"desheng-dev\",\"siteURL\":\"http://del20-dt.univ.pitt.edu:8080/\"},{\"id\":\"0f2378ec-d9ce-489a-b338-c8f82e567f40\",\"siteName\":\"chuck-dev\",\"siteURL\":\"http://borromeo-lp.dbmi.pitt.edu:8080/\"},{\"id\":\"20b23b5c-61ad-44eb-8eef-886adcced18e\",\"siteName\":\"bill-dev\",\"siteURL\":\"http://shirey-dt-032.dbmi.pitt.edu:8080/\"}]}]";    			
     	NetworkInfo[] address = gson.fromJson(jsonTxt, NetworkInfo[].class);
@@ -48,6 +48,13 @@ public class CentralService extends javax.ws.rs.core.Application{
    	System.out.println(JSONHelper.toJSON(networks)); */
     }
     
+    @GET
+    @Path("/hello")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response helloWorld()
+    {
+    	return(ResponseHelper.getBasicResponse(200, "Hello Cruel Central World"));
+    }
 	/**
 	 * Authenticate a site/key pair.  On success a jwt will be sent back.  If the site key
 	 * is flagged as temporary a new key is generated and sent back along with the site id
@@ -58,7 +65,7 @@ public class CentralService extends javax.ws.rs.core.Application{
 	 * @return 200 with info specified above, 401 if authentication fails or 400/500 on error.
 	 */
 	@GET
-	@Path("authenticatSite/")
+	@Path("authenticateSite/")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)	
 	public Response authenticateSite(@QueryParam("site") String site, @QueryParam("key") String key)
@@ -89,8 +96,6 @@ public class CentralService extends javax.ws.rs.core.Application{
 		{			
 			return(ResponseHelper.getBasicResponse(500, dce.getMessage()));
 		}
-		
-		
 	}
 	
 	@GET
