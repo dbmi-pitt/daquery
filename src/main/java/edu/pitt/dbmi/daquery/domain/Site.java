@@ -39,6 +39,7 @@ import java.util.Objects;
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
 	@NamedQuery(name=Site.FIND_BY_TYPE, query="SELECT s FROM Site s WHERE s.type = :type"),
 	@NamedQuery(name=Site.FIND_BY_NETWORK, query="SELECT s FROM Site s WHERE s.network.id = :network_id"),
+	@NamedQuery(name=Site.FIND_BY_NETWORK_TYPE, query="SELECT s FROM Site s WHERE s.network.id = :network_id and s.type = :type"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
 
@@ -53,6 +54,7 @@ public class Site extends DaqueryObject implements Serializable {
     public static final String FIND_BY_ID = "Site.findId";
     public static final String COUNT_ALL = "Site.countAll";
     public static final String FIND_BY_NETWORK = "Site.findByNetwork";
+    public static final String FIND_BY_NETWORK_TYPE = "Site.findByNetworkType";
     public static final String FIND_BY_TYPE = "Site.findByType";
 
 	private static final long serialVersionUID = 1L;
@@ -131,7 +133,7 @@ public class Site extends DaqueryObject implements Serializable {
 	}
 	
 	//TODO: I need some more constructors
-	//take nmae, URL, adminEmail, status as parameters 
+	//take name, URL, adminEmail, status as parameters 
 	//make an option one that take a UUID
 	public Site(String newName) {
 		this.name = newName;

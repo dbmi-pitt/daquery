@@ -91,27 +91,28 @@ public class NetworkEndpoint extends AbstractEndpoint {
     }
     
     /**
-     * Get specific network by UUID
-     * example url: daquery-ws/ws/networks/a3477419-657d-4ddd-8750-c014e2033937
+     * Get specific network by ID or UUID
+     * example url: daquery-ws/ws/networks/1
+     *           or daquery-ws/ws/networks/a3477419-657d-4ddd-8750-c014e2033937
      * @return 200 OK			Network information for one network
      * @throws 500 Server Error	error message
      * @throws 401 Unauthorized	
      */
     @GET
     @Secured
-    @Path("/{uuid}")
+    @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response retrieveNetworkByID(@PathParam("uuid") String uuid) {
+    public Response retrieveNetworkByID(@PathParam("id") String id) {
     	try {
 
-            logger.info("#### returning network by uuid=" + uuid);
+            logger.info("#### returning network by uuid=" + id);
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            Network network = NetworkDAO.queryNetwork(uuid);
+            Network network = NetworkDAO.queryNetwork(id);
             
             if (network == null) {
                 return Response.status(NOT_FOUND).build();
