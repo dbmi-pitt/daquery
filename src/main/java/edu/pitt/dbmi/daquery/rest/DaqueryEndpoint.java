@@ -15,6 +15,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Context;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -27,9 +28,9 @@ import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
-import edu.pitt.dbmi.daquery.util.UserRoles;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
@@ -52,7 +53,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			String json = resp.readEntity(String.class);
 			NetworkInfo[] ninfo = JSONHelper.gson.fromJson(json, NetworkInfo[].class);
 			DaqueryEndpoint de = new DaqueryEndpoint();
-			List<Network> nets = de.queryAllNetworks();
+			List<Network> nets = NetworkDAO.queryAllNetworks();
 			List<SiteInfo> sitesToRemove = new ArrayList<SiteInfo>();
 			for(NetworkInfo nin : ninfo)
 			{
@@ -121,7 +122,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	 *  
 	 * @return A list of NetworkInfo objects encoded as json
 	 */
-	@Secured(UserRoles.ADMIN)
+	@Secured("ADMIN")
     @GET
     @Path("/available-networks/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -136,7 +137,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				String json = resp.readEntity(String.class);
 				NetworkInfo[] ninfo = JSONHelper.gson.fromJson(json, NetworkInfo[].class);
 				DaqueryEndpoint de = new DaqueryEndpoint();
-				List<Network> nets = de.queryAllNetworks();
+				List<Network> nets = NetworkDAO.queryAllNetworks();
 				List<SiteInfo> sitesToRemove = new ArrayList<SiteInfo>();
 				for(NetworkInfo nin : ninfo)
 				{

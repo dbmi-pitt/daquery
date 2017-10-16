@@ -3,6 +3,8 @@ package edu.pitt.dbmi.daquery.domain;
 import java.io.Serializable;
 import javax.persistence.*;
 
+import com.google.gson.annotations.Expose;
+
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
 import java.util.List;
@@ -14,21 +16,20 @@ import java.util.Objects;
  * 
  */
 @Entity
-@Table(name="ROLE")
+@Table(name="Role")
 @NamedQuery(name="Role.findAll", query="SELECT r FROM Role r")
 public class Role extends DaqueryObject implements Serializable {
 	private static final long serialVersionUID = 1L;
-
+	
+	@Expose
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(unique=true, nullable=false)
 	private long id;
 
+	@Expose
 	@Column(nullable=false, length=50)
 	private String name;
-
-	@Column(nullable=false, length=50)
-	private String type;
 
 	//bi-directional many-to-many association to User
 	@ManyToMany(mappedBy="roles")
@@ -51,14 +52,6 @@ public class Role extends DaqueryObject implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getType() {
-		return this.type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public List<Site_User> getUsers() {

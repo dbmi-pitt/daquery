@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.daquery.rest;
+package edu.pitt.dbmi.daquery.dao;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -9,64 +9,9 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
-import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.Network;
 
+public abstract class AbstractDAO {
 
-//TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"
-//, and create new object calls.  Try a factory to do this.  The factory takes 
-//a class.  The class will convert the object name to the /{objectname} @Path item
-public class AbstractEndpoint {
-
-	private final static Logger absLog = Logger.getLogger(AbstractEndpoint.class.getName());
-	
-    /**
-     * This inner class holds the database query parameter pairing for 
-     * queries.  Each pairing is a string and object.
-     * This object is stored in a List and then looped
-     * when building the query.
-     * @author devuser
-     *
-     */
-	protected class ParameterItem {
-		
-		public String paramName;
-		public Object paramObject;
-		
-		public ParameterItem(String name, Object obj) {
-			this.paramName = name;
-			this.paramObject = obj;
-		}
-		
-		public String getParamName() {
-			return this.paramName;
-		}
-		
-		public Object getParamObject() {
-			return this.paramObject;
-		}
-	}
-	
-	/**
-	 * A simple method that converts an array of DaqueryObjects to a JSON array
-	 * @param jsonList- the list of DaqueryObjects to represent as JSON
-	 * @return a String representing a JSON array
-	 */
-	protected String toJsonArray(List<? extends DaqueryObject> jsonList) {
-        String jsonString = "[";
-        for (DaqueryObject obj : jsonList) {
-        	jsonString = jsonString + obj.toJson() + ", ";
-        }
-        jsonString = jsonString.substring(0, jsonString.length()-2) + "]";
-        
-        //cover an empty list
-        if (jsonList.isEmpty()) {
-        	jsonString = "[ ]";
-        }
-        return jsonString;
-		
-	}
-	
 	/**
 	 * Very generic query method that returns a List of objects from the database.
 	 * @param namedQuery- the namedQuery to be executed
@@ -81,7 +26,7 @@ public class AbstractEndpoint {
 	//TODO: Add LIMIT and OFFSET options for query
 	//check to see how to manage this in JPA
 	//try this: https://stackoverflow.com/questions/25008472/pagination-in-spring-data-jpa-limit-and-offset
-    protected <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+    protected static <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
@@ -126,7 +71,7 @@ public class AbstractEndpoint {
 	 * null if no data is returned.
 	 * @throws Exception
 	 */
-    protected <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+    protected static <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
@@ -155,6 +100,8 @@ public class AbstractEndpoint {
     		if (em != null) {
     			em.close();
     		}
-    	}       
+    	}
+            
     }
+
 }

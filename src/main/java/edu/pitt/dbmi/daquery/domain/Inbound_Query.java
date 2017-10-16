@@ -177,13 +177,13 @@ public class Inbound_Query extends DaqueryObject implements Serializable {
 		return this.site;
 	}
 	
-    public Long getSiteId() {
+    public long getSiteId() {
     	if (this.site == null)
-    		return (long) -1;
+    		return -1;
     	return this.site.getId();
     }	
 	
-	public void setSiteId(long site_id) {
+	public void setSiteId(String site_id) {
 		//TODO: this is a dummy call right now
 		//to satisfy JPA
 		//we need to look up the site according to site_id
