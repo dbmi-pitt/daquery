@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.pitt.dbmi.daquery.common.util.*;
+import edu.pitt.dbmi.daquery.central.ExtendedSiteInfo;
 import edu.pitt.dbmi.daquery.common.domain.*;
 
 public class DBHelper
@@ -42,7 +43,7 @@ public class DBHelper
 	{
 		try
 		{
-			SiteInfo info = DBHelper.getSiteInfo(siteNameOrId);
+			ExtendedSiteInfo info = DBHelper.getExtendedSiteInfo(siteNameOrId);
 			return(sitekey.equals(info.accessKey));
 		}
 		catch(Throwable t)
@@ -65,7 +66,7 @@ public class DBHelper
 	{
 		try
 		{
-			SiteInfo info = DBHelper.getSiteInfo(siteNameOrId);
+			ExtendedSiteInfo info = DBHelper.getExtendedSiteInfo(siteNameOrId);
 			return(info.tempKey);
 		}
 		catch(Throwable t)
@@ -88,7 +89,7 @@ public class DBHelper
 	{
 		try
 		{
-			SiteInfo info = DBHelper.getSiteInfo(sitename);
+			SiteInfo info = DBHelper.getExtendedSiteInfo(sitename);
 			return(info.id);
 			
 		}
@@ -118,7 +119,7 @@ public class DBHelper
 		Statement stat = null;
 		try
 		{
-			SiteInfo info = DBHelper.getSiteInfo(siteNameOrId);
+			SiteInfo info = DBHelper.getExtendedSiteInfo(siteNameOrId);
 			String newKey = PasswordUtils.randomPassword(24);
 			if(info.id != null)
 			{
@@ -149,7 +150,7 @@ public class DBHelper
 	 * @return A SiteInfo object with the information for the site or a null if no record was found.
 	 * @throws DaqueryCentralException
 	 */
-	private static SiteInfo getSiteInfo(String siteNameOrId) throws DaqueryCentralException
+	private static ExtendedSiteInfo getExtendedSiteInfo(String siteNameOrId) throws DaqueryCentralException
 	{
 		Connection conn = null;
 		Statement stat = null;
@@ -161,7 +162,7 @@ public class DBHelper
 			results = stat.executeQuery("select * from site where ucase(name) = '" + siteNameOrId.trim().toUpperCase() +"'");
 			if(results.next())
 			{
-					return(new SiteInfo(results));
+					return(new ExtendedSiteInfo(results));
 			}
 			else
 			{
@@ -171,7 +172,7 @@ public class DBHelper
 				results = stat.executeQuery("select *from site where id = '" + siteNameOrId + "'");
 				if(results.next())
 				{
-					return(new SiteInfo(results));
+					return(new ExtendedSiteInfo(results));
 				}
 				else
 				{

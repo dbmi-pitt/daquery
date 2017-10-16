@@ -7,7 +7,7 @@ public class RunAppSetup
 {
 	public static void main(String [] args)
 	{
-		AppProperties.setDevHomeDir("/usr/local/apache-tomcat-6.0.53");
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		AppSetup.initialize();
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
