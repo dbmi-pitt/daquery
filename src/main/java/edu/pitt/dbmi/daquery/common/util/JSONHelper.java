@@ -21,7 +21,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 public class JSONHelper
 {
 	
-    private static Gson gson = new GsonBuilder()
+    public static Gson gson = new GsonBuilder()
     		.excludeFieldsWithoutExposeAnnotation()
             .registerTypeAdapter(DateTime.class, new JsonSerializer<DateTime>() {
                 

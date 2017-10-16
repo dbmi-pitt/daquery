@@ -35,6 +35,7 @@ public class AppSetup
 	public static final int DBSTATUS_NEWER_VERSION = 4;
 	public static final int DBSTATUS_INDETERMINATE = 5;
 	public static final int DBSTATUS_UNKNOWN = 6;
+	public static final int DBSTATUS_NONEXISTENT = 7;
 	
 	private static Integer dbStatus = null;
 	
@@ -93,7 +94,13 @@ public class AppSetup
 			}
 		}
 		
-		dbStatus = checkDB();
+		try{dbStatus = checkDB();}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "An unexpected error occured while check the state of the application database during initialization.", t);
+			setErroredSetup("Unable to determine the state of the application database during initialization.  Check the application logs for more information.");
+			return(false);
+		}
 		if(dbStatus == AppSetup.DBSTATUS_ALL_GOOD)
 			return(true);
 		else if(dbStatus == AppSetup.DBSTATUS_EMPTY)
@@ -207,8 +214,8 @@ public class AppSetup
 				String currentDateTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
 				conn = ApplicationDBHelper.getConnection();
 				st = conn.createStatement();
-				st.executeUpdate("insert into property (id, name, value) values (1, 'current.version', '" + AppProperties.getCurrentVersion() + "')");
-				st.executeUpdate("insert into property (id, name, value) values (2, 'initial.setup', '" + currentDateTime + "')");
+				AppProperties.setDBProperty("current.version", AppProperties.getCurrentVersion());
+				AppProperties.setDBProperty("initial.setup", currentDateTime);
 				conn.commit();
 				return(true);
 			}
@@ -227,11 +234,16 @@ public class AppSetup
 	public static boolean dbExists()
 	{
 		Connection conn = null;
+		
 		try
 		{
+			String dbDir = AppProperties.getDBDir();
+			File dbDirF = new File(dbDir);
+			if(! dbDirF.exists()) return(false);
+			
 			String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 			Class.forName(driver);
-			String url = "jdbc:derby:" + AppProperties.getDBDir();
+			String url = "jdbc:derby:" + dbDir;
 			conn = DriverManager.getConnection(url);
 			return(true);
 		}
@@ -281,8 +293,13 @@ public class AppSetup
 			}
 		}
 	}
-	private static int checkDB()
+	private static int checkDB() throws Exception
 	{
+		String dbDir = AppProperties.getDBDir();
+		File dbDirF = new File(dbDir);
+		if(! dbDirF.exists())
+			return(AppSetup.DBSTATUS_NONEXISTENT);
+		
 		int tableCount = ApplicationDBHelper.getTableCount();
 		if(tableCount == 0)
 		{
@@ -356,8 +373,17 @@ public class AppSetup
 	}
 	public static int getDBStatus()
 	{
-		if(dbStatus == null) dbStatus = checkDB();
-		return(dbStatus);
+		try
+		{
+			if(dbStatus == null) dbStatus = checkDB();
+			return(dbStatus);
+		}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "An unexpected error occured while check the state of the application database.", t);
+			return(AppSetup.DBSTATUS_UNKNOWN);
+		}
+		
 	}
 	public static boolean isValidSetup()
 	{

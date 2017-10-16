@@ -25,7 +25,7 @@ public class PasswordUtils {
             throw new RuntimeException("Exception encoding password", e);
         }
     }
-    public static final String validPwdCharsStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$#%^*&!";
+    public static final String validPwdCharsStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static String randomPassword(int passwordLength) {
     	Random rng = new SecureRandom();
         rng = Objects.requireNonNull(rng);

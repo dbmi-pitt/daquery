@@ -138,7 +138,7 @@ public class AppProperties
 			}
 			else
 			{ //insert
-				stat.executeUpdate("insert into PROPERTY (name, property) values ('" + propertyName.trim() +"','"+ value +"')");
+				stat.executeUpdate("insert into PROPERTY (name, value) values ('" + propertyName.trim() +"','"+ value +"')");
 			}
 			conn.commit();
 		}
@@ -148,7 +148,7 @@ public class AppProperties
 			{
 				try{conn.rollback();}catch(Throwable t2){}
 			}
-			throw new DaqueryException("An unexpected error happened while updating property " + propertyName);
+			throw new DaqueryException("An unexpected error happened while updating property " + propertyName, t);
 		}
 		finally{ApplicationDBHelper.closeConnection(conn, stat, null);}
 	}

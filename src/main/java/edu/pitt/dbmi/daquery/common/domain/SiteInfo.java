@@ -13,21 +13,18 @@ public class SiteInfo extends DaqueryObject
 {
 	@Expose
 	public String id;
-	public String accessKey;
-	public boolean tempKey;
 	@Expose
-	public String siteName;
-	public boolean emailAccess;
+	public String siteName;	
 	@Expose
 	public String siteURL;
-	
+	@Expose
+	public boolean emailAccess;
+
 	public SiteInfo(){}
 	
 	public SiteInfo(ResultSet rs) throws SQLException
 	{
 		id = rs.getString("id");
-		accessKey = rs.getString("access_key");
-		tempKey = rs.getBoolean("tempkey");
 		siteName = rs.getString("name");
 		emailAccess = rs.getBoolean("email_access");
 		siteURL = rs.getString("site_url");
