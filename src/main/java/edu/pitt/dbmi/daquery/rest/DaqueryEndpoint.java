@@ -92,7 +92,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	 *  
 	 * @return A list of NetworkInfo objects encoded as json
 	 */
-	//@Secured("ADMIN")
+    @Secured("ADMIN")
     @GET
     @Path("/available-networks/")
     @Produces(MediaType.APPLICATION_JSON)
