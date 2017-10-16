@@ -1,6 +1,8 @@
 package edu.pitt.dbmi.daquery.rest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,24 +23,71 @@ import javax.ws.rs.core.UriInfo;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
+import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
+import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.domain.Network;
+import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.util.UserRoles;
 
 @Path("/")
-public class DaqueryEndpoint
+public class DaqueryEndpoint extends AbstractEndpoint
 {
 	private final static Logger log = Logger.getLogger(DaqueryEndpoint.class.getName());
 
 	public static void main (String [] args) throws Exception
 	{
-		AppProperties.setDevHomeDir("/usr/local/apache-tomcat-6.0.53");
+		
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+/*		DaqueryEndpoint de = new DaqueryEndpoint();
+		System.out.println(de.isSiteSetup());
+		de.setupSite("bill-dev", "abc123"); */ 
+		
 		Map<String, String> idParam = new HashMap<String, String>();
 		idParam.put("site-id", AppProperties.getDBProperty("site.id"));
 		Response resp = callCentralServer("availableNetworks",  idParam);
-		String json = resp.readEntity(String.class);
-		Map<String, String> vals = JSONHelper.toMap(json);
-		System.out.println(vals);
+		if(resp.getStatus() == 200)
+		{
+			String json = resp.readEntity(String.class);
+			NetworkInfo[] ninfo = JSONHelper.gson.fromJson(json, NetworkInfo[].class);
+			DaqueryEndpoint de = new DaqueryEndpoint();
+			List<Network> nets = de.queryAllNetworks();
+			List<SiteInfo> sitesToRemove = new ArrayList<SiteInfo>();
+			for(NetworkInfo nin : ninfo)
+			{
+				for(SiteInfo si : nin.allowedSites)
+				{
+					if(containsSite(nets, si.id))
+						sitesToRemove.add(si);
+				}
+				for(SiteInfo sr : sitesToRemove)
+				{
+					nin.allowedSites.remove(sr);
+				}
+				sitesToRemove.clear();
+			}
+			
+			
+			System.out.println(ninfo);
+		}
+		else
+			System.out.println("FAILIED");
+	}
+	
+	private static boolean containsSite(List<Network> networks, String siteId)
+	{
+		for(Network net : networks)
+		{
+			for(Site site : net.getSites())
+			{
+				if(siteId.equals(site.getId()))
+				{
+					return(true);
+				}
+			}
+		}
+		return(false);
 	}
 	
     @Context
@@ -60,25 +109,58 @@ public class DaqueryEndpoint
 		int dbStatus = AppSetup.getDBStatus();
 		if(dbStatus == AppSetup.DBSTATUS_ALL_GOOD)
 			return(ResponseHelper.getBasicResponse(200, "Y"));
-		else if(dbStatus == AppSetup.DBSTATUS_EMPTY)
+		else if(dbStatus == AppSetup.DBSTATUS_NONEXISTENT || dbStatus == AppSetup.DBSTATUS_EMPTY)
 			return(ResponseHelper.getBasicResponse(200, "N"));
 		else
 			return(ResponseHelper.getBasicResponse(500, "The application database is in an indeterminate state.  Check the application error logs for more information."));
 	}
 	
 	
-	/** Get a list of networks with associated sites that can be set
+	/** Get a list of networks with associated sites from the central serverthat 
 	 *  have not yet been set up for this site.
-	 * @param id
-	 * @return
+	 *  
+	 * @return A list of NetworkInfo objects encoded as json
 	 */
 	@Secured(UserRoles.ADMIN)
     @GET
     @Path("/available-networks/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response availableNetworks() {
-    	
-    	return(null);
+    	try
+    	{
+			Map<String, String> idParam = new HashMap<String, String>();
+			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
+			Response resp = callCentralServer("availableNetworks",  idParam);
+			if(resp.getStatus() == 200)
+			{
+				String json = resp.readEntity(String.class);
+				NetworkInfo[] ninfo = JSONHelper.gson.fromJson(json, NetworkInfo[].class);
+				DaqueryEndpoint de = new DaqueryEndpoint();
+				List<Network> nets = de.queryAllNetworks();
+				List<SiteInfo> sitesToRemove = new ArrayList<SiteInfo>();
+				for(NetworkInfo nin : ninfo)
+				{
+					for(SiteInfo si : nin.allowedSites)
+					{
+						if(containsSite(nets, si.id))
+							sitesToRemove.add(si);
+					}
+					for(SiteInfo sr : sitesToRemove)
+					{
+						nin.allowedSites.remove(sr);
+					}
+					sitesToRemove.clear();
+				}
+				return(ResponseHelper.getJsonResponseGen(200, ninfo));
+			}
+			else
+				return(resp);
+    	}
+    	catch(Throwable t)
+    	{
+    		log.log(Level.SEVERE, "An unexpeced error occured while obtaining a list of available networks and sites from the central server.", t);
+    		return(ResponseHelper.getBasicResponse(500, "An unexpected error occured while obtaining a list of avaiilable networks and sites from the central server.  See the appication logs for more information."));
+    	}
     	
     }
 	
@@ -105,19 +187,12 @@ public class DaqueryEndpoint
 
 	    	
 			int dbStatus = AppSetup.getDBStatus();
-			if(dbStatus == AppSetup.DBSTATUS_EMPTY)
+			if(dbStatus == AppSetup.DBSTATUS_NONEXISTENT)
 			{
-				Response resp = callCentralServerAuth(siteName, siteKey);
-		    	if(resp.getStatus() != 200)
-		    		return(ResponseHelper.getBasicResponse(401, "Authentication Failed"));
+				Response centralAuthResponse = callCentralServerAuth(siteName, siteKey);
+		    	if(centralAuthResponse.getStatus() != 200)
+		    		return(centralAuthResponse);
 		    	
-				String jsonval = resp.readEntity(String.class);
-				Map<String, String> jmap = JSONHelper.toMap(jsonval);
-				String key = jmap.get("new-site-key");
-				String siteId = jmap.get("site-id");		    	
-		    	AppProperties.setDBProperty("central.site.key", key);
-		    	AppProperties.setDBProperty("site.id", siteId);
-		    	AppProperties.setDBProperty("site.name", siteName);
 				if(AppSetup.initialize())
 				{
 					
@@ -125,14 +200,41 @@ public class DaqueryEndpoint
 					HashMap<String, String> adminDetails = new HashMap<String, String>();
 					adminDetails.put("username", "admin");
 					adminDetails.put("password", adminPwd);
+					
+					//add the initial values from the central server
+					String jsonval = centralAuthResponse.readEntity(String.class);
+					Map<String, String> jmap = JSONHelper.toMap(jsonval);
+					String key = jmap.get("new-site-key");
+					String siteId = jmap.get("site-id");		    	
+			    	AppProperties.setDBProperty("central.site.key", key);
+			    	AppProperties.setDBProperty("site.id", siteId);
+			    	AppProperties.setDBProperty("site.name", siteName);
+
 					return(ResponseHelper.getJsonResponseGen(200, adminDetails ));
 				}
 				else
-					return(ResponseHelper.getBasicResponse(500, "An error occured while setting up the site. Check the application logs for more information."));
+					return(ResponseHelper.getBasicResponse(500, "An error occured while initializing the application database. Check the application logs for more information."));
 			}
 			else
 			{
-				return(ResponseHelper.getBasicResponse(500, "This site has already been set up.  Check the application error logs for more information."));
+				String msg;
+				if(dbStatus == AppSetup.DBSTATUS_EMPTY)
+				{
+					msg = "The application database was created, but is now empty.  Try deleting and setting up again.  The database is at: " + AppProperties.getDBDir();
+				}
+				else if(dbStatus == AppSetup.DBSTATUS_ALL_GOOD)
+				{
+				    msg = "This site has already been set up.";	
+				}
+				else if(dbStatus == AppSetup.DBSTATUS_NEWER_VERSION || dbStatus == AppSetup.DBSTATUS_OLD_VERSION)
+				{
+					msg = "This site already exists and is a different version.  The application database is located at: " + AppProperties.getDBDir();
+				}
+				else
+				{
+					msg = "This site cannot be set up.  The database is in an unidentifiable state.";
+				}
+				return(ResponseHelper.getBasicResponse(500, msg));
 			}
 		}
 		catch(Throwable t)
@@ -145,7 +247,7 @@ public class DaqueryEndpoint
 	private static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
 		String siteId = AppProperties.getDBProperty("site.id");
-		String siteKey = AppProperties.getDBProperty("central.site.id");
+		String siteKey = AppProperties.getDBProperty("central.site.key");
 		Response auth = callCentralServerAuth(siteId, siteKey);
 		if(auth.getStatus() != 200)
 			return(auth);
