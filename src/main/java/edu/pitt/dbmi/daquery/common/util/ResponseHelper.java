@@ -91,7 +91,9 @@ public class ResponseHelper {
      */
     public static Response accountDisabledResponse(String name, UriInfo uriInfo) throws DaqueryException
     {
-    	return(getTokenResponse(401, 3, name, uriInfo, null));
+        HashMap<String, Object> vals = new HashMap<String, Object>();
+        vals.put("userUUID", name);
+    	return(getJsonResponse(401, 3, vals));
     }
     
     public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, Object> additionalReturnValues) throws DaqueryException
