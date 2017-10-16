@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src/dev/java"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
 		<attributes>
-			<attribute name="optional" value="false"/> 
+			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>

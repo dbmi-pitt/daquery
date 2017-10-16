@@ -41,39 +41,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	{
 		
 		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-/*		DaqueryEndpoint de = new DaqueryEndpoint();
+		DaqueryEndpoint de = new DaqueryEndpoint();
 		System.out.println(de.isSiteSetup());
-		de.setupSite("bill-dev", "abc123"); */ 
-		
-		Map<String, String> idParam = new HashMap<String, String>();
-		idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-		Response resp = callCentralServer("availableNetworks",  idParam);
-		if(resp.getStatus() == 200)
-		{
-			String json = resp.readEntity(String.class);
-			NetworkInfo[] ninfo = JSONHelper.gson.fromJson(json, NetworkInfo[].class);
-			DaqueryEndpoint de = new DaqueryEndpoint();
-			List<Network> nets = NetworkDAO.queryAllNetworks();
-			List<SiteInfo> sitesToRemove = new ArrayList<SiteInfo>();
-			for(NetworkInfo nin : ninfo)
-			{
-				for(SiteInfo si : nin.allowedSites)
-				{
-					if(containsSite(nets, si.id))
-						sitesToRemove.add(si);
-				}
-				for(SiteInfo sr : sitesToRemove)
-				{
-					nin.allowedSites.remove(sr);
-				}
-				sitesToRemove.clear();
-			}
-			
-			
-			System.out.println(ninfo);
-		}
-		else
-			System.out.println("FAILIED");
+		de.setupSite("bill-dev", "abc123");
 	}
 	
 	private static boolean containsSite(List<Network> networks, String siteId)
@@ -122,7 +92,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	 *  
 	 * @return A list of NetworkInfo objects encoded as json
 	 */
-	@Secured("ADMIN")
+	//@Secured("ADMIN")
     @GET
     @Path("/available-networks/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -152,7 +122,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					}
 					sitesToRemove.clear();
 				}
-				return(ResponseHelper.getJsonResponseGen(200, ninfo));
+				List<NetworkInfo> rlist = new ArrayList<NetworkInfo>();
+				for(NetworkInfo n : ninfo)
+					rlist.add(n);
+				return(ResponseHelper.getJsonResponseGen(200, rlist));
 			}
 			else
 				return(resp);
