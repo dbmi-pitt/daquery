@@ -93,8 +93,9 @@ public class CentralService{
 			return(ResponseHelper.getTokenResponse(200, null, site, uriInfo, additionalVals));	
 		}
 		catch(Throwable dce)
-		{			
-			return(ResponseHelper.getBasicResponse(500, dce.getMessage()));
+		{
+			log.log(Level.SEVERE, "An unexpected error occured while authenticating a user.", dce);
+			return(ResponseHelper.getBasicResponse(500, "An unexpected error occured while authenticating a site.  Check the central server logs for more information."));
 		}
 	}
 	

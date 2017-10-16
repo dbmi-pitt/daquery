@@ -200,9 +200,9 @@ public class DBHelper
 	 */
 	public static List<NetworkInfo> getAllowedNetworks(String siteId) throws DaqueryCentralException
 	{
-		String sql = "select site_id, network_name, network_membership.network_id, site.name as site_name, site_url " +
+		String sql = "select site_id, network_name, data_model, network_membership.network_id, site.name as site_name, site_url " +
 		                                  "from network_membership, " +
-                                                "(select id as network_id, name as network_name from network " +
+                                                "(select id as network_id, name as network_name, data_model from network " +
                                                           "where id in " + 
                                                                  "(select network_id from network_membership " +
                                                                                 "where site_id = '" + siteId +"')) as inn, " +
@@ -226,6 +226,7 @@ public class DBHelper
 			{
 				String netId = rs.getString("network_id");
 				String netName = rs.getString("network_name");
+				String netModel = rs.getString("data_model");
 				String site_Id = rs.getString("site_id");
 				String siteName = rs.getString("site_name");
 				String siteURL = rs.getString("site_url");
@@ -235,6 +236,7 @@ public class DBHelper
 					currentNetInfo = new NetworkInfo();
 					currentNetInfo.id = netId;
 					currentNetInfo.name = netName;
+					currentNetInfo.dataModel = netModel;
 					networks.add(currentNetInfo);
 				}
 				SiteInfo nextSite = new SiteInfo();
