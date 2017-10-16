@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions, Response, URLSearchParams } from '@angular/http';
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from 'rxjs/Observable';
 import { Site } from '../models/site.model';
 import { Network } from '../models/network.model';
@@ -12,74 +13,69 @@ import 'rxjs/add/operator/catch';
 @Injectable()
 export class SiteService {
 
-  constructor(private http: Http,
+  constructor(private http: HttpClient,
               private authenticationService: AuthenticationService) { }
 
   sites = [];
   getSite(id: number): Observable<Site> {
     return this.http.get(`/daquery/ws/site/${id}`, this.authenticationService.jwt())
-                    .map((response: Response) => <Network>response.json())
                     .catch(error => {
                       return Observable.throw(error.json().error || 'Server error');
                     })
   }
 
   getSites(network: Network): Observable<Site[]> {
-    let urlSearchParams: URLSearchParams = new URLSearchParams();
-    urlSearchParams.set('network', network.name);
+    const params = new HttpParams().set("network_id", network.id.toString())
 
-    let requestOptions = this.authenticationService.jwt();
-    requestOptions.search = urlSearchParams;
-
-    return this.http.get('/daquery/ws/sites', requestOptions)
-                    .map((response: Response) => <Site[]>response.json())
+    return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
-                      return Observable.throw(error.json().error || 'Server error');
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
+
+  getAvailableSites(network: Network): Observable<Site[]> {
+    const params = new HttpParams().set("network_id", network.id.toString())
+
+    return this.http.get('/daquery/ws/sites/available', {params: params})
+                    .catch(error => {
+                      return Observable.throw(error || 'Server error');
                     });
   }
 
   getInSites(network: Network): Observable<Site[]> {
-    let urlSearchParams: URLSearchParams = new URLSearchParams();
-    urlSearchParams.set('network', network.name);
-    urlSearchParams.set('type', 'in');
+    const params = new HttpParams().set("network_id", network.id.toString())
+                                   .set("type", "in");
 
-    let requestOptions = this.authenticationService.jwt();
-    requestOptions.search = urlSearchParams;
-
-    return this.http.get('/daquery/ws/sites', requestOptions)
-                    .map((response: Response) => <Site[]>response.json())
+    return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
-                      return Observable.throw(error.json().error || 'Server error');
+                      return Observable.throw(error || 'Server error');
                     });
   }
 
   getOutSites(network: Network): Observable<Site[]> {
-    let urlSearchParams: URLSearchParams = new URLSearchParams();
-    urlSearchParams.set('network', network.name);
-    urlSearchParams.set('type', 'out');
+    const params = new HttpParams().set("network_id", network.id.toString())
+                                   .set("type", "out");
 
-    let requestOptions = this.authenticationService.jwt();
-    requestOptions.search = urlSearchParams;
-
-    return this.http.get('/daquery/ws/sites', requestOptions)
-                    .map((response: Response) => <Site[]>response.json())
+    return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
-                      return Observable.throw(error.json().error || 'Server error');
+                      return Observable.throw(error || 'Server error');
                     });
   }
 
   getWaitingSites(network: Network): Observable<Site[]> {
-    let urlSearchParams: URLSearchParams = new URLSearchParams();
-    urlSearchParams.set('network', network.name);
-    urlSearchParams.set('type', 'waiting');
+    const params = new HttpParams().set("network_id", network.id.toString())
+                                   .set("type", "waiting");
 
-    let requestOptions = this.authenticationService.jwt();
-    requestOptions.search = urlSearchParams;
-
-    return this.http.get('/daquery/ws/sites', requestOptions)
-                    .map((response: Response) => <Site[]>response.json())
+    return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
-                      return Observable.throw(error.json().error || 'Server error');
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
+
+  createSite(siteForm: any): Observable<Site>{
+    return this.http.post('/daquery/ws/sites', siteForm)
+                    .catch(error => {
+                      return Observable.throw(error || 'Server error');
                     });
   }
 }

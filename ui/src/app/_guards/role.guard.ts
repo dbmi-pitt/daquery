@@ -7,7 +7,9 @@ export class RoleGuard implements CanActivate {
   currentUserRoles: string[] = JSON.parse(localStorage.getItem('currentUser')).roles.map(r => r.name.toLowerCase());
   constructor(private router: Router,
               private userService: UserService) {
-   this.getCurrentUserRoles();
+    if(this.currentUserRoles.length === 0){
+      this.getCurrentUserRoles();
+    }
   }
 
   async canActivate(route: ActivatedRouteSnapshot,

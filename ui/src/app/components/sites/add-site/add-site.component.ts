@@ -22,8 +22,10 @@ export class AddSiteComponent implements OnInit {
               private siteService: SiteService,
               private activatedRoute: ActivatedRoute) { }
   
-  createForm() {
+  createForm(network_id: Number) {
     this.form = this.fb.group({
+      network_id: network_id,
+      site: '',
       sitename: '',
       siteurl: '',
       siteoptions: ''
@@ -35,12 +37,16 @@ export class AddSiteComponent implements OnInit {
     this.activatedRoute.queryParams.subscribe(async (params: Params) => {
       let id = params['network'];
       await this.getNetwork(id);
-      this.getSites(this.network);
+      this.getAvailableSites(this.network);
+      this.createForm(id);
     });
   }
 
-  onsubmit(){
-    
+  onSubmit(){
+    this.siteService.createSite(this.form.value)
+                    .subscribe(site => {
+                      debugger;
+                    });
   }
   
   getNetwork(id: number): Promise<any>{
@@ -53,8 +59,8 @@ export class AddSiteComponent implements OnInit {
     });
   }
 
-  getSites(network: Network){
-    this.siteService.getSites(network)
+  getAvailableSites(network: Network){
+    this.siteService.getAvailableSites(network)
                     .subscribe(sites => {
                       this.sites = sites;
                     });
