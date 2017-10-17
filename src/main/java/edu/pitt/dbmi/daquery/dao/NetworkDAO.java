@@ -41,13 +41,26 @@ public class NetworkDAO extends AbstractDAO {
 
     private final static Logger logger = Logger.getLogger(NetworkDAO.class.getName());
 	
-    public static Network queryNetwork(String uuid) throws Exception {
-    	logger.info("searching for #### single Network uuid= " +uuid);
+    public static Network queryNetwork(String id) throws Exception {
+    	// auto generated ID
+        if(id.matches("^\\d+$"))
+        	logger.info("searching for #### single Network id= " + id);
+        else
+        	logger.info("searching for #### single Network uuid= " + id);
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piId = new ParameterItem("uuid", uuid);
-    		pList.add(piId);
-    		Network network = executeQueryReturnSingle(Network.FIND_BY_UUID, pList, logger);
+    		Network network = null;
+    		if(id.matches("^\\d+$")) {
+    			ParameterItem piId = new ParameterItem("id", Long.parseLong(id));
+    			pList.add(piId);
+    			network = executeQueryReturnSingle(Network.FIND_BY_ID, pList, logger);
+    		}
+    		else {
+    			ParameterItem piUUId = new ParameterItem("uuid", id);
+    			pList.add(piUUId);
+    			network = executeQueryReturnSingle(Network.FIND_BY_UUID, pList, logger);
+    		}
+    		
 	        return network;
 	    
         } catch (PersistenceException e) {
@@ -55,7 +68,6 @@ public class NetworkDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
             throw e;
         }
-            
     }
 
     public static List<Network> queryAllNetworks() throws Exception {

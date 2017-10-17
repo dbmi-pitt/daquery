@@ -5,12 +5,11 @@ import edu.pitt.dbmi.daquery.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static javax.ws.rs.core.Response.Status.*;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -22,6 +21,7 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -62,24 +62,37 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the sites found in the database.
-     * example URL: daquery-ws/ws/sites?network_id=1
+     * example URL: daquery-ws/ws/sites?network_id=1&type=out
+     * @param network_id network's primary key
+     * @param type 
      * @return a JSON array containing all the sites
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
-    public Response getAllSites(@QueryParam("network_id") long network_id) {
+    public Response getAllSites(@QueryParam("network_id") long network_id,
+    							@DefaultValue("all") @QueryParam("type") String type) {
     	
     	try {
 
             logger.info("#### returning all sites");
-
+            
+            String[] types = {"out", "in", "waiting"};
+            if(!Arrays.asList(types).contains(type)) {
+            	return Response.status(BAD_REQUEST).build();
+            }
+            
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
-                        
-            List<Site> site_list = SiteDAO.querySiteByNetworkId(network_id);
             
-            if (site_list == null) {
+            List<Site> site_list = null;
+            if(type.equals("all")) {
+            	site_list = SiteDAO.querySiteByNetworkId(network_id);
+            } else {
+            	site_list = SiteDAO.querySiteByNetworkIdType(network_id, type);
+            }
+            
+            if (site_list == null || site_list.size() == 0) {
                 return Response.status(NOT_FOUND).build();
             }
 
@@ -93,7 +106,48 @@ public class SiteEndpoint extends AbstractEndpoint {
         }
     }
 
-	
+	@GET
+    @Path("/available")
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    /**
+     * This method returns all the sites found in the database.
+     * example URL: daquery-ws/ws/sites/available?network_id=1
+     * @param network_id network's primary key
+     * @param type 
+     * @return a JSON array containing all the sites
+     * returns a 404 error if no queries are found,
+     *   a 500 error on failure
+     */
+    public Response getAvailableSites(@QueryParam("network_id") long network_id) {
+    	
+    	try {
+
+            logger.info("#### returning avaialable sites for network id: " + network_id);
+            
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            // Faking return here. Suppose get all available sites within Network for netword_id from Daquery-Central 
+            List<Site> site_list = new ArrayList<>();
+            site_list.add(new Site("fakeSite1", "url", "fakeSite1@pitt.edu", ""));
+            
+            if (site_list == null || site_list.size() == 0) {
+                return Response.status(NOT_FOUND).build();
+            }
+
+            String jsonString = toJsonArray(site_list);
+            return Response.ok(200).entity(jsonString).build();
+
+    	} catch (NoResultException nre) {
+    		return Response.status(NOT_FOUND).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
 	/**
      * Get all sites by type
      * example url: daquery-ws/ws/sites/type/inbound
@@ -173,26 +227,55 @@ public class SiteEndpoint extends AbstractEndpoint {
     	try {
     		String network_id = (String) newSite.get("network_id"); 		
 	        Network currentNetwork = NetworkDAO.queryNetwork(network_id);
-	        Site site = new Site((String)newSite.get("name"),
-	        					 (String)newSite.get("url"),
-	        					 (String)newSite.get("admin_email"),
-	        					 (String)newSite.get("type"));
 	        
-            if (currentNetwork == null) {
-                return Response.status(NOT_FOUND).build();
-            }	        
-	        site.setNetwork(currentNetwork);
-	        //persist changes
-	        emf = Persistence.createEntityManagerFactory("derby");
-	        em = emf.createEntityManager();
+	        if(newSite.get("type").equals("both")) {
+	        	Site site_in = new Site((String)newSite.get("name"),
+									 (String)newSite.get("url"),
+									 (String)newSite.get("admin_email"),
+									 "in");
+	        	Site site_out = new Site((String)newSite.get("name"),
+										 (String)newSite.get("url"),
+										 (String)newSite.get("admin_email"),
+										 "out");
+	        	if (currentNetwork == null) {
+	                return Response.status(NOT_FOUND).build();
+	            }	        
+		        site_in.setNetwork(currentNetwork);
+		        site_out.setNetwork(currentNetwork);
+		        //persist changes
+		        emf = Persistence.createEntityManagerFactory("derby");
+		        em = emf.createEntityManager();
+		
+		        em.getTransaction().begin();
+		
+		        em.persist(site_in);
+		        em.persist(site_out);
+		        
+		        em.getTransaction().commit();
 	
-	        em.getTransaction().begin();
+		        return Response.ok(201).entity(site_out).build();
+	        } else {
+		        Site site = new Site((String)newSite.get("name"),
+		        					 (String)newSite.get("url"),
+		        					 (String)newSite.get("admin_email"),
+		        					 (String)newSite.get("type"));
+		        
+	            if (currentNetwork == null) {
+	                return Response.status(NOT_FOUND).build();
+	            }	        
+		        site.setNetwork(currentNetwork);
+		        //persist changes
+		        emf = Persistence.createEntityManagerFactory("derby");
+		        em = emf.createEntityManager();
+		
+		        em.getTransaction().begin();
+		
+		        em.persist(site);
+		        
+		        em.getTransaction().commit();
 	
-	        em.persist(site);
-	        
-	        em.getTransaction().commit();
-
-	        return Response.ok(201).entity(site).build();
+		        return Response.ok(201).entity(site).build();
+	        }
 	        
     	} catch (Exception e) {
     		logger.info(e.getMessage());
