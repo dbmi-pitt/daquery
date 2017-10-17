@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.rest;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
@@ -40,10 +42,11 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	public static void main (String [] args) throws Exception
 	{
 		
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		AppProperties.setDevHomeDir("");
 		DaqueryEndpoint de = new DaqueryEndpoint();
-		System.out.println(de.isSiteSetup());
-		de.setupSite("bill-dev", "abc123");
+		//System.out.println(de.isSiteSetup());
+		Response r = de.setupSite("bill-dev", "abc123");
 	}
 	
 	private static boolean containsSite(List<Network> networks, String siteId)
@@ -159,6 +162,19 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	    	}
 	    	
 
+	    	String homeDir = AppProperties.getHomeDirectory();
+	    	if(StringHelper.isEmpty(homeDir))
+	    	{
+	    		log.log(Level.SEVERE, "A configured database directory was not found.  This directory is the Tomcat conf directory which is found with the global environment variable CATALINA_HOME.");
+	    		return(ResponseHelper.getBasicResponse(500, "Unable to find a configured database helper.  It is possible that the CATALINA_HOME environment variable needs to be set globaly."));
+	    	}
+	    	String confDir = AppProperties.getConfDirectory();
+	    	File confDirF = new File(confDir);
+	    	if(! confDirF.exists() || ! confDirF.canWrite())
+	    	{
+	    		log.log(Level.SEVERE, "The database directory, " + confDir + "does not exist or is not writable.");
+	    		return(ResponseHelper.getBasicResponse(500, "Unable to write to the configured database directory: " + confDir));
+	    	}
 	    	
 			int dbStatus = AppSetup.getDBStatus();
 			if(dbStatus == AppSetup.DBSTATUS_NONEXISTENT)
