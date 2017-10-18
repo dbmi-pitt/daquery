@@ -8,13 +8,11 @@ public class RunAppSetup
 	public static void main(String [] args)
 	{
 		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		AppSetup.initialize();
+		AppSetup.initialSetup("path@pitt.edu", "password", null);
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
 		else if(AppSetup.isValidSetup())
 		{
-			if(AppSetup.wasFirstUserCreated())
-				System.out.println(AppSetup.getFirstUserDetails());			
 			System.out.println("All Good");
 		}
 		else
