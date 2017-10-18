@@ -11,11 +11,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.annotation.Priority;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -33,8 +28,6 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 
 import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
-
-import edu.pitt.dbmi.daquery.domain.Site_User;
 
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
@@ -106,13 +99,13 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         // Get the resource class which matches with the requested URL
         // Extract the roles declared by it
-        Class<?> resourceClass = resourceInfo.getResourceClass();
-        List<String> classRoles = extractRoles(resourceClass);
+        //Class<?> resourceClass = resourceInfo.getResourceClass();
+        //List<String> classRoles = extractRoles(resourceClass);
 
         // Get the resource method which matches with the requested URL
         // Extract the roles declared by it
-        Method resourceMethod = resourceInfo.getResourceMethod();
-        List<String> methodRoles = extractRoles(resourceMethod);
+        //Method resourceMethod = resourceInfo.getResourceMethod();
+        //List<String> methodRoles = extractRoles(resourceMethod);
 
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
@@ -177,7 +170,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                         //a list from the JWT.  The JWT could be spoofed to give the user 
                         //higher credentials
                         public List<String> getRoles() {
-                        	//for now, retrun a hardcoded list
+                        	//for now, return a hard-coded list
                         	//TODO: create some global enum type of roles,
                         	//need to coordinate this with Desheng
                         	List<String> retList = Arrays.asList("ADMIN", "USER");

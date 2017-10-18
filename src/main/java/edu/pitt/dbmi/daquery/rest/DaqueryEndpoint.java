@@ -42,11 +42,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	public static void main (String [] args) throws Exception
 	{
 		
-		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		AppProperties.setDevHomeDir("");
-		DaqueryEndpoint de = new DaqueryEndpoint();
-		//System.out.println(de.isSiteSetup());
-		Response r = de.setupSite("bill-dev", "abc123");
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		/*DaqueryEndpoint de = new DaqueryEndpoint();
+		System.out.println(de.isSiteSetup());
+		Response r = de.setupSite("bill-dev", "abc123"); */
 	}
 	
 	private static boolean containsSite(List<Network> networks, String siteId)
@@ -75,6 +74,12 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return(ResponseHelper.getBasicResponse(200, "Hello Cruel World"));
 	}
     
+	/**
+	 * Check if the site database is set up or not.
+	 * 
+	 * @return A 200 response with a Y or N depending on whether the database is set up (Y) or not (N).
+	 *         returns a 500 response if the database state can't be determined.
+	 */
 	@GET
 	@Path("/is-site-setup")
     @Produces(MediaType.TEXT_PLAIN)
@@ -147,13 +152,20 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	 * Requires a site name and key to authenticate against the DaqueryCentral server.  
 	 * 
 	 * @param siteName DaqueryCentral registered site name.
-	 * @param siteKey DaqueryCentral key that matches 
+	 * @param siteKey DaqueryCentral key that matches
+	 * @param adminEmail email address for initial admin account
+	 * @param adminPwd password for initial admin account
 	 * 
 	 * @return On success a 200 http response with the site-id encoded in json.  On failure a 500 http response.
 	 */
 	@GET
 	@Path("setupSite")
-	public Response setupSite(@DefaultValue("") @QueryParam("site-name") String siteName, @DefaultValue("") @QueryParam("site-key") String siteKey)
+	public Response setupSite(@DefaultValue("") @QueryParam("site-name") String siteName,
+			@DefaultValue("") @QueryParam("site-key") String siteKey,
+			@DefaultValue("") @QueryParam("admin-email") String adminEmail,
+			@DefaultValue("") @QueryParam("admin-pwd") String adminPwd,
+			@DefaultValue("") @QueryParam("admin-real-name") String adminRealName
+			)
 	{
 		try
 		{
@@ -161,7 +173,11 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	            return(ResponseHelper.getBasicResponse(500, "This service must be accessed via https only"));    		
 	    	}
 	    	
-
+	    	if(StringHelper.isEmpty(siteName) || StringHelper.isEmpty(adminEmail) || StringHelper.isEmpty(siteKey) || StringHelper.isEmpty(adminPwd))
+	    	{
+	    		return(ResponseHelper.getBasicResponse(400, "Parameters site-name, site-key, admin-email and admin-pwd are required."));
+	    	}
+	    	
 	    	String homeDir = AppProperties.getHomeDirectory();
 	    	if(StringHelper.isEmpty(homeDir))
 	    	{
@@ -184,13 +200,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		    		return(centralAuthResponse);
 		    	
 				if(AppSetup.initialize())
-				{
-					
-					String adminPwd = AppSetup.getFirstUserPwd();
-					HashMap<String, String> adminDetails = new HashMap<String, String>();
-					adminDetails.put("username", "admin");
-					adminDetails.put("password", adminPwd);
-					
+				{	
 					//add the initial values from the central server
 					String jsonval = centralAuthResponse.readEntity(String.class);
 					Map<String, String> jmap = JSONHelper.toMap(jsonval);
@@ -200,7 +210,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	AppProperties.setDBProperty("site.id", siteId);
 			    	AppProperties.setDBProperty("site.name", siteName);
 
-					return(ResponseHelper.getJsonResponseGen(200, adminDetails ));
+			    	return(ResponseHelper.getTokenResponse(200, null, adminEmail, uriInfo, null));
 				}
 				else
 					return(ResponseHelper.getBasicResponse(500, "An error occured while initializing the application database. Check the application logs for more information."));
