@@ -26,8 +26,6 @@ public class AppSetup
 	private static String setupErrorMessage = "";
 	private static boolean isValidSetup = false;
 	private static boolean firstUserCreated = false;
-	private static String firstUserDetails = "";
-	private static String firstUserPwd = "";
 	
 	public static final int DBSTATUS_EMPTY = 1;
 	public static final int DBSTATUS_ALL_GOOD = 2;
@@ -51,9 +49,19 @@ public class AppSetup
 	
 	public static boolean initialize()
 	{
-		isValidSetup = initializeDB();
+		isValidSetup = initializeDB(null, null, null);
 		return(isValidSetup);
 	}
+
+	public static boolean initialSetup(String adminEmail, String adminPwd, String adminRealName)
+	{
+		if(StringHelper.isEmpty(adminPwd) || StringHelper.isEmpty(adminPwd) )
+			isValidSetup = false;
+		else
+			isValidSetup = initializeDB(adminEmail, adminPwd, adminRealName);
+		return(isValidSetup);
+	}
+
 	
 	/**
 	 * Check to see if the application was set up or needs to
@@ -63,7 +71,7 @@ public class AppSetup
 	 * 
 	 * If JavaDB was never created do it now.
 	 */
-	private static boolean initializeDB()
+	private static boolean initializeDB(String adminEmail, String adminPwd, String adminRealName)
 	{
 		if(AppProperties.getHomeDirectory() == null)
 		{
@@ -107,9 +115,9 @@ public class AppSetup
 		{
 			if(initializeDBData())
 			{
-				if(AppProperties.setupAdminUser())
+				if(AppProperties.setupAdminUser() && ! StringHelper.isEmpty(adminPwd) && ! StringHelper.isEmpty(adminEmail))
 				{
-					if(! setupAdminUser())
+					if(! setupAdminUser(adminEmail, adminPwd, adminRealName))
 					{
 						setErroredSetup("Unable to create the initial admin user.  Check the application logs for more information.");
 						return(false);
@@ -133,7 +141,7 @@ public class AppSetup
 		return(false);
 		
 	}
-	private static boolean setupAdminUser()
+	private static boolean setupAdminUser(String adminEmail, String adminPwd, String adminRealName)
 	{
 		Connection conn = null;
 		Statement stat = null;
@@ -153,13 +161,11 @@ public class AppSetup
 			}
 			UUID uuid = UUID.randomUUID();
 		    String uuidStr = uuid.toString();
-		    String pwd = PasswordUtils.randomPassword();
-			String hashedPwd = PasswordUtils.digestPassword(pwd);
-			String insertSQL = "insert into site_user (id, username, password, status) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', " + UserStatus.PWD_EXPIRED.getValue() + ")";
+			String hashedPwd = PasswordUtils.digestPassword(adminPwd.trim());
+			if(StringHelper.isEmpty(adminRealName)) adminRealName = "";
+			String insertSQL = "insert into site_user (id, username, password, status, email, real_name) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', " + UserStatus.ACTIVE.getValue() + ", '" + adminEmail.trim() + "', '" + adminRealName + "')";
 			log.info("User inserted with: " + insertSQL);
 			stat.executeUpdate(insertSQL);
-			firstUserDetails = "Initial admin user created with password: " + pwd;
-			firstUserPwd = pwd;
 			firstUserCreated = true;
 			return(true);
 		}
@@ -392,15 +398,5 @@ public class AppSetup
 	public static boolean wasFirstUserCreated()
 	{
 		return(firstUserCreated);
-	}
-	public static String getFirstUserDetails()
-	{
-		return(firstUserDetails);
-	}
-	public static String getFirstUserPwd()
-	{
-		String rVal = firstUserPwd;
-		firstUserPwd = "";
-		return(rVal);
 	}
 }

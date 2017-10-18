@@ -96,6 +96,20 @@ public class ResponseHelper {
     	return(getJsonResponse(401, 3, vals));
     }
     
+    /**
+     * Gets an http response with a JWT attached
+     * 
+     * @param responseCode the HTTP response code (usually 200)
+     * @param subcode OPTIONAL A response subcode to include in the payload.  These are typically used with 401 (e.g. 401.1, 401.4)
+     *                responses and typically not needed by this call.
+     * @param name The username or site name that the JWT will be generated against.
+     * @param uriInfo The web service URI information for the call that this is being sent in response to.
+     * @param OPTIONAL additionalReturnValues Additional parameters/values in a Map<String, Object> to return in the json payload.
+     * 
+     * @return
+     * 
+     * @throws DaqueryException
+     */
     public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, Object> additionalReturnValues) throws DaqueryException
     {
         // Issue a token for the user
