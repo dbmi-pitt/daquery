@@ -99,14 +99,18 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         // Get the resource class which matches with the requested URL
         // Extract the roles declared by it
-        //Class<?> resourceClass = resourceInfo.getResourceClass();
-        //List<String> classRoles = extractRoles(resourceClass);
+        Class<?> resourceClass = resourceInfo.getResourceClass();
+        List<String> classRoles = extractRoles(resourceClass);
 
         // Get the resource method which matches with the requested URL
         // Extract the roles declared by it
-        //Method resourceMethod = resourceInfo.getResourceMethod();
-        //List<String> methodRoles = extractRoles(resourceMethod);
-
+        Method resourceMethod = resourceInfo.getResourceMethod();
+        List<String> methodRoles = extractRoles(resourceMethod);
+        
+        List<String> roleSuperset = new ArrayList<String>();
+        roleSuperset.addAll(classRoles);
+        roleSuperset.addAll(methodRoles);
+        
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
@@ -159,31 +163,16 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                             return tokenUsername;
                         }
                         
-                        /**
-                         * Return a list of the role(s) for the current user
-                         * @return List<String> of the role(s) for the current user
-                         */
-                        
-                        //TODO: Use this.getUserPrincipal().getName() to 
-                        //do a database query to find all the roles for the user
-                        //always look up the roles in the database, don't rely on
-                        //a list from the JWT.  The JWT could be spoofed to give the user 
-                        //higher credentials
-                        public List<String> getRoles() {
-                        	//for now, return a hard-coded list
-                        	//TODO: create some global enum type of roles,
-                        	//need to coordinate this with Desheng
-                        	List<String> retList = Arrays.asList("ADMIN", "USER");
-                        	return retList;
-                        }
                     };
                 }
 
                 @Override
                 public boolean isUserInRole(String role) {
-                	//TODO: definitely need to override this method
-                	this.getUserPrincipal().getName();
-                    return true;
+                	try {
+                		return Site_UserDAO.hasRole(tokenUsername, role);
+                	} catch (Exception e) {
+                		return false;
+                	}
                 }
 
                 @Override
