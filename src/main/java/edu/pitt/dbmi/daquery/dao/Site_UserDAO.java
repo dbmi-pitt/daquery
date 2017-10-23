@@ -148,6 +148,40 @@ public class Site_UserDAO extends AbstractDAO {
 	        throw e;    		
     	}
     }
+    
+    /**
+     * Return a boolean indicating if the user has a particular role.
+     * @param uuid- the UUID for the user
+     * @param role- the single role to find in the list of the user's assigned roles
+     * @return True if the user's role list is populated and contains the
+     * role parameter.  
+     * True if the role is blank (a blank role is assumed to mean "any user")
+     * False if the user's role list is empty (this means the code is looking
+     * for a role, but the user does not have any roles
+     * False if the user's role list does not contain the role
+     * @throws Exception
+     */
+    public static boolean hasRole(String uuid, String role) throws Exception
+    {
+    	if (role.isEmpty()) {
+    		return true;
+    	}
+    	try {
+    		Site_User currentUser = queryUserByID(uuid);
+    		List<String> roleList = currentUser.getRoles();
+    		if (roleList == null || roleList.isEmpty()) {
+    			return false;
+    		}
+    		return roleList.contains(role);
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+    	} catch (Exception e) {
+	        throw e;    		
+    	}
+    	
+    }
         
     
     /**
