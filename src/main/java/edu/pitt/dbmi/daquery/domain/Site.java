@@ -35,7 +35,6 @@ import java.util.Objects;
 	@NamedQuery(name=Site.FIND_ALL, query="SELECT s FROM Site s"),
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
 	@NamedQuery(name=Site.FIND_BY_UUID, query="SELECT s FROM Site s WHERE s.site_id = :uuid"),
-	@NamedQuery(name=Site.FIND_BY_NETWORK, query="SELECT s FROM Site s WHERE s.network.id = :network_id"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
 
@@ -50,7 +49,6 @@ public class Site extends DaqueryObject implements Serializable {
     public static final String FIND_BY_ID = "Site.findId";
     public static final String FIND_BY_UUID = "Site.findUUId";
     public static final String COUNT_ALL = "Site.countAll";
-    public static final String FIND_BY_NETWORK = "Site.findByNetwork";
 
 	private static final long serialVersionUID = 1L;
 

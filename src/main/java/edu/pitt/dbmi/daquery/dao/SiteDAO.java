@@ -81,19 +81,6 @@ public class SiteDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
             throw e;
         }
-    }
-
-    public static List<Site> querySiteByNetworkId(long id) throws Exception {
-    	try {
-			List<ParameterItem> pList = new ArrayList<ParameterItem>();
-			ParameterItem piNetworkId = new ParameterItem("network_id", id);
-			pList.add(piNetworkId);
-			List<Site> sites = executeQueryReturnList(Site.FIND_BY_NETWORK, pList, logger);	
-	        return sites;
-    	} catch (Exception e) {
-	        throw e;    		
-    	}
-    	
     }	
 }
 

@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.rest;
 
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
@@ -85,17 +86,17 @@ public class SiteEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            List<Site> site_list = null;
-            if(type.equals("all")) {
-            	site_list = SiteDAO.querySiteByNetworkId(network_id);
-            }
+            //List<Site> site_list = null;
+            //if(type.equals("all")) {
+            //	site_list = SiteDAO.querySiteByNetworkId(network_id);
+            //}
             
-            if (site_list == null || site_list.size() == 0) {
-                return Response.status(NOT_FOUND).build();
-            }
+         //   if (site_list == null || site_list.size() == 0) {
+          //      return Response.status(NOT_FOUND).build();
+           // }
 
-            String jsonString = toJsonArray(site_list);
-            return Response.ok(200).entity(jsonString).build();
+            //String jsonString = toJsonArray(site_list);
+            return ResponseHelper.getBasicResponse(500, "this method is not implemented.");
 
     	} catch (NoResultException nre) {
     		return Response.status(NOT_FOUND).build();
