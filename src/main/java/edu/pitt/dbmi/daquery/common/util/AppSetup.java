@@ -39,12 +39,9 @@ public class AppSetup
 	
 	public static void main(String [] args)
 	{
-		for(int i = 0; i < 1; i++ )
-		{
-			UUID uuid = UUID.randomUUID();
-		    String uuidStr = uuid.toString();
-		    System.out.println(uuidStr);
-		}
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		int status = AppSetup.getDBStatus();
+		System.out.println(status);
 	}
 	
 	public static boolean initialize()

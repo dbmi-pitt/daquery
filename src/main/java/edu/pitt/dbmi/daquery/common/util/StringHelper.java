@@ -16,6 +16,16 @@ public class StringHelper
 		return(val.trim().equals(""));
 	}
 	
+	public static boolean anyAreEmpty(String [] vals)
+	{
+		if(vals == null) return(true);
+		for(String val : vals)
+		{
+			if(isEmpty(val)) return(true);
+		}
+		return(false);
+	}
+	
 	public static String unEscapeQuotes(String val)
 	{
 		if(val == null)
