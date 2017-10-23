@@ -27,7 +27,6 @@ public class AbstractEndpoint {
      * when building the query.
      * @author devuser
      *
-     */
 	protected class ParameterItem {
 		
 		public String paramName;
@@ -46,6 +45,7 @@ public class AbstractEndpoint {
 			return this.paramObject;
 		}
 	}
+     */
 	
 	/**
 	 * A simple method that converts an array of DaqueryObjects to a JSON array
@@ -81,7 +81,7 @@ public class AbstractEndpoint {
 	//TODO: Add LIMIT and OFFSET options for query
 	//check to see how to manage this in JPA
 	//try this: https://stackoverflow.com/questions/25008472/pagination-in-spring-data-jpa-limit-and-offset
-    protected <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+/*    protected <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
@@ -114,7 +114,7 @@ public class AbstractEndpoint {
     	}
             
     }
-
+*/
     
 	/**
 	 * Very generic query method that returns a single object from the database.
@@ -126,7 +126,7 @@ public class AbstractEndpoint {
 	 * null if no data is returned.
 	 * @throws Exception
 	 */
-    protected <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+/*    protected <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
@@ -157,4 +157,5 @@ public class AbstractEndpoint {
     		}
     	}       
     }
+    */
 }

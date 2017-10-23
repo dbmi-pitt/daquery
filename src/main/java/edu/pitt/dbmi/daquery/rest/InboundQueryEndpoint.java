@@ -24,6 +24,9 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
+import edu.pitt.dbmi.daquery.dao.ParameterItem;
+import edu.pitt.dbmi.daquery.dao.AbstractDAO;
+
 
 @Path("/inboundqueries")
 @Produces(APPLICATION_JSON)
@@ -314,7 +317,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		ParameterItem piId = new ParameterItem("id", id);
     		pList.add(piId);
-    		Inbound_Query iq = executeQueryReturnSingle(Inbound_Query.FIND_BY_ID, pList, logger);
+    		Inbound_Query iq = AbstractDAO.executeQueryReturnSingle(Inbound_Query.FIND_BY_ID, pList, logger);
 	        return iq;
 	    
         } catch (PersistenceException e) {
@@ -327,7 +330,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
     private List<Inbound_Query> queryAllInboundQueries() throws Exception {
     	try { 		
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_ALL, null, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_ALL, null, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -343,7 +346,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		ParameterItem piStatus = new ParameterItem("status", status);
     		pList.add(piStatus);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_STATUS, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_STATUS, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -359,7 +362,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		ParameterItem piStudy = new ParameterItem("study", study);
     		pList.add(piStudy);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_STUDY, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_STUDY, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -375,7 +378,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		ParameterItem piSite = new ParameterItem("site", site);
     		pList.add(piSite);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_SITE, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_SITE, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -393,7 +396,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		pList.add(piSite);
     		ParameterItem piStatus = new ParameterItem("status", status);
     		pList.add(piStatus);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_SITE_STATUS, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_SITE_STATUS, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -411,7 +414,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		pList.add(piUser);
     		ParameterItem piStatus = new ParameterItem("status", status);
     		pList.add(piStatus);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_USER_STATUS, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_USER_STATUS, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {

@@ -73,6 +73,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @Produces(MediaType.TEXT_PLAIN)
 	public Response helloWorld()
 	{
+		//that's a little dark, mate.
 		return(ResponseHelper.getBasicResponse(200, "Hello Cruel World"));
 	}
     

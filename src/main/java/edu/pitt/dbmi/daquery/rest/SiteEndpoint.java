@@ -161,20 +161,27 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworkByID(@PathParam("id") String id) {
     	try {
-		    EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
-		    EntityManager em = emf.createEntityManager();
-		    
-		    Site site = em.find(Site.class, Integer.parseInt(id));
-		
-		    em.close();
-		   
-		    logger.info("Done trying to get site: " + site.toString());
-		    
-		    
-		    return Response.ok().entity(site).build();
-		} catch (Exception e) {
-		    return Response.serverError().build();
-		}
+
+            logger.info("#### returning site by id=" + id);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            Site site = SiteDAO.querySiteByID(id);
+            
+            if (site == null) {
+                return Response.status(NOT_FOUND).build();
+            }
+            
+            String json = site.toJson();
+
+            return Response.ok(200).entity(json).build();
+    	} catch (NoResultException nre) {
+    		return Response.status(NOT_FOUND).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**
@@ -269,7 +276,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 
     	try {
     		
-	        Site site = SiteDAO.querySiteByID(updatedSite.getId());	
+	        Site site = SiteDAO.querySiteByID(updatedSite.getSite_id());	
 	        
 	        //step 1: make sure this is a valid site
 	        if (site == null)

@@ -144,5 +144,5 @@ create table property
 )
 ;
 
-INSERT INTO role (name) VALUES ('admin'), ('steward'), ('viewer')
+
 

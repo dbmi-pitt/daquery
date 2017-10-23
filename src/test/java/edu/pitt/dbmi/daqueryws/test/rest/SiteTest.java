@@ -9,7 +9,9 @@ import org.junit.Test;
 
 public class SiteTest extends DaqueryBaseTest {
 
-	private String siteTestUUID = "";
+	private String siteTestUUID = "fb7aa4e1-35e7-45a7-aa05-d50691439652";
+	
+	private long testNetworkID = 1;
 	
 	private String badToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI0ZTIyNGFiZi03OWVkLTQxZTktOGI3Yy1iODYxZTI3NzEwYTkiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvZGFxdWVyeS13cy93cy91c2Vycy9sb2dpbiIsImlhdCI6MTUwNzEyMDUyMiwiZXhwIjoxNTA3MTIxNDIyfQ.zlxdwkHOXSldVAgdbpVcTQ0uGSW8fI_LPHtgEMIh5u5BspvOzmXusl09HYeOk_lSrTSkqho-zRBTNL2wBY8feA";
 	
@@ -23,6 +25,7 @@ public class SiteTest extends DaqueryBaseTest {
 	public void findAllSitesTest() {
 		List<String> uuidList = given().with().contentType("application/json")
 		.headers("Authorization", "Bearer " + currentToken)
+		.queryParam("network_id", testNetworkID)
 		.when().get("sites").then().statusCode(200)
 		.extract().response().path("site_id");
 		siteTestUUID = uuidList.get(0);

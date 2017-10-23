@@ -3,11 +3,13 @@ package edu.pitt.dbmi.daquery.dao;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
+import org.hibernate.HibernateException;
+import org.hibernate.NonUniqueResultException;
+import org.hibernate.Query;
+
+import org.hibernate.Session;
+
+import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 
 
 public abstract class AbstractDAO {
@@ -26,34 +28,32 @@ public abstract class AbstractDAO {
 	//TODO: Add LIMIT and OFFSET options for query
 	//check to see how to manage this in JPA
 	//try this: https://stackoverflow.com/questions/25008472/pagination-in-spring-data-jpa-limit-and-offset
-    protected static <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+    public static <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
-    	EntityManagerFactory emf = null;
-    	EntityManager em = null;
+    	Session s = null;
     	try {
-	        emf = Persistence.createEntityManagerFactory("derby");
-	        em = emf.createEntityManager();
-	        Query query = em.createNamedQuery(namedQuery);
+    		s = HibernateConfiguration.openSession();
+	        Query query = s.getNamedQuery(namedQuery);
 	        if (params != null && !params.isEmpty()) {
 	        	for (ParameterItem param : params) {
 	        		query.setParameter(param.getParamName(), param.getParamObject());
 	        	}
 	        }
-	        List<T> queries = null;
-	        queries = (List<T>)query.getResultList();
-	        return queries;
+	        List<T> resultList = null;
+	        resultList = (List<T>)query.list();
+	        return resultList;
 	    
-        } catch (PersistenceException pe) {
+        } catch (HibernateException he) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(pe.getLocalizedMessage());
-            throw pe;
+    		logger.info(he.getLocalizedMessage());
+            throw he;
         } catch (Exception e) {
     		logger.info(e.getLocalizedMessage());
         	throw e;
         }
     	finally {
-    		if (em != null) {
-    			em.close();
+    		if (s != null) {
+    			s.close();
     		}
     		
     	}
@@ -71,34 +71,41 @@ public abstract class AbstractDAO {
 	 * null if no data is returned.
 	 * @throws Exception
 	 */
-    protected static <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+    public static <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
-    	EntityManagerFactory emf = null;
-    	EntityManager em = null;
+    	Session s = null;
     	try {
-	        emf = Persistence.createEntityManagerFactory("derby");
-	        em = emf.createEntityManager();
-	        Query query = em.createNamedQuery(namedQuery);
+    		s = HibernateConfiguration.openSession();
+	        Query query = s.getNamedQuery(namedQuery);
 	        if (params != null && !params.isEmpty()) {
 	        	for (ParameterItem param : params) {
 	        		query.setParameter(param.getParamName(), param.getParamObject());
 	        	}
 	        }
 	        T item = null;
-	        item = (T)query.getSingleResult();
+	        item = (T)query.uniqueResult();
 	        return item;
 	    
-        } catch (PersistenceException pe) {
+        } catch (NonUniqueResultException nure) {
+    		logger.info("Query Error: Expected a single result but more than one result returned for query:");
+    		logger.info(namedQuery);
+    		logger.info("Using these parameters: ");
+        	for (ParameterItem param : params) {
+        		logger.info(param.getParamName() + ": " + param.getParamObject().toString());
+        	}    		    		
+    		logger.info(nure.getLocalizedMessage());
+            throw nure;
+        } catch (HibernateException he) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(pe.getLocalizedMessage());
-            throw pe;
-        } catch (Exception e) {
+    		logger.info(he.getLocalizedMessage());
+            throw he;        	
+    	} catch (Exception e) {
     		logger.info(e.getLocalizedMessage());
         	throw e;
         }
     	finally {
-    		if (em != null) {
-    			em.close();
+    		if (s != null) {
+    			s.close();
     		}
     	}
             
