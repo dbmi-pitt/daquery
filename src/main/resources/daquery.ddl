@@ -91,5 +91,5 @@ CREATE TABLE "APP"."OUTBOUND_QUERY"
 
 create table property (ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY, name varchar(256), value varchar(256));
 
-
+INSERT INTO role (name) VALUES ('admin'), ('steward'), ('viewer')
 

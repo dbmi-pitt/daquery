@@ -393,10 +393,10 @@ public class UserEndpoint extends AbstractEndpoint {
 	        //1.  has an admin role
 	        // -OR-
 	        //2.  is the same person represented by the updatedUser
-	        List<String> roleList = loggedInUser.getRoles();
+	        List<Role> roleList = loggedInUser.getRoles();
 	        boolean hasAdminRole = false;
-	        for (String r : roleList) {
-	        	if (r.equalsIgnoreCase("admin")) {
+	        for (Role r : roleList) {
+	        	if (r.toString().equalsIgnoreCase("admin")) {
 	        		hasAdminRole = true;
 	        		break;
 	        	}

@@ -168,7 +168,7 @@ public class Site_UserDAO extends AbstractDAO {
     	}
     	try {
     		Site_User currentUser = queryUserByID(uuid);
-    		List<String> roleList = currentUser.getRoles();
+    		List<Role> roleList = currentUser.getRoles();
     		if (roleList == null || roleList.isEmpty()) {
     			return false;
     		}

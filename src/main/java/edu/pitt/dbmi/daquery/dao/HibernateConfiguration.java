@@ -5,17 +5,17 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
-import edu.pitt.dbmi.daquery.domain.DataSource;
+//import edu.pitt.dbmi.daquery.domain.DataSource;
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Notification;
 import edu.pitt.dbmi.daquery.domain.OutboundQuery;
 import edu.pitt.dbmi.daquery.domain.Role;
-import edu.pitt.dbmi.daquery.domain.SASDataSource;
-import edu.pitt.dbmi.daquery.domain.SQLDataSource;
+//import edu.pitt.dbmi.daquery.domain.SASDataSource;
+//import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.Site_User;
-import edu.pitt.dbmi.daquery.domain.SourceType;
+//import edu.pitt.dbmi.daquery.domain.SourceType;
 
 /**
  *  Singleton used to configure and get a Hibernate Session application wide. 
@@ -45,17 +45,17 @@ public class HibernateConfiguration {
 			return(sessFact);
 		
         Configuration hibernateConf = new Configuration();
-    	hibernateConf.addAnnotatedClass(DataSource.class);	            	
+//    	hibernateConf.addAnnotatedClass(DataSource.class);	            	
     	hibernateConf.addAnnotatedClass(Inbound_Query.class);
     	hibernateConf.addAnnotatedClass(Network.class);
     	hibernateConf.addAnnotatedClass(Notification.class);
     	hibernateConf.addAnnotatedClass(OutboundQuery.class);
     	hibernateConf.addAnnotatedClass(Role.class);
-    	hibernateConf.addAnnotatedClass(SASDataSource.class);
+//    	hibernateConf.addAnnotatedClass(SASDataSource.class);
     	hibernateConf.addAnnotatedClass(Site_User.class);
     	hibernateConf.addAnnotatedClass(Site.class);
-    	hibernateConf.addAnnotatedClass(SourceType.class);
-    	hibernateConf.addAnnotatedClass(SQLDataSource.class);
+//    	hibernateConf.addAnnotatedClass(SourceType.class);
+//    	hibernateConf.addAnnotatedClass(SQLDataSource.class);
         	
 
         hibernateConf.setProperty("hibernate.connection.driver_class", "org.apache.derby.jdbc.EmbeddedDriver" )
