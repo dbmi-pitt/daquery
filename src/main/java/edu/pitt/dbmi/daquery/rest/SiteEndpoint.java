@@ -76,7 +76,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning all sites");
             
-            String[] types = {"out", "in", "waiting"};
+            String[] types = {"out", "in", "pending", "waiting"};
             if(!Arrays.asList(types).contains(type)) {
             	return Response.status(BAD_REQUEST).build();
             }
@@ -236,7 +236,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	Site site_out = new Site((String)newSite.get("name"),
 										 (String)newSite.get("url"),
 										 (String)newSite.get("admin_email"),
-										 "out");
+										 "pending");
 	        	if (currentNetwork == null) {
 	                return Response.status(NOT_FOUND).build();
 	            }	        
@@ -280,7 +280,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     	} catch (Exception e) {
     		logger.info(e.getMessage());
     		e.printStackTrace();
-    		return Response.status(UNAUTHORIZED).build();	        		
+    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
 
     	} finally {
     		if (em != null) {
@@ -324,7 +324,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     	} catch (Exception e) {
     		logger.info(e.getMessage());
     		e.printStackTrace();
-    		return Response.status(UNAUTHORIZED).build();	        		
+    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
 
     	} finally {
     		if (em != null) {
