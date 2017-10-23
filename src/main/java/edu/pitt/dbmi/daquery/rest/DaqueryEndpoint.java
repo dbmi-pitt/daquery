@@ -98,8 +98,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	}
 	
 	
-	/** Get a list of networks with associated sites from the central serverthat 
-	 *  have not yet been set up for this site.
+	/** Get a list of networks with associated sites from the central server that 
+	 *  have not yet been set up for this site to query from.
 	 *  
 	 * @return A list of NetworkInfo objects encoded as json
 	 */
