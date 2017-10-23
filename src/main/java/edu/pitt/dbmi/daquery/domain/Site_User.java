@@ -33,6 +33,7 @@ import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
         @NamedQuery(name = Site_User.FIND_BY_ID_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.id = :id AND u.password = :password"),
         @NamedQuery(name = Site_User.FIND_BY_EMAIL_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.email = :email AND u.password = :password"),
         @NamedQuery(name = Site_User.FIND_BY_ID, query = "SELECT u FROM Site_User u WHERE u.id = :id"),
+        @NamedQuery(name = Site_User.FIND_ADMIN, query = "SELECT u FROM Site_User u WHERE u.username = 'admin'"),
         @NamedQuery(name = Site_User.COUNT_ALL, query = "SELECT COUNT(u) FROM Site_User u")
 })
 
@@ -51,6 +52,7 @@ public class Site_User extends DaqueryObject {
     public static final String FIND_BY_ID_PASSWORD = "Site_User.findByIDAndPassword";
     public static final String FIND_BY_EMAIL_PASSWORD = "Site_User.findByEmailAndPassword";
     public static final String FIND_BY_ID = "Site_User.findByID";
+    public static final String FIND_ADMIN = "Site_User.findAdmin";
 
     
     // ======================================
