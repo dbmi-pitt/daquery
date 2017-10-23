@@ -135,21 +135,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             
             
             
-            
-            /*got this approach from:
-            * https://stackoverflow.com/questions/26777083/best-practice-for-rest-token-based-authentication-with-jax-rs-and-jersey
-            * Basically this code allows all the REST calls to inherit a common SecurityContext object.
-            * This object contains the username for the current user.
-            * To access this object, the REST class needs to declare this annotation 
-            * at the top of the class:
-            * 
-            *     @Context
-    		*     SecurityContext securityContext;
-    		*     
-    		*     To access the username in the REST call itself:
-    		*     Principal principal = securityContext.getUserPrincipal();
-    		*     String username = principal.getName();
-            */
             final SecurityContext currentSecurityContext = requestContext.getSecurityContext();
             requestContext.setSecurityContext(new SecurityContext() {
 
@@ -261,12 +246,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 return Arrays.asList(allowedRoles);
             }
         }
-    }
-
-    private void checkPermissions(List<String> allowedRoles, String uuid) throws Exception {
-    	//TODO: run a database query to check this.
-        // Check if the user contains one of the allowed roles
-        // Throw an Exception if the user has not permission to execute the method
     }
 
 }

@@ -24,6 +24,7 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
+import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.Site_User;
@@ -53,17 +54,33 @@ public class SiteDAO extends AbstractDAO {
             
     }
 
-    public static Site querySiteByID(long id) throws Exception {
+    public static Site querySiteByID(String id) throws Exception {
+    	// auto generated ID
+        if(id.matches("^\\d+$"))
+        	logger.info("searching for #### single Site id= " + id);
+        else
+        	logger.info("searching for #### single Site uuid= " + id);
     	try {
-			List<ParameterItem> pList = new ArrayList<ParameterItem>();
-			ParameterItem piSite = new ParameterItem("id", id);
-			pList.add(piSite);
-	        Site site = executeQueryReturnSingle(Site.FIND_BY_ID, pList, logger);	
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		Site site = null;
+    		if(id.matches("^\\d+$")) {
+    			ParameterItem piId = new ParameterItem("id", Long.parseLong(id));
+    			pList.add(piId);
+    			site = executeQueryReturnSingle(Site.FIND_BY_ID, pList, logger);
+    		}
+    		else {
+    			ParameterItem piUUId = new ParameterItem("uuid", id);
+    			pList.add(piUUId);
+    			site = executeQueryReturnSingle(Site.FIND_BY_UUID, pList, logger);
+    		}
+    		
 	        return site;
-    	} catch (Exception e) {
-	        throw e;    		
-    	}
-    	
+	    
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
     }
     
     public static List<Site> querySitesByType(String type) throws Exception {

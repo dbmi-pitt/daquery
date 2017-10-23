@@ -130,7 +130,8 @@ public class Site_UserDAO extends AbstractDAO {
     }
     
     /**
-     * Return a boolean indicating if the user has a particular role.
+     * Return a boolean indicating if the user has a particular role.  This method
+     * is CASE-INSENSITIVE (e.g. ADMIN==admin)
      * @param uuid- the UUID for the user
      * @param role- the single role to find in the list of the user's assigned roles
      * @return True if the user's role list is populated and contains the
@@ -148,11 +149,17 @@ public class Site_UserDAO extends AbstractDAO {
     	}
     	try {
     		Site_User currentUser = queryUserByID(uuid);
-    		List<String> roleList = currentUser.getRoles();
+    		List<Role> roleList = currentUser.getRoles();
+    		List<String> roleNames = new ArrayList<String>();
     		if (roleList == null || roleList.isEmpty()) {
     			return false;
     		}
-    		return roleList.contains(role);
+    		//build a String list of the role names
+    		//make them lowercase to support case-insensitive matching 
+    		for (Role r : roleList) {
+    			roleNames.add(r.getName().toLowerCase());
+    		}
+    		return roleNames.contains(role.toLowerCase());
         } catch (PersistenceException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());

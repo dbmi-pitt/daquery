@@ -18,11 +18,6 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.HashMap;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -41,6 +36,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.hibernate.HibernateException;
+import org.hibernate.NonUniqueResultException;
+import org.hibernate.Session;
+
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
@@ -51,7 +50,9 @@ import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.Site_User;
 
 import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
-
+import edu.pitt.dbmi.daquery.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.dao.ParameterItem;
 
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
@@ -125,13 +126,14 @@ public class UserEndpoint extends AbstractEndpoint {
             if (user_list == null) {
                 return Response.status(NOT_FOUND).build();
             }
+            if (user_list.isEmpty()) {
+                return Response.status(NOT_FOUND).build();
+            }
 
             String jsonString = toJsonArray(user_list);
             return Response.ok(200).entity(jsonString).build();
 
-    	} catch (NoResultException nre) {
-    		return Response.status(NOT_FOUND).build();
-        } catch (Exception e) {
+    	} catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -222,18 +224,16 @@ public class UserEndpoint extends AbstractEndpoint {
     	String loggermsg = "login=" + login + " password=" + password;
         logger.info("Trying to create user with: " + loggermsg);
         
-        EntityManagerFactory emf = null;
-        EntityManager em = null;
-        try {
-	        emf = Persistence.createEntityManagerFactory("derby");
-	        em = emf.createEntityManager();
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
 	
-	        em.getTransaction().begin();
+	        s.getTransaction().begin();
 	
 	        Site_User newUser = new Site_User(login, password);
-	        em.persist(newUser);
+	        s.persist(newUser);
 	
-	        em.getTransaction().commit();
+	        s.getTransaction().commit();
 	
 	       
 	        logger.info("Done trying to create user: " + newUser.toString());
@@ -242,8 +242,8 @@ public class UserEndpoint extends AbstractEndpoint {
         } catch (Exception e) {
 	        return Response.serverError().build();
 	    } finally {
-	    	if (em != null) {
-	    		em.close();
+	    	if (s != null) {
+	    		s.close();
 	    	}
 	    	
 	    }
@@ -372,10 +372,10 @@ public class UserEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateUser(@PathParam("id") String id, Site_User updatedUser) {
-        EntityManagerFactory emf = null;
-        EntityManager em = null;
 
+    	Session s = null;
     	try {
+    		s = HibernateConfiguration.openSession();
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -393,15 +393,9 @@ public class UserEndpoint extends AbstractEndpoint {
 	        //1.  has an admin role
 	        // -OR-
 	        //2.  is the same person represented by the updatedUser
-	        List<String> roleList = loggedInUser.getRoles();
-	        boolean hasAdminRole = false;
-	        for (String r : roleList) {
-	        	if (r.equalsIgnoreCase("admin")) {
-	        		hasAdminRole = true;
-	        		break;
-	        	}
-	        }
+	        boolean hasAdminRole = Site_UserDAO.hasRole(loggedInUser.getId(), "admin");
 	        boolean isMatchingUser = loggedInUser.getId().equalsIgnoreCase(user.getId());
+
 	        //if the current user does not match, return a 401
 	        if ((hasAdminRole || isMatchingUser) == false) {
 	        	return Response.status(UNAUTHORIZED).build();
@@ -451,14 +445,11 @@ public class UserEndpoint extends AbstractEndpoint {
 	     
 	        
 	        //persist changes
-	        emf = Persistence.createEntityManagerFactory("derby");
-	        em = emf.createEntityManager();
+	        s.getTransaction().begin();
 	
-	        em.getTransaction().begin();
-	
-	        em.merge(user);
+	        s.merge(user);
 	        
-	        em.getTransaction().commit();
+	        s.getTransaction().commit();
 
 	        return Response.ok(200).build();
 	        
@@ -468,8 +459,8 @@ public class UserEndpoint extends AbstractEndpoint {
     		return Response.status(UNAUTHORIZED).build();	        		
 
     	} finally {
-    		if (em != null) {
-    			em.close();
+    		if (s != null) {
+    			s.close();
     		}
     		
     	}
@@ -516,7 +507,7 @@ public class UserEndpoint extends AbstractEndpoint {
      * @throws SecurityException on authentication failure
      * NoResultException if no user is found
      */
-    private Site_User authenticate(String email, String password) throws SecurityException, PersistenceException, Exception {
+    private Site_User authenticate(String email, String password) throws SecurityException, HibernateException, Exception {
     	logger.info("searching for #### email/password : " + email + "/" + password);
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
@@ -524,7 +515,7 @@ public class UserEndpoint extends AbstractEndpoint {
 			pList.add(piEmail);
     		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
     		pList.add(piPassword);
-	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_EMAIL_PASSWORD, pList, logger);
+	        Site_User user = AbstractDAO.executeQueryReturnSingle(Site_User.FIND_BY_EMAIL_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
 	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / " + password);
@@ -532,10 +523,10 @@ public class UserEndpoint extends AbstractEndpoint {
 	        }
 	        
 	        return user;
-    	} catch (NoResultException e) {
-    		logger.info("Invalid user/password");
-    		throw new SecurityException("Invalid user/password");
-        } catch (PersistenceException e) {
+        } catch (NonUniqueResultException nure) {
+    		logger.info("Invalid email/password.  Found multiple username/password entries using: " + email + " / " + password);
+            throw new SecurityException("Invalid email/password");
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;

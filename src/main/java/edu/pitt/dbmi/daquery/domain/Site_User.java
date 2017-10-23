@@ -118,7 +118,7 @@ public class Site_User extends DaqueryObject {
 			@JoinColumn(name="ROLE_ID", nullable=false)
 			}
 		)
-	private List<String> roles;
+	private List<Role> roles;
 
     
     // ======================================
@@ -275,11 +275,11 @@ public class Site_User extends DaqueryObject {
 	}
 
 	
-	public List<String> getRoles() {
+	public List<Role> getRoles() {
 		return this.roles;
 	}
 
-	public void setRoles(List<String> roles) {
+	public void setRoles(List<Role> roles) {
 		this.roles = roles;
 	}
 
