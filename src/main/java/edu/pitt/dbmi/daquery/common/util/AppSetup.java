@@ -110,7 +110,9 @@ public class AppSetup
 			return(false);
 		}
 		if(dbStatus == AppSetup.DBSTATUS_ALL_GOOD)
+		{
 			return(true);
+		}
 		else if(dbStatus == AppSetup.DBSTATUS_EMPTY)
 		{
 			if(initializeDBData())
@@ -123,6 +125,7 @@ public class AppSetup
 						return(false);
 					}
 				}
+				dbStatus = AppSetup.DBSTATUS_ALL_GOOD;
 				return(true);
 			}
 			else
@@ -165,6 +168,8 @@ public class AppSetup
 			if(StringHelper.isEmpty(adminRealName)) adminRealName = "";
 			String insertSQL = "insert into site_user (id, username, password, status, email, real_name) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', " + UserStatus.ACTIVE.getValue() + ", '" + adminEmail.trim() + "', '" + adminRealName + "')";
 			log.info("User inserted with: " + insertSQL);
+			stat.executeUpdate(insertSQL);
+			insertSQL = "insert into user_role (role_id, user_id) values ((select id from role where name='admin'), '" + uuidStr.trim() + "')";
 			stat.executeUpdate(insertSQL);
 			firstUserCreated = true;
 			return(true);
