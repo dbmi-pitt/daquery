@@ -33,6 +33,7 @@ import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
         @NamedQuery(name = Site_User.FIND_BY_ID_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.id = :id AND u.password = :password"),
         @NamedQuery(name = Site_User.FIND_BY_EMAIL_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.email = :email AND u.password = :password"),
         @NamedQuery(name = Site_User.FIND_BY_ID, query = "SELECT u FROM Site_User u WHERE u.id = :id"),
+        @NamedQuery(name = Site_User.FIND_ADMIN, query = "SELECT u FROM Site_User u WHERE u.username = 'admin'"),
         @NamedQuery(name = Site_User.COUNT_ALL, query = "SELECT COUNT(u) FROM Site_User u")
 })
 
@@ -51,6 +52,7 @@ public class Site_User extends DaqueryObject {
     public static final String FIND_BY_ID_PASSWORD = "Site_User.findByIDAndPassword";
     public static final String FIND_BY_EMAIL_PASSWORD = "Site_User.findByEmailAndPassword";
     public static final String FIND_BY_ID = "Site_User.findByID";
+    public static final String FIND_ADMIN = "Site_User.findAdmin";
 
     
     // ======================================
@@ -118,7 +120,7 @@ public class Site_User extends DaqueryObject {
 			@JoinColumn(name="ROLE_ID", nullable=false)
 			}
 		)
-	private List<String> roles;
+	private List<Role> roles;
 
     
     // ======================================
@@ -275,11 +277,11 @@ public class Site_User extends DaqueryObject {
 	}
 
 	
-	public List<String> getRoles() {
+	public List<Role> getRoles() {
 		return this.roles;
 	}
 
-	public void setRoles(List<String> roles) {
+	public void setRoles(List<Role> roles) {
 		this.roles = roles;
 	}
 

@@ -82,6 +82,26 @@ public class Site_UserDAO extends AbstractDAO {
     	}
     	
     }
+    
+    /**
+     * Return an first created user object
+     * @return- a Site_User object of first created
+     * @throws PersistenceException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static Site_User getAdminUser() throws Exception {
+    	try {
+	        Site_User user = executeQueryReturnSingle(Site_User.FIND_ADMIN, null, logger);	
+	        return user;
+        } catch (PersistenceException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+    	} catch (Exception e) {
+	        throw e;    		
+    	}
+    	
+    }
 
     /**
      * Return a boolean indicating if the user's account has an expired password
@@ -148,7 +168,7 @@ public class Site_UserDAO extends AbstractDAO {
     	}
     	try {
     		Site_User currentUser = queryUserByID(uuid);
-    		List<String> roleList = currentUser.getRoles();
+    		List<Role> roleList = currentUser.getRoles();
     		if (roleList == null || roleList.isEmpty()) {
     			return false;
     		}

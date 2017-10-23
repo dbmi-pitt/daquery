@@ -31,8 +31,10 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
+import edu.pitt.dbmi.daquery.domain.Site_User;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
@@ -199,7 +201,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		    	if(centralAuthResponse.getStatus() != 200)
 		    		return(centralAuthResponse);
 
-				if(AppSetup.initialSetup(adminEmail, adminPwd, adminRealName))
+		    	if(AppSetup.initialSetup(adminEmail, adminPwd, adminRealName))
 				{	
 					//add the initial values from the central server
 					String jsonval = centralAuthResponse.readEntity(String.class);
@@ -209,8 +211,11 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	AppProperties.setDBProperty("central.site.key", key);
 			    	AppProperties.setDBProperty("site.id", siteId);
 			    	AppProperties.setDBProperty("site.name", siteName);
-
-			    	return(ResponseHelper.getTokenResponse(200, null, adminEmail, uriInfo, null));
+			    	
+			    	Site_User currentUser = Site_UserDAO.getAdminUser();
+			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
+			    	addtionalVal.put("user", currentUser);
+			    	return(ResponseHelper.getTokenResponse(200, null, adminEmail, uriInfo, addtionalVal));
 				}
 				else
 					return(ResponseHelper.getBasicResponse(500, "An error occured while initializing the application database. Check the application logs for more information."));
