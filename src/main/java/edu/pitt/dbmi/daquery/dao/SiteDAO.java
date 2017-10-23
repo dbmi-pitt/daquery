@@ -65,23 +65,7 @@ public class SiteDAO extends AbstractDAO {
     	}
     	
     }
-    
-    public static List<Site> querySitesByType(String type) throws Exception {
-    	try {
-    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piType = new ParameterItem("type", type);
-    		pList.add(piType);
-    	    List<Site> sites = executeQueryReturnList(Site.FIND_BY_TYPE, pList, logger);
-	        return sites;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-    
+
     public static List<Site> querySiteByNetworkId(long id) throws Exception {
     	try {
 			List<ParameterItem> pList = new ArrayList<ParameterItem>();
@@ -93,21 +77,6 @@ public class SiteDAO extends AbstractDAO {
 	        throw e;    		
     	}
     	
-    }
-    
-    public static List<Site> querySiteByNetworkIdType(long id, String type) throws Exception {
-    	try {
-			List<ParameterItem> pList = new ArrayList<ParameterItem>();
-			ParameterItem piNetworkId = new ParameterItem("network_id", id);
-			ParameterItem piType = new ParameterItem("type", type);
-			pList.add(piNetworkId);
-			pList.add(piType);
-			List<Site> sites = executeQueryReturnList(Site.FIND_BY_NETWORK_TYPE, pList, logger);	
-	        return sites;
-    	} catch (Exception e) {
-	        throw e;    		
-    	}
-    }
-	
+    }	
 }
 

@@ -48,11 +48,11 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		Response r = de.setupSite("bill-dev", "abc123"); */
 	}
 	
-	private static boolean containsSite(List<Network> networks, String siteId)
+	private static boolean containsSiteWhoIQuery(List<Network> networks, String siteId)
 	{
 		for(Network net : networks)
 		{
-			for(Site site : net.getSites())
+			for(Site site : net.getOutgoingQuerySites())
 			{
 				if(siteId.equals(site.getId()))
 				{
@@ -102,7 +102,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	 */
     @Secured("ADMIN")
     @GET
-    @Path("/available-networks/")
+    @Path("/available-networks-to-query/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response availableNetworks() {
     	try
@@ -121,7 +121,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				{
 					for(SiteInfo si : nin.allowedSites)
 					{
-						if(containsSite(nets, si.id))
+						if(containsSiteWhoIQuery(nets, si.id))
 							sitesToRemove.add(si);
 					}
 					for(SiteInfo sr : sitesToRemove)
@@ -198,8 +198,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				Response centralAuthResponse = callCentralServerAuth(siteName, siteKey);
 		    	if(centralAuthResponse.getStatus() != 200)
 		    		return(centralAuthResponse);
-		    	
-				if(AppSetup.initialize())
+
+				if(AppSetup.initialSetup(adminEmail, adminPwd, adminRealName))
 				{	
 					//add the initial values from the central server
 					String jsonval = centralAuthResponse.readEntity(String.class);

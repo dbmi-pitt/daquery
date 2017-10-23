@@ -46,13 +46,13 @@ public class HibernateConfiguration {
 		
         Configuration hibernateConf = new Configuration();
     	hibernateConf.addAnnotatedClass(DataSource.class);	            	
-    	hibernateConf.addAnnotatedClass(Inbound_Query.class);
+    	//hibernateConf.addAnnotatedClass(Inbound_Query.class);
     	hibernateConf.addAnnotatedClass(Network.class);
     	hibernateConf.addAnnotatedClass(Notification.class);
-    	hibernateConf.addAnnotatedClass(OutboundQuery.class);
-    	hibernateConf.addAnnotatedClass(Role.class);
+    	//hibernateConf.addAnnotatedClass(OutboundQuery.class);
+    	//hibernateConf.addAnnotatedClass(Role.class);
     	hibernateConf.addAnnotatedClass(SASDataSource.class);
-    	hibernateConf.addAnnotatedClass(Site_User.class);
+    	//hibernateConf.addAnnotatedClass(Site_User.class);
     	hibernateConf.addAnnotatedClass(Site.class);
     	hibernateConf.addAnnotatedClass(SourceType.class);
     	hibernateConf.addAnnotatedClass(SQLDataSource.class);

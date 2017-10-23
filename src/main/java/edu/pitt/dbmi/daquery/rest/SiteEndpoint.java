@@ -88,8 +88,6 @@ public class SiteEndpoint extends AbstractEndpoint {
             List<Site> site_list = null;
             if(type.equals("all")) {
             	site_list = SiteDAO.querySiteByNetworkId(network_id);
-            } else {
-            	site_list = SiteDAO.querySiteByNetworkIdType(network_id, type);
             }
             
             if (site_list == null || site_list.size() == 0) {
@@ -132,7 +130,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             
             // Faking return here. Suppose get all available sites within Network for netword_id from Daquery-Central 
             List<Site> site_list = new ArrayList<>();
-            site_list.add(new Site("fakeSite1", "url", "fakeSite1@pitt.edu", ""));
+            site_list.add(new Site("fakeSite1", "url", "fakeSite1@pitt.edu"));
             
             if (site_list == null || site_list.size() == 0) {
                 return Response.status(NOT_FOUND).build();
@@ -147,35 +145,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
-    
-	/**
-     * Get all sites by type
-     * example url: daquery-ws/ws/sites/type/inbound
-     * @param  type inbound, outbound or pending 
-     * @return 200 OK			List of sites
-     * @throws 400 Bad Request	error message
-     * @throws 401 Unauthorized	
-     */
-    @GET
-    @Secured
-    @Path("/type/{type}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response retrieveSites(@QueryParam("type") String type) {
-		try {
-            List<Site> site_list = SiteDAO.querySitesByType(type);
-            
-            if (site_list == null) {
-                return Response.status(NOT_FOUND).build();
-            }
 
-            String jsonString = toJsonArray(site_list);
-            return Response.ok(200).entity(jsonString).build();
-		} catch (Exception e) {
-		    return Response.serverError().build();
-		}
-    }
-    
     //TODO: Do we need a call that retrieves a site by UUID?
     /**
      * Get specific site by Id
@@ -231,17 +201,15 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        if(newSite.get("type").equals("both")) {
 	        	Site site_in = new Site((String)newSite.get("name"),
 									 (String)newSite.get("url"),
-									 (String)newSite.get("admin_email"),
-									 "in");
+									 (String)newSite.get("admin_email"));
 	        	Site site_out = new Site((String)newSite.get("name"),
 										 (String)newSite.get("url"),
-										 (String)newSite.get("admin_email"),
-										 "out");
+										 (String)newSite.get("admin_email"));
 	        	if (currentNetwork == null) {
 	                return Response.status(NOT_FOUND).build();
 	            }	        
-		        site_in.setNetwork(currentNetwork);
-		        site_out.setNetwork(currentNetwork);
+		       // site_in.setNetwork(currentNetwork);
+		       // site_out.setNetwork(currentNetwork);
 		        //persist changes
 		        emf = Persistence.createEntityManagerFactory("derby");
 		        em = emf.createEntityManager();
@@ -257,13 +225,12 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        } else {
 		        Site site = new Site((String)newSite.get("name"),
 		        					 (String)newSite.get("url"),
-		        					 (String)newSite.get("admin_email"),
-		        					 (String)newSite.get("type"));
+		        					 (String)newSite.get("admin_email"));
 		        
 	            if (currentNetwork == null) {
 	                return Response.status(NOT_FOUND).build();
 	            }	        
-		        site.setNetwork(currentNetwork);
+		      //  site.setNetwork(currentNetwork);
 		        //persist changes
 		        emf = Persistence.createEntityManagerFactory("derby");
 		        em = emf.createEntityManager();

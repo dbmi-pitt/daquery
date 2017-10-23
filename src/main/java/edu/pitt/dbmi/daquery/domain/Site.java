@@ -2,15 +2,11 @@ package edu.pitt.dbmi.daquery.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -24,6 +20,7 @@ import org.hibernate.annotations.GenericGenerator;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.common.domain.EncryptionType;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 
 import java.util.List;
@@ -37,9 +34,6 @@ import java.util.Objects;
 @NamedQueries({
 	@NamedQuery(name=Site.FIND_ALL, query="SELECT s FROM Site s"),
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
-	@NamedQuery(name=Site.FIND_BY_TYPE, query="SELECT s FROM Site s WHERE s.type = :type"),
-	@NamedQuery(name=Site.FIND_BY_NETWORK, query="SELECT s FROM Site s WHERE s.network.id = :network_id"),
-	@NamedQuery(name=Site.FIND_BY_NETWORK_TYPE, query="SELECT s FROM Site s WHERE s.network.id = :network_id and s.type = :type"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
 
@@ -54,8 +48,6 @@ public class Site extends DaqueryObject implements Serializable {
     public static final String FIND_BY_ID = "Site.findId";
     public static final String COUNT_ALL = "Site.countAll";
     public static final String FIND_BY_NETWORK = "Site.findByNetwork";
-    public static final String FIND_BY_NETWORK_TYPE = "Site.findByNetworkType";
-    public static final String FIND_BY_TYPE = "Site.findByType";
 
 	private static final long serialVersionUID = 1L;
 
@@ -74,14 +66,6 @@ public class Site extends DaqueryObject implements Serializable {
 	@Expose
 	@Column(name= "NAME", nullable=false, length=100)
 	private String name;
-
-	/**
-	 * in: Sites which can query this site
-	 * out: Sites which this site can query
-	 */
-	@Expose
-	@Column(name= "TYPE", nullable=false, length=100)
-	private String type;
 
 	@Expose
 	@Column(name= "URL", nullable=false, length=500)
@@ -109,10 +93,10 @@ public class Site extends DaqueryObject implements Serializable {
 	private List<OutboundQuery> outboundQueries;
     
 	//bi-directional many-to-one association to Network
-    @Expose
+/*    @Expose
 	@ManyToOne
 	@JoinColumn(name="NETWORK_ID", nullable=false)
-	private Network network;
+	private Network network; */
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "REQUEST_SENT")
@@ -121,16 +105,54 @@ public class Site extends DaqueryObject implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "REQUEST_REPLIED")
 	private java.util.Date request_replied;
+
+	/**
+	 * The access key used to make and receive calls to/from this site.
+	 */
+	@Column(name = "ACCESS_KEY")
+	private String accessKey;
 	
-	public Site() {
+	/**
+	 * The encryption key used to encrypt data sent to this site.
+	 */
+	@Column(name = "COMM_ENC_KEY")
+	private String commEncKey;
+	
+	/**
+	 * The type of encryption used to send data to this site.
+	 */
+	@Column(name = "ENC_TYPE")
+	private int commEncType;
+	
+	public Site()
+	{
+		
 	}
 	
-	public Site(String name, String url, String admin_email, String type) {
+	public Site(String name, String url, String admin_email) {
 		this.name = name;
 		this.url = url;
 		this.admin_email = admin_email;
-		this.type = type;
 	}
+	
+	public Site (String accessKey,
+			  String adminEmail,
+			  String commEncKey,
+			  EncryptionType commType,
+			  String name,
+			  String siteId,
+			  SiteStatus status,
+			  String url)
+	{
+		this.setAccessKey(accessKey);
+		this.setAdmin_email(adminEmail);
+		this.setComEncKey(commEncKey);
+		this.setCommTypeValue(commType);
+		this.setName(name);
+		this.setSite_id(siteId);
+		this.setStatus(status.getValue());
+		this.setUrl(url);
+	}	
 	
 	//TODO: I need some more constructors
 	//take name, URL, adminEmail, status as parameters 
@@ -161,14 +183,6 @@ public class Site extends DaqueryObject implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public String getUrl() {
@@ -203,13 +217,13 @@ public class Site extends DaqueryObject implements Serializable {
 		this.statusValue = statusValue;
 	}
 
-	public Network getNetwork() {
+/*	public Network getNetwork() {
 		return network;
 	}
 
 	public void setNetwork(Network network) {
 		this.network = network;
-	}
+	} */
 
 	public java.util.Date getRequest_sent() {
 		return request_sent;
@@ -270,7 +284,28 @@ public class Site extends DaqueryObject implements Serializable {
 
 		return outboundQuery;
 	}
+	
+	/**
+	 * The access key used to make and receive calls to/from this site.
+	 */
+	public String getAccessKey(){return(accessKey);}
+	public void setAccessKey(String key){accessKey = key;}
 
+	/**
+	 * The encryption key used to encrypt data sent to this site.
+	 */
+	public String getCommEncKey(){return(commEncKey);}
+	public void setComEncKey(String key){commEncKey = key;}
+	
+	/**
+	 * The type of encryption used to send data to this site.
+	 */
+	public int getCommEncType(){return(commEncType);}
+	public void setCommEncType(int type){}	
+	@Transient
+	public EncryptionType getCommTypeValue(){return(EncryptionType.fromInt(commEncType));}
+	public void setCommTypeValue(EncryptionType et){commEncType = et.getValue();}
+	
 	
 	// ======================================
     // =   Methods hash, equals, toString   =
@@ -282,11 +317,6 @@ public class Site extends DaqueryObject implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Site site = (Site) o;
         return Objects.equals(id, site.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 
     @Override

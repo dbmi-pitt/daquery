@@ -16,8 +16,8 @@ public class SiteTest {
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
 		EntityManager em = emf.createEntityManager();
 		Long network_id = 401L;
-		Network nw = em.find(Network.class, network_id);
-		s.setNetwork(nw);
+		//Network nw = em.find(Network.class, network_id);
+		//s.setNetwork(nw);
 		
 		em.getTransaction().begin();
 		em.persist(s);

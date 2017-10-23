@@ -3,9 +3,6 @@ CREATE TABLE "APP"."NETWORK"
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    NETWORK_ID varchar(50),
    NAME varchar(100) NOT NULL,
-   DATABASE_URL varchar(500),
-   DATABASE_USERNAME varchar(100),
-   DATABASE_PASSWORD varchar(100),
    DATA_MODEL varchar(100)
 )
 ;
@@ -49,12 +46,14 @@ CREATE TABLE "APP"."SITE"
    SITE_ID varchar(50),
    NAME varchar(100) NOT NULL,
    NETWORK_ID bigint,
-   TYPE varchar(100),
    URL varchar(500),
    ADMIN_EMAIL varchar(500),
    STATUS int,
    REQUEST_SENT timestamp,
-   REQUEST_REPLIED timestamp
+   REQUEST_REPLIED timestamp,
+   ACCESS_KEY varchar(500),
+   COMM_ENC_KEY  varchar(1024),
+   ENC_TYPE int 
 )
 ;
 CREATE TABLE "APP"."INBOUND_QUERY"
@@ -89,7 +88,61 @@ CREATE TABLE "APP"."OUTBOUND_QUERY"
 )
 ;
 
-create table property (ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY, name varchar(256), value varchar(256));
+CREATE TABLE DATA_SOURCE
+(
+   DS_ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+   NAME varchar(50) NOT NULL,
+   CONNECTION_URL varchar(250),
+   USERNAME varchar(50),
+   PWD varchar(50),
+   DTYPE int
+)
+;
+
+CREATE TABLE SQL_DATA_SOURCE
+(
+   DS_ID bigint NOT NULL,
+   CONNECTION_URL varchar(250),
+   USERNAME varchar(50),
+   PWD varchar(50)
+)
+;
+
+CREATE TABLE SAS_DATA_SOURCE
+(
+   DS_ID bigint NOT NULL,
+   DATASET_LOCATION varchar(250)
+)
+;
+
+CREATE TABLE SOURCE_TO_NETWORK
+(
+   NETWORK_ID bigint NOT NULL,
+   DATA_SOURCE_ID bigint NOT NULL
+)
+;
+
+CREATE TABLE OUTGOING_QUERY_SITES
+(
+	SITE_ID bigint not NULL,
+	NETWORK_ID bigint not NULL
+)
+;
+
+CREATE TABLE INCOMING_QUERY_SITES
+(
+	SITE_ID bigint not NULL,
+	NETWORK_ID bigint not NULL
+)
+;
+
+create table property
+(
+   ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+   name varchar(256),
+   value varchar(256)
+)
+;
 
 
 
