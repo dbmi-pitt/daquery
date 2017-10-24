@@ -61,7 +61,17 @@ public class HibernateConfiguration {
         hibernateConf.setProperty("hibernate.connection.driver_class", "org.apache.derby.jdbc.EmbeddedDriver" )
         .setProperty("hibernate.connection.url", "jdbc:derby:/opt/apache-tomcat-6.0.53/conf/daquery-db")
         .setProperty("hibernate.connection.username", "")
-    	.setProperty("hibernate.connection.password", "");
+    	.setProperty("hibernate.connection.password", "")
+    	
+        
+        .setProperty("hibernate.c3p0.acquire_increment", "1")
+        .setProperty("hibernate.c3p0.idle_test_period","240")
+        .setProperty("hibernate.c3p0.timeout","600")	            
+        .setProperty("hibernate.c3p0.max_size","100")
+        .setProperty("hibernate.c3p0.min_size","3")
+        .setProperty("hibernate.c3p0.validate", "false") 
+        .setProperty("hibernate.c3p0.max_statements", "500");
+
 /*      .setProperty("hibernate.dialect", props.getProperty("hibernate.dialect", "org.hibernate.dialect.Oracle9Dialect")) */         
 /*	    .setProperty("hibernate.connection.release_mode", "after_statement") */
 /*    	.setProperty("hibernate.show_sql", props.getProperty("hibernate.show_sql", "false")) */
