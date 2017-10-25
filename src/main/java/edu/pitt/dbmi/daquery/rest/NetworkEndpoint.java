@@ -3,20 +3,13 @@ package edu.pitt.dbmi.daquery.rest;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Logger;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -30,6 +23,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+
+import org.hibernate.HibernateException;
 
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
@@ -81,11 +76,14 @@ public class NetworkEndpoint extends AbstractEndpoint {
             if (networks == null) {
                 return Response.status(NOT_FOUND).build();
             }
+            if (networks.isEmpty()) {
+                return Response.status(NOT_FOUND).build();
+            }
 
             String jsonString = toJsonArray(networks);
             return Response.ok(200).entity(jsonString).build();
 
-    	} catch (NoResultException nre) {
+    	} catch (HibernateException he) {
     		return Response.status(NOT_FOUND).build();
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
@@ -119,11 +117,12 @@ public class NetworkEndpoint extends AbstractEndpoint {
             if (network == null) {
                 return Response.status(NOT_FOUND).build();
             }
+        
             
             String json = network.toJson();
 
             return Response.ok(200).entity(json).build();
-    	} catch (NoResultException nre) {
+    	} catch (HibernateException he) {
     		return Response.status(NOT_FOUND).build();
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();

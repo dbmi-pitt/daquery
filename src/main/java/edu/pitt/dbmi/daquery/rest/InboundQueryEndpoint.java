@@ -23,9 +23,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import edu.pitt.dbmi.daquery.domain.Inbound_Query;
-import edu.pitt.dbmi.daquery.dao.ParameterItem;
+import org.hibernate.HibernateException;
+
 import edu.pitt.dbmi.daquery.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.dao.ParameterItem;
+import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 
 
 @Path("/inboundqueries")
@@ -320,7 +322,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		Inbound_Query iq = AbstractDAO.executeQueryReturnSingle(Inbound_Query.FIND_BY_ID, pList, logger);
 	        return iq;
 	    
-        } catch (PersistenceException e) {
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
@@ -333,7 +335,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_ALL, null, logger);
 	        return queries;
 	    
-        } catch (PersistenceException e) {
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
@@ -349,7 +351,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_STATUS, pList, logger);
 	        return queries;
 	    
-        } catch (PersistenceException e) {
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
@@ -365,7 +367,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_STUDY, pList, logger);
 	        return queries;
 	    
-        } catch (PersistenceException e) {
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
@@ -381,7 +383,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_SITE, pList, logger);
 	        return queries;
 	    
-        } catch (PersistenceException e) {
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
@@ -399,7 +401,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_SITE_STATUS, pList, logger);
 	        return queries;
 	    
-        } catch (PersistenceException e) {
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
@@ -417,7 +419,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_USER_STATUS, pList, logger);
 	        return queries;
 	    
-        } catch (PersistenceException e) {
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
