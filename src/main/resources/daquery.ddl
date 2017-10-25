@@ -33,8 +33,6 @@ CREATE TABLE "APP"."ROLE"
 )
 ;
 
-insert into ROLE (name) values ('admin');
-
 
 CREATE TABLE "APP"."USER_ROLE"
 (
