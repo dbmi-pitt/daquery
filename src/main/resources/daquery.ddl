@@ -33,6 +33,9 @@ CREATE TABLE "APP"."ROLE"
 )
 ;
 
+insert into ROLE (name) values ('admin');
+
+
 CREATE TABLE "APP"."USER_ROLE"
 (
   USER_ID varchar(50) NOT NULL,
@@ -92,9 +95,6 @@ CREATE TABLE DATA_SOURCE
 (
    DS_ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    NAME varchar(50) NOT NULL,
-   CONNECTION_URL varchar(250),
-   USERNAME varchar(50),
-   PWD varchar(50),
    DTYPE int
 )
 ;
