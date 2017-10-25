@@ -66,3 +66,5 @@ drop table inbound_query;
 drop table outbound_query;
 
 rename table site_user to dq_user;
+
+insert into ROLE (name) values ('admin');

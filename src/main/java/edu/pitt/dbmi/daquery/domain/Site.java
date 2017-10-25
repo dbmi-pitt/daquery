@@ -34,7 +34,7 @@ import java.util.Objects;
 @NamedQueries({
 	@NamedQuery(name=Site.FIND_ALL, query="SELECT s FROM Site s"),
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
-	@NamedQuery(name=Site.FIND_BY_UUID, query="SELECT s FROM Site s WHERE s.site_id = :uuid"),
+	@NamedQuery(name=Site.FIND_BY_UUID, query="SELECT s FROM Site s WHERE s.siteId = :uuid"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
 
@@ -130,7 +130,7 @@ public class Site extends DaqueryObject implements Serializable {
 		this.setComEncKey(commEncKey);
 		this.setCommTypeValue(commType);
 		this.setName(name);
-		this.setSite_id(siteId);
+		this.setSiteId(siteId);
 		this.setStatus(status.getValue());
 		this.setUrl(url);
 	}	
@@ -150,12 +150,12 @@ public class Site extends DaqueryObject implements Serializable {
 		this.id = id;
 	}
 
-	public String getSite_id() {
+	public String getSiteId() {
 		return siteId;
 	}
 
-	public void setSite_id(String site_id) {
-		this.siteId = site_id;
+	public void setSiteId(String id) {
+		this.siteId = id;
 	}
 
 	public String getName() {

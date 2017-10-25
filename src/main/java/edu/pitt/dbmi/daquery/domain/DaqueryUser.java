@@ -27,7 +27,7 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 
 @NamedQueries({
-        @NamedQuery(name = DaqueryUser.FIND_ALL, query = "SELECT u FROM DaquryUser u ORDER BY u.realName DESC"),
+        @NamedQuery(name = DaqueryUser.FIND_ALL, query = "SELECT u FROM DaqueryUser u ORDER BY u.realName DESC"),
         @NamedQuery(name = DaqueryUser.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.username = :login AND u.password = :password"),
         @NamedQuery(name = DaqueryUser.FIND_BY_ID_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.id = :id AND u.password = :password"),
         @NamedQuery(name = DaqueryUser.FIND_BY_EMAIL_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.email = :email AND u.password = :password"),

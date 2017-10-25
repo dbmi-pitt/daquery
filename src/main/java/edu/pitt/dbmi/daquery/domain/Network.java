@@ -16,7 +16,7 @@ import java.util.Set;
 @NamedQueries({
     @NamedQuery(name = Network.FIND_ALL, query = "SELECT u FROM Network u ORDER BY u.name DESC"),
     @NamedQuery(name = Network.FIND_BY_ID, query = "SELECT u FROM Network u WHERE u.id = :id"),
-    @NamedQuery(name = Network.FIND_BY_UUID, query = "SELECT u FROM Network u WHERE u.network_id = :uuid"),
+    @NamedQuery(name = Network.FIND_BY_UUID, query = "SELECT u FROM Network u WHERE u.networkId = :uuid"),
 })
 
 /**
@@ -81,11 +81,11 @@ public class Network extends DaqueryObject implements Serializable {
 		this.id = id;
 	}
 
-	public String getNetwork_Id() {
+	public String getNetworkId() {
 		return this.networkId;
 	}
 
-	public void setNetwork_Id(String id) {
+	public void setNetworkId(String id) {
 		this.networkId = id;
 	}
 
@@ -167,7 +167,7 @@ public class Network extends DaqueryObject implements Serializable {
     
     @Override
 	public String toString() {
-		return "Network [id=" + id + ", network_id=" + networkId + ", name=" + name  + "]";
+		return "Network [id=" + id + ", network id=" + networkId + ", name=" + name  + "]";
 	}
     
 

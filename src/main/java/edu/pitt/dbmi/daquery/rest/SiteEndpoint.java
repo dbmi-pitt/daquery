@@ -121,11 +121,11 @@ public class SiteEndpoint extends AbstractEndpoint {
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
-    public Response getAvailableSites(@QueryParam("network_id") long network_id) {
+    public Response getAvailableSites(@QueryParam("network_id") long networkId) {
     	
     	try {
 
-            logger.info("#### returning available sites for network id: " + network_id);
+            logger.info("#### returning available sites for network id: " + networkId);
             
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -205,8 +205,8 @@ public class SiteEndpoint extends AbstractEndpoint {
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
-    		String network_id = (String) newSite.get("network_id"); 		
-	        Network currentNetwork = NetworkDAO.queryNetwork(network_id);
+    		String networkId = (String) newSite.get("network_id"); 		
+	        Network currentNetwork = NetworkDAO.queryNetwork(networkId);
 	        
 	        if(newSite.get("type").equals("both")) {
 	        	Site site_in = new Site((String)newSite.get("name"),
@@ -275,7 +275,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     	try {
     		s = HibernateConfiguration.openSession();
     		
-	        Site site = SiteDAO.querySiteByID(updatedSite.getSite_id());	
+	        Site site = SiteDAO.querySiteByID(updatedSite.getSiteId());	
 	        
 	        //step 1: make sure this is a valid site
 	        if (site == null)
