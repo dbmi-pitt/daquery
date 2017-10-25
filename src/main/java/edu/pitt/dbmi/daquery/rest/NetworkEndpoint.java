@@ -80,7 +80,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (HibernateException he) {
-    		return Response.status(NOT_FOUND).build();
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
@@ -119,7 +119,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
 
             return Response.ok(200).entity(json).build();
     	} catch (HibernateException he) {
-    		return Response.status(NOT_FOUND).build();
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }

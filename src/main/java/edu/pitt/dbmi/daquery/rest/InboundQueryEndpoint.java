@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -103,10 +102,14 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
                 return Response.status(NOT_FOUND).build();
             }
 
+            if (queries.isEmpty()) {
+                return Response.status(NOT_FOUND).build();
+            }
+            
             String jsonString = toJsonArray(queries);
             return Response.ok(200).entity(jsonString).build();
 
-    	} catch (NoResultException nre) {
+    	} catch (HibernateException he) {
     		return Response.status(NOT_FOUND).build();
         } catch (Exception e) {
         	e.printStackTrace();
@@ -146,7 +149,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
             String json = iq.toJson();
 
             return Response.ok(200).entity(json).build();
-    	} catch (NoResultException nre) {
+    	} catch (HibernateException he) {
     		return Response.status(NOT_FOUND).build();
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();

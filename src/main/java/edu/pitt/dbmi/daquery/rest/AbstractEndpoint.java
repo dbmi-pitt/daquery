@@ -3,14 +3,7 @@ package edu.pitt.dbmi.daquery.rest;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.Network;
 
 
 //TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"

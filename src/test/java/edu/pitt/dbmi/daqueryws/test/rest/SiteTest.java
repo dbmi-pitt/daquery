@@ -21,7 +21,7 @@ public class SiteTest extends DaqueryBaseTest {
 
 	
 	//return the UUID for first user found
-	@Test
+/*	@Test
 	public void findAllSitesTest() {
 		List<String> uuidList = given().with().contentType("application/json")
 		.headers("Authorization", "Bearer " + currentToken)
@@ -31,7 +31,7 @@ public class SiteTest extends DaqueryBaseTest {
 		siteTestUUID = uuidList.get(0);
 
 	}
-	
+*/	
 	@Test 
 	public void findByIdTest() {
 		given().with().contentType("application/json")
