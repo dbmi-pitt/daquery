@@ -42,7 +42,7 @@ public class Network extends DaqueryObject implements Serializable {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "NETWORK_ID", unique = true, length=50)
-	private String network_id;
+	private String networkId;
 
 	@Expose
 	@Column(name = "NAME", nullable=false, length=100)
@@ -50,23 +50,7 @@ public class Network extends DaqueryObject implements Serializable {
 	
 	@Expose
 	@Column(name = "DATA_MODEL", nullable=true, length=100)
-	private String data_model;
-	
-	//bi-directional many-to-one association to InboundQuery
-	@Transient
-	@OneToMany(mappedBy="network")
-	private List<Inbound_Query> inboundQueries;
-
-	//bi-directional many-to-one association to OutboundQuery
-	@Transient
-	@OneToMany(mappedBy="network")
-	private List<OutboundQuery> outboundQueries;
-
-	//bi-directional many-to-one association to Site
-	//@Expose
-	//@Transient
-//	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy="network")
-//	private List<Site> sites;
+	private String dataModel;
 
 	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -98,11 +82,11 @@ public class Network extends DaqueryObject implements Serializable {
 	}
 
 	public String getNetwork_Id() {
-		return this.network_id;
+		return this.networkId;
 	}
 
 	public void setNetwork_Id(String id) {
-		this.network_id = id;
+		this.networkId = id;
 	}
 
 	public String getName() {
@@ -114,56 +98,14 @@ public class Network extends DaqueryObject implements Serializable {
 	}
 	
 	public String getData_model() {
-		return data_model;
+		return dataModel;
 	}
 
 	public void setData_model(String data_model) {
-		this.data_model = data_model;
+		this.dataModel = data_model;
 	}
 
-	public List<Inbound_Query> getInboundQueries() {
-		return this.inboundQueries;
-	}
 
-	public void setInboundQueries(List<Inbound_Query> inboundQueries) {
-		this.inboundQueries = inboundQueries;
-	}
-
-	public Inbound_Query addInboundQuery(Inbound_Query inboundQuery) {
-		getInboundQueries().add(inboundQuery);
-		inboundQuery.setNetwork(this);
-
-		return inboundQuery;
-	}
-
-	public Inbound_Query removeInboundQuery(Inbound_Query inboundQuery) {
-		getInboundQueries().remove(inboundQuery);
-		inboundQuery.setNetwork(null);
-
-		return inboundQuery;
-	}
-
-	public List<OutboundQuery> getOutboundQueries() {
-		return this.outboundQueries;
-	}
-
-	public void setOutboundQueries(List<OutboundQuery> outboundQueries) {
-		this.outboundQueries = outboundQueries;
-	}
-
-	public OutboundQuery addOutboundQuery(OutboundQuery outboundQuery) {
-		getOutboundQueries().add(outboundQuery);
-		outboundQuery.setNetwork(this);
-
-		return outboundQuery;
-	}
-
-	public OutboundQuery removeOutboundQuery(OutboundQuery outboundQuery) {
-		getOutboundQueries().remove(outboundQuery);
-		outboundQuery.setNetwork(null);
-
-		return outboundQuery;
-	}
 
 	public Set<Site> getOutgoingQuerySites()
 	{
@@ -219,20 +161,13 @@ public class Network extends DaqueryObject implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Network network = (Network) o;
-        return Objects.equals(network_id, network.network_id);
+        return Objects.equals(networkId, network.networkId);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(network_id);
-    }
-
 
     
     @Override
 	public String toString() {
-		return "Network [id=" + id + ", network_id=" + network_id + ", name=" + name + ", inboundQueries="
-				+ inboundQueries + ", outboundQueries=" + outboundQueries + "]";
+		return "Network [id=" + id + ", network_id=" + networkId + ", name=" + name  + "]";
 	}
     
 

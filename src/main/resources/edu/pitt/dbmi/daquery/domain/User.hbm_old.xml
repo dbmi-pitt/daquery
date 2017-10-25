@@ -3,7 +3,7 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-    <class name="edu.pitt.dbmi.daquery.domain.User" table="SITE_USER" catalog="daquery">
+    <class name="edu.pitt.dbmi.daquery.domain.User" table="DQ_USER" catalog="daquery">
         <id name="Id" type="string">
             <column name="ID" />
             <generator class="identity" />

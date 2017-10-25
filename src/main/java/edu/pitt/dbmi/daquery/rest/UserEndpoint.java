@@ -47,9 +47,9 @@ import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.domain.Role;
-import edu.pitt.dbmi.daquery.domain.Site_User;
+import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 
-import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
+import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.ParameterItem;
@@ -71,7 +71,7 @@ public class UserEndpoint extends AbstractEndpoint {
 
 	public static void main(String [] args) throws Exception
 	{
-		Site_User user = new Site_User();
+		DaqueryUser user = new DaqueryUser();
 		user.setEmail("me@email.com");
 		user.setId("id123");
 		user.setRealName("My Name");
@@ -121,7 +121,7 @@ public class UserEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
                         
-            List<Site_User> user_list = Site_UserDAO.queryAllUsers();
+            List<DaqueryUser> user_list = DaqueryUserDAO.queryAllUsers();
             
             if (user_list == null) {
                 return Response.status(NOT_FOUND).build();
@@ -165,21 +165,21 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	}
     	}
     	
-    	Site_User user = null;
+    	DaqueryUser user = null;
     	try {
             logger.info("#### email : " + email);
             
             // Authenticate the user using the credentials provided
             user = authenticate(email, password);
 
-            if(Site_UserDAO.expiredPassword(user.getId()))
+            if(DaqueryUserDAO.expiredPassword(user.getId()))
                 return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
             
-            if (Site_UserDAO.accountDisabled(user.getId()))
+            if (DaqueryUserDAO.accountDisabled(user.getId()))
                 return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
             	
             
-            Site_User currentUser = Site_UserDAO.queryUserByID(user.getId());
+            DaqueryUser currentUser = DaqueryUserDAO.queryUserByID(user.getId());
             Map<String, Object> extraObjs = new HashMap<String, Object>();
             extraObjs.put("user", currentUser);
             
@@ -230,7 +230,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	        s.getTransaction().begin();
 	
-	        Site_User newUser = new Site_User(login, password);
+	        DaqueryUser newUser = new DaqueryUser(login, password);
 	        s.persist(newUser);
 	
 	        s.getTransaction().commit();
@@ -301,7 +301,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	        em.getTransaction().begin();
 	
-	        Site_User newUser = new Site_User(login, password);
+	        DaqueryUser newUser = new DaqueryUser(login, password);
 	        em.persist(newUser);
 	        
 	        //TODO: Assign this user to the Admin group
@@ -347,7 +347,7 @@ public class UserEndpoint extends AbstractEndpoint {
     @Path("/{id}")
     public Response findById(@PathParam("id") String id) {
     	try {
-	        Site_User user = Site_UserDAO.queryUserByID(id);	
+	        DaqueryUser user = DaqueryUserDAO.queryUserByID(id);	
 	        if (user == null)
 	            return Response.status(NOT_FOUND).build();
 	        String json = user.toJson();	
@@ -371,7 +371,7 @@ public class UserEndpoint extends AbstractEndpoint {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(@PathParam("id") String id, Site_User updatedUser) {
+    public Response updateUser(@PathParam("id") String id, DaqueryUser updatedUser) {
 
     	Session s = null;
     	try {
@@ -380,9 +380,9 @@ public class UserEndpoint extends AbstractEndpoint {
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
 
-	        Site_User user = Site_UserDAO.queryUserByID(id);
+	        DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
 	        
-	        Site_User loggedInUser = Site_UserDAO.queryUserByID(username);
+	        DaqueryUser loggedInUser = DaqueryUserDAO.queryUserByID(username);
 
 	        //step 1: make sure this is a valid user id
 	        if (user == null)
@@ -393,7 +393,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        //1.  has an admin role
 	        // -OR-
 	        //2.  is the same person represented by the updatedUser
-	        boolean hasAdminRole = Site_UserDAO.hasRole(loggedInUser.getId(), "admin");
+	        boolean hasAdminRole = DaqueryUserDAO.hasRole(loggedInUser.getId(), "admin");
 	        boolean isMatchingUser = loggedInUser.getId().equalsIgnoreCase(user.getId());
 
 	        //if the current user does not match, return a 401
@@ -404,7 +404,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        //step 3: check if account is disabled
 	        //Do NOT allow a disabled user account to be updated if
 	        //the user is trying to update their own disabled account
-	        if (Site_UserDAO.accountDisabled(user.getId()) && isMatchingUser) {
+	        if (DaqueryUserDAO.accountDisabled(user.getId()) && isMatchingUser) {
 	            return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));	        	
 	        }
 	        
@@ -427,7 +427,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        }
 	        
 	        //step 6: is the user's password expired?
-	        if (Site_UserDAO.expiredPassword(user.getId())) {
+	        if (DaqueryUserDAO.expiredPassword(user.getId())) {
 	            return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
 	        }
 	        
@@ -507,7 +507,7 @@ public class UserEndpoint extends AbstractEndpoint {
      * @throws SecurityException on authentication failure
      * NoResultException if no user is found
      */
-    private Site_User authenticate(String email, String password) throws SecurityException, HibernateException, Exception {
+    private DaqueryUser authenticate(String email, String password) throws SecurityException, HibernateException, Exception {
     	logger.info("searching for #### email/password : " + email + "/" + password);
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
@@ -515,7 +515,7 @@ public class UserEndpoint extends AbstractEndpoint {
 			pList.add(piEmail);
     		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
     		pList.add(piPassword);
-	        Site_User user = AbstractDAO.executeQueryReturnSingle(Site_User.FIND_BY_EMAIL_PASSWORD, pList, logger);
+	        DaqueryUser user = AbstractDAO.executeQueryReturnSingle(DaqueryUser.FIND_BY_EMAIL_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
 	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / " + password);

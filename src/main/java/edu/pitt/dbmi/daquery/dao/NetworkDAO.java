@@ -27,7 +27,7 @@ import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.Site;
-import edu.pitt.dbmi.daquery.domain.Site_User;
+import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.rest.UserEndpoint;
 import edu.pitt.dbmi.daquery.dao.ParameterItem;
 

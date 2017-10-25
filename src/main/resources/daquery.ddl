@@ -15,7 +15,7 @@ CREATE TABLE "APP"."NOTIFICATION"
 )
 ;
 
-CREATE TABLE "APP"."SITE_USER"
+CREATE TABLE "APP"."DQ_USER"
 (
    ID varchar(50) PRIMARY KEY,
    USERNAME varchar(50),
@@ -57,37 +57,6 @@ CREATE TABLE "APP"."SITE"
    ACCESS_KEY varchar(500),
    COMM_ENC_KEY  varchar(1024),
    ENC_TYPE int 
-)
-;
-CREATE TABLE "APP"."INBOUND_QUERY"
-(
-   ID bigint PRIMARY KEY NOT NULL,
-   STUDYNAME varchar(500),
-   QUERYNAME varchar(500),
-   QUERYTYPE varchar(50),
-   NETWORK_ID bigint,
-   SITE_ID bigint,
-   LASTUPDATE timestamp,
-   STATUS varchar(500),
-   ORACLEQUERY varchar(500),
-   SQLQUERY varchar(500),
-   USER_ID varchar(50)
-)
-;
-
-CREATE TABLE "APP"."OUTBOUND_QUERY"
-(
-   ID bigint PRIMARY KEY NOT NULL,
-   STUDYNAME varchar(500),
-   QUERYNAME varchar(500),
-   QUERYTYPE varchar(50),
-   NETWORK_ID bigint,
-   SITE_ID bigint,
-   USER_ID varchar(50),
-   LASTUPDATE timestamp,
-   STATUS varchar(500),
-   ORACLEQUERY varchar(500),
-   SQLQUERY varchar(500)
 )
 ;
 

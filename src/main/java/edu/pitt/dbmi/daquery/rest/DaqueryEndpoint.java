@@ -31,10 +31,10 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
+import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
-import edu.pitt.dbmi.daquery.domain.Site_User;
+import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
@@ -213,7 +213,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	AppProperties.setDBProperty("site.id", siteId);
 			    	AppProperties.setDBProperty("site.name", siteName);
 			    	
-			    	Site_User currentUser = Site_UserDAO.getAdminUser();
+			    	DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
 			    	addtionalVal.put("user", currentUser);
 			    	return(ResponseHelper.getTokenResponse(200, null, adminEmail, uriInfo, addtionalVal));

@@ -14,7 +14,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -28,31 +27,31 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 
 @NamedQueries({
-        @NamedQuery(name = Site_User.FIND_ALL, query = "SELECT u FROM Site_User u ORDER BY u.realName DESC"),
-        @NamedQuery(name = Site_User.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.username = :login AND u.password = :password"),
-        @NamedQuery(name = Site_User.FIND_BY_ID_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.id = :id AND u.password = :password"),
-        @NamedQuery(name = Site_User.FIND_BY_EMAIL_PASSWORD, query = "SELECT u FROM Site_User u WHERE u.email = :email AND u.password = :password"),
-        @NamedQuery(name = Site_User.FIND_BY_ID, query = "SELECT u FROM Site_User u WHERE u.id = :id"),
-        @NamedQuery(name = Site_User.FIND_ADMIN, query = "SELECT u FROM Site_User u WHERE u.username = 'admin'"),
-        @NamedQuery(name = Site_User.COUNT_ALL, query = "SELECT COUNT(u) FROM Site_User u")
+        @NamedQuery(name = DaqueryUser.FIND_ALL, query = "SELECT u FROM DaquryUser u ORDER BY u.realName DESC"),
+        @NamedQuery(name = DaqueryUser.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.username = :login AND u.password = :password"),
+        @NamedQuery(name = DaqueryUser.FIND_BY_ID_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.id = :id AND u.password = :password"),
+        @NamedQuery(name = DaqueryUser.FIND_BY_EMAIL_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.email = :email AND u.password = :password"),
+        @NamedQuery(name = DaqueryUser.FIND_BY_ID, query = "SELECT u FROM DaqueryUser u WHERE u.id = :id"),
+        @NamedQuery(name = DaqueryUser.FIND_ADMIN, query = "SELECT u FROM DaqueryUser u WHERE u.username = 'admin'"),
+        @NamedQuery(name = DaqueryUser.COUNT_ALL, query = "SELECT COUNT(u) FROM DaqueryUser u")
 })
 
 
 @Entity
-@Table(name = "Site_User")
-public class Site_User extends DaqueryObject {
+@Table(name = "DQ_USER")
+public class DaqueryUser extends DaqueryObject {
 
     // ======================================
     // =             Constants              =
     // ======================================
 
-    public static final String FIND_ALL = "Site_User.findAll";
-    public static final String COUNT_ALL = "Site_User.countAll";
-    public static final String FIND_BY_LOGIN_PASSWORD = "Site_User.findByLoginAndPassword";
-    public static final String FIND_BY_ID_PASSWORD = "Site_User.findByIDAndPassword";
-    public static final String FIND_BY_EMAIL_PASSWORD = "Site_User.findByEmailAndPassword";
-    public static final String FIND_BY_ID = "Site_User.findByID";
-    public static final String FIND_ADMIN = "Site_User.findAdmin";
+    public static final String FIND_ALL = "DaqueryUser.findAll";
+    public static final String COUNT_ALL = "DaqueryUser.countAll";
+    public static final String FIND_BY_LOGIN_PASSWORD = "DaqueryUser.findByLoginAndPassword";
+    public static final String FIND_BY_ID_PASSWORD = "DaqueryUser.findByIDAndPassword";
+    public static final String FIND_BY_EMAIL_PASSWORD = "DaqueryUser.findByEmailAndPassword";
+    public static final String FIND_BY_ID = "DaqueryUser.findByID";
+    public static final String FIND_ADMIN = "DaqueryUser.findAdmin";
 
     
     // ======================================
@@ -91,19 +90,8 @@ public class Site_User extends DaqueryObject {
     @Column(name="EMAIL", length = 500, nullable = true)
     private String email;
     
-	//bi-directional many-to-one association to InboundQuery
-    @Transient
-	@OneToMany(mappedBy="user")
-	private List<Inbound_Query> inboundQueries;
-
-	//bi-directional many-to-one association to OutboundQuery
-    @Transient
-	@OneToMany(mappedBy="user")
-	private List<OutboundQuery> outboundQueries;
-
-
     //TODO: determine if this should be transient or if
-    //we want Site_User to manage its user role updates (we could manage it separately)
+    //we want DaqueryUser to manage its user role updates (we could manage it separately)
 	//bi-directional many-to-many association to Role
     @Expose
 	@ManyToMany(fetch = FetchType.EAGER,
@@ -127,16 +115,16 @@ public class Site_User extends DaqueryObject {
     // =            Constructors            =
     // ======================================
 
-    public Site_User() {
+    public DaqueryUser() {
     }
 
-    public Site_User(String realName, String login, String password) {
+    public DaqueryUser(String realName, String login, String password) {
         this.realName = realName;
         this.username = login;
         this.setPassword(password);
     }
 
-    public Site_User(String login, String password) {
+    public DaqueryUser(String login, String password) {
         this.username = login;
         this.setPassword(password);
     }
@@ -230,52 +218,6 @@ public class Site_User extends DaqueryObject {
     {
     	setStatus(status);
     }
-
-    
-	public List<Inbound_Query> getInboundQueries() {
-		return this.inboundQueries;
-	}
-
-	public void setInboundQueries(List<Inbound_Query> inboundQueries) {
-		this.inboundQueries = inboundQueries;
-	}
-
-	public Inbound_Query addInboundQuery(Inbound_Query inboundQuery) {
-		getInboundQueries().add(inboundQuery);
-		inboundQuery.setUser(this);
-
-		return inboundQuery;
-	}
-
-	public Inbound_Query removeInboundQuery(Inbound_Query inboundQuery) {
-		getInboundQueries().remove(inboundQuery);
-		inboundQuery.setUser(null);
-
-		return inboundQuery;
-	}
-
-	public List<OutboundQuery> getOutboundQueries() {
-		return this.outboundQueries;
-	}
-
-	public void setOutboundQueries(List<OutboundQuery> outboundQueries) {
-		this.outboundQueries = outboundQueries;
-	}
-
-	public OutboundQuery addOutboundQuery(OutboundQuery outboundQuery) {
-		getOutboundQueries().add(outboundQuery);
-		outboundQuery.setUser(this);
-
-		return outboundQuery;
-	}
-
-	public OutboundQuery removeOutboundQuery(OutboundQuery outboundQuery) {
-		getOutboundQueries().remove(outboundQuery);
-		outboundQuery.setUser(null);
-
-		return outboundQuery;
-	}
-
 	
 	public List<Role> getRoles() {
 		return this.roles;
@@ -294,7 +236,7 @@ public class Site_User extends DaqueryObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Site_User user = (Site_User) o;
+        DaqueryUser user = (DaqueryUser) o;
         return Objects.equals(id, user.id);
     }
 

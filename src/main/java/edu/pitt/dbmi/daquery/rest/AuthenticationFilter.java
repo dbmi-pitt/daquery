@@ -27,7 +27,7 @@ import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 
-import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
+import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
@@ -118,13 +118,13 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
             // Validate the token and extract the users UUID from the token
             final String tokenUsername = validateToken(token);
-            if (!Site_UserDAO.isUserValid(tokenUsername)) {
+            if (!DaqueryUserDAO.isUserValid(tokenUsername)) {
             	throw new Exception("User account is not valid");
             }
             //just set this variable to throw an error
             username = tokenUsername;
             
-            if (Site_UserDAO.expiredPassword(tokenUsername)) {
+            if (DaqueryUserDAO.expiredPassword(tokenUsername)) {
             	try {
             		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(tokenUsername, uriInfo));
             	} catch (Exception e) {
@@ -154,7 +154,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 @Override
                 public boolean isUserInRole(String role) {
                 	try {
-                		return Site_UserDAO.hasRole(tokenUsername, role);
+                		return DaqueryUserDAO.hasRole(tokenUsername, role);
                 	} catch (Exception e) {
                 		return false;
                 	}
