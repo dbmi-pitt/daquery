@@ -305,9 +305,4 @@ public class SiteEndpoint extends AbstractEndpoint {
     	}
     	
     }
-
-    
-    
-    
-
 }

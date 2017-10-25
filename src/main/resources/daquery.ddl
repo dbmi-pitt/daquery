@@ -113,5 +113,7 @@ create table property
 )
 ;
 
+INSERT INTO ROLE (NAME) VALUES ('admin'), ('steward'), ('viewer');
+
 
 
