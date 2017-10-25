@@ -6,10 +6,12 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -127,6 +129,39 @@ public class NetworkEndpoint extends AbstractEndpoint {
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
+    }
+    
+    @PUT
+    @Secured
+    @Path("/join")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response joinNetwork(LinkedHashMap<?, ?> payload) {
+    	try {
+
+            logger.info("#### joining network by uuid=" + ((LinkedHashMap<?, ?>)payload.get("network")).get("id"));
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            HashMap<String, String> params = new HashMap<>();
+            params.put("id", ((LinkedHashMap<?, ?>)payload.get("network")).get("id").toString());
+            params.put("name", ((LinkedHashMap<?, ?>)payload.get("network")).get("name").toString());
+            params.put("data_model", ((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
+            
+            
+            Network network = NetworkDAO.createNetwork(params);
+            
+            String json = network.toJson();
+
+            return Response.ok(200).entity(json).build();
+    	} catch (NoResultException nre) {
+    		return Response.status(NOT_FOUND).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    	
     }
     
 }
