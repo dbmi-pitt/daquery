@@ -59,7 +59,7 @@ public class HibernateConfiguration {
         	
 
         hibernateConf.setProperty("hibernate.connection.driver_class", "org.apache.derby.jdbc.EmbeddedDriver" )
-        .setProperty("hibernate.connection.url", "jdbc:derby:/opt/apache-tomcat-6.0.53/conf/daquery-db")
+        .setProperty("hibernate.connection.url", "jdbc:derby:C:\\Users\\del20\\conf\\daquery-db")
         .setProperty("hibernate.connection.username", "")
     	.setProperty("hibernate.connection.password", "");
 /*      .setProperty("hibernate.dialect", props.getProperty("hibernate.dialect", "org.hibernate.dialect.Oracle9Dialect")) */         
