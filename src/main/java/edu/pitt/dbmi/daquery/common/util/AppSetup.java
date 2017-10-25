@@ -156,9 +156,25 @@ public class AppSetup
 				adminCount = rs.getInt(1);
 			if(adminCount > 0)
 			{
-				log.log(Level.SEVERE, "An admin user already exists while trying to add the first admin user.");
+				String msg = "An admin user already exists while trying to add the first admin user.";				
+				log.log(Level.SEVERE, msg);
+				setErroredSetup(msg);
 				return(false);
 			}
+			
+			rs.close();
+			rs = stat.executeQuery("select id from role where lower(name) = 'admin'");
+			Integer roleId = null;
+			if(rs.next())
+				roleId = rs.getInt(1);
+			else
+			{
+				String msg = "Role ADMIN not found in application database. Unable to add initial admin user.";
+				log.log(Level.SEVERE, msg);
+				setErroredSetup(msg);
+				return(false);
+			}
+			
 			UUID uuid = UUID.randomUUID();
 		    String uuidStr = uuid.toString();
 			String hashedPwd = PasswordUtils.digestPassword(adminPwd.trim());
@@ -166,9 +182,12 @@ public class AppSetup
 			String insertSQL = "insert into site_user (id, username, password, status, email, real_name) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', " + UserStatus.ACTIVE.getValue() + ", '" + adminEmail.trim() + "', '" + adminRealName + "')";
 			log.info("User inserted with: " + insertSQL);
 			stat.executeUpdate(insertSQL);
-			insertSQL = "insert into user_role (role_id, user_id) values ((select id from role where name='admin'), '" + uuidStr.trim() + "')";
-			stat.executeUpdate(insertSQL);
+			insertSQL = "insert into user_role (role_id, user_id) values (" + roleId + ", '" + uuidStr.trim() + "')";
+			stat.executeUpdate(insertSQL);			
 			firstUserCreated = true;
+			
+			
+			
 			return(true);
 		}
 		catch(Throwable t)
