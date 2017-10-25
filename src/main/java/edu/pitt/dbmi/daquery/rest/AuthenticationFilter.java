@@ -11,11 +11,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.annotation.Priority;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -25,14 +20,15 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-import edu.pitt.dbmi.daquery.common.domain.UserStatus;
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
-import edu.pitt.dbmi.daquery.domain.Site_User;
-import edu.pitt.dbmi.daquery.util.KeyGenerator;
-import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
-import edu.pitt.dbmi.daquery.util.UserRoles;
+import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+
+import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
+
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -60,13 +56,31 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Context
     private ResourceInfo resourceInfo;
+
+    @Context
+    private UriInfo uriInfo;
+
+    /*This take a little explaining.
+     * The securityContext is created during the AuthenticationFilter.filter method.
+     * This annotations allows the class to extract the username from the securityContext.
+     * The username is extracted from the JWT passed to these methods.
+     */
+    @Context
+    SecurityContext securityContext;
+
     
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-    	//TODO: Reject any communication coming across anything other than HTTPS:
+        //Principal principal = securityContext.getUserPrincipal();
+        String username = "";
+        /*
+        if (principal != null) 
+        	username = principal.getName();
+*/
+        //TODO: Reject any communication coming across anything other than HTTPS:
     	//here is the check:
-    	if (!PropertiesHelper.isDebugMode()) {
+    	if (!AppProperties.isDebugMode()) {
     	
 	    	if (requestContext.getUriInfo().getRequestUri().getScheme() != "https") {
 	            throw new NotAuthorizedException("You must access web services using https");    		
@@ -80,43 +94,47 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new NotAuthorizedException("Authorization header must be provided");
         }
+        
+        //Check the user's status.  If their password is expired, 
 
         // Get the resource class which matches with the requested URL
         // Extract the roles declared by it
         Class<?> resourceClass = resourceInfo.getResourceClass();
-        List<UserRoles> classRoles = extractRoles(resourceClass);
+        List<String> classRoles = extractRoles(resourceClass);
 
         // Get the resource method which matches with the requested URL
         // Extract the roles declared by it
         Method resourceMethod = resourceInfo.getResourceMethod();
-        List<UserRoles> methodRoles = extractRoles(resourceMethod);
-
+        List<String> methodRoles = extractRoles(resourceMethod);
+        
+        List<String> roleSuperset = new ArrayList<String>();
+        roleSuperset.addAll(classRoles);
+        roleSuperset.addAll(methodRoles);
+        
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
         try {
 
-            // Validate the token
+            // Validate the token and extract the users UUID from the token
             final String tokenUsername = validateToken(token);
-            if (!isUserValid(tokenUsername)) {
+            if (!Site_UserDAO.isUserValid(tokenUsername)) {
             	throw new Exception("User account is not valid");
+            }
+            //just set this variable to throw an error
+            username = tokenUsername;
+            
+            if (Site_UserDAO.expiredPassword(tokenUsername)) {
+            	try {
+            		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(tokenUsername, uriInfo));
+            	} catch (Exception e) {
+            		//if there are any problems, just throw an UNAUTHORIZED error
+            		Response.status(Response.Status.UNAUTHORIZED).build();
+            	}
             }
             
             
-            /*got this approach from:
-            * https://stackoverflow.com/questions/26777083/best-practice-for-rest-token-based-authentication-with-jax-rs-and-jersey
-            * Basically this code allows all the REST calls to inherit a common SecurityContext object.
-            * This object contains the username for the current user.
-            * To access this object, the REST class needs to declare this annotation 
-            * at the top of the class:
-            * 
-            *     @Context
-    		*     SecurityContext securityContext;
-    		*     
-    		*     To access the username in the REST call itself:
-    		*     Principal principal = securityContext.getUserPrincipal();
-    		*     String username = principal.getName();
-            */
+            
             final SecurityContext currentSecurityContext = requestContext.getSecurityContext();
             requestContext.setSecurityContext(new SecurityContext() {
 
@@ -130,31 +148,16 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                             return tokenUsername;
                         }
                         
-                        /**
-                         * Return a list of the role(s) for the current user
-                         * @return List<String> of the role(s) for the current user
-                         */
-                        
-                        //TODO: Use this.getUserPrincipal().getName() to 
-                        //do a database query to find all the roles for the user
-                        //always look up the roles in the database, don't rely on
-                        //a list from the JWT.  The JWT could be spoofed to give the user 
-                        //higher credentials
-                        public List<String> getRoles() {
-                        	//for now, retrun a hardcoded list
-                        	//TODO: create some global enum type of roles,
-                        	//need to coordinate this with Desheng
-                        	List<String> retList = Arrays.asList("ADMIN", "USER");
-                        	return retList;
-                        }
                     };
                 }
 
                 @Override
                 public boolean isUserInRole(String role) {
-                	//TODO: definitely need to override this method
-                	this.getUserPrincipal().getName();
-                    return true;
+                	try {
+                		return Site_UserDAO.hasRole(tokenUsername, role);
+                	} catch (Exception e) {
+                		return false;
+                	}
                 }
 
                 @Override
@@ -167,6 +170,14 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     return "Bearer";
                 }
             });
+        } catch (ExpiredJwtException expired) {
+        	logger.info("Expired token: " + expired.getLocalizedMessage());
+        	try {
+        		requestContext.abortWith(ResponseHelper.expiredTokenResponse(username, uriInfo));
+        	} catch (Exception e) {
+        		//if there are any problems, just throw an UNAUTHORIZED error
+        		Response.status(Response.Status.UNAUTHORIZED).build();
+        	}
         } catch (Exception e) {
             requestContext.abortWith(
                 Response.status(Response.Status.UNAUTHORIZED).build());
@@ -187,7 +198,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         // Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
     	logger.info("Trying to validate this token: " + token);
-    	KeyGenerator kg = new SimpleKeyGenerator();
+    	KeyGenerator kg = new KeyGenerator();
         Key key = kg.generateKey();
         try {
 	        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
@@ -213,47 +224,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
      }
     
-    /**
-     * Query the database to find the current user (represented by UUID).
-     * Determine: a) if the user has a valid account and b) if the user's status is active
-     * @param uuid- The user's UUID
-     * @return- True is the UUID represents a valid AND active account,
-     * return False otherwise
-     * @throws PersistenceException if the database is incorrectly configured
-     * Exception for any other issue
-     */
-    private boolean isUserValid(String uuid) throws Exception {
-    	logger.info("checking if user: " + uuid + " is valid");
-    	EntityManagerFactory emf = null;
-    	EntityManager em = null;
-    	try {
-	        emf = Persistence.createEntityManagerFactory("jpa-example");
-	        em = emf.createEntityManager();
-	        Query query = em.createNamedQuery(Site_User.FIND_BY_UUID);
-	        query.setParameter("uuid", uuid);
-	        Site_User user = null;
-	        user = (Site_User)query.getSingleResult();
-	        return user.getStatusEnum() == UserStatus.ACTIVE;
-	    
-        } catch (PersistenceException pe) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(pe.getLocalizedMessage());
-            throw pe;
-        } catch (Exception e) {
-    		logger.info(e.getLocalizedMessage());
-        	throw e;
-        }
-    	finally {
-    		if (em != null) {
-    			em.close();
-    		}
-    		if (emf != null) {
-    			emf.close();
-    		}
-    		
-    	}
-            
-    }
 
     /**
      * Extract the roles granting permission to an annotated web service call.
@@ -264,24 +234,18 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      * @return a List of the valid UserRoles for the web service call or 
      * an empty list if no UserRoles are assigned to the web service call 
      */
-    private List<UserRoles> extractRoles(AnnotatedElement annotatedElement) {
+    private List<String> extractRoles(AnnotatedElement annotatedElement) {
         if (annotatedElement == null) {
-            return new ArrayList<UserRoles>();
+            return new ArrayList<String>();
         } else {
             Secured secured = annotatedElement.getAnnotation(Secured.class);
             if (secured == null) {
-                return new ArrayList<UserRoles>();
+                return new ArrayList<String>();
             } else {
-                UserRoles[] allowedRoles = secured.value();
+                String[] allowedRoles = secured.value();
                 return Arrays.asList(allowedRoles);
             }
         }
-    }
-
-    private void checkPermissions(List<UserRoles> allowedRoles, String uuid) throws Exception {
-    	//TODO: run a database query to check this.
-        // Check if the user contains one of the allowed roles
-        // Throw an Exception if the user has not permission to execute the method
     }
 
 }

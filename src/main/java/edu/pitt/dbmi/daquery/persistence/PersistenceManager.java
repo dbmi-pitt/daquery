@@ -11,7 +11,7 @@ public enum PersistenceManager {
   private PersistenceManager() {
     // "jpa-example" was the value of the name attribute of the
     // persistence-unit element.
-    emFactory = Persistence.createEntityManagerFactory("jpa-example");
+    emFactory = Persistence.createEntityManagerFactory("derby");
   }
   
   public EntityManager getEntityManager() {

@@ -2,6 +2,9 @@ package edu.pitt.dbmi.daquery.domain;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+
 import java.sql.Timestamp;
 
 
@@ -10,7 +13,7 @@ import java.sql.Timestamp;
  * 
  */
 @Entity
-@Table(name="OUTBOUND_QUERIES")
+@Table(name="Outbound_Query")
 @NamedQuery(name="OutboundQuery.findAll", query="SELECT o FROM OutboundQuery o")
 public class OutboundQuery extends DaqueryObject implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -53,7 +56,7 @@ public class OutboundQuery extends DaqueryObject implements Serializable {
 	//bi-directional many-to-one association to User
 	@ManyToOne
 	@JoinColumn(name="USER_ID")
-	private User user;
+	private Site_User user;
 
 	public OutboundQuery() {
 	}
@@ -138,11 +141,11 @@ public class OutboundQuery extends DaqueryObject implements Serializable {
 		this.site = site;
 	}
 
-	public User getUser() {
+	public Site_User getUser() {
 		return this.user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(Site_User user) {
 		this.user = user;
 	}
 

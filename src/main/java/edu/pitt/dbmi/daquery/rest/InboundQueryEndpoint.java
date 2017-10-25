@@ -5,7 +5,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -25,7 +24,9 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import edu.pitt.dbmi.daquery.domain.Inbound_Query;
-import edu.pitt.dbmi.daquery.util.UserRoles;
+import edu.pitt.dbmi.daquery.dao.ParameterItem;
+import edu.pitt.dbmi.daquery.dao.AbstractDAO;
+
 
 @Path("/inboundqueries")
 @Produces(APPLICATION_JSON)
@@ -74,12 +75,12 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
      */
     
     @GET
-    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
+    //@Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database.
-     * example URL: daquery/ws/inboundqueries/
+     * example URL: daquery-ws/ws/inboundqueries/
      * @return a JSON array containing all the inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -90,9 +91,9 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning all inbound queries");
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            //Principal principal = securityContext.getUserPrincipal();
+            //String username = principal.getName();
+            //logger.info("Responding to request from: " + username);
                         
             List<Inbound_Query> queries = queryAllInboundQueries();
             
@@ -106,19 +107,20 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     	} catch (NoResultException nre) {
     		return Response.status(NOT_FOUND).build();
         } catch (Exception e) {
+        	e.printStackTrace();
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
 
     
     @GET
-    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
     @Path("/{id}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database.
-     * example URL: daquery/ws/inboundqueries/1
+     * example URL: daquery-ws/ws/inboundqueries/1
      * @return a JSON object containing single inbound query
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -129,9 +131,9 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning  inbound query by id=" + id);
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            //Principal principal = securityContext.getUserPrincipal();
+            //String username = principal.getName();
+            //logger.info("Responding to request from: " + username);
             
             Inbound_Query iq = queryInboundQuery(id);
             
@@ -150,13 +152,13 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     }
 
     @GET
-    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
     @Path("/status/{statusType}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database for a given status.
-     * example URL: daquery/ws/inboundqueries/status/pending
+     * example URL: daquery-ws/ws/inboundqueries/status/pending
      * @return a JSON object containing a list of matching inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -167,9 +169,9 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning  inbound query by status=" + statusType);
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            //Principal principal = securityContext.getUserPrincipal();
+            //String username = principal.getName();
+            //logger.info("Responding to request from: " + username);
                         
             List<Inbound_Query> queries = queryInboundQueriesByStatus(statusType);
             
@@ -188,13 +190,13 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     }
 
     @GET
-    @Secured({UserRoles.ADMIN, UserRoles.AGGREGATE, UserRoles.DATADOWNLOAD, UserRoles.STEWARD, UserRoles.VIEWER})
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
     @Path("/site/{siteName}")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database sent from a given site.
-     * example URL: daquery/ws/inboundqueries/site/Pitt
+     * example URL: daquery-ws/ws/inboundqueries/site/Pitt
      * @return a JSON object containing a list of matching inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -205,9 +207,9 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
             logger.info("#### returning  inbound query by site=" + siteName);
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            //Principal principal = securityContext.getUserPrincipal();
+            //String username = principal.getName();
+            //logger.info("Responding to request from: " + username);
                         
             List<Inbound_Query> queries = queryInboundQueriesBySite(siteName);
             
@@ -232,7 +234,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database sent from a given site.
-     * example URL: daquery/ws/inboundqueries/site/Pitt/status/pending
+     * example URL: daquery-ws/ws/inboundqueries/site/Pitt/status/pending
      * @return a JSON object containing a list of matching inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -270,7 +272,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the inbound queries found in the database sent from a given site.
-     * example URL: daquery/ws/inboundqueries/site/user1/status/pending
+     * example URL: daquery-ws/ws/inboundqueries/site/user1/status/pending
      * @return a JSON object containing a list of matching inbound queries
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
@@ -315,7 +317,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		ParameterItem piId = new ParameterItem("id", id);
     		pList.add(piId);
-    		Inbound_Query iq = executeQueryReturnSingle(Inbound_Query.FIND_BY_ID, pList, logger);
+    		Inbound_Query iq = AbstractDAO.executeQueryReturnSingle(Inbound_Query.FIND_BY_ID, pList, logger);
 	        return iq;
 	    
         } catch (PersistenceException e) {
@@ -328,7 +330,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
 
     private List<Inbound_Query> queryAllInboundQueries() throws Exception {
     	try { 		
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_ALL, null, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_ALL, null, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -344,7 +346,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		ParameterItem piStatus = new ParameterItem("status", status);
     		pList.add(piStatus);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_STATUS, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_STATUS, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -360,7 +362,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		ParameterItem piStudy = new ParameterItem("study", study);
     		pList.add(piStudy);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_STUDY, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_STUDY, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -376,7 +378,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		ParameterItem piSite = new ParameterItem("site", site);
     		pList.add(piSite);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_SITE, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_SITE, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -394,7 +396,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		pList.add(piSite);
     		ParameterItem piStatus = new ParameterItem("status", status);
     		pList.add(piStatus);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_SITE_STATUS, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_SITE_STATUS, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {
@@ -412,7 +414,7 @@ public class InboundQueryEndpoint extends AbstractEndpoint {
     		pList.add(piUser);
     		ParameterItem piStatus = new ParameterItem("status", status);
     		pList.add(piStatus);
-    	    List<Inbound_Query> queries = executeQueryReturnList(Inbound_Query.FIND_BY_USER_STATUS, pList, logger);
+    	    List<Inbound_Query> queries = AbstractDAO.executeQueryReturnList(Inbound_Query.FIND_BY_USER_STATUS, pList, logger);
 	        return queries;
 	    
         } catch (PersistenceException e) {

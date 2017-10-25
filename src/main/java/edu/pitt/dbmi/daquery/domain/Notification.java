@@ -3,13 +3,15 @@ package edu.pitt.dbmi.daquery.domain;
 import java.io.Serializable;
 import javax.persistence.*;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+
 
 /**
  * The persistent class for the NOTIFICATIONS database table.
  * 
  */
 @Entity
-@Table(name="NOTIFICATIONS")
+@Table(name="Notification")
 @NamedQuery(name="Notification.findAll", query="SELECT n FROM Notification n")
 public class Notification extends DaqueryObject implements Serializable {
 	private static final long serialVersionUID = 1L;

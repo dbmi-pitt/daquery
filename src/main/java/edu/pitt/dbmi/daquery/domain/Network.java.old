@@ -47,15 +47,15 @@ public class Network extends DaqueryObject implements Serializable {
 	@Expose
 	@Column(name = "NAME", nullable=false, length=100)
 	private String name;
-	
+		
 	@Expose
 	@Column(name = "DATA_MODEL", nullable=true, length=100)
 	private String data_model;
 	
 	//bi-directional many-to-one association to InboundQuery
-	@Transient
-	@OneToMany(mappedBy="network")
-	private List<Inbound_Query> inboundQueries;
+//	@Transient
+//	@OneToMany(mappedBy="network")
+//	private List<Inbound_Query> inboundQueries;
 
 	//bi-directional many-to-one association to OutboundQuery
 	@Transient
@@ -65,25 +65,17 @@ public class Network extends DaqueryObject implements Serializable {
 	//bi-directional many-to-one association to Site
 	//@Expose
 	//@Transient
-//	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy="network")
-//	private List<Site> sites;
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy="network")
+	private List<Site> sites;
 
-	@Expose
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable(name = "OUTGOING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
-	private Set<Site> outgoingQuerySites;
 
-	@Expose
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable(name = "INCOMING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
-	private Set<Site> incomingQuerySites;
-	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "SOURCE_TO_NETWORK", joinColumns = { @JoinColumn(name = "NETWORK_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATA_SOURCE_ID") })
 	private Set<DataSource> dataSources;
-
-
-	public Network(){}
+	
+	
+	public Network() {
+	}
 	
 	public Network(String newName) {
 		this.name = newName;
@@ -112,7 +104,7 @@ public class Network extends DaqueryObject implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getData_model() {
 		return data_model;
 	}
@@ -121,7 +113,7 @@ public class Network extends DaqueryObject implements Serializable {
 		this.data_model = data_model;
 	}
 
-	public List<Inbound_Query> getInboundQueries() {
+/*	public List<Inbound_Query> getInboundQueries() {
 		return this.inboundQueries;
 	}
 
@@ -164,29 +156,8 @@ public class Network extends DaqueryObject implements Serializable {
 
 		return outboundQuery;
 	}
-
-	public Set<Site> getOutgoingQuerySites()
-	{
-		return(outgoingQuerySites);
-	}
-	public void setOutgoingQuerySites(Set<Site> sites)
-	{
-		outgoingQuerySites = sites;
-	}
-	
-	public Set<Site> getIncomingQuerySites()
-	{
-		return(incomingQuerySites);
-	}
-	public void setIncomingQuerySites(Set<Site> sites)
-	{
-		incomingQuerySites = sites;
-	}
-
-	public Set<DataSource> getDataSources(){return(dataSources);}
-	public void setDataSources(Set<DataSource> ds){dataSources = ds;}
-	
-/*	public List<Site> getSites() {
+*/
+	public List<Site> getSites() {
 		return this.sites;
 	}
 
@@ -207,8 +178,9 @@ public class Network extends DaqueryObject implements Serializable {
 
 		return site;
 	}
-	*/
 	
+	public Set<DataSource> getDataSources(){return(dataSources);}
+	public void setDataSources(Set<DataSource> ds){dataSources = ds;}
 	
 	// ======================================
     // =   Methods hash, equals, toString   =
@@ -229,11 +201,11 @@ public class Network extends DaqueryObject implements Serializable {
 
 
     
-    @Override
+/*    @Override
 	public String toString() {
 		return "Network [id=" + id + ", network_id=" + network_id + ", name=" + name + ", inboundQueries="
-				+ inboundQueries + ", outboundQueries=" + outboundQueries + "]";
+				+ inboundQueries + ", outboundQueries=" + outboundQueries + ", sites=" + sites + "]";
 	}
-    
+*/    
 
 }

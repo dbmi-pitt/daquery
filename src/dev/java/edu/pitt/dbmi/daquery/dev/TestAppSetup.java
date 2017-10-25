@@ -1,20 +1,20 @@
-package edu.pitt.dbmi.daqueryws.test;
+package edu.pitt.dbmi.daquery.dev;
 
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 
 public class TestAppSetup
 {
 	public static void main(String [] args)
 	{
-		PropertiesHelper.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		AppSetup.initialize();
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		AppSetup.initialSetup("path@pitt.edu", "password", null);
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
 		else if(AppSetup.isValidSetup())
 		{
-			if(AppSetup.wasFirstUserCreated())
-				System.out.println(AppSetup.getFirstUserDetails());			
+/*			if(AppSetup.wasFirstUserCreated())
+				System.out.println(AppSetup.getFirstUserDetails()); */			
 			System.out.println("All Good");
 		}
 		else

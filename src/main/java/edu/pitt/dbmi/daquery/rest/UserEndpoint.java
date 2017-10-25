@@ -12,25 +12,19 @@ import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.HashMap;
 
-import javax.json.Json;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -42,36 +36,55 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import edu.pitt.dbmi.daquery.common.util.PropertiesHelper;
+import org.hibernate.HibernateException;
+import org.hibernate.NonUniqueResultException;
+import org.hibernate.Session;
+
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
+import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
+
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.domain.Inbound_Query;
+import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.Site_User;
-import edu.pitt.dbmi.daquery.util.KeyGenerator;
-//import edu.pitt.dbmi.daquery.persistence.HibernateUtil;
-import edu.pitt.dbmi.daquery.util.SimpleKeyGenerator;
+
+import edu.pitt.dbmi.daquery.dao.Site_UserDAO;
+import edu.pitt.dbmi.daquery.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.dao.ParameterItem;
+
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
-/**
- * @author Antonio Goncalves
- *         http://www.antoniogoncalves.org
- *         --
- */
+
 @Path("/users")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
 @Transactional
 public class UserEndpoint extends AbstractEndpoint {
 
-    // ======================================
-    // =          Injection Points          =
-    // ======================================
+	public static void main(String [] args) throws Exception
+	{
+		Site_User user = new Site_User();
+		user.setEmail("me@email.com");
+		user.setId("id123");
+		user.setRealName("My Name");
+		Map<String, Object> extras = new HashMap<String, Object>();
+		//extras.put("token", "abcdefghijklm");
+		extras.put("user", user);
+		ResponseHelper.getTokenResponse(200, null, user.getId(), null, extras);
+		//String val = JSONHelper.toJSON(extras);
+		//System.out.println(val);
+		//System.out.println(user.toJson());
+		
+		
+	}
 
     @Context
     private UriInfo uriInfo;
@@ -86,22 +99,19 @@ public class UserEndpoint extends AbstractEndpoint {
     
     
     private final static Logger logger = Logger.getLogger(UserEndpoint.class.getName());
-        
-    // ======================================
-    // =          Business methods          =
-    // ======================================
-
+       
+    
     /**
      * Return a list of all the users.
-     * example URL: daquery/ws/users/
+     * example URL: daquery-ws/ws/users/
      * @return a JSON object containing a list of all users
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
-    
-
     @GET
     @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response findAllUsers() {
     	try {
 
@@ -111,18 +121,19 @@ public class UserEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
                         
-            List<Site_User> user_list = queryAllUsers();
+            List<Site_User> user_list = Site_UserDAO.queryAllUsers();
             
             if (user_list == null) {
+                return Response.status(NOT_FOUND).build();
+            }
+            if (user_list.isEmpty()) {
                 return Response.status(NOT_FOUND).build();
             }
 
             String jsonString = toJsonArray(user_list);
             return Response.ok(200).entity(jsonString).build();
 
-    	} catch (NoResultException nre) {
-    		return Response.status(NOT_FOUND).build();
-        } catch (Exception e) {
+    	} catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -130,7 +141,7 @@ public class UserEndpoint extends AbstractEndpoint {
     /**
      * This method uses login information to authenticate a user.  It generates a new JWT
      * (JSON Web Token) if the user's information is valid.
-     * example URL: daquery/ws/users/login?uuid=d2dd12f4-6b2e-430a-90db-dfe0c1617a48&password=demouser
+     * example URL: daquery-ws/ws/users/login?uuid=d2dd12f4-6b2e-430a-90db-dfe0c1617a48&password=demouser
      * @param uuid- the uuid for the account.  This value must not be empty.
      * @param password- the password for the account.  This value must not be empty.
      * @return javax.ws.rs.core.Response containing a status of OK plus the JWT for a valid login/password combination
@@ -138,57 +149,71 @@ public class UserEndpoint extends AbstractEndpoint {
      */
     @GET
     @Path("/login")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response authenticateUser(@QueryParam("uuid") String uuid,
+    public Response authenticateUser(@QueryParam("email") String email,
                                      @QueryParam("password") String password) {
 
-    	if (uuid.isEmpty() || password.isEmpty()) 
+    	if (email.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
     	
     	//TODO: Reject any communication coming across anything other than HTTPS:
     	//here is the check:
-    	if (!PropertiesHelper.isDebugMode()) {
-    	
+    	if (!AppProperties.isDebugMode()) {
 	    	if (uriInfo.getRequestUri().getScheme() != "https") {
 	            throw new NotAuthorizedException("You must access web services using https");    		
 	    	}
     	}
     	
+    	Site_User user = null;
     	try {
-
-            logger.info("#### uuid/password : " + uuid + "/" + password);
-
-            // Authenticate the user using the credentials provided
-            authenticate(uuid, password);
+            logger.info("#### email : " + email);
             
-            // Issue a token for the user
-            String token = issueToken(uuid);
+            // Authenticate the user using the credentials provided
+            user = authenticate(email, password);
 
-            // Return the token to the response
-            JsonBuilderFactory jFactory = Json.createBuilderFactory(null);
-            JsonObject jsonData = jFactory.createObjectBuilder()
-            		.add("token", token)
-            		.build();
+            if(Site_UserDAO.expiredPassword(user.getId()))
+                return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
+            
+            if (Site_UserDAO.accountDisabled(user.getId()))
+                return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
+            	
+            
+            Site_User currentUser = Site_UserDAO.queryUserByID(user.getId());
+            Map<String, Object> extraObjs = new HashMap<String, Object>();
+            extraObjs.put("user", currentUser);
+            
+            Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), uriInfo, extraObjs);
 
-            //String json = "{\"token\" : \"" + token + "\"}";
-            return Response.ok(200).entity(jsonData.toString()).build();
+            return rVal;
 
+        } catch (ExpiredJwtException expired) {
+        	logger.info("Expired token: " + expired.getLocalizedMessage());
+            try {
+            	return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));
+            } catch(Throwable t) {
+            	String msg = "Unexpected error while generating an expired token response.";
+            	logger.log(Level.SEVERE, msg, t);
+            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            }
         } catch (Exception e) {
+        	e.printStackTrace();
             return Response.status(UNAUTHORIZED).build();
         }
     }
 
     /**
      * Create a new user account with the given login and password combination.
-     * example URL: daquery/ws/users/newuser?login=sample4&password=demouser
+     * example URL: daquery-ws/ws/users/newuser?login=sample4&password=demouser
      * @param login- a new user login
      * @param password- the password for the new account
      * @return either a javax.ws.rs.core.Response confirming the account creation
      * (a 201 response) or a SERVER ERROR if there was a problem. 
      */
     @POST
-    @Secured
+    //@Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/newuser")
     public Response create(@QueryParam("login") String login,
                            @QueryParam("password") String password) {
@@ -199,42 +224,52 @@ public class UserEndpoint extends AbstractEndpoint {
     	String loggermsg = "login=" + login + " password=" + password;
         logger.info("Trying to create user with: " + loggermsg);
         
-        try {
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-example");
-	        EntityManager em = emf.createEntityManager();
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
 	
-	        em.getTransaction().begin();
+	        s.getTransaction().begin();
 	
 	        Site_User newUser = new Site_User(login, password);
-	        em.persist(newUser);
+	        s.persist(newUser);
 	
-	        em.getTransaction().commit();
+	        s.getTransaction().commit();
 	
-	        em.close();
 	       
 	        logger.info("Done trying to create user: " + newUser.toString());
-	        
-	        //TODO: build some JSON into the response.  Return the new UUID
 	        
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
         } catch (Exception e) {
 	        return Response.serverError().build();
+	    } finally {
+	    	if (s != null) {
+	    		s.close();
+	    	}
+	    	
 	    }
     }
 
     /**
      * Create a new user admin account with the given login.
-     * Example URL: daquery/ws/users/firstadmin?login=adminuser&password=demouser
+     * Example URL: daquery-ws/ws/users/firstadmin?login=adminuser&password=demouser
      * @param login- a new user login
      * @return either a javax.ws.rs.core.Response confirming the account creation
      * or a SERVER ERROR if there was a problem. 
      */
     
-    @POST
+/*    @POST
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/firstadmin")
     public Response createFirstAdmin(@Context HttpHeaders httpheaders, @QueryParam("login") String login,
     		@QueryParam("password") String password) {
 
+        Principal principal = securityContext.getUserPrincipal();
+        String username = principal.getName();
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+        
         try {
         	//extract the token sent by the central server
             // Get the HTTP Authorization header from the request
@@ -261,8 +296,8 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	String loggermsg = "login=" + login + " password=" + password;
 	        logger.info("Trying to create ADMIN user with: " + loggermsg);
         
-	        EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpa-example");
-	        EntityManager em = emf.createEntityManager();
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
 	
 	        em.getTransaction().begin();
 	
@@ -273,32 +308,46 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	        em.getTransaction().commit();
 	
-	        em.close();
-	       
 	        logger.info("Done trying to create admin user: " + newUser.toString());
 	        
 	        //TODO: build some JSON into the response.  Return the new UUID
 	        
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
+        } catch (ExpiredJwtException expired) {
+        	logger.info("Expired token: " + expired.getLocalizedMessage());
+        	//TODO: This needs to be reported back to the UI so it can handle it
+            try{
+            	return(ResponseHelper.expiredTokenResponse(login, uriInfo));
+            } catch(Throwable t) {
+            	String msg = "Unexpected error while generating an expired token response.";
+            	logger.log(Level.SEVERE, msg, t);
+            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            }
         } catch (Exception e) {
 	        return Response.serverError().build();
+	    } finally {
+	    	if (em != null) {
+	    		em.close();
+	    	}
 	    }
-    }
+    } */
     
     /**
      * Get a JSON string representing a user given the user's UUID
-     * @param uuid- the user's UUID
-     * @return
+     * example url: daquery-ws/ws/users/507f5c77-265c-4fc2-bed7-986bf3182786
+     * @param id- the user's UUID
+     * @return 200 OK			A JSON object representing the user
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
      */
     @GET
-    //@Secured
-    @Path("/{uuid}")
-    public Response findById(@PathParam("uuid") String uuid) {
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}")
+    public Response findById(@PathParam("id") String id) {
     	try {
-			List<ParameterItem> pList = new ArrayList<ParameterItem>();
-			ParameterItem piUser = new ParameterItem("uuid", uuid);
-			pList.add(piUser);
-	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_UUID, pList, logger);	
+	        Site_User user = Site_UserDAO.queryUserByID(id);	
 	        if (user == null)
 	            return Response.status(NOT_FOUND).build();
 	        String json = user.toJson();	
@@ -307,40 +356,133 @@ public class UserEndpoint extends AbstractEndpoint {
 	        return Response.serverError().build();    		
     	}
     }
+    
+    /**
+     * This method will allow the user to be updated.
+     * @param updatedUser- a JSON object representing the updated user
+     * example url: daquery-ws/ws/users
+     * @return 200 OK
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized
+     * @throws 404 Not found	
+     */
+    @PUT
+    @Secured
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateUser(@PathParam("id") String id, Site_User updatedUser) {
 
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
 
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+
+	        Site_User user = Site_UserDAO.queryUserByID(id);
+	        
+	        Site_User loggedInUser = Site_UserDAO.queryUserByID(username);
+
+	        //step 1: make sure this is a valid user id
+	        if (user == null)
+	            return Response.status(NOT_FOUND).build();
+	        
+	        //step 2: prevent unauthorized users from updating this account
+	        //the update can continue only if the current user is either:
+	        //1.  has an admin role
+	        // -OR-
+	        //2.  is the same person represented by the updatedUser
+	        boolean hasAdminRole = Site_UserDAO.hasRole(loggedInUser.getId(), "admin");
+	        boolean isMatchingUser = loggedInUser.getId().equalsIgnoreCase(user.getId());
+
+	        //if the current user does not match, return a 401
+	        if ((hasAdminRole || isMatchingUser) == false) {
+	        	return Response.status(UNAUTHORIZED).build();
+	        }
+
+	        //step 3: check if account is disabled
+	        //Do NOT allow a disabled user account to be updated if
+	        //the user is trying to update their own disabled account
+	        if (Site_UserDAO.accountDisabled(user.getId()) && isMatchingUser) {
+	            return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));	        	
+	        }
+	        
+	        //step 4: check if this is an user initiated password change
+	        if (updatedUser.getOldPassword() != null && updatedUser.getNewPassword() != null) {
+	        	try {
+	        		if(user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getOldPassword()))) {
+		        		//everything is ok, so change the password
+		        		user.setPassword(updatedUser.getNewPassword());
+	        		} else {
+	        			logger.info("Invalid password");
+	            		throw new SecurityException("Invalid password");
+	        		}
+	        	} catch (SecurityException se) {
+		    		return Response.status(UNAUTHORIZED).build();	        		
+	        	}
+	        //step 5: check if this is an admin initiated password change	        
+	        } else if (hasAdminRole && updatedUser.getNewPassword() != null) {
+	        	user.setPassword(updatedUser.getNewPassword());
+	        }
+	        
+	        //step 6: is the user's password expired?
+	        if (Site_UserDAO.expiredPassword(user.getId())) {
+	            return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
+	        }
+	        
+	        //if you passed all the checks then update the User
+	        
+	        
+	        if(updatedUser.getRealName() != null)
+	        	user.setRealName(updatedUser.getRealName());
+	        if(updatedUser.getRoles() != null)
+	        	user.setRoles(updatedUser.getRoles());
+	        if(updatedUser.getStatus() != -1)
+	        	user.setStatus(updatedUser.getStatus());
+	        if(updatedUser.getEmail() != null)
+	        	user.setEmail(updatedUser.getEmail());
+	     
+	        
+	        //persist changes
+	        s.getTransaction().begin();
+	
+	        s.merge(user);
+	        
+	        s.getTransaction().commit();
+
+	        return Response.ok(200).build();
+	        
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		e.printStackTrace();
+    		return Response.status(UNAUTHORIZED).build();	        		
+
+    	} finally {
+    		if (s != null) {
+    			s.close();
+    		}
+    		
+    	}
+    	
+    }
+
+/*
+ * Remove the DELETE methods until we discuss how to "delete" something in
+ * this project
     @DELETE
     @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public Response remove(@PathParam("id") String id) {
         //em.remove(em.getReference(User.class, id));
         return Response.noContent().build();
     }
-    
+  */  
     // ======================================
     // =          PRIVATE METHODS           =
     // ======================================
-
-    /**
-     * Return a list of all the Site_Users for the current site.
-     * @return- a List of all the query users
-     * @throws Exception- throw any errors encountered back to the calling method
-     */
-    private List<Site_User> queryAllUsers() throws Exception {
-    	try { 		
-    	    List<Site_User> user_list = executeQueryReturnList(Site_User.FIND_ALL, null, logger);
-	        return user_list;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-    
-    /**
-     */
     
     /**
      * This method detects if the request for an admin account was sent from the
@@ -356,44 +498,35 @@ public class UserEndpoint extends AbstractEndpoint {
     	//{'valid':'true'}
     	return true;
     }
-    
+        
     /**
-     * Create a temporary password
-     * @return a plaintext String password
-     * @throws Exception
-     */
-    private String createTemporaryPassword() throws Exception {
-    	String retPassword = "";
-    	retPassword = "temporary";
-    	return retPassword;
-    }
-    
-    /**
-     * A back-end call that uses the uuid/password combination to find the user's
+     * A back-end call that uses the id/password combination to find the user's
      * account in the database.  Throws an error if the account cannot be verified.
-     * @param uuid- the uuid for the account.  This value must not be empty.
+     * @param email- the email for the account.  This value must not be empty.
      * @param password- the plaintext password for the account.  This value must not be empty.
      * @throws SecurityException on authentication failure
+     * NoResultException if no user is found
      */
-    private void authenticate(String uuid, String password) throws Exception {
-    	logger.info("searching for #### uuid/password : " + uuid + "/" + password);
+    private Site_User authenticate(String email, String password) throws SecurityException, HibernateException, Exception {
+    	logger.info("searching for #### email/password : " + email + "/" + password);
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piUser = new ParameterItem("uuid", uuid);
-    		pList.add(piUser);
+			ParameterItem piEmail = new ParameterItem("email", email);
+			pList.add(piEmail);
     		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
     		pList.add(piPassword);
-	        Site_User user = executeQueryReturnSingle(Site_User.FIND_BY_UUID_PASSWORD, pList, logger);
+	        Site_User user = AbstractDAO.executeQueryReturnSingle(Site_User.FIND_BY_EMAIL_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
-	    		logger.info("Invalid user/password.  Tried to login using: " + uuid + " / " + password);
-	            throw new SecurityException("Invalid user/password");
+	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / " + password);
+	            throw new SecurityException("Invalid email/password");
 	        }
-	    
-    	} catch (NoResultException e) {
-    		logger.info("Invalid user/password");
-    		throw new SecurityException("Invalid user/password");
-        } catch (PersistenceException e) {
+	        
+	        return user;
+        } catch (NonUniqueResultException nure) {
+    		logger.info("Invalid email/password.  Found multiple username/password entries using: " + email + " / " + password);
+            throw new SecurityException("Invalid email/password");
+        } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
@@ -401,31 +534,6 @@ public class UserEndpoint extends AbstractEndpoint {
             
     }
 
-    /**
-     * Create a JWT based on a user's uuid.  The JWT is set to expire in 15 minutes.
-     * @param uuid- a user's uuid
-     * @return a String representing the JWT for the user set to expire in 15 minutes.
-     */
-    private String issueToken(String uuid) {
-    	KeyGenerator kg = new SimpleKeyGenerator();
-        Key key = kg.generateKey();
-        Calendar date = Calendar.getInstance();
-        long t=date.getTimeInMillis();
-        //add fifteen minutes to current time to create
-        //a token that expires in 15 minutes (15 * 60 milliseconds)
-        Date fifteenMinuteExpiry = new Date(t + (15 * 60000));
-        String jwtToken = Jwts.builder()
-                .setSubject(uuid)
-                .setIssuer(uriInfo.getAbsolutePath().toString())
-                .setIssuedAt(new Date())
-                .setExpiration(fifteenMinuteExpiry)
-                .signWith(SignatureAlgorithm.HS512, key)
-                .compact();
-        logger.info("#### generating token for a key : " + jwtToken + " - " + key);
-        return jwtToken;
-
-    }
-    
     /**
      * Validate a JWT token used to create the initial admin account for a site
      * @param JWT token with sitename and sitekey in the payload
@@ -440,14 +548,14 @@ public class UserEndpoint extends AbstractEndpoint {
         // Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
     	logger.info("Trying to validate this admin token: " + token);
-    	KeyGenerator kg = new SimpleKeyGenerator();
+    	KeyGenerator kg = new KeyGenerator();
         Key key = kg.generateKey();
         try {
 	        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
 	        logger.info(claims.toString());
 	        
 	        //TODO: add code to validate the token
-	        
+	        //      this will make a call to the Central server to authenticate
 	        return true;
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
@@ -468,7 +576,5 @@ public class UserEndpoint extends AbstractEndpoint {
 	    }
 
      }
-
-
 
 }

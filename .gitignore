@@ -4,6 +4,7 @@ target
 *.DS_Store
 
 *~
+private-data.props
 
 .metadata
 RemoteSystemsTempFiles

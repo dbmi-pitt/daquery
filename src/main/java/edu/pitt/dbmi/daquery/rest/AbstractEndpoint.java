@@ -9,10 +9,17 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
-import edu.pitt.dbmi.daquery.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.domain.Network;
 
+
+//TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"
+//, and create new object calls.  Try a factory to do this.  The factory takes 
+//a class.  The class will convert the object name to the /{objectname} @Path item
 public class AbstractEndpoint {
 
+	private final static Logger absLog = Logger.getLogger(AbstractEndpoint.class.getName());
+	
     /**
      * This inner class holds the database query parameter pairing for 
      * queries.  Each pairing is a string and object.
@@ -20,7 +27,6 @@ public class AbstractEndpoint {
      * when building the query.
      * @author devuser
      *
-     */
 	protected class ParameterItem {
 		
 		public String paramName;
@@ -39,6 +45,7 @@ public class AbstractEndpoint {
 			return this.paramObject;
 		}
 	}
+     */
 	
 	/**
 	 * A simple method that converts an array of DaqueryObjects to a JSON array
@@ -74,12 +81,12 @@ public class AbstractEndpoint {
 	//TODO: Add LIMIT and OFFSET options for query
 	//check to see how to manage this in JPA
 	//try this: https://stackoverflow.com/questions/25008472/pagination-in-spring-data-jpa-limit-and-offset
-    protected <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+/*    protected <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
     	try {
-	        emf = Persistence.createEntityManagerFactory("jpa-example");
+	        emf = Persistence.createEntityManagerFactory("derby");
 	        em = emf.createEntityManager();
 	        Query query = em.createNamedQuery(namedQuery);
 	        if (params != null && !params.isEmpty()) {
@@ -103,14 +110,11 @@ public class AbstractEndpoint {
     		if (em != null) {
     			em.close();
     		}
-    		if (emf != null) {
-    			emf.close();
-    		}
     		
     	}
             
     }
-
+*/
     
 	/**
 	 * Very generic query method that returns a single object from the database.
@@ -122,12 +126,12 @@ public class AbstractEndpoint {
 	 * null if no data is returned.
 	 * @throws Exception
 	 */
-    protected <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+/*    protected <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
     	logger.info("executing query: " + namedQuery);
     	EntityManagerFactory emf = null;
     	EntityManager em = null;
     	try {
-	        emf = Persistence.createEntityManagerFactory("jpa-example");
+	        emf = Persistence.createEntityManagerFactory("derby");
 	        em = emf.createEntityManager();
 	        Query query = em.createNamedQuery(namedQuery);
 	        if (params != null && !params.isEmpty()) {
@@ -151,12 +155,7 @@ public class AbstractEndpoint {
     		if (em != null) {
     			em.close();
     		}
-    		if (emf != null) {
-    			emf.close();
-    		}
-    		
-    	}
-            
+    	}       
     }
-
+    */
 }

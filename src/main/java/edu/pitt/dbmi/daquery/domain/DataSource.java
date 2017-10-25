@@ -7,7 +7,6 @@ import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
-import java.util.List;
 import java.util.Objects;
 
 
@@ -16,26 +15,27 @@ import java.util.Objects;
  * 
  */
 @Entity
-@Table(name="Role")
-@NamedQuery(name="Role.findAll", query="SELECT r FROM Role r")
-public class Role extends DaqueryObject implements Serializable {
-	private static final long serialVersionUID = 1L;
+@Table(name="DATA_SOURCE")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.INTEGER)
+@DiscriminatorValue(value = SourceType.TYPES.BASE_VAL)
+public abstract class DataSource extends DaqueryObject implements Serializable {
+	private static final long serialVersionUID = 12342392828383l;
 	
 	@Expose
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(unique=true, nullable=false)
+	@Column(unique=true, nullable=false, name="ds_id")
 	private long id;
 
 	@Expose
 	@Column(nullable=false, length=50)
-	private String name;
+	protected String name;
 
-	//bi-directional many-to-many association to User
-	@ManyToMany(mappedBy="roles")
-	private List<Site_User> users;
 
-	public Role() {
+	
+	public DataSource() {
+		
 	}
 
 	public long getId() {
@@ -54,13 +54,6 @@ public class Role extends DaqueryObject implements Serializable {
 		this.name = name;
 	}
 
-	public List<Site_User> getUsers() {
-		return this.users;
-	}
-
-	public void setUsers(List<Site_User> users) {
-		this.users = users;
-	}
 
 	
     // ======================================
@@ -71,18 +64,13 @@ public class Role extends DaqueryObject implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Role role = (Role) o;
-        return Objects.equals(id, role.id);
+        DataSource ds = (DataSource) o;
+        return Objects.equals(id, ds.id);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-    
-    @Override
-    public String toString() {
-    	return this.name;
     }
 	
 }

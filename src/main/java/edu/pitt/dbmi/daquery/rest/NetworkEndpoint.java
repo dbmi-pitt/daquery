@@ -3,17 +3,23 @@ package edu.pitt.dbmi.daquery.rest;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -23,8 +29,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
-import edu.pitt.dbmi.daquery.rest.AbstractEndpoint.ParameterItem;
 
 
 @Path("/networks")
@@ -45,7 +51,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
     SecurityContext securityContext;
 
 	
-	private final static Logger logger = Logger.getLogger(NetworkEndpoint.class.getName());
+    private final static Logger logger = Logger.getLogger(NetworkEndpoint.class.getName());
 	
 	/**
      * Get all joined networks
@@ -55,7 +61,8 @@ public class NetworkEndpoint extends AbstractEndpoint {
      * @throws 401 Unauthorized	
      */
     @GET
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworks() {
     	
@@ -67,7 +74,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
                         
-            List<Network> networks = queryAllNetworks();
+            List<Network> networks = NetworkDAO.queryAllNetworks();
             
             if (networks == null) {
                 return Response.status(NOT_FOUND).build();
@@ -84,26 +91,28 @@ public class NetworkEndpoint extends AbstractEndpoint {
     }
     
     /**
-     * Get specific network by Id
-     * example url: daquery-ws/ws/network/1
-     * @return 200 OK			List of networks
+     * Get specific network by ID or UUID
+     * example url: daquery-ws/ws/networks/1
+     *           or daquery-ws/ws/networks/a3477419-657d-4ddd-8750-c014e2033937
+     * @return 200 OK			Network information for one network
      * @throws 500 Server Error	error message
      * @throws 401 Unauthorized	
      */
     @GET
+    @Secured
     @Path("/{id}")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworkByID(@PathParam("id") String id) {
     	try {
 
-            logger.info("#### returning network by id=" + id);
+            logger.info("#### returning network by uuid=" + id);
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            Network network = queryNetwork(id);
+            Network network = NetworkDAO.queryNetwork(id);
             
             if (network == null) {
                 return Response.status(NOT_FOUND).build();
@@ -118,41 +127,5 @@ public class NetworkEndpoint extends AbstractEndpoint {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
-
-    // ======================================
-    // =          PRIVATE METHODS           =
-    // ======================================
-    
-    
-    private Network queryNetwork(String id) throws Exception {
-    	logger.info("searching for #### single Inbound_Query id= " +id);
-    	try {
-    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
-    		ParameterItem piId = new ParameterItem("id", id);
-    		pList.add(piId);
-    		Network network = executeQueryReturnSingle(Network.FIND_BY_ID, pList, logger);
-	        return network;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-
-    private List<Network> queryAllNetworks() throws Exception {
-    	try { 		
-    	    List<Network> networks = executeQueryReturnList(Network.FIND_ALL, null, logger);
-	        return networks;
-	    
-        } catch (PersistenceException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
-    }
-
 
 }

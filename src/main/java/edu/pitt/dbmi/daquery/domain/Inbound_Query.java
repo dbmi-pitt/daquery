@@ -1,46 +1,39 @@
 package edu.pitt.dbmi.daquery.domain;
 
+import java.io.Serializable;
+import javax.persistence.*;
 
+import com.google.gson.annotations.Expose;
+
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+
+import java.sql.Timestamp;
 import java.util.Objects;
-import java.util.logging.Logger;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 /**
+ * The persistent class for the INBOUND_QUERIES database table.
  * 
- * @author devuser
- *
  */
 
-@NamedQueries({
-        @NamedQuery(name = Inbound_Query.FIND_ALL, query = "SELECT u FROM Inbound_Query u ORDER BY u.lastupdate DESC"),
-        @NamedQuery(name = Inbound_Query.FIND_BY_ID, query = "SELECT u FROM Inbound_Query u WHERE u.id = :id"),
-        @NamedQuery(name = Inbound_Query.COUNT_ALL, query = "SELECT COUNT(u) FROM Inbound_Query u"),
-        @NamedQuery(name = Inbound_Query.FIND_BY_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.status = :status"),
-        @NamedQuery(name = Inbound_Query.FIND_BY_SITE, query = "SELECT u FROM Inbound_Query u WHERE u.site = :site"),
-        @NamedQuery(name = Inbound_Query.FIND_BY_STUDY, query = "SELECT u FROM Inbound_Query u WHERE u.studyname = :studyname"),
-        @NamedQuery(name = Inbound_Query.FIND_BY_SITE_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.site = :site AND u.status = :status"),
-        @NamedQuery(name = Inbound_Query.FIND_BY_USER_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.username = :username AND u.status = :status"),
- //       @NamedQuery(name = Inbound_Query.FIND_BY_USERNAME, query = "SELECT u FROM Inbound_Query u WHERE u.username = :username"),
-})
 
+@NamedQueries({
+    @NamedQuery(name = Inbound_Query.FIND_ALL, query = "SELECT u FROM Inbound_Query u ORDER BY u.lastupdate DESC"),
+    @NamedQuery(name = Inbound_Query.FIND_BY_ID, query = "SELECT u FROM Inbound_Query u WHERE u.id = :id"),
+    @NamedQuery(name = Inbound_Query.COUNT_ALL, query = "SELECT COUNT(u) FROM Inbound_Query u"),
+})
+/*    @NamedQuery(name = Inbound_Query.FIND_BY_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.status = :status"),
+    @NamedQuery(name = Inbound_Query.FIND_BY_SITE, query = "SELECT u FROM Inbound_Query u WHERE u.site_id = :site_id"),
+    @NamedQuery(name = Inbound_Query.FIND_BY_STUDY, query = "SELECT u FROM Inbound_Query u WHERE u.studyname = :studyname"),
+    @NamedQuery(name = Inbound_Query.FIND_BY_SITE_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.site_id = :site_id AND u.status = :status"),
+    @NamedQuery(name = Inbound_Query.FIND_BY_USER_STATUS, query = "SELECT u FROM Inbound_Query u WHERE u.user_id = :user_id AND u.status = :status"),
+})
+*/
 
 @Entity
-@Table(name = "Inbound_Query")
-public class Inbound_Query extends DaqueryObject {
-
-    // ======================================
+@Table(name="Inbound_Query")
+public class Inbound_Query extends DaqueryObject implements Serializable {
+	// ======================================
     // =             Constants              =
     // ======================================
 
@@ -52,153 +45,177 @@ public class Inbound_Query extends DaqueryObject {
     public static final String FIND_BY_STUDY = "Inbound_Query.findByStudy";
     public static final String FIND_BY_SITE_STATUS = "Inbound_Query.findBySiteStatus";
     public static final String FIND_BY_USER_STATUS = "Inbound_Query.findByUserStatus";
-   // public static final String FIND_BY_USERNAME = "Inbound_Query.findByUsername";
-
-    private final static Logger logger = Logger.getLogger(Inbound_Query.class.getName());
     
-    // ======================================
-    // =             Attributes             =
-    // ======================================
+	private static final long serialVersionUID = 1L;
 
-    @Id
-    @SequenceGenerator(name = "SEQ_GEN", sequenceName = "SEQ_DAQUERY", allocationSize=1)
-    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SEQ_GEN")
-    @Column(name="ID", unique = true, nullable = false)
-    private long id;
-    @Column(name="STUDYNAME", length = 500)
-    private String studyname;
-    @Column(name="QUERYNAME", length = 500)
-    private String queryname;
-    @Column(name="QUERYTYPE", length = 500)
-    private String querytype;
-    @Column(name="SITE", length = 500)
-    private String site;    
-    @Column(name="USERNAME", length = 500)
-    private String username; //TODO: should this be userid?  If they create a query, we
-    //should check to make sure we have their id in our own records
-    @Column(name="LASTUPDATE", length = 500)
-    @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-    private DateTime lastupdate;
-    //TODO: coordinate the status list with Desheng
-    @Column(name="STATUS", length = 500)
-    private String status;
-    @Column(name="ORACLEQUERY", length = 500)
-    private String oraclequery;
-    @Column(name="SQLQUERY", length = 500)
-    private String sqlquery;
+	@Expose
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(unique=true, nullable=false)
+	private long id;
 
-    // ======================================
-    // =            Constructors            =
-    // ======================================
+	private Timestamp lastupdate;
 
-    public Inbound_Query() {
-    	
-    }
-    
-    
-    public Inbound_Query(long id, String studyName, String queryName, String queryType, String site, String userName,
-			DateTime lastUpdate, String status, String oracleQuery, String sqlQuery) {
-		super();
-		this.id = id;
-		this.studyname = studyName;
-		this.queryname = queryName;
-		this.querytype = queryType;
-		this.site = site;
-		this.username = userName;
-		this.lastupdate = lastUpdate;
-		this.status = status;
-		this.oraclequery = oracleQuery;
-		this.sqlquery = sqlQuery;
+	@Expose
+	@Column(length=500)
+	private String oraclequery;
+
+	@Expose
+	@Column(length=500)
+	private String queryname;
+
+	@Expose
+	@Column(length=50)
+	private String querytype;
+
+	@Expose
+	@Column(length=500)
+	private String sqlquery;
+
+	@Expose
+	@Column(length=500)
+	private String status;
+
+	@Expose
+	@Column(length=500)
+	private String studyname;
+
+	//single directional many-to-one association to Network
+	@Expose
+	@ManyToOne
+	@JoinColumn(name="NETWORK_ID")
+	private Network network;
+
+	//single directional many-to-one association to Site
+	@Expose
+	@ManyToOne
+	@JoinColumn(name="SITE_ID")
+	private Site site;
+
+	//single directional many-to-one association to User
+	@Expose
+	@ManyToOne
+	@JoinColumn(name="USER_ID")
+	private Site_User user;
+
+	public Inbound_Query() {
 	}
 
-
-    // ======================================
-    // =          Getters & Setters         =
-    // ======================================
-
-    public long getId() {
-		return id;
+	public long getId() {
+		return this.id;
 	}
-
 
 	public void setId(long id) {
 		this.id = id;
 	}
 
-	public String getStudyName() {
-		return studyname;
+	public Timestamp getLastupdate() {
+		return this.lastupdate;
 	}
 
-	public void setStudyName(String studyName) {
-		this.studyname = studyName;
+	public void setLastupdate(Timestamp lastupdate) {
+		this.lastupdate = lastupdate;
 	}
 
-	public String getQueryName() {
-		return queryname;
+	public String getOraclequery() {
+		return this.oraclequery;
 	}
 
-	public void setQueryName(String queryName) {
-		this.queryname = queryName;
+	public void setOraclequery(String oraclequery) {
+		this.oraclequery = oraclequery;
 	}
 
-	public String getQueryType() {
-		return querytype;
+	public String getQueryname() {
+		return this.queryname;
 	}
 
-	public void setQueryType(String queryType) {
-		this.querytype = queryType;
+	public void setQueryname(String queryname) {
+		this.queryname = queryname;
 	}
 
-	public String getSite() {
-		return site;
+	public String getQuerytype() {
+		return this.querytype;
 	}
 
-	public void setSite(String site) {
-		this.site = site;
+	public void setQuerytype(String querytype) {
+		this.querytype = querytype;
 	}
 
-	public String getUserName() {
-		return username;
+	public String getSqlquery() {
+		return this.sqlquery;
 	}
 
-	public void setUserName(String userName) {
-		this.username = userName;
-	}
-
-	public DateTime getLastUpdate() {
-		return lastupdate;
-	}
-
-	public void setLastUpdate(DateTime lastUpdate) {
-		this.lastupdate = lastUpdate;
+	public void setSqlquery(String sqlquery) {
+		this.sqlquery = sqlquery;
 	}
 
 	public String getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public void setStatus(String status) {
 		this.status = status;
 	}
 
-	public String getOracleQuery() {
-		return oraclequery;
+	public String getStudyname() {
+		return this.studyname;
 	}
 
-	public void setOracleQuery(String oracleQuery) {
-		this.oraclequery = oracleQuery;
+	public void setStudyname(String studyname) {
+		this.studyname = studyname;
 	}
 
-	public String getSqlQuery() {
-		return sqlquery;
+	public Network getNetwork() {
+		return this.network;
 	}
 
-	public void setSqlQuery(String sqlQuery) {
-		this.sqlquery = sqlQuery;
+	public void setNetwork(Network network) {
+		this.network = network;
 	}
 
+	public Site getSite() {
+		return this.site;
+	}
+	
+    public long getSiteId() {
+    	if (this.site == null)
+    		return -1;
+    	return this.site.getId();
+    }	
+	
+	public void setSiteId(String site_id) {
+		//TODO: this is a dummy call right now
+		//to satisfy JPA
+		//we need to look up the site according to site_id
+	}
 
-    // ======================================
+	public void setSite(Site site) {
+		this.site = site;
+	}
+	
+	public String getUserId() {
+		if (this.user == null) {
+			return null;
+		}
+		return this.user.getId();
+	}
+	
+	public void setUserId(String userID) {
+		//TODO: this is a dummy call right now
+		//to satisfy JPA
+		//we need to look up the user according to user_id
+		
+	}
+
+	public Site_User getUser() {
+		return this.user;
+	}
+
+	public void setUser(Site_User user) {
+		this.user = user;
+	}
+	
+	 // ======================================
     // =   Methods hash, equals, toString   =
     // ======================================
 
@@ -206,8 +223,8 @@ public class Inbound_Query extends DaqueryObject {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Inbound_Query user = (Inbound_Query) o;
-        return Objects.equals(id, user.id);
+        Inbound_Query inbound_query = (Inbound_Query) o;
+        return Objects.equals(id, inbound_query.id);
     }
 
 
@@ -218,11 +235,9 @@ public class Inbound_Query extends DaqueryObject {
 
 	@Override
 	public String toString() {
-		return "Inbound_Query [id=" + id + ", studyName=" + studyname + ", queryName=" + queryname + ", queryType="
-				+ querytype + ", site=" + site + ", userName=" + username + ", lastUpdate=" + lastupdate + ", status="
-				+ status + ", oracleQuery=" + oraclequery + ", sqlQuery=" + sqlquery + "]";
+		return "Inbound_Query {id=" + id + ", studyName=" + studyname + ", queryName=" + queryname + ", queryType="
+				+ querytype + ", site=" + site + ", user=" + user + ", lastUpdate=" + lastupdate + ", status="
+				+ status + ", oracleQuery=" + oraclequery + ", sqlQuery=" + sqlquery + "}";
 	}
-	
-
 
 }
