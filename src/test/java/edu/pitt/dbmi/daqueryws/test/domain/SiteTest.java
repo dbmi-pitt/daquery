@@ -1,28 +1,34 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
-import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
+
+import org.hibernate.Session;
+
+import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
+
 
 public class SiteTest {
 
 	public static void main(String[] args) {
-		Site s = new Site();
-		s.setName("PITT");
-		
-		EntityManagerFactory emf = Persistence.createEntityManagerFactory("derby");
-		EntityManager em = emf.createEntityManager();
-		Long network_id = 401L;
-		//Network nw = em.find(Network.class, network_id);
-		//s.setNetwork(nw);
-		
-		em.getTransaction().begin();
-		em.persist(s);
-		em.getTransaction().commit();
-		em.close();
+		Session session = null;
+		try {
+	    	session = HibernateConfiguration.openSession();
+			Site s = new Site();
+			s.setName("PITT");
+			
+			Long network_id = 401L;
+			//Network nw = em.find(Network.class, network_id);
+			//s.setNetwork(nw);
+			
+			session.getTransaction().begin();
+			session.persist(s);
+			session.getTransaction().commit();
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		} finally {
+			if (session != null) 
+				session.close();
+		}
 	}
 
 }

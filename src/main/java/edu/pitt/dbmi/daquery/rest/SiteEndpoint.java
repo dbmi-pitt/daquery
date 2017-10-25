@@ -1,12 +1,9 @@
 package edu.pitt.dbmi.daquery.rest;
 
-import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.dao.SiteDAO;
-import edu.pitt.dbmi.daquery.domain.Network;
-import edu.pitt.dbmi.daquery.domain.Site;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -15,11 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -35,6 +27,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.domain.Network;
+import edu.pitt.dbmi.daquery.domain.Site;
 
 
 @Path("/sites")
@@ -98,8 +100,8 @@ public class SiteEndpoint extends AbstractEndpoint {
             //String jsonString = toJsonArray(site_list);
             return ResponseHelper.getBasicResponse(500, "this method is not implemented.");
 
-    	} catch (NoResultException nre) {
-    		return Response.status(NOT_FOUND).build();
+    	} catch (HibernateException he) {
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
@@ -123,7 +125,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     	
     	try {
 
-            logger.info("#### returning avaialable sites for network id: " + network_id);
+            logger.info("#### returning available sites for network id: " + network_id);
             
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -140,8 +142,8 @@ public class SiteEndpoint extends AbstractEndpoint {
             String jsonString = toJsonArray(site_list);
             return Response.ok(200).entity(jsonString).build();
 
-    	} catch (NoResultException nre) {
-    		return Response.status(NOT_FOUND).build();
+    	} catch (HibernateException he) {
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
@@ -178,8 +180,8 @@ public class SiteEndpoint extends AbstractEndpoint {
             String json = site.toJson();
 
             return Response.ok(200).entity(json).build();
-    	} catch (NoResultException nre) {
-    		return Response.status(NOT_FOUND).build();
+    	} catch (HibernateException he) {
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
@@ -199,10 +201,10 @@ public class SiteEndpoint extends AbstractEndpoint {
     //@Consumes(MediaType.APPLICATION_JSON)
     //@Produces(MediaType.APPLICATION_JSON)
     public Response createSite(LinkedHashMap<?, ?> newSite) {
-        EntityManagerFactory emf = null;
-        EntityManager em = null;
 
+    	Session s = null;
     	try {
+    		s = HibernateConfiguration.openSession();
     		String network_id = (String) newSite.get("network_id"); 		
 	        Network currentNetwork = NetworkDAO.queryNetwork(network_id);
 	        
@@ -219,15 +221,13 @@ public class SiteEndpoint extends AbstractEndpoint {
 		       // site_in.setNetwork(currentNetwork);
 		       // site_out.setNetwork(currentNetwork);
 		        //persist changes
-		        emf = Persistence.createEntityManagerFactory("derby");
-		        em = emf.createEntityManager();
 		
-		        em.getTransaction().begin();
+		        s.getTransaction().begin();
 		
-		        em.persist(site_in);
-		        em.persist(site_out);
+		        s.persist(site_in);
+		        s.persist(site_out);
 		        
-		        em.getTransaction().commit();
+		        s.getTransaction().commit();
 	
 		        return Response.ok(201).entity(site_out).build();
 	        } else {
@@ -240,14 +240,12 @@ public class SiteEndpoint extends AbstractEndpoint {
 	            }	        
 		      //  site.setNetwork(currentNetwork);
 		        //persist changes
-		        emf = Persistence.createEntityManagerFactory("derby");
-		        em = emf.createEntityManager();
 		
-		        em.getTransaction().begin();
+		        s.getTransaction().begin();
 		
-		        em.persist(site);
+		        s.persist(site);
 		        
-		        em.getTransaction().commit();
+		        s.getTransaction().commit();
 	
 		        return Response.ok(201).entity(site).build();
 	        }
@@ -258,8 +256,8 @@ public class SiteEndpoint extends AbstractEndpoint {
     		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
 
     	} finally {
-    		if (em != null) {
-    			em.close();
+    		if (s != null) {
+    			s.close();
     		}
     		
     	}
@@ -272,10 +270,10 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateSite(Site updatedSite) {
-        EntityManagerFactory emf = null;
-        EntityManager em = null;
 
+    	Session s = null;
     	try {
+    		s = HibernateConfiguration.openSession();
     		
 	        Site site = SiteDAO.querySiteByID(updatedSite.getSite_id());	
 	        
@@ -285,14 +283,12 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	        	     
 	        
 	        //persist changes
-	        emf = Persistence.createEntityManagerFactory("derby");
-	        em = emf.createEntityManager();
 	
-	        em.getTransaction().begin();
+	        s.getTransaction().begin();
 	
-	        em.merge(updatedSite);
+	        s.merge(updatedSite);
 	        
-	        em.getTransaction().commit();
+	        s.getTransaction().commit();
 
 	        return Response.ok(201).entity(updatedSite).build();
 	        
@@ -302,8 +298,8 @@ public class SiteEndpoint extends AbstractEndpoint {
     		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
 
     	} finally {
-    		if (em != null) {
-    			em.close();
+    		if (s != null) {
+    			s.close();
     		}
     		
     	}
