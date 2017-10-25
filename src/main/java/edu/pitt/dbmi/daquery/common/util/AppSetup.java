@@ -150,7 +150,7 @@ public class AppSetup
 		{
 			conn = ApplicationDBHelper.getConnection();
 			stat = conn.createStatement();
-			rs = stat.executeQuery("select count(*) from site_user where lower(username) = 'admin'");
+			rs = stat.executeQuery("select count(*) from dq_user where lower(username) = 'admin'");
 			int adminCount = 0;
 			if(rs.next())
 				adminCount = rs.getInt(1);
@@ -179,7 +179,7 @@ public class AppSetup
 		    String uuidStr = uuid.toString();
 			String hashedPwd = PasswordUtils.digestPassword(adminPwd.trim());
 			if(StringHelper.isEmpty(adminRealName)) adminRealName = "";
-			String insertSQL = "insert into site_user (id, username, password, status, email, real_name) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', " + UserStatus.ACTIVE.getValue() + ", '" + adminEmail.trim() + "', '" + adminRealName + "')";
+			String insertSQL = "insert into dq_user (id, username, password, status, email, real_name) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', " + UserStatus.ACTIVE.getValue() + ", '" + adminEmail.trim() + "', '" + adminRealName + "')";
 			log.info("User inserted with: " + insertSQL);
 			stat.executeUpdate(insertSQL);
 			insertSQL = "insert into user_role (role_id, user_id) values (" + roleId + ", '" + uuidStr.trim() + "')";
@@ -367,7 +367,7 @@ public class AppSetup
 				return(DBSTATUS_INDETERMINATE);
 			}
 			rs.close();
-			rs = state.executeQuery("select id from site_user where lcase(username) = 'admin'");
+			rs = state.executeQuery("select id from dq_user where lcase(username) = 'admin'");
 			if(!rs.next())
 			{
 				log.log(Level.SEVERE, "Unable to find the initial admin user, can't validate a complete setup.");
