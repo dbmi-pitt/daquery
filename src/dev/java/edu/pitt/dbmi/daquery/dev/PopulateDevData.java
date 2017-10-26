@@ -1,8 +1,6 @@
 package edu.pitt.dbmi.daquery.dev;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -37,7 +35,7 @@ public class PopulateDevData
 		Network net = new Network();
 		net.setData_model("cdm");
 		net.setName("dbmi-dev");
-		net.setNetwork_Id("abcd-efgh-ijkm-nopq");
+		net.setNetworkId("abcd-efgh-ijkm-nopq");
 
 		Site bsiteOut = new Site("jajasioujaiojaijf","shirey@pitt.edu","no key for now..",EncryptionType.NONE,"bill-dev","20b23b5c-61ad-44eb-8eef-886adcced18e",SiteStatus.CONNECTED,"http://localhost:8080/");	
 		Site dsiteOut = new Site("jaoijafojafasdf","del20@pitt.edu","no key for now..",EncryptionType.NONE,"desheng-dev","bcfdd450-3dd8-4ced-9599-c65de7c9f115",SiteStatus.CONNECTED,"http://del20-dt.univ.pitt.edu:8080/");		

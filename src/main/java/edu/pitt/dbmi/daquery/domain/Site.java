@@ -34,8 +34,7 @@ import java.util.Objects;
 @NamedQueries({
 	@NamedQuery(name=Site.FIND_ALL, query="SELECT s FROM Site s"),
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
-	@NamedQuery(name=Site.FIND_BY_UUID, query="SELECT s FROM Site s WHERE s.site_id = :uuid"),
-	@NamedQuery(name=Site.FIND_BY_NETWORK, query="SELECT s FROM Site s WHERE s.network.id = :network_id"),
+	@NamedQuery(name=Site.FIND_BY_UUID, query="SELECT s FROM Site s WHERE s.siteId = :uuid"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
 
@@ -50,7 +49,6 @@ public class Site extends DaqueryObject implements Serializable {
     public static final String FIND_BY_ID = "Site.findId";
     public static final String FIND_BY_UUID = "Site.findUUId";
     public static final String COUNT_ALL = "Site.countAll";
-    public static final String FIND_BY_NETWORK = "Site.findByNetwork";
 
 	private static final long serialVersionUID = 1L;
 
@@ -64,7 +62,7 @@ public class Site extends DaqueryObject implements Serializable {
 	@GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "SITE_ID", unique = true, length=50)
-	private String site_id;
+	private String siteId;
 
 	@Expose
 	@Column(name= "NAME", nullable=false, length=100)
@@ -76,7 +74,7 @@ public class Site extends DaqueryObject implements Serializable {
 
 	@Expose
 	@Column(name= "ADMIN_EMAIL", nullable=false, length=500)
-	private String admin_email;
+	private String adminEmail;
 
 	@Column(name= "STATUS", nullable=false, length=500)
 	private int status;
@@ -84,31 +82,11 @@ public class Site extends DaqueryObject implements Serializable {
 	@Expose
 	@Transient
 	private SiteStatus statusValue;
-	
-	//bi-directional many-to-one association to InboundQuery
-    @Transient
-	@OneToMany(mappedBy="site")
-	private List<Inbound_Query> inboundQueries;
 
-	//bi-directional many-to-one association to OutboundQuery
-    @Transient
-	@OneToMany(mappedBy="site")
-	private List<OutboundQuery> outboundQueries;
-    
-	//bi-directional many-to-one association to Network
-/*    @Expose
-	@ManyToOne
-	@JoinColumn(name="NETWORK_ID", nullable=false)
-	private Network network; */
-
-	@Temporal(TemporalType.TIMESTAMP)
+/*	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "REQUEST_SENT")
 	private java.util.Date request_sent;
-
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "REQUEST_REPLIED")
-	private java.util.Date request_replied;
-
+*/
 	/**
 	 * The access key used to make and receive calls to/from this site.
 	 */
@@ -135,7 +113,7 @@ public class Site extends DaqueryObject implements Serializable {
 	public Site(String name, String url, String admin_email) {
 		this.name = name;
 		this.url = url;
-		this.admin_email = admin_email;
+		this.adminEmail = admin_email;
 	}
 	
 	public Site (String accessKey,
@@ -152,7 +130,7 @@ public class Site extends DaqueryObject implements Serializable {
 		this.setComEncKey(commEncKey);
 		this.setCommTypeValue(commType);
 		this.setName(name);
-		this.setSite_id(siteId);
+		this.setSiteId(siteId);
 		this.setStatus(status.getValue());
 		this.setUrl(url);
 	}	
@@ -172,12 +150,12 @@ public class Site extends DaqueryObject implements Serializable {
 		this.id = id;
 	}
 
-	public String getSite_id() {
-		return site_id;
+	public String getSiteId() {
+		return siteId;
 	}
 
-	public void setSite_id(String site_id) {
-		this.site_id = site_id;
+	public void setSiteId(String id) {
+		this.siteId = id;
 	}
 
 	public String getName() {
@@ -197,11 +175,11 @@ public class Site extends DaqueryObject implements Serializable {
 	}
 
 	public String getAdmin_email() {
-		return admin_email;
+		return adminEmail;
 	}
 
 	public void setAdmin_email(String admin_email) {
-		this.admin_email = admin_email;
+		this.adminEmail = admin_email;
 	}
 
 	public int getStatus() {
@@ -220,74 +198,6 @@ public class Site extends DaqueryObject implements Serializable {
 		this.statusValue = statusValue;
 	}
 
-/*	public Network getNetwork() {
-		return network;
-	}
-
-	public void setNetwork(Network network) {
-		this.network = network;
-	} */
-
-	public java.util.Date getRequest_sent() {
-		return request_sent;
-	}
-
-	public void setRequest_sent(java.util.Date request_sent) {
-		this.request_sent = request_sent;
-	}
-
-	public java.util.Date getRequest_replied() {
-		return request_replied;
-	}
-
-	public void setRequest_replied(java.util.Date request_replied) {
-		this.request_replied = request_replied;
-	}
-
-	public List<Inbound_Query> getInboundQueries() {
-		return this.inboundQueries;
-	}
-
-	public void setInboundQueries(List<Inbound_Query> inboundQueries) {
-		this.inboundQueries = inboundQueries;
-	}
-
-	public Inbound_Query addInboundQuery(Inbound_Query inboundQuery) {
-		getInboundQueries().add(inboundQuery);
-		inboundQuery.setSite(this);
-
-		return inboundQuery;
-	}
-
-	public Inbound_Query removeInboundQuery(Inbound_Query inboundQuery) {
-		getInboundQueries().remove(inboundQuery);
-		inboundQuery.setSite(null);
-
-		return inboundQuery;
-	}
-
-	public List<OutboundQuery> getOutboundQueries() {
-		return this.outboundQueries;
-	}
-
-	public void setOutboundQueries(List<OutboundQuery> outboundQueries) {
-		this.outboundQueries = outboundQueries;
-	}
-
-	public OutboundQuery addOutboundQuery(OutboundQuery outboundQuery) {
-		getOutboundQueries().add(outboundQuery);
-		outboundQuery.setSite(this);
-
-		return outboundQuery;
-	}
-
-	public OutboundQuery removeOutboundQuery(OutboundQuery outboundQuery) {
-		getOutboundQueries().remove(outboundQuery);
-		outboundQuery.setSite(null);
-
-		return outboundQuery;
-	}
-	
 	/**
 	 * The access key used to make and receive calls to/from this site.
 	 */

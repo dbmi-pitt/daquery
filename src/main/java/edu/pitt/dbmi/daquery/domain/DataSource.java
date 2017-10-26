@@ -67,10 +67,4 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
         DataSource ds = (DataSource) o;
         return Objects.equals(id, ds.id);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-	
 }

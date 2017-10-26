@@ -33,7 +33,7 @@ public class Role extends DaqueryObject implements Serializable {
 
 	//bi-directional many-to-many association to User
 	@ManyToMany(mappedBy="roles")
-	private List<Site_User> users;
+	private List<DaqueryUser> users;
 
 	public Role() {
 	}
@@ -54,11 +54,11 @@ public class Role extends DaqueryObject implements Serializable {
 		this.name = name;
 	}
 
-	public List<Site_User> getUsers() {
+	public List<DaqueryUser> getUsers() {
 		return this.users;
 	}
 
-	public void setUsers(List<Site_User> users) {
+	public void setUsers(List<DaqueryUser> users) {
 		this.users = users;
 	}
 

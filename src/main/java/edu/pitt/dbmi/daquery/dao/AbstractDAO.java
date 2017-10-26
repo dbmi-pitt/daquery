@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ public abstract class AbstractDAO {
 	 * parameters are required by the namedQuery).
 	 * @param logger- a logger instance to record any problems
 	 * @return- a List of objects returned by a successful execution of namedQuery.  Returns
-	 * null if no data is returned.
+	 * empty list if no data is returned.
 	 * @throws Exception
 	 */
 	
@@ -39,7 +40,8 @@ public abstract class AbstractDAO {
 	        		query.setParameter(param.getParamName(), param.getParamObject());
 	        	}
 	        }
-	        List<T> resultList = null;
+	        //it is best to return an empty list, not null
+	        List<T> resultList = new ArrayList<T>();
 	        resultList = (List<T>)query.list();
 	        return resultList;
 	    

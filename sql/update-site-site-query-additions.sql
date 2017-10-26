@@ -61,3 +61,11 @@ CREATE TABLE INCOMING_QUERY_SITES
 
 update site set TYPE = null;
 alter table site drop column TYPE;
+
+drop table inbound_query;
+drop table outbound_query;
+
+rename table site_user to dq_user;
+
+INSERT INTO ROLE (NAME) VALUES ('admin'), ('steward'), ('viewer');
+

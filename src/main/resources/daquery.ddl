@@ -15,7 +15,7 @@ CREATE TABLE "APP"."NOTIFICATION"
 )
 ;
 
-CREATE TABLE "APP"."SITE_USER"
+CREATE TABLE "APP"."DQ_USER"
 (
    ID varchar(50) PRIMARY KEY,
    USERNAME varchar(50),
@@ -32,6 +32,7 @@ CREATE TABLE "APP"."ROLE"
    NAME varchar(50) NOT NULL
 )
 ;
+
 
 CREATE TABLE "APP"."USER_ROLE"
 (
@@ -56,45 +57,11 @@ CREATE TABLE "APP"."SITE"
    ENC_TYPE int 
 )
 ;
-CREATE TABLE "APP"."INBOUND_QUERY"
-(
-   ID bigint PRIMARY KEY NOT NULL,
-   STUDYNAME varchar(500),
-   QUERYNAME varchar(500),
-   QUERYTYPE varchar(50),
-   NETWORK_ID bigint,
-   SITE_ID bigint,
-   LASTUPDATE timestamp,
-   STATUS varchar(500),
-   ORACLEQUERY varchar(500),
-   SQLQUERY varchar(500),
-   USER_ID varchar(50)
-)
-;
-
-CREATE TABLE "APP"."OUTBOUND_QUERY"
-(
-   ID bigint PRIMARY KEY NOT NULL,
-   STUDYNAME varchar(500),
-   QUERYNAME varchar(500),
-   QUERYTYPE varchar(50),
-   NETWORK_ID bigint,
-   SITE_ID bigint,
-   USER_ID varchar(50),
-   LASTUPDATE timestamp,
-   STATUS varchar(500),
-   ORACLEQUERY varchar(500),
-   SQLQUERY varchar(500)
-)
-;
 
 CREATE TABLE DATA_SOURCE
 (
    DS_ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    NAME varchar(50) NOT NULL,
-   CONNECTION_URL varchar(250),
-   USERNAME varchar(50),
-   PWD varchar(50),
    DTYPE int
 )
 ;
@@ -143,6 +110,8 @@ create table property
    value varchar(256)
 )
 ;
+
+INSERT INTO ROLE (NAME) VALUES ('admin'), ('steward'), ('viewer');
 
 
 

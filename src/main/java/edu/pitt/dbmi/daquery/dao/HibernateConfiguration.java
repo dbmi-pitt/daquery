@@ -5,17 +5,20 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
+import java.util.logging.Logger;
+
 import edu.pitt.dbmi.daquery.domain.DataSource;
-import edu.pitt.dbmi.daquery.domain.Inbound_Query;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Notification;
-import edu.pitt.dbmi.daquery.domain.OutboundQuery;
 import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.SASDataSource;
 import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.domain.Site;
-import edu.pitt.dbmi.daquery.domain.Site_User;
+import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.SourceType;
+
+import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 
 /**
  *  Singleton used to configure and get a Hibernate Session application wide. 
@@ -23,6 +26,9 @@ import edu.pitt.dbmi.daquery.domain.SourceType;
  */
 public class HibernateConfiguration {
 
+    private final static Logger logger = Logger.getLogger(HibernateConfiguration.class.getName());
+	
+	
 	private static SessionFactory sessFact = null;
 
 	/**
@@ -30,7 +36,7 @@ public class HibernateConfiguration {
 	 * 
 	 * @return An open Hibernate session.  Take care to make sure the session is closed when you're finished with it... 
 	 */
-	public static Session openSession()
+	public static Session openSession() throws DaqueryException
 	{
 		return(getSessionFactory().openSession());
 	}
@@ -39,29 +45,44 @@ public class HibernateConfiguration {
 	 * Get the Hibernate SessionFactory
 	 * @return
 	 */
-	public static SessionFactory getSessionFactory()
+	public static SessionFactory getSessionFactory() throws DaqueryException
 	{
 		if(sessFact != null)
 			return(sessFact);
 		
         Configuration hibernateConf = new Configuration();
     	hibernateConf.addAnnotatedClass(DataSource.class);	            	
-    	hibernateConf.addAnnotatedClass(Inbound_Query.class);
     	hibernateConf.addAnnotatedClass(Network.class);
     	hibernateConf.addAnnotatedClass(Notification.class);
-    	hibernateConf.addAnnotatedClass(OutboundQuery.class);
     	hibernateConf.addAnnotatedClass(Role.class);
     	hibernateConf.addAnnotatedClass(SASDataSource.class);
-    	hibernateConf.addAnnotatedClass(Site_User.class);
+    	hibernateConf.addAnnotatedClass(DaqueryUser.class);
     	hibernateConf.addAnnotatedClass(Site.class);
     	hibernateConf.addAnnotatedClass(SourceType.class);
     	hibernateConf.addAnnotatedClass(SQLDataSource.class);
         	
 
         hibernateConf.setProperty("hibernate.connection.driver_class", "org.apache.derby.jdbc.EmbeddedDriver" )
-        .setProperty("hibernate.connection.url", "jdbc:derby:/opt/apache-tomcat-6.0.53/conf/daquery-db")
         .setProperty("hibernate.connection.username", "")
-    	.setProperty("hibernate.connection.password", "");
+    	.setProperty("hibernate.connection.password", "")
+    	
+        
+        .setProperty("hibernate.c3p0.acquire_increment", "1")
+        .setProperty("hibernate.c3p0.idle_test_period","240")
+        .setProperty("hibernate.c3p0.timeout","600")	            
+        .setProperty("hibernate.c3p0.max_size","100")
+        .setProperty("hibernate.c3p0.min_size","3")
+        .setProperty("hibernate.c3p0.validate", "false") 
+        .setProperty("hibernate.c3p0.max_statements", "500");
+        
+        try {
+        	hibernateConf.setProperty("hibernate.connection.url", ApplicationDBHelper.getDBURL());
+        } catch (Exception e) {
+        	String strMsg = "Unable to find hibernate.connection.url in properties file.";
+        	logger.info(strMsg);
+        	throw new DaqueryException(strMsg, e);
+        }
+
 /*      .setProperty("hibernate.dialect", props.getProperty("hibernate.dialect", "org.hibernate.dialect.Oracle9Dialect")) */         
 /*	    .setProperty("hibernate.connection.release_mode", "after_statement") */
 /*    	.setProperty("hibernate.show_sql", props.getProperty("hibernate.show_sql", "false")) */
