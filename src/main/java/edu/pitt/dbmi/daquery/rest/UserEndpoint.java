@@ -438,7 +438,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	user.setRealName(updatedUser.getRealName());
 	        if(updatedUser.getRoles() != null)
 	        	user.setRoles(updatedUser.getRoles());
-	        if(updatedUser.getStatus() != -1)
+	        if(updatedUser.getStatus() != null)
 	        	user.setStatus(updatedUser.getStatus());
 	        if(updatedUser.getEmail() != null)
 	        	user.setEmail(updatedUser.getEmail());

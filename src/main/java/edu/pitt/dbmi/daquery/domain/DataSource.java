@@ -17,7 +17,7 @@ import java.util.Objects;
 @Entity
 @Table(name="DATA_SOURCE")
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.INTEGER)
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue(value = SourceType.TYPES.BASE_VAL)
 public abstract class DataSource extends DaqueryObject implements Serializable {
 	private static final long serialVersionUID = 12342392828383l;

@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.domain;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,10 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -22,9 +20,6 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.EncryptionType;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
-
-import java.util.List;
-import java.util.Objects;
 
 
 /**
@@ -59,8 +54,8 @@ public class Site extends DaqueryObject implements Serializable {
 	private long id;
 
 	@Expose
-	@GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+//	@GeneratedValue(generator = "uuid")
+//    @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "SITE_ID", unique = true, length=50)
 	private String siteId;
 
@@ -77,11 +72,7 @@ public class Site extends DaqueryObject implements Serializable {
 	private String adminEmail;
 
 	@Column(name= "STATUS", nullable=false, length=500)
-	private int status;
-	
-	@Expose
-	@Transient
-	private SiteStatus statusValue;
+	private String status;
 
 /*	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "REQUEST_SENT")
@@ -103,7 +94,7 @@ public class Site extends DaqueryObject implements Serializable {
 	 * The type of encryption used to send data to this site.
 	 */
 	@Column(name = "ENC_TYPE")
-	private int commEncType;
+	private String commEncType;
 	
 	public Site()
 	{
@@ -131,7 +122,7 @@ public class Site extends DaqueryObject implements Serializable {
 		this.setCommTypeValue(commType);
 		this.setName(name);
 		this.setSiteId(siteId);
-		this.setStatus(status.getValue());
+		this.setStatusValue(status);
 		this.setUrl(url);
 	}	
 	
@@ -182,20 +173,21 @@ public class Site extends DaqueryObject implements Serializable {
 		this.adminEmail = admin_email;
 	}
 
-	public int getStatus() {
+	public String getStatus() {
 		return status;
 	}
 
-	public void setStatus(int status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 
+	@Transient
 	public SiteStatus getStatusValue() {
-		return statusValue;
+		return SiteStatus.valueOf(status);
 	}
 
 	public void setStatusValue(SiteStatus statusValue) {
-		this.statusValue = statusValue;
+		status = statusValue.name();
 	}
 
 	/**
@@ -213,11 +205,11 @@ public class Site extends DaqueryObject implements Serializable {
 	/**
 	 * The type of encryption used to send data to this site.
 	 */
-	public int getCommEncType(){return(commEncType);}
-	public void setCommEncType(int type){}	
+	public String getCommEncType(){return(commEncType);}
+	public void setCommEncType(String type){this.commEncType = type;}	
 	@Transient
-	public EncryptionType getCommTypeValue(){return(EncryptionType.fromInt(commEncType));}
-	public void setCommTypeValue(EncryptionType et){commEncType = et.getValue();}
+	public EncryptionType getCommTypeValue(){return(EncryptionType.valueOf(commEncType));}
+	public void setCommTypeValue(EncryptionType et){commEncType = et.toString();}
 	
 	
 	// ======================================

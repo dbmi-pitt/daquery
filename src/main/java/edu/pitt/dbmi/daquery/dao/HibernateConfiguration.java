@@ -16,7 +16,8 @@ import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.SourceType;
-
+import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 
@@ -60,6 +61,8 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(Site.class);
     	hibernateConf.addAnnotatedClass(SourceType.class);
     	hibernateConf.addAnnotatedClass(SQLDataSource.class);
+    	hibernateConf.addAnnotatedClass(Inquiry.class);
+    	hibernateConf.addAnnotatedClass(SQLQuery.class);
         	
 
         hibernateConf.setProperty("hibernate.connection.driver_class", "org.apache.derby.jdbc.EmbeddedDriver" )

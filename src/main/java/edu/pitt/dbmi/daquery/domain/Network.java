@@ -9,7 +9,6 @@ import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -40,8 +39,8 @@ public class Network extends DaqueryObject implements Serializable {
 	private long id;
     
 	@Expose
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+//    @GeneratedValue(generator = "uuid")
+//    @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "NETWORK_ID", unique = true, length=50)
 	private String networkId;
 

@@ -41,6 +41,8 @@ import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 @Table(name = "DQ_USER")
 public class DaqueryUser extends DaqueryObject {
 
+	private static final long serialVersionUID = 29290820752342l;
+	
     // ======================================
     // =             Constants              =
     // ======================================
@@ -84,7 +86,7 @@ public class DaqueryUser extends DaqueryObject {
     
     @Expose
     @Column(name="STATUS")
-    private Integer status;
+    private String status;
 
     @Expose
     @Column(name="EMAIL", length = 500, nullable = true)
@@ -198,25 +200,22 @@ public class DaqueryUser extends DaqueryObject {
     	return password.length() > 0;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    public int getStatus() {
-    	if (this.status == null) {
-    		return -1;
-    	}
+    public String getStatus() {
         return this.status;
     }
     
     @Transient
     public UserStatus getStatusEnum()
     {
-    	return UserStatus.fromInt(status);
+    	return UserStatus.valueOf(status);
     }
     public void setStatusEnum(UserStatus stat)
     {
-    	setStatus(status);
+    	setStatus(stat.toString());
     }
 	
 	public List<Role> getRoles() {

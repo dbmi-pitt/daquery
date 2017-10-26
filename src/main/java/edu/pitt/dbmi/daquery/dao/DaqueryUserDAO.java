@@ -103,7 +103,7 @@ public class DaqueryUserDAO extends AbstractDAO {
     {
     	try {
     		DaqueryUser currentUser = queryUserByID(uuid);
-    		return UserStatus.PWD_EXPIRED == UserStatus.fromInt(currentUser.getStatus());
+    		return UserStatus.PWD_EXPIRED == UserStatus.valueOf(currentUser.getStatus());
         } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
@@ -127,7 +127,7 @@ public class DaqueryUserDAO extends AbstractDAO {
     {
     	try {
     		DaqueryUser currentUser = queryUserByID(uuid);
-    		return UserStatus.DISABLED == UserStatus.fromInt(currentUser.getStatus());
+    		return UserStatus.DISABLED == UserStatus.valueOf(currentUser.getStatus());
         } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
@@ -193,7 +193,7 @@ public class DaqueryUserDAO extends AbstractDAO {
     	try {
 
     		DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
-    		return UserStatus.ACTIVE == UserStatus.fromInt(user.getStatus());
+    		return UserStatus.ACTIVE == UserStatus.valueOf(user.getStatus());
 	    
         } catch (HibernateException pe) {
     		logger.info("Error unable to connect to database.  Please check database settings.");

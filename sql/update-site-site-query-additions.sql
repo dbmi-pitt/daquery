@@ -1,6 +1,11 @@
+update site set TYPE = null;
+alter table site drop column TYPE;
+update site set status = null;
+alter table site drop column status;
 alter table site add column ACCESS_KEY varchar(500); 
 alter table site add column COMM_ENC_KEY  varchar(1024);
-alter table site add column ENC_TYPE int; 
+alter table site add column ENC_TYPE varchar(50);
+alter table site add column STATUS varchar(50); 
 
 update network set DATABASE_URL = null;
 update network set DATABASE_PASSWORD = null;
@@ -59,13 +64,14 @@ CREATE TABLE INCOMING_QUERY_SITES
 )
 ;
 
-update site set TYPE = null;
-alter table site drop column TYPE;
 
 drop table inbound_query;
 drop table outbound_query;
 
 rename table site_user to dq_user;
+update site set status = null;
+alter table dq_user drop column status;
+alter table dq_user add column STATUS varchar(50); 
 
 INSERT INTO ROLE (NAME) VALUES ('admin'), ('steward'), ('viewer');
 

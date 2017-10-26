@@ -12,6 +12,7 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.domain.*;
+import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 /**
  * Populate the database with some dev data in a Hibernatey kind of way..
@@ -22,6 +23,51 @@ public class PopulateDevData
 	public static void main(String [] args)
 	{
 		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		int exitCode = createInquiryData();
+		System.exit(exitCode);
+	}
+	
+	private static int createInquiryData()
+	{
+		Session session = null;
+		Transaction t = null;		
+		SQLQuery sqlQ = new SQLQuery();
+		sqlQ.setVersion(1);
+
+		DaqueryUser user = new DaqueryUser();
+		user.setEmail("blech@somewhere.com");
+		user.setRealName("Joe Schmoe");
+
+		try
+		{
+			session = HibernateConfiguration.openSession();
+			t = session.beginTransaction();
+			session.save(user);
+			String uid = user.getId();
+			t.commit();
+			session.close();
+
+			session = HibernateConfiguration.openSession();
+			t = session.beginTransaction();
+			DaqueryUser u2 = (DaqueryUser) session.get(DaqueryUser.class, uid);
+			sqlQ.setRequester(u2);
+			session.save(sqlQ);
+			t.commit();
+			return(0);
+		}
+		catch(Throwable tr)
+		{
+			if(t != null) t.rollback();
+			tr.printStackTrace();
+			return(1);
+		}
+		finally
+		{
+			if(session != null) session.close();
+		}
+	}
+	private static void createNetAndSiteData()
+	{
 		String dbURL = PrivateProps.getProps().getProperty("cdm.url");
 		String dbUsername = PrivateProps.getProps().getProperty("cdm.username");
 		String dbPassword = PrivateProps.getProps().getProperty("cdm.password");

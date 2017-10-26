@@ -22,7 +22,7 @@ CREATE TABLE "APP"."DQ_USER"
    EMAIL varchar(100),
    PASSWORD varchar(100),
    REAL_NAME varchar(100),
-   STATUS int
+   STATUS varchar(50)
 )
 ;
 
@@ -49,12 +49,12 @@ CREATE TABLE "APP"."SITE"
    NETWORK_ID bigint,
    URL varchar(500),
    ADMIN_EMAIL varchar(500),
-   STATUS int,
+   STATUS varchar(50),
    REQUEST_SENT timestamp,
    REQUEST_REPLIED timestamp,
    ACCESS_KEY varchar(500),
    COMM_ENC_KEY  varchar(1024),
-   ENC_TYPE int 
+   ENC_TYPE varchar(50) 
 )
 ;
 
@@ -62,7 +62,7 @@ CREATE TABLE DATA_SOURCE
 (
    DS_ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    NAME varchar(50) NOT NULL,
-   DTYPE int
+   DTYPE varchar(50)
 )
 ;
 
@@ -113,5 +113,19 @@ create table property
 
 INSERT INTO ROLE (NAME) VALUES ('admin'), ('steward'), ('viewer');
 
+CREATE TABLE INQUIRY
+(
+   ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+   INQUIRY_ID varchar(50),
+   VERSION int,
+   REQUESTER_ID varchar(50),
+   INQUIRY_TYPE varchar(50)
+)
+;
 
-
+CREATE TABLE SQL_QUERY
+(
+   INQ_ID bigint NOT NULL,
+   SQL_CODE varchar(32000)
+)
+;
