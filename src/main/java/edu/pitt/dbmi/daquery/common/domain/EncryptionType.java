@@ -2,26 +2,18 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 public enum EncryptionType
 {
-	PRVT_PUBLIC(1), SHRINE(2), NONE(3);
+	PRIVATE_PUBLIC("PRIVATE_PUBLIC"), SHRINE("SHRINE"), NONE("NONE");
 	
-	int intValue = 0;
-	EncryptionType(int val)
+	String val = null;
+	EncryptionType(String val)
 	{
-		intValue = val;
+		this.val = val;
 	}
 	
-	public int getValue()
+	public String toString()
 	{
-		return(intValue);
+		return(val);
 	}
 	
-	public static EncryptionType fromInt(int val)
-	{
-		for(EncryptionType st : values())
-		{
-			if(val == st.intValue)
-				return(st);
-		}
-		return(null);
-	}
+
 }

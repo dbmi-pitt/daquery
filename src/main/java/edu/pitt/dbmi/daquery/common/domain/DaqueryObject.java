@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 
 import javax.json.JsonValue;
@@ -27,7 +28,9 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
 //by trying to serialize all the nested objects.  The @Expose annotation
 //should be used to exclude nested objects that reference one another
 //and cause circular references within the JSON.
-public abstract class DaqueryObject {
+public abstract class DaqueryObject implements Serializable{
+	
+	private static final long serialVersionUID = 29220787101312l;
 	
 	public String toJson() {
         Gson gson = new GsonBuilder()

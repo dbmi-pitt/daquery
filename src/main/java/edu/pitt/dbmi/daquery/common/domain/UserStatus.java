@@ -2,26 +2,17 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 
 public enum UserStatus {
-	ACTIVE(1), DISABLED(2), PWD_EXPIRED(3);
+	ACTIVE("ACTIVE"), DISABLED("DISABLED"), PWD_EXPIRED("PWD_EXPIRED");
 	
-	int intValue = 0;
-	UserStatus(int val)
+	String value = null;
+	UserStatus(String val)
 	{
-		intValue = val;
+		value = val;
 	}
 	
-	public int getValue()
+	@Override
+	public String toString()
 	{
-		return(intValue);
-	}
-	
-	public static UserStatus fromInt(int val)
-	{
-		for(UserStatus st : values())
-		{
-			if(val == st.intValue)
-				return(st);
-		}
-		return(null);
+		return(value);
 	}
 }

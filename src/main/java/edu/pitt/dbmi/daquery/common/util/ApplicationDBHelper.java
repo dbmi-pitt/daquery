@@ -137,7 +137,11 @@ public class ApplicationDBHelper
 	            	if(l2.endsWith(";"))
 	            		l2 = l2.substring(0, l2.length() - 1);
 	                try{st.execute(l2);}
-	                catch(Throwable t){System.err.println("Error executing the following DDL \n" + l2); t.printStackTrace();}
+	                catch(Throwable t)
+	                {
+	                	System.err.println("Error executing the following DDL \n" + l2); t.printStackTrace();
+	                	throw t;  //Eclipse reports a resource leak here, but this isn't true it is handled in the finally clause below
+	                }                
 	            }
 	        }
 	        return(true);
