@@ -7,7 +7,9 @@ import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -32,6 +34,9 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 	@Column(nullable=false, length=50)
 	protected String name;
 
+	//bi-directional many-to-many association to User
+	@ManyToMany(mappedBy="dataSources")
+	private Set<Network> networks;
 
 	
 	public DataSource() {
@@ -52,6 +57,14 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public Set<Network> getNetworks(){
+		return this.networks;
+	}
+	
+	public void setNetworks(Set<Network> networks) {
+		this.networks = networks;
 	}
 
 

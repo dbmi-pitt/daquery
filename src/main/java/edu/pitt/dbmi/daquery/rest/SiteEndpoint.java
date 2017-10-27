@@ -8,8 +8,10 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.transaction.Transactional;
@@ -31,6 +33,10 @@ import javax.ws.rs.core.UriInfo;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
+import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
+import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
@@ -107,11 +113,6 @@ public class SiteEndpoint extends AbstractEndpoint {
         }
     }
 
-	@GET
-    @Path("/available")
-    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     /**
      * This method returns all the sites found in the database.
      * example URL: daquery-ws/ws/sites/available?network_id=1
@@ -121,6 +122,11 @@ public class SiteEndpoint extends AbstractEndpoint {
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
+	@GET
+    @Path("/available")
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getAvailableSites(@QueryParam("network_id") long networkId) {
     	
     	try {
@@ -131,16 +137,46 @@ public class SiteEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
+            Map<String, String> idParam = new HashMap<String, String>();
+			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
+			Response resp = DaqueryEndpoint.callCentralServer("availableNetworks",  idParam);
+			Network network = NetworkDAO.queryNetwork(String.valueOf(networkId));
+			
+			if(resp.getStatus() == 200)
+			{
+				String json = resp.readEntity(String.class);
+				NetworkInfo[] ninfo = JSONHelper.gson.fromJson(json, NetworkInfo[].class);
+				NetworkInfo network_info = null;
+				for(NetworkInfo nin : ninfo) {
+					if(nin.id.equals(network.getNetworkId()))
+						network_info = nin;
+				}
+				
+				SiteInfo si = null;
+				for(SiteInfo sin : network_info.allowedSites) {
+					if(sin.id.equals(AppProperties.getDBProperty("site.id")))
+						si = sin;
+				}
+				
+				network_info.allowedSites.remove(si);
+				
+				List<SiteInfo> rlist = new ArrayList<>();
+				for(SiteInfo s : network_info.allowedSites)
+					rlist.add(s);
+				return(ResponseHelper.getJsonResponseGen(200, rlist));
+			} else {
+				return(resp);
+			}
             // Faking return here. Suppose get all available sites within Network for netword_id from Daquery-Central 
-            List<Site> site_list = new ArrayList<>();
-            site_list.add(new Site("fakeSite1", "url", "fakeSite1@pitt.edu"));
-            
-            if (site_list == null || site_list.size() == 0) {
-                return Response.status(NOT_FOUND).build();
-            }
-
-            String jsonString = toJsonArray(site_list);
-            return Response.ok(200).entity(jsonString).build();
+//            List<Site> site_list = new ArrayList<>();
+//            site_list.add(new Site("fakeSite1", "url", "fakeSite1@pitt.edu"));
+//            
+//            if (site_list == null || site_list.size() == 0) {
+//                return Response.status(NOT_FOUND).build();
+//            }
+//
+//            String jsonString = toJsonArray(site_list);
+//            return Response.ok(200).entity(jsonString).build();
 
     	} catch (HibernateException he) {
     		return Response.status(INTERNAL_SERVER_ERROR).build();
