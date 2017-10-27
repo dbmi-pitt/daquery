@@ -6,11 +6,13 @@ import java.util.HashMap;
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
+import edu.pitt.dbmi.daquery.domain.DataSource;
 import edu.pitt.dbmi.daquery.domain.Network;
 
 
@@ -62,7 +64,7 @@ public class NetworkDAO extends AbstractDAO {
             
     }
 	
-    public static Network createNetwork(HashMap<String, String> params) throws Exception {
+    public static Network createNetwork(HashMap<String, String> params, Set<DataSource> dsSet) throws Exception {
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
@@ -73,6 +75,7 @@ public class NetworkDAO extends AbstractDAO {
     		network.setName(params.get("name"));
     		network.setNetworkId(params.get("id"));
     		network.setData_model(params.get("data_model"));
+    		network.setDataSources(dsSet);
     		
     		s.persist(network);
     		s.getTransaction().commit();
