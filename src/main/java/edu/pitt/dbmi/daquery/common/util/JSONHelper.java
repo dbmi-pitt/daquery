@@ -61,7 +61,7 @@ public class JSONHelper
 	        		if(obj instanceof DaqueryObject)
 	        			rJson = rJson + comma + "\"" + (String) key + "\":" + ((DaqueryObject) obj).toJson();
 	        		else if(obj instanceof List)
-	        			rJson = rJson + "\"" + comma + (String) key + "\":" + toJSON(obj);
+	        			rJson = rJson + comma + "\"" + (String) key + "\":" + toJSON(obj);
 	        		else
 	        			rJson = rJson + comma + "\"" + (String) key + "\":" + jsonValue(obj);
 
