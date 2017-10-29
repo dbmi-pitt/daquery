@@ -216,7 +216,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
 			    	addtionalVal.put("user", currentUser);
-			    	return(ResponseHelper.getTokenResponse(200, null, adminEmail, uriInfo, addtionalVal));
+			    	return(ResponseHelper.getTokenResponse(200, null, currentUser.getId(), uriInfo, addtionalVal));
 				}
 				else
 					return(ResponseHelper.getBasicResponse(500, "An error occured while initializing the application database. Check the application logs for more information."));
@@ -250,7 +250,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		}
 	}
 	
-	private static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
+	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
 		String siteId = AppProperties.getDBProperty("site.id");
 		String siteKey = AppProperties.getDBProperty("central.site.key");

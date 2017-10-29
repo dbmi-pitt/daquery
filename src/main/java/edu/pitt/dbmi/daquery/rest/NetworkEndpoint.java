@@ -7,8 +7,10 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.persistence.NoResultException;
@@ -29,7 +31,10 @@ import javax.ws.rs.core.UriInfo;
 import org.hibernate.HibernateException;
 
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
+import edu.pitt.dbmi.daquery.domain.DataSource;
 import edu.pitt.dbmi.daquery.domain.Network;
+import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 
 
 @Path("/networks")
@@ -145,13 +150,27 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            HashMap<String, String> params = new HashMap<>();
-            params.put("id", ((LinkedHashMap<?, ?>)payload.get("network")).get("id").toString());
-            params.put("name", ((LinkedHashMap<?, ?>)payload.get("network")).get("name").toString());
-            params.put("data_model", ((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
+            HashMap<String, String> network_params = new HashMap<>();
+            network_params.put("id", ((LinkedHashMap<?, ?>)payload.get("network")).get("id").toString());
+            network_params.put("name", ((LinkedHashMap<?, ?>)payload.get("network")).get("name").toString());
+            network_params.put("data_model", ((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
             
+            HashMap<String, String> sqldatasource_params = new HashMap<>();
+            sqldatasource_params.put("url", ((LinkedHashMap<?, ?>)payload.get("form")).get("url").toString());
+            sqldatasource_params.put("name", network_params.get("name") + "_datasource");
+            sqldatasource_params.put("username", ((LinkedHashMap<?, ?>)payload.get("form")).get("username").toString());
+            sqldatasource_params.put("password", ((LinkedHashMap<?, ?>)payload.get("form")).get("password").toString());
             
-            Network network = NetworkDAO.createNetwork(params);
+            //SQLDataSource sqlDataSource = SQLDataSourceDAO.createSQLDataSource(sqldatasource_params);
+            SQLDataSource sqlDataSource = new SQLDataSource();
+            sqlDataSource.setConnectionUrl(sqldatasource_params.get("url"));
+            sqlDataSource.setName(sqldatasource_params.get("name"));
+            sqlDataSource.setUsername(sqldatasource_params.get("username"));
+            sqlDataSource.setPassword(sqldatasource_params.get("password"));
+            
+            Set<DataSource> dsset = new HashSet<DataSource>();
+            dsset.add(sqlDataSource);
+            Network network = NetworkDAO.createNetwork(network_params, dsset);
             
             String json = network.toJson();
 

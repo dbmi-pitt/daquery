@@ -40,5 +40,5 @@ public class SQLDataSource extends DataSource
 	public void setUsername(String uName){username = uName;}
 	
 	public String getPassword(){return(password);}
-	public void setPassord(String pwd){password = pwd;}	
+	public void setPassword(String pwd){password = pwd;}	
 }
