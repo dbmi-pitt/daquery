@@ -1,29 +1,22 @@
 package edu.pitt.dbmi.daquery.domain;
 
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.GenericGenerator;
-
-import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 
 @NamedQueries({
@@ -38,8 +31,8 @@ import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 
 
 @Entity
-@Table(name = "DQ_USER")
-public class DaqueryUser extends DaqueryObject {
+@DiscriminatorValue("FULL")  
+public class DaqueryUser extends UserInfo {
 
 	private static final long serialVersionUID = 29290820752342l;
 	
@@ -59,17 +52,6 @@ public class DaqueryUser extends DaqueryObject {
     // ======================================
     // =             Attributes             =
     // ======================================
-
-    @Expose
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "ID", unique = true, length=50)
-    private String id;
-    
-    @Expose
-	@Column(name="REAL_NAME", length=100)
-	private String realName;
     
     @Expose
     @Column(name="USERNAME", unique = true, length = 500, nullable = false)
@@ -87,10 +69,6 @@ public class DaqueryUser extends DaqueryObject {
     @Expose
     @Column(name="STATUS")
     private String status;
-
-    @Expose
-    @Column(name="EMAIL", length = 500, nullable = true)
-    private String email;
     
     //TODO: determine if this should be transient or if
     //we want DaqueryUser to manage its user role updates (we could manage it separately)
@@ -132,27 +110,6 @@ public class DaqueryUser extends DaqueryObject {
     }
     
 
-    // ======================================
-    // =          Getters & Setters         =
-    // ======================================
-
-    public String getId() {
-    	if(id == null) return(null);
-        return id.trim();
-    }
-
-    public void setId(String id) {
-    	if(id == null) this.id = null;
-        this.id = id.trim();
-    }
-
-	public String getRealName() {
-		return this.realName;
-	}
-
-	public void setRealName(String realName) {
-		this.realName = realName;
-	}
 
     public String getUsername() {
         return this.username;
@@ -160,14 +117,6 @@ public class DaqueryUser extends DaqueryObject {
 
     public void setUsername(String login) {
         this.username = login;
-    }
-    
-    public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPassword() {
@@ -226,36 +175,13 @@ public class DaqueryUser extends DaqueryObject {
 		this.roles = roles;
 	}
 
-    
-    // ======================================
-    // =   Methods hash, equals, toString   =
-    // ======================================
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DaqueryUser user = (DaqueryUser) o;
-        return Objects.equals(id, user.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
     //TODO: Add loop to print out the roles, queries, etc.
     @Override
     public String toString() {
-    	String passwordSet = "blank password";
-        if (this.isPasswordSet()) {
-        	passwordSet = "password is set"; 
-        }
         return "User{" +
                 "id='" + id + '\'' +
                 ", realName='" + realName + '\'' +
                  ", login='" + username + '\'' +
-                ", password='" + passwordSet + '\'' +
                 '}';
     }
     

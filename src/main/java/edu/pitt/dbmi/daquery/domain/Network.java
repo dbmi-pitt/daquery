@@ -39,8 +39,6 @@ public class Network extends DaqueryObject implements Serializable {
 	private long id;
     
 	@Expose
-//    @GeneratedValue(generator = "uuid")
-//    @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "NETWORK_ID", unique = true, length=50)
 	private String networkId;
 
@@ -66,7 +64,16 @@ public class Network extends DaqueryObject implements Serializable {
 	@JoinTable(name = "SOURCE_TO_NETWORK", joinColumns = { @JoinColumn(name = "NETWORK_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATA_SOURCE_ID") })
 	private Set<DataSource> dataSources;
 
+	@Expose
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable(name = "OUTGOING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
+	private Set<Site> outgoingRequests;
 
+	@Expose
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable(name = "INCOMING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
+	private Set<Site> incomingRequests;
+	
 	public Network(){}
 	
 	public Network(String newName) {

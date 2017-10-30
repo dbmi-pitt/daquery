@@ -22,7 +22,8 @@ CREATE TABLE "APP"."DQ_USER"
    EMAIL varchar(100),
    PASSWORD varchar(100),
    REAL_NAME varchar(100),
-   STATUS varchar(50)
+   STATUS varchar(50),
+   UTYPE varchar(4)
 )
 ;
 
@@ -103,6 +104,21 @@ CREATE TABLE INCOMING_QUERY_SITES
 )
 ;
 
+CREATE TABLE OUTGOING_REQUESTS
+(
+	REQUEST_ID bigint not NULL,
+	NETWORK_ID bigint not NULL
+)
+;
+
+CREATE TABLE INCOMING_REQUESTS
+(
+	REQUEST_ID bigint not NULL,
+	NETWORK_ID bigint not NULL
+)
+;
+
+
 create table property
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
@@ -123,9 +139,34 @@ CREATE TABLE INQUIRY
 )
 ;
 
+CREATE TABLE INQUIRY_RESPONSE
+(
+   ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+   RECEIVED_TIMESTAMP timestamp,
+   STATUS varchar(50),
+   RESPONSE_VALUE varchar(1024),
+   SITE_ID varchar(50)
+
+)
+;
+
 CREATE TABLE SQL_QUERY
 (
    INQ_ID bigint NOT NULL,
-   SQL_CODE varchar(32000)
+   SQL_CODE varchar(32000),   
+)
+;
+
+CREATE TABLE FILESET
+(
+   ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+   ISSUE_ID bigint
+)
+;
+
+CREATE TABLE FILEPATH
+(
+	fileset_id bigint,
+	path varchar(3000)
 )
 ;

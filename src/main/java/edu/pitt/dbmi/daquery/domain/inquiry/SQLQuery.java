@@ -16,4 +16,16 @@ public class SQLQuery extends Inquiry
 	
 	@Column(name = "SQL_CODE")
 	private String sqlCode;
+	
+	@Column(name = "SQL_DIALECT")
+	private String sqlDialect;
+	
+	public SQLDialect getSQLDialectEnum()
+	{
+		return(SQLDialect.valueOf(sqlDialect));
+	}
+	public void setSQLDialect(SQLDialect dialect)
+	{
+		sqlDialect = dialect.toString();
+	}
 }

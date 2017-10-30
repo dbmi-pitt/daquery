@@ -2,10 +2,51 @@ package edu.pitt.dbmi.daquery.domain.inquiry;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import com.google.gson.annotations.Expose;
+
+import edu.pitt.dbmi.daquery.domain.Site;
+import edu.pitt.dbmi.daquery.domain.UserInfo;
+
 public class InquiryResponse
 {
-	private Date receiveDate;
+    @Expose
+    @Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name = "ID", unique=true, nullable=false)
+	private long id;
+    
+    @Expose
+    @Temporal(TemporalType.TIMESTAMP)	
+	@Column(name="RECEIVED_TIMESTAMP")    
+	private Date receivedTimestamp;
+    
+	private String status;
 	
-	//int value of an InquiryStatus enum
-	private int status;
+	@Column(name="RESPONSE_VALUE")
+	private String value;
+	
+    @OneToOne
+    @JoinColumn(name="USER_ID")
+	private UserInfo responder;
+    
+    @OneToMany(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
+	@JoinColumn(name="issue_id", nullable=false)
+	private Fileset files;
+
+    @OneToOne
+    @JoinColumn(name="SITE_ID")
+	private Site site;
+	
 }
