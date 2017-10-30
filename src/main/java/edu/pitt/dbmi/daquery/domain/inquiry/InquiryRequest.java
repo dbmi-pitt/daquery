@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.domain.inquiry;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -9,12 +10,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Site;
 
@@ -56,19 +59,40 @@ public class InquiryRequest
 	private String direction;
 
     @Expose
+    @ManyToOne(fetch=FetchType.EAGER)
     private Inquiry inquiry;
     
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "RESPONSE_ID", nullable = false)
+	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="request")
 	private InquiryResponse response;
+		
+	public long getId(){return(id);}
+	public void setId(long id){this.id = id;}
 	
-	public RequestDirection getDirectionEnum()
-	{
-		return(RequestDirection.valueOf(direction));
-	}
-	public void setDirectionEnum(RequestDirection dir)
-	{
-		direction = direction.toString();
-	}
+	public String getRequestId(){return(requestId);}
+	public void setRequestId(String id){requestId = id;}
 	
+	public Site getRequestSite(){return(requestSite);}
+	public void setRequestSite(Site site){requestSite = site;}
+	
+	public String getRequestSiteId(){return(requestSiteId);}
+	public void setRequestSiteId(String id)throws DaqueryException{ throw new DaqueryException("InquiryRequest.requestSiteId is obtained from the requestSite field and cannot be set.");}
+	
+	public Date getSentTimestamp(){return(sentTimestamp);}
+	public void setSentTimestamp(Date timestamp){sentTimestamp = timestamp;}
+	
+	public DaqueryUser getRequester(){return(requester);}
+	public void setRequester(DaqueryUser user){requester = user;}
+	
+	public String getDirection(){return(direction);}
+	public void setDirection(String direction){this.direction = direction;}
+	
+	public Inquiry getInquiry(){return(inquiry);}
+	public void setInquiry(Inquiry inq){inquiry = inq;}
+	
+	public InquiryResponse getResponse(){return(response);}
+	public void setResponse(InquiryResponse resp){response = resp;}
+	
+	public RequestDirection getDirectionEnum(){return(RequestDirection.valueOf(direction));}
+	public void setDirectionEnum(RequestDirection dir){direction = direction.toString();}
+
 }

@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -41,12 +42,14 @@ public class InquiryResponse
     @JoinColumn(name="USER_ID")
 	private UserInfo responder;
     
-    @OneToMany(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
-	@JoinColumn(name="issue_id", nullable=false)
+    @OneToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
+	@JoinColumn(name="fileset_id", nullable=false)
 	private Fileset files;
 
     @OneToOne
     @JoinColumn(name="SITE_ID")
 	private Site site;
 	
+    @ManyToOne(fetch=FetchType.EAGER)
+    private InquiryRequest request;
 }

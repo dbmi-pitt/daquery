@@ -1,11 +1,14 @@
 package edu.pitt.dbmi.daquery.domain.inquiry;
 
 import java.io.Serializable;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,11 +16,13 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 
 @Entity
@@ -41,15 +46,15 @@ public abstract class Inquiry implements Serializable
 	private String inquiryId;
 	
 	@Expose
-	private int version;
-	
-	private DaqueryUser requester;
-		
-	@Expose
-	private String requesterId;
+	private int version;	
 	
 	@Expose
 	protected String dataType;
+	
+	protected Set<InquiryRequest> requests;
+	
+	@Expose
+	protected DaqueryUser author;
 	
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -61,30 +66,30 @@ public abstract class Inquiry implements Serializable
 	public String getInquiryId(){return(inquiryId);}
 	public void setInquiryId(String id){inquiryId = id;}	
 	
-	@Transient
-	public String getRequesterId(){return(requesterId);}
-	public void setRequesterId(String id){requesterId = id;}
-	
 	public int getVersion(){return(version);}
 	public void setVersion(int vers){version = vers;}
 	
-	@ManyToOne
-	@JoinColumn(name="REQUESTER_ID")
-	public DaqueryUser getRequester(){return(requester);}
-	public void setRequester(DaqueryUser user)
-	{
-		this.requester = user;
-		requesterId = user.getId();
-	}
-	
-
 	@Column(name="INQUIRY_TYPE", insertable = false, updatable = false)
 	public String getDataType(){return(dataType);}
-	public void setDataType(String type){dataType = type;}
+	public void setDataType(String type) throws DaqueryException
+	{
+		throw new DaqueryException("Inquiry.dataType is automatically set.");
+	}
 	
 	@Transient
 	public InquiryType getDataTypeEnum()
 	{
 		return(InquiryType.valueOf(dataType));
-	}	
+	}
+	
+	@OneToMany(fetch = FetchType.EAGER,cascade=CascadeType.ALL, mappedBy="inquiry")
+	public Set<InquiryRequest> getRequests(){return(requests);}
+	public void setRequests(Set<InquiryRequest> reqs){requests = reqs;}
+
+	@ManyToOne
+	@JoinColumn(name="AUTHOR_ID")
+	public DaqueryUser getAuthor(){return(author);}
+	public void setAuthor(DaqueryUser auth){author = auth;}
+	
+	
 }

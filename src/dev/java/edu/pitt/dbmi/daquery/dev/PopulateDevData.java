@@ -1,5 +1,7 @@
 package edu.pitt.dbmi.daquery.dev;
 
+import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,10 +10,15 @@ import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.domain.EncryptionType;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
+import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.domain.*;
+import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.RequestDirection;
+import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 /**
@@ -23,20 +30,42 @@ public class PopulateDevData
 	public static void main(String [] args)
 	{
 		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		int exitCode = createInquiryData();
-		System.exit(exitCode);
+		assembleRequest();
+		System.exit(0);
 	}
 	
-	private static int createInquiryData()
+	private static void assembleRequest()
 	{
-		Session session = null;
-		Transaction t = null;		
+		Network net = createNetAndSiteData();
+		DaqueryUser user = createTestUser();
+		net = (Network) save(net);
+		user = (DaqueryUser) save(user);
+		Inquiry inq = createInquiryData(user);
+		inq = (Inquiry) save(inq);
+		createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
+	}
+	
+	private static InquiryRequest createOutgoingRequest(Inquiry inquiry, DaqueryUser requester, Site requestSite)
+	{
+		InquiryRequest req = new InquiryRequest();
+		req.setDirectionEnum(RequestDirection.OUT);
+		req.setInquiry(inquiry);
+		req.setRequester(requester);
+		req.setRequestSite(requestSite);
+		req.setSentTimestamp(new Date());
+		return(req);
+	}
+	
+	private static Inquiry createInquiryData(DaqueryUser author)
+	{
 		SQLQuery sqlQ = new SQLQuery();
 		sqlQ.setVersion(1);
-
-		DaqueryUser user = new DaqueryUser();
-		user.setEmail("blech@somewhere.com");
-		user.setRealName("Joe Schmoe");
+		sqlQ.setAuthor(author);
+		sqlQ.setSQLDialect(SQLDialect.ORACLE);
+		return(sqlQ);
+		
+		
+/*		
 
 		try
 		{
@@ -50,7 +79,7 @@ public class PopulateDevData
 			session = HibernateConfiguration.openSession();
 			t = session.beginTransaction();
 			DaqueryUser u2 = (DaqueryUser) session.get(DaqueryUser.class, uid);
-			sqlQ.setRequester(u2);
+			sqlQ.setAuthor(u2);
 			session.save(sqlQ);
 			t.commit();
 			return(0);
@@ -64,9 +93,18 @@ public class PopulateDevData
 		finally
 		{
 			if(session != null) session.close();
-		}
+		} */
 	}
-	private static void createNetAndSiteData()
+	private static DaqueryUser createTestUser()
+	{
+		DaqueryUser user = new DaqueryUser();
+		user.setEmail("tester@somewhere.com");
+		user.setRealName("Test User");
+		user.setStatusEnum(UserStatus.ACTIVE);
+		user.setUsername("tester");
+		return(user);
+	}
+	private static Network createNetAndSiteData()
 	{
 		String dbURL = PrivateProps.getProps().getProperty("cdm.url");
 		String dbUsername = PrivateProps.getProps().getProperty("cdm.username");
@@ -104,6 +142,12 @@ public class PopulateDevData
 		dataSources.add(sqlDS);
 		net.setDataSources(dataSources);
 		
+		return(net);
+		
+	}
+	
+	private static Serializable save(Object obj)
+	{
 		Session session = null;
 		Transaction t = null;
 		int exitCode = 0;
@@ -111,22 +155,19 @@ public class PopulateDevData
 		{
 			session = HibernateConfiguration.openSession();
 			t = session.beginTransaction();
-			session.save(net);
+			Serializable rval = session.save(obj);
 			t.commit();
+			return(rval);
 		}
 		catch(Throwable tr)
 		{
 			if(t != null) t.rollback();
 			tr.printStackTrace();
-			exitCode = 1;
+			return(null);
 		}
 		finally
 		{
 			if(session != null) session.close();
-			System.exit(exitCode);
 		}
-		
 	}
-	
-
 }
