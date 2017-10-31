@@ -44,4 +44,23 @@ public class StringHelper
 		}
 		return(tPath);
 	}
+	
+	public static boolean isBlank(String val)
+	{
+		if(val == null || val.trim().equals(""))
+			return(true);
+		else
+			return(false);
+	}
+	
+	public static boolean stringToBool(String val)
+	{
+		if(isBlank(val))
+			return(false);
+		String yn = val.trim().toUpperCase();
+		if(yn.equals("YES") || yn.equals("TRUE"))
+			return(true);
+		else
+			return(false);
+	}
 }

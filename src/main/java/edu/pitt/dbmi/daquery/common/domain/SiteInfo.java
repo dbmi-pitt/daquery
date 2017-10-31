@@ -18,6 +18,8 @@ public class SiteInfo extends DaqueryObject
 	@Expose
 	public String siteURL;
 	@Expose
+	public String adminEmail;
+	@Expose
 	public boolean emailAccess;
 
 	public SiteInfo(){}
@@ -28,5 +30,6 @@ public class SiteInfo extends DaqueryObject
 		siteName = rs.getString("name");
 		emailAccess = rs.getBoolean("email_access");
 		siteURL = rs.getString("site_url");
+		adminEmail = rs.getString("admin_email");
 	}
 }
