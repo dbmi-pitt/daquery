@@ -1,6 +1,9 @@
 package edu.pitt.dbmi.daquery.central.service;
 
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -11,6 +14,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -19,9 +24,13 @@ import javax.ws.rs.core.UriInfo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import edu.pitt.dbmi.daquery.central.ConnectionRequest;
+import edu.pitt.dbmi.daquery.central.ExtendedSiteInfo;
 import edu.pitt.dbmi.daquery.central.util.DBHelper;
 import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
+import edu.pitt.dbmi.daquery.central.util.EmailHelper;
 import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
+import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
@@ -113,6 +122,46 @@ public class CentralService{
 		catch(Throwable t)
 		{
 			String msg = "An error occurred while looking up allowed networks for site with id:" + siteId;
+			log.log(Level.SEVERE, msg, t);
+			return(ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
+		}
+	}
+	
+	
+	/**
+	 * Site request to connect to another site
+	 * @params network-id: "fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823"
+	 * @param from-site-id: "20b23b5c-61ad-44eb-8eef-886adcced18e"
+	 * @param to-site-id: "0f2378ec-d9ce-489a-b338-c8f82e567f40"
+	 * @return 200 with info specified above, 401 if authentication fails or 400/500 on error.
+	 */
+	@GET
+	@Path("requestConnection")
+	@Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+	public Response requestConnection(@QueryParam("network-id") String networkId,
+									  @QueryParam("from-site-id") String fromSiteId, 
+									  @QueryParam("to-site-id") String toSiteId) {
+		try
+		{
+			// create connection request
+			ConnectionRequest cr = DBHelper.getConnectionRequest(networkId, fromSiteId, toSiteId);
+			if(cr != null)
+				return(ResponseHelper.getBasicResponse(500, "Connection Request is already existed."));
+			
+			ExtendedSiteInfo esi = DBHelper.getExtendedSiteInfo(toSiteId);
+			// send email to toSite admin
+			if(DBHelper.createConnectionRequest(cr)) {
+				EmailHelper eh = new EmailHelper();
+				eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", esi.adminEmail);
+				return Response.ok(200).build();
+			} else {
+				return Response.status(INTERNAL_SERVER_ERROR).build();	   
+			}
+		}
+		catch(Throwable t)
+		{
+			String msg = "An error occurred while create connection request with network_id:" + networkId + " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
 			return(ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
 		}

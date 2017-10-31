@@ -1,6 +1,6 @@
-insert into site (id, name, access_key, tempkey, site_url, email_access) values ('20b23b5c-61ad-44eb-8eef-886adcced18e', 'bill-dev', 'abc123', true, 'http://shirey-dt-032.dbmi.pitt.edu:8080/', true);
-insert into site (id, name, access_key, tempkey, site_url, email_access) values ('0f2378ec-d9ce-489a-b338-c8f82e567f40', 'chuck-dev', '123abc', true, 'http://borromeo-lp.dbmi.pitt.edu:8080/', true);
-insert into site (id, name, access_key, tempkey, site_url, email_access) values ('bcfdd450-3dd8-4ced-9599-c65de7c9f115', 'desheng-dev', 'xyz789', true, 'http://del20-dt.univ.pitt.edu:8080/', true);
+insert into site (id, name, access_key, tempkey, site_url, admin_email, email_access) values ('20b23b5c-61ad-44eb-8eef-886adcced18e', 'bill-dev', 'abc123', true, 'http://shirey-dt-032.dbmi.pitt.edu:8080/', 'shirey@pitt.edu', true);
+insert into site (id, name, access_key, tempkey, site_url, admin_email, email_access) values ('0f2378ec-d9ce-489a-b338-c8f82e567f40', 'chuck-dev', '123abc', true, 'http://borromeo-lp.dbmi.pitt.edu:8080/', 'chuck.borromeo@pitt.edu', true);
+insert into site (id, name, access_key, tempkey, site_url, admin_email, email_access) values ('bcfdd450-3dd8-4ced-9599-c65de7c9f115', 'desheng-dev', 'xyz789', true, 'http://del20-dt.univ.pitt.edu:8080/', 'del20@pitt.edu', true);
 
 insert into network(name, id, data_model) values('devALL','fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823','cdm');
 insert into network(name, id, data_model) values('devDandC','1169eae7-79ed-41e6-bb62-c86167aef92f','cdm');
@@ -19,6 +19,8 @@ insert into network_membership(id, site_id, networkId) values(7,'0f2378ec-d9ce-4
 
 insert into network_membership(id, site_id, networkId) values(8,'20b23b5c-61ad-44eb-8eef-886adcced18e','afff8323-176c-4cb0-9d2c-cccc03fff101');
 insert into network_membership(id, site_id, networkId) values(9,'bcfdd450-3dd8-4ced-9599-c65de7c9f115','afff8323-176c-4cb0-9d2c-cccc03fff101');
+
+insert into connection_request(network_id, from_site_id, to_site_id) values ('fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823', '20b23b5c-61ad-44eb-8eef-886adcced18e', 'bcfdd450-3dd8-4ced-9599-c65de7c9f115');
 
 
 

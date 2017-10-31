@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.central.util;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.pitt.dbmi.daquery.common.util.*;
+import edu.pitt.dbmi.daquery.central.ConnectionRequest;
 import edu.pitt.dbmi.daquery.central.ExtendedSiteInfo;
 import edu.pitt.dbmi.daquery.common.domain.*;
 
@@ -150,7 +152,7 @@ public class DBHelper
 	 * @return A SiteInfo object with the information for the site or a null if no record was found.
 	 * @throws DaqueryCentralException
 	 */
-	private static ExtendedSiteInfo getExtendedSiteInfo(String siteNameOrId) throws DaqueryCentralException
+	public static ExtendedSiteInfo getExtendedSiteInfo(String siteNameOrId) throws DaqueryCentralException
 	{
 		Connection conn = null;
 		Statement stat = null;
@@ -258,5 +260,63 @@ public class DBHelper
 			ApplicationDBHelper.closeConnection(conn, s, rs);
 		}
 		
+	}
+
+	/**
+	 * Get the connection request by network_id, from_site_id, to_site_id
+	 * @param networkId
+	 * @param fromSiteId
+	 * @param toSiteId
+	 * @throws DaqueryCentralException
+	 */
+	public static ConnectionRequest getConnectionRequest(String networkId, String fromSiteId, String toSiteId) throws DaqueryCentralException {
+		String sql = String.format("select id, network_id, from_site_id, to_site_id from connection_request where network_id={0} and from_site_id={1} and to_site_id={2}", networkId, fromSiteId, toSiteId);
+		Connection conn = null;
+		Statement s = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			s = conn.createStatement();
+			rs = s.executeQuery(sql);
+			if(rs.next()) {
+				return new ConnectionRequest(rs);
+			} else {
+				return null;
+			}
+		} catch (Throwable t) {
+			String msg = "An unexpected error occurred while looking up the connection request with network_id: " + networkId + " from_site_id: " + fromSiteId + " to_site_id: " + toSiteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, s, rs);
+		}
+	}
+	
+	/**
+	 * Create the connection request with network_id, from_site_id, to_site_id
+	 * @param ConnectionRequest cr
+	 * @throws DaqueryCentralException
+	 */
+	public static boolean createConnectionRequest(ConnectionRequest cr) throws DaqueryCentralException {
+		String sql = "insert into connection_request (network_id, from_site_id, to_site_id) values (?, ?, ?)";
+		Connection conn = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, cr.networkId);
+			ps.setString(2, cr.fromSiteId);
+			ps.setString(3, cr.toSiteId);
+			ps.execute();
+			
+			return true;
+		} catch(Throwable t) {
+			String msg = "An unexpected error occurred while creating the connection request with network_id: " + cr.networkId + " from_site_id: " + cr.fromSiteId + " to_site_id: " + cr.toSiteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, null, null);
+		}
 	}
 }
