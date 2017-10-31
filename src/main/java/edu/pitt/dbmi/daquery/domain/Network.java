@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
 
 import java.util.Objects;
 import java.util.Set;
@@ -67,12 +68,12 @@ public class Network extends DaqueryObject implements Serializable {
 	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "OUTGOING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
-	private Set<Site> outgoingRequests;
+	private Set<InquiryRequest> outgoingRequests;
 
 	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "INCOMING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
-	private Set<Site> incomingRequests;
+	private Set<InquiryRequest> incomingRequests;
 	
 	public Network(){}
 	
@@ -134,6 +135,12 @@ public class Network extends DaqueryObject implements Serializable {
 
 	public Set<DataSource> getDataSources(){return(dataSources);}
 	public void setDataSources(Set<DataSource> ds){dataSources = ds;}
+	
+	public Set<InquiryRequest> getOutgoingRequests(){return(outgoingRequests);}
+	public void setOutgoingRequests(Set<InquiryRequest> requests){outgoingRequests = requests;}
+	
+	public Set<InquiryRequest> getIncomingRequests(){return(incomingRequests);}
+	public void setIncomingRequests(Set<InquiryRequest> requests){incomingRequests = requests;}
 	
 /*	public List<Site> getSites() {
 		return this.sites;

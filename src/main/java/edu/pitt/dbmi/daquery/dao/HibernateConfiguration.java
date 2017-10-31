@@ -65,9 +65,9 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(Site.class);
     	hibernateConf.addAnnotatedClass(SourceType.class);
     	hibernateConf.addAnnotatedClass(SQLDataSource.class);
+    	hibernateConf.addAnnotatedClass(InquiryRequest.class);    	
     	hibernateConf.addAnnotatedClass(Inquiry.class);
     	hibernateConf.addAnnotatedClass(SQLQuery.class);
-    	hibernateConf.addAnnotatedClass(InquiryRequest.class);
     	hibernateConf.addAnnotatedClass(InquiryResponse.class);
     	hibernateConf.addAnnotatedClass(UserInfo.class);
     	hibernateConf.addAnnotatedClass(Fileset.class);

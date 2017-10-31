@@ -29,7 +29,7 @@ public class PopulateDevData
 {
 	public static void main(String [] args)
 	{
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		AppProperties.setDevHomeDir("/Users/bill/daquery-data");
 		assembleRequest();
 		System.exit(0);
 	}
@@ -38,11 +38,16 @@ public class PopulateDevData
 	{
 		Network net = createNetAndSiteData();
 		DaqueryUser user = createTestUser();
-		net = (Network) save(net);
-		user = (DaqueryUser) save(user);
+		save(net);
+		save(user);
 		Inquiry inq = createInquiryData(user);
-		inq = (Inquiry) save(inq);
-		createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
+		save(inq);
+		InquiryRequest req = createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
+		save(req);
+		Set<InquiryRequest> outgoing = new HashSet<InquiryRequest>();
+		outgoing.add(req);
+		net.setOutgoingRequests(outgoing);
+		save(net);
 	}
 	
 	private static InquiryRequest createOutgoingRequest(Inquiry inquiry, DaqueryUser requester, Site requestSite)
@@ -146,7 +151,7 @@ public class PopulateDevData
 		
 	}
 	
-	private static Serializable save(Object obj)
+	private static void save(Object obj)
 	{
 		Session session = null;
 		Transaction t = null;
@@ -155,15 +160,13 @@ public class PopulateDevData
 		{
 			session = HibernateConfiguration.openSession();
 			t = session.beginTransaction();
-			Serializable rval = session.save(obj);
+			session.saveOrUpdate(obj);
 			t.commit();
-			return(rval);
 		}
 		catch(Throwable tr)
 		{
 			if(t != null) t.rollback();
 			tr.printStackTrace();
-			return(null);
 		}
 		finally
 		{

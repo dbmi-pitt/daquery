@@ -5,6 +5,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "SQL_QUERY")
@@ -20,6 +21,7 @@ public class SQLQuery extends Inquiry
 	@Column(name = "SQL_DIALECT")
 	private String sqlDialect;
 	
+	@Transient
 	public SQLDialect getSQLDialectEnum()
 	{
 		return(SQLDialect.valueOf(sqlDialect));

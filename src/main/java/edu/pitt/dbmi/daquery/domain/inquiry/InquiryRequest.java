@@ -1,9 +1,11 @@
 package edu.pitt.dbmi.daquery.domain.inquiry;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -21,6 +24,8 @@ import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Site;
 
+@Entity
+@Table(name="INQUIRY_REQUEST")
 public class InquiryRequest
 {
     @Expose
@@ -39,7 +44,7 @@ public class InquiryRequest
     private Site requestSite;
 
     @Expose
-    @Column(name="REQUEST_SITE_ID")
+    @Column(name="REQUEST_SITE_ID", insertable = false, updatable = false)
 	private String requestSiteId;
     
     @Expose
@@ -59,11 +64,12 @@ public class InquiryRequest
 	private String direction;
 
     @Expose
-    @ManyToOne(fetch=FetchType.EAGER)
+    @ManyToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
+    @JoinColumn(name = "INQUIRY_ID")
     private Inquiry inquiry;
     
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="request")
-	private InquiryResponse response;
+	private Set<InquiryResponse> responses;
 		
 	public long getId(){return(id);}
 	public void setId(long id){this.id = id;}
@@ -89,10 +95,10 @@ public class InquiryRequest
 	public Inquiry getInquiry(){return(inquiry);}
 	public void setInquiry(Inquiry inq){inquiry = inq;}
 	
-	public InquiryResponse getResponse(){return(response);}
-	public void setResponse(InquiryResponse resp){response = resp;}
+	public Set<InquiryResponse> getResponses(){return(responses);}
+	public void setResponses(Set<InquiryResponse> resps){responses = resps;}
 	
 	public RequestDirection getDirectionEnum(){return(RequestDirection.valueOf(direction));}
-	public void setDirectionEnum(RequestDirection dir){direction = direction.toString();}
+	public void setDirectionEnum(RequestDirection dir){direction = dir.toString();}
 
 }
