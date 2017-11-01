@@ -1,6 +1,8 @@
 package edu.pitt.dbmi.daquery.common.util;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,13 +22,14 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
 public class JSONHelper
 {
-	
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"); 
     public static Gson gson = new GsonBuilder()
     		.excludeFieldsWithoutExposeAnnotation()
-            .registerTypeAdapter(DateTime.class, new JsonSerializer<DateTime>() {
+            .registerTypeAdapter(Date.class, new JsonSerializer<Date>() {
                 
-                public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
-                    return new JsonPrimitive(ISODateTimeFormat.dateTime().print(src));
+                public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext context) {
+                	return new JsonPrimitive(dateFormat.format(src));
+                	//return new JsonPrimitive(ISODateTimeFormat.dateTime().print(src));
                 }
             }).create();
 	/**

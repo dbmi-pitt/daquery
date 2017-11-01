@@ -2,11 +2,8 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-
-import javax.json.JsonValue;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,13 +29,16 @@ public abstract class DaqueryObject implements Serializable{
 	
 	private static final long serialVersionUID = 29220787101312l;
 	
+	
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"); 
 	public String toJson() {
         Gson gson = new GsonBuilder()
         		.excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(DateTime.class, new JsonSerializer<DateTime>() {
+                .registerTypeAdapter(Date.class, new JsonSerializer<Date>() {
                     
-                    public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
-                        return new JsonPrimitive(ISODateTimeFormat.dateTime().print(src));
+                    public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext context) {
+                    	return new JsonPrimitive(dateFormat.format(src));
+                        //return new JsonPrimitive(ISODateTimeFormat.dateTime().print(src));
                     }
                 }).create();
 		return StringHelper.unEscapeQuotes(gson.toJson(this));
