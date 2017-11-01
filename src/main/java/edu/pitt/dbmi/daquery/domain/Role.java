@@ -17,8 +17,12 @@ import java.util.Objects;
  */
 @Entity
 @Table(name="Role")
-@NamedQuery(name="Role.findAll", query="SELECT r FROM Role r")
+@NamedQueries({
+@NamedQuery(name=Role.FIND_ALL, query="SELECT r FROM Role r"),
+@NamedQuery(name=Role.FIND_BY_NAME, query="SELECT r FROM Role r WHERE name = :name"),
+})
 public class Role extends DaqueryObject implements Serializable {
+
 	private static final long serialVersionUID = 979278294724242L;
 	
 	public static final String AGGREGATE_QUERIER = "AGGREGATE_AUERIER";
@@ -26,7 +30,11 @@ public class Role extends DaqueryObject implements Serializable {
 	public static final String ADMIN = "ADMIN";
 	public static final String STEWARD = "STEWARD";
 	public static final String VIEWER = "VIEWER";
-	
+
+	public static final String FIND_ALL = "Role.findAll";
+	public static final String FIND_BY_NAME = "Role.findByName";
+
+
 	@Expose
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)

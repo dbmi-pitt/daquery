@@ -27,7 +27,7 @@ public class DaqueryBaseTest {
 
         String basePath = System.getProperty("server.base");
         if(basePath==null){
-            basePath = "/daquery-ws/ws/";
+            basePath = "/daquery/ws/";
         }
         RestAssured.basePath = basePath;
 
