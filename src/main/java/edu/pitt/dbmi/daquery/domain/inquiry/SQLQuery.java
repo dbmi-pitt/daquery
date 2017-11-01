@@ -47,6 +47,7 @@ public class SQLQuery extends Inquiry
 	public String getSQLCode(){return(sqlcode);}
 	public void setSQLCode(String code){sqlcode = code;}
 	
+	@Transient
 	public boolean isAggregate() throws DaqueryException
 	{
 		if(StringHelper.isEmpty(sqlcode))
@@ -54,6 +55,7 @@ public class SQLQuery extends Inquiry
 		return(true);
 	}
 	
+	@Transient
 	public Long runAggregate() throws DaqueryException
 	{
 		if(! isAggregate())
