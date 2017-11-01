@@ -38,7 +38,7 @@ public class Role extends DaqueryObject implements Serializable {
 	@Expose
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(name="ROLE_ID", unique=true, nullable=false)
+	@Column(unique=true, nullable=false)
 	private long id;
 
 	@Expose
