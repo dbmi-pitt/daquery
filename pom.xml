@@ -24,8 +24,6 @@
         <jjwt.version>0.7.0</jjwt.version>   
         <cdi.version>2.0</cdi.version> 
         <hibernate.version>4.3.6.Final</hibernate.version>
-        <joda.version>2.9.9</joda.version>
-        <joda-time.version>1.4</joda-time.version>
         <transaction.version>1.2</transaction.version> 
         <entitymanager.version>4.3.6.Final</entitymanager.version>
         <jackson.version>2.5.2</jackson.version>
@@ -188,18 +186,6 @@
 	    	<version>${derby.version}</version>
 		</dependency>
 		
-		<!-- Let's try a sane date/time Java implementation, shall we? -->
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>${joda.version}</version>
-		</dependency>
-		
-		<!-- the straight JODA code does not support Hibernate 4.
-		It throws org.joda.time.contrib.hibernate.PersistentDateTime.nullSafeGet errors
-		during runtime (see this: https://stackoverflow.com/questions/14900875/java-lang-abstractmethoderror-org-joda-time-contrib-hibernate-persistentdatetim
-		Therefore, use usertype.core instead:
-		 -->
 		<dependency>
 		    <groupId>org.jadira.usertype</groupId>
 		    <artifactId>usertype.core</artifactId>

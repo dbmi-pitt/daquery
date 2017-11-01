@@ -20,16 +20,21 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.gson.annotations.Expose;
 
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.PROPERTY, property = "dataType")
+@JsonSubTypes({@Type(value = SQLQuery.class, name = InquiryType.TYPES.SQL_VAL)})
 @Entity
 @Table(name="INQUIRY")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "INQUIRY_TYPE", discriminatorType = DiscriminatorType.STRING)
-public abstract class Inquiry implements Serializable
+public abstract class Inquiry extends DaqueryObject implements Serializable
 {
 	private static final long serialVersionUID = 1272382834723l;
 	
@@ -71,10 +76,7 @@ public abstract class Inquiry implements Serializable
 	
 	@Column(name="INQUIRY_TYPE", insertable = false, updatable = false)
 	public String getDataType(){return(dataType);}
-	public void setDataType(String type) throws DaqueryException
-	{
-		throw new DaqueryException("Inquiry.dataType is automatically set.");
-	}
+	public void setDataType(String type){dataType = type;}
 	
 	@Transient
 	public InquiryType getDataTypeEnum()

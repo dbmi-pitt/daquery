@@ -20,14 +20,17 @@ import javax.persistence.TemporalType;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Site;
 
 @Entity
 @Table(name="INQUIRY_REQUEST")
-public class InquiryRequest
+public class InquiryRequest extends DaqueryObject
 {
+	private static final long serialVersionUID = 292729082342423l;
+	
     @Expose
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)

@@ -52,6 +52,7 @@ public class PopulateDevData
 	
 	private static InquiryRequest createOutgoingRequest(Inquiry inquiry, DaqueryUser requester, Site requestSite)
 	{
+		
 		InquiryRequest req = new InquiryRequest();
 		req.setDirectionEnum(RequestDirection.OUT);
 		req.setInquiry(inquiry);
@@ -60,13 +61,21 @@ public class PopulateDevData
 		req.setSentTimestamp(new Date());
 		return(req);
 	}
-	
+
+	public static InquiryRequest createFullOutgoingRequest()
+	{
+		DaqueryUser author = PopulateDevData.createTestUser();
+		Inquiry inquiry = PopulateDevData.createInquiryData(author);
+		Site requestSite = PopulateDevData.createNetAndSiteData().getOutgoingQuerySites().iterator().next();
+		return(PopulateDevData.createOutgoingRequest(inquiry, author, requestSite));
+	}
 	private static Inquiry createInquiryData(DaqueryUser author)
 	{
 		SQLQuery sqlQ = new SQLQuery();
 		sqlQ.setVersion(1);
 		sqlQ.setAuthor(author);
 		sqlQ.setSQLDialect(SQLDialect.ORACLE);
+		sqlQ.setSQLCode("some test sql goes here");
 		return(sqlQ);
 		
 		

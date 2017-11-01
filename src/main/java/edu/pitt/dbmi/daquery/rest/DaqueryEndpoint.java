@@ -8,19 +8,23 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Context;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.glassfish.jersey.client.ClientResponse;
 
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -31,9 +35,11 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+//import edu.pitt.dbmi.daquery.dev.PopulateDevData;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
+import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 
 @Path("/")
@@ -43,8 +49,19 @@ public class DaqueryEndpoint extends AbstractEndpoint
 
 	public static void main (String [] args) throws Exception
 	{
-		
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+/*		InquiryRequest iq = PopulateDevData.createFullOutgoingRequest();
+		String json = iq.toJson();
+		System.out.println(json); */
+		Client client = ClientBuilder.newClient();
+//		InquiryRequest ir =  PopulateDevData.createFullOutgoingRequest();
+//		String json = JSONHelper.toJSON(ir);
+//		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
+		//Response resp = client.target("http://localhost:8080/daquery/ws/hello").request(MediaType.TEXT_PLAIN).get();
+//		Response resp = client.target("http://localhost:8080/daquery/ws/aggregate-inquiry-request")
+//						                    .request(MediaType.APPLICATION_JSON).post(ent);
+				                    //.post(ent, ClientResponse.class); 
+//		System.out.println(resp.readEntity(String.class));
+		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		/*DaqueryEndpoint de = new DaqueryEndpoint();
 		System.out.println(de.isSiteSetup());
 		Response r = de.setupSite("bill-dev", "abc123"); */
@@ -73,7 +90,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @Produces(MediaType.TEXT_PLAIN)
 	public Response helloWorld()
 	{
-		//that's a little dark, mate.
+		//that's a little dark, mate.-- it's actually a flipped reference to a Pink Floyd song
 		return(ResponseHelper.getBasicResponse(200, "Hello Cruel World"));
 	}
     
@@ -250,6 +267,16 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		}
 	}
 	
+	@POST
+	@Path("aggregate-inquiry-request")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+	public static Response aggregateInquiry(InquiryRequest request) throws DaqueryException
+	{
+		System.out.println("HERE!!!!!!!!!!!!!!!!!!!!!!");
+		return(ResponseHelper.getJsonResponseGen(200, request));
+	}
+	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
 		String siteId = AppProperties.getDBProperty("site.id");
@@ -292,5 +319,5 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		String url = AppProperties.getCentralServerURL() + "/daquery-central/authenticateSite?site=" +siteName + "&key=" + siteKey;
 		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
 		return(rVal);
-	}
+	}	
 }
