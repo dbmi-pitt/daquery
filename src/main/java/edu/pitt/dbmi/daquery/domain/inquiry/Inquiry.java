@@ -26,10 +26,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.PROPERTY, property = "dataType")
 @JsonSubTypes({@Type(value = SQLQuery.class, name = InquiryType.TYPES.SQL_VAL)})
+
 @Entity
 @Table(name="INQUIRY")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -93,5 +95,10 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	public DaqueryUser getAuthor(){return(author);}
 	public void setAuthor(DaqueryUser auth){author = auth;}
 	
+	@Transient
+	public abstract boolean isAggregate() throws DaqueryException;
+	
+	@Transient
+	public abstract Long runAggregate() throws DaqueryException;
 	
 }

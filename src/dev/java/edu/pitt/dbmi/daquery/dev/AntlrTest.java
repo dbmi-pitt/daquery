@@ -22,7 +22,7 @@ public class AntlrTest
 		printParse("select count(distinct abcd.xycd.blec as mmmmm) from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc';");
 	}
 	
-	private static void printParse(String sql) {
+	public static void printParse(String sql) {
 		
 		CharStream charStream = CharStreams.fromString(sql);
         SQLiteLexer lexer = new SQLiteLexer(charStream);

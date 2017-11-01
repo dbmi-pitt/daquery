@@ -2,7 +2,7 @@ package edu.pitt.dbmi.daquery.domain.inquiry;
 
 public enum ResponseStatus
 {
-	APPROVED(TYPES.APPROVED), DENIED(TYPES.DENIED), PENDING(TYPES.PENDING);
+	APPROVED(TYPES.APPROVED), DENIED(TYPES.DENIED), PENDING(TYPES.PENDING), ERROR(TYPES.ERROR);
 	
 	ResponseStatus(String val)
 	{
@@ -22,5 +22,6 @@ public enum ResponseStatus
 		public static final String APPROVED = "APPROVED";
 		public static final String DENIED = "DENIED";
 		public static final String PENDING = "PENDING";
+		public static final String ERROR = "ERROR";
 	} 
 }

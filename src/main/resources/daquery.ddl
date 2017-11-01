@@ -127,7 +127,7 @@ create table property
 )
 ;
 
-INSERT INTO ROLE (NAME) VALUES ('admin'), ('steward'), ('viewer');
+INSERT INTO ROLE (NAME) VALUES ('admin'), ('steward'), ('viewer'), ('aggregate_querier'), ('data_querier');
 
 CREATE TABLE INQUIRY
 (
@@ -154,11 +154,12 @@ CREATE TABLE INQUIRY_REQUEST
 CREATE TABLE INQUIRY_RESPONSE
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
-   RECEIVED_TIMESTAMP timestamp,
+   REPLY_TIMESTAMP timestamp,
    STATUS varchar(50),
    RESPONSE_VALUE varchar(1024),
    SITE_ID bigint,
-   FILESET_ID bigint
+   FILESET_ID bigint,
+   ERROR_MESSAGE varchar(1024)
 )
 ;
 

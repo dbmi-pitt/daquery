@@ -2,9 +2,12 @@ package edu.pitt.dbmi.daquery.rest;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,30 +20,27 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Context;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.glassfish.jersey.client.ClientResponse;
-
-import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
-import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.AppSetup;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-//import edu.pitt.dbmi.daquery.dev.PopulateDevData;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
+import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
-import edu.pitt.dbmi.daquery.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.domain.inquiry.InquiryResponse;
+import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
@@ -52,19 +52,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 /*		InquiryRequest iq = PopulateDevData.createFullOutgoingRequest();
 		String json = iq.toJson();
 		System.out.println(json); */
-		Client client = ClientBuilder.newClient();
-//		InquiryRequest ir =  PopulateDevData.createFullOutgoingRequest();
-//		String json = JSONHelper.toJSON(ir);
-//		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
-		//Response resp = client.target("http://localhost:8080/daquery/ws/hello").request(MediaType.TEXT_PLAIN).get();
-//		Response resp = client.target("http://localhost:8080/daquery/ws/aggregate-inquiry-request")
-//						                    .request(MediaType.APPLICATION_JSON).post(ent);
-				                    //.post(ent, ClientResponse.class); 
-//		System.out.println(resp.readEntity(String.class));
-		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		/*DaqueryEndpoint de = new DaqueryEndpoint();
-		System.out.println(de.isSiteSetup());
-		Response r = de.setupSite("bill-dev", "abc123"); */
 	}
 	
 	private static boolean containsSiteWhoIQuery(List<Network> networks, String siteId)
@@ -273,8 +260,52 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @Produces(MediaType.APPLICATION_JSON)
 	public static Response aggregateInquiry(InquiryRequest request) throws DaqueryException
 	{
-		System.out.println("HERE!!!!!!!!!!!!!!!!!!!!!!");
-		return(ResponseHelper.getJsonResponseGen(200, request));
+		try
+		{
+			if(request == null || request.getRequester() == null || StringHelper.isEmpty(request.getRequester().getId()))
+				return(ResponseHelper.getBasicResponse(400, "An Inquery request with a valid requster user object is required."));
+
+			if(request.getInquiry() == null)
+				return(ResponseHelper.getBasicResponse(400, "No query provided."));
+			
+			String userId = request.getRequester().getId();
+			DaqueryUser requester = DaqueryUserDAO.queryUserByID(userId);
+			if(requester == null)
+				return(ResponseHelper.getBasicResponse(400, "The requester with user id " + userId + " was not found."));
+			
+			if(! DaqueryUserDAO.hasRole(userId, "AGGREGATE_QUERYIER"))
+				return(ResponseHelper.getBasicResponse(403, "User with id: " + userId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
+
+			InquiryResponse response = new InquiryResponse();
+			//TODO add "SYSTEM" responder as UserInfo object and UUID field??
+			Long rVal = null;
+			try
+			{
+				rVal = request.getInquiry().runAggregate();
+			}
+			catch(DaqueryException e)
+			{
+				response.setStatusEnum(ResponseStatus.ERROR);
+				response.setErrorMessage(e.getMessage());
+				response.setReplyTimestamp(new Date());
+			}
+			
+			if(rVal == null)
+				return(ResponseHelper.getBasicResponse(500, "No result returned from aggregate query."));
+			else
+			{
+				Map<String, String> aggVal = new HashMap<String, String>();
+				aggVal.put("value", rVal.toString());
+				return(ResponseHelper.getJsonResponseGen(200, aggVal));
+			}
+				
+		}
+		catch(Throwable t)
+		{
+			String msg = "An unexpected error occured while trying process an InquiryRequest.";
+			log.log(Level.SEVERE, msg, t);
+			return(ResponseHelper.getBasicResponse(500, msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name") + " for further information."));
+		}
 	}
 	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException

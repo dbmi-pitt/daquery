@@ -31,7 +31,7 @@ import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 
 
 @Entity
-@DiscriminatorValue("FULL")  
+@DiscriminatorValue(UserInfo.FULL_USER)  
 public class DaqueryUser extends UserInfo {
 
 	private static final long serialVersionUID = 29290820752342l;

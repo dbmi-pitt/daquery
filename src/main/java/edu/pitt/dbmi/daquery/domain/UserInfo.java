@@ -13,19 +13,29 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.domain.inquiry.InquiryType;
+import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
-
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.PROPERTY, property = "utype")
+@JsonSubTypes({@Type(value = UserInfo.class, name = UserInfo.INFO_ONLY),
+               @Type(value = DaqueryUser.class, name = UserInfo.FULL_USER)})
 @Entity  
 @Table(name = "DQ_USER")  
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)  
 @DiscriminatorColumn(name="utype",discriminatorType=DiscriminatorType.STRING)  
-@DiscriminatorValue(value="INFO")  
+@DiscriminatorValue(value=UserInfo.INFO_ONLY)  
 public class UserInfo extends DaqueryObject
 {
 	private static final long serialVersionUID = 293230423424234l;
+
+	protected static final String INFO_ONLY = "INFO";
+	protected static final String FULL_USER = "FULL";
 	
     @Expose
     @Id

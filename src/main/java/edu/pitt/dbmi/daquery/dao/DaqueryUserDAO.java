@@ -163,11 +163,13 @@ public class DaqueryUserDAO extends AbstractDAO {
     			return false;
     		}
     		//build a String list of the role names
-    		//make them lowercase to support case-insensitive matching 
+    		//make them lowercase to support case-insensitive matching
+    		String trimmedRole = role.toLowerCase().trim();
     		for (Role r : roleList) {
-    			roleNames.add(r.getName().toLowerCase());
+    			if(trimmedRole.equals(r.getName().toLowerCase().trim()))
+    					return(true);
     		}
-    		return roleNames.contains(role.toLowerCase());
+    		return(false);
         } catch (HibernateException e) {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());

@@ -19,12 +19,18 @@ import java.util.Objects;
 @Table(name="Role")
 @NamedQuery(name="Role.findAll", query="SELECT r FROM Role r")
 public class Role extends DaqueryObject implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 979278294724242L;
+	
+	public static final String AGGREGATE_QUERIER = "AGGREGATE_AUERIER";
+	public static final String DATA_QUERIER = "DATA_QUERIER";
+	public static final String ADMIN = "ADMIN";
+	public static final String STEWARD = "STEWARD";
+	public static final String VIEWER = "VIEWER";
 	
 	@Expose
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(unique=true, nullable=false)
+	@Column(name="ROLE_ID", unique=true, nullable=false)
 	private long id;
 
 	@Expose
@@ -61,28 +67,4 @@ public class Role extends DaqueryObject implements Serializable {
 	public void setUsers(List<DaqueryUser> users) {
 		this.users = users;
 	}
-
-	
-    // ======================================
-    // =   Methods hash, equals, toString   =
-    // ======================================
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Role role = (Role) o;
-        return Objects.equals(id, role.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-    
-    @Override
-    public String toString() {
-    	return this.name;
-    }
-	
 }

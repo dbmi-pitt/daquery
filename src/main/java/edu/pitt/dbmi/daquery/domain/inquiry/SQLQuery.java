@@ -7,7 +7,11 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.internal.util.StringHelper;
+
 import com.google.gson.annotations.Expose;
+
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 
 @Entity
 @Table(name = "SQL_QUERY")
@@ -42,4 +46,19 @@ public class SQLQuery extends Inquiry
 	
 	public String getSQLCode(){return(sqlcode);}
 	public void setSQLCode(String code){sqlcode = code;}
+	
+	public boolean isAggregate() throws DaqueryException
+	{
+		if(StringHelper.isEmpty(sqlcode))
+			return(false);
+		return(true);
+	}
+	
+	public Long runAggregate() throws DaqueryException
+	{
+		if(! isAggregate())
+			throw new DaqueryException("The supplied query is not in the form to return a single aggregate result.  It must start with a single select clause of count(field)....");
+		
+		return 17l;
+	}
 }

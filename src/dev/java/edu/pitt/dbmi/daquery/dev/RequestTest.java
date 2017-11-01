@@ -1,0 +1,30 @@
+package edu.pitt.dbmi.daquery.dev;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
+import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
+
+public class RequestTest
+{
+	public static void main(String [] args) throws Exception
+	{
+		Client client = ClientBuilder.newClient();
+		InquiryRequest ir =  PopulateDevData.createFullOutgoingRequest();
+		String json = JSONHelper.toJSON(ir);
+		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
+		//Response resp = client.target("http://localhost:8080/daquery/ws/hello").request(MediaType.TEXT_PLAIN).get();
+		Response resp = client.target("http://localhost:8080/daquery/ws/aggregate-inquiry-request")
+						                    .request(MediaType.APPLICATION_JSON).post(ent);
+				                    //.post(ent, ClientResponse.class); 
+		System.out.println(resp.readEntity(String.class));
+		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		/*DaqueryEndpoint de = new DaqueryEndpoint();
+		System.out.println(de.isSiteSetup());
+		Response r = de.setupSite("bill-dev", "abc123"); */		
+	}
+}
