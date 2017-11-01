@@ -180,7 +180,7 @@ public class AppSetup
 		    String uuidStr = uuid.toString();
 			String hashedPwd = PasswordUtils.digestPassword(adminPwd.trim());
 			if(StringHelper.isEmpty(adminRealName)) adminRealName = "";
-			String insertSQL = "insert into dq_user (id, username, password, status, email, real_name) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', '" + UserStatus.ACTIVE.toString() + "', '" + adminEmail.trim() + "', '" + adminRealName + "')";
+			String insertSQL = "insert into dq_user (id, username, password, status, email, real_name, utype) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', '" + UserStatus.ACTIVE.toString() + "', '" + adminEmail.trim() + "', '" + adminRealName + "', 'FULL')";
 			log.info("User inserted with: " + insertSQL);
 			stat.executeUpdate(insertSQL);
 			insertSQL = "insert into user_role (role_id, user_id) values (" + roleId + ", '" + uuidStr.trim() + "')";

@@ -1,7 +1,7 @@
 package edu.pitt.dbmi.daquery.common.util;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(name="daqueryProperties")
 public class DaqueryProperties {
-	public DaqueryCentralProperties daqueryCentralProperties = new DaqueryCentralProperties();
+	public DaqueryCentralProperties daqueryCentralProps = new DaqueryCentralProperties();
 }
