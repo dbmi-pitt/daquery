@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
+import org.hibernate.NonUniqueResultException;
 
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
+import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.rest.UserEndpoint;
@@ -65,6 +67,42 @@ public class DaqueryUserDAO extends AbstractDAO {
     	}
     	
     }
+    
+    /**
+     * A back-end call that uses the id/password combination to find the user's
+     * account in the database.  Throws an error if the account cannot be verified.
+     * @param email- the email for the account.  This value must not be empty.
+     * @param password- the plaintext password for the account.  This value must not be empty.
+     * @throws SecurityException on authentication failure
+     * NoResultException if no user is found
+     */
+    public static DaqueryUser authenticate(String email, String password) throws SecurityException, HibernateException, Exception {
+    	logger.info("searching for #### email/password : " + email + "/" + password);
+    	try {
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+			ParameterItem piEmail = new ParameterItem("email", email);
+			pList.add(piEmail);
+    		ParameterItem piPassword = new ParameterItem("password", PasswordUtils.digestPassword(password));
+    		pList.add(piPassword);
+	        DaqueryUser user = AbstractDAO.executeQueryReturnSingle(DaqueryUser.FIND_BY_EMAIL_PASSWORD, pList, logger);
+	        if (user == null)
+	        {
+	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / " + password);
+	            throw new SecurityException("Invalid email/password");
+	        }
+	        
+	        return user;
+        } catch (NonUniqueResultException nure) {
+    		logger.info("Invalid email/password.  Found multiple username/password entries using: " + email + " / " + password);
+            throw new SecurityException("Invalid email/password");
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+            
+    }
+
     
     /**
      * Return an first created user object
