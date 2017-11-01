@@ -157,7 +157,7 @@ CREATE TABLE INQUIRY_RESPONSE
    RECEIVED_TIMESTAMP timestamp,
    STATUS varchar(50),
    RESPONSE_VALUE varchar(1024),
-   SITE_ID varchar(50),
+   SITE_ID bigint,
    FILESET_ID bigint
 )
 ;
