@@ -58,7 +58,7 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Expose
 	protected String dataType;
 	
-	protected Set<InquiryRequest> requests;
+	protected Set<DaqueryRequest> requests;
 	
 	@Expose
 	protected DaqueryUser author;
@@ -87,8 +87,8 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	}
 	
 	@OneToMany(fetch = FetchType.EAGER,cascade=CascadeType.ALL, mappedBy="inquiry")
-	public Set<InquiryRequest> getRequests(){return(requests);}
-	public void setRequests(Set<InquiryRequest> reqs){requests = reqs;}
+	public Set<DaqueryRequest> getRequests(){return(requests);}
+	public void setRequests(Set<DaqueryRequest> reqs){requests = reqs;}
 
 	@ManyToOne
 	@JoinColumn(name="AUTHOR_ID")

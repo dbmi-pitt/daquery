@@ -72,24 +72,13 @@ public class DaqueryUser extends UserInfo {
     @Column(name="STATUS")
     private String status;
     
-    //TODO: determine if this should be transient or if
-    //we want DaqueryUser to manage its user role updates (we could manage it separately)
 	//bi-directional many-to-many association to Role
     @Expose
-	@ManyToMany(fetch = FetchType.EAGER,
-			cascade = { 			
-	        CascadeType.PERSIST, 
-	        CascadeType.MERGE
-	})
-	@JoinTable(
-		name="USER_ROLE"
-		, joinColumns={
-			@JoinColumn(name="USER_ID", nullable=false)
-			}
-		, inverseJoinColumns={
-			@JoinColumn(name="ROLE_ID", nullable=false)
-			}
-		)
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name="USER_ROLE",
+	           joinColumns={@JoinColumn(name="USER_ID", nullable=false)},
+	           inverseJoinColumns={@JoinColumn(name="ROLE_ID", nullable=false)}
+		      )
 	private List<Role> roles;
 
     

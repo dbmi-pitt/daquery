@@ -22,8 +22,8 @@ import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.UserInfo;
 
 @Entity
-@Table(name="INQUIRY_RESPONSE")
-public class InquiryResponse
+@Table(name="DAQUERY_RESPONSE")
+public class DaqueryResponse
 {
     @Expose
     @Id
@@ -58,7 +58,8 @@ public class InquiryResponse
 	
     @Expose
     @ManyToOne(fetch=FetchType.EAGER)
-    private InquiryRequest request;
+    @JoinColumn(name="REQID")
+    private DaqueryRequest request;
     
     @Expose
     @Column(name = "ERROR_MESSAGE")
@@ -88,8 +89,8 @@ public class InquiryResponse
     public Site getSite(){return(site);}
     public void setSite(Site site){this.site = site;}
     
-    public InquiryRequest getRequest(){return(request);}
-    public void setRequest(InquiryRequest reqst){request = reqst;}
+    public DaqueryRequest getRequest(){return(request);}
+    public void setRequest(DaqueryRequest reqst){request = reqst;}
     
     public String getErrorMessage(){return(errorMessage);}
     public void setErrorMessage(String msg){errorMessage = msg;}

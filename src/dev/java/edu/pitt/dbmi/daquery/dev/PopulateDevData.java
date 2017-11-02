@@ -2,8 +2,10 @@ package edu.pitt.dbmi.daquery.dev;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -12,11 +14,11 @@ import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.domain.*;
 import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.domain.inquiry.RequestDirection;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
@@ -30,11 +32,28 @@ public class PopulateDevData
 	public static void main(String [] args) throws Exception
 	{
 		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		DaqueryUser user = DaqueryUserDAO.getAdminUser();
+		assembleRequest();
+		assembleRequest();
+		assembleRequest();
+		Session s = HibernateConfiguration.openSession();
+		Query q = s.createQuery("select r from DaqueryRequest r");
+		List<DaqueryRequest> reqs = q.list();
+//		List<Network> nets = NetworkDAO.queryAllNetworks();
+		for(DaqueryRequest req : reqs)
+			System.out.println(req.getId());
+		
+//		DaqueryUser u = PopulateDevData.createTestUser();
+//		u.setId("zzABCDEFGHIJK");
+//		PopulateDevData.save(u);
+//		DaqueryUser user = DaqueryUserDAO.getAdminUser();
 //		assembleRequest();
 		System.exit(0);
 	}
 	
+	private static void saveSite(DaqueryRequest req)
+	{
+		save(req.getRequestSite());
+	}
 	private static void assembleRequest()
 	{
 		Network net = createNetAndSiteData();
@@ -43,18 +62,18 @@ public class PopulateDevData
 		save(user);
 		Inquiry inq = createInquiryData(user);
 		save(inq);
-		InquiryRequest req = createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
+		DaqueryRequest req = createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
 		save(req);
-		Set<InquiryRequest> outgoing = new HashSet<InquiryRequest>();
+		Set<DaqueryRequest> outgoing = new HashSet<DaqueryRequest>();
 		outgoing.add(req);
 		net.setOutgoingRequests(outgoing);
 		save(net);
 	}
 	
-	private static InquiryRequest createOutgoingRequest(Inquiry inquiry, DaqueryUser requester, Site requestSite)
+	private static DaqueryRequest createOutgoingRequest(Inquiry inquiry, DaqueryUser requester, Site requestSite)
 	{
 		
-		InquiryRequest req = new InquiryRequest();
+		DaqueryRequest req = new DaqueryRequest();
 		req.setDirectionEnum(RequestDirection.OUT);
 		req.setInquiry(inquiry);
 		req.setRequester(requester);
@@ -63,7 +82,7 @@ public class PopulateDevData
 		return(req);
 	}
 
-	public static InquiryRequest createFullOutgoingRequest()
+	public static DaqueryRequest createFullOutgoingRequest()
 	{
 		DaqueryUser author = PopulateDevData.createTestUser();
 		Inquiry inquiry = PopulateDevData.createInquiryData(author);
@@ -75,8 +94,8 @@ public class PopulateDevData
 		SQLQuery sqlQ = new SQLQuery();
 		sqlQ.setVersion(1);
 		sqlQ.setAuthor(author);
-		sqlQ.setSQLDialect(SQLDialect.ORACLE);
-		sqlQ.setSQLCode("some test sql goes here");
+		sqlQ.setSqlDialectEnum(SQLDialect.ORACLE);
+		sqlQ.setCode("some test sql goes here");
 		return(sqlQ);
 		
 		
@@ -152,10 +171,10 @@ public class PopulateDevData
 		sitesIn.add(dsiteIn);
 		net.setIncomingQuerySites(sitesIn);
 		
-		SQLDataSource sqlDS = new SQLDataSource("dev cdm data set",dbURL,dbPassword,dbUsername);
+/*		SQLDataSource sqlDS = new SQLDataSource("dev cdm data set",dbURL,dbPassword,dbUsername);
 		Set<DataSource> dataSources = new HashSet<DataSource>();
 		dataSources.add(sqlDS);
-		net.setDataSources(dataSources);
+		net.setDataSources(dataSources); */
 		
 		return(net);
 		

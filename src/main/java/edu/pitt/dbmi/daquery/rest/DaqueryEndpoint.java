@@ -38,8 +38,8 @@ import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryResponse;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
 
 @Path("/")
@@ -258,7 +258,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	@Path("aggregate-inquiry-request")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-	public static Response aggregateInquiry(InquiryRequest request) throws DaqueryException
+	public static Response aggregateInquiry(DaqueryRequest request) throws DaqueryException
 	{
 		try
 		{
@@ -276,7 +276,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			if(! DaqueryUserDAO.hasRole(userId, "AGGREGATE_QUERYIER"))
 				return(ResponseHelper.getBasicResponse(403, "User with id: " + userId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
 
-			InquiryResponse response = new InquiryResponse();
+			DaqueryResponse response = new DaqueryResponse();
 			//TODO add "SYSTEM" responder as UserInfo object and UUID field??
 			Long rVal = null;
 			try

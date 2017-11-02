@@ -7,14 +7,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 
 public class RequestTest
 {
 	public static void main(String [] args) throws Exception
 	{
 		Client client = ClientBuilder.newClient();
-		InquiryRequest ir =  PopulateDevData.createFullOutgoingRequest();
+		DaqueryRequest ir =  PopulateDevData.createFullOutgoingRequest();
 		String json = JSONHelper.toJSON(ir);
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
 		//Response resp = client.target("http://localhost:8080/daquery/ws/hello").request(MediaType.TEXT_PLAIN).get();
