@@ -1,6 +1,5 @@
 package edu.pitt.dbmi.daquery.dev;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,6 +12,7 @@ import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.domain.*;
 import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
@@ -27,10 +27,11 @@ import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
  */
 public class PopulateDevData
 {
-	public static void main(String [] args)
+	public static void main(String [] args) throws Exception
 	{
-		AppProperties.setDevHomeDir("/Users/bill/daquery-data");
-		assembleRequest();
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		DaqueryUser user = DaqueryUserDAO.getAdminUser();
+//		assembleRequest();
 		System.exit(0);
 	}
 	

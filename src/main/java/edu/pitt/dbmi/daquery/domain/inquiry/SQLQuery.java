@@ -47,6 +47,7 @@ public class SQLQuery extends Inquiry
 	public String getSQLCode(){return(sqlcode);}
 	public void setSQLCode(String code){sqlcode = code;}
 	
+	@Transient
 	public boolean isAggregate() throws DaqueryException
 	{
 		if(StringHelper.isEmpty(sqlcode))
@@ -54,10 +55,15 @@ public class SQLQuery extends Inquiry
 		return(true);
 	}
 	
+	@Transient
 	public Long runAggregate() throws DaqueryException
 	{
 		if(! isAggregate())
 			throw new DaqueryException("The supplied query is not in the form to return a single aggregate result.  It must start with a single select clause of count(field)....");
+		
+		//throw excpetion for bad query 
+		
+		//run queryl
 		
 		return 17l;
 	}

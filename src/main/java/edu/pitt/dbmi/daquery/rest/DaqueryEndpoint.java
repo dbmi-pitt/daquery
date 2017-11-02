@@ -288,6 +288,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				response.setStatusEnum(ResponseStatus.ERROR);
 				response.setErrorMessage(e.getMessage());
 				response.setReplyTimestamp(new Date());
+				ResponseHelper.getJsonResponseGen(500, response);
 			}
 			
 			if(rVal == null)
