@@ -19,8 +19,8 @@ import edu.pitt.dbmi.daquery.domain.SourceType;
 import edu.pitt.dbmi.daquery.domain.UserInfo;
 import edu.pitt.dbmi.daquery.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryResponse;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -65,10 +65,10 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(Site.class);
     	hibernateConf.addAnnotatedClass(SourceType.class);
     	hibernateConf.addAnnotatedClass(SQLDataSource.class);
-    	hibernateConf.addAnnotatedClass(InquiryRequest.class);    	
+    	hibernateConf.addAnnotatedClass(DaqueryRequest.class);    	
     	hibernateConf.addAnnotatedClass(Inquiry.class);
     	hibernateConf.addAnnotatedClass(SQLQuery.class);
-    	hibernateConf.addAnnotatedClass(InquiryResponse.class);
+    	hibernateConf.addAnnotatedClass(DaqueryResponse.class);
     	hibernateConf.addAnnotatedClass(UserInfo.class);
     	hibernateConf.addAnnotatedClass(Fileset.class);
     	
@@ -77,14 +77,14 @@ public class HibernateConfiguration {
         hibernateConf.setProperty("hibernate.connection.driver_class", "org.apache.derby.jdbc.EmbeddedDriver" )
         .setProperty("hibernate.connection.username", "")
     	.setProperty("hibernate.connection.password", "")
-    	
+    	.setProperty("hibernate.show_sql", "true")
         
         .setProperty("hibernate.c3p0.acquire_increment", "1")
         .setProperty("hibernate.c3p0.idle_test_period","240")
         .setProperty("hibernate.c3p0.timeout","600")	            
         .setProperty("hibernate.c3p0.max_size","100")
         .setProperty("hibernate.c3p0.min_size","3")
-        .setProperty("hibernate.c3p0.validate", "false") 
+        .setProperty("hibernate.c3p0.validate", "false")
         .setProperty("hibernate.c3p0.max_statements", "500");
         
         try {

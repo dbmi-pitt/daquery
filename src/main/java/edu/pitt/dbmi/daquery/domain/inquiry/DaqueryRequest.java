@@ -26,8 +26,8 @@ import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Site;
 
 @Entity
-@Table(name="INQUIRY_REQUEST")
-public class InquiryRequest extends DaqueryObject
+@Table(name="DAQUERY_REQUEST")
+public class DaqueryRequest extends DaqueryObject
 {
 	private static final long serialVersionUID = 292729082342423l;
 	
@@ -38,11 +38,11 @@ public class InquiryRequest extends DaqueryObject
 	private long id;
     
 	@Expose
-    @Column(name = "REQUEST_ID",unique = true, length=50)
+    @Column(name = "REQUESTID",unique = true, length=50)
 	private String requestId;
 	
 	
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="REQUEST_SITE_ID")
     private Site requestSite;
 
@@ -72,7 +72,7 @@ public class InquiryRequest extends DaqueryObject
     private Inquiry inquiry;
     
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="request")
-	private Set<InquiryResponse> responses;
+	private Set<DaqueryResponse> responses;
 		
 	public long getId(){return(id);}
 	public void setId(long id){this.id = id;}
@@ -98,8 +98,8 @@ public class InquiryRequest extends DaqueryObject
 	public Inquiry getInquiry(){return(inquiry);}
 	public void setInquiry(Inquiry inq){inquiry = inq;}
 	
-	public Set<InquiryResponse> getResponses(){return(responses);}
-	public void setResponses(Set<InquiryResponse> resps){responses = resps;}
+	public Set<DaqueryResponse> getResponses(){return(responses);}
+	public void setResponses(Set<DaqueryResponse> resps){responses = resps;}
 	
 	public RequestDirection getDirectionEnum(){return(RequestDirection.valueOf(direction));}
 	public void setDirectionEnum(RequestDirection dir){direction = dir.toString();}

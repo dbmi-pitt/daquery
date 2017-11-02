@@ -8,7 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 
 import java.util.Objects;
 import java.util.Set;
@@ -66,14 +66,14 @@ public class Network extends DaqueryObject implements Serializable {
 	private Set<DataSource> dataSources;
 
 	@Expose
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "OUTGOING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
-	private Set<InquiryRequest> outgoingRequests;
+	private Set<DaqueryRequest> outgoingRequests;
 
 	@Expose
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "INCOMING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
-	private Set<InquiryRequest> incomingRequests;
+	private Set<DaqueryRequest> incomingRequests;
 	
 	public Network(){}
 	
@@ -136,11 +136,11 @@ public class Network extends DaqueryObject implements Serializable {
 	public Set<DataSource> getDataSources(){return(dataSources);}
 	public void setDataSources(Set<DataSource> ds){dataSources = ds;}
 	
-	public Set<InquiryRequest> getOutgoingRequests(){return(outgoingRequests);}
-	public void setOutgoingRequests(Set<InquiryRequest> requests){outgoingRequests = requests;}
+	public Set<DaqueryRequest> getOutgoingRequests(){return(outgoingRequests);}
+	public void setOutgoingRequests(Set<DaqueryRequest> requests){outgoingRequests = requests;}
 	
-	public Set<InquiryRequest> getIncomingRequests(){return(incomingRequests);}
-	public void setIncomingRequests(Set<InquiryRequest> requests){incomingRequests = requests;}
+	public Set<DaqueryRequest> getIncomingRequests(){return(incomingRequests);}
+	public void setIncomingRequests(Set<DaqueryRequest> requests){incomingRequests = requests;}
 	
 /*	public List<Site> getSites() {
 		return this.sites;

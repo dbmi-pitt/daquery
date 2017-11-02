@@ -1,14 +1,22 @@
 package edu.pitt.dbmi.daquery.domain;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-
-import java.util.List;
-import java.util.Objects;
 
 
 /**
@@ -25,7 +33,7 @@ public class Role extends DaqueryObject implements Serializable {
 
 	private static final long serialVersionUID = 979278294724242L;
 	
-	public static final String AGGREGATE_QUERIER = "AGGREGATE_AUERIER";
+	public static final String AGGREGATE_QUERIER = "AGGREGATE_QUERIER";
 	public static final String DATA_QUERIER = "DATA_QUERIER";
 	public static final String ADMIN = "ADMIN";
 	public static final String STEWARD = "STEWARD";
@@ -46,33 +54,17 @@ public class Role extends DaqueryObject implements Serializable {
 	private String name;
 
 	//bi-directional many-to-many association to User
-	@ManyToMany(mappedBy="roles")
+	@ManyToMany(mappedBy="roles", fetch=FetchType.LAZY)
 	private List<DaqueryUser> users;
 
-	public Role() {
-	}
+	public Role() {}
 
-	public long getId() {
-		return this.id;
-	}
+	public long getId(){return this.id;}
+	public void setId(long id){this.id = id;}
 
-	public void setId(long id) {
-		this.id = id;
-	}
+	public String getName(){return this.name;}
+	public void setName(String name) {this.name = name;}
 
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public List<DaqueryUser> getUsers() {
-		return this.users;
-	}
-
-	public void setUsers(List<DaqueryUser> users) {
-		this.users = users;
-	}
+	public List<DaqueryUser> getUsers(){return this.users;}
+	public void setUsers(List<DaqueryUser> users){this.users = users;}
 }

@@ -22,8 +22,8 @@ public class SQLQuery extends Inquiry
 	private static final long serialVersionUID = 2928392034234l;
 	
 	@Expose
-	@Column(name = "SQL_CODE")
-	private String sqlcode;
+	@Column(name = "CODE")
+	private String code;
 	
 	@Expose
 	@Column(name = "SQL_DIALECT")
@@ -35,22 +35,22 @@ public class SQLQuery extends Inquiry
 	}
 	
 	@Transient
-	public SQLDialect getSQLDialectEnum()
+	public SQLDialect getSqlDialectEnum()
 	{
 		return(SQLDialect.valueOf(sqldialect));
 	}
-	public void setSQLDialect(SQLDialect dialect)
+	public void setSqlDialectEnum(SQLDialect dialect)
 	{
 		sqldialect = dialect.toString();
 	}
 	
-	public String getSQLCode(){return(sqlcode);}
-	public void setSQLCode(String code){sqlcode = code;}
+	public String getCode(){return(code);}
+	public void setCode(String code){this.code = code;}
 	
 	@Transient
 	public boolean isAggregate() throws DaqueryException
 	{
-		if(StringHelper.isEmpty(sqlcode))
+		if(StringHelper.isEmpty(code))
 			return(false);
 		return(true);
 	}
