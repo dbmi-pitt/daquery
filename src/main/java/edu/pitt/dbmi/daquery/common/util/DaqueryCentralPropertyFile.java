@@ -22,19 +22,19 @@ public class DaqueryCentralPropertyFile extends DaqueryXMLPropertyFile {
 	public static DaqueryCentralPropertyFile instance() throws FileNotFoundException
 	{
 		if(setupError)
-			throw new FileNotFoundException("Unable to find a valid shrine-plus.xml in a Tomcat configuration directory.");
+			throw new FileNotFoundException("Unable to find a valid daquery.xml in a Tomcat configuration directory.");
 		else if(inst == null)
 		{
 			try
 			{
 				AppProperties.setDevHomeDir("C:\\Users\\del20");
-				propFilename = AppProperties.getHomeDirectory() + "daquery.xml";
+				propFilename = AppProperties.getHomeDirectory() + "\\conf\\daquery.xml";
 				inst = new DaqueryCentralPropertyFile();
 			}
 			catch(Throwable t)
 			{
 				setupError = true;
-				log.log(Level.SEVERE, "Cannot find a valid shrine-plus.xml file in a Tomcat configuration directory.", t);
+				log.log(Level.SEVERE, "Cannot find a valid daquery.xml file in a Tomcat configuration directory.", t);
 				throw new FileNotFoundException();
 			}
 		}
@@ -43,7 +43,7 @@ public class DaqueryCentralPropertyFile extends DaqueryXMLPropertyFile {
 	
 	private DaqueryCentralProperties getProperties()
 	{
-		return(inst.getProps().daqueryCentralProperties);
+		return(inst.getProps().daqueryCentralProps);
 	}
 	
 	public EmailConfig getEmailConfiguration()

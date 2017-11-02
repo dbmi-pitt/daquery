@@ -53,7 +53,7 @@ public abstract class DaqueryXMLPropertyFile {
 			}
 			try
 			{
-				JAXBContext jaxbContext = JAXBContext.newInstance(DaqueryCentralProperties.class);
+				JAXBContext jaxbContext = JAXBContext.newInstance(DaqueryProperties.class);
 		
 				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 				props = (DaqueryProperties) jaxbUnmarshaller.unmarshal(propFile);
