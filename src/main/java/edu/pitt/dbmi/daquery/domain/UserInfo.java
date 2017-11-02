@@ -14,13 +14,11 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryType;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.PROPERTY, property = "utype")
 @JsonSubTypes({@Type(value = UserInfo.class, name = UserInfo.INFO_ONLY),
@@ -51,6 +49,10 @@ public class UserInfo extends DaqueryObject
     @Expose
     @Column(name="EMAIL", length = 500, nullable = true)
     protected String email;  
+    
+    @Expose
+    @Column(name="UTYPE", insertable = false, updatable = false)
+    protected String utype;
     
     public String getId() {
     	if(id == null) return(null);
