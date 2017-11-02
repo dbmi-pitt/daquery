@@ -16,6 +16,11 @@ public class StringHelper
 		return(val.trim().equals(""));
 	}
 	
+	public static boolean isBlank(String val)
+	{
+		return(isEmpty(val));
+	}
+	
 	public static boolean anyAreEmpty(String [] vals)
 	{
 		if(vals == null) return(true);
@@ -44,15 +49,7 @@ public class StringHelper
 		}
 		return(tPath);
 	}
-	
-	public static boolean isBlank(String val)
-	{
-		if(val == null || val.trim().equals(""))
-			return(true);
-		else
-			return(false);
-	}
-	
+		
 	public static boolean stringToBool(String val)
 	{
 		if(isBlank(val))

@@ -185,6 +185,28 @@ public class AppProperties
 		finally{ApplicationDBHelper.closeConnection(conn, stat, null);}
 	}
 	
+	private static final int defaultTaskQueueMaxLength = 4;
+	public static int getTaskQueueMaxLength()
+	{
+		try
+		{
+			String mLen = getDBProperty("task.queue.length");
+			if(StringHelper.isEmpty(mLen)) return(defaultTaskQueueMaxLength);
+			return(Integer.parseInt(mLen));
+		}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the task queue lenght from the application database.", t);
+			return(defaultTaskQueueMaxLength);			
+		}
+		
+	}
+	public static void setTaskQueueMaxLenght(int max) throws DaqueryException
+	{
+		if(max <= 0) throw new DaqueryException("The maximum task queue length must be greater than zero.");
+		String maxStr = Integer.toString(max);
+		setDBProperty("task.queue.length", maxStr);
+	}
 	/**
 	 * Check for the existence of a property in the application database table PROPERTY.
 	 * @param propertyName  The name of the property to check for.
