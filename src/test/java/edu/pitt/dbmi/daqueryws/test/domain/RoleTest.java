@@ -25,15 +25,15 @@ import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 
 public class RoleTest {
 
-	private static String username = "RoleTester";
+	private static String username = "RoleTest_User";
 	private static String email = "roletester@dummyaccounts.com";
 	private static String password = "dummy";
 	private static String realname = "Role Tester, Esq.";
 	
     @BeforeClass
     public static void setupBeforeClass() {
-    	//create a dummy user account for use in the RoleTests
     	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+    	//create a dummy user account for use in the RoleTests
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
@@ -103,26 +103,4 @@ public class RoleTest {
 		
 	}
 	
-	/*
-	 * 
-	 * 		Session session = null;
-		try {
-	    	session = HibernateConfiguration.openSession();
-			Network nw = new Network();
-			nw.setName("PaTH");
-			
-			Query qry = session.getNamedQuery(Network.FIND_BY_ID);
-			qry.setParameter("id", 1L);
-			
-			Network network = (Network)qry.uniqueResult();
-			System.out.println(network.toString());
-			System.out.println(network.toJson());
-		} catch (Exception e) {
-			e.printStackTrace(System.out);
-		} finally {
-			if (session != null) 
-				session.close();
-		}
-
-	 */
 }

@@ -67,6 +67,31 @@ public class DaqueryUserDAO extends AbstractDAO {
     	}
     	
     }
+
+    
+    /**
+     * Return an object representing the user matching the given username
+     * @param username- the username of the user to find 
+     * @return- a DaqueryUser object representing the username
+     * @throws HibernateException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static DaqueryUser queryUserByUsername(String username) throws Exception {
+    	try {
+			List<ParameterItem> pList = new ArrayList<ParameterItem>();
+			ParameterItem piUser = new ParameterItem("username", username);
+			pList.add(piUser);
+	        DaqueryUser user = executeQueryReturnSingle(DaqueryUser.FIND_BY_USERNAME, pList, logger);	
+	        return user;
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+    	} catch (Exception e) {
+	        throw e;    		
+    	}
+    	
+    }
     
     /**
      * A back-end call that uses the id/password combination to find the user's
