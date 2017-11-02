@@ -16,6 +16,7 @@ import java.util.Set;
 @NamedQueries({
     @NamedQuery(name = Network.FIND_ALL, query = "SELECT u FROM Network u ORDER BY u.name DESC"),
     @NamedQuery(name = Network.FIND_BY_ID, query = "SELECT u FROM Network u WHERE u.id = :id"),
+    @NamedQuery(name = Network.FIND_BY_NAME, query = "SELECT u FROM Network u WHERE u.name = :name"),
     @NamedQuery(name = Network.FIND_BY_UUID, query = "SELECT u FROM Network u WHERE u.networkId = :uuid"),
 
 })
@@ -31,6 +32,7 @@ public class Network extends DaqueryObject implements Serializable {
     public static final String FIND_ALL = "Network.findAll";
     public static final String FIND_BY_ID = "Network.findByID";
     public static final String FIND_BY_UUID = "Network.findByUUID";
+    public static final String FIND_BY_NAME = "Network.findByName";
 
 
     @Expose
@@ -132,6 +134,8 @@ public class Network extends DaqueryObject implements Serializable {
 	{
 		incomingQuerySites = sites;
 	}
+	
+	//#TODO: add a method addIncomingSite(Site) 
 
 	public Set<DataSource> getDataSources(){return(dataSources);}
 	public void setDataSources(Set<DataSource> ds){dataSources = ds;}

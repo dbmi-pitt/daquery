@@ -51,6 +51,23 @@ public class NetworkDAO extends AbstractDAO {
         }
     }
 
+    public static Network queryNetworkByName(String networkname) throws Exception {
+    	try { 	
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+			ParameterItem piName = new ParameterItem("name", networkname);
+			pList.add(piName);
+    		
+    	    Network network = executeQueryReturnSingle(Network.FIND_BY_NAME, pList, logger);
+	        return network;
+	    
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+            
+    }
+    
     public static List<Network> queryAllNetworks() throws Exception {
     	try { 		
     	    List<Network> networks = executeQueryReturnList(Network.FIND_ALL, null, logger);
@@ -63,6 +80,7 @@ public class NetworkDAO extends AbstractDAO {
         }
             
     }
+    
 	
     public static Network createNetwork(HashMap<String, String> params, Set<DataSource> dsSet) throws Exception {
     	Session s = null;

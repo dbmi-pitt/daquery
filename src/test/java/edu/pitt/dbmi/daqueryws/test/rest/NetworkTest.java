@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class NetworkTest extends DaqueryBaseTest {
 
-	private String networkTestUUID = "";
+	private String networkTestUUID = "a2610ae0-22b1-4dc8-92c6-8780c2cf0e9f";
 	
 	private String badToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI0ZTIyNGFiZi03OWVkLTQxZTktOGI3Yy1iODYxZTI3NzEwYTkiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvZGFxdWVyeS13cy93cy91c2Vycy9sb2dpbiIsImlhdCI6MTUwNzEyMDUyMiwiZXhwIjoxNTA3MTIxNDIyfQ.zlxdwkHOXSldVAgdbpVcTQ0uGSW8fI_LPHtgEMIh5u5BspvOzmXusl09HYeOk_lSrTSkqho-zRBTNL2wBY8feA";
 	
