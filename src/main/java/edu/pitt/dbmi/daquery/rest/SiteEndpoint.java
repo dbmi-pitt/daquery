@@ -9,9 +9,11 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.transaction.Transactional;
@@ -35,6 +37,7 @@ import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
+import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
@@ -163,21 +166,60 @@ public class SiteEndpoint extends AbstractEndpoint {
 				List<SiteInfo> rlist = new ArrayList<>();
 				for(SiteInfo s : network_info.allowedSites)
 					rlist.add(s);
-				return(ResponseHelper.getJsonResponseGen(200, rlist));
+				Map<String, List> rmap = new HashMap<>();
+				rmap.put("full", rlist);
+				rmap.put("outgoing", new ArrayList<>(network.getOutgoingQuerySites()));
+				return(ResponseHelper.getJsonResponseGen(200, rmap));
 			} else {
 				return(resp);
 			}
-            // Faking return here. Suppose get all available sites within Network for netword_id from Daquery-Central 
-//            List<Site> site_list = new ArrayList<>();
-//            site_list.add(new Site("fakeSite1", "url", "fakeSite1@pitt.edu"));
-//            
-//            if (site_list == null || site_list.size() == 0) {
-//                return Response.status(NOT_FOUND).build();
-//            }
-//
-//            String jsonString = toJsonArray(site_list);
-//            return Response.ok(200).entity(jsonString).build();
+			
+    	} catch (HibernateException he) {
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    }
+	
+	/**
+     * This method returns all the sites found in the database.
+     * example URL: daquery-ws/ws/sites/available?network_id=1
+     * @param network_id network's primary key
+     * @param type 
+     * @return a JSON array containing all the sites
+     * returns a 404 error if no queries are found,
+     *   a 500 error on failure
+     */
+	@GET
+    @Path("/pending")
+    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPendingSites(@QueryParam("network_id") long networkId) {
+    	
+    	try {
 
+            logger.info("#### returning pending sites for network id: " + networkId);
+            
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            Network network = NetworkDAO.queryNetwork(String.valueOf(networkId));
+            
+            Map<String, String> idParam = new HashMap<String, String>();
+            idParam.put("network-id", network.getNetworkId());
+			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
+			Response resp = DaqueryEndpoint.callCentralServer("pending-sites",  idParam);
+			
+			if(resp.getStatus() == 200)
+			{
+				String json = resp.readEntity(String.class);
+				return(ResponseHelper.getJsonResponseGen(200, json));
+			} else {
+				return(resp);
+			}
+			
     	} catch (HibernateException he) {
     		return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
@@ -225,8 +267,8 @@ public class SiteEndpoint extends AbstractEndpoint {
 
     /**
      * 
-     * example url: daquery-ws/ws/sites?networkid=a3477419-657d-4ddd-8750-c014e2033937
-     * @param networkid- The UUID for a network
+     * example url: daquery-ws/ws/sites?type=outgoing
+     * @param type- incoming or outgoing sites.
      * @param newSite- A JSON Object representing the site information
      * @return 201 Created			Site
      * @throws 400 Bad Request	error message
@@ -234,58 +276,56 @@ public class SiteEndpoint extends AbstractEndpoint {
      */
     @POST
     @Secured
-    //@Consumes(MediaType.APPLICATION_JSON)
-    //@Produces(MediaType.APPLICATION_JSON)
-    public Response createSite(LinkedHashMap<?, ?> newSite) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response requrestConnectSite(@QueryParam("type") String type, LinkedHashMap<?, ?> newSite) {
 
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
-    		String networkId = (String) newSite.get("network_id"); 		
-	        Network currentNetwork = NetworkDAO.queryNetwork(networkId);
-	        
-	        if(newSite.get("type").equals("both")) {
-	        	Site site_in = new Site((String)newSite.get("name"),
-									 (String)newSite.get("url"),
-									 (String)newSite.get("admin_email"));
-	        	Site site_out = new Site((String)newSite.get("name"),
-										 (String)newSite.get("url"),
-										 (String)newSite.get("admin_email"));
-	        	if (currentNetwork == null) {
-	                return Response.status(NOT_FOUND).build();
-	            }	        
-		       // site_in.setNetwork(currentNetwork);
-		       // site_out.setNetwork(currentNetwork);
-		        //persist changes
-		
-		        s.getTransaction().begin();
-		
-		        s.persist(site_in);
-		        s.persist(site_out);
-		        
-		        s.getTransaction().commit();
-	
-		        return Response.ok(201).entity(site_out).build();
+	        if(type.equals("outgoing")) {
+	        	// create site entity
+	        	// call central server for requesting site connection
+	        	// get response from central server
+	        	// respond to UI
+	        	String networkId = (String) newSite.get("network_id"); 		
+		        Network network = NetworkDAO.queryNetwork(networkId);
+	        	Site site_out = new Site((String)newSite.get("id"),
+	        							 (String)newSite.get("name"),
+						 				 (String)newSite.get("url"),
+						 				 (String)newSite.get("admin_email"));
+	        	Set<Site> ss = new HashSet<Site>();
+	        	ss.add(site_out);
+	        	network.setOutgoingQuerySites(ss);
+	        	
+	        	s.getTransaction().begin();
+	     		
+ 		        s.persist(network);
+ 		        
+ 		        s.getTransaction().commit();
+ 		        
+ 		        return Response.ok(201).entity(site_out).build();
+	        } else if(type.equals("incoming")) {
+	        	String networkId = (String) newSite.get("network_id"); 
+	        	Network network = NetworkDAO.queryNetwork(networkId);
+	        	Site site_in = new Site((String)newSite.get("id"),
+	        							(String)newSite.get("name"),
+						 				(String)newSite.get("url"),
+						 				(String)newSite.get("admin_email"));
+	        	Set<Site> ss = new HashSet<Site>();
+	        	ss.add(site_in);
+	        	network.setIncomingQuerySites(ss);
+	        	
+	        	s.getTransaction().begin();
+	     		
+ 		        s.persist(network);
+ 		        
+ 		        s.getTransaction().commit();
+	        	
+ 		       return Response.ok(201).build();
 	        } else {
-		        Site site = new Site((String)newSite.get("name"),
-		        					 (String)newSite.get("url"),
-		        					 (String)newSite.get("admin_email"));
-		        
-	            if (currentNetwork == null) {
-	                return Response.status(NOT_FOUND).build();
-	            }	        
-		      //  site.setNetwork(currentNetwork);
-		        //persist changes
-		
-		        s.getTransaction().begin();
-		
-		        s.persist(site);
-		        
-		        s.getTransaction().commit();
-	
-		        return Response.ok(201).entity(site).build();
+	        	return Response.status(BAD_REQUEST).build();
 	        }
-	        
     	} catch (Exception e) {
     		logger.info(e.getMessage());
     		e.printStackTrace();
@@ -297,7 +337,55 @@ public class SiteEndpoint extends AbstractEndpoint {
     		}
     		
     	}
-    	
+    }
+    
+    /**
+     * 
+     * example url: daquery-ws/ws/sites/receive-connection-request
+     * @param type- incoming or outgoing sites.
+     * @param newSite- A JSON Object representing the site information
+     * @return 201 Created			Site
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
+     */
+    @POST
+    @Path("/receive-connection-request")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response requrestConnectSite(LinkedHashMap<?, ?> newSite) {
+
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+        	String networkId = (String) newSite.get("network_id"); 
+        	Network network = NetworkDAO.queryNetwork(networkId);
+        	Site site_in = new Site((String)newSite.get("id"),
+        							(String)newSite.get("name"),
+					 				(String)newSite.get("url"),
+					 				(String)newSite.get("admin_email"));
+        	site_in.setStatus(SiteStatus.PENDING.toString());
+        	Set<Site> ss = new HashSet<Site>();
+        	ss.add(site_in);
+        	network.setIncomingQuerySites(ss);
+        	
+        	s.getTransaction().begin();
+     		
+	        s.save(network);
+	        
+	        s.getTransaction().commit();
+        	
+	       return Response.ok(201).build();
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		e.printStackTrace();
+    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
+
+    	} finally {
+    		if (s != null) {
+    			s.close();
+    		}
+    		
+    	}
     }
     
     
