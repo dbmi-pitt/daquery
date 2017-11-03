@@ -12,9 +12,9 @@ public class TaskQueue
 {
 	private static Hashtable<String, Task> tasksById = new Hashtable<String, Task>();
 	private static LinkedList<Task> waitingQueue = new LinkedList<Task>();
-	private static List<Task> runningQueue = new ArrayList<Task>();
+	private static List<TaskRunner> runningQueue = new ArrayList<TaskRunner>();
 	
-	public static synchronized void addTask(Task task) throws DaqueryException
+	public synchronized void addTask(Task task) throws DaqueryException
 	{
 		if(task == null || task.getQueueId() == null) throw new DaqueryException("Trying to queue a null task or a task without a queue id");
 		if(tasksById.containsKey(task.getQueueId())) throw new DaqueryException("Task " + task.getQueueId() + " is already queued or running.");
@@ -24,16 +24,15 @@ public class TaskQueue
 		runNext();
 	}
 	
-	public static synchronized void taskFinished(String taskId)
+	public synchronized void taskFinished(TaskRunner runner)
 	{
-		Task task = tasksById.get(taskId);
-		runningQueue.remove(task);
-		task.setStatus(TaskStatus.FINISHED);
-		tasksById.remove(taskId);
+		runningQueue.remove(runner);
+		runner.task.setStatus(TaskStatus.FINISHED);
+		tasksById.remove(runner.task.getQueueId());
 		runNext();
 	}
 	
-	public static synchronized int queueLength()
+	public synchronized int queueLength()
 	{
 		return(tasksById.size());
 	}
@@ -41,14 +40,35 @@ public class TaskQueue
 	//only be called from synchronized methods in
 	//this class, but cannot be synchronized itself
 	//because it is called from sychronized methods
-	private static void runNext()
+	private void runNext()
 	{
 		if(runningQueue.size() < AppProperties.getTaskQueueMaxLength() && waitingQueue.size() > 0)
 		{
 			Task task = waitingQueue.poll();
-			runningQueue.add(task);
+			TaskRunner runner = new TaskRunner(task, this);
+			runningQueue.add(runner);
 			task.setStatus(TaskStatus.RUNNING);
-			((Thread)task).start();
+			((Thread)runner).start();
+		}
+	}
+	
+	private class TaskRunner extends Thread implements Runnable
+	{
+		Task task = null;
+		TaskQueue queue = null;
+		TaskRunner(Task task, TaskQueue queue)
+		{
+			this.task = task;
+			this.queue = queue;
+		}
+		
+		@Override
+		public void run()
+		{
+			task.startup();
+			task.execute();
+			task.shutdown();
+			queue.taskFinished(this);
 		}
 	}
 }

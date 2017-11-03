@@ -50,10 +50,6 @@ public class PopulateDevData
 		System.exit(0);
 	}
 	
-	private static void saveSite(DaqueryRequest req)
-	{
-		save(req.getRequestSite());
-	}
 	private static void assembleRequest()
 	{
 		Network net = createNetAndSiteData();
