@@ -28,6 +28,7 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.domain.Network;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.PROPERTY, property = "dataType")
 @JsonSubTypes({@Type(value = SQLQuery.class, name = InquiryType.TYPES.SQL_VAL)})
@@ -63,6 +64,8 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Expose
 	protected DaqueryUser author;
 	
+	private Network network;
+	
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)	
@@ -94,6 +97,12 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@JoinColumn(name="AUTHOR_ID")
 	public DaqueryUser getAuthor(){return(author);}
 	public void setAuthor(DaqueryUser auth){author = auth;}
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="NETWORK_ID")
+	public Network getNetwork(){return(network);}
+	public void setNetwork(Network net){network = net;}
+	
 	
 	@Transient
 	public abstract boolean isAggregate() throws DaqueryException;
