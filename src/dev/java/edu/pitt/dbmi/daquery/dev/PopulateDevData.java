@@ -32,21 +32,26 @@ public class PopulateDevData
 	public static void main(String [] args) throws Exception
 	{
 		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		assembleRequest();
-		assembleRequest();
-		assembleRequest();
+/*		assembleRequest();
 		Session s = HibernateConfiguration.openSession();
 		Query q = s.createQuery("select r from DaqueryRequest r");
 		List<DaqueryRequest> reqs = q.list();
-//		List<Network> nets = NetworkDAO.queryAllNetworks();
 		for(DaqueryRequest req : reqs)
-			System.out.println(req.getId());
+			System.out.println(req.getId()); */
 		
-//		DaqueryUser u = PopulateDevData.createTestUser();
-//		u.setId("zzABCDEFGHIJK");
-//		PopulateDevData.save(u);
-//		DaqueryUser user = DaqueryUserDAO.getAdminUser();
-//		assembleRequest();
+		assembleNetworkAndInquiry();
+		Session s = HibernateConfiguration.openSession();
+		Query q = s.createQuery("select i from Inquiry i");
+		List<Inquiry> inqs = q.list();
+		for(Inquiry inq : inqs)
+		{
+			System.out.println(inq.getId());
+			Network net = inq.getNetwork();
+			System.out.println(net.getName());
+			System.out.println(net.getData_model());
+			System.out.println(net.getIncomingQuerySites().size());
+		}
+		
 		System.exit(0);
 	}
 	
@@ -58,12 +63,23 @@ public class PopulateDevData
 		save(user);
 		Inquiry inq = createInquiryData(user);
 		save(inq);
-		DaqueryRequest req = createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
-		save(req);
-		Set<DaqueryRequest> outgoing = new HashSet<DaqueryRequest>();
-		outgoing.add(req);
-		net.setOutgoingRequests(outgoing);
 		save(net);
+		DaqueryRequest req = createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
+		req.setNetwork(net);
+		save(req);
+	}
+	
+	private static void assembleNetworkAndInquiry()
+	{
+		Network net = createNetAndSiteData();
+		DaqueryUser user = createTestUser();
+		save(net);
+		save(user);
+		Inquiry inq = createInquiryData(user);
+		inq.setAuthor(user);
+		inq.setNetwork(net);
+		save(inq);
+		
 	}
 	
 	private static DaqueryRequest createOutgoingRequest(Inquiry inquiry, DaqueryUser requester, Site requestSite)
