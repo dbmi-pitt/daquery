@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.domain.inquiry;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -63,6 +64,17 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Expose
 	protected DaqueryUser author;
 	
+	public Inquiry() {
+		
+	}
+	
+	public Inquiry(boolean generateUUID) {
+		if (generateUUID) {
+			UUID newUUID = UUID.randomUUID();
+			this.setInquiryId(newUUID.toString());
+		}
+
+	}
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)	

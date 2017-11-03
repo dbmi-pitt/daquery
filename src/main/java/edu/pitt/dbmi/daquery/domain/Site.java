@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.domain;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -33,6 +34,7 @@ import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 	@NamedQuery(name=Site.FIND_ALL, query="SELECT s FROM Site s"),
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
 	@NamedQuery(name=Site.FIND_BY_UUID, query="SELECT s FROM Site s WHERE s.siteId = :uuid"),
+	@NamedQuery(name=Site.FIND_BY_NAME, query="SELECT s FROM Site s WHERE s.name = :name"),
 	@NamedQuery(name=Site.FIND_BY_NETWORK, query="SELECT s FROM Site s WHERE s.network.id = :network_id"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
@@ -49,6 +51,7 @@ public class Site extends DaqueryObject implements Serializable {
     public static final String FIND_BY_UUID = "Site.findUUId";
     public static final String FIND_BY_NETWORK = "Site.findByNetwork";
     public static final String COUNT_ALL = "Site.countAll";
+    public static final String FIND_BY_NAME = "Site.findByName";
 
 	private static final long serialVersionUID = 1L;
 
@@ -107,6 +110,13 @@ public class Site extends DaqueryObject implements Serializable {
 	public Site()
 	{
 		
+	}
+	
+	public Site(boolean generateUUID) {
+		if (generateUUID) {
+			UUID newUUID = UUID.randomUUID();
+			this.setSiteId(newUUID.toString());
+		}
 	}
 	
 	public Site(String siteId, String name, String url, String admin_email) {

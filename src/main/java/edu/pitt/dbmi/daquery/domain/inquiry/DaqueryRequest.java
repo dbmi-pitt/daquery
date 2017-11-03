@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.domain.inquiry;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -74,6 +75,19 @@ public class DaqueryRequest extends DaqueryObject
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="request")
 	private Set<DaqueryResponse> responses;
 		
+	
+	public DaqueryRequest() {
+		
+	}
+	
+	public DaqueryRequest(boolean generateUUID) {
+		if (generateUUID) {
+			UUID newUUID = UUID.randomUUID();
+			this.setRequestId(newUUID.toString());
+		}
+		
+	}
+	
 	public long getId(){return(id);}
 	public void setId(long id){this.id = id;}
 	
