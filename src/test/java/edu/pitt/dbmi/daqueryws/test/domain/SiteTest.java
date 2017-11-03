@@ -77,7 +77,7 @@ public class SiteTest {
 			
 			session.getTransaction().begin();
 			session.persist(s);
-			session.persist(n);
+			session.update(n);
 			session.getTransaction().commit();
 		} catch (Exception e) {
 			e.printStackTrace(System.out);

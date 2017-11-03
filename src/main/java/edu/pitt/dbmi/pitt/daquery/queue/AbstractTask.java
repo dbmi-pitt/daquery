@@ -1,6 +1,6 @@
 package edu.pitt.dbmi.pitt.daquery.queue;
 
-public abstract class AbstractTask extends Thread implements Task {
+public abstract class AbstractTask implements Task {
 
 	protected String queueId;
 	private boolean running = false;
@@ -21,11 +21,5 @@ public abstract class AbstractTask extends Thread implements Task {
 
 	public TaskStatus getStatus(){return(status);}
 	public void setStatus(TaskStatus stat){status = stat;}
-	
-	@Override
-	public void run()
-	{
-		execute();
-		TaskQueue.taskFinished(getQueueId());
-	}
+
 }

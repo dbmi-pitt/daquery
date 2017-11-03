@@ -1,6 +1,6 @@
 package edu.pitt.dbmi.pitt.daquery.queue;
 
-public interface Task extends Runnable
+public interface Task
 {
 	public String getQueueId();
 	public boolean isRunning();
@@ -14,7 +14,9 @@ public interface Task extends Runnable
 	 */
 	public int getProgress();
 	public boolean isQueued();
+	public void startup();
 	public void execute();
+	public void shutdown();
 	public TaskStatus getStatus();
 	public void setStatus(TaskStatus status);
 }
