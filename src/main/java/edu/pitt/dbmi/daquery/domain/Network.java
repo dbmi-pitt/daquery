@@ -67,12 +67,12 @@ public class Network extends DaqueryObject implements Serializable {
 	@JoinTable(name = "SOURCE_TO_NETWORK", joinColumns = { @JoinColumn(name = "NETWORK_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATA_SOURCE_ID") })
 	private Set<DataSource> dataSources;
 
-	@Expose
+//	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "OUTGOING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
 	private Set<DaqueryRequest> outgoingRequests;
 
-	@Expose
+//	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "INCOMING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
 	private Set<DaqueryRequest> incomingRequests;

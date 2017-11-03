@@ -168,7 +168,11 @@ public class SiteEndpoint extends AbstractEndpoint {
 					rlist.add(s);
 				Map<String, List> rmap = new HashMap<>();
 				rmap.put("full", rlist);
-				rmap.put("outgoing", new ArrayList<>(network.getOutgoingQuerySites()));
+				List<SiteInfo> outgoings = new ArrayList<>();
+				for(Site s : network.getOutgoingQuerySites()) {
+					outgoings.add(new SiteInfo(s.getSiteId(), s.getName(), s.getUrl(), s.getAdmin_email()));
+				}
+				rmap.put("outgoing", outgoings);
 				return(ResponseHelper.getJsonResponseGen(200, rmap));
 			} else {
 				return(resp);
@@ -288,9 +292,9 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	// call central server for requesting site connection
 	        	// get response from central server
 	        	// respond to UI
-	        	String networkId = (String) newSite.get("network_id"); 		
+	        	String networkId = (String) newSite.get("network_id");	
 		        Network network = NetworkDAO.queryNetwork(networkId);
-	        	Site site_out = new Site((String)newSite.get("id"),
+	        	Site site_out = new Site((String)newSite.get("site"),
 	        							 (String)newSite.get("name"),
 						 				 (String)newSite.get("url"),
 						 				 (String)newSite.get("admin_email"));
@@ -300,7 +304,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 	        	s.getTransaction().begin();
 	     		
- 		        s.persist(network);
+ 		        s.save(network);
  		        
  		        s.getTransaction().commit();
  		        
