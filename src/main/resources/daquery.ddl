@@ -135,7 +135,8 @@ CREATE TABLE INQUIRY
    INQUIRY_ID varchar(50),
    VERSION int,
    INQUIRY_TYPE varchar(50),
-   AUTHOR_ID varchar(50)
+   AUTHOR_ID varchar(50),
+   NETWORK_ID bigint
 )
 ;
 
@@ -147,7 +148,8 @@ CREATE TABLE DAQUERY_REQUEST
    SENT_TIMESTAMP timestamp,
    REQUESTER_ID varchar(50),
    INQUIRY_ID bigint,
-   DIRECTION varchar(4)
+   DIRECTION varchar(4),
+   NETWORK_ID bigint
 )
 ;
 

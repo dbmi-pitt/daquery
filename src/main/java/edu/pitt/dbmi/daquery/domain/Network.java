@@ -67,16 +67,6 @@ public class Network extends DaqueryObject implements Serializable {
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "SOURCE_TO_NETWORK", joinColumns = { @JoinColumn(name = "NETWORK_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATA_SOURCE_ID") })
 	private Set<DataSource> dataSources;
-
-	@Expose
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "OUTGOING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
-	private Set<DaqueryRequest> outgoingRequests;
-
-	@Expose
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "INCOMING_REQUESTS", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "REQUEST_ID"))
-	private Set<DaqueryRequest> incomingRequests;
 	
 	public Network(){}
 	
@@ -148,48 +138,6 @@ public class Network extends DaqueryObject implements Serializable {
 	public Set<DataSource> getDataSources(){return(dataSources);}
 	public void setDataSources(Set<DataSource> ds){dataSources = ds;}
 	
-	public Set<DaqueryRequest> getOutgoingRequests(){return(outgoingRequests);}
-	public void setOutgoingRequests(Set<DaqueryRequest> requests){outgoingRequests = requests;}
-	
-	public Set<DaqueryRequest> getIncomingRequests(){return(incomingRequests);}
-	public void setIncomingRequests(Set<DaqueryRequest> requests){incomingRequests = requests;}
-	
-/*	public List<Site> getSites() {
-		return this.sites;
-	}
-
-	public void setSites(List<Site> sites) {
-		this.sites = sites;
-	}
-
-	public Site addSite(Site site) {
-		getSites().add(site);
-		site.setNetwork(this);
-
-		return site;
-	}
-
-	public Site removeSite(Site site) {
-		getSites().remove(site);
-		site.setNetwork(null);
-
-		return site;
-	}
-	*/
-	
-	
-	// ======================================
-    // =   Methods hash, equals, toString   =
-    // ======================================
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Network network = (Network) o;
-        return Objects.equals(networkId, network.networkId);
-    }
-
     
     @Override
 	public String toString() {

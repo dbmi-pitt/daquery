@@ -24,6 +24,7 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
 
 @Entity
@@ -75,7 +76,6 @@ public class DaqueryRequest extends DaqueryObject
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="request")
 	private Set<DaqueryResponse> responses;
 		
-	
 	public DaqueryRequest() {
 		
 	}
@@ -87,6 +87,10 @@ public class DaqueryRequest extends DaqueryObject
 		}
 		
 	}
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="NETWORK_ID")
+	private Network network;
 	
 	public long getId(){return(id);}
 	public void setId(long id){this.id = id;}
@@ -117,5 +121,8 @@ public class DaqueryRequest extends DaqueryObject
 	
 	public RequestDirection getDirectionEnum(){return(RequestDirection.valueOf(direction));}
 	public void setDirectionEnum(RequestDirection dir){direction = dir.toString();}
+	
+	public Network getNetwork(){return(network);}
+	public void setNetwork(Network net){network = net;}
 
 }
