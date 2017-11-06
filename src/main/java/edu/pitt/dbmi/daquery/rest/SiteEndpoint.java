@@ -35,6 +35,9 @@ import javax.ws.rs.core.UriInfo;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
@@ -109,10 +112,9 @@ public class SiteEndpoint extends AbstractEndpoint {
     			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
     			Response resp = DaqueryEndpoint.callCentralServer("pending-sites",  idParam);
     			
-    			if(resp.getStatus() == 200)
-    			{
+    			if(resp.getStatus() == 200) {
     				String json = resp.readEntity(String.class);
-    				return(ResponseHelper.getJsonResponseGen(200, json));
+    				return(ResponseHelper.getBasicResponse(200, json));
     			} else {
     				return(resp);
     			}
@@ -345,42 +347,110 @@ public class SiteEndpoint extends AbstractEndpoint {
     	}
     }
     
+//    /**
+//     * 
+//     * example url: daquery-ws/ws/sites/receive-connection-request
+//     * @param type- incoming or outgoing sites.
+//     * @param newSite- A JSON Object representing the site information
+//     * @return 201 Created			Site
+//     * @throws 400 Bad Request	error message
+//     * @throws 401 Unauthorized	
+//     */
+//    @POST
+//    @Path("/receive-connection-request")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response requrestConnectSite(LinkedHashMap<?, ?> newSite) {
+//
+//    	Session s = null;
+//    	try {
+//    		s = HibernateConfiguration.openSession();
+//        	String networkId = (String) newSite.get("network_id"); 
+//        	Network network = NetworkDAO.queryNetwork(networkId);
+//        	Site site_in = new Site((String)newSite.get("id"),
+//        							(String)newSite.get("name"),
+//					 				(String)newSite.get("url"),
+//					 				(String)newSite.get("admin_email"));
+//        	site_in.setStatus(SiteStatus.PENDING.toString());
+//        	Set<Site> ss = new HashSet<Site>();
+//        	ss.add(site_in);
+//        	network.setIncomingQuerySites(ss);
+//        	
+//        	s.getTransaction().begin();
+//     		
+//	        s.save(network);
+//	        
+//	        s.getTransaction().commit();
+//        	
+//	       return Response.ok(201).build();
+//    	} catch (Exception e) {
+//    		logger.info(e.getMessage());
+//    		e.printStackTrace();
+//    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
+//
+//    	} finally {
+//    		if (s != null) {
+//    			s.close();
+//    		}
+//    		
+//    	}
+//    }
+    
     /**
      * 
-     * example url: daquery-ws/ws/sites/receive-connection-request
-     * @param type- incoming or outgoing sites.
+     * example url: daquery-ws/ws/sites/approve-connectrequest
+     * @param network-id   network id
+     * @param from-site-id site id which 
      * @param newSite- A JSON Object representing the site information
-     * @return 201 Created			Site
+     * @return 200 OK			
      * @throws 400 Bad Request	error message
      * @throws 401 Unauthorized	
      */
-    @POST
-    @Path("/receive-connection-request")
+    @PUT
+    @Path("/approve-connectrequest")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response requrestConnectSite(LinkedHashMap<?, ?> newSite) {
-
+    public Response approveConnectRequest(LinkedHashMap<?, ?> object) {
+    	String networkId = object.get("network_id").toString();
+    	String fromSiteId = object.get("from_site_id").toString();
     	Session s = null;
     	try {
-    		s = HibernateConfiguration.openSession();
-        	String networkId = (String) newSite.get("network_id"); 
-        	Network network = NetworkDAO.queryNetwork(networkId);
-        	Site site_in = new Site((String)newSite.get("id"),
-        							(String)newSite.get("name"),
-					 				(String)newSite.get("url"),
-					 				(String)newSite.get("admin_email"));
-        	site_in.setStatus(SiteStatus.PENDING.toString());
-        	Set<Site> ss = new HashSet<Site>();
-        	ss.add(site_in);
-        	network.setIncomingQuerySites(ss);
-        	
-        	s.getTransaction().begin();
-     		
-	        s.save(network);
-	        
-	        s.getTransaction().commit();
-        	
-	       return Response.ok(201).build();
+    		// tell daquery central you approve this site
+    		Map<String, String> idParam = new HashMap<String, String>();
+            idParam.put("network-id", networkId);
+            idParam.put("from-site-id", fromSiteId);
+			idParam.put("to-site-id", AppProperties.getDBProperty("site.id"));
+			Response resp = DaqueryEndpoint.callCentralServer("approve-connectrequest",  idParam);
+			
+			if(resp.getStatus() == 200) {
+				s = HibernateConfiguration.openSession(); 
+	        	Network network = NetworkDAO.queryNetwork(networkId);
+	        	
+	        	idParam = new HashMap<String, String>();
+    			idParam.put("site-id", fromSiteId);
+    			resp = DaqueryEndpoint.callCentralServer("sites",  idParam);
+    			String json = resp.readEntity(String.class);
+    			ObjectMapper mapper = new ObjectMapper();
+    			Map<String, Object> map= new LinkedHashMap<>();
+    			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
+    			
+    			    			
+	        	Site site_in = new Site((String)map.get("id"),
+	        							(String)map.get("siteName"),
+						 				(String)map.get("siteURL"),
+						 				(String)map.get("adminEmail"));
+	        	site_in.setStatus(SiteStatus.CONNECTED.toString());
+	        	Set<Site> ss = new HashSet<Site>();
+	        	ss.add(site_in);
+	        	network.setIncomingQuerySites(ss);
+	        	s.getTransaction().begin();
+		        s.update(network);
+		        s.getTransaction().commit();
+	        	
+		       return Response.ok(201).build();
+			} else {
+				return(resp);
+			}
     	} catch (Exception e) {
     		logger.info(e.getMessage());
     		e.printStackTrace();
