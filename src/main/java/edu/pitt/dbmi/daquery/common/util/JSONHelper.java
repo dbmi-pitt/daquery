@@ -120,7 +120,7 @@ public class JSONHelper
 			return(rVal);
 		}
 		else
-			throw new DaqueryException("JSON conversion is only supported for types Map<String, Object>, DaqueryObject and List<DaqueryObject>.  An object of type " + value.getClass().getSimpleName() +  " found"); 
+			throw new DaqueryException("JSON conversion is only supported for types Map<String, Object>, DaqueryObject and List<DaqueryObject> and Set<DaqueryObject>.  An object of type " + value.getClass().getSimpleName() +  " found"); 
 	}
 	
 	/**
