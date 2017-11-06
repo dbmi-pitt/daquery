@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import edu.pitt.dbmi.daquery.common.util.*;
 import edu.pitt.dbmi.daquery.central.ConnectionRequest;
+import edu.pitt.dbmi.daquery.central.ConnectionRequestStatus;
 import edu.pitt.dbmi.daquery.central.ExtendedSiteInfo;
 import edu.pitt.dbmi.daquery.common.domain.*;
 
@@ -304,7 +305,7 @@ public class DBHelper
 	 * @throws DaqueryCentralException
 	 */
 	public static boolean createConnectionRequest(String networkId, String fromSiteId, String toSiteId) throws DaqueryCentralException {
-		String sql = "insert into connection_request (network_id, from_site_id, to_site_id) values (?, ?, ?)";
+		String sql = "insert into connection_request (network_id, from_site_id, to_site_id, status) values (?, ?, ?, ?)";
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
@@ -314,6 +315,7 @@ public class DBHelper
 			ps.setString(1, networkId);
 			ps.setString(2, fromSiteId);
 			ps.setString(3, toSiteId);
+			ps.setString(4, "PENDING");
 			ps.execute();
 			
 			return true;
@@ -331,8 +333,8 @@ public class DBHelper
 	 * @param String siteId
 	 * @throws DaqueryCentralException
 	 */
-	public static List<SiteInfo> getPendingSites(String networkId, String siteId) throws DaqueryCentralException{
-		String sql = "select id, name, access_key, tempkey, site_url, admin_email, email_access from sites s join connection_request cr on s.id = cr.from_site_id where cr.network_id = ? and cr.to_site_id = ?";
+	public static List<SiteInfo> getPendingSites(String networkId, String siteId, ConnectionRequestStatus status) throws DaqueryCentralException{
+		String sql = "select s.id, name, access_key, tempkey, site_url, admin_email, email_access from site s join connection_request cr on s.id = cr.from_site_id where cr.network_id = ? and cr.to_site_id = ? and cr.status = ?";
 		
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -345,6 +347,7 @@ public class DBHelper
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, networkId);
 			ps.setString(2, siteId);
+			ps.setString(3, status.toString());
 			rs = ps.executeQuery();
 			
 			while(rs.next()) {
@@ -359,6 +362,78 @@ public class DBHelper
 			return sites;	
 		} catch(Throwable t) {
 			String msg = "An unexpected error occurred while geting pending sites with site_id: " + siteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, null);
+		}
+	}
+	
+	/**
+	 * Get site by site id
+	 * @param String siteId
+	 * @throws DaqueryCentralException
+	 */
+	public static ExtendedSiteInfo getSite(String siteId) throws DaqueryCentralException{
+		String sql = "select id, name, access_key, tempkey, site_url, admin_email, email_access from site where site.id = ?";
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		ExtendedSiteInfo site = new ExtendedSiteInfo();
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, siteId);
+			rs = ps.executeQuery();
+			
+			if(rs.next()) {
+				site.id = rs.getString("id");
+				site.siteName = rs.getString("name");
+				site.siteURL = rs.getString("site_url");
+				site.adminEmail = rs.getString("admin_email");
+			}
+			
+			return site;	
+		} catch(Throwable t) {
+			String msg = "An unexpected error occurred while geting pending sites with site_id: " + siteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, null);
+		}
+	}
+	
+	/**
+	 * Approve connection request
+	 * @param String networkId
+	 * @param String fromSiteId
+	 * @param String toSiteId
+	 * @throws DaqueryCentralException
+	 */
+	public static boolean approveConnectionRequest(String networkId, String fromSiteId, String toSiteId) throws DaqueryCentralException{
+		String sql = "update connection_request set status = 'APPROVED' where network_id = ? and from_site_id = ? and to_site_id = ?";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		ExtendedSiteInfo site = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, networkId);
+			ps.setString(2, fromSiteId);
+			ps.setString(3, toSiteId);
+			int rows = ps.executeUpdate();
+			
+			if(rows == 1)
+				return true;
+			else
+				throw new Exception();
+		} catch(Throwable t) {
+			String msg = "An unexpected error occurred while approving connection request, network_id: " + networkId + " from_site_id: " + fromSiteId + " to_site_id: " + toSiteId;
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryCentralException(msg, t);
 		} finally {

@@ -8,11 +8,13 @@ public class ConnectionRequest {
 	public String networkId;
 	public String fromSiteId;
 	public String toSiteId;
+	public String status;
 	
 	public ConnectionRequest() {}
 	public ConnectionRequest(ResultSet rs) throws SQLException {
 		this.networkId = rs.getString("network_id");
 		this.fromSiteId = rs.getString("from_site_id");
 		this.toSiteId = rs.getString("to_site_id");
+		this.status = rs.getString("status");
 	}
 }
