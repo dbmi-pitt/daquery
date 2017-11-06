@@ -32,4 +32,11 @@ public class SiteInfo extends DaqueryObject
 		siteURL = rs.getString("site_url");
 		adminEmail = rs.getString("admin_email");
 	}
+	
+	public SiteInfo(String id, String siteName, String siteURL, String adminEmail) {
+		this.id = id;
+		this.siteName = siteName;
+		this.siteURL = siteURL;
+		this.adminEmail = adminEmail;
+	}
 }

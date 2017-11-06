@@ -101,6 +101,24 @@ public class JSONHelper
 			rVal = rVal + "]";
 			return(rVal);
 		}
+		else if(value instanceof Set) {
+			if(((Set) value).size() == 0) return("[]");
+			String rVal = "[";
+			String comma = "";
+			boolean first = true;
+			for(Object obj : (Set) value)
+			{
+				rVal = rVal + comma + toJSON(obj);
+				if(first)
+				{
+					first = false;
+					comma = ", ";
+				}
+			}
+				
+			rVal = rVal + "]";
+			return(rVal);
+		}
 		else
 			throw new DaqueryException("JSON conversion is only supported for types Map<String, Object>, DaqueryObject and List<DaqueryObject>.  An object of type " + value.getClass().getSimpleName() +  " found"); 
 	}
