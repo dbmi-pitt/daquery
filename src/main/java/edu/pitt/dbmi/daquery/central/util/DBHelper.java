@@ -202,7 +202,7 @@ public class DBHelper
 	 */
 	public static List<NetworkInfo> getAllowedNetworks(String siteId) throws DaqueryCentralException
 	{
-		String sql = "select site_id, network_name, data_model, network_membership.network_id, site.name as site_name, site_url " +
+		String sql = "select site_id, network_name, data_model, network_membership.network_id, site.name as site_name, site_url, admin_email " +
 		                                  "from network_membership, " +
                                                 "(select id as network_id, name as network_name, data_model from network " +
                                                           "where id in " + 
@@ -232,6 +232,7 @@ public class DBHelper
 				String site_Id = rs.getString("site_id");
 				String siteName = rs.getString("site_name");
 				String siteURL = rs.getString("site_url");
+				String adminEmail = rs.getString("admin_email");
 				if(!currentNetworkId.equals(netId))
 				{
 					currentNetworkId = netId;
@@ -245,6 +246,7 @@ public class DBHelper
 				nextSite.id = site_Id;
 				nextSite.siteName = siteName;
 				nextSite.siteURL = siteURL;
+				nextSite.adminEmail = adminEmail;
 				currentNetInfo.allowedSites.add(nextSite);
 			}
 			return(networks);	
@@ -270,15 +272,18 @@ public class DBHelper
 	 * @throws DaqueryCentralException
 	 */
 	public static ConnectionRequest getConnectionRequest(String networkId, String fromSiteId, String toSiteId) throws DaqueryCentralException {
-		String sql = String.format("select id, network_id, from_site_id, to_site_id from connection_request where network_id={0} and from_site_id={1} and to_site_id={2}", networkId, fromSiteId, toSiteId);
+		String sql = "select id, network_id, from_site_id, to_site_id from connection_request where network_id=? and from_site_id=? and to_site_id=?";
 		Connection conn = null;
-		Statement s = null;
+		PreparedStatement ps = null;
 		ResultSet rs = null;
 		
 		try {
 			conn = ApplicationDBHelper.getConnection();
-			s = conn.createStatement();
-			rs = s.executeQuery(sql);
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, networkId);
+			ps.setString(2, fromSiteId);
+			ps.setString(3, toSiteId);
+			rs = ps.executeQuery();
 			if(rs.next()) {
 				return new ConnectionRequest(rs);
 			} else {
@@ -289,7 +294,7 @@ public class DBHelper
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryCentralException(msg, t);
 		} finally {
-			ApplicationDBHelper.closeConnection(conn, s, rs);
+			ApplicationDBHelper.closeConnection(conn, ps, rs);
 		}
 	}
 	
@@ -298,25 +303,66 @@ public class DBHelper
 	 * @param ConnectionRequest cr
 	 * @throws DaqueryCentralException
 	 */
-	public static boolean createConnectionRequest(ConnectionRequest cr) throws DaqueryCentralException {
+	public static boolean createConnectionRequest(String networkId, String fromSiteId, String toSiteId) throws DaqueryCentralException {
 		String sql = "insert into connection_request (network_id, from_site_id, to_site_id) values (?, ?, ?)";
 		Connection conn = null;
+		PreparedStatement ps = null;
 		
 		try {
 			conn = ApplicationDBHelper.getConnection();
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, cr.networkId);
-			ps.setString(2, cr.fromSiteId);
-			ps.setString(3, cr.toSiteId);
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, networkId);
+			ps.setString(2, fromSiteId);
+			ps.setString(3, toSiteId);
 			ps.execute();
 			
 			return true;
 		} catch(Throwable t) {
-			String msg = "An unexpected error occurred while creating the connection request with network_id: " + cr.networkId + " from_site_id: " + cr.fromSiteId + " to_site_id: " + cr.toSiteId;
+			String msg = "An unexpected error occurred while creating the connection request with network_id: " + networkId + " from_site_id: " + fromSiteId + " to_site_id: " + toSiteId;
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryCentralException(msg, t);
 		} finally {
-			ApplicationDBHelper.closeConnection(conn, null, null);
+			ApplicationDBHelper.closeConnection(conn, ps, null);
+		}
+	}
+	
+	/**
+	 * Get sites waiting for response
+	 * @param String siteId
+	 * @throws DaqueryCentralException
+	 */
+	public static List<SiteInfo> getPendingSites(String networkId, String siteId) throws DaqueryCentralException{
+		String sql = "select id, name, access_key, tempkey, site_url, admin_email, email_access from sites s join connection_request cr on s.id = cr.from_site_id where cr.network_id = ? and cr.to_site_id = ?";
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		List<SiteInfo> sites = new ArrayList<>();
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, networkId);
+			ps.setString(2, siteId);
+			rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				ExtendedSiteInfo site = new ExtendedSiteInfo();
+				site.id = rs.getString("id");
+				site.siteName = rs.getString("name");
+				site.siteURL = rs.getString("site_url");
+				site.adminEmail = rs.getString("admin_email");
+				sites.add(site);
+			}
+			
+			return sites;	
+		} catch(Throwable t) {
+			String msg = "An unexpected error occurred while geting pending sites with site_id: " + siteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, null);
 		}
 	}
 }
