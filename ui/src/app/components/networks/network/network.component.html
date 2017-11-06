@@ -13,8 +13,8 @@
             <li *ngFor="let ws of waitingSites">
               <div class="callout callout-warning clearfix">
                 <p class="pull-right">
-                  <button class="btn btn-success">Accept</button>
-                  <button class="btn btn-danger">Deny</button>
+                  <button class="btn btn-success" (click)="approveConnect()">Accept</button>
+                  <button class="btn btn-danger" (click)="denyConnect()">Deny</button>
                 </p>
                 <p>{{ ws.name }} wants to access your data. Please respond!</p>
               </div>
@@ -26,7 +26,7 @@
   </div>
   <div class="row">
     <div class="col-lg-offset-3 col-lg-6 col-md-6 col-sm-12">
-      <a class="btn btn-block btn-info" [routerLink]="['/add-site']" [queryParams]="{network: network.id}">Connect New Site</a>
+      <a class="btn btn-block btn-info" [routerLink]="['/add-site']" [queryParams]="{network: network_id}">Connect New Site</a>
     </div>
   </div>
   <div class="row">
@@ -41,7 +41,7 @@
               <div class="box box-success">
                 <div class="box-body">
                   <p class="pull-right">
-                    <small class="label pull-right bg-green">on</small>
+                    <small *ngIf="os.status.toLowerCase() === 'pending'" class="label pull-right bg-red">pending</small>
                   </p>
                   <h4>{{ os.name }}</h4>
                 </div>

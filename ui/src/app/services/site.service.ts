@@ -18,7 +18,7 @@ export class SiteService {
 
   sites = [];
   getSite(id: number): Observable<Site> {
-    return this.http.get(`/daquery/ws/site/${id}`, this.authenticationService.jwt())
+    return this.http.get(`/daquery/ws/sites/${id}`, this.authenticationService.jwt())
                     .catch(error => {
                       return Observable.throw(error.json().error || 'Server error');
                     })
@@ -33,7 +33,7 @@ export class SiteService {
                     });
   }
 
-  getAvailableSites(network: Network): Observable<Site[]> {
+  getAvailableSites(network: Network): Observable<any> {
     const params = new HttpParams().set("network_id", network.id.toString())
 
     return this.http.get('/daquery/ws/sites/available', {params: params})
@@ -44,7 +44,7 @@ export class SiteService {
 
   getInSites(network: Network): Observable<Site[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
-                                   .set("type", "in");
+                                   .set("type", "incoming");
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
@@ -54,7 +54,7 @@ export class SiteService {
 
   getOutSites(network: Network): Observable<Site[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
-                                   .set("type", "out");
+                                   .set("type", "outgoing");
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
@@ -64,7 +64,7 @@ export class SiteService {
 
   getWaitingSites(network: Network): Observable<Site[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
-                                   .set("type", "waiting");
+                                   .set("type", "pending");
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
@@ -72,8 +72,8 @@ export class SiteService {
                     });
   }
 
-  createSite(siteForm: any): Observable<Site>{
-    return this.http.post('/daquery/ws/sites', siteForm)
+  requestConnectSite(siteForm: any): Observable<Site>{
+    return this.http.post('/daquery/ws/sites?type=outgoing', siteForm)
                     .catch(error => {
                       return Observable.throw(error || 'Server error');
                     });

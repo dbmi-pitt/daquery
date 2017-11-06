@@ -22,9 +22,7 @@ import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
 
 const appRoutes:Routes = [
-  { path: 'setup/step1', component: Step1Component },
-  { path: 'setup/step2', component: Step2Component },
-  { path: 'setup/step3', component: Step3Component },
+  { path: 'setup', component: SetupComponent },
   { path: "", component: LoginComponent },
   { path: "login", component: LoginComponent },
   { path: '', component: DashboardComponent,
@@ -33,9 +31,9 @@ const appRoutes:Routes = [
       { path: "queries-from-me", component: QueriesFromMeComponent, canActivate: [AuthGuard] },
       { path: "review-query/:id", component: ReviewQueryComponent, canActivate: [AuthGuard] },
       { path: "networks", component: NetworksComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
-      { path: "network/:id", component: NetworkComponent, canActivate: [AuthGuard] },
+      { path: "networks/:id", component: NetworkComponent, canActivate: [AuthGuard] },
       { path: "add-site", component: AddSiteComponent, canActivate: [AuthGuard] },
-      { path: "site/:id", component: SiteComponent, canActivate: [AuthGuard] },
+      { path: "sites/:id", component: SiteComponent, canActivate: [AuthGuard] },
       { path: "users", component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "change-password", component: ChangePasswordComponent, canActivate: [AuthGuard] },
     ]

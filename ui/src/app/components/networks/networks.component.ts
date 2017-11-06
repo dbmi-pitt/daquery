@@ -12,8 +12,8 @@ export class NetworksComponent implements OnInit {
   showJoinNetwork = false;
   showCreateNetwork = false;
 
-  networks: Network[];
-    constructor(private networkService: NetworkService) { 
+  networks: Network[] = [];
+  constructor(private networkService: NetworkService) {
   }
 
   ngOnInit() {

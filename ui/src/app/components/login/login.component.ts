@@ -21,9 +21,9 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     // get setup flag. if not setup, redirect to setup page
     this.setupService.getSetup()
-                     .subscribe(setup => {
-                        if(!setup){
-                          this.router.navigate(['./setup/step1']);
+                     .subscribe(isSetup => {
+                        if(isSetup === 'N'){
+                          this.router.navigate(['./setup']);
                         }
                       });
     // reset login status
@@ -34,10 +34,13 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.authenticationService.login(this.model.email, this.model.password)
                               .subscribe(result => {
-                                if (result === true) {
+                                if (result === 'success') {
                                   this.router.navigate(['/queries-from-me']);
-                                } else {
+                                } else if (result === 'fail'){
                                   this.error = 'Email or password is incorrect';
+                                  this.loading = false;
+                                } else if (result === 'error'){
+                                  this.error = 'Unexcepted problem happened';
                                   this.loading = false;
                                 }
                               });

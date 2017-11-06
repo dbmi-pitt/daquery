@@ -20,10 +20,10 @@ export class DashboardComponent implements OnInit {
               private idle: Idle, 
               private keepalive: Keepalive,
               private authenticationService: AuthenticationService) { 
-    // sets an idle timeout of 30 minutes
-    idle.setIdle(1800);
-    // sets a timeout period of . after 30 seconds of inactivity, the user will be considered timed out.
-    idle.setTimeout(120);
+    // sets an idle timeout of 5 minutes(300 seconds)
+    idle.setIdle(300);
+    // sets a timeout period of . after 1 minute(60 seconds) of inactivity, the user will be considered timed out.
+    idle.setTimeout(60);
     // sets the default interrupts, in this case, things like clicks, scrolls, touches to the document
     idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
 

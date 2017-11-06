@@ -26,7 +26,7 @@ export class EqualValidator implements Validator {
     // value not equal
     if (e && v !== e.value && !this.isReverse) {
       return {
-        validateEqual: false
+        validateEqual: true
        }
     }
 
@@ -39,7 +39,7 @@ export class EqualValidator implements Validator {
     // value not equal and reverse
     if (e && v !== e.value && this.isReverse) {
       e.setErrors({
-        validateEqual: false
+        validateEqual: true
       })
     }
 

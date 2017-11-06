@@ -4,18 +4,20 @@
 <section class="content">
   <div class="row">
     <div class="col-sm-12 col-md-4 placeholder">
-      <button class="btn btn-primary" (click)="toggleJoinNetwork()">Join Network</button>
-      <button class="btn btn-primary" (click)="toggleCreateNetwork()">Create Network</button>
+      <button class="btn btn-default btn-app" (click)="toggleJoinNetwork()">
+          <i class="fa fa-sign-in"></i>Join Network</button>
+      <button class="btn btn-default btn-app" (click)="toggleCreateNetwork()">
+          <i class="fa fa-edit"></i>Create Network</button>
     </div>
   </div>
-  <app-add-network *ngIf="showJoinNetwork"></app-add-network>
+  <app-add-network *ngIf="showJoinNetwork" (newNetwork)="addNewNetwork($event)"></app-add-network>
   <app-create-network *ngIf="showCreateNetwork" (newNetwork)="addNewNetwork($event)"></app-create-network>
   <div *ngFor="let network of networks">
     <div class="row">
       <div class="col-md-12">
         <div class="box box-default">
           <div class="box-header with-border">
-            <h3 class="box-title"><a [routerLink]="['/network', network.id]">{{network.name}}</a></h3>
+            <h3 class="box-title"><a [routerLink]="['/networks', network.id]">{{network.name}}</a></h3>
 
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>

@@ -12,6 +12,7 @@ import { Observable } from 'rxjs/Observable';
 })
 export class NetworkComponent implements OnInit {
 
+  network_id: number;
   network: Network = new Network();
   inSites = [];
   outSites = [];
@@ -23,11 +24,11 @@ export class NetworkComponent implements OnInit {
   ngOnInit() {
     // subscribe to router event
     this.activatedRoute.params.subscribe(async (params: Params) => {
-      let id = params['id'];
-      await this.getNetwork(id);
-      this.getInSites();
+      this.network_id = params['id'];
+      await this.getNetwork(this.network_id);
+      //this.getInSites();
       this.getOutSites();
-      this.getWaitingSites();
+      //this.getWaitingSites();
     });
   }
 
@@ -60,6 +61,14 @@ export class NetworkComponent implements OnInit {
                     .subscribe(sites => {
                       this.waitingSites = sites;
                     });
+  }
+
+  denyConnect(){
+    console.log("deny!");
+  }
+
+  approveConnect(){
+    console.log("approve!");
   }
 
 }

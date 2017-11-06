@@ -1,18 +1,36 @@
 <div class="row">
   <div class="col-md-8">
-    <div class="box box-info">
-      <div class="box-header with-border">Add Network</div>
+    <div class="box box-primary">
+      <div class="box-header with-border">Join Network</div>
       <div class="box-body">
-        <form>
-          <div class="form-group">
-            <label for="url">URL</label>
-            <input type="text" class="form-control" id="url" placeholder="URL">
+        <form #f [formGroup]="joinNetworkForm" (ngSubmit)="onSubmit()" novalidate>
+          <div class="form-group has-feedback" [ngClass]="{'has-error': network.invalid && (submitted || network.dirty || network.touched), 'has-success': network.valid && (submitted || network.dirty || network.touched) }">
+            <label for="available-networks">Available Networks</label>
+            <select formControlName="network" class="form-control">
+              <option value="">-Select-</option>
+              <option *ngFor="let network of availableNetworks" value="{{ network.id }}">
+                {{ network.name }}
+              </option>
+            </select>
+            <div class="help-block" *ngIf="network.invalid && (submitted || network.dirty || network.touched)">Please select a network</div>
           </div>
-          <div class="form-group">
-            <label for="sitename">Network Name</label>
-            <input type="text" class="form-control" id="networkname" placeholder="Network Name">
+          <hr />
+          <div class="form-group has-feedback" [ngClass]="{'has-error': url.invalid && (submitted || url.dirty || url.touched), 'has-success': url.valid && (submitted || url.dirty || url.touched) }">
+            <label>Datamodel URL</label>
+            <input type="text" formControlName="url" class="form-control" name="url" placeholder="Datamodel URL">
+            <div class="help-block" *ngIf="url.invalid && (submitted || url.dirty || url.touched)">Please enter the datamodel url</div>
           </div>
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <div class="form-group has-feedback" [ngClass]="{'has-error': username.invalid && (submitted || username.dirty || username.touched), 'has-success': username.valid && (submitted || username.dirty || username.touched) }">
+            <label>Datamodel Username</label>
+            <input type="text" formControlName="username" class="form-control" name="username" placeholder="Datamodel Username">
+            <div class="help-block" *ngIf="username.invalid && (submitted || username.dirty || username.touched)">Please enter the datamodel username</div>
+          </div>
+          <div class="form-group has-feedback" [ngClass]="{'has-error': password.invalid && (submitted || password.dirty || password.touched), 'has-success': password.valid && (submitted || password.dirty || password.touched) }">
+            <label>Datamodel Password</label>
+            <input type="password" formControlName="password" class="form-control" name="password" placeholder="Datamodel Password">
+            <div class="help-block" *ngIf="password.invalid && (submitted || password.dirty || password.touched)">Please enter the datamodel password</div>
+          </div>
+          <button class="btn btn-primary">Join</button>
         </form>
       </div>
     </div>

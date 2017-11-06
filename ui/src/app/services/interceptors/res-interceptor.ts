@@ -17,14 +17,18 @@ constructor(private router: Router) {}
         if(event.status === 401){
           throw new HttpErrorResponse({status: event.status});
         }
+
+        // if('token' in event.body){
+        //   localStorage.setItem('jwt', JSON.stringify(event.body.token));
+        // }
         return event;
       }
     }).catch(error => {
-      if (error instanceof HttpErrorResponse){
-        if(error.status === 401) {
-          this.router.navigate(['/login']);
-        }
-      }
+      // if (error instanceof HttpErrorResponse){
+      //   if(error.status === 401) {
+      //     this.router.navigate(['/login']);
+      //   }
+      // }
       return Observable.throw(error || 'Server error');
     });
   }

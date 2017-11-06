@@ -3,33 +3,55 @@
     <b>Daquery</b><i class="fa fa-glass"></i>
   </div>
   <div class="login-box-body">
-    <p class="login-box-msg">Application Initial Setup (Step 1/3)</p>
-
-    <form name="form" (ngSubmit)="f.form.valid && submit()" #f="ngForm" novalidate>
-      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !model.sitename.valid }">
-        <input type="text" class="form-control" name="sitename" placeholder="Site Name" [(ngModel)]="model.sitename" #email="ngModel" required />
-        <span class="fa fa-sitemap form-control-feedback"></span>
-        <div *ngIf="f.submitted && !model.sitename.valid" class="help-block">Site Name is required</div>
+    <p class="login-box-msg">Application Initial Setup</p>
+    <form #f [formGroup]="setupForm" (ngSubmit)="onSubmit()">
+      <div class="form-group has-feedback" [ngClass]="{'has-error': sitename.invalid && (sitename.dirty || sitename.touched), 'has-success': sitename.valid && (sitename.dirty || sitename.touched) }">
+        <input type="text" formControlName="sitename" class="form-control" name="site-name" placeholder="Site Name" />
+        <span class="fa fa-file-text-o form-control-feedback"></span>
+        <div class="help-block" *ngIf="sitename.invalid && (sitename.dirty || sitename.touched)">Please enter a site name</div>
       </div>
-      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !model.key.valid }">
-        <input type="text" class="form-control" name="key" placeholder="Key" [(ngModel)]="model.key" #key="ngModel" required />
+      <div class="form-group has-feedback" [ngClass]="{'has-error': sitekey.invalid && (sitekey.dirty || sitekey.touched), 'has-success': sitekey.valid && (sitekey.dirty || sitekey.touched) }">
+        <input type="text" formControlName="sitekey" class="form-control" name="site-key" placeholder="Site Key" />
         <span class="fa fa-key form-control-feedback"></span>
-        <div *ngIf="f.submitted && !model.key.valid" class="help-block">Password is required</div>
+        <div class="help-block" *ngIf="sitekey.invalid && (sitekey.dirty || sitekey.touched)">Please enter a site key</div>
       </div>
-      <div class="form-group has-feedback" [ngClass]="{ 'has-error': f.submitted && !model.url.valid }">
-        <input type="text" class="form-control" name="url" placeholder="URL" [(ngModel)]="model.url" #url="ngModel" required />
-        <span class="fa fa-link form-control-feedback"></span>
-        <div *ngIf="f.submitted && !model.url.valid" class="help-block">Password is required</div>
+      <div class="form-group has-feedback" [ngClass]="{'has-error': adminemail.invalid && (adminemail.dirty || adminemail.touched), 'has-success': adminemail.valid && (adminemail.dirty || adminemail.touched) }">
+        <input type="text" formControlName="adminemail" class="form-control" name="admin-email" placeholder="Admin Email" validateEqual="adminemail_confirmation" reverse="true" />
+        <span class="fa fa-envelope-o form-control-feedback"></span>
+        <div class="help-block" *ngIf="adminemail.invalid && (adminemail.dirty || adminemail.touched)">Please enter a valid email address</div>
+      </div>
+      <div class="form-group has-feedback" [ngClass]="{'has-error': adminemail_confirmation.invalid && (adminemail_confirmation.dirty || adminemail_confirmation.touched), 'has-success': adminemail_confirmation.valid && (adminemail_confirmation.dirty || adminemail_confirmation.touched) }">
+        <input type="text" formControlName="adminemail_confirmation" class="form-control" name="admin-email_confirmation" placeholder="Retype Admin Email" validateEqual="adminemail" reverse="false" />
+        <span class="fa fa-envelope-o form-control-feedback"></span>
+        <div class="help-block" *ngIf="(adminemail_confirmation.hasError('required') || adminemail_confirmation.hasError('email')) && (adminemail_confirmation.dirty || adminemail_confirmation.touched)">Please enter a valid email address</div>
+        <div class="help-block" *ngIf="(!adminemail_confirmation.hasError('required') && !adminemail_confirmation.hasError('email') && adminemail_confirmation.hasError('validateEqual')) && (adminemail_confirmation.dirty || adminemail_confirmation.touched)">Email mismatch</div>
+      </div>
+      <div class="form-group has-feedback" [ngClass]="{'has-error': adminpwd.invalid && (adminpwd.dirty || adminpwd.touched), 'has-success': adminpwd.valid && (adminpwd.dirty || adminpwd.touched) }">
+        <input type="password" formControlName="adminpwd" class="form-control" name="admin-pwd" placeholder="Admin Password" validateEqual="adminpwd_confirmation" reverse="true" />
+        <span class="fa fa-lock form-control-feedback"></span>
+        <div class="help-block" *ngIf="adminpwd.hasError('required') && (adminpwd.dirty || adminpwd.touched)">Please enter a password</div>
+        <div class="help-block" *ngIf="adminpwd.hasError('minlength') && (adminpwd.dirty || adminpwd.touched)">Password at least 4 characters</div>
+      </div>
+      <div class="form-group has-feedback" [ngClass]="{'has-error': adminpwd_confirmation.invalid && (adminpwd_confirmation.dirty || adminpwd_confirmation.touched), 'has-success': adminpwd_confirmation.valid && (adminpwd_confirmation.dirty || adminpwd_confirmation.touched) }">
+        <input type="password" formControlName="adminpwd_confirmation" class="form-control" name="admin-pwd_confirmation" placeholder="Retype Admin Password" validateEqual="adminpwd" reverse="false" />
+        <span class="fa fa-lock form-control-feedback"></span>
+        <div class="help-block" *ngIf="adminpwd_confirmation.hasError('required') && (adminpwd_confirmation.dirty || adminpwd_confirmation.touched)">Please retype a password</div>
+        <div class="help-block" *ngIf="(!adminpwd_confirmation.hasError('required') && adminpwd_confirmation.hasError('validateEqual')) && (adminpwd_confirmation.dirty || adminpwd_confirmation.touched)">Password mismatch</div>
+      </div>
+      <div class="form-group has-feedback" [ngClass]="{'has-error': adminrealname.invalid && (adminrealname.dirty || adminrealname.touched), 'has-success': adminrealname.valid && (adminrealname.dirty || adminrealname.touched) }">
+        <input type="text" formControlName="adminrealname" class="form-control" name="admin-real-name" placeholder="Admin Real Name" />
+        <span class="fa fa-user-o form-control-feedback"></span>
+        <div class="help-block" *ngIf="adminrealname.invalid && (adminrealname.dirty || adminrealname.touched)">Please retype a password</div>
       </div>
       <div class="row">
-        <div class="col-xs-offset-4 col-xs-4">
+        <div class="col-xs-12">
           <button [disabled]="loading" class="btn btn-primary btn-block btn-flat">
-            {{ loading ? '...' : 'Next' }}
+            {{ loading ? 'Application initialling, please wait...' : 'Initial Daquery Application' }}
           </button>
         </div>
       </div>
+      <br />
       <div *ngIf="error" class="alert alert-danger">{{error}}</div>
     </form>
-
   </div>
 </div>
