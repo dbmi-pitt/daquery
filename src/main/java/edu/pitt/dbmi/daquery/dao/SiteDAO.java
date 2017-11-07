@@ -58,6 +58,24 @@ public class SiteDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
             throw e;
         }
+    }
+    
+    public static Site querySiteByName(String name) throws Exception {
+    	try {
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		Site site = null;
+    		ParameterItem piName = new ParameterItem("name", name);
+			pList.add(piName);
+			site = executeQueryReturnSingle(Site.FIND_BY_NAME, pList, logger);
+    		
+	        return site;
+	    
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
     }	
+
 }
 

@@ -12,6 +12,7 @@ import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @NamedQueries({
     @NamedQuery(name = Network.FIND_ALL, query = "SELECT u FROM Network u ORDER BY u.name DESC"),
@@ -68,6 +69,13 @@ public class Network extends DaqueryObject implements Serializable {
 	private Set<DataSource> dataSources;
 	
 	public Network(){}
+	
+	public Network(boolean generateUUID) {
+		if (generateUUID) {
+			UUID newUUID = UUID.randomUUID();
+			this.setNetworkId(newUUID.toString());
+		}
+	}
 	
 	public Network(String newName) {
 		this.name = newName;

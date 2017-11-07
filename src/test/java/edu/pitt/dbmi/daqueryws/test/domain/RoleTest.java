@@ -84,7 +84,7 @@ public class RoleTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 			DaqueryUser u = DaqueryUserDAO.authenticate(email, password);
-			Role r = RoleDAO.queryRoleBYName("admin");
+			Role r = RoleDAO.queryRoleByName("admin");
 			List<Role> roles = new ArrayList<Role>();
 			roles.add(r);
 			u.setRoles(roles);			

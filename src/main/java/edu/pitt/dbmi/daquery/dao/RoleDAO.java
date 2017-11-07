@@ -31,7 +31,7 @@ public class RoleDAO extends AbstractDAO {
             
     }
 
-    public static Role queryRoleBYName(String name) throws Exception {
+    public static Role queryRoleByName(String name) throws Exception {
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
     		Role role = null;
