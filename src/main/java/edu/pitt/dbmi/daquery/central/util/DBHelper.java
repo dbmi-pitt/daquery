@@ -273,7 +273,7 @@ public class DBHelper
 	 * @throws DaqueryCentralException
 	 */
 	public static ConnectionRequest getConnectionRequest(String networkId, String fromSiteId, String toSiteId) throws DaqueryCentralException {
-		String sql = "select id, network_id, from_site_id, to_site_id from connection_request where network_id=? and from_site_id=? and to_site_id=?";
+		String sql = "select id, network_id, from_site_id, to_site_id, status from connection_request where network_id=? and from_site_id=? and to_site_id=?";
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -330,6 +330,7 @@ public class DBHelper
 	
 	/**
 	 * Get sites waiting for response
+	 * @param <ConnectionRequestStatus>
 	 * @param String siteId
 	 * @throws DaqueryCentralException
 	 */
