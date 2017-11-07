@@ -5,10 +5,10 @@ import java.util.Date;
 
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
-import edu.pitt.dbmi.pitt.daquery.queue.AbstractTask;
-import edu.pitt.dbmi.pitt.daquery.queue.QueueManager;
-import edu.pitt.dbmi.pitt.daquery.queue.Task;
-import edu.pitt.dbmi.pitt.daquery.queue.TaskQueue;
+import edu.pitt.dbmi.daquery.queue.AbstractTask;
+import edu.pitt.dbmi.daquery.queue.QueueManager;
+import edu.pitt.dbmi.daquery.queue.Task;
+import edu.pitt.dbmi.daquery.queue.TaskQueue;
 
 public class TaskQueueTest
 {
