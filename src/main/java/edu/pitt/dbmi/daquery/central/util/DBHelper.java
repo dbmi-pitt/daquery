@@ -413,8 +413,8 @@ public class DBHelper
 	 * @param String toSiteId
 	 * @throws DaqueryCentralException
 	 */
-	public static boolean approveConnectionRequest(String networkId, String fromSiteId, String toSiteId) throws DaqueryCentralException{
-		String sql = "update connection_request set status = 'APPROVED' where network_id = ? and from_site_id = ? and to_site_id = ?";
+	public static boolean updateConnectionRequest(String networkId, String fromSiteId, String toSiteId, String status) throws DaqueryCentralException{
+		String sql = "update connection_request set status = ? where network_id = ? and from_site_id = ? and to_site_id = ?";
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
@@ -423,9 +423,10 @@ public class DBHelper
 		try {
 			conn = ApplicationDBHelper.getConnection();
 			ps = conn.prepareStatement(sql);
-			ps.setString(1, networkId);
-			ps.setString(2, fromSiteId);
-			ps.setString(3, toSiteId);
+			ps.setString(1, status);
+			ps.setString(2, networkId);
+			ps.setString(3, fromSiteId);
+			ps.setString(4, toSiteId);
 			int rows = ps.executeUpdate();
 			
 			if(rows == 1)

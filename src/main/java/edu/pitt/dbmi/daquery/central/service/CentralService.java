@@ -220,7 +220,7 @@ public class CentralService {
 	}
 	
 	/**
-	 * Get sites pending for you response
+	 * Approve connection request
 	 * 
 	 * @param network-id:
 	 *            "fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823"
@@ -236,7 +236,36 @@ public class CentralService {
 	public Response approveConnectReques(@QueryParam("network-id") String networkId, @QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId) {
 		try {
 			// get pending sites
-			if(DBHelper.approveConnectionRequest(networkId, fromSiteId, toSiteId))
+			if(DBHelper.updateConnectionRequest(networkId, fromSiteId, toSiteId, "APPROVED"))
+				return ResponseHelper.getBasicResponse(200, "");
+			else
+				return ResponseHelper.getBasicResponse(500,
+						"An unexpected error occured while approving connect request.  Check the central server logs for more information.");
+		} catch (Throwable t) {
+			String msg = "An error occurred while approving connect request network_id:" + networkId + " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
+			log.log(Level.SEVERE, msg, t);
+			return (ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
+		}
+	}
+	
+	/**
+	 * Deny connection request
+	 * 
+	 * @param network-id:
+	 *            "fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823"
+	 * @param site-id:
+	 *            "0f2378ec-d9ce-489a-b338-c8f82e567f40"
+	 * @return 200 with info specified above, 401 if authentication fails or 400/500
+	 *         on error.
+	 */
+	@GET
+	@Path("deny-connectrequest")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response denyConnectReques(@QueryParam("network-id") String networkId, @QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId) {
+		try {
+			// get pending sites
+			if(DBHelper.updateConnectionRequest(networkId, fromSiteId, toSiteId, "DENIED"))
 				return ResponseHelper.getBasicResponse(200, "");
 			else
 				return ResponseHelper.getBasicResponse(500,
