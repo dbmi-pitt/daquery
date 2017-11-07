@@ -1,7 +1,5 @@
 package edu.pitt.dbmi.daquery.sql.parser;
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
