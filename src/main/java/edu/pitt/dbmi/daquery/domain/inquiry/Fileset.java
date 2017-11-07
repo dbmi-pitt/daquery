@@ -32,4 +32,20 @@ public class Fileset extends DaqueryObject
 	@CollectionTable(name="filepath", joinColumns=@JoinColumn(name="fileset_id"))
 	@Column(name="path")
 	private Set<String> filepaths;
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public Set<String> getFilepaths() {
+		return filepaths;
+	}
+
+	public void setFilepaths(Set<String> filepaths) {
+		this.filepaths = filepaths;
+	}
 }

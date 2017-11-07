@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.Session;
+import org.joda.time.DateTime;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,14 +20,17 @@ import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.domain.inquiry.RequestDirection;
+import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 
-public class DaqueryRequestTest {
+public class DaqueryResponseTest {
 
-	private static String networkname = "DaqueryRequestTest_Network";
+	private static String networkname = "DaqueryResponseTest_Network";
 	private static String networkUUID = "";
 	private static String inrequestname = "In Request Name";
 	private static String inrequestUUID = "";
@@ -36,7 +40,7 @@ public class DaqueryRequestTest {
 	private static String password = "datasourcepassword";
 
 	//site data elements
-	private static String sitename = "DaqueryRequestTestSite";
+	private static String sitename = "DaqueryResponseTestSite";
 	private static String siteurl = "http://DaqueryRequestTestURL.com";
 	private static String adminemail = "TestSiteAdmin@email.com";
 	private static String accesskey = "TestSiteAccessKey";
@@ -45,16 +49,27 @@ public class DaqueryRequestTest {
 	private static String siteUUID = "";
 	
 	//DaqueryUser data elements
-	private static String daqueryusername = "DaqueryRequestTest_User";
-	private static String email = "daqueryusertester@dummyaccounts.com";
+	private static String daqueryusername = "DaqueryResponseTest_User";
+	private static String email = "daqueryuserresponsetester@dummyaccounts.com";
 	private static String daquerypassword = "dummy";
 	private static String realname = "Daquery Tester, Esq.";
+	private static String userUUID = "";
 	
 	//SQLQuery data elements
-	private static String inquiryname = "DaqueryRequestTestSQLQuery";
+	private static String inquiryname = "DaqueryResponseTestSQLQuery";
 	private static String inquirydesc = "Description of test inquiry";
 	private static String inquirySQLcode = "SELECT * FROM table X";
 	private static String inquiryUUID = "";
+	
+	//DaqueryResponse data elements
+	private static String responsename = "DaqueryResponseTest Name";
+	private static long responseid = -1;
+	private static String responsevalue = "test response Value";
+	
+	//Fileset data elements
+	private static String filesetpath = "/home/noplace/like/home/";
+	private static long filesetid = -1;
+	
 	
 	@BeforeClass
 	public static void setupBeforeClass() {
@@ -95,6 +110,9 @@ public class DaqueryRequestTest {
 			session.persist(u);
 			session.getTransaction().commit();
 			
+			userUUID = u.getId();
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
@@ -104,48 +122,19 @@ public class DaqueryRequestTest {
 		
 	}
 	
-    @Test
-    public void testCreateIncomingAndAddToNetwork() {
-		Session session = null;
-		try {
-	    	session = HibernateConfiguration.openSession();
-	    	Network n = NetworkDAO.queryNetwork(networkUUID);
-	    	Site s = SiteDAO.querySiteByID(siteUUID);
-	    	DaqueryUser u = DaqueryUserDAO.queryUserByUsername(daqueryusername);
-	    	DaqueryRequest dr = new DaqueryRequest(true);
-			dr.setRequestId(inrequestname);
-			dr.setDirectionEnum(RequestDirection.IN);
-			dr.setRequester(u);
-			dr.setRequestSite(s);
-			dr.setNetwork(n);
-			Date timestamp = new Date();
-			dr.setSentTimestamp(timestamp);
-			
-			session.getTransaction().begin();
-			session.update(s);
-			session.persist(dr);
-			session.getTransaction().commit();
-			inrequestUUID = dr.getRequestId();
-			
-		} catch (Exception e) {
-			e.printStackTrace(System.out);
-		} finally {
-			if (session != null) 
-				session.close();
-		}
-	}
 
     
     @Test
-    public void testCreateOutgoingAndAddToNetwork() {
+    public void testCreateResponseAndFileset() {
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
-	    	Network n = NetworkDAO.queryNetwork(networkUUID);
-	    	Site s = SiteDAO.querySiteByID(siteUUID);
-	    	DaqueryUser u = DaqueryUserDAO.queryUserByUsername(daqueryusername);
+			Network n = NetworkDAO.queryNetwork(networkUUID);
+			Site s = SiteDAO.querySiteByID(siteUUID);
+			DaqueryUser u = DaqueryUserDAO.queryUserByID(userUUID);
+
 	    	DaqueryRequest dr = new DaqueryRequest(true);
-			dr.setRequestId(outrequestname);
+			dr.setRequestId(inrequestname);
 			dr.setDirectionEnum(RequestDirection.OUT);
 			dr.setRequester(u);
 			dr.setRequestSite(s);
@@ -169,6 +158,30 @@ public class DaqueryRequestTest {
 			session.persist(q);
 			session.getTransaction().commit();
 			inrequestUUID = dr.getRequestId();
+
+			
+			DaqueryResponse resp = new DaqueryResponse();
+			resp.setResponder(u);
+			resp.setReplyTimestamp(DateTime.now().toDate());
+			resp.setRequest(dr);
+			resp.setSite(s);
+			resp.setStatusEnum(ResponseStatus.COMPLETED);
+			resp.setValue(responsevalue);
+			
+			Fileset fs = new Fileset();
+			Set<String> fp = new HashSet<String>();
+			fp.add(filesetpath);
+			fs.setFilepaths(fp);
+
+			session.getTransaction().begin();
+			session.update(dr);
+			session.persist(fs);
+			session.persist(resp);
+			session.getTransaction().commit();
+			
+			responseid = resp.getId();
+			filesetid = fs.getId();
+			
 			
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
@@ -191,11 +204,17 @@ public class DaqueryRequestTest {
 			session.createQuery("delete from Network where networkId = :networkUUID")
 				.setParameter("networkUUID", networkUUID)
 				.executeUpdate();
-			session.createQuery("delete from DaqueryUser where username = :username")
-				.setParameter("username", username)
+			session.createQuery("delete from DaqueryUser where id = :userUUID")
+				.setParameter("userUUID", userUUID)
 				.executeUpdate();
 			session.createQuery("delete from DaqueryRequest where requestId = :requestid")
 				.setParameter("requestid", inrequestUUID)
+				.executeUpdate();
+			session.createQuery("delete from DaqueryResponse where id = :responseid")
+				.setParameter("responseid", responseid)
+				.executeUpdate();
+			session.createQuery("delete from Fileset where id = :filesetid")
+				.setParameter("filesetid", filesetid)
 				.executeUpdate();
 			session.getTransaction().commit();
 		} catch (Exception e) {
