@@ -1,6 +1,9 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hibernate.Session;
 import org.junit.AfterClass;
@@ -17,6 +20,8 @@ import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.domain.inquiry.RequestDirection;
+import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
+import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 
 public class DaqueryRequestTest {
@@ -44,6 +49,12 @@ public class DaqueryRequestTest {
 	private static String email = "daqueryusertester@dummyaccounts.com";
 	private static String daquerypassword = "dummy";
 	private static String realname = "Daquery Tester, Esq.";
+	
+	//SQLQuery data elements
+	private static String inquiryname = "DaqueryRequestTestSQLQuery";
+	private static String inquirydesc = "Description of test inquiry";
+	private static String inquirySQLcode = "SELECT * FROM table X";
+	private static String inquiryUUID = "";
 	
 	@BeforeClass
 	public static void setupBeforeClass() {
@@ -113,6 +124,49 @@ public class DaqueryRequestTest {
 			session.getTransaction().begin();
 			session.update(s);
 			session.persist(dr);
+			session.getTransaction().commit();
+			inrequestUUID = dr.getRequestId();
+			
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		} finally {
+			if (session != null) 
+				session.close();
+		}
+	}
+
+    
+    @Test
+    public void testCreateOutgoingAndAddToNetwork() {
+		Session session = null;
+		try {
+	    	session = HibernateConfiguration.openSession();
+	    	Network n = NetworkDAO.queryNetwork(networkUUID);
+	    	Site s = SiteDAO.querySiteByID(siteUUID);
+	    	DaqueryUser u = DaqueryUserDAO.queryUserByUsername(daqueryusername);
+	    	DaqueryRequest dr = new DaqueryRequest(true);
+			dr.setRequestId(inrequestname);
+			dr.setDirectionEnum(RequestDirection.OUT);
+			dr.setRequester(u);
+			dr.setRequestSite(s);
+			dr.setNetwork(n);
+			Date timestamp = new Date();
+			dr.setSentTimestamp(timestamp);
+			
+			SQLQuery q = new SQLQuery(true);
+			q.setAuthor(u);
+			q.setCode(inquirySQLcode);
+			q.setDataType("B positive");
+			q.setNetwork(n);
+			q.setSqlDialectEnum(SQLDialect.ANSI);
+			Set<DaqueryRequest> drset = new HashSet<DaqueryRequest>();
+			drset.add(dr);
+			q.setRequests(drset);
+			
+			session.getTransaction().begin();
+			session.update(s);
+			session.persist(dr);
+			session.persist(q);
 			session.getTransaction().commit();
 			inrequestUUID = dr.getRequestId();
 			

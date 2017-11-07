@@ -34,6 +34,10 @@ public class SQLQuery extends Inquiry
 		dataType = InquiryType.TYPES.SQL_VAL;
 	}
 	
+	public SQLQuery(boolean generateUUID) {
+		super(generateUUID);
+	}
+	
 	@Transient
 	public SQLDialect getSqlDialectEnum()
 	{
