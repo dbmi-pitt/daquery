@@ -42,7 +42,7 @@ error
  ;
 
 sql_stmt_list
- : ';'* sql_stmt ( ';'+ sql_stmt )* ';'*
+ : sql_stmt ( sql_stmt )*
  ;
 
 sql_stmt
@@ -64,6 +64,7 @@ sql_stmt
                                       | drop_table_stmt
                                       | drop_trigger_stmt
                                       | drop_view_stmt
+                                      | factored_select_stmt
                                       | insert_stmt
                                       | pragma_stmt
                                       | reindex_stmt
@@ -71,13 +72,16 @@ sql_stmt
                                       | rollback_stmt
                                       | savepoint_stmt
                                       | simple_select_stmt
-                                      | factored_select_stmt                                      
                                       | select_stmt
                                       | update_stmt
                                       | update_stmt_limited
-                                      | vacuum_stmt )
+                                      | vacuum_stmt ) end_of_select
  ;
 
+end_of_select
+ : ';'
+ ;
+ 
 alter_table_stmt
  : K_ALTER K_TABLE ( database_name '.' )? table_name
    ( K_RENAME K_TO new_table_name

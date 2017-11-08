@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.dev;
 
-import edu.pitt.dbmi.daquery.sql.AggregateAnalyzer;
+import edu.pitt.dbmi.daquery.sql.SQLAnalyzer;
+import edu.pitt.dbmi.daquery.sql.parser.ParseException;
 
 public class AggregateSQLCheckTest
 {
@@ -15,7 +16,7 @@ public class AggregateSQLCheckTest
 		//printParse("select aliasA.col1 as alias1, tableA.col2 alias2 from tableA aliasA, where mySchema.tableA.col2 = 7 and (aliasA.col3 = '5' or col4 = 6)");
 		
 //		evaluate ("crap crap crap");
-		evaluate("select count(abcd.xycd.blec) !@#$%^^&*()_+=?/@#*sikdfsf from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc';");
+		evaluate("select count(abcd.xycd.blec) from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc'; select x from y;");
 /*		//fail because more than one result is returned
 		evaluate("select count(distinct abcd.xycd.blec as mmmmm), aasdf from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc';");
 		
@@ -29,7 +30,8 @@ public class AggregateSQLCheckTest
 	}
 	
 	public static void evaluate(String sql) {
-		AggregateAnalyzer analyzer = new AggregateAnalyzer(sql);
+		SQLAnalyzer analyzer = null;
+		analyzer = new SQLAnalyzer(sql);
 		if(analyzer.isRejected())
 			System.out.println(analyzer.getRejectionMessage());
 		else
