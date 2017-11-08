@@ -13,10 +13,11 @@ import { Observable } from 'rxjs/Observable';
 export class NetworkComponent implements OnInit {
 
   network_id: number;
-  network: Network = new Network();
+  network: any = null;
   inSites = [];
   outSites = [];
-  waitingSites = [];
+  pendingSites = [];
+  error: string;
   constructor(private siteService: SiteService,
               private networkService: NetworkService,
               private activatedRoute: ActivatedRoute) { }
@@ -26,9 +27,9 @@ export class NetworkComponent implements OnInit {
     this.activatedRoute.params.subscribe(async (params: Params) => {
       this.network_id = params['id'];
       await this.getNetwork(this.network_id);
-      //this.getInSites();
-      this.getOutSites();
-      //this.getWaitingSites();
+      this.getIncomingSites();
+      this.getOutgoingSites();
+      this.getPendingSites();
     });
   }
 
@@ -42,33 +43,59 @@ export class NetworkComponent implements OnInit {
     });
   }
 
-  getInSites(){
-    this.siteService.getInSites(this.network)
+  getIncomingSites(){
+    this.siteService.getIncomingSites(this.network)
                     .subscribe(sites => {
                           this.inSites = sites;
                        });
   }
 
-  getOutSites(){
-    this.siteService.getOutSites(this.network)
+  getOutgoingSites(){
+    this.siteService.getOutgoingSites(this.network)
                     .subscribe(sites => {
                           this.outSites = sites;
                        });
   }
 
-  getWaitingSites(){
-    this.siteService.getWaitingSites(this.network)
+  getPendingSites(){
+    this.siteService.getPendingSites(this.network)
                     .subscribe(sites => {
-                      this.waitingSites = sites;
+                      this.pendingSites = sites;
                     });
   }
 
-  denyConnect(){
-    console.log("deny!");
+  denyConnect(pendingSite: any){
+    const connectRequest = {
+      network_id: this.network.networkId,
+      from_site_id: pendingSite.id
+    };
+    this.siteService.denyConnect(connectRequest)
+                    .subscribe(data => {
+                      // get the pending, outgoing, incoming sites again
+                      this.getPendingSites();
+                      this.getOutgoingSites();
+                      this.getIncomingSites();
+                    },
+                    error => {
+                      this.error = error;
+                    });
   }
 
-  approveConnect(){
-    console.log("approve!");
+  approveConnect(pendingSite: any){
+    const connectRequest = {
+      network_id: this.network.networkId,
+      from_site_id: pendingSite.id
+    };
+    this.siteService.approveConnect(connectRequest)
+                    .subscribe(data => {
+                      // get the pending, outgoing, incoming sites again
+                      this.getPendingSites();
+                      this.getOutgoingSites();
+                      this.getIncomingSites();
+                    },
+                    error => {
+                      this.error = error;
+                    });
   }
 
 }

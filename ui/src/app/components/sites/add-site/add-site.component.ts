@@ -106,7 +106,6 @@ export class AddSiteComponent implements OnInit {
                         this.sites.map(s => {
                           if(s.id === e.id)
                             s["connected"] = true;
-                        
                         });
                       });
                     });

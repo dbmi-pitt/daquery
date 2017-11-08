@@ -42,7 +42,7 @@ export class SiteService {
                     });
   }
 
-  getInSites(network: Network): Observable<Site[]> {
+  getIncomingSites(network: Network): Observable<Site[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
                                    .set("type", "incoming");
 
@@ -52,7 +52,7 @@ export class SiteService {
                     });
   }
 
-  getOutSites(network: Network): Observable<Site[]> {
+  getOutgoingSites(network: Network): Observable<Site[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
                                    .set("type", "outgoing");
 
@@ -62,7 +62,7 @@ export class SiteService {
                     });
   }
 
-  getWaitingSites(network: Network): Observable<Site[]> {
+  getPendingSites(network: Network): Observable<Site[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
                                    .set("type", "pending");
 
@@ -72,8 +72,33 @@ export class SiteService {
                     });
   }
 
-  requestConnectSite(siteForm: any): Observable<Site>{
+  requestConnectSite(siteForm: any): Observable<Site> {
     return this.http.post('/daquery/ws/sites?type=outgoing', siteForm)
+                    .catch(error => {
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
+
+  approveConnect(connectRequest: any): Observable<any> {
+    const payload = {
+                      'network_id': connectRequest.network_id,
+                      'from_site_id': connectRequest.from_site_id
+                    };
+
+    return this.http.put('/daquery/ws/sites/approve-connectrequest', payload)
+                    .catch(error => {
+                      return Observable.throw(error || 'Server error');
+                    });
+
+  }
+
+  denyConnect(connectRequest: any): Observable<any> {
+    const payload = {
+      'network_id': connectRequest.network_id,
+      'from_site_id': connectRequest.from_site_id
+    };
+
+    return this.http.put('/daquery/ws/sites/deny-connectrequest', payload)
                     .catch(error => {
                       return Observable.throw(error || 'Server error');
                     });

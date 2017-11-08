@@ -54,6 +54,9 @@ export class SetupComponent implements OnInit {
                         if(error.status === 401){
                           this.loading = false;
                           this.error = "Invalid Site-name and Site-key combination."
+                        } else if(error.status === 500){
+                          this.loading = false;
+                          this.error = "Unexpected error occurs on server side."
                         }
                       });
   }
