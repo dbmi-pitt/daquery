@@ -319,9 +319,7 @@ public class SiteEndpoint extends AbstractEndpoint {
  				Response resp = DaqueryEndpoint.callCentralServer("request-connection",  idParam);
  				
  				if(resp.getStatus() == 200) {
-		        	Set<Site> ss = new HashSet<Site>();
-		        	ss.add(site_out);
-		        	network.setOutgoingQuerySites(ss);
+		        	network.getOutgoingQuerySites().add(site_out);
 		        	
 		        	s.getTransaction().begin();
 	 		        s.update(network);       
