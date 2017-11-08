@@ -464,6 +464,73 @@ public class SiteEndpoint extends AbstractEndpoint {
     	}
     }
     
+    /**
+     * 
+     * example url: daquery-ws/ws/sites/deny-connectrequest
+     * @param network-id   network id
+     * @param from-site-id site id which 
+     * @param newSite- A JSON Object representing the site information
+     * @return 200 OK			
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
+     */
+    @PUT
+    @Path("/deny-connectrequest")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response denyConnectRequest(LinkedHashMap<?, ?> object) {
+    	String networkId = object.get("network_id").toString();
+    	String fromSiteId = object.get("from_site_id").toString();
+    	Session s = null;
+    	try {
+    		// tell daquery central you deny this site
+    		Map<String, String> idParam = new HashMap<String, String>();
+            idParam.put("network-id", networkId);
+            idParam.put("from-site-id", fromSiteId);
+			idParam.put("to-site-id", AppProperties.getDBProperty("site.id"));
+			Response resp = DaqueryEndpoint.callCentralServer("deny-connectrequest",  idParam);
+			
+			if(resp.getStatus() == 200) {
+				s = HibernateConfiguration.openSession(); 
+	        	Network network = NetworkDAO.queryNetwork(networkId);
+	        	
+	        	idParam = new HashMap<String, String>();
+    			idParam.put("site-id", fromSiteId);
+    			resp = DaqueryEndpoint.callCentralServer("sites",  idParam);
+    			String json = resp.readEntity(String.class);
+    			ObjectMapper mapper = new ObjectMapper();
+    			Map<String, Object> map= new LinkedHashMap<>();
+    			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
+    			
+    			    			
+	        	Site site_in = new Site((String)map.get("id"),
+	        							(String)map.get("siteName"),
+						 				(String)map.get("siteURL"),
+						 				(String)map.get("adminEmail"));
+	        	site_in.setStatus(SiteStatus.DENIED.toString());
+	        	Set<Site> ss = new HashSet<Site>();
+	        	ss.add(site_in);
+	        	network.setIncomingQuerySites(ss);
+	        	s.getTransaction().begin();
+		        s.update(network);
+		        s.getTransaction().commit();
+	        	
+		       return Response.ok(201).build();
+			} else {
+				return(resp);
+			}
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		e.printStackTrace();
+    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
+
+    	} finally {
+    		if (s != null) {
+    			s.close();
+    		}
+    		
+    	}
+    }
     
     @PUT
     @Secured

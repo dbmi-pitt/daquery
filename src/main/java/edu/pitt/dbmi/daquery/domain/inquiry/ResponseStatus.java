@@ -7,6 +7,7 @@ public enum ResponseStatus
 	PENDING(TYPES.PENDING),
 	QUEUED(TYPES.QUEUED),
 	EXECUTING(TYPES.EXECUTING),
+	COMPLETED(TYPES.COMPLETED),
 	ERROR(TYPES.ERROR);
 	
 	ResponseStatus(String val)
@@ -30,5 +31,6 @@ public enum ResponseStatus
 		public static final String QUEUED = "QUEUED";
 		public static final String EXECUTING = "EXECUTING";
 		public static final String ERROR = "ERROR";
+		public static final String COMPLETED = "COMPLETED";
 	} 
 }
