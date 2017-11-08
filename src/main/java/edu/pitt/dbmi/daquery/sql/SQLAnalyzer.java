@@ -44,7 +44,7 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 		analyzeNode(topNode, 1);
 		if(statementCount > 1)
 		{
-			setRejection("Only one select is allowed.  This query contains " + statementCount);
+			setRejection("Only one select is allowed.  This query contains " + statementCount + " select statements.");
 		}
 	}
 	
