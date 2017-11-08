@@ -28,6 +28,8 @@ public class SiteTest {
 	private static String adminemail = "TestSiteAdmin@email.com";
 	private static String accesskey = "TestSiteAccessKey";
 	private static String commenckey = "TestSiteCommEncKey";
+	private static String siteUUID = "";
+	private static String networkUUID = "";
 	
 	@BeforeClass
 	public static void setupBeforeClass() {
@@ -36,12 +38,12 @@ public class SiteTest {
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
-			Network n = new Network();
+			Network n = new Network(true);
 			n.setName(networkname);			
 			session.getTransaction().begin();
 			session.persist(n);
 			session.getTransaction().commit();
-			Site s = new Site();
+			Site s = new Site(true);
 			s.setName(sitename);
 			s.setUrl(siteurl);
 			s.setAdmin_email(adminemail);
@@ -58,6 +60,10 @@ public class SiteTest {
 			session.persist(s);
 			session.update(n);
 			session.getTransaction().commit();
+			
+			networkUUID = n.getNetworkId();
+			siteUUID = s.getSiteId();
+			
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
@@ -73,12 +79,12 @@ public class SiteTest {
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
-	    	Site s = SiteDAO.querySiteByName(sitename);
+	    	Site s = SiteDAO.querySiteByID(siteUUID);
 	    	s.setStatusValue(SiteStatus.CONNECTED);
 			session.getTransaction().begin();
 			session.update(s);
 			session.getTransaction().commit();
-	    	Site s1 = SiteDAO.querySiteByName(sitename);
+	    	Site s1 = SiteDAO.querySiteByID(siteUUID);
 			assertTrue(s1.getStatusValue() == SiteStatus.CONNECTED);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
@@ -93,12 +99,12 @@ public class SiteTest {
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
-	    	Site s = SiteDAO.querySiteByName(sitename);
+	    	Site s = SiteDAO.querySiteByID(siteUUID);
 	    	s.setStatusValue(SiteStatus.PENDING);
 			session.getTransaction().begin();
 			session.update(s);
 			session.getTransaction().commit();
-	    	Site s1 = SiteDAO.querySiteByName(sitename);
+	    	Site s1 = SiteDAO.querySiteByID(siteUUID);
 			assertTrue(s1.getStatusValue() == SiteStatus.PENDING);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
@@ -114,12 +120,12 @@ public class SiteTest {
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
-	    	Site s = SiteDAO.querySiteByName(sitename);
+	    	Site s = SiteDAO.querySiteByID(siteUUID);
 	    	s.setStatusValue(SiteStatus.DENIED);
 			session.getTransaction().begin();
 			session.update(s);
 			session.getTransaction().commit();
-	    	Site s1 = SiteDAO.querySiteByName(sitename);
+	    	Site s1 = SiteDAO.querySiteByID(siteUUID);
 			assertTrue(s1.getStatusValue() == SiteStatus.DENIED);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
@@ -134,12 +140,12 @@ public class SiteTest {
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
-	    	Site s = SiteDAO.querySiteByName(sitename);
+	    	Site s = SiteDAO.querySiteByID(siteUUID);
 	    	s.setStatusValue(SiteStatus.NOT_CONNECTED);
 			session.getTransaction().begin();
 			session.update(s);
 			session.getTransaction().commit();
-	    	Site s1 = SiteDAO.querySiteByName(sitename);
+	    	Site s1 = SiteDAO.querySiteByID(siteUUID);
 			assertTrue(s1.getStatusValue() == SiteStatus.NOT_CONNECTED);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
@@ -158,11 +164,11 @@ public class SiteTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 			session.getTransaction().begin();
-			session.createQuery("delete from Site where name = :sitename")
-				.setParameter("sitename", sitename)
+			session.createQuery("delete from Site where siteId = :siteUUID")
+				.setParameter("siteUUID", siteUUID)
 				.executeUpdate();
-			session.createQuery("delete from Network where name = :networkname")
-			.setParameter("networkname", networkname)
+			session.createQuery("delete from Network where networkId = :networkUUID")
+			.setParameter("networkUUID", networkUUID)
 			.executeUpdate();
 			session.getTransaction().commit();
 		} catch (Exception e) {

@@ -28,9 +28,10 @@ public class DaqueryRequestTest {
 
 	private static String networkname = "DaqueryRequestTest_Network";
 	private static String networkUUID = "";
-	private static String inrequestname = "In Request Name";
+	private static String inrequestname = "In Request Name DaqueryRequestTest";
 	private static String inrequestUUID = "";
-	private static String outrequestname = "Out Request Name";
+	private static String outrequestname = "Out Request Name DaqueryRequestTest";
+	private static String outrequestUUID = "";
 	private static String connectionurl = "jdbc:oracle:thin:@//server-a.dept.university.edu:1521/OracleSID";
 	private static String username = "datasourceusername";
 	private static String password = "datasourcepassword";
@@ -113,7 +114,6 @@ public class DaqueryRequestTest {
 	    	Site s = SiteDAO.querySiteByID(siteUUID);
 	    	DaqueryUser u = DaqueryUserDAO.queryUserByUsername(daqueryusername);
 	    	DaqueryRequest dr = new DaqueryRequest(true);
-			dr.setRequestId(inrequestname);
 			dr.setDirectionEnum(RequestDirection.IN);
 			dr.setRequester(u);
 			dr.setRequestSite(s);
@@ -145,7 +145,6 @@ public class DaqueryRequestTest {
 	    	Site s = SiteDAO.querySiteByID(siteUUID);
 	    	DaqueryUser u = DaqueryUserDAO.queryUserByUsername(daqueryusername);
 	    	DaqueryRequest dr = new DaqueryRequest(true);
-			dr.setRequestId(outrequestname);
 			dr.setDirectionEnum(RequestDirection.OUT);
 			dr.setRequester(u);
 			dr.setRequestSite(s);
@@ -168,7 +167,8 @@ public class DaqueryRequestTest {
 			session.persist(dr);
 			session.persist(q);
 			session.getTransaction().commit();
-			inrequestUUID = dr.getRequestId();
+			outrequestUUID = dr.getRequestId();
+			inquiryUUID = q.getInquiryId();
 			
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
@@ -185,17 +185,23 @@ public class DaqueryRequestTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 			session.getTransaction().begin();
+			session.createQuery("delete from DaqueryRequest where requestId = :requestid")
+				.setParameter("requestid", inrequestUUID)
+				.executeUpdate();
+			session.createQuery("delete from DaqueryRequest where requestId = :requestid")
+				.setParameter("requestid", outrequestUUID)
+				.executeUpdate();
+			session.createQuery("delete from SQLQuery where inquiryId = :inquiryid")
+				.setParameter("inquiryid", inquiryUUID)
+				.executeUpdate();
+			session.createQuery("delete from DaqueryUser where username = :username")
+				.setParameter("username", username)
+				.executeUpdate();
 			session.createQuery("delete from Site where siteId = :siteUUID")
 				.setParameter("siteUUID", siteUUID)
 				.executeUpdate();
 			session.createQuery("delete from Network where networkId = :networkUUID")
 				.setParameter("networkUUID", networkUUID)
-				.executeUpdate();
-			session.createQuery("delete from DaqueryUser where username = :username")
-				.setParameter("username", username)
-				.executeUpdate();
-			session.createQuery("delete from DaqueryRequest where requestId = :requestid")
-				.setParameter("requestid", inrequestUUID)
 				.executeUpdate();
 			session.getTransaction().commit();
 		} catch (Exception e) {
