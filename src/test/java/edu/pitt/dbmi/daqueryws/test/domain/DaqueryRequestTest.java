@@ -96,7 +96,7 @@ public class DaqueryRequestTest {
 	    	Network n = NetworkDAO.queryNetworkByName(networkname);
 	    	Site s = SiteDAO.querySiteByName(sitename);
 	    	DaqueryUser u = DaqueryUserDAO.queryUserByUsername(daqueryusername);
-	    	DaqueryRequest dr = new DaqueryRequest();
+/*	    	DaqueryRequest dr = new DaqueryRequest();
 			dr.setRequestId(inrequestname);
 			dr.setDirectionEnum(RequestDirection.IN);
 			dr.setRequester(u);
@@ -106,10 +106,10 @@ public class DaqueryRequestTest {
 			
 			Set<DaqueryRequest> newRequests = new HashSet<DaqueryRequest>();
 			newRequests.add(dr);
-			n.setIncomingRequests(newRequests);
+			n.setIncomingRequests(newRequests); */
 			
 			session.getTransaction().begin();
-			session.persist(dr);
+//			session.persist(dr);
 			session.update(n);
 			session.getTransaction().commit();
 		} catch (Exception e) {

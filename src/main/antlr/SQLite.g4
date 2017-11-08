@@ -64,7 +64,6 @@ sql_stmt
                                       | drop_table_stmt
                                       | drop_trigger_stmt
                                       | drop_view_stmt
-                                      | factored_select_stmt
                                       | insert_stmt
                                       | pragma_stmt
                                       | reindex_stmt
@@ -72,6 +71,7 @@ sql_stmt
                                       | rollback_stmt
                                       | savepoint_stmt
                                       | simple_select_stmt
+                                      | factored_select_stmt                                      
                                       | select_stmt
                                       | update_stmt
                                       | update_stmt_limited

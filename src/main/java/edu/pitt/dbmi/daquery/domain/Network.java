@@ -3,14 +3,10 @@ package edu.pitt.dbmi.daquery.domain;
 import java.io.Serializable;
 import javax.persistence.*;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
