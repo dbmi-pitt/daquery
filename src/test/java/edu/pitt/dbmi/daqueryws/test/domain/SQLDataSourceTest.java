@@ -16,10 +16,10 @@ import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 
 
-public class DataSourceTest {
+public class SQLDataSourceTest {
 
-	private static String networkname = "DataSourceTest_Network";
-	private static String datasourcename = "TestDataSource";
+	private static String networkname = "SQLDataSourceTest_Network";
+	private static String datasourcename = "SQLTestDataSource";
 	private static String connectionurl = "jdbc:oracle:thin:@//server-a.dept.university.edu:1521/OracleSID";
 	private static String username = "datasourceusername";
 	private static String password = "datasourcepassword";

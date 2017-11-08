@@ -28,7 +28,7 @@ import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 
-public class DaqueryResponseTest {
+public class DaqueryResponseAndFilesetTest {
 
 	private static String networkname = "DaqueryResponseTest_Network";
 	private static String networkUUID = "";
