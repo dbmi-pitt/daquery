@@ -7,20 +7,18 @@ insert into network(name, id, data_model) values('devDandC','1169eae7-79ed-41e6-
 insert into network(name, id, data_model) values('devCandB','9dc38074-a153-4183-a36f-2b64cf75c13c','cdm');
 insert into network(name, id, data_model) values('devDandB','afff8323-176c-4cb0-9d2c-cccc03fff101','cdm');
 
-insert into network_membership(id, site_id, networkId) values(1,'20b23b5c-61ad-44eb-8eef-886adcced18e','fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823');
-insert into network_membership(id, site_id, networkId) values(2,'0f2378ec-d9ce-489a-b338-c8f82e567f40','fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823');
-insert into network_membership(id, site_id, networkId) values(3,'bcfdd450-3dd8-4ced-9599-c65de7c9f115','fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823');
+insert into network_membership(id, site_id, network_id) values(1,'20b23b5c-61ad-44eb-8eef-886adcced18e','fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823');
+insert into network_membership(id, site_id, network_id) values(2,'0f2378ec-d9ce-489a-b338-c8f82e567f40','fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823');
+insert into network_membership(id, site_id, network_id) values(3,'bcfdd450-3dd8-4ced-9599-c65de7c9f115','fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823');
 
-insert into network_membership(id, site_id, networkId) values(4,'0f2378ec-d9ce-489a-b338-c8f82e567f40','1169eae7-79ed-41e6-bb62-c86167aef92f');
-insert into network_membership(id, site_id, networkId) values(5,'bcfdd450-3dd8-4ced-9599-c65de7c9f115','1169eae7-79ed-41e6-bb62-c86167aef92f');
+insert into network_membership(id, site_id, network_id) values(4,'0f2378ec-d9ce-489a-b338-c8f82e567f40','1169eae7-79ed-41e6-bb62-c86167aef92f');
+insert into network_membership(id, site_id, network_id) values(5,'bcfdd450-3dd8-4ced-9599-c65de7c9f115','1169eae7-79ed-41e6-bb62-c86167aef92f');
 
-insert into network_membership(id, site_id, networkId) values(6,'20b23b5c-61ad-44eb-8eef-886adcced18e','9dc38074-a153-4183-a36f-2b64cf75c13c');
-insert into network_membership(id, site_id, networkId) values(7,'0f2378ec-d9ce-489a-b338-c8f82e567f40','9dc38074-a153-4183-a36f-2b64cf75c13c');
+insert into network_membership(id, site_id, network_id) values(6,'20b23b5c-61ad-44eb-8eef-886adcced18e','9dc38074-a153-4183-a36f-2b64cf75c13c');
+insert into network_membership(id, site_id, network_id) values(7,'0f2378ec-d9ce-489a-b338-c8f82e567f40','9dc38074-a153-4183-a36f-2b64cf75c13c');
 
-insert into network_membership(id, site_id, networkId) values(8,'20b23b5c-61ad-44eb-8eef-886adcced18e','afff8323-176c-4cb0-9d2c-cccc03fff101');
-insert into network_membership(id, site_id, networkId) values(9,'bcfdd450-3dd8-4ced-9599-c65de7c9f115','afff8323-176c-4cb0-9d2c-cccc03fff101');
-
-insert into connection_request(network_id, from_site_id, to_site_id) values ('fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823', '20b23b5c-61ad-44eb-8eef-886adcced18e', 'bcfdd450-3dd8-4ced-9599-c65de7c9f115');
+insert into network_membership(id, site_id, network_id) values(8,'20b23b5c-61ad-44eb-8eef-886adcced18e','afff8323-176c-4cb0-9d2c-cccc03fff101');
+insert into network_membership(id, site_id, network_id) values(9,'bcfdd450-3dd8-4ced-9599-c65de7c9f115','afff8323-176c-4cb0-9d2c-cccc03fff101');
 
 
 
