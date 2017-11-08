@@ -20,6 +20,7 @@ public class SASDataSourceTest {
 
 	private static String networkname = "SASDataSourceTest_Network";
 	private static String datasourcename = "TestSASDataSource";
+	private static long datasourceid = -1;
 	
 	@BeforeClass
 	public static void setupBeforeClass() {
@@ -63,6 +64,8 @@ public class SASDataSourceTest {
 			session.persist(ds);
 			session.update(n);
 			session.getTransaction().commit();
+			
+			datasourceid = ds.getId();
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
@@ -78,8 +81,8 @@ public class SASDataSourceTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 			session.getTransaction().begin();
-			session.createQuery("delete from SQLDataSource where name = :sourcename")
-				.setParameter("sourcename", datasourcename)
+			session.createQuery("delete from SASDataSource where id = :datasourceid")
+				.setParameter("datasourceid", datasourceid)
 				.executeUpdate();
 			session.createQuery("delete from Network where name = :networkname")
 			.setParameter("networkname", networkname)

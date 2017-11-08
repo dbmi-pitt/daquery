@@ -23,6 +23,7 @@ public class SQLDataSourceTest {
 	private static String connectionurl = "jdbc:oracle:thin:@//server-a.dept.university.edu:1521/OracleSID";
 	private static String username = "datasourceusername";
 	private static String password = "datasourcepassword";
+	private static long datasourceid = -1;
 	
 	@BeforeClass
 	public static void setupBeforeClass() {
@@ -65,6 +66,8 @@ public class SQLDataSourceTest {
 			session.persist(ds);
 			session.update(n);
 			session.getTransaction().commit();
+			
+			datasourceid = ds.getId();
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
@@ -80,8 +83,8 @@ public class SQLDataSourceTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 			session.getTransaction().begin();
-			session.createQuery("delete from SQLDataSource where name = :sourcename")
-				.setParameter("sourcename", datasourcename)
+			session.createQuery("delete from SQLDataSource where id = :datasourceid")
+				.setParameter("datasourceid", datasourceid)
 				.executeUpdate();
 			session.createQuery("delete from Network where name = :networkname")
 			.setParameter("networkname", networkname)

@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 import com.google.gson.annotations.Expose;
@@ -31,6 +32,7 @@ public class Fileset extends DaqueryObject
 	@ElementCollection
 	@CollectionTable(name="filepath", joinColumns=@JoinColumn(name="fileset_id"))
 	@Column(name="path")
+	@OrderColumn
 	private Set<String> filepaths;
 
 	public long getId() {
