@@ -48,7 +48,6 @@ public class PopulateDevData
 			System.out.println(inq.getId());
 			Network net = inq.getNetwork();
 			System.out.println(net.getName());
-			System.out.println(net.getData_model());
 			System.out.println(net.getIncomingQuerySites().size());
 		}
 		
@@ -163,7 +162,6 @@ public class PopulateDevData
 		}
 		
 		Network net = new Network();
-		net.setData_model("cdm");
 		net.setName("dbmi-dev");
 		net.setNetworkId("abcd-efgh-ijkm-nopq");
 

@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.Session;
+
+import static org.junit.Assert.fail;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,6 +13,8 @@ import org.junit.Test;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.domain.DataAttribute;
+import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.DataSource;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.SQLDataSource;
@@ -47,7 +51,7 @@ public class SQLDataSourceTest {
 	}
 	
     @Test
-    public void testCreateAndAddToNetwork() {
+    public void testCreateAndAddToModel() {
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
@@ -60,16 +64,39 @@ public class SQLDataSourceTest {
 			
 			Set<DataSource> newSources = new HashSet<DataSource>();
 			newSources.add(ds);
-			n.setDataSources(newSources);
+
+	    	DataModel dModel = new DataModel(true);
+	    	dModel.setName("test-model");
+	    	dModel.setDataSources(newSources);
+
+	    	DataAttribute da1 = new DataAttribute();
+	    	da1.setDataModel(dModel);
+	    	da1.setEntityName("ENTITY");
+	    	da1.setFieldName("FieldA");
+	    	da1.setPhi(false);
+	    	
+	    	DataAttribute da2 = new DataAttribute();
+	    	da2.setDataModel(dModel);
+	    	da2.setEntityName("ENTITY");
+	    	da2.setFieldName("FieldB");
+	    	da2.setPhi(true);
+	    	
+	    	Set<DataAttribute> attributes = new HashSet<DataAttribute>();
+	    	attributes.add(da1);
+	    	attributes.add(da2);
+	    	
+	    	dModel.setAttributes(attributes);			
+			ds.setDataModel(dModel);
 			
 			session.getTransaction().begin();
-			session.persist(ds);
+			session.persist(dModel);
 			session.update(n);
 			session.getTransaction().commit();
 			
 			datasourceid = ds.getId();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace(System.out);
+			fail("Unexpected exception");
 		} finally {
 			if (session != null) 
 				session.close();
@@ -90,8 +117,9 @@ public class SQLDataSourceTest {
 			.setParameter("networkname", networkname)
 			.executeUpdate();
 			session.getTransaction().commit();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace(System.out);
+			fail("Unexpected exception");
 		} finally {
 			if (session != null) 
 				session.close();

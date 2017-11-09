@@ -3,17 +3,22 @@ CREATE TABLE "APP"."NETWORK"
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    NETWORK_ID varchar(50),
    NAME varchar(100) NOT NULL,
-   DATA_MODEL varchar(100)
-)
-;
+   DATA_MODEL_ID bigint
+);
+
+CREATE TABLE DATA_MODEL
+(
+   ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+   DATA_MODEL_ID varchar(50),
+   NAME varchar(100)
+);
 
 CREATE TABLE "APP"."NOTIFICATION"
 (
    ID bigint PRIMARY KEY NOT NULL,
    TYPE varchar(100) NOT NULL,
    MESSAGE varchar(1000)
-)
-;
+);
 
 CREATE TABLE "APP"."DQ_USER"
 (
@@ -24,23 +29,19 @@ CREATE TABLE "APP"."DQ_USER"
    REAL_NAME varchar(100),
    STATUS varchar(50),
    UTYPE varchar(4)
-)
-;
+);
 
 CREATE TABLE "APP"."ROLE"
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    NAME varchar(50) NOT NULL
-)
-;
-
+);
 
 CREATE TABLE "APP"."USER_ROLE"
 (
   USER_ID varchar(50) NOT NULL,
   ROLE_ID bigint NOT NULL
-)
-;
+);
 
 CREATE TABLE "APP"."SITE"
 (
@@ -56,16 +57,25 @@ CREATE TABLE "APP"."SITE"
    ACCESS_KEY varchar(500),
    COMM_ENC_KEY  varchar(1024),
    ENC_TYPE varchar(50) 
-)
-;
+);
 
 CREATE TABLE DATA_SOURCE
 (
    DS_ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    NAME varchar(50) NOT NULL,
-   DTYPE varchar(50)
-)
-;
+   DTYPE varchar(50),
+   MODEL_ID bigint
+);
+
+CREATE TABLE DATA_ATTRIBUTE
+(
+   ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+   ENTITY_NAME varchar(100),
+   FIELD_NAME varchar(100),
+   PHI boolean,
+   MODEL_ID bigint
+);
+
 
 CREATE TABLE SQL_DATA_SOURCE
 (
@@ -73,50 +83,43 @@ CREATE TABLE SQL_DATA_SOURCE
    CONNECTION_URL varchar(250),
    USERNAME varchar(50),
    PWD varchar(50)
-)
-;
+);
 
 CREATE TABLE SAS_DATA_SOURCE
 (
    DS_ID bigint NOT NULL,
    DATASET_LOCATION varchar(250)
-)
-;
+);
 
-CREATE TABLE SOURCE_TO_NETWORK
+CREATE TABLE SOURCE_TO_MODEL
 (
-   NETWORK_ID bigint NOT NULL,
+   MODEL_ID bigint NOT NULL,
    DATA_SOURCE_ID bigint NOT NULL
-)
-;
+);
 
 CREATE TABLE OUTGOING_QUERY_SITES
 (
 	SITE_ID bigint not NULL,
 	NETWORK_ID bigint not NULL
-)
-;
+);
 
 CREATE TABLE INCOMING_QUERY_SITES
 (
 	SITE_ID bigint not NULL,
 	NETWORK_ID bigint not NULL
-)
-;
+);
 
 CREATE TABLE OUTGOING_REQUESTS
 (
 	REQUEST_ID bigint not NULL,
 	NETWORK_ID bigint not NULL
-)
-;
+);
 
 CREATE TABLE INCOMING_REQUESTS
 (
 	REQUEST_ID bigint not NULL,
 	NETWORK_ID bigint not NULL
-)
-;
+);
 
 
 create table property
@@ -124,8 +127,7 @@ create table property
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    name varchar(256),
    value varchar(256)
-)
-;
+);
 
 INSERT INTO ROLE (NAME) VALUES ('admin'), ('steward'), ('viewer'), ('aggregate_querier'), ('data_querier');
 
@@ -137,8 +139,7 @@ CREATE TABLE INQUIRY
    INQUIRY_TYPE varchar(50),
    AUTHOR_ID varchar(50),
    NETWORK_ID bigint
-)
-;
+);
 
 CREATE TABLE DAQUERY_REQUEST
 (
@@ -150,8 +151,7 @@ CREATE TABLE DAQUERY_REQUEST
    INQUIRY_ID bigint,
    DIRECTION varchar(4),
    NETWORK_ID bigint
-)
-;
+);
 
 CREATE TABLE DAQUERY_RESPONSE
 (
@@ -164,25 +164,21 @@ CREATE TABLE DAQUERY_RESPONSE
    FILESET_ID bigint,
    ERROR_MESSAGE varchar(1024),
    USER_ID varchar(50)
-)
-;
+);
 
 CREATE TABLE SQL_QUERY
 (
    INQ_ID bigint NOT NULL,
    CODE varchar(32000)   
-)
-;
+);
 
 CREATE TABLE FILESET
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY
-)
-;
+);
 
 CREATE TABLE FILEPATH
 (
 	fileset_id bigint,
 	path varchar(3000)
-)
-;
+);

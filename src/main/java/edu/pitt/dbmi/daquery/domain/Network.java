@@ -45,11 +45,11 @@ public class Network extends DaqueryObject implements Serializable {
 	@Expose
 	@Column(name = "NAME", nullable=false, length=100)
 	private String name;
-	
-	@Expose
-	@Column(name = "DATA_MODEL", nullable=true, length=100)
-	private String dataModel;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="DATA_MODEL_ID")
+    private DataModel dataModel;
+	
 	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "OUTGOING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
@@ -59,10 +59,6 @@ public class Network extends DaqueryObject implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "INCOMING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
 	private Set<Site> incomingQuerySites;
-	
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable(name = "SOURCE_TO_NETWORK", joinColumns = { @JoinColumn(name = "NETWORK_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATA_SOURCE_ID") })
-	private Set<DataSource> dataSources;
 	
 	public Network(){}
 	
@@ -101,16 +97,6 @@ public class Network extends DaqueryObject implements Serializable {
 		this.name = name;
 	}
 	
-	public String getData_model() {
-		return dataModel;
-	}
-
-	public void setData_model(String data_model) {
-		this.dataModel = data_model;
-	}
-
-
-
 	public Set<Site> getOutgoingQuerySites()
 	{
 		return(outgoingQuerySites);
@@ -130,10 +116,9 @@ public class Network extends DaqueryObject implements Serializable {
 	}
 	
 	//#TODO: add a method addIncomingSite(Site) 
-
-	public Set<DataSource> getDataSources(){return(dataSources);}
-	public void setDataSources(Set<DataSource> ds){dataSources = ds;}
 	
+	public DataModel getDataModel(){return(dataModel);}
+	public void setDataModel(DataModel model){dataModel = model;}
     
     @Override
 	public String toString() {

@@ -122,4 +122,6 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Transient
 	public abstract Long runAggregate() throws DaqueryException;
 	
+	
+	
 }
