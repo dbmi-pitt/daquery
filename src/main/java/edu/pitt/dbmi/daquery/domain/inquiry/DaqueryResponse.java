@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.domain.inquiry;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,11 +26,14 @@ import edu.pitt.dbmi.daquery.domain.UserInfo;
 @Table(name="DAQUERY_RESPONSE")
 public class DaqueryResponse
 {
-    @Expose
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
 	private long id;
+
+    @Expose
+    @Column(name = "RESPONSE_ID")
+    String responseId;
     
     @Expose
     @Temporal(TemporalType.TIMESTAMP)	
@@ -64,6 +68,18 @@ public class DaqueryResponse
     @Expose
     @Column(name = "ERROR_MESSAGE")
     private String errorMessage;
+    
+    public DaqueryResponse(){}
+    
+    public DaqueryResponse(boolean createUUID)
+    {
+    	responseId = UUID.randomUUID().toString();
+    }
+    
+    public DaqueryResponse(String uuid)
+    {
+    	responseId = uuid;
+    }
     
     public long getId(){return(id);}
     public void setId(long id){this.id = id;}

@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -86,5 +87,10 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 
 	public DataModel getDataModel(){return(dataModel);}
 	public void setDataModel(DataModel model){dataModel = model;}
-	
+
+	@Transient
+	public SourceType getSourceTypeEnum()
+	{
+		return(SourceType.valueOf(dtype));
+	}
 }

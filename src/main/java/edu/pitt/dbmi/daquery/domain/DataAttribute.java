@@ -31,7 +31,10 @@ public class DataAttribute
     
     @Expose
     @Column(name = "PHI")
-    private boolean phi;
+    private boolean phi = true;
+    
+    @Expose
+    private boolean aggregatable = false;
     
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="MODEL_ID")
@@ -48,6 +51,9 @@ public class DataAttribute
     
     public boolean isPhi(){return(phi);}
     public void setPhi(boolean phi){this.phi = phi;}
+    
+    public boolean isAggregatable(){return(aggregatable);}
+    public void setAggregatable(boolean aggregate){aggregatable = aggregate;}
     
     public DataModel getDataModel(){return(dataModel);}
     public void setDataModel(DataModel model){dataModel = model;}

@@ -12,6 +12,9 @@ import org.hibernate.internal.util.StringHelper;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.domain.SQLDataSource;
+import edu.pitt.dbmi.daquery.domain.SourceType;
+import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
 
 @Entity
 @Table(name = "SQL_QUERY")
@@ -50,25 +53,43 @@ public class SQLQuery extends Inquiry
 	
 	public String getCode(){return(code);}
 	public void setCode(String code){this.code = code;}
-	
-	@Transient
-	public boolean isAggregate() throws DaqueryException
+
+	public DaqueryResponse run()
 	{
-		if(StringHelper.isEmpty(code))
-			return(false);
-		return(true);
-	}
-	
-	@Transient
-	public Long runAggregate() throws DaqueryException
-	{
-		if(! isAggregate())
-			throw new DaqueryException("The supplied query is not in the form to return a single aggregate result.  It must start with a single select clause of count(field)....");
-		
-		//throw excpetion for bad query 
-		
-		//run queryl
-		
-		return 17l;
+		DaqueryResponse response = new DaqueryResponse(true);;
+		try
+		{	
+			if(isAggregate())
+			{
+				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(code);
+				if(analyze.isRejected())
+				{
+					response.setStatusEnum(ResponseStatus.ERROR);
+					response.setErrorMessage(analyze.getRejectionMessage());
+				}
+				SQLDataSource ds = (SQLDataSource) getNetwork().getDataModel().getDataSource(SourceType.SQL);
+				if(ds == null)
+				{
+					response.setStatusEnum(ResponseStatus.ERROR);
+					response.setErrorMessage("A SQL data source attached to data model " + getNetwork().getDataModel().getName() + " was not found.");
+				}
+				
+				response.setValue(ds.executeAggregate(code).toString());
+				response.setStatusEnum(ResponseStatus.COMPLETED);
+			}
+			else
+			{
+				response.setStatusEnum(ResponseStatus.ERROR);
+				response.setErrorMessage("Non-aggregate queries are not supported at this time.");
+			}
+				
+			return(response);
+		}
+		catch(Throwable t)
+		{
+			response.setStatusEnum(ResponseStatus.ERROR);
+			response.setErrorMessage("An unexpected error occured. Check the site logs for more information." + t.getMessage());
+			return(response);
+		}
 	}
 }

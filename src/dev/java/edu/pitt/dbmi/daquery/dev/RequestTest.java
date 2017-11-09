@@ -18,7 +18,7 @@ public class RequestTest
 		String json = JSONHelper.toJSON(ir);
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
 		//Response resp = client.target("http://localhost:8080/daquery/ws/hello").request(MediaType.TEXT_PLAIN).get();
-		Response resp = client.target("http://localhost:8080/daquery/ws/aggregate-inquiry-request")
+		Response resp = client.target("http://localhost:8080/daquery/ws/request")
 						                    .request(MediaType.APPLICATION_JSON).post(ent);
 				                    //.post(ent, ClientResponse.class); 
 		System.out.println(resp.readEntity(String.class));

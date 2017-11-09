@@ -65,6 +65,9 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Expose
 	protected DaqueryUser author;
 
+	@Expose
+	protected boolean aggregate;
+	
 	public Inquiry() {
 		
 	}
@@ -114,13 +117,12 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@JoinColumn(name="NETWORK_ID")
 	public Network getNetwork(){return(network);}
 	public void setNetwork(Network net){network = net;}
-	
+		
+	public boolean isAggregate(){return(aggregate);}
+	public void setAggregatable(boolean aggregate){this.aggregate = aggregate;}
 	
 	@Transient
-	public abstract boolean isAggregate() throws DaqueryException;
-	
-	@Transient
-	public abstract Long runAggregate() throws DaqueryException;
+	public abstract DaqueryResponse run();
 	
 	
 	

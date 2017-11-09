@@ -255,10 +255,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	}
 	
 	@POST
-	@Path("aggregate-inquiry-request")
+	@Path("request")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-	public static Response aggregateInquiry(DaqueryRequest request) throws DaqueryException
+	public static Response request(DaqueryRequest request) throws DaqueryException
 	{
 		try
 		{

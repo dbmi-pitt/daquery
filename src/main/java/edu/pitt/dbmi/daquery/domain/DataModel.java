@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 
@@ -31,9 +32,13 @@ public class DataModel
 	@Column(name = "DATA_MODEL_ID")
 	private String dataModelId;
 
+	@Expose
+	private String description;
+	
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="dataModel")
 	private Set<DataSource> dataSources;	
 
+	@Expose
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="dataModel")
 	private Set<DataAttribute> attributes;	
 	
@@ -56,6 +61,9 @@ public class DataModel
 	public String getName(){return(name);}
 	public void setName(String name){this.name = name;}
 	
+	public String getDescription(){return(description);}
+	public void setDescription(String desc){this.description = desc;}	
+	
 	public String getDataModelId(){return(dataModelId);}
 	public void setDataModelId(String id){dataModelId = id;}
 	
@@ -64,5 +72,17 @@ public class DataModel
 	
 	public Set<DataAttribute> getAttributes(){return(attributes);}
 	public void setAttributes(Set<DataAttribute> attribs){attributes = attribs;}
-	
+
+	@Transient
+	public DataSource getDataSource(SourceType type)
+	{
+		for(DataSource ds: dataSources)
+		{
+			if(ds.getSourceTypeEnum() == type)
+			{
+				return(ds);
+			}
+		}
+		return(null);
+	}
 }

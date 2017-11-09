@@ -36,10 +36,11 @@ public class TaskQueue
 	{
 		return(tasksById.size());
 	}
+	
 	//this method must remain private and can
 	//only be called from synchronized methods in
 	//this class, but cannot be synchronized itself
-	//because it is called from sychronized methods
+	//because it is called from synchronized methods
 	private void runNext()
 	{
 		if(runningQueue.size() < AppProperties.getTaskQueueMaxLength() && waitingQueue.size() > 0)

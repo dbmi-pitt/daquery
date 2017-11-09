@@ -10,7 +10,8 @@ CREATE TABLE DATA_MODEL
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    DATA_MODEL_ID varchar(50),
-   NAME varchar(100)
+   NAME varchar(100),
+   DESCRIPTION varchar(2048)
 );
 
 CREATE TABLE "APP"."NOTIFICATION"
@@ -73,7 +74,8 @@ CREATE TABLE DATA_ATTRIBUTE
    ENTITY_NAME varchar(100),
    FIELD_NAME varchar(100),
    PHI boolean,
-   MODEL_ID bigint
+   MODEL_ID bigint,
+   AGGREGATABLE boolean
 );
 
 
@@ -138,7 +140,8 @@ CREATE TABLE INQUIRY
    VERSION int,
    INQUIRY_TYPE varchar(50),
    AUTHOR_ID varchar(50),
-   NETWORK_ID bigint
+   NETWORK_ID bigint,
+   AGGREGATE boolean
 );
 
 CREATE TABLE DAQUERY_REQUEST
