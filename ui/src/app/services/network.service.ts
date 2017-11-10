@@ -32,14 +32,14 @@ export class NetworkService {
   }
 
   getAvailableNetworks(): Observable<any[]>{
-    return this.http.get('daquery/ws/available-networks-to-query')
+    return this.http.get('/daquery/ws/available-networks-to-query')
                     .catch(error => {
                       return Observable.throw(error || 'Server error');
                     })
   }
 
   joinNetwork(network: any): Observable<any[]>{
-    return this.http.put('daquery/ws/networks/join', network)
+    return this.http.put('/daquery/ws/networks/join', network)
                     .catch(error => {
                       return Observable.throw(error || 'Server error');
                     })
