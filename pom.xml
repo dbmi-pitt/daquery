@@ -378,35 +378,6 @@
          		<artifactId>exec-maven-plugin</artifactId>
          		<executions>
          			<execution>
-         				<id>rm-app.module.ts</id>
-         				<phase>generate-sources</phase>
-         				<configuration>
-         					<workingDirectory>${ui_project.Directory}</workingDirectory>
-         					<executable>rm</executable>
-         					<arguments>
-         						<argument>./src/app/app.module.ts</argument>
-         					</arguments>
-         				</configuration>
-         				<goals>
-         					<goal>exec</goal>
-         				</goals>
-         			</execution>
-         			<execution>
-         				<id>cp-app.module.ts.prod</id>
-         				<phase>generate-sources</phase>
-         				<configuration>
-         					<workingDirectory>${ui_project.Directory}</workingDirectory>
-         					<executable>cp</executable>
-         					<arguments>
-         						<argument>./src/app/app.module.ts.prod</argument>
-         						<argument>./src/app/app.module.ts</argument>
-         					</arguments>
-         				</configuration>
-         				<goals>
-         					<goal>exec</goal>
-         				</goals>
-         			</execution>
-         			<execution>
          				<id>npm-install-angular-cli@1.4.2</id>
          				<phase>generate-sources</phase>
          				<configuration>
@@ -484,36 +455,6 @@
          		<groupId>org.codehaus.mojo</groupId>
          		<artifactId>exec-maven-plugin</artifactId>
          		<executions>
-         			<execution>
-         				<id>rm-app.module.ts</id>
-         				<phase>generate-sources</phase>
-         				<configuration>
-         					<workingDirectory>${ui_project.Directory}</workingDirectory>
-         					<executable>cmd</executable>
-         					<arguments>
-         						<arguments>/C</arguments>
-         						<argument>del ".\src\app\app.module.ts"</argument>
-         					</arguments>
-         				</configuration>
-         				<goals>
-         					<goal>exec</goal>
-         				</goals>
-         			</execution>
-         			<execution>
-         				<id>cp-app.module.ts.prod</id>
-         				<phase>generate-sources</phase>
-         				<configuration>
-         					<workingDirectory>${ui_project.Directory}</workingDirectory>
-         					<executable>cmd</executable>
-         					<arguments>
-         						<argument>/C</argument>
-         						<argument>copy ".\src\app\app.module.ts.prod" ".\src\app\app.module.ts"</argument>
-         					</arguments>
-         				</configuration>
-         				<goals>
-         					<goal>exec</goal>
-         				</goals>
-         			</execution>
          			<execution>
          				<id>npm-install-angular-cli@1.4.2</id>
          				<phase>generate-sources</phase>
