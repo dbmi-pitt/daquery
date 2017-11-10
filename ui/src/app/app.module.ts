@@ -8,7 +8,6 @@ import { MomentModule } from 'angular2-moment';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JWTInterceptor } from './services/interceptors/jwt-interceptor'
 import { ResInterceptor } from './services/interceptors/res-interceptor'
-import { MockHttpInterceptor } from './services/interceptors/mockup-interceptor';
 
 import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';

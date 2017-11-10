@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers, Response, RequestOptions, URLSearchParams } from '@angular/http';
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
