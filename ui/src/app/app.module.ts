@@ -23,11 +23,6 @@ import { SetupService } from './services/setup.service';
 // custom validator
 import { EqualValidator } from './validators/equal-validator.directive';
 
-// used to create fake backend
-import { fakeBackendProvider } from './_helpers/fake-backend';
-import { MockBackend, MockConnection } from '@angular/http/testing';
-import { BaseRequestOptions } from '@angular/http';
-
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
@@ -62,18 +57,6 @@ import { Step1Component } from './components/setup/step1/step1.component';
 import { Step2Component } from './components/setup/step2/step2.component';
 import { Step3Component } from './components/setup/step3/step3.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
-
-import { environment } from '../environments/environment';
-
-let mockupInterceptor = [{
-  provide: HTTP_INTERCEPTORS,
-  useClass: MockHttpInterceptor,
-  multi: true,
-}];
-
-if(environment.production){
-  mockupInterceptor = [];
-}
 
 @NgModule({
   declarations: [
@@ -139,12 +122,7 @@ if(environment.production){
                 provide: HTTP_INTERCEPTORS,
                 useClass: ResInterceptor,
                 multi: true,
-              },
-              ...mockupInterceptor,
-              // providers used to create fake backend
-              fakeBackendProvider,
-              MockBackend,
-              BaseRequestOptions
+              }
   ],
   bootstrap: [AppComponent]
 })
