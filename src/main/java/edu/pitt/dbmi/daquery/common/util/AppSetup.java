@@ -184,11 +184,14 @@ public class AppSetup
 			log.info("User inserted with: " + insertSQL);
 			stat.executeUpdate(insertSQL);
 			insertSQL = "insert into user_role (role_id, user_id) values (" + roleId + ", '" + uuidStr.trim() + "')";
-			stat.executeUpdate(insertSQL);			
+			stat.executeUpdate(insertSQL);
 			firstUserCreated = true;
-			
-			
-			
+			String sysUUID = 	UUID.randomUUID().toString().trim();
+			insertSQL = "insert into dq_user (id, username, status, real_name, utype)"
+					+ "values ('" + sysUUID + "', 'system', '" +
+					UserStatus.DISABLED.toString() + "', 'System User', 'INFO')";
+			stat.executeUpdate(insertSQL);
+
 			return(true);
 		}
 		catch(Throwable t)
