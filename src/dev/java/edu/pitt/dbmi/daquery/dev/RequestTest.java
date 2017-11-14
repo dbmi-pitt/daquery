@@ -6,6 +6,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 
@@ -13,8 +14,9 @@ public class RequestTest
 {
 	public static void main(String [] args) throws Exception
 	{
+		AppProperties.setDevHomeDir("/home/devuser/dq-data");
 		Client client = ClientBuilder.newClient();
-		DaqueryRequest ir =  PopulateDevData.createFullOutgoingRequest();
+		DaqueryRequest ir =  PopulateDevData.assembleOutgoingRequest();
 		String json = JSONHelper.toJSON(ir);
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
 		//Response resp = client.target("http://localhost:8080/daquery/ws/hello").request(MediaType.TEXT_PLAIN).get();

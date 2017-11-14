@@ -27,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.Network;
@@ -43,7 +42,6 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 {
 	private static final long serialVersionUID = 1272382834723l;
 	
-    @Expose
 	private long id;
     
     /**
@@ -120,7 +118,7 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	public void setNetwork(Network net){network = net;}
 		
 	public boolean isAggregate(){return(aggregate);}
-	public void setAggregatable(boolean aggregate){this.aggregate = aggregate;}
+	public void setAggregate(boolean aggregate){this.aggregate = aggregate;}
 	
 	@Transient
 	public abstract DaqueryResponse run(DaqueryResponse response, DataModel model);

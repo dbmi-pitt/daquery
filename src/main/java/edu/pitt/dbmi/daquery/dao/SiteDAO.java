@@ -5,11 +5,13 @@ import java.util.ArrayList;
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 
 import edu.pitt.dbmi.daquery.domain.Site;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.dao.ParameterItem;
 
 
@@ -18,6 +20,8 @@ public class SiteDAO extends AbstractDAO {
 
     private final static Logger logger = Logger.getLogger(SiteDAO.class.getName());
 	
+    public static final String LOCAL_SITE_ID_PROP_NAME = "local.site.id";
+    
     public static List<Site> queryAllSites() throws Exception {
     	try { 		
     	    List<Site> site_list = executeQueryReturnList(Site.FIND_ALL, null, logger);
@@ -77,5 +81,21 @@ public class SiteDAO extends AbstractDAO {
         }
     }	
 
+    public static Site getLocalSite()
+    {
+    	try
+    	{
+    		String localSiteId = AppProperties.getDBProperty(LOCAL_SITE_ID_PROP_NAME);
+    		if(localSiteId == null) return null;
+    		Site localSite = SiteDAO.querySiteByID(localSiteId);
+    		return(localSite);
+    	}
+    	catch(Throwable t)
+    	{
+    		logger.log(Level.SEVERE, "Unexpected error while trying to find local site.", t);
+    		return(null);
+    	}
+    }
+    
 }
 

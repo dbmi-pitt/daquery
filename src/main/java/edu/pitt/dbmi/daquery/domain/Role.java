@@ -3,6 +3,7 @@ package edu.pitt.dbmi.daquery.domain;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -54,7 +55,7 @@ public class Role extends DaqueryObject implements Serializable {
 	private String name;
 
 	//bi-directional many-to-many association to User
-	@ManyToMany(mappedBy="roles", fetch=FetchType.LAZY)
+	@ManyToMany(mappedBy="roles", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	private List<DaqueryUser> users;
 
 	public Role() {}

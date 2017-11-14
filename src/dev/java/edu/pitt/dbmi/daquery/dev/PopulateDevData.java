@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.dev;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -13,9 +14,13 @@ import edu.pitt.dbmi.daquery.common.domain.EncryptionType;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.dao.RoleDAO;
+import edu.pitt.dbmi.daquery.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.domain.*;
 import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
@@ -39,7 +44,7 @@ public class PopulateDevData
 		for(DaqueryRequest req : reqs)
 			System.out.println(req.getId()); */
 		
-		assembleNetworkAndInquiry();
+/*		assembleNetworkAndInquiry();
 		Session s = HibernateConfiguration.openSession();
 		Query q = s.createQuery("select i from Inquiry i");
 		List<Inquiry> inqs = q.list();
@@ -49,28 +54,36 @@ public class PopulateDevData
 			Network net = inq.getNetwork();
 			System.out.println(net.getName());
 			System.out.println(net.getIncomingQuerySites().size());
-		}
+		} */
 		
+		assembleOutgoingRequest();
+				
 		System.exit(0);
 	}
 	
-	private static void assembleRequest()
+	public static DaqueryRequest assembleOutgoingRequest() throws DaqueryException, Exception
 	{
-		Network net = createNetAndSiteData();
+		NetAndSite nas = createNetAndSiteData();
+		Network net = nas.net;
+		String localSiteId = nas.localSite.getSiteId();
+		AppProperties.setDBProperty(SiteDAO.LOCAL_SITE_ID_PROP_NAME, localSiteId);
 		DaqueryUser user = createTestUser();
+		save(net.getDataModel());
 		save(net);
 		save(user);
 		Inquiry inq = createInquiryData(user);
+		inq.setNetwork(net);
 		save(inq);
 		save(net);
 		DaqueryRequest req = createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
 		req.setNetwork(net);
 		save(req);
+		return(req);
 	}
 	
-	private static void assembleNetworkAndInquiry()
+	private static void assembleNetworkAndInquiry() throws Exception
 	{
-		Network net = createNetAndSiteData();
+		Network net = createNetAndSiteData().net;
 		DaqueryUser user = createTestUser();
 		save(net);
 		save(user);
@@ -84,7 +97,7 @@ public class PopulateDevData
 	private static DaqueryRequest createOutgoingRequest(Inquiry inquiry, DaqueryUser requester, Site requestSite)
 	{
 		
-		DaqueryRequest req = new DaqueryRequest();
+		DaqueryRequest req = new DaqueryRequest(true);
 		req.setDirectionEnum(RequestDirection.OUT);
 		req.setInquiry(inquiry);
 		req.setRequester(requester);
@@ -93,20 +106,20 @@ public class PopulateDevData
 		return(req);
 	}
 
-	public static DaqueryRequest createFullOutgoingRequest()
+	public static DaqueryRequest createFullOutgoingRequest() throws Exception
 	{
 		DaqueryUser author = PopulateDevData.createTestUser();
 		Inquiry inquiry = PopulateDevData.createInquiryData(author);
-		Site requestSite = PopulateDevData.createNetAndSiteData().getOutgoingQuerySites().iterator().next();
+		Site requestSite = PopulateDevData.createNetAndSiteData().net.getOutgoingQuerySites().iterator().next();
 		return(PopulateDevData.createOutgoingRequest(inquiry, author, requestSite));
 	}
 	private static Inquiry createInquiryData(DaqueryUser author)
 	{
-		SQLQuery sqlQ = new SQLQuery();
+		SQLQuery sqlQ = new SQLQuery(true);
 		sqlQ.setVersion(1);
 		sqlQ.setAuthor(author);
 		sqlQ.setSqlDialectEnum(SQLDialect.ORACLE);
-		sqlQ.setCode("some test sql goes here");
+		sqlQ.setCode("select count(*) from ");
 		return(sqlQ);
 		
 		
@@ -140,16 +153,23 @@ public class PopulateDevData
 			if(session != null) session.close();
 		} */
 	}
-	private static DaqueryUser createTestUser()
+	private static DaqueryUser createTestUser() throws Exception
 	{
 		DaqueryUser user = new DaqueryUser();
 		user.setEmail("tester@somewhere.com");
 		user.setRealName("Test User");
 		user.setStatusEnum(UserStatus.ACTIVE);
 		user.setUsername("tester");
+		List<Role> roles = new ArrayList<Role>();
+		Role role = RoleDAO.queryRoleByName("aggregate_querier");
+		roles.add(role);
+		user.setRoles(roles);
+		List<DaqueryUser> users = new ArrayList<DaqueryUser>();
+		users.add(user);
+		role.setUsers(users);
 		return(user);
 	}
-	private static Network createNetAndSiteData()
+	private static NetAndSite createNetAndSiteData()
 	{
 		String dbURL = PrivateProps.getProps().getProperty("cdm.url");
 		String dbUsername = PrivateProps.getProps().getProperty("cdm.username");
@@ -174,20 +194,36 @@ public class PopulateDevData
 		sitesOut.add(csiteOut);
 		net.setOutgoingQuerySites(sitesOut);
 		
-		Site bsiteIn = new Site("jajasioujaiojaijf","shirey@pitt.edu","no key for now..",EncryptionType.NONE,"bill-dev","20b23b5c-61ad-44eb-8eef-886adcced18e",SiteStatus.CONNECTED,"http://localhost:8080/");	
-		Site dsiteIn = new Site("wuiowujwoiuwrwer","del20@pitt.edu","no key for now..",EncryptionType.NONE,"desheng-dev","bcfdd450-3dd8-4ced-9599-c65de7c9f115",SiteStatus.CONNECTED,"http://del20-dt.univ.pitt.edu:8080/");				
+//		Site bsiteIn = new Site("jajasioujaiojaijf","shirey@pitt.edu","no key for now..",EncryptionType.NONE,"bill-dev","20b23b5c-61ad-44eb-8eef-886adcced18e",SiteStatus.CONNECTED,"http://localhost:8080/");	
+//		Site dsiteIn = new Site("wuiowujwoiuwrwer","del20@pitt.edu","no key for now..",EncryptionType.NONE,"desheng-dev","bcfdd450-3dd8-4ced-9599-c65de7c9f115",SiteStatus.CONNECTED,"http://del20-dt.univ.pitt.edu:8080/");				
 		Set<Site> sitesIn = new HashSet<Site>();
-		sitesIn.add(bsiteIn);
-		sitesIn.add(dsiteIn);
+		sitesIn.add(bsiteOut);
+		sitesIn.add(dsiteOut);
 		net.setIncomingQuerySites(sitesIn);
 		
-/*		SQLDataSource sqlDS = new SQLDataSource("dev cdm data set",dbURL,dbPassword,dbUsername);
+		DataModel dm = new DataModel(true);
+		dm.setName("CDM");
+		dm.setDescription("The PCORI Common Data Model");
+		
+		SQLDataSource sqlDS = new SQLDataSource("dev cdm data set",dbURL,dbPassword,dbUsername);
 		Set<DataSource> dataSources = new HashSet<DataSource>();
 		dataSources.add(sqlDS);
-		net.setDataSources(dataSources); */
+		dm.setDataSources(dataSources);
+		sqlDS.setDataModel(dm);
+		net.setDataModel(dm);
 		
-		return(net);
+		NetAndSite ns = new NetAndSite();
+		ns.net = net;
+		ns.localSite = bsiteOut;
 		
+		return(ns);
+		
+	}
+	
+	private static class NetAndSite
+	{
+		Network net;
+		Site localSite;
 	}
 	
 	private static void save(Object obj)

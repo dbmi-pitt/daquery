@@ -46,7 +46,7 @@ public class TaskQueue
 		if(runningQueue.size() < AppProperties.getTaskQueueMaxLength() && waitingQueue.size() > 0)
 		{
 			Task task = waitingQueue.poll();
-			TaskRunner runner = new TaskRunner(task, this);
+			TaskRunner runner = new TaskRunner(task);
 			runningQueue.add(runner);
 			task.setStatus(TaskStatus.RUNNING);
 			((Thread)runner).start();
@@ -56,11 +56,9 @@ public class TaskQueue
 	private class TaskRunner extends Thread implements Runnable
 	{
 		Task task = null;
-		TaskQueue queue = null;
-		TaskRunner(Task task, TaskQueue queue)
+		TaskRunner(Task task)
 		{
 			this.task = task;
-			this.queue = queue;
 		}
 		
 		@Override

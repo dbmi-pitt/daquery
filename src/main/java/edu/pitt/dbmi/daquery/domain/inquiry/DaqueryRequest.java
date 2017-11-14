@@ -57,7 +57,7 @@ public class DaqueryRequest extends DaqueryObject
     @Column(name="SENT_TIMESTAMP")
     private Date sentTimestamp;
     
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="REQUESTER_ID")
     private DaqueryUser requester;
 
