@@ -96,7 +96,12 @@ public class TaskQueueTest
 		{
 			System.out.println(now() + ": Task " + id + " finished");
 		}
-		
-		
+
+		@Override
+		public void errorState(ErrorPeriod period, Throwable cause)
+		{
+			System.out.println("Error during " + period.toString());
+			cause.printStackTrace();
+		}
 	}
 }

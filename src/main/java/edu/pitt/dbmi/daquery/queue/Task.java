@@ -19,7 +19,12 @@ public interface Task
 	public void startup() throws DaqueryException;
 	public void execute() throws DaqueryException;
 	public void shutdown() throws DaqueryException;
-	public void errorState()
+	public void errorState(ErrorPeriod period, Throwable cause);
 	public TaskStatus getStatus();
 	public void setStatus(TaskStatus status);
+	
+	public enum ErrorPeriod
+	{
+		STARTUP, EXECUTE, SHUTDOWN
+	}
 }

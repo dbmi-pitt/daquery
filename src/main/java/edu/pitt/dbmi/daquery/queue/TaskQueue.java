@@ -66,15 +66,9 @@ public class TaskQueue
 		@Override
 		public void run()
 		{
-			try{task.startup();}catch(Throwable t){task.errorState(t);}
-				task.execute();
-				task.shutdown();
-				queue.taskFinished(this);
-			}
-			catch(Throwable t)
-			{
-				task.errorState(Throwable t);
-			}
+			try{task.startup();}catch(Throwable t){task.errorState(Task.ErrorPeriod.STARTUP, t);}
+			try{task.execute();}catch(Throwable t){task.errorState(Task.ErrorPeriod.EXECUTE, t);}
+			try{task.shutdown();}catch(Throwable t){task.errorState(Task.ErrorPeriod.SHUTDOWN, t);}
 		}
 	}
 }

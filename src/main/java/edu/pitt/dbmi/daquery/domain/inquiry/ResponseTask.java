@@ -1,5 +1,8 @@
 package edu.pitt.dbmi.daquery.domain.inquiry;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.domain.DataModel;
@@ -9,10 +12,14 @@ import edu.pitt.dbmi.daquery.queue.Task;
 
 public class ResponseTask extends AbstractTask implements Task
 {
+	private final static Logger log = Logger.getLogger(ResponseTask.class.getName());
+	
 	private DaqueryResponse response;
 	private Inquiry inquiry;
 	private DaqueryRequest request;
 	private DataModel model;
+	
+	
 	
 	public ResponseTask(DaqueryRequest request, UserInfo responder, DataModel dm) throws DaqueryException
 	{
@@ -34,22 +41,9 @@ public class ResponseTask extends AbstractTask implements Task
 	}
 
 	public DaqueryResponse getResponse(){return(response);}
-/*
-	@Override
-	public boolean isRunning() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isQueued() {
-		// TODO Auto-generated method stub
-		return false;
-	} */
 
 	@Override
 	public void startup() {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -64,12 +58,24 @@ public class ResponseTask extends AbstractTask implements Task
 		ResponseDAO.saveOrUpdate(response);
 		response = inquiry.run(response, model);
 		
+		
 	}
 
 	@Override
-	public void shutdown() {
+	public void shutdown() throws DaqueryException{
 		// TODO Auto-generated method stub
 		if(response.getStatusEnum() != ResponseStatus.DENIED && response.getStatusEnum() != ResponseStatus.ERROR)
 			response.setStatusEnum(ResponseStatus.COMPLETED);
+		ResponseDAO.saveOrUpdate(response);
+	}
+	
+	public void errorState(Task.ErrorPeriod period, Throwable cause)
+	{
+		response.setStatusEnum(ResponseStatus.ERROR);
+		log.log(Level.SEVERE, "Unexpected error while executing query for response with id: " + response.getResponseId(), cause);
+		response.setErrorMessage("Unexpected error while executing.  Check executing site server logs for more information.");
+		
+		try{ResponseDAO.saveOrUpdate(response);}
+		catch(Throwable t){log.log(Level.SEVERE, "Error while trying to save response error state or response with id: " + response.getResponseId(), t);}
 	}
 }
