@@ -111,4 +111,7 @@ public class DaqueryResponse
     public String getErrorMessage(){return(errorMessage);}
     public void setErrorMessage(String msg){errorMessage = msg;}
     
+    public String getResponseId(){return(responseId);}
+    public void setResponseId(String id){responseId = id;}
+    
 }

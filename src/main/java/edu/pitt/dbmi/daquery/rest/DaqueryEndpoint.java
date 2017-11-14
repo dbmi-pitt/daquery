@@ -41,6 +41,7 @@ import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
+import edu.pitt.dbmi.daquery.domain.inquiry.ResponseTask;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
@@ -277,13 +278,21 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				return(ResponseHelper.getBasicResponse(403, "User with id: " + userId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
 
 			DaqueryResponse response = new DaqueryResponse();
-			//TODO add "SYSTEM" responder as UserInfo object and UUID field??
-			Long rVal = null;
+			
+			//TODO decide if this is an immediate response or if it needs to be reviewed
+			// if it needs to be reviewed create a DaqueryResponse object, mark as pending
+			//  and return- maybe send a message to someone??
+			// else do the below..
+			
+			DaqueryResponse rVal = null;
 			try
 			{
-				rVal = request.getInquiry().runAggregate();
+				Site site = request.getRequestSite();
+				Network net = site.getNetwork();
+				ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
+				rVal = task.getResponse();
 			}
-			catch(DaqueryException e)
+			catch(Throwable e)
 			{
 				response.setStatusEnum(ResponseStatus.ERROR);
 				response.setErrorMessage(e.getMessage());
@@ -298,8 +307,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				Map<String, String> aggVal = new HashMap<String, String>();
 				aggVal.put("value", rVal.toString());
 				return(ResponseHelper.getJsonResponseGen(200, aggVal));
-			}
-				
+			}	
 		}
 		catch(Throwable t)
 		{

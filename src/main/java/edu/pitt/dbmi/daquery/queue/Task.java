@@ -1,5 +1,7 @@
 package edu.pitt.dbmi.daquery.queue;
 
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+
 public interface Task
 {
 	public String getQueueId();
@@ -14,9 +16,10 @@ public interface Task
 	 */
 	public int getProgress();
 	public boolean isQueued();
-	public void startup();
-	public void execute();
-	public void shutdown();
+	public void startup() throws DaqueryException;
+	public void execute() throws DaqueryException;
+	public void shutdown() throws DaqueryException;
+	public void errorState()
 	public TaskStatus getStatus();
 	public void setStatus(TaskStatus status);
 }

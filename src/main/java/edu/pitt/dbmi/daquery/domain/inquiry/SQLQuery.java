@@ -12,6 +12,7 @@ import org.hibernate.internal.util.StringHelper;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.domain.SourceType;
 import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
@@ -54,9 +55,8 @@ public class SQLQuery extends Inquiry
 	public String getCode(){return(code);}
 	public void setCode(String code){this.code = code;}
 
-	public DaqueryResponse run()
+	public DaqueryResponse run(DaqueryResponse response, DataModel model)
 	{
-		DaqueryResponse response = new DaqueryResponse(true);;
 		try
 		{	
 			if(isAggregate())
@@ -67,7 +67,7 @@ public class SQLQuery extends Inquiry
 					response.setStatusEnum(ResponseStatus.ERROR);
 					response.setErrorMessage(analyze.getRejectionMessage());
 				}
-				SQLDataSource ds = (SQLDataSource) getNetwork().getDataModel().getDataSource(SourceType.SQL);
+				SQLDataSource ds = (SQLDataSource) model.getDataSource(SourceType.SQL);
 				if(ds == null)
 				{
 					response.setStatusEnum(ResponseStatus.ERROR);

@@ -66,10 +66,15 @@ public class TaskQueue
 		@Override
 		public void run()
 		{
-			task.startup();
-			task.execute();
-			task.shutdown();
-			queue.taskFinished(this);
+			try{task.startup();}catch(Throwable t){task.errorState(t);}
+				task.execute();
+				task.shutdown();
+				queue.taskFinished(this);
+			}
+			catch(Throwable t)
+			{
+				task.errorState(Throwable t);
+			}
 		}
 	}
 }

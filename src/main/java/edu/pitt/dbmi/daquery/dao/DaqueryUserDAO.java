@@ -13,6 +13,7 @@ import org.hibernate.NonUniqueResultException;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.domain.Role;
+import edu.pitt.dbmi.daquery.domain.UserInfo;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.rest.UserEndpoint;
 import edu.pitt.dbmi.daquery.dao.ParameterItem;
@@ -272,5 +273,18 @@ public class DaqueryUserDAO extends AbstractDAO {
     }
 
 	
+    public static UserInfo getSysUser()
+    {
+    	UserInfo sysUser = null;
+    	try
+    	{
+    		sysUser = (UserInfo) DaqueryUserDAO.queryUserByUsername("system");
+    	}
+    	catch(Throwable t)
+    	{
+    		logger.log(Level.SEVERE, "An unexpected exception occured while retrieving the SYSTEM user", t);
+    	}
+    	return(sysUser);
+    }
 }
 
