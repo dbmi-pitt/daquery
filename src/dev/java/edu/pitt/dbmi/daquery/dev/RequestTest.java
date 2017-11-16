@@ -17,7 +17,11 @@ public class RequestTest
 		AppProperties.setDevHomeDir("/home/devuser/dq-data");
 		Client client = ClientBuilder.newClient();
 		DaqueryRequest ir =  PopulateDevData.assembleOutgoingRequest();
+		ir.getInquiry().setDataType("SQL_QUERY");
+		ir.getRequester().setUtype("FULL");
+		ir.getInquiry().getAuthor().setUtype("FULL");
 		String json = JSONHelper.toJSON(ir);
+		System.out.println(json);
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
 		//Response resp = client.target("http://localhost:8080/daquery/ws/hello").request(MediaType.TEXT_PLAIN).get();
 		Response resp = client.target("http://localhost:8080/daquery/ws/request")

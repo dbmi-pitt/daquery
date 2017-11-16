@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -33,6 +34,7 @@ import edu.pitt.dbmi.daquery.domain.Network;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.PROPERTY, property = "dataType")
 @JsonSubTypes({@Type(value = SQLQuery.class, name = InquiryType.TYPES.SQL_VAL)})
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 @Entity
 @Table(name="INQUIRY")

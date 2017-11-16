@@ -43,6 +43,9 @@ public class DaqueryRequest extends DaqueryObject
     @Column(name = "REQUESTID",unique = true, length=50)
 	private String requestId;
 	
+	@Expose
+	@Column(name = "REQUEST_GROUP")
+	private String requestGroup;
 	
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="REQUEST_SITE_ID")
@@ -98,6 +101,9 @@ public class DaqueryRequest extends DaqueryObject
 	public String getRequestId(){return(requestId);}
 	public void setRequestId(String id){requestId = id;}
 	
+	public String getRequestGroup(){return(requestGroup);}
+	public void setRequestGroup(String group){requestGroup = group;}
+	
 	public Site getRequestSite(){return(requestSite);}
 	public void setRequestSite(Site site){requestSite = site;}
 	
@@ -109,6 +115,10 @@ public class DaqueryRequest extends DaqueryObject
 	
 	public DaqueryUser getRequester(){return(requester);}
 	public void setRequester(DaqueryUser user){requester = user;}
+
+	public String getRequesterId(){return(requesterId);}
+	public void setRequester(String id){requesterId = id;}
+	
 	
 	public String getDirection(){return(direction);}
 	public void setDirection(String direction){this.direction = direction;}

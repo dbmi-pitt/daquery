@@ -7,11 +7,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.internal.util.StringHelper;
-
 import com.google.gson.annotations.Expose;
 
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.domain.SourceType;

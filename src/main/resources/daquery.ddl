@@ -147,7 +147,8 @@ CREATE TABLE DAQUERY_REQUEST
    REQUESTER_ID varchar(50),
    INQUIRY_ID bigint,
    DIRECTION varchar(4),
-   NETWORK_ID bigint
+   NETWORK_ID bigint,
+   REQUEST_GROUP varchar(50)
 );
 
 CREATE TABLE DAQUERY_RESPONSE
@@ -160,6 +161,7 @@ CREATE TABLE DAQUERY_RESPONSE
    SITE_ID bigint,
    FILESET_ID bigint,
    ERROR_MESSAGE varchar(1024),
+   RESPONSE_ID varchar(50),
    USER_ID varchar(50)
 );
 

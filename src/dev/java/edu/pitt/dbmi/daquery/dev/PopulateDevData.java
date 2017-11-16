@@ -56,7 +56,13 @@ public class PopulateDevData
 			System.out.println(net.getIncomingQuerySites().size());
 		} */
 		
-		assembleOutgoingRequest();
+		DaqueryUser tu = createTestUser();
+		save(tu);
+		
+		NetAndSite ns = createNetAndSiteData();
+		save(ns.net);
+		
+		//assembleOutgoingRequest();
 				
 		System.exit(0);
 	}

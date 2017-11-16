@@ -19,13 +19,16 @@ import javax.persistence.TemporalType;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.UserInfo;
 
 @Entity
 @Table(name="DAQUERY_RESPONSE")
-public class DaqueryResponse
+public class DaqueryResponse extends DaqueryObject
 {
+	private static final long serialVersionUID = 2923990823424234234l;
+	
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
@@ -55,11 +58,14 @@ public class DaqueryResponse
 	@JoinColumn(name="fileset_id", nullable=false)
 	private Fileset files;
 
-    @Expose
     @OneToOne
     @JoinColumn(name="SITE_ID")
 	private Site site;
-	
+
+    @Expose
+    @Column(name="SITE_ID", insertable = false, updatable = false)
+    private String siteId;
+    
     @Expose
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="REQID")
@@ -103,7 +109,7 @@ public class DaqueryResponse
     public void setFiles(Fileset files){this.files = files;}
     
     public Site getSite(){return(site);}
-    public void setSite(Site site){this.site = site;}
+    public void setSite(Site site){this.site = site; this.siteId = site.getSiteId();}
     
     public DaqueryRequest getRequest(){return(request);}
     public void setRequest(DaqueryRequest reqst){request = reqst;}
