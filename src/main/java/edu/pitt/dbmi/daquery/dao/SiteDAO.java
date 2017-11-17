@@ -12,11 +12,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-<<<<<<< HEAD
 import edu.pitt.dbmi.daquery.domain.Network;
-=======
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
->>>>>>> origin/master
 import edu.pitt.dbmi.daquery.domain.Site;
 
 
@@ -93,7 +90,6 @@ public class SiteDAO extends AbstractDAO {
         }
     }
     
-<<<<<<< HEAD
     /** Get sites by network_id
      *  @param network_id
      *  @return List<Site>
@@ -120,7 +116,6 @@ public class SiteDAO extends AbstractDAO {
         }
     }
 
-=======
     public static Site getLocalSite()
     {
     	try
@@ -137,6 +132,5 @@ public class SiteDAO extends AbstractDAO {
     	}
     }
     
->>>>>>> origin/master
 }
 
