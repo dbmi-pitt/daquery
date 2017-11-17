@@ -7,6 +7,11 @@ import org.hibernate.cfg.Configuration;
 
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.domain.DataAttribute;
+import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.DataSource;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Notification;
@@ -14,16 +19,13 @@ import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.SASDataSource;
 import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.domain.Site;
-import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.SourceType;
 import edu.pitt.dbmi.daquery.domain.UserInfo;
-import edu.pitt.dbmi.daquery.domain.inquiry.Fileset;
-import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.domain.inquiry.Fileset;
+import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
-import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 
 /**
  *  Singleton used to configure and get a Hibernate Session application wide. 
@@ -71,6 +73,9 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(DaqueryResponse.class);
     	hibernateConf.addAnnotatedClass(UserInfo.class);
     	hibernateConf.addAnnotatedClass(Fileset.class);
+    	hibernateConf.addAnnotatedClass(DataModel.class);
+    	hibernateConf.addAnnotatedClass(DataAttribute.class);
+    	
     	
         	
 

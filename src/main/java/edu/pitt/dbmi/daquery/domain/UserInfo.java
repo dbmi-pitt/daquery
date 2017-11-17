@@ -81,4 +81,7 @@ public class UserInfo extends DaqueryObject
     }
     
     
+    public String getUtype(){return(utype);}
+    public void setUtype(String type){utype = type;}
+    
 }

@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.domain.inquiry;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,21 +16,28 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.UserInfo;
 
 @Entity
 @Table(name="DAQUERY_RESPONSE")
-public class DaqueryResponse
+public class DaqueryResponse extends DaqueryObject
 {
-    @Expose
+	private static final long serialVersionUID = 2923990823424234234l;
+	
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
 	private long id;
+
+    @Expose
+    @Column(name = "RESPONSE_ID")
+    String responseId;
     
     @Expose
     @Temporal(TemporalType.TIMESTAMP)	
@@ -51,11 +59,14 @@ public class DaqueryResponse
 	@JoinColumn(name="fileset_id", nullable=false)
 	private Fileset files;
 
-    @Expose
     @OneToOne
     @JoinColumn(name="SITE_ID")
 	private Site site;
-	
+
+    @Expose
+    @Column(name="SITE_ID", insertable = false, updatable = false)
+    private String siteId;
+    
     @Expose
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="REQID")
@@ -64,6 +75,22 @@ public class DaqueryResponse
     @Expose
     @Column(name = "ERROR_MESSAGE")
     private String errorMessage;
+    
+    @Expose
+    @Transient
+    private String stackTrace;
+    
+    public DaqueryResponse(){}
+    
+    public DaqueryResponse(boolean createUUID)
+    {
+    	responseId = UUID.randomUUID().toString();
+    }
+    
+    public DaqueryResponse(String uuid)
+    {
+    	responseId = uuid;
+    }
     
     public long getId(){return(id);}
     public void setId(long id){this.id = id;}
@@ -87,12 +114,18 @@ public class DaqueryResponse
     public void setFiles(Fileset files){this.files = files;}
     
     public Site getSite(){return(site);}
-    public void setSite(Site site){this.site = site;}
+    public void setSite(Site site){this.site = site; this.siteId = site.getSiteId();}
     
     public DaqueryRequest getRequest(){return(request);}
     public void setRequest(DaqueryRequest reqst){request = reqst;}
     
     public String getErrorMessage(){return(errorMessage);}
     public void setErrorMessage(String msg){errorMessage = msg;}
+    
+    public String getResponseId(){return(responseId);}
+    public void setResponseId(String id){responseId = id;}
+    
+    public String getStackTrace(){return(stackTrace);}
+    public void setStackTrace(String trace){stackTrace = trace;}
     
 }

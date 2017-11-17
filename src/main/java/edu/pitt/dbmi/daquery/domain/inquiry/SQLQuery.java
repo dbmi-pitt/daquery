@@ -1,5 +1,8 @@
 package edu.pitt.dbmi.daquery.domain.inquiry;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -7,11 +10,12 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.internal.util.StringHelper;
-
 import com.google.gson.annotations.Expose;
 
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.domain.DataModel;
+import edu.pitt.dbmi.daquery.domain.SQLDataSource;
+import edu.pitt.dbmi.daquery.domain.SourceType;
+import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
 
 @Entity
 @Table(name = "SQL_QUERY")
@@ -20,7 +24,8 @@ import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 public class SQLQuery extends Inquiry
 {
 	private static final long serialVersionUID = 2928392034234l;
-	
+	private final static Logger log = Logger.getLogger(SQLQuery.class.getName());
+		
 	@Expose
 	@Column(name = "CODE")
 	private String code;
@@ -50,25 +55,43 @@ public class SQLQuery extends Inquiry
 	
 	public String getCode(){return(code);}
 	public void setCode(String code){this.code = code;}
-	
-	@Transient
-	public boolean isAggregate() throws DaqueryException
+
+	public DaqueryResponse run(DaqueryResponse response, DataModel model)
 	{
-		if(StringHelper.isEmpty(code))
-			return(false);
-		return(true);
-	}
-	
-	@Transient
-	public Long runAggregate() throws DaqueryException
-	{
-		if(! isAggregate())
-			throw new DaqueryException("The supplied query is not in the form to return a single aggregate result.  It must start with a single select clause of count(field)....");
-		
-		//throw excpetion for bad query 
-		
-		//run queryl
-		
-		return 17l;
+		try
+		{	
+			if(isAggregate())
+			{
+				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(code);
+				if(analyze.isRejected())
+				{
+					response.setStatusEnum(ResponseStatus.ERROR);
+					response.setErrorMessage(analyze.getRejectionMessage());
+				}
+				SQLDataSource ds = (SQLDataSource) model.getDataSource(SourceType.SQL);
+				if(ds == null)
+				{
+					response.setStatusEnum(ResponseStatus.ERROR);
+					response.setErrorMessage("A SQL data source attached to data model " + getNetwork().getDataModel().getName() + " was not found.");
+				}
+				String sql = "select count(patid) from demographic;";
+				response.setValue(ds.executeAggregate(sql).toString());
+				response.setStatusEnum(ResponseStatus.COMPLETED);
+			}
+			else
+			{
+				response.setStatusEnum(ResponseStatus.ERROR);
+				response.setErrorMessage("Non-aggregate queries are not supported at this time.");
+			}
+				
+			return(response);
+		}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "Unexpected error while executing query: " + code, t);
+			response.setStatusEnum(ResponseStatus.ERROR);
+			response.setErrorMessage("An unexpected error occured. Check the site logs for more information." + t.getMessage());
+			return(response);
+		}
 	}
 }

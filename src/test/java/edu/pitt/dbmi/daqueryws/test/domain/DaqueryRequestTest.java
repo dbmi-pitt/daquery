@@ -1,7 +1,6 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -77,7 +76,6 @@ public class DaqueryRequestTest {
 			Site s = new Site(true);
 			s.setName(sitename);
 			s.setAdmin_email(adminemail);
-			s.setNetwork(n);
 			session.getTransaction().begin();
 			session.persist(s);
 			session.update(n);

@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.pitt.daquery.queue;
+package edu.pitt.dbmi.daquery.queue;
 
 import java.util.Hashtable;
 

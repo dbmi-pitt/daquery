@@ -9,13 +9,17 @@ import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -23,8 +27,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryType;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
+
 
 
 /**
@@ -55,11 +58,11 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 	@Expose
 	@Column(name="DTYPE", insertable = false, updatable = false)
 	protected String dtype;
-	
-	//bi-directional many-to-many association to User
-	@ManyToMany(mappedBy="dataSources")
-	protected Set<Network> networks;
 
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="MODEL_ID")
+    DataModel dataModel;
+	
 	
 	public DataSource() {
 		
@@ -80,26 +83,13 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public Set<Network> getNetworks(){
-		return this.networks;
+
+	public DataModel getDataModel(){return(dataModel);}
+	public void setDataModel(DataModel model){dataModel = model;}
+
+	@Transient
+	public SourceType getSourceTypeEnum()
+	{
+		return(SourceType.valueOf(dtype));
 	}
-	
-	public void setNetworks(Set<Network> networks) {
-		this.networks = networks;
-	}
-
-
-	
-    // ======================================
-    // =   Methods hash, equals, toString   =
-    // ======================================
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DataSource ds = (DataSource) o;
-        return Objects.equals(id, ds.id);
-    }
 }

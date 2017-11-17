@@ -31,6 +31,7 @@ public class AntlrTest
 
         SQLPrintVisitor classVisitor = new SQLPrintVisitor();
         classVisitor.visit(parser.sql_stmt_list());
+        System.out.println("=========================================================");
         classVisitor.printTree();
         	
 	}

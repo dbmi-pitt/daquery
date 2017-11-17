@@ -5,7 +5,10 @@ import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
 
 public class SQLPrintVisitor extends SqlAbstractVisitor
 {
-	protected void handleNode(TreeNode node){}
+	protected void handleNode(TreeNode node)
+	{
+		//printNode(node);
+	}
 	
 	public void printTree()
 	{
@@ -16,6 +19,13 @@ public class SQLPrintVisitor extends SqlAbstractVisitor
 	{
 		for(int i = 1; i < level; i++)
 			System.out.print("    ");
+		printNode(node);
+		int nextLevel = level + 1;
+		for(TreeNode n : node.children)
+			printNode(n, nextLevel);		
+	}
+	private void printNode(TreeNode node)
+	{
 		if(node == null || node.self == null)
 		{
 			System.out.println("null");
@@ -23,8 +33,5 @@ public class SQLPrintVisitor extends SqlAbstractVisitor
 		}
 		String cName = node.self.getClass().getSimpleName();
 		System.out.println(cName + ":  " + node.self.getText());
-		int nextLevel = level + 1;
-		for(TreeNode n : node.children)
-			printNode(n, nextLevel);
 	}
 }

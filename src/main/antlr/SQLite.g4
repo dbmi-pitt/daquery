@@ -42,7 +42,7 @@ error
  ;
 
 sql_stmt_list
- : ';'* sql_stmt ( ';'+ sql_stmt )* ';'*
+ : sql_stmt ( sql_stmt )*
  ;
 
 sql_stmt
@@ -75,9 +75,13 @@ sql_stmt
                                       | select_stmt
                                       | update_stmt
                                       | update_stmt_limited
-                                      | vacuum_stmt )
+                                      | vacuum_stmt ) end_of_select
  ;
 
+end_of_select
+ : ';'
+ ;
+ 
 alter_table_stmt
  : K_ALTER K_TABLE ( database_name '.' )? table_name
    ( K_RENAME K_TO new_table_name
