@@ -1,14 +1,11 @@
 package edu.pitt.dbmi.daquery.dao;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
-import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 
 public class SQLDataSourceDAO extends AbstractDAO {

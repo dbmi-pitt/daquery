@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.pitt.daquery.queue;
+package edu.pitt.dbmi.daquery.queue;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -36,16 +36,17 @@ public class TaskQueue
 	{
 		return(tasksById.size());
 	}
+	
 	//this method must remain private and can
 	//only be called from synchronized methods in
 	//this class, but cannot be synchronized itself
-	//because it is called from sychronized methods
+	//because it is called from synchronized methods
 	private void runNext()
 	{
 		if(runningQueue.size() < AppProperties.getTaskQueueMaxLength() && waitingQueue.size() > 0)
 		{
 			Task task = waitingQueue.poll();
-			TaskRunner runner = new TaskRunner(task, this);
+			TaskRunner runner = new TaskRunner(task);
 			runningQueue.add(runner);
 			task.setStatus(TaskStatus.RUNNING);
 			((Thread)runner).start();
@@ -55,20 +56,17 @@ public class TaskQueue
 	private class TaskRunner extends Thread implements Runnable
 	{
 		Task task = null;
-		TaskQueue queue = null;
-		TaskRunner(Task task, TaskQueue queue)
+		TaskRunner(Task task)
 		{
 			this.task = task;
-			this.queue = queue;
 		}
 		
 		@Override
 		public void run()
 		{
-			task.startup();
-			task.execute();
-			task.shutdown();
-			queue.taskFinished(this);
+			try{task.startup();}catch(Throwable t){task.errorState(Task.ErrorPeriod.STARTUP, t);}
+			try{task.execute();}catch(Throwable t){task.errorState(Task.ErrorPeriod.EXECUTE, t);}
+			try{task.shutdown();}catch(Throwable t){task.errorState(Task.ErrorPeriod.SHUTDOWN, t);}
 		}
 	}
 }

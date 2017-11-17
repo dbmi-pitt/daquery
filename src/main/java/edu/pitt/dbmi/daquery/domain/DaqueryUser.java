@@ -99,8 +99,6 @@ public class DaqueryUser extends UserInfo {
         this.username = login;
         this.setPassword(password);
     }
-    
-
 
     public String getUsername() {
         return this.username;

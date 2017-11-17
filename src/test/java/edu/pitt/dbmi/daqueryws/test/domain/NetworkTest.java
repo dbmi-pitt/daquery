@@ -1,21 +1,18 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hibernate.Query;
 import org.hibernate.Session;
+
+import static org.junit.Assert.fail;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.pitt.dbmi.daquery.common.domain.EncryptionType;
-import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.domain.Network;
-import edu.pitt.dbmi.daquery.domain.Site;
+
+
 
 public class NetworkTest {
 	
@@ -35,12 +32,12 @@ public class NetworkTest {
 	    	session = HibernateConfiguration.openSession();
 			Network n = new Network();
 			n.setName(networkname);	
-			n.setData_model(datamodel);
 			session.getTransaction().begin();
 			session.persist(n);
 			session.getTransaction().commit();
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
+			fail("Unexpected exception");
 		} finally {
 			if (session != null) 
 				session.close();
@@ -55,12 +52,12 @@ public class NetworkTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 			Network n = NetworkDAO.queryNetworkByName(networkname);
-			n.setData_model(datamodel + "2");
 			session.getTransaction().begin();
 			session.update(n);
 			session.getTransaction().commit();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace(System.out);
+			fail("Unexpected exception");
 		} finally {
 			if (session != null) 
 				session.close();
@@ -78,8 +75,9 @@ public class NetworkTest {
 			.setParameter("networkname", networkname)
 			.executeUpdate();
 			session.getTransaction().commit();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace(System.out);
+			fail("Unexpected exception");
 		} finally {
 			if (session != null) 
 				session.close();

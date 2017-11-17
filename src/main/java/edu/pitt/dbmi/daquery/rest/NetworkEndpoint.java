@@ -32,6 +32,7 @@ import org.hibernate.HibernateException;
 
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
+import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.DataSource;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.SQLDataSource;
@@ -169,8 +170,15 @@ public class NetworkEndpoint extends AbstractEndpoint {
             sqlDataSource.setPassword(sqldatasource_params.get("password"));
             
             Set<DataSource> dsset = new HashSet<DataSource>();
+            
+            DataModel dModel = new DataModel(true);
+            dModel.setName(((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
             dsset.add(sqlDataSource);
-            Network network = NetworkDAO.createNetwork(network_params, dsset);
+            
+            dModel.setDataSources(dsset);
+            sqlDataSource.setDataModel(dModel);
+            
+            Network network = NetworkDAO.createNetwork(network_params, dModel);
             
             String json = network.toJson();
 

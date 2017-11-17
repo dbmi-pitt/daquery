@@ -21,18 +21,20 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.Network;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.PROPERTY, property = "dataType")
 @JsonSubTypes({@Type(value = SQLQuery.class, name = InquiryType.TYPES.SQL_VAL)})
+@JsonIgnoreProperties(ignoreUnknown = true)
 
 @Entity
 @Table(name="INQUIRY")
@@ -42,7 +44,6 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 {
 	private static final long serialVersionUID = 1272382834723l;
 	
-    @Expose
 	private long id;
     
     /**
@@ -65,6 +66,9 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Expose
 	protected DaqueryUser author;
 
+	@Expose
+	protected boolean aggregate;
+	
 	public Inquiry() {
 		
 	}
@@ -114,12 +118,13 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@JoinColumn(name="NETWORK_ID")
 	public Network getNetwork(){return(network);}
 	public void setNetwork(Network net){network = net;}
-	
+		
+	public boolean isAggregate(){return(aggregate);}
+	public void setAggregate(boolean aggregate){this.aggregate = aggregate;}
 	
 	@Transient
-	public abstract boolean isAggregate() throws DaqueryException;
+	public abstract DaqueryResponse run(DaqueryResponse response, DataModel model);
 	
-	@Transient
-	public abstract Long runAggregate() throws DaqueryException;
+	
 	
 }

@@ -4,10 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,10 +14,12 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -35,12 +35,16 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.dao.ResponseDAO;
+import edu.pitt.dbmi.daquery.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
+import edu.pitt.dbmi.daquery.domain.inquiry.ResponseTask;
+import edu.pitt.dbmi.daquery.queue.QueueManager;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
@@ -254,52 +258,75 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		}
 	}
 	
+	
 	@POST
-	@Path("aggregate-inquiry-request")
+	@Path("request")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-	public static Response aggregateInquiry(DaqueryRequest request) throws DaqueryException
+	public static Response request(DaqueryRequest request) throws DaqueryException
 	{
 		try
 		{
-			if(request == null || request.getRequester() == null || StringHelper.isEmpty(request.getRequester().getId()))
-				return(ResponseHelper.getBasicResponse(400, "An Inquery request with a valid requster user object is required."));
-
-			if(request.getInquiry() == null)
-				return(ResponseHelper.getBasicResponse(400, "No query provided."));
+			if(request == null || request.getRequestSite() == null || request.getRequestSite().getSiteId() == null)
+				return(ResponseHelper.getBasicResponse(400, "A request site with a valid request site UUID is required."));
 			
-			String userId = request.getRequester().getId();
-			DaqueryUser requester = DaqueryUserDAO.queryUserByID(userId);
-			if(requester == null)
-				return(ResponseHelper.getBasicResponse(400, "The requester with user id " + userId + " was not found."));
+			String requestSiteId = request.getRequestSite().getSiteId();
+			Site mySite = SiteDAO.getLocalSite();
 			
-			if(! DaqueryUserDAO.hasRole(userId, "AGGREGATE_QUERYIER"))
-				return(ResponseHelper.getBasicResponse(403, "User with id: " + userId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
-
-			DaqueryResponse response = new DaqueryResponse();
-			//TODO add "SYSTEM" responder as UserInfo object and UUID field??
-			Long rVal = null;
-			try
-			{
-				rVal = request.getInquiry().runAggregate();
-			}
-			catch(DaqueryException e)
-			{
-				response.setStatusEnum(ResponseStatus.ERROR);
-				response.setErrorMessage(e.getMessage());
-				response.setReplyTimestamp(new Date());
-				ResponseHelper.getJsonResponseGen(500, response);
-			}
-			
-			if(rVal == null)
-				return(ResponseHelper.getBasicResponse(500, "No result returned from aggregate query."));
-			else
-			{
-				Map<String, String> aggVal = new HashMap<String, String>();
-				aggVal.put("value", rVal.toString());
-				return(ResponseHelper.getJsonResponseGen(200, aggVal));
-			}
+			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
+			{	
+				if(request == null || request.getRequester() == null || request.getRequester().getId() == null || StringHelper.isEmpty(request.getRequester().getId()))
+					return(ResponseHelper.getBasicResponse(400, "An Inquery request with a valid requster user object is required."));
+	
+				String requesterId = request.getRequester().getId();
+				if(request.getInquiry() == null)
+					return(ResponseHelper.getBasicResponse(400, "No inquiry provided."));
 				
+				DaqueryUser requester = DaqueryUserDAO.queryUserByID(requesterId);
+				if(requester == null)
+					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
+				
+				if(! DaqueryUserDAO.hasRole(requesterId, "AGGREGATE_QUERIER"))
+					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
+	
+				
+				//TODO decide if this is an immediate response or if it needs to be reviewed
+				// if it needs to be reviewed create a DaqueryResponse object, mark as pending
+				//  and return- maybe send a message to someone??
+				// else do the below..
+				
+				DaqueryResponse rVal = null;
+				try
+				{
+					Network net = NetworkDAO.getNetworkForIncomingSite(request.getRequestSite());
+					ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
+					QueueManager.getNamedQueue("main").addTask(task);
+					rVal = task.getResponse();
+				}
+				catch(Throwable e)
+				{
+					log.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
+					DaqueryResponse response = new DaqueryResponse(true);
+					response.setStatusEnum(ResponseStatus.ERROR);
+					response.setErrorMessage(e.getMessage());
+					String trace = StringHelper.stackToString(e);
+					response.setStackTrace(trace);
+					response.setReplyTimestamp(new Date());
+					ResponseHelper.getJsonResponseGen(500, response);
+				}
+				
+				if(rVal == null)
+					return(ResponseHelper.getBasicResponse(500, "No result returned from aggregate query."));
+				else
+				{
+					return(ResponseHelper.getJsonResponseGen(200, rVal));
+				}
+			}
+			else  //send to a remote site
+			{
+				Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
+				return postJSONToRemoteSite(remoteSite, "request", request.toJson());
+			}
 		}
 		catch(Throwable t)
 		{
@@ -307,6 +334,44 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			log.log(Level.SEVERE, msg, t);
 			return(ResponseHelper.getBasicResponse(500, msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name") + " for further information."));
 		}
+	}
+	
+    @GET
+    @Secured
+    @Path("/response/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response response(@PathParam("id") String id)
+    {
+    	if(StringHelper.isBlank(id))
+    		return(ResponseHelper.getBasicResponse(400, "Response id required."));
+    	
+    	if(ResponseDAO.containsId(id))
+    		return(ResponseHelper.getBasicResponse(404, "A response with id:" + id + " was not found."));
+    	
+    	DaqueryResponse resp = null;
+    	try{resp = ResponseDAO.getResponseById(id);}
+    	catch(Throwable t)
+    	{
+    		String msg = "An unhandled exception occured while retrieving a response with id: " + id;
+    		log.log(Level.SEVERE, msg, t);
+    		return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
+    	}
+    	if(resp == null)
+    		return(ResponseHelper.getBasicResponse(404, "Response not found." ));
+    	
+        return Response.ok(200).entity(resp.toJson()).build();    	
+    }
+	
+	private static Response postJSONToRemoteSite(Site site, String serviceName, String json)
+	{
+		Client client = ClientBuilder.newClient();
+		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
+		
+		Response resp = client.target(site.getUrl() + "daquery/ws/" + serviceName)
+						                    .request(MediaType.APPLICATION_JSON).post(ent);
+		
+		return(resp);
 	}
 	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException

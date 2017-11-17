@@ -8,6 +8,7 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
+import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.Role;
 import edu.pitt.dbmi.daquery.domain.Site;
@@ -20,8 +21,6 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-
-import edu.pitt.dbmi.daquery.domain.DaqueryUser;
 
 public class RoleTest {
 

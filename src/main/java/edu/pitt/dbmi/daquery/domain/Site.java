@@ -4,21 +4,17 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.GenericGenerator;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
@@ -35,12 +31,12 @@ import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
 	@NamedQuery(name=Site.FIND_BY_UUID, query="SELECT s FROM Site s WHERE s.siteId = :uuid"),
 	@NamedQuery(name=Site.FIND_BY_NAME, query="SELECT s FROM Site s WHERE s.name = :name"),
-	@NamedQuery(name=Site.FIND_BY_NETWORK, query="SELECT s FROM Site s WHERE s.network.id = :network_id"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
 
 @Entity
 @Table(name="Site")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Site extends DaqueryObject implements Serializable {
 	// ======================================
     // =             Constants              =
@@ -49,13 +45,11 @@ public class Site extends DaqueryObject implements Serializable {
     public static final String FIND_ALL = "Site.findAll";
     public static final String FIND_BY_ID = "Site.findId";
     public static final String FIND_BY_UUID = "Site.findUUId";
-    public static final String FIND_BY_NETWORK = "Site.findByNetwork";
     public static final String COUNT_ALL = "Site.countAll";
     public static final String FIND_BY_NAME = "Site.findByName";
 
 	private static final long serialVersionUID = 1L;
 
-	@Expose
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
@@ -79,13 +73,9 @@ public class Site extends DaqueryObject implements Serializable {
 	@Column(name= "ADMIN_EMAIL", nullable=false, length=500)
 	private String adminEmail;
 
-	@Expose
 	@Column(name= "STATUS", nullable=false, length=500)
 	private String status;
 	
-	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	private Network network;
-
 /*	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "REQUEST_SENT")
 	private java.util.Date request_sent;
@@ -199,14 +189,6 @@ public class Site extends DaqueryObject implements Serializable {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-	
-	public Network getNetwork() {
-		return this.network;
-	}
-	
-	public void setNetwork(Network network) {
-		this.network = network;
 	}
 
 	@Transient

@@ -43,27 +43,24 @@ public class DaqueryRequest extends DaqueryObject
     @Column(name = "REQUESTID",unique = true, length=50)
 	private String requestId;
 	
+	@Expose
+	@Column(name = "REQUEST_GROUP")
+	private String requestGroup;
 	
+	@Expose
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="REQUEST_SITE_ID")
     private Site requestSite;
-
-    @Expose
-    @Column(name="REQUEST_SITE_ID", insertable = false, updatable = false)
-	private String requestSiteId;
     
     @Expose
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="SENT_TIMESTAMP")
     private Date sentTimestamp;
-    
-    @OneToOne
-    @JoinColumn(name="REQUESTER_ID")
-    private DaqueryUser requester;
 
     @Expose
-    @Column(name="REQUESTER_ID", insertable = false, updatable = false)
-    private String requesterId;
+    @OneToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="REQUESTER_ID")
+    private DaqueryUser requester;
 
     @Expose
 	private String direction;
@@ -98,11 +95,11 @@ public class DaqueryRequest extends DaqueryObject
 	public String getRequestId(){return(requestId);}
 	public void setRequestId(String id){requestId = id;}
 	
+	public String getRequestGroup(){return(requestGroup);}
+	public void setRequestGroup(String group){requestGroup = group;}
+	
 	public Site getRequestSite(){return(requestSite);}
 	public void setRequestSite(Site site){requestSite = site;}
-	
-	public String getRequestSiteId(){return(requestSiteId);}
-	public void setRequestSiteId(String id)throws DaqueryException{ throw new DaqueryException("InquiryRequest.requestSiteId is obtained from the requestSite field and cannot be set.");}
 	
 	public Date getSentTimestamp(){return(sentTimestamp);}
 	public void setSentTimestamp(Date timestamp){sentTimestamp = timestamp;}

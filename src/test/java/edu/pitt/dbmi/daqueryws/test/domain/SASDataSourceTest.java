@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.Session;
+
+import static org.junit.Assert.fail;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,6 +13,8 @@ import org.junit.Test;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.domain.DataAttribute;
+import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.DataSource;
 import edu.pitt.dbmi.daquery.domain.Network;
 import edu.pitt.dbmi.daquery.domain.SASDataSource;
@@ -34,8 +38,9 @@ public class SASDataSourceTest {
 			session.getTransaction().begin();
 			session.persist(n);
 			session.getTransaction().commit();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace(System.out);
+			fail("Unexpected exception");
 		} finally {
 			if (session != null) 
 				session.close();
@@ -49,25 +54,45 @@ public class SASDataSourceTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 	    	Network n = NetworkDAO.queryNetworkByName(networkname);
+	    		    	
 			SASDataSource ds = new SASDataSource();
 			ds.setName(datasourcename);
 			ds.setDatasetLocation("/sasdatasetlocation");
-			Set<Network> networklist = new HashSet<Network>();
-			networklist.add(n);
-			ds.setNetworks(networklist);
-			
 			Set<DataSource> newSources = new HashSet<DataSource>();
 			newSources.add(ds);
-			n.setDataSources(newSources);
 			
+	    	DataModel dModel = new DataModel(true);
+	    	dModel.setName("test-data-model");
+	    	dModel.setDataSources(newSources);
+
+	    	DataAttribute da1 = new DataAttribute();
+	    	da1.setDataModel(dModel);
+	    	da1.setEntityName("ENT");
+	    	da1.setFieldName("Field1");
+	    	da1.setPhi(false);
+	    	
+	    	DataAttribute da2 = new DataAttribute();
+	    	da2.setDataModel(dModel);
+	    	da2.setEntityName("ENT");
+	    	da2.setFieldName("Field2");
+	    	da2.setPhi(true);
+	    	
+	    	Set<DataAttribute> attributes = new HashSet<DataAttribute>();
+	    	attributes.add(da1);
+	    	attributes.add(da2);
+	    	
+	    	dModel.setAttributes(attributes);
+	    	ds.setDataModel(dModel);
+	    	
 			session.getTransaction().begin();
-			session.persist(ds);
+			session.persist(dModel);
 			session.update(n);
 			session.getTransaction().commit();
 			
 			datasourceid = ds.getId();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace(System.out);
+			fail("Unexpected exception");
 		} finally {
 			if (session != null) 
 				session.close();
