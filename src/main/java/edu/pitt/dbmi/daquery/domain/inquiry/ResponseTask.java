@@ -10,6 +10,7 @@ import edu.pitt.dbmi.daquery.domain.UserInfo;
 import edu.pitt.dbmi.daquery.queue.AbstractTask;
 import edu.pitt.dbmi.daquery.queue.Task;
 
+
 public class ResponseTask extends AbstractTask implements Task
 {
 	private final static Logger log = Logger.getLogger(ResponseTask.class.getName());
@@ -57,7 +58,7 @@ public class ResponseTask extends AbstractTask implements Task
 		response.setStatusEnum(ResponseStatus.EXECUTING);
 		ResponseDAO.saveOrUpdate(response);
 		response = inquiry.run(response, model);
-		
+		ResponseDAO.saveOrUpdate(response);
 		
 	}
 

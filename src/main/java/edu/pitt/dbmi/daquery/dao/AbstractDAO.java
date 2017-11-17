@@ -13,6 +13,7 @@ import org.hibernate.Session;
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 
 
+
 public abstract class AbstractDAO {
 
 	/**

@@ -10,9 +10,8 @@ import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 
-import edu.pitt.dbmi.daquery.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.dao.ParameterItem;
+import edu.pitt.dbmi.daquery.domain.Site;
 
 
 
@@ -21,6 +20,13 @@ public class SiteDAO extends AbstractDAO {
     private final static Logger logger = Logger.getLogger(SiteDAO.class.getName());
 	
     public static final String LOCAL_SITE_ID_PROP_NAME = "local.site.id";
+    
+    public static void main(String [] args)
+    {
+    	//AppProperties.setDevHomeDir("/home/devuser/dq-data");
+    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+    	getLocalSite();
+    }
     
     public static List<Site> queryAllSites() throws Exception {
     	try { 		
@@ -79,8 +85,8 @@ public class SiteDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
             throw e;
         }
-    }	
-
+    }
+    
     public static Site getLocalSite()
     {
     	try

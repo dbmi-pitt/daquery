@@ -27,8 +27,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
-import edu.pitt.dbmi.daquery.domain.inquiry.InquiryType;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
+
 
 
 /**

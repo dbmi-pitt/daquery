@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
@@ -16,23 +17,30 @@ public class ResponseDAO extends AbstractDAO
 {
 	private final static Logger log = Logger.getLogger(ResponseDAO.class.getName());
 	
+	
+	
 	public static void saveOrUpdate(DaqueryResponse response) throws DaqueryException
 	{
-		Session ses = null;
+		Session session = null;
+		Transaction t = null;
 		try
 		{
-			ses = HibernateConfiguration.openSession();
-			ses.saveOrUpdate(response);
+			session = HibernateConfiguration.openSession();
+			t = session.beginTransaction();
+			session.saveOrUpdate(response);
+			t.commit();
 		}
-		catch(Throwable t)
+		catch(Throwable tr)
 		{
+			if(t != null) t.rollback();
+			tr.printStackTrace();
 			String msg = "Unhandled exception while trying to save a response object with id: " + response.getResponseId();
 			log.log(Level.SEVERE, msg, t);
-			throw new DaqueryException(msg, t);
+			throw new DaqueryException(msg, tr);			
 		}
 		finally
 		{
-			if(ses != null) ses.close();
+			if(session != null) session.close();
 		}
 	}
 	

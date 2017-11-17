@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import org.hibernate.HibernateException;
 
 import edu.pitt.dbmi.daquery.domain.Role;
-import edu.pitt.dbmi.daquery.dao.ParameterItem;
 
 
 

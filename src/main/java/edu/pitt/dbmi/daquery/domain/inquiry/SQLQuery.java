@@ -1,5 +1,8 @@
 package edu.pitt.dbmi.daquery.domain.inquiry;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -21,7 +24,8 @@ import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
 public class SQLQuery extends Inquiry
 {
 	private static final long serialVersionUID = 2928392034234l;
-	
+	private final static Logger log = Logger.getLogger(SQLQuery.class.getName());
+		
 	@Expose
 	@Column(name = "CODE")
 	private String code;
@@ -70,8 +74,8 @@ public class SQLQuery extends Inquiry
 					response.setStatusEnum(ResponseStatus.ERROR);
 					response.setErrorMessage("A SQL data source attached to data model " + getNetwork().getDataModel().getName() + " was not found.");
 				}
-				
-				response.setValue(ds.executeAggregate(code).toString());
+				String sql = "select count(patid) from demographic;";
+				response.setValue(ds.executeAggregate(sql).toString());
 				response.setStatusEnum(ResponseStatus.COMPLETED);
 			}
 			else
@@ -84,6 +88,7 @@ public class SQLQuery extends Inquiry
 		}
 		catch(Throwable t)
 		{
+			log.log(Level.SEVERE, "Unexpected error while executing query: " + code, t);
 			response.setStatusEnum(ResponseStatus.ERROR);
 			response.setErrorMessage("An unexpected error occured. Check the site logs for more information." + t.getMessage());
 			return(response);

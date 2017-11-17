@@ -16,6 +16,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 
@@ -75,6 +76,10 @@ public class DaqueryResponse extends DaqueryObject
     @Column(name = "ERROR_MESSAGE")
     private String errorMessage;
     
+    @Expose
+    @Transient
+    private String stackTrace;
+    
     public DaqueryResponse(){}
     
     public DaqueryResponse(boolean createUUID)
@@ -119,5 +124,8 @@ public class DaqueryResponse extends DaqueryObject
     
     public String getResponseId(){return(responseId);}
     public void setResponseId(String id){responseId = id;}
+    
+    public String getStackTrace(){return(stackTrace);}
+    public void setStackTrace(String trace){stackTrace = trace;}
     
 }

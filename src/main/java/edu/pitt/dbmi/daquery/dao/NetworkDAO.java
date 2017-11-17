@@ -6,13 +6,16 @@ import java.util.HashMap;
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.domain.DataModel;
 import edu.pitt.dbmi.daquery.domain.Network;
+import edu.pitt.dbmi.daquery.domain.Site;
 
 
 
@@ -107,6 +110,30 @@ public class NetworkDAO extends AbstractDAO {
 	    		s.close();
 	    	}
         }
+    }
+    
+    public static Network getNetworkForIncomingSite(Site site)
+    {
+    	if(site == null || site.getSiteId() == null)
+    		return(null);
+    	
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+    		String sql = "select n.network_id from incoming_query_sites iqs, site s, network n where s.site_id = '" + site.getSiteId() + "' and s.id = iqs.site_id and iqs.network_id = n.id";
+    		SQLQuery q = s.createSQLQuery(sql);
+    		String netId = (String) q.uniqueResult();
+    		Network net = queryNetwork(netId);
+	        return net;
+	    
+        } catch (Throwable t) {
+    		logger.log(Level.SEVERE, "Unable to get a network for an incoming site due to an unexpected error.", t);
+    		return(null);
+        } finally {
+        	if (s != null) {
+	    		s.close();
+	    	}
+        }    	
     }
 }
 

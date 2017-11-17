@@ -22,8 +22,8 @@ import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.domain.*;
-import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.domain.inquiry.RequestDirection;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
@@ -36,7 +36,8 @@ public class PopulateDevData
 {
 	public static void main(String [] args) throws Exception
 	{
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		AppProperties.setDevHomeDir("/home/devuser/dq-data");
 /*		assembleRequest();
 		Session s = HibernateConfiguration.openSession();
 		Query q = s.createQuery("select r from DaqueryRequest r");
@@ -56,14 +57,19 @@ public class PopulateDevData
 			System.out.println(net.getIncomingQuerySites().size());
 		} */
 		
-		DaqueryUser tu = createTestUser();
+/*		DaqueryUser tu = createTestUser();
 		save(tu);
 		
 		NetAndSite ns = createNetAndSiteData();
 		save(ns.net);
 		
-		//assembleOutgoingRequest();
-				
+		AppProperties.setDBProperty(SiteDAO.LOCAL_SITE_ID_PROP_NAME, ns.localSite.getSiteId());
+		
+		System.out.println("Test user id: " + tu.getId());
+		//assembleOutgoingRequest(); */
+		
+		DaqueryRequest r = assembleOutgoingRequest();
+		System.out.println("Request Id = : " + r.getRequestId());
 		System.exit(0);
 	}
 	
@@ -79,9 +85,10 @@ public class PopulateDevData
 		save(user);
 		Inquiry inq = createInquiryData(user);
 		inq.setNetwork(net);
+		inq.setAggregate(true);
 		save(inq);
 		save(net);
-		DaqueryRequest req = createOutgoingRequest(inq, user, net.getOutgoingQuerySites().iterator().next());
+		DaqueryRequest req = createOutgoingRequest(inq, user, nas.localSite);
 		req.setNetwork(net);
 		save(req);
 		return(req);
@@ -125,7 +132,7 @@ public class PopulateDevData
 		sqlQ.setVersion(1);
 		sqlQ.setAuthor(author);
 		sqlQ.setSqlDialectEnum(SQLDialect.ORACLE);
-		sqlQ.setCode("select count(*) from ");
+		sqlQ.setCode("select count(patid) from demographic;");
 		return(sqlQ);
 		
 		
@@ -212,6 +219,7 @@ public class PopulateDevData
 		dm.setDescription("The PCORI Common Data Model");
 		
 		SQLDataSource sqlDS = new SQLDataSource("dev cdm data set",dbURL,dbPassword,dbUsername);
+		sqlDS.setDriverClass("oracle.jdbc.driver.OracleDriver");
 		Set<DataSource> dataSources = new HashSet<DataSource>();
 		dataSources.add(sqlDS);
 		dm.setDataSources(dataSources);

@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.domain;
 
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,6 +26,16 @@ import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 @PrimaryKeyJoinColumn(name = "ds_id", referencedColumnName = "ds_id")
 public class SQLDataSource extends DataSource
 {
+	
+	public static void main(String [] args) throws Exception
+	{
+		String runSQL = "asdf af asdfasd fadf;";
+			if(runSQL.endsWith(";"))
+				runSQL = runSQL.substring(0, runSQL.length() - 1);
+			
+		System.out.println(runSQL);
+	}
+	
 	private static final long serialVersionUID = 29408234823894234l;
 	
 	private static Hashtable<Long, ComboPooledDataSource> datasources = new Hashtable<Long, ComboPooledDataSource>();
@@ -38,6 +49,7 @@ public class SQLDataSource extends DataSource
 		this.password = password;
 		this.username = username;		
 	}
+
 	
 	@Column(name = "CONNECTION_URL")
 	private String connectionUrl;
@@ -48,6 +60,9 @@ public class SQLDataSource extends DataSource
 	@Column(name = "PWD")
 	private String password; 
 	
+	@Column(name = "DRIVER_CLASS")
+	private String driverClass;
+	
 	public String getConnectionUrl(){return(connectionUrl);}
 	public void setConnectionUrl(String url){connectionUrl = url;}
 
@@ -57,12 +72,8 @@ public class SQLDataSource extends DataSource
 	public String getPassword(){return(password);}
 	public void setPassword(String pwd){password = pwd;}
 	
-	@Transient
-	public String getDriverClass()
-	{
-		//TODO base class on database type 
-		return("oracel.jdbc.driver.OracleDriver");
-	}
+	public String getDriverClass(){return(driverClass);}
+	public void setDriverClass(String cls){driverClass = cls;}
 	
 	@Transient
 	public Long executeAggregate(String sql) throws DaqueryException
@@ -72,9 +83,12 @@ public class SQLDataSource extends DataSource
 		ResultSet rs = null;
 		try
 		{
+			String runSQL = sql.trim();
+			if(runSQL.endsWith(";"))
+				runSQL = runSQL.substring(0, runSQL.length() - 1);
 			conn = getConnection();
 			s = conn.createStatement();
-			rs = s.executeQuery(sql);
+			rs = s.executeQuery(runSQL);
 			if(rs.next())
 				return(rs.getLong(1));
 			else
@@ -115,6 +129,7 @@ public class SQLDataSource extends DataSource
 			ds.setJdbcUrl(connectionUrl);
 			ds.setPassword(password);
 			ds.setUser(username);
+			datasources.put(key,ds);
 		}
 		return(datasources.get(key));
 	}

@@ -47,26 +47,20 @@ public class DaqueryRequest extends DaqueryObject
 	@Column(name = "REQUEST_GROUP")
 	private String requestGroup;
 	
+	@Expose
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="REQUEST_SITE_ID")
     private Site requestSite;
-
-    @Expose
-    @Column(name="REQUEST_SITE_ID", insertable = false, updatable = false)
-	private String requestSiteId;
     
     @Expose
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="SENT_TIMESTAMP")
     private Date sentTimestamp;
-    
-    @OneToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="REQUESTER_ID")
-    private DaqueryUser requester;
 
     @Expose
-    @Column(name="REQUESTER_ID", insertable = false, updatable = false)
-    private String requesterId;
+    @OneToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="REQUESTER_ID")
+    private DaqueryUser requester;
 
     @Expose
 	private String direction;
@@ -107,18 +101,11 @@ public class DaqueryRequest extends DaqueryObject
 	public Site getRequestSite(){return(requestSite);}
 	public void setRequestSite(Site site){requestSite = site;}
 	
-	public String getRequestSiteId(){return(requestSiteId);}
-	public void setRequestSiteId(String id)throws DaqueryException{ throw new DaqueryException("InquiryRequest.requestSiteId is obtained from the requestSite field and cannot be set.");}
-	
 	public Date getSentTimestamp(){return(sentTimestamp);}
 	public void setSentTimestamp(Date timestamp){sentTimestamp = timestamp;}
 	
 	public DaqueryUser getRequester(){return(requester);}
 	public void setRequester(DaqueryUser user){requester = user;}
-
-	public String getRequesterId(){return(requesterId);}
-	public void setRequester(String id){requesterId = id;}
-	
 	
 	public String getDirection(){return(direction);}
 	public void setDirection(String direction){this.direction = direction;}

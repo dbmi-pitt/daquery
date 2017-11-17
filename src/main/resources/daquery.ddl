@@ -49,7 +49,6 @@ CREATE TABLE "APP"."SITE"
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    SITE_ID varchar(50),
    NAME varchar(100) NOT NULL,
-   NETWORK_ID bigint,
    URL varchar(500),
    ADMIN_EMAIL varchar(500),
    STATUS varchar(50),
@@ -84,7 +83,8 @@ CREATE TABLE SQL_DATA_SOURCE
    DS_ID bigint NOT NULL,
    CONNECTION_URL varchar(250),
    USERNAME varchar(50),
-   PWD varchar(50)
+   PWD varchar(50),
+   DRIVER_CLASS varchar(255)
 );
 
 CREATE TABLE SAS_DATA_SOURCE
