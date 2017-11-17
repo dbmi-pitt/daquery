@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.dao;
 
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +28,7 @@ public class ResponseDAO extends AbstractDAO
 		{
 			session = HibernateConfiguration.openSession();
 			t = session.beginTransaction();
+			response.setReplyTimestamp(new Date());
 			session.saveOrUpdate(response);
 			t.commit();
 		}
