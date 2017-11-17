@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * API into application level properties.  Properties are read from both the internal (inlcuded in war) application.properties
  * file and from the PROPERY 
@@ -21,6 +20,11 @@ public class AppProperties
 	
 	private static final String confDir = "conf";
 	private static String devHomeDir = null;
+	
+	public static void main(String [] args)
+	{
+		
+	}
 	
 	public static void setDevHomeDir(String val)
 	{
@@ -161,8 +165,11 @@ public class AppProperties
 	 * @return The value of the property of null if it doesn't exist.
 	 * @throws DaqueryException Is thrown if an unexpected error occurs.
 	 */
+	
+	
 	public static String getDBProperty(String propertyName) throws DaqueryException
 	{
+
 		if(StringHelper.isEmpty(propertyName)) return(null);
 		Connection conn = null;
 		Statement stat = null;
@@ -183,7 +190,29 @@ public class AppProperties
 			throw new DaqueryException(msg + " Check the application logs for further information.", t);
 		}
 		finally{ApplicationDBHelper.closeConnection(conn, stat, null);}
-	}
+	}		
+	
+/*	public static String getDBProperty(String propertyName) throws DaqueryException
+	{	
+		
+		if(StringHelper.isEmpty(propertyName)) return(null);
+		Session sess = null;
+		try
+		{
+			sess = HibernateConfiguration.openSession();
+			String sql = "select value from property where upper(name) = '" + propertyName.trim().toUpperCase() + "'";
+			SQLQuery q = sess.createSQLQuery(sql);
+			String val = (String) q.uniqueResult();
+			return(val);
+		}
+		catch(Throwable t)
+		{
+			String msg = "An unexpected error occured while setting the application database property: " + propertyName;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryException(msg + " Check the application logs for further information.", t);
+		}
+		finally{if(sess != null) sess.close();}
+	} */
 	
 	private static final int defaultTaskQueueMaxLength = 4;
 	public static int getTaskQueueMaxLength()

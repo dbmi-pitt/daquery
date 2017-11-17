@@ -1,9 +1,21 @@
 package edu.pitt.dbmi.daquery.common.util;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class StringHelper
 {
+	public static String stackToString(Throwable t)
+	{
+		StringWriter sWriter = new StringWriter();
+		PrintWriter writer = new PrintWriter(sWriter);
+		t.printStackTrace(writer);
+		String trace = sWriter.toString();
+		if(trace.length() > 10000) trace = trace.substring(0, 9999);
+		return(trace);
+	}
+	
 	public static void main(String [] args)
 	{
 		String val = "\\\"here\\\"";
