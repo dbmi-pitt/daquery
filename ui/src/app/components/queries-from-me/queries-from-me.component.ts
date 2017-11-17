@@ -7,9 +7,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class QueriesFromMeComponent implements OnInit {
   showNewQuery = false;
+  editingInquiry: any;
   constructor() { }
 
   ngOnInit() {
+  }
+
+  editInquiry(inquiry: any){
+    this.editingInquiry = inquiry;
+    this.showNewQuery = true;
   }
 
 }

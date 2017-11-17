@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { Site } from '../models/site.model';
 import { Network } from '../models/network.model';
 import { AuthenticationService } from './authentication.service';
+import { Error } from '../_globals/error';
 
 // Import RxJs required methods
 import 'rxjs/add/operator/map';
@@ -13,21 +14,24 @@ import 'rxjs/add/operator/catch';
 export class SiteService {
 
   constructor(private http: HttpClient,
-              private authenticationService: AuthenticationService) { }
+              private authenticationService: AuthenticationService,
+              private error: Error) { }
 
   sites = [];
   getSite(id: number): Observable<Site> {
     return this.http.get(`/daquery/ws/sites/${id}`, this.authenticationService.jwt())
                     .catch(error => {
-                      return Observable.throw(error.json().error || 'Server error');
+                      return Observable.throw(error || 'Server error');
                     })
   }
 
   getSites(network: Network): Observable<Site[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
+                                   .set("type", "outgoing");
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -37,6 +41,7 @@ export class SiteService {
 
     return this.http.get('/daquery/ws/sites/available', {params: params})
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -47,6 +52,7 @@ export class SiteService {
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -57,6 +63,7 @@ export class SiteService {
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -67,6 +74,7 @@ export class SiteService {
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -74,6 +82,7 @@ export class SiteService {
   requestConnectSite(siteForm: any): Observable<Site> {
     return this.http.post('/daquery/ws/sites?type=outgoing', siteForm)
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -86,6 +95,7 @@ export class SiteService {
 
     return this.http.put('/daquery/ws/sites/approve-connectrequest', payload)
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
 
@@ -99,6 +109,7 @@ export class SiteService {
 
     return this.http.put('/daquery/ws/sites/deny-connectrequest', payload)
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }

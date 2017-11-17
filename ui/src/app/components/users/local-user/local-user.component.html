@@ -2,7 +2,9 @@
   <div class="col-md-12">
     <div class="box box-default">
       <div class="box-header with-border">
-        <h3>{{user.email}}</h3>
+        <h3>{{user.realName}}</h3>
+        <span>{{user.email}}</span> |
+        <span *ngFor="let role of user.roles">{{role.name}}</span> |
         <span>sign up at:{{user.signupAt}}</span>
       </div>
       <div class="box-body">

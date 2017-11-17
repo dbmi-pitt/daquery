@@ -15,18 +15,25 @@
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Password" formControlName="password" required>
+            <input type="password" class="form-control" id="password" placeholder="Password" formControlName="password">
             <div *ngIf="formErrors.password" class="alert alert-danger">
               {{ formErrors.password }}
             </div>
           </div>
           <div class="form-group">
             <label for="password_confirmation">Password Confirm</label>
-            <input type="password" class="form-control" id="password_confirmation" placeholder="Password Comfirm" formControlName="password_confirmation" required>
+            <input type="password" class="form-control" id="password_confirmation" placeholder="Password Comfirm" formControlName="password_confirmation">
             <div *ngIf="formErrors.password_confirmation" class="alert alert-danger">
               {{ formErrors.password_confirmation }}
             </div>
           </div>
+          <div class="form-group">
+              <label for="realname">Real Name</label>
+              <input type="text" class="form-control" id="realname" placeholder="Real Name" formControlName="realname">
+              <div *ngIf="formErrors.email" class="alert alert-danger">
+                {{ formErrors.email }}
+              </div>
+            </div>
           <button type="submit" class="btn btn-primary" [disabled]="!userForm.valid">Submit</button>
         </form>
       </div>

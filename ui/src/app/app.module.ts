@@ -10,10 +10,11 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JWTInterceptor } from './services/interceptors/jwt-interceptor'
 import { ResInterceptor } from './services/interceptors/res-interceptor'
 
+import { Error } from './_globals/error';
 import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
 import { AuthenticationService } from './services/authentication.service';
-import { QueryService } from './services/query.service';
+import { RequestService } from './services/request.service';
 import { SiteService } from './services/site.service';
 import { UserService } from './services/user.service';
 import { NetworkService } from './services/network.service';
@@ -33,7 +34,7 @@ import { routing }        from './app.routing';
 import { QueriesFromMeComponent } from './components/queries-from-me/queries-from-me.component';
 import { SitesComponent } from './components/sites/sites.component';
 import { UsersComponent } from './components/users/users.component';
-import { QueriesFromMeListComponent } from './components/queries-from-me/queries-from-me-list/queries-from-me-list.component';
+import { RequestsFromMeListComponent } from './components/queries-from-me/requests-from-me-list/requests-from-me-list.component';
 import { SiteComponent } from './components/sites/site/site.component';
 import { LocalUserComponent } from './components/users/local-user/local-user.component';
 import { AddUserComponent } from './components/users/add-user/add-user.component';
@@ -57,6 +58,7 @@ import { Step1Component } from './components/setup/step1/step1.component';
 import { Step2Component } from './components/setup/step2/step2.component';
 import { Step3Component } from './components/setup/step3/step3.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { DataSourceComponent } from './components/networks/network/data-source/data-source.component';
 
 @NgModule({
   declarations: [
@@ -70,7 +72,7 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
     QueriesFromMeComponent,
     SitesComponent,
     UsersComponent,
-    QueriesFromMeListComponent,
+    RequestsFromMeListComponent,
     SiteComponent,
     LocalUserComponent,
     AddUserComponent,
@@ -93,7 +95,8 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
     Step1Component,
     Step2Component,
     Step3Component,
-    ChangePasswordComponent
+    ChangePasswordComponent,
+    DataSourceComponent
   ],
   imports: [
     BrowserModule,
@@ -107,8 +110,9 @@ import { ChangePasswordComponent } from './components/change-password/change-pas
   ],
   providers: [AuthGuard, 
               RoleGuard,
+              Error,
               AuthenticationService,
-              QueryService,
+              RequestService,
               SiteService,
               UserService,
               NetworkService,

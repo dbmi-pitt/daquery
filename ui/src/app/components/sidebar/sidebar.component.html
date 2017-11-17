@@ -17,10 +17,10 @@
     <ul class="sidebar-menu tree" data-widget="tree">
       <li class="header">MAIN NAVIGATION</li>
       <li [class.active]="isActive('/queries-to-me')">
-        <a [routerLink]="['/queries-to-me']"><i class="fa fa-cloud-download"></i><span>Queries to me</span></a>
+        <a [routerLink]="['/queries-to-me']"><i class="fa fa-cloud-download"></i><span>Incoming Requests</span></a>
       </li>
       <li [class.active]="isActive('/queries-from-me')">
-        <a [routerLink]="['/queries-from-me']"><i class="fa fa-cloud-upload"></i><span>Queries from me</span></a>
+        <a [routerLink]="['/queries-from-me']"><i class="fa fa-cloud-upload"></i><span>Outgoing Requests</span></a>
       </li>
       <li *ngIf="showNetworkConfiguration" [class.active]="isActive('/networks')">
         <a [routerLink]="['/networks']"><i class="fa fa-share-alt"></i><span>Network configuration</span></a>

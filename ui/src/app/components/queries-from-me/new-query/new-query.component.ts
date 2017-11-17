@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { NewQuery } from '../../../models/new-query.model';
 import { NetworkService } from '../../../services/network.service';
@@ -13,29 +13,44 @@ import { Site } from '../../../models/site.model';
 })
 export class NewQueryComponent implements OnInit {
 
+  @Input() editingInquiry: any;
   queryForm: FormGroup;
   networks: Network[];
+
   constructor(private fb: FormBuilder,
               private networkService: NetworkService,
               private siteService: SiteService) { }
 
-  createForm() {
-    this.queryForm = this.fb.group({
-      network: new FormControl('', Validators.required),
-      sitesToQuery: this.fb.array([]),
-      dataType: new FormControl('aggregate'),
-      queryName: 'aaa',
-      studyName: '',
-      queryDescription: '',
-      oracleQuery: '',
-      sqlQuery: ''
-    });
+  createForm(inquiry) {
+    if(inquiry){
+      this.queryForm = this.fb.group({
+        network: new FormControl('', Validators.required),
+        sitesToQuery: this.fb.array([]),
+        dataType: new FormControl('aggregate'),
+        queryName: 'continue edit inquiry',
+        studyName: '',
+        queryDescription: '',
+        oracleQuery: '',
+        sqlQuery: ''
+      });
+    } else {
+      this.queryForm = this.fb.group({
+        network: new FormControl('', Validators.required),
+        sitesToQuery: this.fb.array([]),
+        dataType: new FormControl('aggregate'),
+        queryName: '',
+        studyName: '',
+        queryDescription: '',
+        oracleQuery: '',
+        sqlQuery: ''
+      });
+    }
   }
 
   ngOnInit() {
     this.networkService.getNetworks()
                        .subscribe(networks => this.networks = networks);
-    this.createForm();
+    this.createForm(this.editingInquiry);
   }
 
   onSubmit() {

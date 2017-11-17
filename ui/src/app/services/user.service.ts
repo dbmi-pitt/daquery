@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from 'rxjs/Observable';
 import { AuthenticationService } from './authentication.service';
 import { User } from '../models/user.model';
+import { Error } from '../_globals/error';
 
 // Import RxJs required methods
 import 'rxjs/add/operator/map';
@@ -12,12 +13,14 @@ import 'rxjs/add/operator/catch';
 export class UserService {
 
   constructor(private http: HttpClient,
-              private authenticationService: AuthenticationService) { }
+              private authenticationService: AuthenticationService,
+              private error: Error) { }
 
   users = [];
   getUsers(): Observable<User[]> {
     return this.http.get('/daquery/ws/users', this.authenticationService.jwt())
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -26,6 +29,7 @@ export class UserService {
     const params = new HttpParams().set('user_id', user_id.toString());
     return this.http.get('/daquery/ws/roles', {params: params})
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -39,6 +43,7 @@ export class UserService {
     requestOptions.search = urlSearchParams;
     return this.http.get('/daquery/ws/remote-site-users', requestOptions)
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -46,6 +51,7 @@ export class UserService {
   getLocalRoles(): Observable<string[]> {
     return this.http.get('/daquery/ws/local-roles', this.authenticationService.jwt())
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -53,6 +59,7 @@ export class UserService {
   createUser(user: any): Observable<User>{
     return this.http.post('/daquery/ws/users', JSON.stringify(user), this.authenticationService.jwt())
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -61,6 +68,7 @@ export class UserService {
     let userObj = JSON.parse(user);
     return this.http.patch(`/daquery/ws/users/${userObj.id}`, user, this.authenticationService.jwt())
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error.json().error || 'Server error');
                     });
   }
@@ -69,6 +77,7 @@ export class UserService {
     let userObj = JSON.parse(user);
     return this.http.patch(`/daquery/ws/users/${userObj.id}`, user, this.authenticationService.jwt())
                     .catch(error => {
+                      this.error.message = error.message;
                       return Observable.throw(error.json().error || 'Server error');
                     });
   }

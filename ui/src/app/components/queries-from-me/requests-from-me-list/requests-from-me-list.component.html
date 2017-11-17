@@ -1,0 +1,61 @@
+<div class="table-responsive">
+  <table class="table table-striped">
+    <caption>Inquiries</caption>
+    <thead>
+      <tr>
+        <th>Inquiry ID</th>
+        <th>Type</th>
+        <th>Date/Time</th>
+      </tr>
+    </thead>
+    <tbody *ngFor="let inquiry of inquires">
+      <tr>
+        <td>{{inquiry.inquiry_id}}</td>
+        <td>{{inquiry.type}}</td>
+        <td>{{inquiry.datetime}}</td>
+        <td>
+          <button class="btn btn-primary" (click)="onEditClick(inquiry)">Continue edit</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="table table-striped">
+    <caption>Requests</caption>
+    <thead>
+      <tr>
+        <th>Request ID</th>
+        <th>Type</th>
+        <th>Date/Time</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody *ngFor="let request of requests">
+      <tr>
+        <td><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !request.active, 'fa-minus-square-o': request.active}" (click)="request.active = !request.active"></i> {{request.request_id}}</td>
+        <td>{{request.type}}</td>
+        <td>{{request.datetime}}</td>
+        <td></td>
+      </tr>
+      <tr *ngIf="request.active">
+        <td colspan="4">
+          <table class="table table-condensed table-striped">
+            <thead>
+              <tr>
+                <th>Site</th>
+                <th>Status</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let response of request.responses">
+                <td>{{response.site}}</td>
+                <td>{{response.status}}</td>
+                <td>{{response.result}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {Idle, DEFAULT_INTERRUPTSOURCES} from '@ng-idle/core';
-import {Keepalive} from '@ng-idle/keepalive';
+import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
+import { Keepalive } from '@ng-idle/keepalive';
 import { AuthenticationService } from '../../services/authentication.service';
+import { Error } from '../../_globals/error';
 
 declare var $:any;
 
@@ -19,7 +20,8 @@ export class DashboardComponent implements OnInit {
   constructor(private router: Router,
               private idle: Idle, 
               private keepalive: Keepalive,
-              private authenticationService: AuthenticationService) { 
+              private authenticationService: AuthenticationService,
+              public error: Error) { 
     // sets an idle timeout of 5 minutes(300 seconds)
     idle.setIdle(300);
     // sets a timeout period of . after 1 minute(60 seconds) of inactivity, the user will be considered timed out.
@@ -60,5 +62,10 @@ export class DashboardComponent implements OnInit {
     this.idleState = 'Started.';
     this.timedOut = false;
     $('#myModal').modal('hide');
+  }
+
+  onAlertDismiss(){
+    this.error.message = null;
+    console.log("alert dismiss");
   }
 }

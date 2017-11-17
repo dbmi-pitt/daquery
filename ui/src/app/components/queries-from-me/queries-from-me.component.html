@@ -33,13 +33,13 @@
   </div>
   <div class="row">
     <div class="col-md-2 placeholder">
-        <button class="btn btn-block btn-primary" (click)="showNewQuery=!showNewQuery">New Query</button>
+        <button class="btn btn-block btn-primary" (click)="showNewQuery=!showNewQuery; editingInquiry = null;">New Query</button>
     </div>
   </div>
   <div class="row">
     <div class="col-md-12">
-      <app-new-query *ngIf="showNewQuery"></app-new-query>
-      <app-queries-from-me-list></app-queries-from-me-list>
+      <app-new-query *ngIf="showNewQuery" [editingInquiry]="editingInquiry"></app-new-query>
+      <app-requests-from-me-list (editInquiry)="editInquiry($event)"></app-requests-from-me-list>
     </div>
   </div>
 </section>

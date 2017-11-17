@@ -2,6 +2,7 @@
   <table class="table table-striped">
     <thead>
       <tr>
+        <th>ID</th>
         <th>Study Name</th>
         <th>Query Name</th>
         <th>Type</th>
@@ -13,18 +14,19 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let query of queries">
-        <td>{{query.studyName}}</td>
-        <td><a [routerLink]="['/review-query', query.id]">{{query.name}}</a></td>
-        <td>{{query.type}}</td>
-        <td>{{query.site}}-{{query.username}}</td>
-        <td>{{query.datetime}}</td>
-        <td>{{query.status}}</td>
-        <td *ngIf="query.status === 'pending'">
+      <tr *ngFor="let request of requests">
+        <td>{{request.request+id}}</td>
+        <td>{{request.studyName}}</td>
+        <td><a [routerLink]="['/review-query', request.id]">{{request.name}}</a></td>
+        <td>{{request.type}}</td>
+        <td>{{request.site}}-{{request.username}}</td>
+        <td>{{request.datetime}}</td>
+        <td>{{request.status}}</td>
+        <td *ngIf="request.status === 'pending'">
           <button class="btn btn-success btn-sm">Approve</button>
           <button class="btn btn-danger btn-sm">Deny</button>
         </td>
-        <td *ngIf="query.status !== 'pending'">
+        <td *ngIf="request.status !== 'pending'">
         </td>
       </tr>
     </tbody>

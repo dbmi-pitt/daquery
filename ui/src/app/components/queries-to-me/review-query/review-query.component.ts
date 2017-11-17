@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { QueryService } from '../../../services/query.service';
+import { RequestService } from '../../../services/request.service';
 import { QueryToMe } from '../../../models/query-to-me.model';
 import { ActivatedRoute, Params } from '@angular/router';
 
@@ -13,7 +13,7 @@ import { Observable } from 'rxjs/Observable';
 export class ReviewQueryComponent implements OnInit {
 
   query: QueryToMe = new QueryToMe();
-  constructor(private queryService: QueryService,
+  constructor(private requestService: RequestService,
               private activatedRoute: ActivatedRoute) { }
 
   ngOnInit() {
@@ -25,7 +25,7 @@ export class ReviewQueryComponent implements OnInit {
   }
 
   getQueryToMe(id: number) {
-    this.queryService.getQueryToMe(id)
+    this.requestService.getQueryToMe(id)
                      .subscribe(query => this.query = query);
   }
 }
