@@ -13,9 +13,9 @@ import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
-import edu.pitt.dbmi.daquery.domain.DataModel;
-import edu.pitt.dbmi.daquery.domain.Network;
-import edu.pitt.dbmi.daquery.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.Site;
 
 
 

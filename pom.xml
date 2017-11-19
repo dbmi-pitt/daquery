@@ -9,6 +9,7 @@
     <url>http://maven.apache.org</url>
     <properties>
         <hibernate-validator.version>5.4.1.Final</hibernate-validator.version>
+        <hibernate.version>4.3.6.Final</hibernate.version>
         <mysql-connector.version>5.1.38</mysql-connector.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
         <jstl.version>1.2</jstl.version>
@@ -21,10 +22,8 @@
   	  <jersey.version>2.25.1</jersey.version>        
         <jaxrs.version>2.0.1</jaxrs.version>
         <logback.version>1.2.3</logback.version>
-        <antlr4.version>4.7</antlr4.version>
         <jjwt.version>0.7.0</jjwt.version>   
         <cdi.version>2.0</cdi.version> 
-        <hibernate.version>4.3.6.Final</hibernate.version>
         <transaction.version>1.2</transaction.version> 
         <entitymanager.version>4.3.6.Final</entitymanager.version>
         <jackson.version>2.5.2</jackson.version>
@@ -52,13 +51,6 @@
 	  <version>${oraclejdbc.version}</version>
 	</dependency>
     
-    <!-- https://mvnrepository.com/artifact/org.antlr/antlr4-runtime -->
-		<dependency>
-		    <groupId>org.antlr</groupId>
-		    <artifactId>antlr4-runtime</artifactId>
-		    <version>${antlr4.version}</version>
-		</dependency>
-
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -283,29 +275,6 @@
 		                        <contextPath>/</contextPath>
 		                    </webApp>
 		                </configuration>
-		            </plugin>
-			    	<plugin>
-		                <groupId>org.antlr</groupId>
-		                <artifactId>antlr4-maven-plugin</artifactId>
-		                <version>4.7</version>
-		                <executions>
-		                    <execution>
-		                    	<id>antlr</id>
-				    			<configuration>
-									<sourceDirectory>${basedir}/src/main/antlr</sourceDirectory>
-									<outputDirectory>${basedir}/src\main\java\edu\pitt\dbmi\daquery\sql\parser\generated</outputDirectory>		
-									<listener>true</listener>
-									<visitor>true</visitor>
-									<arguments>
-						    			<argument>-package</argument>
-						    			<argument>edu.pitt.dbmi.daquery.sql.parser.generated</argument>
-									</arguments>
-				    			</configuration>		    
-		                    	<goals>
-		                        	<goal>antlr4</goal>
-		                    	</goals>
-		                	</execution>
-		                </executions>
 		            </plugin>
 		        </plugins>
 		    </build>

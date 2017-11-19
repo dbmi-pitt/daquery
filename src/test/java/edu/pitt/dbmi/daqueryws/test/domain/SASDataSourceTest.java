@@ -1,23 +1,23 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
+import static org.junit.Assert.fail;
+
 import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.Session;
-
-import static org.junit.Assert.fail;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.DataSource;
+import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.SASDataSource;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.domain.DataAttribute;
-import edu.pitt.dbmi.daquery.domain.DataModel;
-import edu.pitt.dbmi.daquery.domain.DataSource;
-import edu.pitt.dbmi.daquery.domain.Network;
-import edu.pitt.dbmi.daquery.domain.SASDataSource;
 
 
 public class SASDataSourceTest {

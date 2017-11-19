@@ -10,11 +10,11 @@ import java.util.logging.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.NonUniqueResultException;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.Role;
+import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.domain.DaqueryUser;
-import edu.pitt.dbmi.daquery.domain.Role;
-import edu.pitt.dbmi.daquery.domain.UserInfo;
 import edu.pitt.dbmi.daquery.rest.UserEndpoint;
 
 import java.util.logging.Level;

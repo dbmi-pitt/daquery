@@ -9,6 +9,9 @@ Make sure to change the "catalina.home" property to the directory where
 your Tomcat instance is installed.  Make sure this directory exists and is
 writable with a subdirectory of conf/
 
+Obtain a copy of the oracle ojdbc.jar JDBC drivers and place it in your maven repository at
+
+
 --build with: mvn install
 
 --deploy target/daquery-1.0-SNAPSHOT.war in Tomcat as daquery.war

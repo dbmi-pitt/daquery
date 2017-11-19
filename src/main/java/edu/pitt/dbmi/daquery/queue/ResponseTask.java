@@ -1,14 +1,16 @@
-package edu.pitt.dbmi.daquery.domain.inquiry;
+package edu.pitt.dbmi.daquery.queue;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
-import edu.pitt.dbmi.daquery.domain.DataModel;
-import edu.pitt.dbmi.daquery.domain.UserInfo;
-import edu.pitt.dbmi.daquery.queue.AbstractTask;
-import edu.pitt.dbmi.daquery.queue.Task;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
 
 
 public class ResponseTask extends AbstractTask implements Task
@@ -78,5 +80,5 @@ public class ResponseTask extends AbstractTask implements Task
 		
 		try{ResponseDAO.saveOrUpdate(response);}
 		catch(Throwable t){log.log(Level.SEVERE, "Error while trying to save response error state or response with id: " + response.getResponseId(), t);}
-	}
+	}	
 }

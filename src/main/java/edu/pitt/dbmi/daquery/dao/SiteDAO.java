@@ -10,8 +10,8 @@ import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 
+import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.domain.Site;
 
 
 
