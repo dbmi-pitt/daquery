@@ -7,6 +7,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public class SQLDataSourceDAO extends AbstractDAO {
 	private final static Logger logger = Logger.getLogger(SQLDataSourceDAO.class.getName());

@@ -9,8 +9,8 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import io.restassured.RestAssured;
 

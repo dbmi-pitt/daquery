@@ -8,6 +8,7 @@ import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 

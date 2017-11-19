@@ -16,6 +16,7 @@ import org.hibernate.Session;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 
 

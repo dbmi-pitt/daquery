@@ -15,7 +15,7 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.dao.SiteDAO;
 

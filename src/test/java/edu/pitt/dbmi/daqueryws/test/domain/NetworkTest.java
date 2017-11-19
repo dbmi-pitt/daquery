@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 
 

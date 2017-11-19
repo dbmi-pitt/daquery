@@ -11,6 +11,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
 

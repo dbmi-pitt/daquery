@@ -11,6 +11,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 
 

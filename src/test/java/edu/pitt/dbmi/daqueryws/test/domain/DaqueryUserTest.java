@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.HibernateConfiguration;
 
 public class DaqueryUserTest {
 	
