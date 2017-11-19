@@ -10,8 +10,13 @@
   	<jaxrs.version>2.0.1</jaxrs.version>
   	<gson.version>2.6.2</gson.version>
     <joda.version>2.9.9</joda.version>
+	<hibernate-validator.version>5.4.1.Final</hibernate-validator.version>
+    <hibernate.version>4.3.6.Final</hibernate.version>
+    <c3p0.version>0.9.1.2</c3p0.version>
+    <antlr4.version>4.7</antlr4.version>
+
   	<maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>      	
+    <maven.compiler.target>1.7</maven.compiler.target>    
   </properties>
   <dependencies>
     <dependency>
@@ -49,7 +54,50 @@
 		<artifactId>joda-time</artifactId>
 		<version>${joda.version}</version>
 	</dependency>
+		<dependency>
+	    <groupId>org.hibernate</groupId>
+	    <artifactId>hibernate-core</artifactId>
+	    <version>${hibernate.version}</version>
+	</dependency>
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>4.3.2.Final</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-entitymanager</artifactId>
+        <version>${hibernate.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-ehcache</artifactId>
+        <version>${hibernate.version}</version>
+    </dependency>
     
+    <dependency>
+		<groupId>c3p0</groupId>
+		<artifactId>c3p0</artifactId>
+		<version>${c3p0.version}</version> 
+	</dependency> 
+	<dependency>
+		<groupId>org.hibernate</groupId>
+		<artifactId>hibernate-c3p0</artifactId>
+		<version>${hibernate.version}</version> 
+	</dependency>
+    <!-- https://mvnrepository.com/artifact/org.antlr/antlr4-runtime -->
+	<dependency>
+	    <groupId>org.antlr</groupId>
+	    <artifactId>antlr4-runtime</artifactId>
+	    <version>${antlr4.version}</version>
+	</dependency>
+	
   </dependencies>
   <build>
     <finalName>daquery-common</finalName>
@@ -66,6 +114,29 @@
 			  </archive>
 			</configuration>
 	    </plugin>
+    	<plugin>
+        	<groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+          	<version>4.7</version>
+            <executions>
+            	<execution>
+                	<id>antlr</id>
+	    			<configuration>
+						<sourceDirectory>${basedir}/src/main/antlr</sourceDirectory>
+						<outputDirectory>${basedir}/src\main\java\edu\pitt\dbmi\daquery\sql\parser\generated</outputDirectory>		
+						<listener>true</listener>
+						<visitor>true</visitor>
+						<arguments>
+			    			<argument>-package</argument>
+			    			<argument>edu.pitt.dbmi.daquery.sql.parser.generated</argument>
+						</arguments>
+	    			</configuration>		    
+                   	<goals>
+                       	<goal>antlr4</goal>
+                   	</goals>
+               	</execution>
+              </executions>
+           </plugin>	    
     </plugins>
   </build>
 </project>
