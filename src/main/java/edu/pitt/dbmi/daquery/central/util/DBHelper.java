@@ -240,7 +240,6 @@ public class DBHelper
 					currentNetInfo = new NetworkInfo();
 					currentNetInfo.id = netId;
 					currentNetInfo.name = netName;
-					currentNetInfo.dataModel = netModel;
 					networks.add(currentNetInfo);
 				}
 				SiteInfo nextSite = new SiteInfo();
