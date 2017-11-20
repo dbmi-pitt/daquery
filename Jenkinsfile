@@ -1,7 +1,9 @@
 node {
     stage('Get Dependencies') {
         echo 'Getting dependencies'
-        git url: 'https://github.com/dbmi-pitt/daquery-common.git', credentialsId: 'cborromeo'
+        dir('daquery-common') {
+            git url: 'https://github.com/dbmi-pitt/daquery-common.git', credentialsId: 'cborromeo'
+        }
     }
     stage('Checkout') {
         echo 'Getting the code'
