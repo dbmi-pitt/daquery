@@ -7,7 +7,7 @@ node {
         }
     }
     stage('Dependency: daquery UI') {
-        dir('daquery-ws/ui') {
+        dir('daquery') {
             git url: 'https://cborromeo@github.com/dbmi-pitt/daquery.git', credentialsId: 'cborromeo-git'
             echo 'Extracting daquery UI'
         }
