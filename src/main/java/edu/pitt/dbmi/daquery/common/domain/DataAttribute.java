@@ -30,6 +30,10 @@ public class DataAttribute
     private String fieldName;
     
     @Expose
+    @Column(name = "FIELD_TYPE")
+    private String fieldType;
+    
+    @Expose
     @Column(name = "PHI")
     private boolean phi = true;
     
@@ -48,6 +52,9 @@ public class DataAttribute
     
     public String getFieldName(){return(fieldName);}
     public void setFieldName(String name){fieldName = name;}
+
+    public String getFieldType(){return(fieldType);}
+    public void setFieldType(String type){fieldType = type;}
     
     public boolean isPhi(){return(phi);}
     public void setPhi(boolean phi){this.phi = phi;}

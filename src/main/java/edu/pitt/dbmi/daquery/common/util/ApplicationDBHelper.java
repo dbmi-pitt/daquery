@@ -111,39 +111,22 @@ public class ApplicationDBHelper
 			log.log(Level.SEVERE, "An error occurred while trying to close a connect, statement or result set", t);
 		}	
 	}
+
+	private static final String SCANNER_PATTERN = "(;(\r)?\n)|((\r)?\n)?(--)?.*(--(\r)?\n)";
 	
-	public static boolean executeDDL(InputStream in)
+	public static boolean createTables(InputStream input)
 	{
-		Connection conn = null;
-	    Scanner s = new Scanner(in);
-	    s.useDelimiter("(;(\r)?\n)|((\r)?\n)?(--)?.*(--(\r)?\n)");
-	    Statement st = null;
+		Connection dbConn = null;
+	    Scanner inputScanner = new Scanner(input);
+	    inputScanner.useDelimiter(SCANNER_PATTERN);
+	    Statement dbStatement = null;
 	    try
 	    {
-	    	conn = getConnection();
-	        st = conn.createStatement();
-	        while (s.hasNext())
-	        {
-	            String line = s.next();
-	            if (line.startsWith("/*!") && line.endsWith("*/"))
-	            {
-	                int i = line.indexOf(' ');
-	                line = line.substring(i + 1, line.length() - " */".length());
-	            }
+	    	dbConn = getConnection();
+	        dbStatement = dbConn.createStatement();
+	        
+	        executeDDL(dbStatement, inputScanner);
 
-	            if (line.trim().length() > 0)
-	            {
-	            	String l2 = line.trim();
-	            	if(l2.endsWith(";"))
-	            		l2 = l2.substring(0, l2.length() - 1);
-	                try{st.execute(l2);}
-	                catch(Throwable t)
-	                {
-	                	System.err.println("Error executing the following DDL \n" + l2); t.printStackTrace();
-	                	throw t;  //Eclipse reports a resource leak here, but this isn't true it is handled in the finally clause below
-	                }                
-	            }
-	        }
 	        return(true);
 	    }
 	    catch(Throwable t)
@@ -153,9 +136,46 @@ public class ApplicationDBHelper
 	    }
 	    finally
 	    {
-	    	if(s != null)
-	    		s.close();
-	        closeConnection(conn, st, null);
+	    	if(inputScanner != null)
+	    		inputScanner.close();
+	        closeConnection(dbConn, dbStatement, null);
 	    }
+	}
+	
+	private static void executeDDL(Statement dbStat, Scanner ddlScanner) throws DaqueryException
+	{
+        while (ddlScanner.hasNext())
+        {
+            String line = ddlScanner.next();
+            if (line.startsWith("/*!") && line.endsWith("*/"))
+            {
+                int i = line.indexOf(' ');
+                line = line.substring(i + 1, line.length() - " */".length());
+            }
+
+            if (line.trim().length() > 0)
+            {
+            	String l2 = line.trim();
+            	if(l2.startsWith("#include"))
+            	{
+            		String includeFile = l2.substring(8).trim();
+            		InputStream is = FileHelper.streamFromBaseResource(includeFile);
+            	    Scanner inputScanner = new Scanner(is);
+            	    inputScanner.useDelimiter(SCANNER_PATTERN);
+            	    executeDDL(dbStat, inputScanner);
+            	}
+            	else
+            	{
+	            	if(l2.endsWith(";"))
+	            		l2 = l2.substring(0, l2.length() - 1);
+	                try{dbStat.execute(l2);}
+	                catch(Throwable t)
+	                {
+	                	System.err.println("Error executing the following DDL \n" + l2); t.printStackTrace();
+	                	throw new DaqueryException("Error executing the following DDL \n" + l2);  //Eclipse reports a resource leak here, but this isn't true it is handled in the finally clause below
+	                }
+            	}
+            }
+        }		
 	}
 }
