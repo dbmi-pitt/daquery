@@ -22,7 +22,7 @@ public class CreateCDMModelInfo
 {
 	private static final String CDM_CONN_URL = "jdbc:oracle:thin:@dbmi-db-dev-01.dbmi.pitt.edu:1521:dbmi02";
 	private static final String CDM_SCHEMA_NAME = "pcori_etl_31";
-	private static final String CDM_PASSWORD = "dbmi17etl";
+	private static final String CDM_PASSWORD = "password";
 	
 	public static void main(String [] args) throws DaqueryException
 	{
