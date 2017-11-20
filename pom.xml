@@ -117,6 +117,11 @@
 					<mainClass>edu.pitt.dbmi.daquery.common.util.AppSetup</mainClass>
 			    </manifest>
 			  </archive>
+			  <excludes>
+			  	<exclude>
+			  		**/private-data.props
+			  	</exclude>
+			  </excludes>
 			</configuration>
 	    </plugin>
     	<plugin>

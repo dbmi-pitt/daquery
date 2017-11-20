@@ -72,10 +72,9 @@ public class Site extends DaqueryObject implements Serializable {
 	@Column(name= "STATUS", nullable=false, length=500)
 	private String status;
 	
-/*	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "REQUEST_SENT")
-	private java.util.Date request_sent;
-*/
+	@Column(name="TEMPKEY")
+	private boolean tempKey;
+	
 	/**
 	 * The access key used to make and receive calls to/from this site.
 	 */
@@ -106,11 +105,11 @@ public class Site extends DaqueryObject implements Serializable {
 		}
 	}
 	
-	public Site(String siteId, String name, String url, String admin_email) {
+	public Site(String siteId, String name, String url, String email) {
 		this.siteId = siteId;
 		this.name = name;
 		this.url = url;
-		this.adminEmail = admin_email;
+		this.adminEmail = email;
 	}
 	
 	public Site (String accessKey,
@@ -123,7 +122,7 @@ public class Site extends DaqueryObject implements Serializable {
 			  String url)
 	{
 		this.setAccessKey(accessKey);
-		this.setAdmin_email(adminEmail);
+		this.setAdminEmail(adminEmail);
 		this.setComEncKey(commEncKey);
 		this.setCommTypeValue(commType);
 		this.setName(name);
@@ -132,11 +131,8 @@ public class Site extends DaqueryObject implements Serializable {
 		this.setUrl(url);
 	}	
 	
-	//TODO: I need some more constructors
-	//take name, URL, adminEmail, status as parameters 
-	//make an option one that take a UUID
-	public Site(String newName) {
-		this.name = newName;
+	public Site(String uuid) {
+		this.siteId = uuid;
 	}
 
 	public long getId() {
@@ -171,12 +167,12 @@ public class Site extends DaqueryObject implements Serializable {
 		this.url = url;
 	}
 
-	public String getAdmin_email() {
+	public String getAdminEmail() {
 		return adminEmail;
 	}
 
-	public void setAdmin_email(String admin_email) {
-		this.adminEmail = admin_email;
+	public void setAdminEmail(String email) {
+		this.adminEmail = email;
 	}
 
 	public String getStatus() {
@@ -202,6 +198,9 @@ public class Site extends DaqueryObject implements Serializable {
 	public String getAccessKey(){return(accessKey);}
 	public void setAccessKey(String key){accessKey = key;}
 
+	public boolean isTempKey(){return(tempKey);}
+	public void setTempKey(boolean temp){tempKey = temp;}
+	
 	/**
 	 * The encryption key used to encrypt data sent to this site.
 	 */

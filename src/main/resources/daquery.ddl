@@ -56,7 +56,8 @@ CREATE TABLE "APP"."SITE"
    REQUEST_REPLIED timestamp,
    ACCESS_KEY varchar(500),
    COMM_ENC_KEY  varchar(1024),
-   ENC_TYPE varchar(50) 
+   ENC_TYPE varchar(50),
+   TEMPKEY boolean
 );
 
 CREATE TABLE DATA_SOURCE

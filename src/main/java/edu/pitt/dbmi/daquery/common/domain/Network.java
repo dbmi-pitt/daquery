@@ -67,8 +67,8 @@ public class Network extends DaqueryObject implements Serializable {
 		}
 	}
 	
-	public Network(String newName) {
-		this.name = newName;
+	public Network(String uuid) {
+		this.networkId = uuid;
 	}
 
 	public long getId() {
