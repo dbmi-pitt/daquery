@@ -10,11 +10,9 @@ node {
     stage('Checkout') {
         dir('daquery-ws') {
             git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-ws.git', credentialsId: 'cborromeo-git'
-        }
+            echo 'Building'
+            sh "mvn -B -DskipTests clean install"
+       }
     }
 
-    stage("Build") {
-        echo 'Building'
-        sh "mvn -B -DskipTests clean install"
-    }
 }
