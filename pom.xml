@@ -108,6 +108,10 @@
 	            <failOnMissingWebXml>false</failOnMissingWebXml>
 	            <source>1.7</source>
 	            <target>1.7</target>
+	            <packagingExcludes>
+	                	**/private-data.props,
+	                	**/ojdbc*.jar
+	            </packagingExcludes>
 	        </configuration>
 	    </plugin>
 	</plugins>

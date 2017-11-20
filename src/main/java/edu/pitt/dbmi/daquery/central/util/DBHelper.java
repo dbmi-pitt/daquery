@@ -9,10 +9,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+
 import edu.pitt.dbmi.daquery.common.util.*;
 import edu.pitt.dbmi.daquery.central.ConnectionRequest;
 import edu.pitt.dbmi.daquery.central.ConnectionRequestStatus;
-import edu.pitt.dbmi.daquery.central.ExtendedSiteInfo;
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.*;
 
 public class DBHelper
@@ -21,13 +25,13 @@ public class DBHelper
 	{
 		//for testing set the location of the application database
 		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
-		List<NetworkInfo> netInfo = getAllowedNetworks("20b23b5c-61ad-44eb-8eef-886adcced18e");
-		for(NetworkInfo net : netInfo)
+		List<Network> nets = getAllowedNetworks("20b23b5c-61ad-44eb-8eef-886adcced18e");
+		for(Network net : nets)
 		{
-			System.out.println(net.name + ":" + net.id);
-			for(SiteInfo site : net.allowedSites)
+			System.out.println(net.getName() + ":" + net.getNetworkId());
+			for(Site site : net.getOutgoingQuerySites())
 			{
-				System.out.println("\t" + site.siteName + ":" + site.siteURL + ":" + site.id);
+				System.out.println("\t" + site.getName() + ":" + site.getUrl() + ":" + site.getSiteId());
 			}
 		}
 		
@@ -46,8 +50,11 @@ public class DBHelper
 	{
 		try
 		{
-			ExtendedSiteInfo info = DBHelper.getExtendedSiteInfo(siteNameOrId);
-			return(sitekey.equals(info.accessKey));
+			Site site = SiteDAO.querySiteByID(siteNameOrId);
+			if(site == null) site = SiteDAO.querySiteByName(siteNameOrId);
+			if(site == null) return(false);
+			
+			return(sitekey.equals(site.getAccessKey()));
 		}
 		catch(Throwable t)
 		{
@@ -69,8 +76,8 @@ public class DBHelper
 	{
 		try
 		{
-			ExtendedSiteInfo info = DBHelper.getExtendedSiteInfo(siteNameOrId);
-			return(info.tempKey);
+			Site site = SiteDAO.getSiteByNameOrId(siteNameOrId);
+			return(site.isTempKey());
 		}
 		catch(Throwable t)
 		{
@@ -85,15 +92,16 @@ public class DBHelper
 	 * Get a site's id given it's name
 	 * 
 	 * @param sitename The name of the site.
-	 * @return The database id of the site.
+	 * @return The database id of the site.				Query q2 = sess.createQuery(queryString)
+
 	 * @throws DaqueryCentralException
 	 */
 	public static String getSiteId(String sitename) throws DaqueryCentralException
 	{
 		try
 		{
-			SiteInfo info = DBHelper.getExtendedSiteInfo(sitename);
-			return(info.id);
+			Site site = SiteDAO.querySiteByName(sitename);
+			return(site.getSiteId());
 			
 		}
 		catch(Throwable t)
@@ -122,13 +130,13 @@ public class DBHelper
 		Statement stat = null;
 		try
 		{
-			SiteInfo info = DBHelper.getExtendedSiteInfo(siteNameOrId);
+			Site site = SiteDAO.getSiteByNameOrId(siteNameOrId);
 			String newKey = PasswordUtils.randomPassword(24);
-			if(info.id != null)
+			if(site != null)
 			{
 				conn = ApplicationDBHelper.getConnection();
 				stat = conn.createStatement();
-				String sql = "update site set access_key = '" + newKey + "', tempkey = false where id = '" + info.id + "'";
+				String sql = "update site set access_key = '" + newKey + "', tempkey = false where id = '" + site.getSiteId() + "'";
 				stat.executeUpdate(sql);
 				conn.commit();
 				return(newKey);
@@ -146,52 +154,6 @@ public class DBHelper
 		finally{ApplicationDBHelper.closeConnection(conn, stat, null);}
 	}
 	
-	/**
-	 * Get the information for a given site given the sites name or id.  If a record isn't found null is returned.
-	 * 
-	 * @param siteNameOrId
-	 * @return A SiteInfo object with the information for the site or a null if no record was found.
-	 * @throws DaqueryCentralException
-	 */
-	public static ExtendedSiteInfo getExtendedSiteInfo(String siteNameOrId) throws DaqueryCentralException
-	{
-		Connection conn = null;
-		Statement stat = null;
-		ResultSet results = null;
-		try
-		{
-			conn = ApplicationDBHelper.getConnection();
-			stat = conn.createStatement();
-			results = stat.executeQuery("select * from site where ucase(name) = '" + siteNameOrId.trim().toUpperCase() +"'");
-			if(results.next())
-			{
-					return(new ExtendedSiteInfo(results));
-			}
-			else
-			{
-				results.close();
-				stat.close();
-				stat = conn.createStatement();
-				results = stat.executeQuery("select *from site where id = '" + siteNameOrId + "'");
-				if(results.next())
-				{
-					return(new ExtendedSiteInfo(results));
-				}
-				else
-				{
-					return(null);
-				}
-			}
-		}
-		catch(Throwable t)
-		{
-			String msg = "An error occured while looking for site information with an id or site name of: " + siteNameOrId;
-			log.log(Level.SEVERE, msg, t);
-			throw new DaqueryCentralException(msg, t);
-		}
-		finally{ApplicationDBHelper.closeConnection(conn, stat, results);}
-		
-	}
 	
 	/**
 	 * Get a list of networks and associated sites that a given site is
@@ -203,7 +165,7 @@ public class DBHelper
 	 */
 	public static List<Network> getAllowedNetworks(String siteId) throws DaqueryCentralException
 	{
-		String sql = "select network_id from network_membership where site_id = '" + siteId +"'";
+		String sql = "select distinct network_id from outgoing_query_sites where site_id = '" + siteId +"'";
 /*		String sql = "select site_id, network_name, data_model, network_membership.network_id, site.name as site_name, site_url, admin_email " +
 		                                  "from network_membership, " +
                                                 "(select id as network_id, name as network_name, data_model from network " +
@@ -215,7 +177,21 @@ public class DBHelper
                                                  "site.id = network_membership.site_id " +
                                            "order by network_membership.network_id"; */
 		List<Network> networks = new ArrayList<Network>();
-			return(networks);	
+
+		Session sess = null;
+		Statement stat = null;
+		try
+		{
+			sess = HibernateConfiguration.openSession();
+			SQLQuery q = sess.createSQLQuery(sql);
+			List<String> netIds = q.list();
+			for(String netId : netIds)
+			{
+				Network net = NetworkDAO.queryNetwork(netId);
+				if(net != null) networks.add(net);
+			}
+			
+			return(networks);
 		}
 		catch(Throwable t)
 		{
@@ -225,7 +201,7 @@ public class DBHelper
 		}
 		finally
 		{
-			ApplicationDBHelper.closeConnection(conn, s, rs);
+			if(sess != null) sess.close();
 		}
 		
 	}
@@ -293,118 +269,6 @@ public class DBHelper
 		}
 	}
 	
-	/**
-	 * Get sites waiting for response
-	 * @param <ConnectionRequestStatus>
-	 * @param String siteId
-	 * @throws DaqueryCentralException
-	 */
-	public static List<SiteInfo> getPendingSites(String networkId, String siteId, ConnectionRequestStatus status) throws DaqueryCentralException{
-		String sql = "select s.id, name, access_key, tempkey, site_url, admin_email, email_access from site s join connection_request cr on s.id = cr.from_site_id where cr.network_id = ? and cr.to_site_id = ? and cr.status = ?";
-		
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		
-		List<SiteInfo> sites = new ArrayList<>();
-		
-		try {
-			conn = ApplicationDBHelper.getConnection();
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, networkId);
-			ps.setString(2, siteId);
-			ps.setString(3, status.toString());
-			rs = ps.executeQuery();
-			
-			while(rs.next()) {
-				ExtendedSiteInfo site = new ExtendedSiteInfo();
-				site.id = rs.getString("id");
-				site.siteName = rs.getString("name");
-				site.siteURL = rs.getString("site_url");
-				site.adminEmail = rs.getString("admin_email");
-				sites.add(site);
-			}
-			
-			return sites;	
-		} catch(Throwable t) {
-			String msg = "An unexpected error occurred while geting pending sites with site_id: " + siteId;
-			log.log(Level.SEVERE, msg, t);
-			throw new DaqueryCentralException(msg, t);
-		} finally {
-			ApplicationDBHelper.closeConnection(conn, ps, null);
-		}
-	}
 	
-	/**
-	 * Get site by site id
-	 * @param String siteId
-	 * @throws DaqueryCentralException
-	 */
-	public static ExtendedSiteInfo getSite(String siteId) throws DaqueryCentralException{
-		String sql = "select id, name, access_key, tempkey, site_url, admin_email, email_access from site where site.id = ?";
-		
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		
-		ExtendedSiteInfo site = new ExtendedSiteInfo();
-		
-		try {
-			conn = ApplicationDBHelper.getConnection();
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, siteId);
-			rs = ps.executeQuery();
-			
-			if(rs.next()) {
-				site.id = rs.getString("id");
-				site.siteName = rs.getString("name");
-				site.siteURL = rs.getString("site_url");
-				site.adminEmail = rs.getString("admin_email");
-			}
-			
-			return site;	
-		} catch(Throwable t) {
-			String msg = "An unexpected error occurred while geting pending sites with site_id: " + siteId;
-			log.log(Level.SEVERE, msg, t);
-			throw new DaqueryCentralException(msg, t);
-		} finally {
-			ApplicationDBHelper.closeConnection(conn, ps, null);
-		}
-	}
-	
-	/**
-	 * Approve connection request
-	 * @param String networkId
-	 * @param String fromSiteId
-	 * @param String toSiteId
-	 * @throws DaqueryCentralException
-	 */
-	public static boolean updateConnectionRequest(String networkId, String fromSiteId, String toSiteId, String status) throws DaqueryCentralException{
-		String sql = "update connection_request set status = ? where network_id = ? and from_site_id = ? and to_site_id = ?";
-		Connection conn = null;
-		PreparedStatement ps = null;
-		
-		ExtendedSiteInfo site = null;
-		
-		try {
-			conn = ApplicationDBHelper.getConnection();
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, status);
-			ps.setString(2, networkId);
-			ps.setString(3, fromSiteId);
-			ps.setString(4, toSiteId);
-			int rows = ps.executeUpdate();
-			
-			if(rows == 1)
-				return true;
-			else
-				throw new Exception();
-		} catch(Throwable t) {
-			String msg = "An unexpected error occurred while approving connection request, network_id: " + networkId + " from_site_id: " + fromSiteId + " to_site_id: " + toSiteId;
-			log.log(Level.SEVERE, msg, t);
-			throw new DaqueryCentralException(msg, t);
-		} finally {
-			ApplicationDBHelper.closeConnection(conn, ps, null);
-		}
-	}
+
 }
