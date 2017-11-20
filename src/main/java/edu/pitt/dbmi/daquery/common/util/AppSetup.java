@@ -230,8 +230,8 @@ public class AppSetup
 	
 	private static boolean initializeDBData()
 	{
-		InputStream is = ApplicationPropertiesFile.class.getResourceAsStream("/" + AppProperties.getInitializationDDL());
-		if(! ApplicationDBHelper.executeDDL(is))
+		InputStream is = FileHelper.streamFromBaseResource(AppProperties.getInitializationDDL());
+		if(! ApplicationDBHelper.createTables(is))
 		{
 			setErroredSetup("An error occured while trying to initialize the application database.  Check the application logs for more information.");
 			return(false);			
