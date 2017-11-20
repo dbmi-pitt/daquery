@@ -3,11 +3,14 @@ node {
         echo 'Getting dependencies'
         dir('daquery-common') {
             git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-common.git', credentialsId: 'cborromeo-git'
+            echo 'Building daquery-common'
+            sh "mvn -B -DskipTests clean install"
         }
     }
     stage('Checkout') {
-        echo 'Getting the code'
-        checkout scm
+        dir('daquery-ws') {
+            git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-ws.git', credentialsId: 'cborromeo-git'
+        }
     }
 
     stage("Build") {
