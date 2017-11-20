@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.NonUniqueResultException;
 
+import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;

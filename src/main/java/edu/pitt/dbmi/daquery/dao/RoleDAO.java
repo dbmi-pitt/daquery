@@ -9,6 +9,8 @@ import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 
+import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 
 

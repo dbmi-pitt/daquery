@@ -426,6 +426,10 @@
 	            <version>2.6</version>
 	            <configuration>
 	                <failOnMissingWebXml>false</failOnMissingWebXml>
+	                <packagingExcludes>
+	                	**/private-data.props,
+	                	**/ojdbc*.jar
+	                </packagingExcludes>
 	            </configuration>
 	        </plugin>
 

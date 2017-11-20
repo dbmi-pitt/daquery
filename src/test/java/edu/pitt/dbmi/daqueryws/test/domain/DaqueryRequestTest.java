@@ -9,14 +9,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.domain.inquiry.RequestDirection;
 import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
@@ -75,7 +75,7 @@ public class DaqueryRequestTest {
 			
 			Site s = new Site(true);
 			s.setName(sitename);
-			s.setAdmin_email(adminemail);
+			s.setAdminEmail(adminemail);
 			session.getTransaction().begin();
 			session.persist(s);
 			session.update(n);

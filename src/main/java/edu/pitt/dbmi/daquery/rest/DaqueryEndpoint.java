@@ -25,11 +25,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
-import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -37,9 +37,7 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
-import edu.pitt.dbmi.daquery.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
@@ -124,25 +122,25 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			if(resp.getStatus() == 200)
 			{
 				String json = resp.readEntity(String.class);
-				NetworkInfo[] ninfo = JSONHelper.gson.fromJson(json, NetworkInfo[].class);
+				Network[] ninfo = JSONHelper.gson.fromJson(json, Network[].class);
 				DaqueryEndpoint de = new DaqueryEndpoint();
 				List<Network> nets = NetworkDAO.queryAllNetworks();
-				List<SiteInfo> sitesToRemove = new ArrayList<SiteInfo>();
-				for(NetworkInfo nin : ninfo)
+				List<Site> sitesToRemove = new ArrayList<Site>();
+				for(Network nin : ninfo)
 				{
-					for(SiteInfo si : nin.allowedSites)
+					for(Site si : nin.getOutgoingQuerySites())
 					{
-						if(containsSiteWhoIQuery(nets, si.id))
+						if(containsSiteWhoIQuery(nets, si.getSiteId()))
 							sitesToRemove.add(si);
 					}
-					for(SiteInfo sr : sitesToRemove)
+					for(Site sr : sitesToRemove)
 					{
-						nin.allowedSites.remove(sr);
+						nin.getOutgoingQuerySites().remove(sr);
 					}
 					sitesToRemove.clear();
 				}
-				List<NetworkInfo> rlist = new ArrayList<NetworkInfo>();
-				for(NetworkInfo n : ninfo)
+				List<Network> rlist = new ArrayList<Network>();
+				for(Network n : ninfo)
 					rlist.add(n);
 				return(ResponseHelper.getJsonResponseGen(200, rlist));
 			}

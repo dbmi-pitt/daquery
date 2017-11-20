@@ -5,7 +5,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
+import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
@@ -15,7 +15,7 @@ public class CentralServerClient
 	private Client centralClient = ClientBuilder.newClient();
 	private String baseUrl = null;
 	
-	public NetworkInfo [] getAvailableNetworks(String siteId)
+	public Network [] getAvailableNetworks(String siteId)
 	{
 		Response resp = centralClient.target(baseURL() + "availableNetworks")
 		             .path(siteId)

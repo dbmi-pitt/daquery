@@ -28,11 +28,11 @@ import javax.ws.rs.core.UriInfo;
 
 import org.hibernate.HibernateException;
 
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
 
 
 @Path("/networks")

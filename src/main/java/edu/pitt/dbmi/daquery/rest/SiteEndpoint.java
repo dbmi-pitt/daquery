@@ -38,17 +38,15 @@ import org.hibernate.Session;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.Network;
-import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.common.domain.SiteInfo;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.dao.SiteDAO;
 
 
 @Path("/sites")
@@ -160,29 +158,29 @@ public class SiteEndpoint extends AbstractEndpoint {
 			if(resp.getStatus() == 200)
 			{
 				String json = resp.readEntity(String.class);
-				NetworkInfo[] ninfo = JSONHelper.gson.fromJson(json, NetworkInfo[].class);
-				NetworkInfo network_info = null;
-				for(NetworkInfo nin : ninfo) {
-					if(nin.id.equals(network.getNetworkId()))
+				Network[] ninfo = JSONHelper.gson.fromJson(json, Network[].class);
+				Network network_info = null;
+				for(Network nin : ninfo) {
+					if(nin.getNetworkId().equals(network.getNetworkId()))
 						network_info = nin;
 				}
 				
-				SiteInfo si = null;
-				for(SiteInfo sin : network_info.allowedSites) {
-					if(sin.id.equals(AppProperties.getDBProperty("site.id")))
+				Site si = null;
+				for(Site sin : network_info.getOutgoingQuerySites()) {
+					if(sin.getSiteId().equals(AppProperties.getDBProperty("site.id")))
 						si = sin;
 				}
 				
-				network_info.allowedSites.remove(si);
+				network_info.getOutgoingQuerySites().remove(si);
 				
-				List<SiteInfo> rlist = new ArrayList<>();
-				for(SiteInfo s : network_info.allowedSites)
+				List<Site> rlist = new ArrayList<>();
+				for(Site s : network_info.getOutgoingQuerySites())
 					rlist.add(s);
 				Map<String, List> rmap = new HashMap<>();
 				rmap.put("full", rlist);
-				List<SiteInfo> outgoings = new ArrayList<>();
+				List<Site> outgoings = new ArrayList<>();
 				for(Site s : network.getOutgoingQuerySites()) {
-					outgoings.add(new SiteInfo(s.getSiteId(), s.getName(), s.getUrl(), s.getAdmin_email()));
+					outgoings.add(s);
 				}
 				rmap.put("outgoing", outgoings);
 				return(ResponseHelper.getJsonResponseGen(200, rmap));

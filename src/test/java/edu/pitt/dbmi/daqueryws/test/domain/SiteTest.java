@@ -10,14 +10,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.EncryptionType;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.dao.SiteDAO;
 
 
 public class SiteTest {
@@ -46,7 +46,7 @@ public class SiteTest {
 			Site s = new Site(true);
 			s.setName(sitename);
 			s.setUrl(siteurl);
-			s.setAdmin_email(adminemail);
+			s.setAdminEmail(adminemail);
 			s.setStatusValue(SiteStatus.PENDING);
 			s.setAccessKey(accesskey);
 			s.setComEncKey(commenckey);
