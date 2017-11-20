@@ -27,21 +27,16 @@ public class CreateCDMModelInfo
 	public static void main(String [] args) throws DaqueryException
 	{
 		AppProperties.setDevHomeDir("/Users/bill/dq-data");
-		makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD);
+		makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
 	}
 	
-	public static void test(String cdmConnUrl, String cdmSchemaName, String cdmPassword) throws DaqueryException
-	{
-		
-	}
-	
-	public static DataModel makeModel(String cdmConnUrl, String cdmSchemaName, String cdmPassword) throws DaqueryException
+	public static DataModel makeModel(String cdmConnUrl, String cdmSchemaName, String cdmPassword, String modelName) throws DaqueryException
 	{
 		Session sess = null;
 		Transaction t = null;
 		try
 		{
-			DataModel dm = createModel(cdmConnUrl, cdmSchemaName, cdmPassword);
+			DataModel dm = createModel(cdmConnUrl, cdmSchemaName, cdmPassword, modelName);
 			sess = HibernateConfiguration.openSession();
 			t = sess.beginTransaction();
 			sess.save(dm);
@@ -58,7 +53,7 @@ public class CreateCDMModelInfo
 			if(sess != null) sess.close();
 		}
 	}
-	private static DataModel createModel(String cdmConnUrl, String cdmSchemaName, String cdmPassword) throws DaqueryException
+	private static DataModel createModel(String cdmConnUrl, String cdmSchemaName, String cdmPassword, String modelName) throws DaqueryException
 	{
 		Connection conn = null;
 		try
@@ -70,7 +65,7 @@ public class CreateCDMModelInfo
 			dm.setName("CDM");
 			dm.setDescription("PCORI Common Data Model");
 			SQLDataSource ds = new SQLDataSource();
-			ds.setName("CDM");
+			ds.setName(modelName);
 			ds.setDataModel(dm);
 			Set<DataSource> src = new HashSet<DataSource>();
 			src.add(ds);
