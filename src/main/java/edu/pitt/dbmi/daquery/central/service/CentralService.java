@@ -21,6 +21,7 @@ import com.google.gson.GsonBuilder;
 
 import edu.pitt.dbmi.daquery.central.util.DBHelper;
 import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
+import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.NetworkInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
@@ -106,7 +107,7 @@ public class CentralService{
 	{
 		try
 		{
-			List<NetworkInfo> networks = DBHelper.getAllowedNetworks(siteId);
+			List<Network> networks = DBHelper.getAllowedNetworks(siteId);
 			return ResponseHelper.getJsonResponseGen(200, networks);
 		}
 		catch(Throwable t)

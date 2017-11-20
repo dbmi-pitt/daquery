@@ -201,9 +201,10 @@ public class DBHelper
 	 * @return a list of networks with associated sites.
 	 * @throws DaqueryCentralException
 	 */
-	public static List<NetworkInfo> getAllowedNetworks(String siteId) throws DaqueryCentralException
+	public static List<Network> getAllowedNetworks(String siteId) throws DaqueryCentralException
 	{
-		String sql = "select site_id, network_name, data_model, network_membership.network_id, site.name as site_name, site_url, admin_email " +
+		String sql = "select network_id from network_membership where site_id = '" + siteId +"'";
+/*		String sql = "select site_id, network_name, data_model, network_membership.network_id, site.name as site_name, site_url, admin_email " +
 		                                  "from network_membership, " +
                                                 "(select id as network_id, name as network_name, data_model from network " +
                                                           "where id in " + 
@@ -212,43 +213,8 @@ public class DBHelper
                                                  "site " +
                                            "where network_membership.network_id = inn.network_id and " +
                                                  "site.id = network_membership.site_id " +
-                                           "order by network_membership.network_id";
-		List<NetworkInfo> networks = new ArrayList<NetworkInfo>();
-		Connection conn = null;
-		Statement s = null;
-		ResultSet rs = null;
-		try
-		{
-			conn = ApplicationDBHelper.getConnection();
-			s = conn.createStatement();
-			rs = s.executeQuery(sql);
-			String currentNetworkId = "";
-			NetworkInfo currentNetInfo = null;
-			//this only works because the query is ordered by network_id
-			while(rs.next())
-			{
-				String netId = rs.getString("network_id");
-				String netName = rs.getString("network_name");
-				String netModel = rs.getString("data_model");
-				String site_Id = rs.getString("site_id");
-				String siteName = rs.getString("site_name");
-				String siteURL = rs.getString("site_url");
-				String adminEmail = rs.getString("admin_email");
-				if(!currentNetworkId.equals(netId))
-				{
-					currentNetworkId = netId;
-					currentNetInfo = new NetworkInfo();
-					currentNetInfo.id = netId;
-					currentNetInfo.name = netName;
-					networks.add(currentNetInfo);
-				}
-				SiteInfo nextSite = new SiteInfo();
-				nextSite.id = site_Id;
-				nextSite.siteName = siteName;
-				nextSite.siteURL = siteURL;
-				nextSite.adminEmail = adminEmail;
-				currentNetInfo.allowedSites.add(nextSite);
-			}
+                                           "order by network_membership.network_id"; */
+		List<Network> networks = new ArrayList<Network>();
 			return(networks);	
 		}
 		catch(Throwable t)
