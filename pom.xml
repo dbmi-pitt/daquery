@@ -382,18 +382,14 @@
          				<phase>generate-sources</phase>
          				<configuration>
          					<workingDirectory>${ui_project.Directory}</workingDirectory>
+						<verbose>true</verbose>
                             <executable>bash</executable>
                             <arguments>
                                 <argument>-c</argument>
                                 <argument>cp dist/* ${basedir}/src/main/webapp/</argument>
-                            </arguments>
+                            </arguments>  
+						
          				</configuration>
-       <configuration>
-           <executable>echo</executable>
-           <arguments>
-              <argument>"cp dist/* ${basedir}/src/main/webapp/"</argument>
-           </arguments>
-        </configuration>
          				<goals>
          					<goal>exec</goal>
          				</goals>
