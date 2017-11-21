@@ -8,8 +8,12 @@ node {
     }
     stage('Dependency: daquery UI') {
         dir('daquery') {
+            echo 'Checkout daquery UI'
             git url: 'https://cborromeo@github.com/dbmi-pitt/daquery.git', credentialsId: 'cborromeo-git'
-            echo 'Extracting daquery UI'
+        }
+        dir('ui') {
+            echo 'Building daquery UI'
+            sh "npm run prod"
         }
     }
     stage('Checkout and Build Web Services') {
