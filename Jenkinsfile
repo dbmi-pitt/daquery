@@ -13,6 +13,7 @@ node {
         }
         dir('daquery/ui') {
             echo 'Building daquery UI'
+            sh "npm install"
             sh "npm run prod"
         }
     }
