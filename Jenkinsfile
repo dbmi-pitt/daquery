@@ -17,9 +17,6 @@ node {
             sh "npm run prod"
         }
     }
-    stage ('Copy UI Dist files') {
-        cp 'daquery/ui/dist/*.*' 'daquery-ws/src/main/webapp/'
-    }
     stage('Checkout and Build Web Services') {
         dir('daquery-ws') {
             git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-ws.git', credentialsId: 'cborromeo-git'
