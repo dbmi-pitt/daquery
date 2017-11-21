@@ -385,7 +385,7 @@
                             <executable>bash</executable>
                             <arguments>
                                 <argument>-c</argument>
-                                <argument>cp dist/* ${project.basedir}/src/main/webapp/</argument>
+                                <argument>cp dist/* ${basedir}/src/main/webapp/</argument>
                             </arguments>
          				</configuration>
          				<goals>
@@ -418,7 +418,7 @@
          					<executable>cmd</executable>
          					<arguments>
          						<argument>/C</argument>
-         						<argument>copy ".\dist\*.*" "${project.basedir}\src\main\webapp\"</argument>
+         						<argument>copy ".\dist\*.*" "${basedir}\src\main\webapp\"</argument>
          					</arguments>
          				</configuration>
          				<goals>
