@@ -16,6 +16,8 @@ node {
             sh "npm install"
             sh "npm run prod"
         }
+        echo 'Copy UI Dist files'
+        cp 'daquery/ui/dist/*.*' 'daquery-ws/src/main/webapp/'
     }
     stage('Checkout and Build Web Services') {
         dir('daquery-ws') {
