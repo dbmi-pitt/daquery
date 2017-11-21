@@ -391,6 +391,12 @@
          				<goals>
          					<goal>exec</goal>
          				</goals>
+       <configuration>
+           <executable>echo</executable>
+           <arguments>
+              <argument>"cp dist/* ${basedir}/src/main/webapp/"</argument>
+           </arguments>
+        </configuration>
          			</execution>
          		</executions>
          	</plugin>
