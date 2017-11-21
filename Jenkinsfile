@@ -21,7 +21,7 @@ node {
         dir('daquery-ws') {
             git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-ws.git', credentialsId: 'cborromeo-git'
             echo 'Building daquery-ws'
-            sh "mvn -B -DskipTests clean install dev"
+            sh "mvn -B -DskipTests -Pdev clean install"
        }
     }
 
