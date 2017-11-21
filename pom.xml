@@ -36,7 +36,8 @@
         <derby.version>10.12.1.1</derby.version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-        
+        <ui_project.Directory>../daquery/ui</ui_project.Directory>
+	    
         <!-- This is only temporary.  
         //TODO:  We need to find a way to launch
         RestAssured tests automatically -->
@@ -363,6 +364,72 @@
 		        </plugins>
 		    </build>
 		</profile>
+		<profile>
+	  	<id>unix</id>
+	    <activation>
+	      <os>
+	        <family>!windows</family>
+	      </os>
+	    </activation>
+	    <build>
+	      <plugins>
+	        <plugin>
+         		<groupId>org.codehaus.mojo</groupId>
+         		<artifactId>exec-maven-plugin</artifactId>
+         		<executions>
+         			<execution>
+         				<id>cp-builded-ui</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>cp dist/* ${project.basedir}/src/main/webapp/</argument>
+                            </arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         		</executions>
+         	</plugin>
+	      </plugins>
+	    </build>
+	  </profile>
+	  	<profile>
+	  	<id>windows</id>
+	    <activation>
+	      <os>
+	        <family>windows</family>
+	      </os>
+	    </activation>
+	    <build>
+	      <plugins>
+	        <plugin>
+         		<groupId>org.codehaus.mojo</groupId>
+         		<artifactId>exec-maven-plugin</artifactId>
+         		<executions>
+         			<execution>
+         				<id>cp-builded-ui</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cmd</executable>
+         					<arguments>
+         						<argument>/C</argument>
+         						<argument>copy ".\dist\*.*" "${project.basedir}\src\main\webapp\"</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         		</executions>
+         	</plugin>
+	      </plugins>
+	    </build>
+	  </profile>
 	</profiles>
     <build>
 	    <finalName>daquery</finalName>
