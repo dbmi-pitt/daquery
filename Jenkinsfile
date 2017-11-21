@@ -11,7 +11,7 @@ node {
             echo 'Checkout daquery UI'
             git url: 'https://cborromeo@github.com/dbmi-pitt/daquery.git', credentialsId: 'cborromeo-git'
         }
-        dir('ui') {
+        dir('daquery/ui') {
             echo 'Building daquery UI'
             sh "npm run prod"
         }
