@@ -381,7 +381,7 @@
          				<id>cp-builded-ui</id>
          				<phase>generate-sources</phase>
          				<configuration>
-         					<workingDirectory>/var/lib/jenkins/workspace/daquery-pipeline/daquery/ui</workingDirectory>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
 						<verbose>true</verbose>
                             <executable>bash</executable>
                             <arguments>
