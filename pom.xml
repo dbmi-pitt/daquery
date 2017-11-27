@@ -13,6 +13,7 @@
         <commons-dbcp.version>1.4</commons-dbcp.version>
         <jstl.version>1.2</jstl.version>
         <junit.version>4.11</junit.version>
+        <oraclejdbc.version>11.1.0.7.0</oraclejdbc.version>
         <!-- NOTE: Jersey 2.6 and below are compatible with Java 1.6
         I was encountering an UnsupportedClassVersionError when deploying to Eclipse's Tomcat 6 server
         this link helped: https://stackoverflow.com/questions/33010871/issue-java-lang-unsupportedclassversionerror-org-glassfish-jersey-servlet-serv -->
@@ -37,7 +38,7 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <ui_project.Directory>../daquery/ui</ui_project.Directory>
-	    
+        
         <!-- This is only temporary.  
         //TODO:  We need to find a way to launch
         RestAssured tests automatically -->
@@ -45,7 +46,7 @@
     </properties>
 	
     <dependencies>
-    
+     
     <!-- https://mvnrepository.com/artifact/org.antlr/antlr4-runtime -->
 		<dependency>
 		    <groupId>org.antlr</groupId>
@@ -364,7 +365,7 @@
 		        </plugins>
 		    </build>
 		</profile>
-		<profile>
+	  	<profile>
 	  	<id>unix</id>
 	    <activation>
 	      <os>
