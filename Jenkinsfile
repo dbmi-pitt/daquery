@@ -22,6 +22,9 @@ node {
             git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-ws.git', branch: 'chuck-workspace', credentialsId: 'cborromeo-git'
             echo 'Building daquery-ws'
             sh "mvn -B -DskipTests install"
+            echo 'checking directory structure'
+            sh "cd ../daquery/ui"
+            sh "ls"
        }
     }
 
