@@ -1,7 +1,7 @@
 node {
     stage('Dependency: daquery-common') {
         dir('daquery-common') {
-            git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-common.git', credentialsId: 'cborromeo-git'
+            git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-common.git', credentialsId: 'git-readonly'
             echo 'Building daquery-common'
             sh "mvn -B -DskipTests clean install"
         }
@@ -9,7 +9,7 @@ node {
     stage('Dependency: daquery UI') {
         dir('daquery') {
             echo 'Checkout daquery UI'
-            git url: 'https://cborromeo@github.com/dbmi-pitt/daquery.git', credentialsId: 'cborromeo-git'
+            git url: 'https://cborromeo@github.com/dbmi-pitt/daquery.git', credentialsId: 'git-readonly'
         }
         dir('daquery/ui') {
             echo 'Building daquery UI'
@@ -19,7 +19,7 @@ node {
     }
     stage('Checkout and Build Web Services') {
         dir('daquery-ws') {
-            git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-ws.git', branch: 'chuck-workspace', credentialsId: 'cborromeo-git'
+            git url: 'https://cborromeo@github.com/dbmi-pitt/daquery-ws.git', branch: 'chuck-workspace', credentialsId: 'git-readonly'
             echo 'Building daquery-ws'
             sh "mvn -B -DskipTests clean install"
        }
