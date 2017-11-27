@@ -18,7 +18,7 @@
         I was encountering an UnsupportedClassVersionError when deploying to Eclipse's Tomcat 6 server
         this link helped: https://stackoverflow.com/questions/33010871/issue-java-lang-unsupportedclassversionerror-org-glassfish-jersey-servlet-serv -->
   	<!-- <jersey.version>2.19</jersey.version> -->
-  	  <jersey.version>2echo.25.1</jersey.version>        
+  	  <jersey.version>2.25.1</jersey.version>        
         <jaxrs.version>2.0.1</jaxrs.version>
         <logback.version>1.2.3</logback.version>
         <antlr4.version>4.7</antlr4.version>
