@@ -41,8 +41,8 @@
         
         <!-- This is only temporary.  
         //TODO:  We need to find a way to launch
-        RestAssured tests automatically -->
-        <maven.test.skip>true</maven.test.skip>  
+        RestAssured tests automatically 
+        <maven.test.skip>true</maven.test.skip> --> 
     </properties>
 	
     <dependencies>
