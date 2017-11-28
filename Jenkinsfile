@@ -26,7 +26,7 @@ node {
     }
     stage('Deploy web ui to Tomcat') {
          dir('daquery-ws') {
-            //sh 'cp target/daquery.war /opt/apache-tomcat-7.0.78/webapps/'
+            sh 'cp target/daquery.war /opt/apache-tomcat-7.0.78/webapps/'
             sh 'BUILD_ID=dontKillMe nohup /opt/apache-tomcat-7.0.78/bin/startup.sh &'
              sleep 60
                                 
