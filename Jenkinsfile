@@ -28,7 +28,7 @@ node {
          dir('daquery-ws') {
             sh 'cp target/daquery.war /opt/apache-tomcat-7.0.78/webapps/'
             sh '/opt/apache-tomcat-7.0.78/bin/startup.sh'
-            sleep 10000
+            sleep 60
                                 
        }
 
