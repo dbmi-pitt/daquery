@@ -25,9 +25,9 @@ node {
        }
     }
     stage('Deploy web ui to Tomcat') {
-         dir('daquery-ws') {
+         dir('daquery-ws/target') {
             sh 'whoami'
-            sh 'cp target/daquery.war /opt/apache-tomcat-7.0.78/webapps/'                      
+            sh 'cp daquery.war /opt/apache-tomcat-7.0.78/webapps/'                      
                                 
        }
 
