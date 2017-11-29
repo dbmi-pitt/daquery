@@ -46,16 +46,16 @@ public class AbstractEndpoint {
 	 * @return a String representing a JSON array
 	 */
 	protected String toJsonArray(List<? extends DaqueryObject> jsonList) {
+        //cover an empty list
+        if (jsonList.isEmpty()) {
+        	return "[]";
+        }
         String jsonString = "[";
         for (DaqueryObject obj : jsonList) {
         	jsonString = jsonString + obj.toJson() + ", ";
         }
         jsonString = jsonString.substring(0, jsonString.length()-2) + "]";
         
-        //cover an empty list
-        if (jsonList.isEmpty()) {
-        	jsonString = "[ ]";
-        }
         return jsonString;
 		
 	}
