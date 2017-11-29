@@ -9,7 +9,7 @@ public class RunAppSetup
 	{
 		AppProperties.setDevHomeDir("/Users/bill/dq-data");
 		//AppProperties.setDevHomeDir("C:\\Users\\del20");
-		AppSetup.initialSetup("path@pitt.edu", "password", null);
+		AppSetup.initialSetup("path@pitt.edu", "password", null, null, null, null);
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
 		else if(AppSetup.isValidSetup())
