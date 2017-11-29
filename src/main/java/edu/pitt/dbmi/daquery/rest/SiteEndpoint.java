@@ -78,12 +78,14 @@ public class SiteEndpoint extends AbstractEndpoint {
      * example URL: daquery-ws/ws/sites?network_id=1&type=out
      * @param network_id network's primary key
      * @param type 
+     * @param status
      * @return a JSON array containing all the sites
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
     public Response getAllSites(@QueryParam("network_id") long network_id,
-    							@DefaultValue("all") @QueryParam("type") String type) {
+    							@DefaultValue("all") @QueryParam("type") String type,
+    							@DefaultValue("") @QueryParam("status") String status) {
     	
     	try {
 
@@ -100,8 +102,9 @@ public class SiteEndpoint extends AbstractEndpoint {
             
 
             Network network = NetworkDAO.queryNetwork(String.valueOf(network_id));
-            if(type.equals("outgoing"))
-            	return(ResponseHelper.getJsonResponseGen(200, network.getOutgoingQuerySites()));
+            if(type.equals("outgoing")) {
+            	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network_id)));
+            }
             else if(type.equals("incoming"))
             	return(ResponseHelper.getJsonResponseGen(200, network.getIncomingQuerySites()));
             else if(type.equals("pending")) {
