@@ -99,9 +99,11 @@ public class CentralService {
 				if (newKey == null)
 					throw new DaqueryCentralException(
 							"An unknown error while trying to generate a new site key. Check the central server log files for more information.");
+				ExtendedSiteInfo i = DBHelper.getSite(DBHelper.getSiteId(site));
 				additionalVals = new HashMap<String, Object>();
 				additionalVals.put("new-site-key", newKey);
 				additionalVals.put("site-id", DBHelper.getSiteId(site));
+				additionalVals.put("site-url", i.siteURL);
 			}
 			return (ResponseHelper.getTokenResponse(200, null, site, uriInfo, additionalVals));
 		} catch (Throwable dce) {
