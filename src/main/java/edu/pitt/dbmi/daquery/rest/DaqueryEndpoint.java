@@ -38,9 +38,17 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
+
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
+import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.domain.inquiry.ResponseTask;
+import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 
@@ -208,11 +216,12 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		    	if(centralAuthResponse.getStatus() != 200)
 		    		return(centralAuthResponse);
 
-		    	if(AppSetup.initialSetup(adminEmail, adminPwd, adminRealName))
+		    	//add the initial values from the central server
+				String jsonval = centralAuthResponse.readEntity(String.class);
+				Map<String, String> jmap = JSONHelper.toMap(jsonval);
+		    	if(AppSetup.initialSetup(jmap.get("site-id"), siteName, jmap.get("site-url"), adminEmail, adminPwd, adminRealName))
 				{	
-					//add the initial values from the central server
-					String jsonval = centralAuthResponse.readEntity(String.class);
-					Map<String, String> jmap = JSONHelper.toMap(jsonval);
+		    		
 					String key = jmap.get("new-site-key");
 					String siteId = jmap.get("site-id");		    	
 			    	AppProperties.setDBProperty("central.site.key", key);
@@ -359,6 +368,33 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		return(ResponseHelper.getBasicResponse(404, "Response not found." ));
     	
         return Response.ok(200).entity(resp.toJson()).build();    	
+    }
+    
+    /**
+     * Save an SQL query
+     * @return On success a 201 http response with the sql query encoded in json.  On failure a 500 http response.
+     * example: /sqlquery
+     */
+    @POST
+    @Secured
+    @Path("/sqlquery")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response saveSQLQuery(SQLQuery query) {
+    	SQLQueryDAO sqlqueryDAO = new SQLQueryDAO();
+    	try {
+			sqlqueryDAO.openCurrentSessionwithTransaction();
+			sqlqueryDAO.save(query);
+			sqlqueryDAO.closeCurrentSessionwithTransaction();
+    	} catch (Throwable t) {
+			String msg = "An unhandled exception occured while saving sql query";
+    		log.log(Level.SEVERE, msg, t);
+			return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
+		} finally {
+			if(sqlqueryDAO.getCurrentSession() != null)
+				sqlqueryDAO.closeCurrentSession();
+		}
+    	return Response.ok(201).entity(query.toJson()).build();   
     }
 	
 	private static Response postJSONToRemoteSite(Site site, String serviceName, String json)

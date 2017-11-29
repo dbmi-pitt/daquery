@@ -1,20 +1,23 @@
 package edu.pitt.dbmi.daquery.dao;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
-public class RequestDAO
-{
-	private static final Logger log = Logger.getLogger(RequestDAO.class.getName());
+public class DaqueryRequestDAO extends AbstractDAO {
+	private static final Logger log = Logger.getLogger(DaqueryRequestDAO.class.getName());
 
 	public static void main(String [] args) throws Exception
 	{
@@ -44,5 +47,27 @@ public class RequestDAO
 		{
 			if(sess != null) sess.close();
 		}		
+	}
+
+	public long save(DaqueryRequest request) {
+		return (Long) getCurrentSession().save(request);
+	}
+	
+	public DaqueryRequest get(long id) {
+		return (DaqueryRequest) getCurrentSession().get(DaqueryRequest.class, id);
+	}
+	
+	public List list(String direction) throws DaqueryException{
+		return getCurrentSession().createCriteria(DaqueryRequest.class)
+								  .add(Restrictions.eq("direction", direction))
+				  				  .list();
+	}
+	
+	public void update(long id, DaqueryRequest request) throws DaqueryException {
+		getCurrentSession().update(request);
+	}
+	
+	public void delete(DaqueryRequest request) throws DaqueryException {
+		getCurrentSession().delete(request);
 	}
 }

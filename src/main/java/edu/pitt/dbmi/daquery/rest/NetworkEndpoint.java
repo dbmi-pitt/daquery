@@ -33,6 +33,10 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.domain.Site;
 
 
 @Path("/networks")
@@ -78,12 +82,12 @@ public class NetworkEndpoint extends AbstractEndpoint {
                         
             List<Network> networks = NetworkDAO.queryAllNetworks();
             
-            if (networks == null) {
-                return Response.status(NOT_FOUND).build();
-            }
-            if (networks.isEmpty()) {
-                return Response.status(NOT_FOUND).build();
-            }
+//            if (networks == null) {
+//                return Response.ok(200).entity(networks).build();
+//            }
+//            if (networks.isEmpty()) {
+//            	return Response.ok(200).entity(networks).build();
+//            }
 
             String jsonString = toJsonArray(networks);
             return Response.ok(200).entity(jsonString).build();
@@ -158,6 +162,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             sqldatasource_params.put("name", network_params.get("name") + "_datasource");
             sqldatasource_params.put("username", ((LinkedHashMap<?, ?>)payload.get("form")).get("username").toString());
             sqldatasource_params.put("password", ((LinkedHashMap<?, ?>)payload.get("form")).get("password").toString());
+            sqldatasource_params.put("driver", ((LinkedHashMap<?, ?>)payload.get("form")).get("driver").toString());
             
             //SQLDataSource sqlDataSource = SQLDataSourceDAO.createSQLDataSource(sqldatasource_params);
             SQLDataSource sqlDataSource = new SQLDataSource();
@@ -165,6 +170,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             sqlDataSource.setName(sqldatasource_params.get("name"));
             sqlDataSource.setUsername(sqldatasource_params.get("username"));
             sqlDataSource.setPassword(sqldatasource_params.get("password"));
+            sqlDataSource.setDriverClass(sqldatasource_params.get("driver"));
             
             Set<DataSource> dsset = new HashSet<DataSource>();
             
@@ -176,6 +182,13 @@ public class NetworkEndpoint extends AbstractEndpoint {
             sqlDataSource.setDataModel(dModel);
             
             Network network = NetworkDAO.createNetwork(network_params, dModel);
+            Site site = SiteDAO.getLocalSite();
+            SiteDAO sitedao = new SiteDAO();
+            
+            sitedao.openCurrentSessionwithTransaction();
+            sitedao.createOutogingSites(network.getId(), site.getId());
+            sitedao.createIncomingSites(network.getId(), site.getId());
+            sitedao.closeCurrentSessionwithTransaction();
             
             String json = network.toJson();
 
@@ -188,4 +201,73 @@ public class NetworkEndpoint extends AbstractEndpoint {
     	
     }
     
+    /**
+     * Get data mode by network ID or UUID
+     * example url: daquery-ws/ws/networks/1/datamodel
+     *           or daquery-ws/ws/networks/a3477419-657d-4ddd-8750-c014e2033937/datamodel
+     * @return 200 OK			Datamodel information for one network
+     * @throws 500 Server Error	error message
+     * @throws 401 Unauthorized	
+     */
+    @GET
+    @Secured
+    @Path("/{id}/datamodel")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDatamodelbyNetworkId(@PathParam("id") String id) {
+    	try {
+
+            logger.info("#### returning network by uuid=" + id);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            Network network = NetworkDAO.queryNetwork(id);
+            DataModel datamodel = NetworkDAO.getDatamodelbyNetworkId(network);
+             
+            String json = datamodel.toJson();
+
+            return Response.ok(200).entity(json).build();
+    	} catch (HibernateException he) {
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
+     * Get SQL data source by network ID or UUID
+     * example url: daquery-ws/ws/networks/1/sqldatasource
+     *           or daquery-ws/ws/networks/a3477419-657d-4ddd-8750-c014e2033937/sqldatasource
+     * @return 200 OK			sqldatasource information for one network
+     * @throws 500 Server Error	error message
+     * @throws 401 Unauthorized	
+     */
+    @GET
+    @Secured
+    @Path("/{id}/sqldatasource")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSQLDataSourcebyNetworkId(@PathParam("id") String id) {
+    	try {
+
+            logger.info("#### returning network by uuid=" + id);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            Network network = NetworkDAO.queryNetwork(id);
+            SQLDataSource sql_data_source = NetworkDAO.getSQLDataSourcebyNetworkId(network);
+             
+            String json = sql_data_source.toJson();
+
+            return Response.ok(200).entity(json).build();
+    	} catch (HibernateException he) {
+    		return Response.status(INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
