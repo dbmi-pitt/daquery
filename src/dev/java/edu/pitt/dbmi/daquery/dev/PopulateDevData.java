@@ -23,6 +23,11 @@ import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.RequestDirection;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
@@ -30,11 +35,6 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.domain.*;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
-import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.domain.inquiry.RequestDirection;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 /**
  * Populate the database with some dev data in a Hibernatey kind of way..

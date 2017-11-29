@@ -30,6 +30,10 @@ import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -38,17 +42,7 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
-
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
-import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
-import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
-import edu.pitt.dbmi.daquery.domain.DaqueryUser;
-import edu.pitt.dbmi.daquery.common.domain.Network;
-import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.domain.inquiry.ResponseTask;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 

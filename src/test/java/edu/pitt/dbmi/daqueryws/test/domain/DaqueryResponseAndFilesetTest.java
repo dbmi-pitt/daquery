@@ -16,16 +16,16 @@ import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.RequestDirection;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryResponse;
-import edu.pitt.dbmi.daquery.domain.inquiry.Fileset;
-import edu.pitt.dbmi.daquery.domain.inquiry.RequestDirection;
-import edu.pitt.dbmi.daquery.domain.inquiry.ResponseStatus;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLDialect;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 
 public class DaqueryResponseAndFilesetTest {
