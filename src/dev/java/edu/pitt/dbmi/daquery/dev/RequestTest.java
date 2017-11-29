@@ -6,10 +6,10 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
-import edu.pitt.dbmi.daquery.dao.RequestDAO;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.dao.DaqueryRequestDAO;
 
 public class RequestTest
 {
@@ -23,7 +23,7 @@ public class RequestTest
 		ir.getRequester().setUtype("FULL");
 		ir.getInquiry().getAuthor().setUtype("FULL"); */
 		
-		DaqueryRequest ir = RequestDAO.getRequestById("84a64748-a928-4891-b16f-d3564d478b5f");
+		DaqueryRequest ir = DaqueryRequestDAO.getRequestById("84a64748-a928-4891-b16f-d3564d478b5f");
 		String json = JSONHelper.toJSON(ir);
 		System.out.println(json);
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);

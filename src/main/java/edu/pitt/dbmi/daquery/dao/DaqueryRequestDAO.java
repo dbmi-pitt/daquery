@@ -8,13 +8,14 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
+import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
-import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 public class DaqueryRequestDAO extends AbstractDAO {
 	private static final Logger log = Logger.getLogger(DaqueryRequestDAO.class.getName());

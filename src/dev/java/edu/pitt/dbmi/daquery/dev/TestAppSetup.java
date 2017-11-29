@@ -9,7 +9,7 @@ public class TestAppSetup
 	{
 		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		AppProperties.setDevHomeDir("/home/devuser/dq-data");
-		AppSetup.initialSetup("path@pitt.edu", "password", null);
+		AppSetup.initialSetup("path@pitt.edu", "password", null, null, null, null);
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
 		else if(AppSetup.isValidSetup())

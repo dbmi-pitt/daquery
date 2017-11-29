@@ -33,10 +33,11 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
+import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
-import edu.pitt.dbmi.daquery.domain.Site;
+
 
 
 @Path("/networks")

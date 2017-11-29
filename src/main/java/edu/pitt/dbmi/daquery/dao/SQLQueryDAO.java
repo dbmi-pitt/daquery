@@ -1,25 +1,15 @@
 package edu.pitt.dbmi.daquery.dao;
 
-import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
-import edu.pitt.dbmi.daquery.domain.Network;
+import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
-import edu.pitt.dbmi.daquery.domain.Site;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
-import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 public class SQLQueryDAO extends AbstractDAO {
 private final static Logger logger = Logger.getLogger(SQLQueryDAO.class.getName());

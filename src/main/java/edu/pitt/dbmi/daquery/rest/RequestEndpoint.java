@@ -29,15 +29,14 @@ import javax.ws.rs.core.UriInfo;
 
 import org.hibernate.HibernateException;
 
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.InquiryDAO;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.dao.SiteDAO;
-import edu.pitt.dbmi.daquery.domain.DaqueryUser;
-import edu.pitt.dbmi.daquery.domain.inquiry.DaqueryRequest;
-import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 @Path("/requests")
 @Produces(APPLICATION_JSON)

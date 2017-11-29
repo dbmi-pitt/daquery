@@ -1,20 +1,14 @@
 package edu.pitt.dbmi.daquery.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -31,17 +25,12 @@ import javax.ws.rs.core.UriInfo;
 
 import org.hibernate.HibernateException;
 
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.InquiryDAO;
-import edu.pitt.dbmi.daquery.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
-import edu.pitt.dbmi.daquery.domain.DaqueryUser;
-import edu.pitt.dbmi.daquery.domain.DataModel;
-import edu.pitt.dbmi.daquery.domain.DataSource;
-import edu.pitt.dbmi.daquery.domain.Network;
-import edu.pitt.dbmi.daquery.domain.SQLDataSource;
-import edu.pitt.dbmi.daquery.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.domain.inquiry.SQLQuery;
 
 
 @Path("/inquiries")
