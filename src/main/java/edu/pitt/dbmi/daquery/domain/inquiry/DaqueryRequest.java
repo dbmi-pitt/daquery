@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.domain.inquiry;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -29,7 +30,7 @@ import edu.pitt.dbmi.daquery.domain.Site;
 
 @Entity
 @Table(name="DAQUERY_REQUEST")
-public class DaqueryRequest extends DaqueryObject
+public class DaqueryRequest extends DaqueryObject implements Serializable
 {
 	private static final long serialVersionUID = 292729082342423l;
 	

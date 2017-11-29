@@ -22,7 +22,7 @@ public class SiteDAO extends AbstractDAO {
 
     private final static Logger logger = Logger.getLogger(SiteDAO.class.getName());
 	
-    public static final String LOCAL_SITE_ID_PROP_NAME = "local.site.id";
+    public static final String LOCAL_SITE_ID_PROP_NAME = "site.id";
     
     public static void main(String [] args)
     {
@@ -114,6 +114,29 @@ public class SiteDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
             throw e;
         }
+    }
+    
+    public long createSite(Site site) throws Exception {
+    	return (Long) getCurrentSession().save(site);
+    }
+    
+    public void createOutogingSites(long network_id, long site_id) throws Exception {
+			
+		String sql = "INSERT INTO OUTGOING_QUERY_SITES (site_id, network_id) VALUES (:site_id, :network_id)";
+		Query query = getCurrentSession().createSQLQuery(sql)
+										 .setParameter("site_id", site_id)
+										 .setParameter("network_id", network_id);
+		
+		query.executeUpdate();
+    }
+    
+    public void createIncomingSites(long network_id, long site_id) throws Exception {
+		String sql = "INSERT INTO INCOMING_QUERY_SITES (site_id, network_id) VALUES (:site_id, :network_id)";
+		Query query = getCurrentSession().createSQLQuery(sql)
+					   .setParameter("site_id", site_id)
+					   .setParameter("network_id", network_id);
+		
+		query.executeUpdate();
     }
 
     public static Site getLocalSite()

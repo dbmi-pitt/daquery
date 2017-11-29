@@ -125,6 +125,4 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Transient
 	public abstract DaqueryResponse run(DaqueryResponse response, DataModel model);
 	
-	
-	
 }
