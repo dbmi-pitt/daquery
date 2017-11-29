@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -55,8 +56,9 @@ public class DaqueryRequestDAO extends AbstractDAO {
 		return (DaqueryRequest) getCurrentSession().get(DaqueryRequest.class, id);
 	}
 	
-	public List list() throws DaqueryException{
+	public List list(String direction) throws DaqueryException{
 		return getCurrentSession().createCriteria(DaqueryRequest.class)
+								  .add(Restrictions.eq("direction", direction))
 				  				  .list();
 	}
 	
