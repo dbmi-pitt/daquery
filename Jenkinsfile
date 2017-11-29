@@ -33,7 +33,7 @@ node {
             sh '/opt/apache-tomcat-6.0.53/clean.sh'
             sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
             sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
-            sleep 20
+            sleep 60
             //sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.domain.*Test" test'
             //sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test" test'
                     
