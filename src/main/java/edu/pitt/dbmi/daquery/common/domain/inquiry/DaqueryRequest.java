@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.daquery.domain.inquiry;
+package edu.pitt.dbmi.daquery.common.domain.inquiry;
 
 import java.util.Date;
 import java.util.Set;
