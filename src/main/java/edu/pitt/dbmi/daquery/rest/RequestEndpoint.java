@@ -20,6 +20,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -60,6 +61,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     /**
      * Get all requests
      * example url: daquery-ws/ws/requests
+     * @params direction 
      * @return 200 OK			List of request
      * @throws 500 Server Error	error message
      * @throws 401 Unauthorized	
@@ -68,7 +70,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRequests() {
+    public Response getRequests(@QueryParam("direction") String direction) {
     	try {
 
             logger.info("#### returning all inquires");
@@ -79,7 +81,7 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             DaqueryRequestDAO dao = new DaqueryRequestDAO();
             dao.openCurrentSession();
-            List requests = dao.list();
+            List requests = dao.list(direction);
             dao.closeCurrentSession();
             
             String jsonString = toJsonArray(requests);
