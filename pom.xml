@@ -52,13 +52,6 @@
 	  <version>${oraclejdbc.version}</version>
 	</dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.antlr/antlr4-runtime -->
-		<dependency>
-		    <groupId>org.antlr</groupId>
-		    <artifactId>antlr4-runtime</artifactId>
-		    <version>${antlr4.version}</version>
-		</dependency>
-
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -406,29 +399,6 @@
                         <contextPath>/</contextPath>
                     </webApp>
                 </configuration>
-            </plugin>
-	    	<plugin>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.7</version>
-                <executions>
-                    <execution>
-                    	<id>antlr</id>
-		    			<configuration>
-							<sourceDirectory>${basedir}/src/main/antlr</sourceDirectory>
-							<outputDirectory>${basedir}/src\main\java\edu\pitt\dbmi\daquery\sql\parser\generated</outputDirectory>		
-							<listener>true</listener>
-							<visitor>true</visitor>
-							<arguments>
-				    			<argument>-package</argument>
-				    			<argument>edu.pitt.dbmi.daquery.sql.parser.generated</argument>
-							</arguments>
-		    			</configuration>		    
-                    	<goals>
-                        	<goal>antlr4</goal>
-                    	</goals>
-                	</execution>
-                </executions>
             </plugin>
 	        <plugin>
 	            <groupId>org.apache.maven.plugins</groupId>
