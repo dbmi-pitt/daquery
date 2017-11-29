@@ -17,6 +17,47 @@ import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public abstract class AbstractDAO {
 
+
+    private Session currentSession;
+    private Transaction currentTransaction;
+
+    public Session openCurrentSession() throws DaqueryException {
+	currentSession = HibernateConfiguration.openSession();
+	return currentSession;
+    }
+
+    public Session openCurrentSessionwithTransaction() throws DaqueryException {
+	currentSession = HibernateConfiguration.openSession();
+	currentTransaction = currentSession.beginTransaction();
+	return currentSession;
+    }
+
+    public void closeCurrentSession() {
+	currentSession.close();
+    }
+
+    public void closeCurrentSessionwithTransaction() {
+	currentTransaction.commit();
+	currentSession.close();
+    }
+
+    public Session getCurrentSession() {
+	return currentSession;
+    }
+
+    public void setCurrentSession(Session s) {
+	currentSession = s;
+    }
+
+    public Transaction getCurrentTransaction() {
+	return currentTransaction;
+    }
+
+    public void setCurrentTransaction(Transaction t) {
+	currentTransaction = t;
+    }
+
+    
 	/**
 	 * Very generic query method that returns a List of objects from the database.
 	 * @param namedQuery- the namedQuery to be executed
