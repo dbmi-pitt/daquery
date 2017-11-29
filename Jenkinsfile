@@ -1,6 +1,10 @@
 node {
+    
+    env.JAVA_HOME="usr/lib/jvm/java-1.7.0-openjdk-1.7.0.99.x86_64/jre"
+    
     stage('Dependency: daquery-common') {
         dir('daquery-common') {
+            sh 'echo $JAVA_HOME'
             git url: 'https://dbmi-jenkins@github.com/dbmi-pitt/daquery-common.git', credentialsId: 'git-readonly'
             echo 'Building daquery-common'
             sh "mvn -B -DskipTests clean install"
