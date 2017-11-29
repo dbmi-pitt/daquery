@@ -21,7 +21,9 @@ import com.google.gson.GsonBuilder;
 
 import edu.pitt.dbmi.daquery.central.util.DBHelper;
 import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
@@ -59,7 +61,7 @@ public class CentralService{
 	 * is flagged as temporary a new key is generated and sent back along with the site id
 	 * in addition to the site jwt.  The site parameter can be either the site name or the 
 	 * site id.
-	 * @param site  The name or site id of the site.
+	 * @param siteNameOrKey  The name or site id of the site.
 	 * @param key The private key used to access information for the site.
 	 * @return 200 with info specified above, 401 if authentication fails or 400/500 on error.
 	 */
@@ -67,29 +69,35 @@ public class CentralService{
 	@Path("authenticateSite/")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)	
-	public Response authenticateSite(@QueryParam("site") String site, @QueryParam("key") String key)
+	public Response authenticateSite(@QueryParam("site") String siteNameOrKey, @QueryParam("key") String key)
 	{
-		if(StringHelper.isEmpty(site) || StringHelper.isEmpty(key))
+		if(StringHelper.isEmpty(siteNameOrKey) || StringHelper.isEmpty(key))
 			return(ResponseHelper.getBasicResponse(400, "sitename and key parameters required"));
 		
 		//TODO: check the sender ip/site name as an extra verification step
-		if(! DBHelper.authenticateSite(site, key))
-			return(ResponseHelper.getBasicResponse(401, site + " is not authorized to use this server.  Possibly a bad key or site name was provided."));
+		if(! DBHelper.authenticateSite(siteNameOrKey, key))
+			return(ResponseHelper.getBasicResponse(401, siteNameOrKey + " is not authorized to use this server.  Possibly a bad key or site name was provided."));
 
 		Map<String, Object> additionalVals = null;
 		
 		try
 		{
-			if(DBHelper.isSiteKeyTemp(site))
+			if(DBHelper.isSiteKeyTemp(siteNameOrKey))
 			{
-				String newKey = DBHelper.getNewSiteKey(site);
-				if(newKey == null)
-					throw new DaqueryCentralException("An unknown error while trying to generate a new site key. Check the central server log files for more information.");
+				String newKey = DBHelper.getNewSiteKey(siteNameOrKey);
+
+				if (newKey == null)
+					throw new DaqueryCentralException(
+							"An unknown error while trying to generate a new site key. Check the central server log files for more information.");
+				
+				Site site = SiteDAO.getSiteByNameOrId(siteNameOrKey);
+				
 				additionalVals = new HashMap<String, Object>();
 				additionalVals.put("new-site-key", newKey);
-				additionalVals.put("site-id", DBHelper.getSiteId(site));
+				additionalVals.put("site-id", DBHelper.getSiteId(siteNameOrKey));
+				additionalVals.put("site-url", site.getUrl());
 			}
-			return(ResponseHelper.getTokenResponse(200, null, site, uriInfo, additionalVals));	
+			return(ResponseHelper.getTokenResponse(200, null, siteNameOrKey, uriInfo, additionalVals));	
 		}
 		catch(Throwable dce)
 		{
