@@ -46,16 +46,16 @@ public class AppSetup
 	
 	public static boolean initialize()
 	{
-		isValidSetup = initializeDB(null, null, null);
+		isValidSetup = initializeDB(null, null, null, null, null, null);
 		return(isValidSetup);
 	}
 
-	public static boolean initialSetup(String adminEmail, String adminPwd, String adminRealName)
+	public static boolean initialSetup(String siteId, String siteName, String url, String adminEmail, String adminPwd, String adminRealName)
 	{
 		if(StringHelper.isEmpty(adminPwd) || StringHelper.isEmpty(adminPwd) )
 			isValidSetup = false;
 		else
-			isValidSetup = initializeDB(adminEmail, adminPwd, adminRealName);
+			isValidSetup = initializeDB(siteId, siteName, url, adminEmail, adminPwd, adminRealName);
 		return(isValidSetup);
 	}
 
@@ -68,7 +68,8 @@ public class AppSetup
 	 * 
 	 * If JavaDB was never created do it now.
 	 */
-	private static boolean initializeDB(String adminEmail, String adminPwd, String adminRealName)
+	private static boolean initializeDB(String siteId, String siteName, String url,
+			String adminEmail, String adminPwd, String adminRealName)
 	{
 		if(AppProperties.getHomeDirectory() == null)
 		{
@@ -119,6 +120,11 @@ public class AppSetup
 					if(! setupAdminUser(adminEmail, adminPwd, adminRealName))
 					{
 						setErroredSetup("Unable to create the initial admin user.  Check the application logs for more information.");
+						return(false);
+					}
+					if(! setupSite(siteId, siteName, url, adminEmail))
+					{
+						setErroredSetup("Unable to create the initial site.  Check the application logs for more information.");
 						return(false);
 					}
 				}
@@ -190,6 +196,46 @@ public class AppSetup
 			insertSQL = "insert into dq_user (id, username, status, real_name, utype)"
 					+ "values ('" + sysUUID + "', 'system', '" +
 					UserStatus.DISABLED.toString() + "', 'System User', 'INFO')";
+			stat.executeUpdate(insertSQL);
+
+			return(true);
+		}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "An error occured while trying to create the first admin user.", t);
+			setErroredSetup("An error occured while trying to create the first admin user.  Check the application logs for more information.");
+			return(false);
+		}
+		finally
+		{
+			ApplicationDBHelper.closeConnection(conn, stat, rs);
+		}
+	}
+	private static boolean setupSite(String siteId, String siteName, String url, String adminEmail)
+	{
+		Connection conn = null;
+		Statement stat = null;
+		ResultSet rs = null;
+		try
+		{
+			conn = ApplicationDBHelper.getConnection();
+			stat = conn.createStatement();
+			rs = stat.executeQuery("select count(*) from site where site_id = '" + siteId + "'");
+			int siteCount = 0;
+			if(rs.next())
+				siteCount = rs.getInt(1);
+			if(siteCount > 0)
+			{
+				String msg = "A site already exists while trying to add the local site.";				
+				log.log(Level.SEVERE, msg);
+				setErroredSetup(msg);
+				return(false);
+			}
+			
+			rs.close();
+			
+			String insertSQL = "insert into site (site_id, name, url, admin_email, status)"
+					+ "values ('" + siteId + "', '" + siteName + "', '" + url + "', '" + adminEmail + "', 'CONNECTED')";
 			stat.executeUpdate(insertSQL);
 
 			return(true);
