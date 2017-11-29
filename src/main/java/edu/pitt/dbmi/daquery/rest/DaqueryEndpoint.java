@@ -1,6 +1,8 @@
 package edu.pitt.dbmi.daquery.rest;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -303,6 +305,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
 					QueueManager.getNamedQueue("main").addTask(task);
 					rVal = task.getResponse();
+					rVal.setRequest(request);
+					ResponseDAO.saveOrUpdate(rVal);
 				}
 				catch(Throwable e)
 				{
@@ -313,6 +317,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					String trace = StringHelper.stackToString(e);
 					response.setStackTrace(trace);
 					response.setReplyTimestamp(new Date());
+					response.setRequest(request);
+					ResponseDAO.saveOrUpdate(response);
 					ResponseHelper.getJsonResponseGen(500, response);
 				}
 				
@@ -350,18 +356,29 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	if(ResponseDAO.containsId(id))
     		return(ResponseHelper.getBasicResponse(404, "A response with id:" + id + " was not found."));
     	
-    	DaqueryResponse resp = null;
-    	try{resp = ResponseDAO.getResponseById(id);}
+    	DaqueryResponse rVal = null;
+    	try
+    	{
+    		rVal = ResponseDAO.getResponseById(id);
+    		Site mySite = SiteDAO.getLocalSite();
+    		String requestSiteId = rVal.getRequest().getRequestSite().getSiteId();
+    		if( !mySite.getSiteId().equals(requestSiteId))
+    		{
+    			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
+    			return(getFromRemoteSite(remoteSite, "/response/" + id, null));    			
+    		}
+    	}
     	catch(Throwable t)
     	{
     		String msg = "An unhandled exception occured while retrieving a response with id: " + id;
     		log.log(Level.SEVERE, msg, t);
     		return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
     	}
-    	if(resp == null)
+    	
+    	if(rVal == null)
     		return(ResponseHelper.getBasicResponse(404, "Response not found." ));
     	
-        return Response.ok(200).entity(resp.toJson()).build();    	
+        return Response.ok(200).entity(rVal.toJson()).build();    	
     }
     
     /**
@@ -401,6 +418,30 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		
 		return(resp);
 	}
+	
+	private static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
+	{
+		Client client = ClientBuilder.newClient();
+		String args = "";
+		if(arguments != null)
+		{
+			boolean first = true;
+			for(String key : arguments.keySet())
+			{
+				String divide = "&";
+				if(first)
+				{
+					divide = "?";
+					first = false;
+				}
+				args = args + URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(arguments.get(key), "UTF-8");
+			}
+		}
+		Response resp = client.target(site.getUrl() + "daquery/ws/" + serviceName + args)
+						                    .request(MediaType.APPLICATION_JSON).get();
+		
+		return(resp);
+	}	
 	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
