@@ -10,10 +10,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
-import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.domain.DataModel;
+import edu.pitt.dbmi.daquery.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
@@ -135,6 +138,50 @@ public class NetworkDAO extends AbstractDAO {
 	    		s.close();
 	    	}
         }    	
+    }
+    
+    public static DataModel getDatamodelbyNetworkId(Network network) throws DaqueryException {
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+			
+			String sql = "SELECT dm.* FROM Network as n join Data_model as dm on n.data_model_id = dm.id where n.id = :network_id ";
+			Query query = s.createSQLQuery(sql)
+						   .addEntity(DataModel.class)
+						   .setParameter("network_id", network.getId());
+			
+			DataModel result = (DataModel) query.uniqueResult();		
+	        return result;
+	    
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+    
+    public static SQLDataSource getSQLDataSourcebyNetworkId(Network network) throws DaqueryException {
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+			
+			String sql = "SELECT sds.*, ds.* FROM Sql_data_source as sds join Data_source as ds on sds.ds_id = ds.ds_id "
+																+ "join Data_model as dm on ds.model_id = dm.id "
+																+ "join Network as n on n.data_model_id = dm.id "
+																+ "where n.id = :network_id ";
+			Query query = s.createSQLQuery(sql)
+						   .addEntity(SQLDataSource.class)
+						   .setParameter("network_id", network.getId());
+			
+			Object obj = query.uniqueResult();
+			SQLDataSource result = (SQLDataSource) obj;	
+	        return result;
+	    
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
     }
 }
 
