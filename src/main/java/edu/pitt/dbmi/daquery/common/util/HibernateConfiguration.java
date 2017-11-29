@@ -10,6 +10,11 @@ import java.util.logging.Logger;
 import edu.pitt.dbmi.daquery.domain.*;
 import edu.pitt.dbmi.daquery.domain.inquiry.*;
 import edu.pitt.dbmi.daquery.common.domain.*;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 
 /**
  *  Singleton used to configure and get a Hibernate Session application wide. 
