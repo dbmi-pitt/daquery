@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,11 +17,11 @@ import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 
-
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 
 @Entity
 @Table(name="DATA_MODEL")
-public class DataModel
+public class DataModel extends DaqueryObject implements Serializable
 {	
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
