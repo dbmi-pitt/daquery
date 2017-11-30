@@ -17,13 +17,13 @@ public class RequestTest
 	{
 		AppProperties.setDevHomeDir("/home/devuser/dq-data");
 		Client client = ClientBuilder.newClient();
-/*		DaqueryRequest ir =  PopulateDevData.assembleOutgoingRequest();
+		DaqueryRequest ir =  PopulateDevData.assembleOutgoingRequest();
 		System.out.println(ir.getRequestId());
 		ir.getInquiry().setDataType("SQL_QUERY");
 		ir.getRequester().setUtype("FULL");
-		ir.getInquiry().getAuthor().setUtype("FULL"); */
+		ir.getInquiry().getAuthor().setUtype("FULL");
 		
-		DaqueryRequest ir = DaqueryRequestDAO.getRequestById("84a64748-a928-4891-b16f-d3564d478b5f");
+//		DaqueryRequest ir = DaqueryRequestDAO.getRequestById("84a64748-a928-4891-b16f-d3564d478b5f");
 		String json = JSONHelper.toJSON(ir);
 		System.out.println(json);
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
