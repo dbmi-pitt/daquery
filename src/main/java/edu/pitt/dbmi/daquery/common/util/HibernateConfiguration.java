@@ -1,15 +1,24 @@
 package edu.pitt.dbmi.daquery.common.util;
 
+import java.util.logging.Logger;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
-import java.util.logging.Logger;
-
-import edu.pitt.dbmi.daquery.domain.*;
-import edu.pitt.dbmi.daquery.domain.inquiry.*;
-import edu.pitt.dbmi.daquery.common.domain.*;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.DataSource;
+import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.Notification;
+import edu.pitt.dbmi.daquery.common.domain.Role;
+import edu.pitt.dbmi.daquery.common.domain.SASDataSource;
+import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
+import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SourceType;
+import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;

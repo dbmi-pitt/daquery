@@ -107,25 +107,46 @@
   <build>
     <finalName>daquery-common</finalName>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/main/java</source>
+                <source>src/dev/java</source>
+                <source>src/test/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     	<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-jar-plugin</artifactId>
-			<version>2.4</version>
-			<configuration>
-			  <archive>
-			    <manifest>
-					<mainClass>edu.pitt.dbmi.daquery.common.util.AppSetup</mainClass>
-			    </manifest>
-			  </archive>
-			  <excludes>
-			  	<exclude>
-			  		**/private-data.props
-			  	</exclude>
-			  </excludes>
-			</configuration>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-jar-plugin</artifactId>
+		<version>2.4</version>
+		<configuration>
+		  <archive>
+		    <manifest>
+			<mainClass>edu.pitt.dbmi.daquery.common.util.AppSetup</mainClass>
+		    </manifest>
+		  </archive>
+		  <excludes>
+		    <exclude>
+		      **/private-data.props
+		    </exclude>
+		  </excludes>
+		</configuration>
 	    </plugin>
     	<plugin>
-        	<groupId>org.antlr</groupId>
+          <groupId>org.antlr</groupId>
             <artifactId>antlr4-maven-plugin</artifactId>
           	<version>4.7</version>
             <executions>
@@ -146,7 +167,7 @@
                    	</goals>
                	</execution>
               </executions>
-           </plugin>	    
+        </plugin>
     </plugins>
   </build>
 </project>
