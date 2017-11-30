@@ -30,7 +30,6 @@ public class SQLDataSourceTest {
 	
 	@BeforeClass
 	public static void setupBeforeClass() {
-    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		//create a new network for testing
 		Session session = null;
 		try {

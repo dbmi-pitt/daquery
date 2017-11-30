@@ -31,8 +31,7 @@ public class RoleTest {
 	
     @BeforeClass
     public static void setupBeforeClass() {
-    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-    	//create a dummy user account for use in the RoleTests
+     	//create a dummy user account for use in the RoleTests
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
