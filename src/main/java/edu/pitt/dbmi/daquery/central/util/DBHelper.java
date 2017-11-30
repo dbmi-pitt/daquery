@@ -136,7 +136,7 @@ public class DBHelper
 			{
 				conn = ApplicationDBHelper.getConnection();
 				stat = conn.createStatement();
-				String sql = "update site set access_key = '" + newKey + "', tempkey = false where id = '" + site.getSiteId() + "'";
+				String sql = "update site set access_key = '" + newKey + "', tempkey = false where site_id = '" + site.getSiteId() + "'";
 				stat.executeUpdate(sql);
 				conn.commit();
 				return(newKey);
