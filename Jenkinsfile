@@ -33,7 +33,7 @@ node {
             sh '/opt/apache-tomcat-6.0.53/clean.sh'
             sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
             //delete the database at the filesystem level
-            sh 'rm -Rf /opt/apache-tomcat-6.0.53/conf/daquery-db/ *'
+            sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
             sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
             sleep 60
             //sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.domain.*Test" test'
