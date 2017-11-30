@@ -165,7 +165,8 @@ public class DBHelper
 	 */
 	public static List<Network> getAllowedNetworks(String siteId) throws DaqueryCentralException
 	{
-		String sql = "select distinct network_id from outgoing_query_sites where site_id = '" + siteId +"'";
+		
+		String sql = "select distinct net.network_id from outgoing_query_sites oqs, site, network net  where oqs.site_id = site.id and oqs.network_id = net.id and site.site_id = '" + siteId +"'";
 /*		String sql = "select site_id, network_name, data_model, network_membership.network_id, site.name as site_name, site_url, admin_email " +
 		                                  "from network_membership, " +
                                                 "(select id as network_id, name as network_name, data_model from network " +
