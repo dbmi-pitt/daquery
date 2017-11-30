@@ -7,6 +7,7 @@ public class RunAppSetup
 {
 	public static void main(String [] args)
 	{
+		AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
 		AppSetup.initialSetup("123456789", "central-test", "", "path@pitt.edu", "temppwd", "Test User");
 
 		if(AppSetup.isErroredSetup())

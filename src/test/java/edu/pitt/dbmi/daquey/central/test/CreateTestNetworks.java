@@ -13,11 +13,18 @@ import edu.pitt.dbmi.daquery.common.dev.util.PrivateProps;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public class CreateTestNetworks
 {
+	public static void main(String [] args) throws DaqueryException
+	{
+		AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
+		createTestNetworks();
+	}
+	
 	public static List<Network> createTestNetworks() throws DaqueryException
 	{
 		Properties props = PrivateProps.getProps();
@@ -44,16 +51,16 @@ public class CreateTestNetworks
 		dSite.setAdminEmail("del20@pitt.edu");
 
 		DataModel modelA = CreateCDMModelInfo.makeModel(props.getProperty("cdm.url"),
-													   props.getProperty("cdm.schema"),
+													   props.getProperty("cdm.username"),
 													   props.getProperty("cdm.password"), "CDM-ALL");
 		DataModel modelDC = CreateCDMModelInfo.makeModel(props.getProperty("cdm.url"),
-													   props.getProperty("cdm.schema"),
+													   props.getProperty("cdm.username"),
 													   props.getProperty("cdm.password"), "CDM-DC");
 		DataModel modelCB = CreateCDMModelInfo.makeModel(props.getProperty("cdm.url"),
-													   props.getProperty("cdm.schema"),
+													   props.getProperty("cdm.username"),
 													   props.getProperty("cdm.password"), "CDM-CB");
 		DataModel modelDB = CreateCDMModelInfo.makeModel(props.getProperty("cdm.url"),
-													   props.getProperty("cdm.schema"),
+													   props.getProperty("cdm.username"),
 													   props.getProperty("cdm.password"), "CDM-DB");
 		
 		
@@ -63,21 +70,25 @@ public class CreateTestNetworks
 		allNet.getOutgoingQuerySites().add(dSite);
 		allNet.getOutgoingQuerySites().add(cSite);
 		allNet.setDataModel(modelA);
+		allNet.setName("All-Net");
 		Network dcNet = new Network("1169eae7-79ed-41e6-bb62-c86167aef92f");
 		dcNet.setOutgoingQuerySites(new HashSet<Site>());
 		dcNet.getOutgoingQuerySites().add(dSite);
 		dcNet.getOutgoingQuerySites().add(cSite);
 		dcNet.setDataModel(modelDC);
+		dcNet.setName("D-C Net");
 		Network cbNet = new Network("9dc38074-a153-4183-a36f-2b64cf75c13c");
 		cbNet.setOutgoingQuerySites(new HashSet<Site>());
 		cbNet.getOutgoingQuerySites().add(cSite);
 		cbNet.getOutgoingQuerySites().add(bSite);
 		cbNet.setDataModel(modelCB);
+		cbNet.setName("C-B Net");
 		Network dbNet = new Network("afff8323-176c-4cb0-9d2c-cccc03fff101");
 		dbNet.setOutgoingQuerySites(new HashSet<Site>());
 		dbNet.getOutgoingQuerySites().add(dSite);
 		dbNet.getOutgoingQuerySites().add(bSite);
 		dbNet.setDataModel(modelDB);
+		dbNet.setName("D-B Net");
 		
 		save(allNet);
 		save(dcNet);
