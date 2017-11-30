@@ -73,7 +73,6 @@ public class DaqueryResponseAndFilesetTest {
 	
 	@BeforeClass
 	public static void setupBeforeClass() {
-    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		//create a new network for testing
     	//NOTE: you must create the site in this method to ensure the site is 
     	//created before the tests are run
