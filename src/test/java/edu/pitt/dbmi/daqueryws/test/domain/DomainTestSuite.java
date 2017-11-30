@@ -1,6 +1,9 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -25,15 +28,15 @@ import edu.pitt.dbmi.daquery.common.util.DaqueryException;
    SQLDataSourceTest.class
 })
 
-public class DomainSuiteTest {
+public class DomainTestSuite {
 	
-    private final static Logger logger = Logger.getLogger(DomainSuiteTest.class.getName());
+    private final static Logger logger = Logger.getLogger(DomainTestSuite.class.getName());
 
     public static String databaseHomeDir = "/opt/apache-tomcat-6.0.53";
 
     @BeforeClass
     public static void init() {
-    	AppProperties.setDevHomeDir(DomainSuiteTest.databaseHomeDir);
+    	AppProperties.setDevHomeDir(DomainTestSuite.databaseHomeDir);
     	System.out.println(AppProperties.getConfDirectory());    	
     	String siteName = "dq-test-site";
     	String localSiteURL = "http://localhost:8008/";
@@ -42,7 +45,7 @@ public class DomainSuiteTest {
     	String adminRealName = "Test User";
     	try {
 	    	System.out.println(AppProperties.getDBDir()); 
-			AppSetup.initialSetup(UUID.randomUUID().toString(), siteName, localSiteURL, adminEmail, adminPassword, adminRealName);
+			assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), siteName, localSiteURL, adminEmail, adminPassword, adminRealName));
 			if(AppSetup.isErroredSetup())
 				throw new DaqueryException(AppSetup.getErrorMessage());
 			else if(!AppSetup.isValidSetup())
@@ -50,6 +53,13 @@ public class DomainSuiteTest {
 	   	} catch (Exception e) {
 	    		System.out.println(e.getMessage());
 	    }
+    }
+    
+    @Test
+    //I added this method because maven's surefire plugin does not like it
+    //if a test class does not contain at least one @Test annotation
+    public void dummyTest() {
+    	System.out.println("Dummy Test");
     }
     
 	
