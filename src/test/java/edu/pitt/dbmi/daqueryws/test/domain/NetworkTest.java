@@ -19,10 +19,6 @@ public class NetworkTest {
 	private static String networkname = "SiteTest_Network";
 	private static String datamodel = "TestModel";
 	
-	@BeforeClass
-	public static void setupBeforeClass() {
-    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");		
-	}
 	
     @Test
     public void testCreate() {
