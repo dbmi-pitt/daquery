@@ -34,9 +34,11 @@ node {
             sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
             //delete the database at the filesystem level
             sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+            //run the POJO Junit tests
+            //This call also builds the database
+            sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite" test'
             sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
             sleep 60
-            //sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.domain.*Test" test'
             //sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test" test'
                     
        }
