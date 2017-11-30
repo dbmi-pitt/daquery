@@ -21,7 +21,6 @@ public class DaqueryUserTest {
 	
 	@BeforeClass
 	public static void setupBeforeClass() {
-    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");	
     	//create a new user account for the other tests to use
 		Session session = null;
 		try {
