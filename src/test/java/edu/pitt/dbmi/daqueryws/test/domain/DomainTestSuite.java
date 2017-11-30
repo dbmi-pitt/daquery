@@ -37,14 +37,12 @@ public class DomainTestSuite {
     @BeforeClass
     public static void init() {
     	AppProperties.setDevHomeDir(DomainTestSuite.databaseHomeDir);
-    	System.out.println(AppProperties.getConfDirectory());    	
     	String siteName = "dq-test-site";
     	String localSiteURL = "http://localhost:8008/";
     	String adminEmail = "dqadmin@pitt.edu";
     	String adminPassword = "temppassword";
     	String adminRealName = "Test User";
     	try {
-	    	System.out.println(AppProperties.getDBDir()); 
 			assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), siteName, localSiteURL, adminEmail, adminPassword, adminRealName));
 			if(AppSetup.isErroredSetup())
 				throw new DaqueryException(AppSetup.getErrorMessage());
