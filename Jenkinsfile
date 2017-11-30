@@ -23,7 +23,7 @@ node {
     }
     stage('Checkout and Build Web Services') {
         dir('daquery-ws') {
-            git url: 'https://dbmi-jenkins@github.com/dbmi-pitt/daquery-ws.git', branch: 'chuck-workspace', credentialsId: 'git-readonly'
+            git url: 'https://dbmi-jenkins@github.com/dbmi-pitt/daquery-ws.git', credentialsId: 'git-readonly'
             echo 'Building daquery-ws'
             sh "mvn -B -DskipTests clean install"
        }
@@ -33,13 +33,19 @@ node {
             sh '/opt/apache-tomcat-6.0.53/clean.sh'
             sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
             //delete the database at the filesystem level
+            //delete the files within the database directory
             sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
             //run the POJO Junit tests
             //This call also builds the database
             sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite" test'
-            sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
-            sleep 60
+            //sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
+            //sleep 60
             //sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test" test'
+            //POST-TEST CLEANUP
+            //delete the database at the filesystem level
+            //delete the files within the database directory
+            sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+             
                     
        }
 
@@ -47,3 +53,4 @@ node {
 
 
 }
+
