@@ -44,6 +44,7 @@ public class Network extends DaqueryObject implements Serializable {
 	@Column(name = "NAME", nullable=false, length=100)
 	private String name;
 
+	@Expose
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="DATA_MODEL_ID")
     private DataModel dataModel;

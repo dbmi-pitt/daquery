@@ -41,7 +41,6 @@ public class DataModel extends DaqueryObject implements Serializable
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="dataModel")
 	private Set<DataSource> dataSources;	
 
-	@Expose
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="dataModel")
 	private Set<DataAttribute> attributes;	
 	
