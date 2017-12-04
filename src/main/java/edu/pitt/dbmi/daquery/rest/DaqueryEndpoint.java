@@ -24,6 +24,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -313,17 +314,12 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			Network net = NetworkDAO.getNetworkById(request.getNetwork().getNetworkId());
 			request.setNetwork(net);
 			request.getInquiry().setNetwork(net);
-			
-			if(request.getRequester() == null)
-			{
-				String securityToken = httpHeaders.getHeaderString("Authorization");
-				Jws<Claims> claims = ResponseHelper.parseToken(securityToken);
-				//System.out.println("ISSUER: " + claims.getBody().getIssuer());
-				String userOrId = claims.getBody().getSubject();
-				DaqueryUser requester = DaqueryUserDAO.getUserByNameOrId(userOrId);
-				request.setRequester(requester);
-			}			
-			
+			String securityToken = httpHeaders.getHeaderString("Authorization");
+			Jws<Claims> claims = ResponseHelper.parseToken(securityToken);
+			//System.out.println("ISSUER: " + claims.getBody().getIssuer());
+			String userOrId = claims.getBody().getSubject();
+			DaqueryUser requester = DaqueryUserDAO.getUserByNameOrId(userOrId);
+				
 			if(request.getInquiry().getInquiryId() == null)
 				request.getInquiry().setInquiryId(UUID.randomUUID().toString());
 				
@@ -337,7 +333,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				if(request.getInquiry() == null)
 					return(ResponseHelper.getBasicResponse(400, "No inquiry provided."));
 				
-				DaqueryUser requester = DaqueryUserDAO.queryUserByID(requesterId);
 				if(requester == null)
 					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
 				
@@ -383,7 +378,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			else  //send to a remote site
 			{
 				AbstractDAO.save(request);
-				return postJSONToRemoteSite(requestSite, "request", request.toJson());
+				return postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 			}
 		}
 		catch(Throwable t)
@@ -459,13 +454,16 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	return Response.ok(201).entity(query.toJson()).build();   
     }
 	
-	private static Response postJSONToRemoteSite(Site site, String serviceName, String json)
+	private static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
 	{
 		Client client = ClientBuilder.newClient();
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
 		
-		Response resp = client.target(site.getUrl() + "daquery/ws/" + serviceName)
-						                    .request(MediaType.APPLICATION_JSON).post(ent);
+		Builder respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
+		if(securityToken != null)
+			respBuilder = respBuilder.header("Authorization", securityToken);
+		
+		Response resp  = respBuilder.post(ent);
 		
 		return(resp);
 	}
