@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.common.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
@@ -10,6 +11,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
@@ -17,7 +19,8 @@ import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public abstract class AbstractDAO {
 
-
+	private final static Logger log = Logger.getLogger(AbstractDAO.class.getName());
+	
     private Session currentSession;
     private Transaction currentTransaction;
 
@@ -57,6 +60,30 @@ public abstract class AbstractDAO {
 	currentTransaction = t;
     }
 
+	public static void save(DaqueryObject obj) throws DaqueryException
+	{
+		Session session = null;
+		Transaction t = null;
+		try
+		{
+			session = HibernateConfiguration.openSession();
+			t = session.beginTransaction();
+			session.saveOrUpdate(obj);
+			t.commit();
+		}
+		catch(Throwable tr)
+		{
+			if(t != null) t.rollback();
+			tr.printStackTrace();
+			String msg = "Unhandled exception while trying to save a daquery object.";
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryException(msg, tr);			
+		}
+		finally
+		{
+			if(session != null) session.close();
+		}
+	}    
     
 	/**
 	 * Very generic query method that returns a List of objects from the database.

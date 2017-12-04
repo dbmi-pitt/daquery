@@ -25,7 +25,6 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 
 @Entity
 @Table(name="DAQUERY_REQUEST")
@@ -85,6 +84,7 @@ public class DaqueryRequest extends DaqueryObject
 		
 	}
 	
+	@Expose
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="NETWORK_ID")
 	private Network network;

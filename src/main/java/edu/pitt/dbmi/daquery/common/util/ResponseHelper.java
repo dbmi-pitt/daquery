@@ -11,6 +11,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -26,21 +28,16 @@ public class ResponseHelper {
      * @param uuid- a user's uuid
      * @return a String representing the JWT for the user set to expire in 15 minutes.
      */
-    public static String issueToken(String uuid, UriInfo uriInfo) {
+    public static String issueToken(String userUuid, String siteUUID) {
         Key key = KeyGenerator.generateKey();
         Calendar date = Calendar.getInstance();
         long t=date.getTimeInMillis();
         //add fifteen minutes to current time to create
         //a token that expires in 15 minutes (15 * 60 milliseconds)
         Date fifteenMinuteExpiry = new Date(t + (15 * 60000));
-        String issuer;
-        if(uriInfo == null)
-        	issuer = "local-context";
-        else
-        	issuer = uriInfo.getAbsolutePath().toString();
         String jwtToken = Jwts.builder()
-                .setSubject(uuid)
-                .setIssuer(issuer)
+                .setSubject(userUuid)
+                .setIssuer(siteUUID)
                 .setIssuedAt(new Date())
                 .setExpiration(fifteenMinuteExpiry)
                 .signWith(SignatureAlgorithm.HS512, key)
@@ -50,6 +47,15 @@ public class ResponseHelper {
 
     }
     
+    public static Jws<Claims> parseToken(String jwtToken)
+    {
+    	String token = jwtToken.trim();
+    	if(token.toUpperCase().startsWith("BEARER"))
+    		token = token.substring(6).trim();
+		Jws<Claims> claims = Jwts.parser().setSigningKey(KeyGenerator.generateKey())
+		.parseClaimsJws(token);
+	    return(claims);
+    }
     
     /**
      * Returns a web response of 401 with a subcode of 401.2, which stands for
@@ -59,9 +65,9 @@ public class ResponseHelper {
      * @param uriInfo the URI information from the parent ws call
      * @return A ws Response object
      */
-    public static Response expiredPasswordResponse(String name, UriInfo uriInfo) throws DaqueryException
+    public static Response expiredPasswordResponse(String name, String siteUUID) throws DaqueryException
     {
-    	return(getTokenResponse(401, 2, name, uriInfo, null));
+    	return(getTokenResponse(401, 2, name, siteUUID, null));
     }
 
     /**
@@ -72,9 +78,9 @@ public class ResponseHelper {
      * @param uriInfo the URI information from the parent ws call
      * @return A ws Response object
      */
-    public static Response expiredTokenResponse(String name, UriInfo uriInfo) throws DaqueryException
+    public static Response expiredTokenResponse(String name, String siteUUID) throws DaqueryException
     {
-    	return(getTokenResponse(401, 4, name, uriInfo, null));
+    	return(getTokenResponse(401, 4, name, siteUUID, null));
     }
 
     /**
@@ -106,10 +112,10 @@ public class ResponseHelper {
      * 
      * @throws DaqueryException
      */
-    public static Response getTokenResponse(int responseCode, Integer subcode, String name, UriInfo uriInfo, Map<String, Object> additionalReturnValues) throws DaqueryException
+    public static Response getTokenResponse(int responseCode, Integer subcode, String name, String siteUUID, Map<String, Object> additionalReturnValues) throws DaqueryException
     {
         // Issue a token for the user
-        String token = ResponseHelper.issueToken(name, uriInfo);
+        String token = ResponseHelper.issueToken(name, siteUUID);
         HashMap<String, Object> vals = new HashMap<String, Object>();
         vals.put("token", token);
         if(additionalReturnValues != null)

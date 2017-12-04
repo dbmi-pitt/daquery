@@ -20,6 +20,7 @@ import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 
 
@@ -158,6 +159,44 @@ public class NetworkDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
             throw e;
         }
+    	finally
+    	{
+    		if(s != null) s.close();
+    	}
+    }
+    
+    public static Network getNetworkById(String networkId) throws DaqueryException
+    {
+    	if(StringHelper.isBlank(networkId)) return(null);
+    	Session s = null;
+    	try
+    	{
+    		s = HibernateConfiguration.openSession();
+    		String hql = "select n FROM Network n where n.networkId = '" + networkId + "'";
+    		Query q = s.createQuery(hql);
+    		List<Network> nets = q.list();
+    		if(nets.size() == 1)
+    			return(nets.get(0));
+    		else if(nets.size() == 0)
+    		{
+    			throw new DaqueryException("Network with id " + networkId + " is not found.");
+    		}
+    		else
+    		{
+    			throw new DaqueryException("Network with id " + networkId + " is found multiple times. (" + nets.size() + ")");
+    		}
+    	}
+    	catch(Throwable t)
+    	{
+    		String msg = "An unexpeced error occured while trying to retrieve a network with id " + networkId;
+    		logger.log(Level.SEVERE, msg, t);
+    		throw new DaqueryException(msg + "  Check the local server logs for more information.", t);
+    	}
+    	finally
+    	{
+    		if(s != null) s.close();
+    	}
+    	
     }
     
     public static SQLDataSource getSQLDataSourcebyNetworkId(Network network) throws DaqueryException {
