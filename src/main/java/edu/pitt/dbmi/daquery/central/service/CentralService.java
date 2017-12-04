@@ -82,22 +82,21 @@ public class CentralService{
 		
 		try
 		{
-			if(DBHelper.isSiteKeyTemp(siteNameOrKey))
+			Site site = SiteDAO.getSiteByNameOrId(siteNameOrKey);
+			if(site.isTempKey())
 			{
 				String newKey = DBHelper.getNewSiteKey(siteNameOrKey);
 
 				if (newKey == null)
 					throw new DaqueryCentralException(
 							"An unknown error while trying to generate a new site key. Check the central server log files for more information.");
-				
-				Site site = SiteDAO.getSiteByNameOrId(siteNameOrKey);
-				
+							
 				additionalVals = new HashMap<String, Object>();
 				additionalVals.put("new-site-key", newKey);
-				additionalVals.put("site-id", DBHelper.getSiteId(siteNameOrKey));
+				additionalVals.put("site-id", site.getSiteId());
 				additionalVals.put("site-url", site.getUrl());
 			}
-			return(ResponseHelper.getTokenResponse(200, null, siteNameOrKey, uriInfo, additionalVals));	
+			return(ResponseHelper.getTokenResponse(200, null, siteNameOrKey, site.getSiteId(), additionalVals));	
 		}
 		catch(Throwable dce)
 		{
