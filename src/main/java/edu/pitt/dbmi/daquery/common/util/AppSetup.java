@@ -234,8 +234,8 @@ public class AppSetup
 			
 			rs.close();
 			
-			String insertSQL = "insert into site (site_id, name, url, admin_email, status)"
-					+ "values ('" + siteId + "', '" + siteName + "', '" + url + "', '" + adminEmail + "', 'CONNECTED')";
+			String insertSQL = "insert into site (site_id, name, url, admin_email, status, tempkey)"
+					+ "values ('" + siteId + "', '" + siteName + "', '" + url + "', '" + adminEmail + "', 'CONNECTED', false)";
 			stat.executeUpdate(insertSQL);
 
 			return(true);
