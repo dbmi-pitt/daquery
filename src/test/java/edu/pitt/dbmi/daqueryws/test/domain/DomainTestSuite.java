@@ -1,6 +1,9 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -9,6 +12,8 @@ import java.util.logging.Logger;
 
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+
 
 @RunWith(Suite.class)
 
@@ -32,28 +37,28 @@ public class DomainTestSuite {
     @BeforeClass
     public static void init() {
     	AppProperties.setDevHomeDir(DomainTestSuite.databaseHomeDir);
-    	System.out.println(AppProperties.getConfDirectory());
+    	String siteName = "dq-test-site";
+    	String localSiteURL = "http://localhost:8008/";
+    	String adminEmail = "dqadmin@pitt.edu";
+    	String adminPassword = "temppassword";
+    	String adminRealName = "Test User";
     	try {
-    	System.out.println(AppProperties.getDBDir()); 
-    	} catch (Exception e) {
-    		System.out.println(e.getMessage());
-    	}
-    	rebuildDatabase();
+			assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), siteName, localSiteURL, adminEmail, adminPassword, adminRealName));
+			if(AppSetup.isErroredSetup())
+				throw new DaqueryException(AppSetup.getErrorMessage());
+			else if(!AppSetup.isValidSetup())
+				throw new DaqueryException("Invalid DB setup, but no error was reported.");
+	   	} catch (Exception e) {
+	    		System.out.println(e.getMessage());
+	    }
     }
     
-	public static void rebuildDatabase() {
-    	
-    	String siteUUID = 	UUID.randomUUID().toString().trim();
-		AppSetup.initialSetup(siteUUID, "testSite", "http://site.edu", "path@pitt.edu", "password", "Admin Name");
-		if(AppSetup.isErroredSetup())
-			System.err.println(AppSetup.getErrorMessage());
-		else if(AppSetup.isValidSetup())
-		{
-			System.out.println("All Good");
-		}
-		else
-			System.out.println("Invalid setup, but no error reported");
-	    
-	}
+    @Test
+    //I added this method because maven's surefire plugin does not like it
+    //if a test class does not contain at least one @Test annotation
+    public void dummyTest() {
+    	System.out.println("Dummy Test");
+    }
+    
 	
 }
