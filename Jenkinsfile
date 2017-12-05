@@ -36,11 +36,11 @@ node {
             //delete the files within the database directory
             sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
             //run the POJO Junit tests
-            //This call also builds the database
+            //This call also builds the database and added test data for the Rest tests
             sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite" test'
-            //sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
-            //sleep 60
-            //sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test" test'
+            sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
+            sleep 60
+            sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test" test'
             //POST-TEST CLEANUP
             //delete the database at the filesystem level
             //delete the files within the database directory
