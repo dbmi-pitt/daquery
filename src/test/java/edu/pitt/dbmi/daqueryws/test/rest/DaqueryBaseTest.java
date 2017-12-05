@@ -9,7 +9,6 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
-import edu.pitt.dbmi.daqueryws.test.domain.GenerateRestTestData;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
