@@ -319,10 +319,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			//System.out.println("ISSUER: " + claims.getBody().getIssuer());
 			String userOrId = claims.getBody().getSubject();
 			DaqueryUser requester = DaqueryUserDAO.getUserByNameOrId(userOrId);
-				
+			
+			request.setRequester(requester);
+			
 			if(request.getInquiry().getInquiryId() == null)
 				request.getInquiry().setInquiryId(UUID.randomUUID().toString());
-				
+			
+			
+			
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
 								
