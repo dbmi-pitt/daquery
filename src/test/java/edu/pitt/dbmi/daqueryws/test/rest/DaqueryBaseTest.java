@@ -82,13 +82,13 @@ public class DaqueryBaseTest {
     @AfterClass
     //It seems like some of the connections remain open after running the classes in the suite
     public static void tearDown() {
-    	try {
+    	/*try {
 	    	HibernateConfiguration.getSessionFactory().close();
     	} catch (Exception e) {
     		System.out.println(e.getMessage());
     		e.printStackTrace();
   
-    	}
+    	}*/
     }
 
 }
