@@ -42,8 +42,10 @@ import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
+import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
@@ -164,14 +166,17 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     	
     	DaqueryUser user = null;
+    	Site mySite = null;
     	try {
+    		
+    		mySite = SiteDAO.getLocalSite();
             logger.info("#### email : " + email);
             
             // Authenticate the user using the credentials provided
             user = DaqueryUserDAO.authenticate(email, password);
 
             if(DaqueryUserDAO.expiredPassword(user.getId()))
-                return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));
+                return(ResponseHelper.expiredPasswordResponse(user.getId(), mySite.getSiteId()));
             
             if (DaqueryUserDAO.accountDisabled(user.getId()))
                 return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
@@ -181,14 +186,15 @@ public class UserEndpoint extends AbstractEndpoint {
             Map<String, Object> extraObjs = new HashMap<String, Object>();
             extraObjs.put("user", currentUser);
             
-            Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), uriInfo, extraObjs);
+            Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), mySite.getSiteId(), extraObjs);
 
             return rVal;
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
             try {
-            	return(ResponseHelper.expiredTokenResponse(user.getId(), uriInfo));
+            	String siteId = (mySite == null)?null:mySite.getSiteId();
+            	return(ResponseHelper.expiredTokenResponse(user.getId(), siteId));
             } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);
@@ -424,9 +430,10 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	user.setPassword(updatedUser.getNewPassword());
 	        }
 	        
+	        Site mySite = SiteDAO.getLocalSite();
 	        //step 6: is the user's password expired?
 	        if (DaqueryUserDAO.expiredPassword(user.getId())) {
-	            return(ResponseHelper.expiredPasswordResponse(user.getId(), uriInfo));	        		        	
+	            return(ResponseHelper.expiredPasswordResponse(user.getId(), mySite.getSiteId()));	        		        	
 	        }
 	        
 	        //if you passed all the checks then update the User

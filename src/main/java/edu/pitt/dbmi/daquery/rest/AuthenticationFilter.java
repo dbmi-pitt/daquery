@@ -57,8 +57,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
-    @Context
-    private UriInfo uriInfo;
 
     /*This take a little explaining.
      * The securityContext is created during the AuthenticationFilter.filter method.
@@ -74,6 +72,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         //Principal principal = securityContext.getUserPrincipal();
         String username = "";
+        String siteId = null;
         /*
         if (principal != null) 
         	username = principal.getName();
@@ -117,16 +116,17 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         try {
 
             // Validate the token and extract the users UUID from the token
-            final String tokenUsername = validateToken(token);
-            if (!DaqueryUserDAO.isUserValid(tokenUsername)) {
+            final UserAndIssuer userAndIssuer = validateToken(token);
+            if (!DaqueryUserDAO.isUserValid(userAndIssuer.user)) {
             	throw new Exception("User account is not valid");
             }
             //just set this variable to throw an error
-            username = tokenUsername;
+            username = userAndIssuer.user;
+            siteId = userAndIssuer.issuer;
             
-            if (DaqueryUserDAO.expiredPassword(tokenUsername)) {
+            if (DaqueryUserDAO.expiredPassword(userAndIssuer.user)) {
             	try {
-            		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(tokenUsername, uriInfo));
+            		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(userAndIssuer.user, userAndIssuer.issuer));
             	} catch (Exception e) {
             		//if there are any problems, just throw an UNAUTHORIZED error
             		Response.status(Response.Status.UNAUTHORIZED).build();
@@ -145,7 +145,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
                         @Override
                         public String getName() {
-                            return tokenUsername;
+                            return userAndIssuer.user;
                         }
                         
                     };
@@ -154,7 +154,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 @Override
                 public boolean isUserInRole(String role) {
                 	try {
-                		return DaqueryUserDAO.hasRole(tokenUsername, role);
+                		return DaqueryUserDAO.hasRole(userAndIssuer.user, role);
                 	} catch (Exception e) {
                 		return false;
                 	}
@@ -173,7 +173,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
         	try {
-        		requestContext.abortWith(ResponseHelper.expiredTokenResponse(username, uriInfo));
+        		requestContext.abortWith(ResponseHelper.expiredTokenResponse(username, siteId));
         	} catch (Exception e) {
         		//if there are any problems, just throw an UNAUTHORIZED error
         		Response.status(Response.Status.UNAUTHORIZED).build();
@@ -194,7 +194,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
      * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
      */
-    private String validateToken(String token) throws Exception {
+    private UserAndIssuer validateToken(String token) throws Exception {
         // Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
     	logger.info("Trying to validate this token: " + token);
@@ -203,7 +203,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         try {
 	        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
 	        logger.info(claims.toString());
-	        return claims.getSubject();
+	        UserAndIssuer uai = new UserAndIssuer();
+	        uai.issuer = claims.getIssuer();
+	        uai.user = claims.getSubject();
+	        return uai;
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
         	//TODO: This needs to be reported back to the UI so it can handle it
@@ -225,6 +228,11 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      }
     
 
+    public class UserAndIssuer
+    {
+    	String user;
+    	String issuer;
+    }
     /**
      * Extract the roles granting permission to an annotated web service call.
      * For example, if a method is annotated like this:

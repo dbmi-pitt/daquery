@@ -95,6 +95,14 @@ public class DaqueryUserDAO extends AbstractDAO {
     	
     }
     
+    public static DaqueryUser getUserByNameOrId(String nameOrId) throws Exception
+    {
+    	DaqueryUser user = queryUserByID(nameOrId);
+    	if(user != null) return(user);
+    	else
+    		return(queryUserByUsername(nameOrId));
+    }
+    
     /**
      * A back-end call that uses the id/password combination to find the user's
      * account in the database.  Throws an error if the account cannot be verified.

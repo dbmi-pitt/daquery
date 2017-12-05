@@ -3,11 +3,13 @@ package edu.pitt.dbmi.daquery.rest;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,11 +24,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
@@ -47,14 +53,29 @@ import edu.pitt.dbmi.daquery.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
 {
 	private final static Logger log = Logger.getLogger(DaqueryEndpoint.class.getName());
 
+    @Context
+    private UriInfo uriInfo;
+    
+    @Context
+    SecurityContext securityContext;
+	
+	@Context HttpHeaders httpHeaders;
+	
 	public static void main (String [] args) throws Exception
 	{
+		Client client = ClientBuilder.newClient();
+		
+		Response rVal = client.target("http://localhost:8080/daquery-central/availableNetworks?site-id=20b23b5c-61ad-44eb-8eef-886adcced18e").request(MediaType.APPLICATION_JSON).get();
+		System.out.println(rVal);
+		//System.out.println(callCentralServerAuth("bill-dev", "abc123"));
 /*		InquiryRequest iq = PopulateDevData.createFullOutgoingRequest();
 		String json = iq.toJson();
 		System.out.println(json); */
@@ -75,9 +96,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return(false);
 	}
 	
-    @Context
-    private UriInfo uriInfo;
-    
 	@GET
 	@Path("/hello")
     @Produces(MediaType.TEXT_PLAIN)
@@ -227,7 +245,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
 			    	addtionalVal.put("user", currentUser);
-			    	return(ResponseHelper.getTokenResponse(200, null, currentUser.getId(), uriInfo, addtionalVal));
+			    	return(ResponseHelper.getTokenResponse(200, null, currentUser.getId(), siteId, addtionalVal));
 				}
 				else
 					return(ResponseHelper.getBasicResponse(500, "An error occured while initializing the application database. Check the application logs for more information."));
@@ -266,18 +284,52 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	@Path("request")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-	public static Response request(DaqueryRequest request) throws DaqueryException
+	public Response request(DaqueryRequest request) throws DaqueryException
 	{
 		try
 		{
 			if(request == null || request.getRequestSite() == null || request.getRequestSite().getSiteId() == null)
 				return(ResponseHelper.getBasicResponse(400, "A request site with a valid request site UUID is required."));
+
+			if(request.getNetwork() == null || StringHelper.isBlank(request.getNetwork().getNetworkId()))
+					return(ResponseHelper.getBasicResponse(400, "A request must specify a valid network with a network id"));
+			
+			if(request.getInquiry() == null ||
+			   request.getInquiry().getDataType() == null)
+					return(ResponseHelper.getBasicResponse(400, "A request must have a valid inquiry attached with associated data type and network id"));
+			
+			if(request.getRequestId() == null)
+				request.setRequestId(UUID.randomUUID().toString());
+
+			if(request.getInquiry().getInquiryId() == null)
+				request.getInquiry().setInquiryId(UUID.randomUUID().toString());
+			
 			
 			String requestSiteId = request.getRequestSite().getSiteId();
 			Site mySite = SiteDAO.getLocalSite();
 			
+			Site requestSite = SiteDAO.getSiteByNameOrId(requestSiteId);
+			request.setRequestSite(requestSite);
+			
+			Network net = NetworkDAO.getNetworkById(request.getNetwork().getNetworkId());
+			request.setNetwork(net);
+			request.getInquiry().setNetwork(net);
+			String securityToken = httpHeaders.getHeaderString("Authorization");
+			Jws<Claims> claims = ResponseHelper.parseToken(securityToken);
+			//System.out.println("ISSUER: " + claims.getBody().getIssuer());
+			String userOrId = claims.getBody().getSubject();
+			DaqueryUser requester = DaqueryUserDAO.getUserByNameOrId(userOrId);
+			
+			request.setRequester(requester);
+			
+			if(request.getInquiry().getInquiryId() == null)
+				request.getInquiry().setInquiryId(UUID.randomUUID().toString());
+			
+			
+			
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
+								
 				if(request == null || request.getRequester() == null || request.getRequester().getId() == null || StringHelper.isEmpty(request.getRequester().getId()))
 					return(ResponseHelper.getBasicResponse(400, "An Inquery request with a valid requster user object is required."));
 	
@@ -285,7 +337,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				if(request.getInquiry() == null)
 					return(ResponseHelper.getBasicResponse(400, "No inquiry provided."));
 				
-				DaqueryUser requester = DaqueryUserDAO.queryUserByID(requesterId);
 				if(requester == null)
 					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
 				
@@ -301,7 +352,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				DaqueryResponse rVal = null;
 				try
 				{
-					Network net = NetworkDAO.getNetworkForIncomingSite(request.getRequestSite());
 					ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
 					QueueManager.getNamedQueue("main").addTask(task);
 					rVal = task.getResponse();
@@ -331,8 +381,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			}
 			else  //send to a remote site
 			{
-				Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
-				return postJSONToRemoteSite(remoteSite, "request", request.toJson());
+				AbstractDAO.save(request);
+				return postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 			}
 		}
 		catch(Throwable t)
@@ -408,13 +458,16 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	return Response.ok(201).entity(query.toJson()).build();   
     }
 	
-	private static Response postJSONToRemoteSite(Site site, String serviceName, String json)
+	private static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
 	{
 		Client client = ClientBuilder.newClient();
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
 		
-		Response resp = client.target(site.getUrl() + "daquery/ws/" + serviceName)
-						                    .request(MediaType.APPLICATION_JSON).post(ent);
+		Builder respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
+		if(securityToken != null)
+			respBuilder = respBuilder.header("Authorization", securityToken);
+		
+		Response resp  = respBuilder.post(ent);
 		
 		return(resp);
 	}
