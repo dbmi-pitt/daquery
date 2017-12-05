@@ -14,13 +14,20 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	private boolean countFound = false;
 	private boolean firstResultFound = false;
 	
+	public static void main(String [] args)
+	{
+		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(patid) from demographic");
+		
+	}
+	
 	public AggregateSQLAnalyzer(String sql)
 	{
 		super(sql);
-		analyzeTree();
+		if(!this.isRejected())
+			analyzeAggregateTree();
 	}
 	
-	private void analyzeTree()
+	private void analyzeAggregateTree()
 	{
 		analyzeNode(topNode, 1);
 		if(! countFound)
