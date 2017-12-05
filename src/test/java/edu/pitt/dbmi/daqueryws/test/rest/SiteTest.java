@@ -7,9 +7,11 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
+
 public class SiteTest extends DaqueryBaseTest {
 
-	private String siteTestUUID = "fb7aa4e1-35e7-45a7-aa05-d50691439652";
+	private String siteTestUUID = "";
 	
 	private long testNetworkID = 1;
 	
@@ -36,7 +38,7 @@ public class SiteTest extends DaqueryBaseTest {
 	public void findByIdTest() {
 		given().with().contentType("application/json")
 		.headers("Authorization", "Bearer " + currentToken)
-		.pathParam("id", siteTestUUID)
+		.pathParam("id", DomainTestSuite.testSiteUUID1)
 		.when().get("sites/{id}").then().statusCode(200);
 	}
 
