@@ -31,7 +31,7 @@ public class DaqueryBaseTest {
 		
     @BeforeClass
     public static void setup() {
-    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+    	//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
     	
     	
         String port = System.getProperty("server.port");
