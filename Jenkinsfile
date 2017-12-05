@@ -39,7 +39,7 @@ node {
             //This call also builds the database and added test data for the Rest tests
             sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite" test'
             sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
-            sleep 60
+            sleep 20
             sh 'mvn "-Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test" test'
             //POST-TEST CLEANUP
             //delete the database at the filesystem level
