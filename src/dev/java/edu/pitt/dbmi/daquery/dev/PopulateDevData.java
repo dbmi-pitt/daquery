@@ -40,8 +40,8 @@ public class PopulateDevData
 {
 	public static void main(String [] args) throws Exception
 	{
-		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		AppProperties.setDevHomeDir("/home/devuser/dq-data");
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+//		AppProperties.setDevHomeDir("/home/devuser/dq-data");
 /*		assembleRequest();
 		Session s = HibernateConfiguration.openSession();
 		Query q = s.createQuery("select r from DaqueryRequest r");
@@ -74,6 +74,8 @@ public class PopulateDevData
 		
 		DaqueryRequest r = assembleOutgoingRequest();
 		System.out.println("Request Id = : " + r.getRequestId());
+		System.out.println("Network Id = : " + r.getNetwork().getNetworkId());
+		System.out.println("From Site Id = : " + r.getRequestSite().getSiteId());
 		System.exit(0);
 	}
 	
