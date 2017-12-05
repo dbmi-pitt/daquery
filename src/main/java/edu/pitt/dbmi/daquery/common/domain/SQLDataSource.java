@@ -97,7 +97,6 @@ public class SQLDataSource extends DataSource
 		{
 			ApplicationDBHelper.closeConnection(conn, s, rs);
 		}
-		
 	}
 	
 	private Long getSourceKey()
