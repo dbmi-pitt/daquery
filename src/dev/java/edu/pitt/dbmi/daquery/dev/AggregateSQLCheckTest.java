@@ -16,7 +16,8 @@ public class AggregateSQLCheckTest
 		//printParse("select aliasA.col1 as alias1, tableA.col2 alias2 from tableA aliasA, where mySchema.tableA.col2 = 7 and (aliasA.col3 = '5' or col4 = 6)");
 		
 //		evaluate ("crap crap crap");
-		evaluate("select count(abcd.xycd.blec) from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc'; select x from y;");
+		evaluate("select count(patid) from demographic;");
+//		evaluate("select count(abcd.xycd.blec) from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc'; select x from y;");
 /*		//fail because more than one result is returned
 		evaluate("select count(distinct abcd.xycd.blec as mmmmm), aasdf from schemaA.tableA ta, (select xyz from tableB) as tb  where tableA.x = 1.2 and b.y = 'abc';");
 		
