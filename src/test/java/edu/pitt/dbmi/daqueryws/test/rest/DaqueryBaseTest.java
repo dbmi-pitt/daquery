@@ -31,7 +31,6 @@ public class DaqueryBaseTest {
 		
     @BeforeClass
     public static void setup() {
-    	//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
     	
     	
         String port = System.getProperty("server.port");
@@ -79,16 +78,4 @@ public class DaqueryBaseTest {
 	
 
 	
-    @AfterClass
-    //It seems like some of the connections remain open after running the classes in the suite
-    public static void tearDown() {
-    	/*try {
-	    	HibernateConfiguration.getSessionFactory().close();
-    	} catch (Exception e) {
-    		System.out.println(e.getMessage());
-    		e.printStackTrace();
-  
-    	}*/
-    }
-
 }
