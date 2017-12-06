@@ -30,7 +30,8 @@ export class AddNetworkComponent implements OnInit {
       network: ['', Validators.required],
       url: ['', Validators.required],
       username: ['', Validators.required],
-      password: ['', Validators.required]
+      password: ['', Validators.required],
+      driver:  ['', Validators.required]
     })
   }
 
@@ -38,6 +39,7 @@ export class AddNetworkComponent implements OnInit {
   get url() { return this.joinNetworkForm.get('url'); }
   get username() { return this.joinNetworkForm.get('username'); }
   get password() { return this.joinNetworkForm.get('password'); }
+  get driver() { return this.joinNetworkForm.get('driver'); }
 
   getAvailableNetworks(){
     this.networkServier.getAvailableNetworks()
@@ -50,7 +52,7 @@ export class AddNetworkComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     if(this.joinNetworkForm.valid){
-      const selectedNetwork = this.availableNetworks.find(e => e.id === this.joinNetworkForm.value.network);
+      const selectedNetwork = this.availableNetworks.find(e => e.networkId === this.joinNetworkForm.value.network);
       this.networkServier.joinNetwork({"form": this.joinNetworkForm.value, "network": selectedNetwork})
                         .subscribe(data => {
                           this.newNetwork.emit(data);

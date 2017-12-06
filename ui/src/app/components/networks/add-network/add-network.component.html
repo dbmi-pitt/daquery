@@ -8,7 +8,7 @@
             <label for="available-networks">Available Networks</label>
             <select formControlName="network" class="form-control">
               <option value="">-Select-</option>
-              <option *ngFor="let network of availableNetworks" value="{{ network.id }}">
+              <option *ngFor="let network of availableNetworks" value="{{ network.networkId }}">
                 {{ network.name }}
               </option>
             </select>
@@ -16,19 +16,24 @@
           </div>
           <hr />
           <div class="form-group has-feedback" [ngClass]="{'has-error': url.invalid && (submitted || url.dirty || url.touched), 'has-success': url.valid && (submitted || url.dirty || url.touched) }">
-            <label>Datamodel URL</label>
-            <input type="text" formControlName="url" class="form-control" name="url" placeholder="Datamodel URL">
-            <div class="help-block" *ngIf="url.invalid && (submitted || url.dirty || url.touched)">Please enter the datamodel url</div>
+            <label>Data source URL</label>
+            <input type="text" formControlName="url" class="form-control" name="url" placeholder="Data source URL">
+            <div class="help-block" *ngIf="url.invalid && (submitted || url.dirty || url.touched)">Please enter the Data source url</div>
           </div>
           <div class="form-group has-feedback" [ngClass]="{'has-error': username.invalid && (submitted || username.dirty || username.touched), 'has-success': username.valid && (submitted || username.dirty || username.touched) }">
-            <label>Datamodel Username</label>
-            <input type="text" formControlName="username" class="form-control" name="username" placeholder="Datamodel Username">
-            <div class="help-block" *ngIf="username.invalid && (submitted || username.dirty || username.touched)">Please enter the datamodel username</div>
+            <label>Data source Username</label>
+            <input type="text" formControlName="username" class="form-control" name="username" placeholder="Data source Username">
+            <div class="help-block" *ngIf="username.invalid && (submitted || username.dirty || username.touched)">Please enter the Data source username</div>
           </div>
           <div class="form-group has-feedback" [ngClass]="{'has-error': password.invalid && (submitted || password.dirty || password.touched), 'has-success': password.valid && (submitted || password.dirty || password.touched) }">
-            <label>Datamodel Password</label>
-            <input type="password" formControlName="password" class="form-control" name="password" placeholder="Datamodel Password">
+            <label>Data source Password</label>
+            <input type="password" formControlName="password" class="form-control" name="password" placeholder="Data source Password">
             <div class="help-block" *ngIf="password.invalid && (submitted || password.dirty || password.touched)">Please enter the datamodel password</div>
+          </div>
+          <div class="form-group has-feedback" [ngClass]="{'has-error': driver.invalid && (submitted || driver.dirty || driver.touched), 'has-success': driver.valid && (submitted || driver.dirty || driver.touched) }">
+            <label>Data source Driver</label>
+            <input type="driver" formControlName="driver" class="form-control" name="driver" placeholder="Data source driver">
+            <div class="help-block" *ngIf="driver.invalid && (submitted || driver.dirty || driver.touched)">Please enter the data source driver</div>
           </div>
           <button class="btn btn-primary">Join</button>
         </form>

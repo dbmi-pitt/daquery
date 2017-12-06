@@ -17,6 +17,8 @@ export class DataSourceComponent implements OnInit {
   submitted = false;
   network_id: number;
   network: any = null;
+  datamodel: any = null;
+  sqldatasource: any = null;
   datasourceForm: FormGroup;
   constructor(private siteService: SiteService,
               private networkService: NetworkService,
@@ -27,8 +29,10 @@ export class DataSourceComponent implements OnInit {
     this.activatedRoute.params.subscribe(async (params: Params) => {
       this.network_id = params['id'];
       this.getNetwork(this.network_id);
+      this.getDatamodel(this.network_id);
+      await this.getSqlDatasource(this.network_id);
+      this.createForm();
     });
-    this.createForm();
   }
 
   createForm() {
@@ -45,13 +49,27 @@ export class DataSourceComponent implements OnInit {
   get password() { return this.datasourceForm.get('password'); }
   get driver() { return this.datasourceForm.get('driver'); }
 
-  getNetwork(id: number): Promise<any>{
-    return new Promise((resolve, reject) => {
+  getNetwork(id: number){
       this.networkService.getNetwork(id)
                          .subscribe(network => {
-                          this.network = network;
-                          resolve();
+                            this.network = network;
+                          });
+  }
+
+  getDatamodel(network_id: number) {
+    this.networkService.getDatamodel(network_id)
+                       .subscribe(datamodel => {
+                          this.datamodel = datamodel;
                        });
+  }
+
+  getSqlDatasource(network_id: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.networkService.getSqlDatasource(network_id)
+                        .subscribe(sqldatasource => {
+                            this.sqldatasource = sqldatasource;
+                            resolve();
+                        });
     });
   }
 

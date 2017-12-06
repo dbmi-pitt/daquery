@@ -22,7 +22,9 @@ export class NetworksComponent implements OnInit {
 
   getNetworks() {
     this.networkService.getNetworks()
-                       .subscribe(networks => this.networks = networks);
+                       .subscribe(networks => {
+                         this.networks = networks
+                        });
   }
 
   toggleJoinNetwork(){

@@ -17,5 +17,4 @@ export class QueriesFromMeComponent implements OnInit {
     this.editingInquiry = inquiry;
     this.showNewQuery = true;
   }
-
 }

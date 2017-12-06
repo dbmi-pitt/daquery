@@ -28,6 +28,22 @@ export class NetworkService {
                       return Observable.throw(error || 'Server error');
                     });
   }
+
+  getDatamodel(network_id: number): Observable<any> {
+    return this.http.get(`/daquery/ws/networks/${network_id}/datamodel`)
+                    .catch(error => {
+                      this.error.message = error.message;
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
+
+  getSqlDatasource(network_id: number): Observable<any> {
+    return this.http.get(`/daquery/ws/networks/${network_id}/sqldatasource`)
+                    .catch(error => {
+                      this.error.message = error.message;
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
   
   createNetwork(networkForm: any): Observable<Network> {
     return this.http.post('/daquery/ws/networks', networkForm)

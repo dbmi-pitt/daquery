@@ -7,72 +7,77 @@
       <div class="box-body">
         <div class="row">
           <div class="col-md-12">
-            <form [formGroup]="queryForm" (submit)="onSubmit()">
-              <div class="form-group">
-                <label for="network">Network</label>
-                <select formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
-                  <option value="">-Select-</option>
-                  <option *ngFor="let network of networks">
-                    {{ network.name }}
-                  </option>
-                </select>
-              </div>
-              <div *ngIf="queryForm.controls.network.dirty" formArrayName="sitesToQuery" class="well well-lg">
+            <form [formGroup]="queryForm">
+              <div *ngIf="!showNetworkSitePanel">
                 <div class="form-group">
-                  <label for="sites">Site to Query</label>
-                  <div class="checkbox">
-                    <ul class="list-unstyled">
-                      <li *ngFor="let site of queryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
-                        <label class="checkbox-inline"><input type="checkbox" value="" formControlName="check">{{site.controls.name._value}}</label>
+                  <label for="dataType">Data Type</label>
+                  <div class="radio">
+                    <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="aggregate">Aggregate</label>
+                    <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="data">Data</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="name">Query Name</label>
+                  <input type="text" class="form-control" id="query-name" formControlName="queryName">
+                </div>
+                <div class="form-group">
+                  <label for="name">Study Name</label>
+                  <input type="text" class="form-control" id="study-name" formControlName="studyName">
+                </div>
+                <div class="form-group">
+                  <label for="name">Query Description</label>
+                  <input type="text" class="form-control" id="query-description" formControlName="queryDescription">
+                </div>
+                <div class="form-group">
+                  <label for="query">SQL</label>
+                  <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                      <li class="active">
+                        <a href="#tab_1" data-toggle="tab" aria-expanded="true">SQL Query</a>
                       </li>
+                      <!-- <li>
+                        <a href="#tab_2" data-toggle="tab" aria-expanded="true">SQL Server Query</a>
+                      </li> -->
                     </ul>
-                  </div>
-                </div>
-              </div> 
-              <div class="form-group">
-                <label for="dataType">Data Type</label>
-                <div class="radio">
-                  <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="aggregate">Aggregate</label>
-                  <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="data">Data</label>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="name">Query Name</label>
-                <input type="text" class="form-control" id="query-name" formControlName="queryName">
-              </div>
-              <div class="form-group">
-                <label for="name">Study Name</label>
-                <input type="text" class="form-control" id="study-name" formControlName="studyName">
-              </div>
-              <div class="form-group">
-                <label for="name">Query Description</label>
-                <input type="text" class="form-control" id="query-description" formControlName="queryDescription">
-              </div>
-              <div class="form-group">
-                <label for="query">SQL</label>
-                <div class="nav-tabs-custom">
-                  <ul class="nav nav-tabs">
-                    <li class="active">
-                      <a href="#tab_1" data-toggle="tab" aria-expanded="true">Oracle Query</a>
-                    </li>
-                    <li>
-                      <a href="#tab_2" data-toggle="tab" aria-expanded="true">SQL Server Query</a>
-                    </li>
-                  </ul>
-                  <div class="tab-content">
-                    <div class="tab-pane active" id="tab_1">
-                      <textarea class="form-control" rows="5" id="oracle_query" formControlName="oracleQuery" placeholder="enter your Oracle PL/SQL query"></textarea>
-                    </div>
-                    <div class="tab-pane" id="tab_2">
-                      <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery" placeholder="enter your SQL Server T/SQL query"></textarea>
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="tab_1">
+                        <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery" placeholder="enter ANSI SQL query"></textarea>
+                      </div>
+                      <!-- <div class="tab-pane" id="tab_2">
+                        <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery" placeholder="enter your SQL Server T/SQL query"></textarea>
+                      </div> -->
                     </div>
                   </div>
                 </div>
+                <button class="btn btn-primary" (click)="onSave()">Save</button>
+                <button class="btn btn-success" (click)="onRequest()">Request</button>
               </div>
-              <button class="btn btn-default">Test Local</button>
-              <button class="btn btn-primary">Save</button>
-              <button class="btn btn-success">Send Request</button>
               <p>{{ queryForm.value | json }}</p>
+              <div *ngIf="showNetworkSitePanel">
+                <div class="form-group">
+                  <label for="network">Network</label>
+                  <select formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
+                    <option value="">-Select-</option>
+                    <option *ngFor="let network of networks" value="{{network.networkId}}">
+                      {{ network.name }}
+                    </option>
+                  </select>
+                </div>
+                <div *ngIf="queryForm.controls.network.dirty" formArrayName="sitesToQuery" class="well well-lg">
+                  <div class="form-group">
+                    <label for="sites">Site to Query</label>
+                    <div class="checkbox">
+                      <ul class="list-unstyled">
+                        <li *ngFor="let site of queryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
+                          <label class="checkbox-inline"><input type="checkbox" value="{{site.controls.siteId._value}}" formControlName="check">{{site.controls.name._value}}</label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-default" (click)="onRequest()">Go Back</button>
+                <button class="btn btn-success" (click)="onSend()">Send</button>
+              </div>
             </form>
           </div>
         </div>

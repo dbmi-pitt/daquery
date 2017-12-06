@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from 'rxjs/Observable';
-import { Site } from '../models/site.model';
 import { Network } from '../models/network.model';
 import { AuthenticationService } from './authentication.service';
 import { Error } from '../_globals/error';
@@ -18,14 +17,14 @@ export class SiteService {
               private error: Error) { }
 
   sites = [];
-  getSite(id: number): Observable<Site> {
+  getSite(id: number): Observable<any> {
     return this.http.get(`/daquery/ws/sites/${id}`, this.authenticationService.jwt())
                     .catch(error => {
                       return Observable.throw(error || 'Server error');
                     })
   }
 
-  getSites(network: Network): Observable<Site[]> {
+  getSites(network: Network): Observable<any[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
                                    .set("type", "outgoing");
 
@@ -46,7 +45,7 @@ export class SiteService {
                     });
   }
 
-  getIncomingSites(network: Network): Observable<Site[]> {
+  getIncomingSites(network: Network): Observable<any[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
                                    .set("type", "incoming");
 
@@ -57,7 +56,7 @@ export class SiteService {
                     });
   }
 
-  getOutgoingSites(network: Network): Observable<Site[]> {
+  getOutgoingSites(network: Network): Observable<any[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
                                    .set("type", "outgoing");
 
@@ -68,7 +67,7 @@ export class SiteService {
                     });
   }
 
-  getPendingSites(network: Network): Observable<Site[]> {
+  getPendingSites(network: Network): Observable<any[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
                                    .set("type", "pending");
 
@@ -79,7 +78,7 @@ export class SiteService {
                     });
   }
 
-  requestConnectSite(siteForm: any): Observable<Site> {
+  requestConnectSite(siteForm: any): Observable<any> {
     return this.http.post('/daquery/ws/sites?type=outgoing', siteForm)
                     .catch(error => {
                       this.error.message = error.message;

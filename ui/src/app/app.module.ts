@@ -4,8 +4,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
-import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
-import { MomentModule } from 'angular2-moment';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JWTInterceptor } from './services/interceptors/jwt-interceptor'
 import { ResInterceptor } from './services/interceptors/res-interceptor'
@@ -20,6 +18,9 @@ import { UserService } from './services/user.service';
 import { NetworkService } from './services/network.service';
 import { NotificationService } from './services/notification.service';
 import { SetupService } from './services/setup.service';
+
+// custom pipe
+import { MapValuesPipe } from './pipes/Iteratable.pipe';
 
 // custom validator
 import { EqualValidator } from './validators/equal-validator.directive';
@@ -60,6 +61,10 @@ import { Step3Component } from './components/setup/step3/step3.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { DataSourceComponent } from './components/networks/network/data-source/data-source.component';
 
+// External Libs
+import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
+import { MomentModule } from 'angular2-moment';
+
 @NgModule({
   declarations: [
     EqualValidator,
@@ -96,7 +101,8 @@ import { DataSourceComponent } from './components/networks/network/data-source/d
     Step2Component,
     Step3Component,
     ChangePasswordComponent,
-    DataSourceComponent
+    DataSourceComponent,
+    MapValuesPipe,
   ],
   imports: [
     BrowserModule,

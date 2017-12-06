@@ -23,34 +23,35 @@
     <caption>Requests</caption>
     <thead>
       <tr>
-        <th>Request ID</th>
+        <th>Request Group ID</th>
         <th>Type</th>
         <th>Date/Time</th>
-        <th>Status</th>
       </tr>
     </thead>
-    <tbody *ngFor="let request of requests">
+    <tbody *ngFor="let requestGroup of (requestGroups | mapValues)">
       <tr>
-        <td><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !request.active, 'fa-minus-square-o': request.active}" (click)="request.active = !request.active"></i> {{request.request_id}}</td>
-        <td>{{request.type}}</td>
-        <td>{{request.datetime}}</td>
+        <td><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}" (click)="requestGroup.active = !requestGroup.active"></i> {{requestGroup.key}}</td>
+        <td>{{ requestGroup.val[0].direction }}</td>
+        <td>{{ requestGroup.val[0].responses[0].replyTimestamp }}</td>
         <td></td>
       </tr>
-      <tr *ngIf="request.active">
+      <tr *ngIf="requestGroup.active">
         <td colspan="4">
           <table class="table table-condensed table-striped">
             <thead>
               <tr>
+                <th>Request ID</th>
                 <th>Site</th>
                 <th>Status</th>
                 <th>Result</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let response of request.responses">
-                <td>{{response.site}}</td>
-                <td>{{response.status}}</td>
-                <td>{{response.result}}</td>
+              <tr *ngFor="let request of requestGroup.val">
+                <td>{{ request.requestId }}</td>
+                <td>{{ request.requestSite.name }}</td>
+                <td>{{ request.responses[0].status }}</td>
+                <td>{{ request.responses[0].result }}</td>
               </tr>
             </tbody>
           </table>
