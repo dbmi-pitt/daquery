@@ -69,6 +69,7 @@ public class DaqueryRequest extends DaqueryObject
     @JoinColumn(name = "INQUIRY_ID")
     private Inquiry inquiry;
     
+    @Expose
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="request")
 	private Set<DaqueryResponse> responses;
 		

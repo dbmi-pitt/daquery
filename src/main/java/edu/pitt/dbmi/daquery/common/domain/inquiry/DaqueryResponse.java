@@ -67,8 +67,7 @@ public class DaqueryResponse extends DaqueryObject
     @Column(name="SITE_ID", insertable = false, updatable = false)
     private String siteId;
     
-    @Expose
-    @ManyToOne(fetch=FetchType.EAGER)
+    @ManyToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
     @JoinColumn(name="REQID")
     private DaqueryRequest request;
     
