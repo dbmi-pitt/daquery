@@ -103,7 +103,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 
             Network network = NetworkDAO.queryNetwork(String.valueOf(network_id));
             if(type.equals("outgoing")) {
-            	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network_id)));
+            	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network.getId())));
             }
             else if(type.equals("incoming"))
             	return(ResponseHelper.getJsonResponseGen(200, network.getIncomingQuerySites()));

@@ -329,7 +329,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
-								
+				request.setDirection("OUT");
 				if(request == null || request.getRequester() == null || request.getRequester().getId() == null || StringHelper.isEmpty(request.getRequester().getId()))
 					return(ResponseHelper.getBasicResponse(400, "An Inquery request with a valid requster user object is required."));
 	

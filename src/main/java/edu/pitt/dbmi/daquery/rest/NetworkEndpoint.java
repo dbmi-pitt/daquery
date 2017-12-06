@@ -147,7 +147,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
     public Response joinNetwork(LinkedHashMap<?, ?> payload) {
     	try {
 
-            logger.info("#### joining network by uuid=" + ((LinkedHashMap<?, ?>)payload.get("network")).get("id"));
+            logger.info("#### joining network by id=" + ((LinkedHashMap<?, ?>)payload.get("form")).get("network"));
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -156,7 +156,8 @@ public class NetworkEndpoint extends AbstractEndpoint {
             HashMap<String, String> network_params = new HashMap<>();
             network_params.put("id", ((LinkedHashMap<?, ?>)payload.get("network")).get("id").toString());
             network_params.put("name", ((LinkedHashMap<?, ?>)payload.get("network")).get("name").toString());
-            network_params.put("data_model", ((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
+            //network_params.put("data_model", ((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
+            network_params.put("data_model", "temp");
             
             HashMap<String, String> sqldatasource_params = new HashMap<>();
             sqldatasource_params.put("url", ((LinkedHashMap<?, ?>)payload.get("form")).get("url").toString());
@@ -176,7 +177,8 @@ public class NetworkEndpoint extends AbstractEndpoint {
             Set<DataSource> dsset = new HashSet<DataSource>();
             
             DataModel dModel = new DataModel(true);
-            dModel.setName(((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
+            //dModel.setName(((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
+            dModel.setName("temp");
             dsset.add(sqlDataSource);
             
             dModel.setDataSources(dsset);
