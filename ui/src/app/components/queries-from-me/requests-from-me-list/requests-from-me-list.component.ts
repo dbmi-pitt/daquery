@@ -3,7 +3,7 @@ import { RequestService } from '../../../services/request.service';
 import { Observable } from 'rxjs/Observable';
 import { forEach } from '@angular/router/src/utils/collection';
 import { environment } from '../../../../environments/environment';
-import { MapValuesPipe } from '../../../pipes/Iteratable.pipe';
+import { MapValuesPipe } from '../../../pipes/iteratable.pipe';
 
 @Component({
   selector: 'app-requests-from-me-list',

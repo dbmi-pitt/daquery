@@ -20,7 +20,7 @@ import { NotificationService } from './services/notification.service';
 import { SetupService } from './services/setup.service';
 
 // custom pipe
-import { MapValuesPipe } from './pipes/Iteratable.pipe';
+import { MapValuesPipe } from './pipes/iteratable.pipe';
 
 // custom validator
 import { EqualValidator } from './validators/equal-validator.directive';
