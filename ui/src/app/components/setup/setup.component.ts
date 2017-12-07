@@ -57,6 +57,9 @@ export class SetupComponent implements OnInit {
                         } else if(error.status === 500){
                           this.loading = false;
                           this.error = "Unexpected error occurs on server side."
+                        } else if(error.status === 404){
+                          this.loading = false;
+                          this.error = "Please double check you application.properties file to make sure central.server.url is set correctly."
                         }
                       });
   }

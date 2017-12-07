@@ -51,7 +51,7 @@
                 <td>{{ request.requestId }}</td>
                 <td>{{ request.requestSite.name }}</td>
                 <td>{{ request.responses[0].status }}</td>
-                <td>{{ request.responses[0].result }}</td>
+                <td>{{ request.responses[0].value }} <i *ngIf="!['ERROR', 'COMPLETED'].includes(request.responses[0].status)" class="fa fa-refresh fa-spin fa-1x fa-fw"></i></td>
               </tr>
             </tbody>
           </table>

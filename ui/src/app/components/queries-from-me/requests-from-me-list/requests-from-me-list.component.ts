@@ -1,5 +1,6 @@
 import { Component, OnInit,  EventEmitter, Output } from '@angular/core';
 import { RequestService } from '../../../services/request.service';
+import { ResponseService } from '../../../services/response.service';
 import { Observable } from 'rxjs/Observable';
 import { forEach } from '@angular/router/src/utils/collection';
 import { environment } from '../../../../environments/environment';
@@ -18,7 +19,8 @@ export class RequestsFromMeListComponent implements OnInit {
   requests: any[];
   inquires: any[];
   requestGroups: Map<String, any[]>;
-  constructor(private requestService: RequestService) { 
+  constructor(private requestService: RequestService,
+              private responseService: ResponseService) { 
   }
 
   ngOnInit() {
@@ -35,31 +37,30 @@ export class RequestsFromMeListComponent implements OnInit {
                          this.requests.forEach((request) => {
                            if(self.requestGroups.has(request.requestGroup)){
                              self.requestGroups.get(request.requestGroup).push(request);
-                             if(!['ERROR', 'COMPLETED'].includes(request.responses[0].status)){
-                                let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
-                                  console.log("calling " + request.response.id );
-                                  // if reutrn status in ['ERROR', 'COMPLETED'], stop interval
-                                  subscription.unsubscribe();
-                                  console.log("unsubscribed");
-                                })
-                             }
                            } else {
                              self.requestGroups.set(request.requestGroup, []);
                              self.requestGroups.get(request.requestGroup).push(request);
-                             if(!['ERROR', 'COMPLETED'].includes(request.responses[0].status)){
-                              let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
-                                console.log("calling " + request.response.id );
-                                // if reutrn status in ['ERROR', 'COMPLETED'], stop interval
-                                subscription.unsubscribe();
-                                console.log("unsubscribed");
-                              })
-                           }
                            }
                          });
+
+                         this.requests.forEach((request) => {
+                          let response = request.responses[0];
+                          if(!['ERROR', 'COMPLETED'].includes(response.status)){
+                             let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
+                               console.log("calling " + response.id );
+                               this.responseService.getResponse(response.responseId)
+                                                   .subscribe(res => {
+                                                     response.status = res.status;
+                                                     response.value = res.value;
+                                                     if(['ERROR', 'COMPLETED'].includes(response.status)){
+                                                       subscription.unsubscribe();
+                                                       console.log("unsubscribed");
+                                                     }
+                                                   });
+                             })
+                          }
                         });
-    //this.requestGroups = new Map([["1111", [0, 1]], ["2222", [1,2]]]);
-    // this.requestGroups.set("11111", []);
-    // this.requestGroups.get("11111").push([1,2,3]);
+                        });
   }
 
   getSavedInquiries(){

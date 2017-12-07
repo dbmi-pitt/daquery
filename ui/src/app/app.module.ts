@@ -13,6 +13,7 @@ import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
 import { AuthenticationService } from './services/authentication.service';
 import { RequestService } from './services/request.service';
+import { ResponseService } from './services/response.service';
 import { SiteService } from './services/site.service';
 import { UserService } from './services/user.service';
 import { NetworkService } from './services/network.service';
@@ -119,6 +120,7 @@ import { MomentModule } from 'angular2-moment';
               Error,
               AuthenticationService,
               RequestService,
+              ResponseService,
               SiteService,
               UserService,
               NetworkService,

@@ -18,6 +18,7 @@ export class NewQueryComponent implements OnInit {
   networks: any[];
 
   showNetworkSitePanel = false;
+  onSending = false;
 
   constructor(private fb: FormBuilder,
               private networkService: NetworkService,
@@ -69,6 +70,7 @@ export class NewQueryComponent implements OnInit {
   }
 
   onSend(){
+    this.onSending = true;
     const requestGroupUUID = this.generateUUID();
     this.queryForm.value.sitesToQuery.forEach((site) => {
       const request = {
