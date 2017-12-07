@@ -74,7 +74,8 @@ public class SQLQuery extends Inquiry
 					response.setStatusEnum(ResponseStatus.ERROR);
 					response.setErrorMessage("A SQL data source attached to data model " + getNetwork().getDataModel().getName() + " was not found.");
 				}
-				String sql = "select count(patid) from demographic;";
+				//String sql = "select count(patid) from demographic;";
+				String sql = ((SQLQuery) response.getRequest().getInquiry()).getCode();
 				response.setValue(ds.executeAggregate(sql).toString());
 				response.setStatusEnum(ResponseStatus.COMPLETED);
 			}

@@ -47,6 +47,7 @@ public class DaqueryResponse extends DaqueryObject
     @Expose
 	private String status;
 	
+    @Expose
 	@Column(name="RESPONSE_VALUE")
 	private String value;
 	
