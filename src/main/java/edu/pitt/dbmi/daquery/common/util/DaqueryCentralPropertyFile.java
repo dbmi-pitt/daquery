@@ -27,7 +27,7 @@ public class DaqueryCentralPropertyFile extends DaqueryXMLPropertyFile {
 		{
 			try
 			{
-				AppProperties.setDevHomeDir("C:\\Users\\del20");
+//				AppProperties.setDevHomeDir("C:\\Users\\del20");
 				propFilename = AppProperties.getHomeDirectory() + "\\conf\\daquery.xml";
 				inst = new DaqueryCentralPropertyFile();
 			}

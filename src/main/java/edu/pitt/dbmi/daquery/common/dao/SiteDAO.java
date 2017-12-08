@@ -131,6 +131,32 @@ public class SiteDAO extends AbstractDAO {
         }
     }
     
+    /** Get sites by network_id
+     *  @param network_id
+     *  @return List<Site>
+     * @throws Exception 
+     */
+    public static List<Site> queryConnectedIncomingSitesByNetworkId(long network_id) throws Exception{
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+			
+			String sql = "SELECT s.* FROM SITE as s JOIN INCOMING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='CONNECTED' and n.id = :network_id";
+			Query query = s.createSQLQuery(sql)
+						   .addEntity(Site.class)
+						   .setParameter("network_id", network_id);
+			
+			List result = query.list();
+    		
+	        return result;
+	    
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+    
     public long createSite(Site site) throws Exception {
     	return (Long) getCurrentSession().save(site);
     }

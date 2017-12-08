@@ -68,7 +68,8 @@ public class Site extends DaqueryObject implements Serializable {
 	@Expose
 	@Column(name= "ADMIN_EMAIL", nullable=false, length=500)
 	private String adminEmail;
-
+	
+	@Expose
 	@Column(name= "STATUS", nullable=false, length=500)
 	private String status;
 	
