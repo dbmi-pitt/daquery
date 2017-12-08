@@ -98,7 +98,7 @@ public class NetworkDAO extends AbstractDAO {
     		
     		Network network = new Network();
     		network.setName(params.get("name"));
-    		network.setNetworkId(params.get("id"));
+    		network.setNetworkId(params.get("network_id"));
     		network.setDataModel(dataModel);
     		
     		s.persist(network);
