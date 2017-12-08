@@ -119,6 +119,36 @@ public class DBHelper
 	}
 	
 	/**
+	 * Get a site by siteId
+	 * 
+	 * @param sitename The name of the site.
+	 * @return The database id of the site.				Query q2 = sess.createQuery(queryString)
+
+	 * @throws DaqueryCentralException
+	 */
+	public static Site getSite(String siteId) throws DaqueryCentralException
+	{
+		try
+		{
+			Site site = SiteDAO.querySiteByID(siteId);
+			return site;
+			
+		}
+		catch(Throwable t)
+		{
+			if(t instanceof DaqueryCentralException)
+				throw (DaqueryCentralException) t;
+			else
+			{
+				String msg = "An error occured while looking up a site id with siteId: " + siteId;
+				log.log(Level.SEVERE, msg, t);
+				throw new DaqueryCentralException(msg, t);
+			}
+		}
+
+	}
+	
+	/**
 	 * Generate a new key for a site and update the site record in the application db with this key.
 	 * @param siteNameOrId
 	 * @return The newly generated key.
@@ -271,5 +301,64 @@ public class DBHelper
 	}
 	
 	
+	/**
+	 * Get sites waiting for response
+	 * @param <ConnectionRequestStatus>
+	 * @param String siteId
+	 * @throws DaqueryCentralException
+	 */
+	public static List<Site> getPendingSites(String networkId, String siteId, ConnectionRequestStatus status) throws DaqueryCentralException{
+		String sql = "select s.* from site s join connection_request cr on s.id = cr.from_site_id where cr.network_id = ? and cr.to_site_id = ? and cr.status = ?";
+		
+		Session sess = null;
+		
+		try {
+			sess = HibernateConfiguration.openSession();
+			SQLQuery q = sess.createSQLQuery(sql);
+			List<Site> sites = q.list();
+			
+			return sites;
+		} catch(Throwable t) {
+			String msg = "An unexpected error occurred while geting pending sites with site_id: " + siteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			if(sess != null) sess.close();
+		}
+	}
+	
+	/**
+	 * Approve connection request
+	 * @param String networkId
+	 * @param String fromSiteId
+	 * @param String toSiteId
+	 * @throws DaqueryCentralException
+	 */
+	public static boolean updateConnectionRequest(String networkId, String fromSiteId, String toSiteId, String status) throws DaqueryCentralException{
+		String sql = "update connection_request set status = ? where network_id = ? and from_site_id = ? and to_site_id = ?";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, status);
+			ps.setString(2, networkId);
+			ps.setString(3, fromSiteId);
+			ps.setString(4, toSiteId);
+			int rows = ps.executeUpdate();
+			
+			if(rows == 1)
+				return true;
+			else
+				throw new Exception();
+		} catch(Throwable t) {
+			String msg = "An unexpected error occurred while approving connection request, network_id: " + networkId + " from_site_id: " + fromSiteId + " to_site_id: " + toSiteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, null);
+		}
+	}
 
 }
