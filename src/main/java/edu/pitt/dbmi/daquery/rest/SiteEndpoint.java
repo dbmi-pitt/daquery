@@ -47,6 +47,8 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.rest.util.KeystoreAlias;
+import edu.pitt.dbmi.daquery.rest.util.WSConnectionUtil;
 
 
 @Path("/sites")
@@ -570,5 +572,24 @@ public class SiteEndpoint extends AbstractEndpoint {
     		
     	}
     	
+    }
+    
+    @GET
+    @Path("/getKeystoreAliases")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getKeystoreAliasList() {
+    	String json = "[]";
+    	HashMap<String, List<KeystoreAlias>> retMap = new HashMap<String, List<KeystoreAlias>>();
+    	//KeystoreAliasList retList = new KeystoreAliasList();
+    	try {
+    		List<KeystoreAlias>retList = WSConnectionUtil.getAliasList();
+    		retMap.put("aliases", retList);
+    		json = JSONHelper.toJSON(retMap);
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		Response.status(500).build();
+    	}
+        return Response.ok(200).entity(json).build();
     }
 }
