@@ -34,14 +34,15 @@
         <restassured.version>3.0.3</restassured.version>
         <javaxjson.version>1.0.4</javaxjson.version>
         <derby.version>10.12.1.1</derby.version>
+        <config.version>1.2.1</config.version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <ui_project.Directory>../daquery/ui</ui_project.Directory>
         
         <!-- This is only temporary.  
         //TODO:  We need to find a way to launch
-        RestAssured tests automatically 
-        <maven.test.skip>true</maven.test.skip> --> 
+        RestAssured tests automatically -->
+        <maven.test.skip>true</maven.test.skip>  
     </properties>
 	
     <dependencies>
@@ -231,6 +232,13 @@
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>${hibernate.version}</version> 
 		</dependency>
+		
+		<dependency>
+		    <groupId>com.typesafe</groupId>
+		    <artifactId>config</artifactId>
+		    <version>${config.version}</version>
+		</dependency>
+		
 	    
 	    <dependency>
 		   	<groupId>edu.pitt.dbmi.daquery</groupId>
