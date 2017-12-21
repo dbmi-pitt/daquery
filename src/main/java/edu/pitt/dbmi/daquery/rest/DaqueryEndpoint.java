@@ -403,7 +403,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	if(StringHelper.isBlank(id))
     		return(ResponseHelper.getBasicResponse(400, "Response id required."));
     	
-    	if(ResponseDAO.containsId(id))
+    	if(!ResponseDAO.containsId(id))
     		return(ResponseHelper.getBasicResponse(404, "A response with id:" + id + " was not found."));
     	
     	DaqueryResponse rVal = null;
