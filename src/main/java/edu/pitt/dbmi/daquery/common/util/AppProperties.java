@@ -96,6 +96,11 @@ public class AppProperties
 		return(ApplicationPropertiesFile.getPropertiesFromFile().getProperty("initialization.ddl.file"));
 	}
 	
+	public static String getKeystorePath()
+	{
+		return(ApplicationPropertiesFile.getPropertiesFromFile().getProperty("keystore.path"));
+	}
+	
 	public static boolean setupAdminUser()
 	{
 		String doit = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("setup.admin.user");
