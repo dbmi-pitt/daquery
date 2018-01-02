@@ -106,7 +106,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network.getId())));
             }
             else if(type.equals("incoming"))
-            	return(ResponseHelper.getJsonResponseGen(200, network.getIncomingQuerySites()));
+            	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network.getId())));
             else if(type.equals("pending")) {
                 Map<String, String> idParam = new HashMap<String, String>();
                 idParam.put("network-id", network.getNetworkId());

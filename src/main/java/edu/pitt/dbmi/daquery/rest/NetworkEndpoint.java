@@ -155,6 +155,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             
             HashMap<String, String> network_params = new HashMap<>();
             network_params.put("id", ((LinkedHashMap<?, ?>)payload.get("network")).get("id").toString());
+            network_params.put("network_id", ((LinkedHashMap<?, ?>)payload.get("form")).get("network").toString());
             network_params.put("name", ((LinkedHashMap<?, ?>)payload.get("network")).get("name").toString());
             //network_params.put("data_model", ((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
             network_params.put("data_model", "temp");
