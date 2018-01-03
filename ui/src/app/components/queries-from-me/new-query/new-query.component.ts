@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
 export class NewQueryComponent implements OnInit {
 
   @Input() editingInquiry: any;
-  queryForm: FormGroup;
+  inquiryForm: FormGroup;
   networks: any[];
 
   showNetworkSitePanel = false;
@@ -28,24 +28,24 @@ export class NewQueryComponent implements OnInit {
 
   createForm(inquiry) {
     if(inquiry){
-      this.queryForm = this.fb.group({
+      this.inquiryForm = this.fb.group({
         network: new FormControl('', Validators.required),
         sitesToQuery: this.fb.array([]),
         dataType: new FormControl('aggregate'),
-        queryName: 'continue edit inquiry',
+        inquiryName: 'continue edit inquiry',
         studyName: '',
-        queryDescription: '',
+        inquiryDescription: '',
         oracleQuery: '',
         sqlQuery: ''
       });
     } else {
-      this.queryForm = this.fb.group({
+      this.inquiryForm = this.fb.group({
         network: new FormControl('', Validators.required),
         sitesToQuery: this.fb.array([]),
         dataType: new FormControl('aggregate'),
-        queryName: '',
+        inquiryName: '',
         studyName: '',
-        queryDescription: '',
+        inquiryDescription: '',
         oracleQuery: '',
         sqlQuery: ''
       });
@@ -59,7 +59,7 @@ export class NewQueryComponent implements OnInit {
   }
 
   onSave() {
-    this.requestService.saveInquires(this.queryForm.value)
+    this.requestService.saveInquires(this.inquiryForm.value)
                        .subscribe(data => {
                           console.log(data);
                        });
@@ -72,20 +72,20 @@ export class NewQueryComponent implements OnInit {
   onSend(){
     this.onSending = true;
     const requestGroupUUID = this.generateUUID();
-    this.queryForm.value.sitesToQuery.forEach((site) => {
+    this.inquiryForm.value.sitesToQuery.forEach((site) => {
       const request = {
         requestSite: {
           siteId: site.siteId,
         },
         network: {
-          networkId: this.queryForm.value.network
+          networkId: this.inquiryForm.value.network
         },
         requestGroup: requestGroupUUID,
         inquiry: {
           version: 1,
           dataType: 'SQL_QUERY',
           aggregate: true,
-          code: this.queryForm.value.sqlQuery
+          code: this.inquiryForm.value.sqlQuery
         }
       };
 
@@ -100,13 +100,13 @@ export class NewQueryComponent implements OnInit {
   networkOnChange(value){
     let network = this.networks.find(n => n.networkId === value);
     if(network === undefined) {
-      this.queryForm.setControl('sitesToQuery', this.fb.array([]));
+      this.inquiryForm.setControl('sitesToQuery', this.fb.array([]));
     } else {
       this.siteService.getSites(network)
                       .subscribe(sites => {
                         const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
                         const siteFormArray = this.fb.array(siteFGs);
-                        this.queryForm.setControl('sitesToQuery', siteFormArray);
+                        this.inquiryForm.setControl('sitesToQuery', siteFormArray);
                       });
     }
   }

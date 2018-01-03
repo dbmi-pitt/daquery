@@ -3,14 +3,14 @@
     <caption>Inquiries</caption>
     <thead>
       <tr>
-        <th>Inquiry ID</th>
+        <th>Inquiry Name</th>
         <th>Type</th>
         <th>Date/Time</th>
       </tr>
     </thead>
-    <tbody *ngFor="let inquiry of inquires">
+    <tbody *ngFor="let inquiry of inquiries">
       <tr>
-        <td>{{inquiry.inquiry_id}}</td>
+        <td>{{inquiry.inquiryName}}</td>
         <td>{{inquiry.type}}</td>
         <td>{{inquiry.datetime}}</td>
         <td>

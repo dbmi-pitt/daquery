@@ -67,91 +67,39 @@ export class RequestService {
                       this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
-    // const requests = [
-    //   {'id': 1,
-    //    'request_id': '11111111-61ad-44eb-8eef-886adcced18e',
-    //    'request_site_id': '11111111-61ad-44eb-ssss-886adcced18e',
-    //    'sent_timestamp': '2012-04-23T18:25:43.511Z',
-    //    'requester_id': '11111111-61ad-44eb-uuuu-886adcced18e',
-    //    'inquiry_id': 1,
-    //    'direction': 'OUT',
+  }
+
+  getSavedInquiries(): Observable<any[]> {
+    return this.http.get('/daquery/ws/inquiries')
+                    .catch(error => {
+                      this.error.message = error.message;
+                      return Observable.throw(error || 'Server error');
+                    });
+
+    // const inquires = [
+    //   {'id': 3,
+    //    'inquiry_id': '33333333-61ad-44eb-8eef-886adcced18e',
+    //    'version': 1,
+    //    'inquiry_type': 'SQL',
+    //    'AUTHOR_ID': '33333333-61ad-44eb-aaaa-886adcced18e',
     //    'network': {
     //      'id': 1,
     //      'name': 'devALL'
-    //     },
-    //    'request_group': '11111111-61ad-44eb-8eef-886adcced1g1',
-    //    'response': {
-    //      'id': 1,
-    //      'status': 'IN QUEUE',
-    //      'result': ''
     //    }
     //   },
-    //   {'id': 2,
-    //   'request_id': '22222222-61ad-44eb-8eef-886adcced18e',
-    //   'request_site_id': '22222222-61ad-44eb-ssss-886adcced18e',
-    //   'sent_timestamp': '2012-04-23T18:25:43.511Z',
-    //   'requester_id': '22222222-61ad-44eb-uuuu-886adcced18e',
-    //   'inquiry_id': 2,
-    //   'direction': 'OUT',
+    //   {'id': 4,
+    //   'inquiry_id': '44444444-61ad-44eb-8eef-886adcced18e',
+    //   'version': 1,
+    //   'inquiry_type': 'SQL',
+    //   'AUTHOR_ID': '44444444-61ad-44eb-aaaa-886adcced18e',
     //   'network': {
     //     'id': 1,
     //     'name': 'devALL'
-    //     },
-    //   'request_group': '11111111-61ad-44eb-8eef-886adcced1g1',
-    //   'response': {
-    //     'id': 2,
-    //     'status': 'COMPLETED',
-    //     'result': '12'
     //   }
-    //   },
-    //   {'id': 3,
-    //   'request_id': '33333333-61ad-44eb-8eef-886adcced18e',
-    //   'request_site_id': '33333333-61ad-44eb-ssss-886adcced18e',
-    //   'sent_timestamp': '2012-04-23T18:25:43.511Z',
-    //   'requester_id': '33333333-61ad-44eb-uuuu-886adcced18e',
-    //   'inquiry_id': 3,
-    //   'direction': 'OUT',
-    //   'network': {
-    //     'id': 1,
-    //     'name': 'devALL'
-    //     },
-    //   'request_group': '11111111-61ad-44eb-8eef-886adcced1g2',
-    //   'response': {
-    //     'id': 3,
-    //     'status': 'IN QUEUE',
-    //     'result': ''
-    //   }
-    //   }
+    //  }
     // ];
 
-    // return Observable.of(requests);
-  }
-
-  getSavedInquires(): Observable<any[]> {
-    const inquires = [
-      {'id': 3,
-       'inquiry_id': '33333333-61ad-44eb-8eef-886adcced18e',
-       'version': 1,
-       'inquiry_type': 'SQL',
-       'AUTHOR_ID': '33333333-61ad-44eb-aaaa-886adcced18e',
-       'network': {
-         'id': 1,
-         'name': 'devALL'
-       }
-      },
-      {'id': 4,
-      'inquiry_id': '44444444-61ad-44eb-8eef-886adcced18e',
-      'version': 1,
-      'inquiry_type': 'SQL',
-      'AUTHOR_ID': '44444444-61ad-44eb-aaaa-886adcced18e',
-      'network': {
-        'id': 1,
-        'name': 'devALL'
-      }
-     }
-    ];
-
-    return Observable.of(inquires);
+    // return Observable.of(inquires);
   }
 
   saveInquires(inquiry: any) {

@@ -30,7 +30,7 @@
         <input type="password" formControlName="adminpwd" class="form-control" name="admin-pwd" placeholder="Admin Password" validateEqual="adminpwd_confirmation" reverse="true" />
         <span class="fa fa-lock form-control-feedback"></span>
         <div class="help-block" *ngIf="adminpwd.hasError('required') && (adminpwd.dirty || adminpwd.touched)">Please enter a password</div>
-        <div class="help-block" *ngIf="adminpwd.hasError('minlength') && (adminpwd.dirty || adminpwd.touched)">Password at least 4 characters</div>
+        <div class="help-block" *ngIf="adminpwd.hasError('minlength') && (adminpwd.dirty || adminpwd.touched)">Password at least 8 characters</div>
       </div>
       <div class="form-group has-feedback" [ngClass]="{'has-error': adminpwd_confirmation.invalid && (adminpwd_confirmation.dirty || adminpwd_confirmation.touched), 'has-success': adminpwd_confirmation.valid && (adminpwd_confirmation.dirty || adminpwd_confirmation.touched) }">
         <input type="password" formControlName="adminpwd_confirmation" class="form-control" name="admin-pwd_confirmation" placeholder="Retype Admin Password" validateEqual="adminpwd" reverse="false" />
@@ -46,7 +46,7 @@
       <div class="row">
         <div class="col-xs-12">
           <button [disabled]="loading" class="btn btn-primary btn-block btn-flat">
-            {{ loading ? 'Application initialling, please wait...' : 'Initial Daquery Application' }}
+            {{ loading ? 'Application initialling, please wait...' : 'Initialize Daquery' }}
           </button>
         </div>
       </div>

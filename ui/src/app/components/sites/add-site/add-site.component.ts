@@ -56,10 +56,10 @@ export class AddSiteComponent implements OnInit {
       this.connectSiteForm.controls["admin_email"].setValidators(Validators.required);
       this.connectSiteForm.controls["admin_email"].updateValueAndValidity();
     } else if (this.connectSiteForm.controls["site"].value !== 'new'){
-      const site = this.sites.find(x => x.id === this.connectSiteForm.controls["site"].value);
-      this.connectSiteForm.controls["name"].setValue(site.siteName);
+      const site = this.sites.find(x => x.siteId === this.connectSiteForm.controls["site"].value);
+      this.connectSiteForm.controls["name"].setValue(site.name);
       this.connectSiteForm.controls["name"].updateValueAndValidity();
-      this.connectSiteForm.controls["url"].setValue(site.siteURL);
+      this.connectSiteForm.controls["url"].setValue(site.url);
       this.connectSiteForm.controls["url"].updateValueAndValidity();
       this.connectSiteForm.controls["admin_email"].setValue(site.adminEmail);
       this.connectSiteForm.controls["admin_email"].updateValueAndValidity();

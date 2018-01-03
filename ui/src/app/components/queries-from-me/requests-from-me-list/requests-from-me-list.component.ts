@@ -17,8 +17,8 @@ export class RequestsFromMeListComponent implements OnInit {
   editInquiry = new EventEmitter<any>();
 
   requests: any[];
-  inquires: any[];
-  requestGroups: Map<String, any[]>;
+  inquiries: any[];
+  requestGroups: Map<String, any[]> = new Map<String, any[]>();
   constructor(private requestService: RequestService,
               private responseService: ResponseService) { 
   }
@@ -64,8 +64,8 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   getSavedInquiries(){
-    this.requestService.getSavedInquires()
-                       .subscribe(inquires => this.inquires = inquires);
+    this.requestService.getSavedInquiries()
+                       .subscribe(inquiries => this.inquiries = inquiries);
   }
 
   onEditClick(inquiry: any){

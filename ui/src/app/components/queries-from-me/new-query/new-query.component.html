@@ -2,12 +2,12 @@
   <div class="col-md-12">
     <div class="box box-info">
       <div class="box-header with-border">
-        <h3 class="box-title">New Query</h3>
+        <h3 class="box-title">New Inquiry</h3>
       </div>
       <div class="box-body">
         <div class="row">
           <div class="col-md-12">
-            <form [formGroup]="queryForm">
+            <form [formGroup]="inquiryForm">
               <div *ngIf="!showNetworkSitePanel">
                 <div class="form-group">
                   <label for="dataType">Data Type</label>
@@ -17,16 +17,16 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="name">Query Name</label>
-                  <input type="text" class="form-control" id="query-name" formControlName="queryName">
+                  <label for="name">Inquiry Name</label>
+                  <input type="text" class="form-control" id="inquiry-name" formControlName="inquiryName">
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                   <label for="name">Study Name</label>
                   <input type="text" class="form-control" id="study-name" formControlName="studyName">
-                </div>
+                </div> -->
                 <div class="form-group">
-                  <label for="name">Query Description</label>
-                  <input type="text" class="form-control" id="query-description" formControlName="queryDescription">
+                  <label for="name">Inquiry Description</label>
+                  <input type="text" class="form-control" id="inquiry-description" formControlName="inquiryDescription">
                 </div>
                 <div class="form-group">
                   <label for="query">SQL</label>
@@ -52,7 +52,7 @@
                 <button class="btn btn-primary" (click)="onSave()">Save</button>
                 <button class="btn btn-success" (click)="onRequest()">Request</button>
               </div>
-              <p>{{ queryForm.value | json }}</p>
+              <p>{{ inquiryForm.value | json }}</p>
               <div *ngIf="showNetworkSitePanel">
                 <div class="form-group">
                   <label for="network">Network</label>
