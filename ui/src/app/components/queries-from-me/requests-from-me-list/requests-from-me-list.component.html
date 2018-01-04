@@ -9,9 +9,10 @@
       </tr>
     </thead>
     <tbody *ngFor="let inquiry of inquiries">
+      {{inquiry | json}}
       <tr>
         <td>{{inquiry.inquiryName}}</td>
-        <td>{{inquiry.type}}</td>
+        <td>{{inquiry.dataType}}</td>
         <td>{{inquiry.datetime}}</td>
         <td>
           <button class="btn btn-primary" (click)="onEditClick(inquiry)">Continue edit</button>

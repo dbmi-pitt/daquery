@@ -2,8 +2,6 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Study Name</th>
         <th>Query Name</th>
         <th>Type</th>
         <th>From</th>
@@ -15,8 +13,6 @@
     </thead>
     <tbody>
       <tr *ngFor="let request of requests">
-        <td>{{request.request+id}}</td>
-        <td>{{request.studyName}}</td>
         <td><a [routerLink]="['/review-query', request.id]">{{request.name}}</a></td>
         <td>{{request.type}}</td>
         <td>{{request.site}}-{{request.username}}</td>

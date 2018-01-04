@@ -5,9 +5,9 @@
   <div class="row">
     <div class="col-sm-12 col-md-4 placeholder">
       <button class="btn btn-default btn-app" (click)="toggleJoinNetwork()">
-          <i class="fa fa-sign-in"></i>Join Network</button>
-      <button class="btn btn-default btn-app" (click)="toggleCreateNetwork()">
-          <i class="fa fa-edit"></i>Create Network</button>
+          <i class="fa fa-sign-in"></i>Join New Network</button>
+      <!-- <button class="btn btn-default btn-app" (click)="toggleCreateNetwork()">
+          <i class="fa fa-edit"></i>Create Network</button> -->
     </div>
   </div>
   <app-add-network *ngIf="showJoinNetwork" (newNetwork)="addNewNetwork($event)"></app-add-network>
@@ -17,8 +17,8 @@
       <div class="col-md-12">
         <div class="box box-default">
           <div class="box-header with-border">
-            <h3 class="box-title"><a [routerLink]="['/networks', network.id]">{{network.name}}</a></h3>
-
+            <h3 class="box-title">{{network.name}}</h3> <small>Description of the network</small>
+            <a class="btn btn-link" [routerLink]="['/networks', network.id]">Edit Sites</a>
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
               </button>
@@ -27,7 +27,9 @@
           </div>
           <!-- /.box-header -->
           <div class="box-body">
-            Description of the network
+            <ul>
+              <li *ngFor="let site of network.sites">{{ site.name }} {{ site.direction }}</li>
+            </ul>
           </div>
           <!-- /.box-body -->
         </div>
