@@ -308,7 +308,7 @@ public class DBHelper
 	 * @throws DaqueryCentralException
 	 */
 	public static List<Site> getPendingSites(String networkId, String siteId, ConnectionRequestStatus status) throws DaqueryCentralException{
-		String sql = "select s.* from site s join connection_request cr on s.id = cr.from_site_id where cr.network_id = ? and cr.to_site_id = ? and cr.status = ?";
+		String sql = "select s.* from site s join connection_request cr on s.id = cr.from_site_id where cr.network_id = '" + networkId + "' and cr.to_site_id = '" + siteId + "' and trim(upper(cr.status)) = '" + status.name().trim().toUpperCase() + "'";
 		
 		Session sess = null;
 		
