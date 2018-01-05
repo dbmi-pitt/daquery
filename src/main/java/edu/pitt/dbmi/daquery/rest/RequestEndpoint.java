@@ -171,6 +171,8 @@ public class RequestEndpoint extends AbstractEndpoint {
 		            inquiry.setAuthor(currentUser);
 		            inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network").toString()));
 		            inquiry.setVersion(1);
+		            inquiry.setInquiryName(form.get("inquiryName").toString());
+		            inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
 		            ((SQLQuery) inquiry).setCode(form.get("oracleQuery").toString());
 		            request.setInquiry(inquiry);
 		            dao.save(request);
