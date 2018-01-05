@@ -74,7 +74,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             
             InquiryDAO dao = new InquiryDAO();
             dao.openCurrentSession();
-            List inquiries = dao.list();
+            List inquiries = dao.listSavedInquiries();
             dao.closeCurrentSession();
             
             String jsonString = toJsonArray(inquiries);
@@ -155,6 +155,8 @@ public class InquiryEndpoint extends AbstractEndpoint {
             inquiry.setAuthor(currentUser);
             inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network").toString()));
             inquiry.setVersion(1);
+            inquiry.setInquiryName(form.get("inquiryName").toString());
+            inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
             ((SQLQuery) inquiry).setCode(form.get("oracleQuery").toString());
             dao.save(inquiry);
             dao.closeCurrentSessionwithTransaction();
