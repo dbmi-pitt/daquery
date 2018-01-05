@@ -56,6 +56,12 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	private String inquiryId;
 	
 	@Expose
+	private String inquiryName;
+	
+	@Expose 
+	private String inquiryDescription;
+	
+	@Expose
 	private int version;	
 	
 	@Expose
@@ -91,6 +97,14 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Column(name = "INQUIRY_ID", unique = true, length=50)
 	public String getInquiryId(){return(inquiryId);}
 	public void setInquiryId(String id){inquiryId = id;}	
+	
+	@Column(name = "INQUIRY_NAME", length=50)
+	public String getInquiryName(){return(inquiryName);}
+	public void setInquiryName(String name){inquiryName = name;}
+	
+	@Column(name = "INQUIRY_DESCRIPTION", length=50)
+	public String getInquiryDescription(){return(inquiryDescription);}
+	public void setInquiryDescription(String desc){inquiryDescription = desc;}
 	
 	public int getVersion(){return(version);}
 	public void setVersion(int vers){version = vers;}
