@@ -129,20 +129,38 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	/** Get a list of networks with associated sites from the central server that 
 	 *  have not yet been set up for this site to query from.
 	 *  
+	 *  @param only-non-connected-networks - An optional parameter to exclude any
+	 *                                       networks (and associated sites, whether
+	 *                                       connected or not) that are already connected.
+	 *                                       Valid values are "true" or "yes".  Any other
+	 *                                       value or the absence of this parameter will 
+	 *                                       trigger returning all networks.
+	 *  
 	 * @return A list of NetworkInfo objects encoded as json
 	 */
     @Secured("ADMIN")
     @GET
     @Path("/available-networks-to-query/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response availableNetworks() {
+    public Response availableNetworks(@DefaultValue("false") @PathParam("only-non-connected-networks") String nonConnectedNetsOnly) {
+    	boolean nonConnNetsOnly = false;
+    	List<String> connectedNetworkIds = new ArrayList<String>();
     	try
     	{
+    		String c = nonConnectedNetsOnly.trim().toUpperCase();
+    		if(c.equals("YES") || c.equals("TRUE")) nonConnNetsOnly = true;
+    		
 			Map<String, String> idParam = new HashMap<String, String>();
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
 			Response resp = callCentralServer("availableNetworks",  idParam);
 			if(resp.getStatus() == 200)
 			{
+				if(nonConnNetsOnly)
+				{
+					List<Network> nets = NetworkDAO.queryAllNetworks();
+					for(Network net : nets)
+						connectedNetworkIds.add(net.getNetworkId());
+				}
 				String json = resp.readEntity(String.class);
 				Network[] ninfo = JSONHelper.gson.fromJson(json, Network[].class);
 				DaqueryEndpoint de = new DaqueryEndpoint();
@@ -150,20 +168,26 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				List<Site> sitesToRemove = new ArrayList<Site>();
 				for(Network nin : ninfo)
 				{
-					for(Site si : nin.getOutgoingQuerySites())
+					if(! connectedNetworkIds.contains(nin.getNetworkId()))
 					{
-						if(containsSiteWhoIQuery(nets, si.getSiteId()))
-							sitesToRemove.add(si);
+						for(Site si : nin.getOutgoingQuerySites())
+						{
+							if(containsSiteWhoIQuery(nets, si.getSiteId()))
+								sitesToRemove.add(si);
+						}
+						for(Site sr : sitesToRemove)
+						{
+							nin.getOutgoingQuerySites().remove(sr);
+						}
+						sitesToRemove.clear();
 					}
-					for(Site sr : sitesToRemove)
-					{
-						nin.getOutgoingQuerySites().remove(sr);
-					}
-					sitesToRemove.clear();
 				}
 				List<Network> rlist = new ArrayList<Network>();
 				for(Network n : ninfo)
-					rlist.add(n);
+				{
+					if(! connectedNetworkIds.contains(n.getNetworkId()))
+						rlist.add(n);
+				}
 				return(ResponseHelper.getJsonResponseGen(200, rlist));
 			}
 			else
