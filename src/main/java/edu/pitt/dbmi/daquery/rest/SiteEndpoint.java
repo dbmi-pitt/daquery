@@ -47,6 +47,7 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.rest.util.KeystoreAlias;
 import edu.pitt.dbmi.daquery.rest.util.WSConnectionUtil;
 
@@ -412,8 +413,18 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response approveConnectRequest(LinkedHashMap<?, ?> object) {
-    	String networkId = object.get("network_id").toString();
-    	String fromSiteId = object.get("from_site_id").toString();
+    	if(object == null)
+    		return(ResponseHelper.getBasicResponse(400, "network_id and from_site_id are required parameters."));
+    	Object netObj = object.get("network_id");
+    	if(netObj == null || StringHelper.isBlank(netObj.toString()))
+    		return(ResponseHelper.getBasicResponse(400, "network_id is a required parameter."));
+    	Object fromSiteObj = object.get("from_site_id");
+    	if(fromSiteObj == null || StringHelper.isBlank(fromSiteObj.toString()))
+    		return(ResponseHelper.getBasicResponse(400, "from_site_id is a required parameter."));
+    		
+    	String networkId = netObj.toString();
+    	String fromSiteId = fromSiteObj.toString();
+    	
     	Session s = null;
     	try {
     		// tell daquery central you approve this site
