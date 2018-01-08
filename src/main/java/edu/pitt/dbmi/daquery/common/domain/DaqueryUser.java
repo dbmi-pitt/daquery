@@ -162,7 +162,7 @@ public class DaqueryUser extends UserInfo {
 	public void setRoles(List<Role> roles) {
 		this.roles = roles;
 	}
-
+	
     //TODO: Add loop to print out the roles, queries, etc.
     @Override
     public String toString() {
