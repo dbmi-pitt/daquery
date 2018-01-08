@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
@@ -54,6 +56,7 @@ import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
+import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import io.jsonwebtoken.ClaimJwtException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -252,6 +255,51 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	
 	    }
     }
+    
+    /**
+     * Create a new user account with the given login and password combination.
+     * example URL: daquery-ws/ws/users/newuser?login=sample4&password=demouser
+     * @param login- a new user login
+     * @param password- the password for the new account
+     * @return either a javax.ws.rs.core.Response confirming the account creation
+     * (a 201 response) or a SERVER ERROR if there was a problem. 
+     */
+    @POST
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response create(DaqueryUser new_user) {
+
+//    	if (login.isEmpty() || password.isEmpty()) 
+//    		return Response.status(BAD_REQUEST).build();
+//    	
+//    	String loggermsg = "login=" + login + " password=" + password;
+//        logger.info("Trying to create user with: " + loggermsg);
+        
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+	
+	        s.getTransaction().begin();
+	
+//	        DaqueryUser newUser = new DaqueryUser(login, password);
+	        s.persist(new_user);
+	
+	        s.getTransaction().commit();
+	
+	       
+	        logger.info("Done trying to create user: " + new_user.toString());
+	        
+	        return Response.created(uriInfo.getAbsolutePathBuilder().path(new_user.getId() + "").build()).build();
+        } catch (Exception e) {
+	        return Response.serverError().build();
+	    } finally {
+	    	if (s != null) {
+	    		s.close();
+	    	}
+	    	
+	    }
+    }
 
     /**
      * Create a new user admin account with the given login.
@@ -358,6 +406,72 @@ public class UserEndpoint extends AbstractEndpoint {
 	        return Response.ok(200).entity(json).build();
     	} catch (Exception e) {
 	        return Response.serverError().build();    		
+    	}
+    }
+    
+    /**
+     * 
+     */
+    @PUT
+    @Secured
+    @Path("/update-role/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateUserRole(@PathParam("id") String id, LinkedHashMap<?, ?> u) {
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+
+	        DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+	        
+	        DaqueryUser loggedInUser = DaqueryUserDAO.queryUserByID(username);
+
+	        if (user == null)
+	            return Response.status(NOT_FOUND).build();
+	        
+	        boolean hasAdminRole = DaqueryUserDAO.hasRole(loggedInUser.getId(), "admin");
+	        if (!hasAdminRole) {
+	        	return Response.status(UNAUTHORIZED).build();
+	        }
+	        
+	        Map.Entry<String, Boolean> entry = (Entry<String, Boolean>) ((HashMap)u.get("roles")).entrySet().iterator().next();
+	        
+	        if(entry.getValue()) {
+	        	if(!user.getRoles().contains(RoleDAO.queryRoleByName(entry.getKey())))
+	        		user.getRoles().add(RoleDAO.queryRoleByName(entry.getKey()));
+	        }
+	        else {
+	        	Role role = null;
+	        	for(Role r : user.getRoles()) {
+	        		if(r.getName().equals(entry.getKey())) {
+	        			role = r;
+	        			break;
+	        		}
+	        	}
+	        	user.getRoles().remove(role);
+	        }
+	       
+	        //persist changes
+	        s.getTransaction().begin();
+	
+	        s.merge(user);
+	        
+	        s.getTransaction().commit();
+ 
+	        return Response.ok(200).build();
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		e.printStackTrace();
+    		return Response.status(UNAUTHORIZED).build();  		
+
+    	} finally {
+    		if (s != null) {
+    			s.close();
+    		}
+    		
     	}
     }
     

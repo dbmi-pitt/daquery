@@ -50,6 +50,7 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
+import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
@@ -480,6 +481,25 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				sqlqueryDAO.closeCurrentSession();
 		}
     	return Response.ok(201).entity(query.toJson()).build();   
+    }
+    
+    /**
+     * Get local roles
+     * @return the list of roles except admin
+     */
+    @GET
+    @Secured
+    @Path("/local-roles")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response localRoles() {
+    	try {
+    		return ResponseHelper.getJsonResponseGen(200, RoleDAO.queryAllRoles()); //Response.ok(200).entity(RoleDAO.queryAllRoles().toJson()).build(); 
+    	} catch (Throwable t) {
+    		String msg = "An unhandled exception occured while getting roles";
+    		log.log(Level.SEVERE, msg, t);
+			return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
+    	}
     }
 	
 	private static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
