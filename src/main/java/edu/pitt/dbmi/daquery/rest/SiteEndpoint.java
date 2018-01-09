@@ -47,6 +47,7 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.rest.util.KeystoreAlias;
 import edu.pitt.dbmi.daquery.rest.util.WSConnectionUtil;
 
@@ -108,7 +109,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network.getId())));
             }
             else if(type.equals("incoming"))
-            	return(ResponseHelper.getJsonResponseGen(200, network.getIncomingQuerySites()));
+            	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network.getId())));
             else if(type.equals("pending")) {
                 Map<String, String> idParam = new HashMap<String, String>();
                 idParam.put("network-id", network.getNetworkId());
@@ -412,8 +413,18 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response approveConnectRequest(LinkedHashMap<?, ?> object) {
-    	String networkId = object.get("network_id").toString();
-    	String fromSiteId = object.get("from_site_id").toString();
+    	if(object == null)
+    		return(ResponseHelper.getBasicResponse(400, "network_id and from_site_id are required parameters."));
+    	Object netObj = object.get("network_id");
+    	if(netObj == null || StringHelper.isBlank(netObj.toString()))
+    		return(ResponseHelper.getBasicResponse(400, "network_id is a required parameter."));
+    	Object fromSiteObj = object.get("from_site_id");
+    	if(fromSiteObj == null || StringHelper.isBlank(fromSiteObj.toString()))
+    		return(ResponseHelper.getBasicResponse(400, "from_site_id is a required parameter."));
+    		
+    	String networkId = netObj.toString();
+    	String fromSiteId = fromSiteObj.toString();
+    	
     	Session s = null;
     	try {
     		// tell daquery central you approve this site
@@ -436,19 +447,19 @@ public class SiteEndpoint extends AbstractEndpoint {
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
     			
     			    			
-	        	Site site_in = new Site((String)map.get("id"),
-	        							(String)map.get("siteName"),
-						 				(String)map.get("siteURL"),
+	        	Site site_in = new Site((String)map.get("siteId"),
+	        							(String)map.get("name"),
+						 				(String)map.get("url"),
 						 				(String)map.get("adminEmail"));
 	        	site_in.setStatus(SiteStatus.CONNECTED.toString());
-	        	Set<Site> ss = new HashSet<Site>();
-	        	ss.add(site_in);
-	        	network.setIncomingQuerySites(ss);
+//	        	Set<Site> ss = new HashSet<Site>();
+//	        	ss.add(site_in);
+	        	network.getIncomingQuerySites().add(site_in);
 	        	s.getTransaction().begin();
-		        s.update(network);
+		        s.merge(network);
 		        s.getTransaction().commit();
 	        	
-		       return Response.ok(201).build();
+		        return Response.ok(201).build();
 			} else {
 				return(resp);
 			}

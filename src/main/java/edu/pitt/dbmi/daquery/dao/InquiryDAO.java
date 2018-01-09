@@ -1,10 +1,13 @@
 package edu.pitt.dbmi.daquery.dao;
 
+import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
 import java.util.logging.Logger;
+
+import org.hibernate.criterion.Restrictions;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
@@ -36,5 +39,18 @@ public class InquiryDAO extends AbstractDAO {
 	
 	public void delete(Inquiry query) throws DaqueryException {
 		getCurrentSession().delete(query);
+	}
+	
+	public List listSavedInquiries() throws DaqueryException {
+		List i =  getCurrentSession().createCriteria(Inquiry.class)
+				  				     .list();
+		List ret = new ArrayList();
+		for(Object a : i) {
+			if(((Inquiry) a).getRequests().size() == 0) {
+				ret.add(a);
+			}
+		}
+		
+		return ret;
 	}
 }
