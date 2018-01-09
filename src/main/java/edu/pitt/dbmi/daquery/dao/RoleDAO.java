@@ -19,7 +19,7 @@ public class RoleDAO extends AbstractDAO {
 
     private final static Logger logger = Logger.getLogger(RoleDAO.class.getName());
 	
-    public static List<Role> queryAllRolees() throws Exception {
+    public static List<Role> queryAllRoles() throws Exception {
     	try { 		
     	    List<Role> role_list = executeQueryReturnList(Role.FIND_ALL, null, logger);
 	        return role_list;
