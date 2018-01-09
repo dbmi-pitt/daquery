@@ -29,7 +29,7 @@
                 <input type="driver" formControlName="driver" class="form-control" name="driver" placeholder="Data source driver">
                 <div class="help-block" *ngIf="driver.invalid && (submitted || driver.dirty || driver.touched)">Please enter the data source driver</div>
               </div>
-              <button class="btn btn-primary">Change</button>
+              <button class="btn btn-danger">Change</button>
               <a class="btn btn-link" [routerLink]="['../']">Cancel</a>
             </form>
           </div>

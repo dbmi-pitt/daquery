@@ -19,14 +19,14 @@
           <div class="form-group has-feedback" [ngClass]="{'has-error': driver.invalid && (submitted || driver.dirty || driver.touched), 'has-success': driver.valid && (submitted || driver.dirty || driver.touched) }">
               <label>CDM Database Type</label>
               <!-- <input type="text" formControlName="driver" class="form-control" name="driver" placeholder="Data source driver"> -->
-              <select formControlName="driver" class="form-control" name="driver">
-                <option value="oracle.jdbc.driver.OracleDriver">Oracle</option>
-                <option value="sqlserver.jdbc.driver.SQLServerDriver">SQL Server</option>
+              <select formControlName="driver" class="form-control" name="driver" (change)="onChange($event)">
+                <option value="oracle.jdbc.driver.OracleDriver" data-urlexample="jdbc:oracle:thin:@server.url:1521:sid">Oracle</option>
+                <option value="sqlserver.jdbc.driver.SQLServerDriver" data-urlexample="jdbc:sqlserver://server.name:1433;databaseName=DB_NAME;integratedSecurity=true;">SQL Server</option>
               </select>
               <div class="help-block" *ngIf="driver.invalid && (submitted || driver.dirty || driver.touched)">Please enter the data source driver</div>
             </div>
           <div class="form-group has-feedback" [ngClass]="{'has-error': url.invalid && (submitted || url.dirty || url.touched), 'has-success': url.valid && (submitted || url.dirty || url.touched) }">
-            <label>CDM JDBC URL e.g. ({{ driver.value }})</label>
+            <label>CDM JDBC URL e.g. ({{ urlexample }})</label>
             <input type="text" formControlName="url" class="form-control" name="url" placeholder="Data source URL">
             <div class="help-block" *ngIf="url.invalid && (submitted || url.dirty || url.touched)">Please enter the Data source url</div>
           </div>

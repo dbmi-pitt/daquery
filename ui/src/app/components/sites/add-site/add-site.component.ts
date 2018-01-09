@@ -13,6 +13,7 @@ export class AddSiteComponent implements OnInit {
 
   network: any;
   sites: any[];
+  loadingAvailableSites = false;
 
   connectSiteForm: FormGroup;
   submitted= false;
@@ -99,8 +100,10 @@ export class AddSiteComponent implements OnInit {
   }
 
   getAvailableSites(network: any){
+    this.loadingAvailableSites = true;
     this.siteService.getAvailableSites(network)
                     .subscribe(data => {
+                      this.loadingAvailableSites = false;
                       this.sites = data.full;
                       data.outgoing.forEach(e => {
                         this.sites.map(s => {

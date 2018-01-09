@@ -63,12 +63,12 @@
                     </option>
                   </select>
                 </div>
-                <div *ngIf="queryForm.controls.network.dirty" formArrayName="sitesToQuery" class="well well-lg">
+                <div *ngIf="inquiryForm.controls.network.dirty" formArrayName="sitesToQuery" class="well well-lg">
                   <div class="form-group">
                     <label for="sites">Site to Query</label>
                     <div class="checkbox">
                       <ul class="list-unstyled">
-                        <li *ngFor="let site of queryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
+                        <li *ngFor="let site of inquiryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
                           <label class="checkbox-inline"><input type="checkbox" value="{{site.controls.siteId._value}}" formControlName="check">{{site.controls.name._value}}</label>
                         </li>
                       </ul>

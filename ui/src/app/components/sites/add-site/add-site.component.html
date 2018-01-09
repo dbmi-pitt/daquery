@@ -10,7 +10,7 @@
       <form #f [formGroup]="connectSiteForm" (ngSubmit)="onSubmit()" novalidate>
         <div class="form-group has-feedback" [ngClass]="{'has-error': site.invalid && (submitted || site.dirty || site.touched), 'has-success': site.valid && (submitted || site.dirty || site.touched) }">
           <label for="site">Site</label>
-          <select class="form-control" formControlName="site" id="site" (change)="onChange()">
+          <select *ngIf="!loadingAvailableSites" class="form-control" formControlName="site" id="site" (change)="onChange()">
             <option value="">-Select-</option>
             <option *ngFor="let site of sites" [value]="site.siteId">
               {{ site.name }}
@@ -19,6 +19,7 @@
               New Site
             </option>
           </select>
+          <i *ngIf="loadingAvailableSites" class="fa fa-spinner fa-spin fa-fw"></i>
           <div class="help-block" *ngIf="site.invalid && (submitted || site.dirty || site.touched)">Please select a site</div>
         </div>
         <div *ngIf="site.value == 'new'" class="form-group has-feedback" [ngClass]="{'has-error': name.invalid && (submitted || name.dirty || name.touched), 'has-success': name.valid && (submitted || name.dirty || name.touched) }">

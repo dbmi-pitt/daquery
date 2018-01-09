@@ -84,7 +84,7 @@ export class NetworkComponent implements OnInit {
   approveConnect(pendingSite: any){
     const connectRequest = {
       network_id: this.network.networkId,
-      from_site_id: pendingSite.id
+      from_site_id: pendingSite.siteId
     };
     this.siteService.approveConnect(connectRequest)
                     .subscribe(data => {

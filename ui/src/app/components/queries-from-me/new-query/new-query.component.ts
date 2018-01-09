@@ -62,6 +62,7 @@ export class NewQueryComponent implements OnInit {
     this.requestService.saveInquires(this.inquiryForm.value)
                        .subscribe(data => {
                           console.log(data);
+                          location.reload();
                        });
   }
 

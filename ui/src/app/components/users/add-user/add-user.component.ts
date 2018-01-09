@@ -22,13 +22,19 @@ export class AddUserComponent implements OnInit {
 
   createForm() {
     this.userForm = this.fb.group({
-      email: [null, Validators.required],
-      password: [null, Validators.required],
-      password_confirmation: [null, Validators.required]
+      email: [null, [Validators.required, Validators.email]],
+      password: [null, [Validators.required, Validators.minLength(8)]],
+      password_confirmation: [null, [Validators.required, Validators.minLength(8)]],
+      realname: ''
     });
 
     this.userForm.valueChanges.subscribe(data => this.onValueChange(data));
   }
+
+  get email() { return this.userForm.get('email'); }
+  get password() { return this.userForm.get('password'); }
+  get password_confirmation() { return this.userForm.get('password_confirmation'); }
+  get realname() { return this.userForm.get('realname'); }
 
   onValueChange(data?: any) {
     if(!this.userForm) { return; }
@@ -49,8 +55,11 @@ export class AddUserComponent implements OnInit {
 
   onSubmit() {
     this.userService.createUser(this.userForm.value)
-                    .subscribe(res => this.newUser.emit(res));
-    this.showAddUser.emit(false);
+                    .subscribe(res => {
+                      location.reload();
+                      //this.newUser.emit(res);
+                    });
+    //this.showAddUser.emit(false);
   }
 
   formErrors = {

@@ -49,7 +49,7 @@ export class UserService {
   }
 
   getLocalRoles(): Observable<string[]> {
-    return this.http.get('/daquery/ws/local-roles', this.authenticationService.jwt())
+    return this.http.get('/daquery/ws/local-roles')
                     .catch(error => {
                       this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
@@ -57,7 +57,11 @@ export class UserService {
   }
 
   createUser(user: any): Observable<User>{
-    return this.http.post('/daquery/ws/users', JSON.stringify(user), this.authenticationService.jwt())
+    delete user.password_confirmation;
+    user['realName'] = user.realname;
+    delete user.realname;
+    user['utype'] = 'FULL';
+    return this.http.post('/daquery/ws/users', user)
                     .catch(error => {
                       this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
@@ -65,8 +69,7 @@ export class UserService {
   }
 
   toggleUserRole(user: any) {
-    let userObj = JSON.parse(user);
-    return this.http.patch(`/daquery/ws/users/${userObj.id}`, user, this.authenticationService.jwt())
+    return this.http.put(`/daquery/ws/users/update-role/${user.id}`, user)
                     .catch(error => {
                       this.error.message = error.message;
                       return Observable.throw(error.json().error || 'Server error');

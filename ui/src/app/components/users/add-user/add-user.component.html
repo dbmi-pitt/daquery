@@ -6,34 +6,28 @@
       </div>
       <div class="box-body">
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-          <div class="form-group">
+          <div class="form-group has-feedback"  [ngClass]="{'has-error': email.invalid && (email.dirty || email.touched), 'has-success': email.valid && (email.dirty || email.touched) }">
             <label for="email">Email</label>
-            <input type="text" class="form-control" id="email" placeholder="Email" formControlName="email" required>
-            <div *ngIf="formErrors.email" class="alert alert-danger">
-              {{ formErrors.email }}
-            </div>
+            <input type="text" class="form-control" id="email" placeholder="Email" formControlName="email">
+            <div class="help-block" *ngIf="email.invalid && (email.dirty || email.touched)">Please enter a valid email</div>
           </div>
-          <div class="form-group">
+          <div class="form-group has-feedback"  [ngClass]="{'has-error': password.invalid && (password.dirty || password.touched), 'has-success': password.valid && (password.dirty || password.touched) }">
             <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Password" formControlName="password">
-            <div *ngIf="formErrors.password" class="alert alert-danger">
-              {{ formErrors.password }}
-            </div>
+            <input type="password" class="form-control" id="password" placeholder="Password" formControlName="password" validateEqual="password_confirmation" reverse="true" />
+            <div class="help-block" *ngIf="password.hasError('required') && (password.dirty || password.touched)">Please enter a password</div>
+            <div class="help-block" *ngIf="password.hasError('minlength') && (password.dirty || password.touched)">Password at least 8 characters</div>
           </div>
-          <div class="form-group">
+          <div class="form-group has-feedback"  [ngClass]="{'has-error': password_confirmation.invalid && (password_confirmation.dirty || password_confirmation.touched), 'has-success': password_confirmation.valid && (password_confirmation.dirty || password_confirmation.touched) }">
             <label for="password_confirmation">Password Confirm</label>
-            <input type="password" class="form-control" id="password_confirmation" placeholder="Password Comfirm" formControlName="password_confirmation">
-            <div *ngIf="formErrors.password_confirmation" class="alert alert-danger">
-              {{ formErrors.password_confirmation }}
-            </div>
+            <input type="password" class="form-control" id="password_confirmation" placeholder="Password Comfirm" formControlName="password_confirmation" validateEqual="password" reverse="false">
+            <div class="help-block" *ngIf="password_confirmation.hasError('required') && (password_confirmation.dirty || password_confirmation.touched)">Please retype a password</div>
+            <div class="help-block" *ngIf="(!password_confirmation.hasError('required') && password_confirmation.hasError('validateEqual')) && (password_confirmation.dirty || password_confirmation.touched)">Password mismatch</div>
           </div>
-          <div class="form-group">
-              <label for="realname">Real Name</label>
-              <input type="text" class="form-control" id="realname" placeholder="Real Name" formControlName="realname">
-              <div *ngIf="formErrors.email" class="alert alert-danger">
-                {{ formErrors.email }}
-              </div>
-            </div>
+          <div class="form-group has-feedback" [ngClass]="{'has-error': realname.invalid && (realname.dirty || realname.touched), 'has-success': realname.valid && (realname.dirty || realname.touched) }">
+            <label for="realname">Real Name</label>
+            <input type="text" class="form-control" id="realname" placeholder="Real Name" formControlName="realname">
+            <div class="help-block" *ngIf="realname.invalid && (realname.dirty || realname.touched)">Please enter a real name</div>
+          </div>
           <button type="submit" class="btn btn-primary" [disabled]="!userForm.valid">Submit</button>
         </form>
       </div>

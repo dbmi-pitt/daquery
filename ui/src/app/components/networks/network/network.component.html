@@ -25,7 +25,7 @@
                   <button class="btn btn-success" (click)="approveConnect(ps)">Approve</button>
                   <button class="btn btn-danger" (click)="denyConnect(ps)">Deny</button>
                 </p>
-                <p>{{ ps.siteName }} wants to access your data. Please respond!</p>
+                <p>{{ ps.name }} wants to access your data. Please respond!</p>
               </div>
             </li>
           </ul>
@@ -74,7 +74,7 @@
                   <p class="pull-right">
                     <small class="label pull-right bg-green">on</small>
                   </p>
-                  <h4><a [routerLink]="['/site', is.id]">{{ is.name }}</a></h4>
+                  <h4><a [routerLink]="['/sites', is.siteId]">{{ is.name }}</a></h4>
                 </div>
               </div>
             </li>

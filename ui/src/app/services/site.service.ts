@@ -27,7 +27,7 @@ export class SiteService {
   getSites(network: Network): Observable<any[]> {
     const params = new HttpParams().set("network_id", network.id.toString())
                                    .set("type", "outgoing");
-
+                                   
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
                       this.error.message = error.message;
@@ -35,7 +35,7 @@ export class SiteService {
                     });
   }
 
-  getAvailableSites(network: Network): Observable<any> {
+  getAvailableSites(network: any): Observable<any> {
     const params = new HttpParams().set("network_id", network.id.toString())
 
     return this.http.get('/daquery/ws/sites/available', {params: params})

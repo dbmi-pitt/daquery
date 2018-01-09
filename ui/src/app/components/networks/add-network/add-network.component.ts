@@ -14,6 +14,7 @@ export class AddNetworkComponent implements OnInit {
   submitted = false;
   joinNetworkForm: FormGroup;
 
+  urlexample: String = "";
   @Output()
   newNetwork = new EventEmitter<any>();
 
@@ -61,6 +62,10 @@ export class AddNetworkComponent implements OnInit {
                           this.newNetwork.emit(data);
                         });
     }
+  }
+
+  onChange(e) {
+    this.urlexample = e.target.options[e.target.selectedIndex].getAttribute('data-urlexample');
   }
 
 }
