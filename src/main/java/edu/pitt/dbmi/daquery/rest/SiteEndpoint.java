@@ -447,19 +447,19 @@ public class SiteEndpoint extends AbstractEndpoint {
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
     			
     			    			
-	        	Site site_in = new Site((String)map.get("id"),
-	        							(String)map.get("siteName"),
-						 				(String)map.get("siteURL"),
+	        	Site site_in = new Site((String)map.get("siteId"),
+	        							(String)map.get("name"),
+						 				(String)map.get("url"),
 						 				(String)map.get("adminEmail"));
 	        	site_in.setStatus(SiteStatus.CONNECTED.toString());
-	        	Set<Site> ss = new HashSet<Site>();
-	        	ss.add(site_in);
-	        	network.setIncomingQuerySites(ss);
+//	        	Set<Site> ss = new HashSet<Site>();
+//	        	ss.add(site_in);
+	        	network.getIncomingQuerySites().add(site_in);
 	        	s.getTransaction().begin();
-		        s.update(network);
+		        s.merge(network);
 		        s.getTransaction().commit();
 	        	
-		       return Response.ok(201).build();
+		        return Response.ok(201).build();
 			} else {
 				return(resp);
 			}
