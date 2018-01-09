@@ -94,6 +94,20 @@ public class Site extends DaqueryObject implements Serializable {
 	@Column(name = "ENC_TYPE")
 	private String commEncType;
 	
+	/**
+	 * The string representing the site within the keystore file.
+	 * For example "130.1.2.3" or "server.institution.edu"
+	 */
+	@Column(name = "KEYSTORE_ALIAS")
+	private String keystoreAlias;
+	
+	/**
+	 * The filepath to the keystore file.
+	 * For example /opt/apache-tomcat-6.0.53/shrine.keystore
+	 */
+	@Column(name = "KEYSTORE_PATH")
+	private String keystorePath;
+	
 	public Site()
 	{
 		
@@ -199,6 +213,10 @@ public class Site extends DaqueryObject implements Serializable {
 	public String getAccessKey(){return(accessKey);}
 	public void setAccessKey(String key){accessKey = key;}
 
+	//TODO: CDB- I think this needs to be wrapped by Boolean class instead of using the boolean
+	//The boolean throws the following error if the column is NULL:
+	//org.hibernate.PropertyAccessException: Null value was assigned to a property of primitive type setter of edu.pitt.dbmi.daquery.common.domain.Site.tempKey
+
 	public boolean isTempKey(){return(tempKey);}
 	public void setTempKey(boolean temp){tempKey = temp;}
 	
@@ -216,6 +234,23 @@ public class Site extends DaqueryObject implements Serializable {
 	@Transient
 	public EncryptionType getCommTypeValue(){return(EncryptionType.valueOf(commEncType));}
 	public void setCommTypeValue(EncryptionType et){commEncType = et.toString();}
+	
+	public String getKeystoreAlias() {
+		return keystoreAlias;
+	}
+
+	public void setKeystoreAlias(String keystoreAlias) {
+		this.keystoreAlias = keystoreAlias;
+	}
+
+	public String getKeystorePath() {
+		return keystorePath;
+	}
+
+	public void setKeystorePath(String keystorePath) {
+		this.keystorePath = keystorePath;
+	}
+
 	
 	// ======================================
     // =   Methods hash, equals, toString   =
