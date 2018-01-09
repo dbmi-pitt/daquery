@@ -57,7 +57,9 @@ CREATE TABLE "APP"."SITE"
    ACCESS_KEY varchar(500),
    COMM_ENC_KEY  varchar(1024),
    ENC_TYPE varchar(50),
-   TEMPKEY boolean
+   TEMPKEY boolean,
+   KEYSTORE_ALIAS varchar(500),
+   KEYSTORE_PATH varchar(1024)
 );
 
 CREATE TABLE DATA_SOURCE
