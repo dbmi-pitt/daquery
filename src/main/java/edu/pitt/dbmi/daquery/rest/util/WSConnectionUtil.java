@@ -46,13 +46,13 @@ public class WSConnectionUtil {
 	{
 		if(daquerySSLFactory == null)
 		{
-			String keyStorePath = AppProperties.getKeystorePath();
+			String keyStorePath = getKeystorePath();
 			if(keyStorePath.isEmpty())
-				throw new FileNotFoundException("Path to Daquery keystore not found.  Set <keystore.path> in Daquery application.properties file.");
+				throw new FileNotFoundException("Path to Shrine keystore not found.  Check Shrine configuration expected to find file here: " + keyStorePath +".");
 			File keyStoreF = new File(keyStorePath);
 			boolean exists = keyStoreF.exists();
 			if(! exists)
-				throw new FileNotFoundException("The Daquery keystore at " + keyStorePath + " was not found.  Check the <keystore.path> in Daquery application.properties file.");
+				throw new FileNotFoundException("The Daquery keystore at " + keyStorePath + " was not found.  Check the Shrine configuration.");
 			KeyStore shrineKeystore = KeyStore.getInstance(KeyStore.getDefaultType());
 			FileInputStream keysIS = new FileInputStream(keyStoreF);
 			shrineKeystore.load(keysIS, null);
@@ -70,7 +70,7 @@ public class WSConnectionUtil {
 	//It looks like JSON, but the format is slightly different.
 	private static String getKeystorePath() {
 		String retString = null;
-		File configDir = new File(System.getProperty("catalina.base"), "lib");
+		File configDir = new File(AppProperties.getHomeDirectory(), "lib");
 		File configFile = new File(configDir, "shrine.conf");
         Config conf = ConfigFactory.parseFile(configFile);
         retString = conf.getString("shrine.keystore.file");
@@ -80,7 +80,7 @@ public class WSConnectionUtil {
 
 	private static String getKeystorePassword(String keystorePath) {
 		String retString = null;
-		File configDir = new File(System.getProperty("catalina.base"), "lib");
+		File configDir = new File(AppProperties.getHomeDirectory(), "lib");
 		File configFile = new File(configDir, "shrine.conf");
         Config conf = ConfigFactory.parseFile(configFile);
         retString = conf.getString("shrine.keystore.password");
