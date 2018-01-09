@@ -25,7 +25,7 @@ import com.google.gson.annotations.Expose;
 @Entity
 @Table(name="Role")
 @NamedQueries({
-@NamedQuery(name=Role.FIND_ALL, query="SELECT r FROM Role r"),
+@NamedQuery(name=Role.FIND_ALL, query="SELECT r FROM Role r WHERE upper(name) != 'ADMIN'"),
 @NamedQuery(name=Role.FIND_BY_NAME, query="SELECT r FROM Role r WHERE name = :name"),
 })
 public class Role extends DaqueryObject implements Serializable {
