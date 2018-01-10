@@ -1,9 +1,20 @@
 package edu.pitt.dbmi.daquery.rest;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.common.domain.Site;
 
 
 //TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"
@@ -60,4 +71,42 @@ public class AbstractEndpoint {
 		
 	}
 	
+	
+	protected static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
+	{
+		Client client = ClientBuilder.newClient();
+		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
+		
+		Builder respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
+		if(securityToken != null)
+			respBuilder = respBuilder.header("Authorization", securityToken);
+		
+		Response resp  = respBuilder.post(ent);
+		
+		return(resp);
+	}
+	
+	protected static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
+	{
+		Client client = ClientBuilder.newClient();
+		String args = "";
+		if(arguments != null)
+		{
+			boolean first = true;
+			for(String key : arguments.keySet())
+			{
+				String divide = "&";
+				if(first)
+				{
+					divide = "?";
+					first = false;
+				}
+				args = args + URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(arguments.get(key), "UTF-8");
+			}
+		}
+		Response resp = client.target(site.getUrl() + "daquery/ws/" + serviceName + args)
+						                    .request(MediaType.APPLICATION_JSON).get();
+		
+		return(resp);
+	}		
 }
