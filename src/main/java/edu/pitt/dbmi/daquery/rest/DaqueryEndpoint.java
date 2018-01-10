@@ -1,9 +1,8 @@
 package edu.pitt.dbmi.daquery.rest;
 
+import static edu.pitt.dbmi.daquery.rest.AbstractEndpoint.getFromRemoteSite;
+
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,8 +22,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -501,44 +498,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
     	}
     }
-	
-	private static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
-	{
-		Client client = ClientBuilder.newClient();
-		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
-		
-		Builder respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
-		if(securityToken != null)
-			respBuilder = respBuilder.header("Authorization", securityToken);
-		
-		Response resp  = respBuilder.post(ent);
-		
-		return(resp);
-	}
-	
-	private static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
-	{
-		Client client = ClientBuilder.newClient();
-		String args = "";
-		if(arguments != null)
-		{
-			boolean first = true;
-			for(String key : arguments.keySet())
-			{
-				String divide = "&";
-				if(first)
-				{
-					divide = "?";
-					first = false;
-				}
-				args = args + URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(arguments.get(key), "UTF-8");
-			}
-		}
-		Response resp = client.target(site.getUrl() + "daquery/ws/" + serviceName + args)
-						                    .request(MediaType.APPLICATION_JSON).get();
-		
-		return(resp);
-	}	
 	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
