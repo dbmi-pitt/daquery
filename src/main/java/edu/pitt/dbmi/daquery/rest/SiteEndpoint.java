@@ -109,7 +109,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network.getId())));
             }
             else if(type.equals("incoming"))
-            	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedOutgoingSitesByNetworkId(network.getId())));
+            	return(ResponseHelper.getJsonResponseGen(200, SiteDAO.queryConnectedIncomingSitesByNetworkId(network.getId())));
             else if(type.equals("pending")) {
                 Map<String, String> idParam = new HashMap<String, String>();
                 idParam.put("network-id", network.getNetworkId());
@@ -298,7 +298,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response requrestConnectSite(@QueryParam("type") String type, LinkedHashMap<?, ?> newSite) {
+    public Response requestConnectSite(@QueryParam("type") String type, LinkedHashMap<?, ?> newSite) {
 
     	Session s = null;
     	try {
@@ -544,6 +544,106 @@ public class SiteEndpoint extends AbstractEndpoint {
     	}
     }
     
+    /**
+     * example url: daquery/ws/sites/setalias/7bc55294-2300-4ca9-8c16-281fc7674be5?alias=130.4.4.4
+     * Set the keystore alias for a given site.  The keystore alias is required for secured communications 
+     * between sites.
+     * @param id - The id for the site whose alias should be set.  The site id can be either the site's database
+     * primary key (an integer) or the site's UUID.
+     * @param alias- The keystore alias for the site.
+     * @return 200 OK			
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
+     */
+    @PUT
+    @Secured
+    @Path("/setalias/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setAlias(@PathParam("id") String id, @QueryParam("alias") String alias) {
+
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+    		
+	        Site site = SiteDAO.querySiteByID(id);	
+	        
+	        //step 1: make sure this is a valid site
+	        if (site == null)
+	            return Response.status(NOT_FOUND).build();
+	        
+	        //step 2: make sure the alias is set
+	        //TODO: should we check if this is a valid URL?
+	        if (alias == null || alias.length() == 0) {
+	    		return Response.status(BAD_REQUEST).build();	        			        	
+	        }
+	        site.setKeystoreAlias(alias);
+	        return updateSite(site);
+	        	        
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		e.printStackTrace();
+    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
+
+    	} finally {
+    		if (s != null) {
+    			s.close();
+    		}
+    		
+    	}
+    	
+    }
+
+    /**
+     * example url: daquery/ws/sites/setkeystorepath/7bc55294-2300-4ca9-8c16-281fc7674be5?keystorepath=/opt/shrine/shrine.keystore
+     * Set the keystore file for a given site.  The keystore file is required for secured communications 
+     * between sites.
+     * @param id - The id for the site whose alias should be set.  The site id can be either the site's database
+     * primary key (an integer) or the site's UUID.
+     * @param keystorepath- The file path for the keystore file for the site.
+     * @return 200 OK			
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized	
+     */
+    @PUT
+    @Secured
+    @Path("/setkeystorepath/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setKeystorePath(@PathParam("id") String id, @QueryParam("keystorepath") String keystorepath) {
+
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+    		
+	        Site site = SiteDAO.querySiteByID(id);	
+	        
+	        //step 1: make sure this is a valid site
+	        if (site == null)
+	            return Response.status(NOT_FOUND).build();
+	        
+	        //step 2: make sure the keystorepath is set
+	        //TODO: should we check if this is a valid file path?
+	        if (keystorepath == null || keystorepath.length() == 0) {
+	    		return Response.status(BAD_REQUEST).build();	        			        	
+	        }
+	        site.setKeystorePath(keystorepath);
+	        return updateSite(site);
+	        	        
+    	} catch (Exception e) {
+    		logger.info(e.getMessage());
+    		e.printStackTrace();
+    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
+
+    	} finally {
+    		if (s != null) {
+    			s.close();
+    		}
+    		
+    	}
+    	
+    }
+    
     @PUT
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
@@ -584,7 +684,16 @@ public class SiteEndpoint extends AbstractEndpoint {
     	}
     	
     }
-    
+
+    /**
+     * This returns a list of all the aliases stored in the local site's keystore
+     * file.  Use this list to determine if a secured connection can be made from
+     * the local site to another site.  If the other site's alias is in the list, then
+     * a secured connection can be made.  If not, you need to work with the system
+     * administrator to add the alias to the keystore first. 
+     * @return a JSON array of site aliases from the local site's keystore:
+     * {"aliases":[{"aliasName":"127.5.5.5"}, {"aliasName":"127.5.2.2"}, {"aliasName":"127.5.1.1"}]}
+     */
     @GET
     @Path("/getKeystoreAliases")
     @Consumes(MediaType.APPLICATION_JSON)
