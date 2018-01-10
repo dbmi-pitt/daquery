@@ -68,7 +68,7 @@ public class WSConnectionUtil {
 	
 	//NOTE: The shrine.conf file is a HOCON format: https://open.med.harvard.edu/wiki/display/SHRINE/Shrine.conf+File+-+SHRINE+1.22.8
 	//It looks like JSON, but the format is slightly different.
-	private static String getKeystorePath() {
+	public static String getKeystorePath() {
 		String retString = null;
 		File configDir = new File(AppProperties.getHomeDirectory(), "lib");
 		File configFile = new File(configDir, "shrine.conf");
