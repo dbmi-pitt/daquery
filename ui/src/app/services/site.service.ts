@@ -17,8 +17,8 @@ export class SiteService {
               private error: Error) { }
 
   sites = [];
-  getSite(id: number): Observable<any> {
-    return this.http.get(`/daquery/ws/sites/${id}`, this.authenticationService.jwt())
+  getSite(id: string): Observable<any> {
+    return this.http.get(`/daquery/ws/sites/${id}`,)
                     .catch(error => {
                       return Observable.throw(error || 'Server error');
                     })

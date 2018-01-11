@@ -18,7 +18,7 @@ export class UserService {
 
   users = [];
   getUsers(): Observable<User[]> {
-    return this.http.get('/daquery/ws/users', this.authenticationService.jwt())
+    return this.http.get('/daquery/ws/users')
                     .catch(error => {
                       this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
@@ -35,17 +35,33 @@ export class UserService {
   }
 
   remote_users = [];
-  getUsersBySite(site_id: number): Observable<any[]>{
-    let urlSearchParams: URLSearchParams = new URLSearchParams();
-    urlSearchParams.set('site_id', site_id.toString());
+  getUsersBySite(site_id: string): Observable<any[]>{
+    // const params = new HttpParams().set('site_id', site_id);
+    // return this.http.get('/daquery/ws/remote-site-users', {params: params})
+    //                 .catch(error => {
+    //                   this.error.message = error.message;
+    //                   return Observable.throw(error || 'Server error');
+    //                 });
 
-    let requestOptions = this.authenticationService.jwt();
-    requestOptions.search = urlSearchParams;
-    return this.http.get('/daquery/ws/remote-site-users', requestOptions)
-                    .catch(error => {
-                      this.error.message = error.message;
-                      return Observable.throw(error || 'Server error');
-                    });
+    return Observable.of([
+      {
+        email: "111@pitt.edu",
+        id: "27e9e519-1111-4c9f-af4e-2e34e750c8cd",
+        realName: "AAA",
+        roles: [{
+          id: 4,
+          name: "aggregate_querier"
+        }],
+        utype: "FULL"
+      },
+      {
+        email: "222@pitt.edu",
+        id: "27e9e519-2222-4c9f-af4e-2e34e750c8cd",
+        realName: "BBB",
+        roles: [],
+        utype: "FULL"
+      }
+    ]);
   }
 
   getLocalRoles(): Observable<string[]> {

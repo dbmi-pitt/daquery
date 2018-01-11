@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { NetworkService } from '../../../services/network.service';
 import { SiteService } from '../../../services/site.service';
+import { DaqueryService } from '../../../services/daquery.service';
 import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({
@@ -13,13 +14,16 @@ export class AddSiteComponent implements OnInit {
 
   network: any;
   sites: any[];
+  aliases: any[];
   loadingAvailableSites = false;
+  loadingAlias = false;
 
   connectSiteForm: FormGroup;
   submitted= false;
   constructor(private fb: FormBuilder,
               private networkService: NetworkService,
               private siteService: SiteService,
+              private daqueryService: DaqueryService,
               private activatedRoute: ActivatedRoute,
               private router: Router) { }
   
@@ -27,6 +31,7 @@ export class AddSiteComponent implements OnInit {
     this.connectSiteForm = this.fb.group({
       network_id: network_id,
       site: ['', Validators.required],
+      alias: ['', Validators.required],
       name: ['', Validators.required],
       url: ['', Validators.required],
       admin_email: ['', Validators.required]
@@ -34,6 +39,7 @@ export class AddSiteComponent implements OnInit {
   }
 
   get site() { return this.connectSiteForm.get('site')};
+  get alias() { return this.connectSiteForm.get('alias')};
   get name() { return this.connectSiteForm.get('name')};
   get url() { return this.connectSiteForm.get('url')};
   get admin_email() { return this.connectSiteForm.get('admin_email')};
@@ -45,6 +51,7 @@ export class AddSiteComponent implements OnInit {
       this.createForm(id);
       await this.getNetwork(id);
       this.getAvailableSites(this.network);
+      this.getAlias();
     });
   }
 
@@ -114,4 +121,12 @@ export class AddSiteComponent implements OnInit {
                     });
   }
 
+  getAlias(){
+    this.loadingAlias = true;
+    this.daqueryService.getAlias()
+                       .subscribe(data => {
+                         this.loadingAlias = false;
+                         this.aliases = data.aliases;
+                       })
+  }
 }

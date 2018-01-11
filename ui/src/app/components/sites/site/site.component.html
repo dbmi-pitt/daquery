@@ -11,13 +11,17 @@
         <li *ngFor="let user of remote_users">
           <div class="row">
             <div class="col-md-12 col-sm-12">
-              <h3>{{ user.email }}</h3>
-              <div class="radio">
+              <h3>{{ user.realName }}</h3>
+              <div class="checkbox">
                 <label>
-                  <input *ngIf="!showSpin" type="radio" name="userright" attr.data-userid="{{user.id}}" [(ngModel)]="user.rights.aggregate" (change)="toggleRight($event, 'aggregate')" ><i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i> Aggregate
-                </label><br />
+                  <input *ngIf="!showSpin" id="{{user.id+'_Aggregate'}}" type="checkbox" attr.data-userid="{{user.id}}" (change)="onCheckAggregate($event, 'aggregate_querier')">
+                  <i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i> aggregate_querier
+                </label>
+              </div>
+              <div class="checkbox">
                 <label>
-                  <input *ngIf="!showSpin" type="radio" name="userright" attr.data-userid="{{user.id}}" [(ngModel)]="user.rights.datadownload" (change)="toggleRight($event, 'datadownload')" ><i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i> Aggregate / Data Download
+                  <input *ngIf="!showSpin" id="{{user.id+'_Data'}}" type="checkbox" attr.data-userid="{{user.id}}" (change)="onCheckData($event, 'data_querier')">
+                  <i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i> data_querier
                 </label>
               </div>
             </div>

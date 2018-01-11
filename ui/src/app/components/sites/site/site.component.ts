@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Site } from '../../../models/site.model';
 import { SiteService } from '../../../services/site.service';
 import { UserService } from '../../../services/user.service';
 import { ActivatedRoute, Params } from '@angular/router';
@@ -11,7 +10,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 })
 export class SiteComponent implements OnInit {
 
-  site: Site;
+  site: any;
   remote_users: any[];
   showSpin = false;
 
@@ -28,14 +27,14 @@ export class SiteComponent implements OnInit {
     });
   }
 
-  getSite(id: number){
+  getSite(id: string){
     this.siteService.getSite(id)
                     .subscribe(site => {
                       this.site = site;
                     });
   }
 
-  getRemoteUser(site_id: number){
+  getRemoteUser(site_id: string){
     this.userService.getUsersBySite(site_id)
                     .subscribe(users => this.remote_users = users);
   }
@@ -50,6 +49,30 @@ export class SiteComponent implements OnInit {
     this.userService.toggleUserRight(user)
                     .subscribe(res => {
                       this.showSpin = false;
+                    });
+  }
+
+  onAggregateToggle(event, role){
+    let user = JSON.parse(`{"id": ${event.target.dataset.userid}, 
+                 "roles": {
+                   "${role}": ${event.target.checked}
+                 }
+                }`);
+    this.userService.toggleUserRole(user)
+                    .subscribe(res => {
+                      //this.showSpin = false;
+                    });
+  }
+
+  onDataToggle(event, role){
+    let user = JSON.parse(`{"id": ${event.target.dataset.userid}, 
+                 "roles": {
+                   "${role}": ${event.target.checked}
+                 }
+                }`);
+    this.userService.toggleUserRole(user)
+                    .subscribe(res => {
+                      //this.showSpin = false;
                     });
   }
 }

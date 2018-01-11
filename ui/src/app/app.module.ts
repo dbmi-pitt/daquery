@@ -19,6 +19,7 @@ import { UserService } from './services/user.service';
 import { NetworkService } from './services/network.service';
 import { NotificationService } from './services/notification.service';
 import { SetupService } from './services/setup.service';
+import { DaqueryService } from './services/daquery.service';
 
 // custom pipe
 import { MapValuesPipe } from './pipes/iteratable.pipe';
@@ -126,6 +127,7 @@ import { MomentModule } from 'angular2-moment';
               NetworkService,
               NotificationService,
               SetupService,
+              DaqueryService,
               {
                 provide: HTTP_INTERCEPTORS,
                 useClass: JWTInterceptor,

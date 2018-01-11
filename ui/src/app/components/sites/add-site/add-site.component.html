@@ -15,13 +15,27 @@
             <option *ngFor="let site of sites" [value]="site.siteId">
               {{ site.name }}
             </option>
-            <option value="new">
+            <!-- <option value="new">
               New Site
-            </option>
+            </option> -->
           </select>
           <i *ngIf="loadingAvailableSites" class="fa fa-spinner fa-spin fa-fw"></i>
           <div class="help-block" *ngIf="site.invalid && (submitted || site.dirty || site.touched)">Please select a site</div>
         </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': alias.invalid && (submitted || alias.dirty || alias.touched), 'has-success': alias.valid && (submitted || alias.dirty || alias.touched) }">
+            <label for="alias">Key Alias</label>
+            <select *ngIf="!loadingAlias" class="form-control" formControlName="alias" id="alias">
+              <option value="">-Select-</option>
+              <option *ngFor="let alias of aliases" [value]="alias.aliasId">
+                {{ alias.aliasName }}
+              </option>
+              <!-- <option value="new">
+                New Site
+              </option> -->
+            </select>
+            <i *ngIf="loadingAlias" class="fa fa-spinner fa-spin fa-fw"></i>
+            <div class="help-block" *ngIf="alias.invalid && (submitted || alias.dirty || alias.touched)">Please select a alias</div>
+          </div>
         <div *ngIf="site.value == 'new'" class="form-group has-feedback" [ngClass]="{'has-error': name.invalid && (submitted || name.dirty || name.touched), 'has-success': name.valid && (submitted || name.dirty || name.touched) }">
           <label for="name">Site Name</label>
           <input type="text" formControlName="name" class="form-control" id="name" placeholder="Name">
