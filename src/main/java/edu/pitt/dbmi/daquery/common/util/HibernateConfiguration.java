@@ -13,6 +13,7 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Notification;
+import edu.pitt.dbmi.daquery.common.domain.RemoteRole;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.SASDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
@@ -73,6 +74,7 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(Fileset.class);
     	hibernateConf.addAnnotatedClass(DataModel.class);
     	hibernateConf.addAnnotatedClass(DataAttribute.class);
+    	hibernateConf.addAnnotatedClass(RemoteRole.class);
     	
     	
         	
@@ -80,7 +82,7 @@ public class HibernateConfiguration {
         hibernateConf.setProperty("hibernate.connection.driver_class", "org.apache.derby.jdbc.EmbeddedDriver" )
         .setProperty("hibernate.connection.username", "")
     	.setProperty("hibernate.connection.password", "")
-    	.setProperty("hibernate.show_sql", "true")
+    	.setProperty("hibernate.show_sql", "false")
         
         .setProperty("hibernate.c3p0.acquire_increment", "1")
         .setProperty("hibernate.c3p0.idle_test_period","240")

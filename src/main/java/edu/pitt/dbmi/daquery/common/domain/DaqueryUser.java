@@ -163,6 +163,16 @@ public class DaqueryUser extends UserInfo {
 		this.roles = roles;
 	}
 	
+	public UserInfo myInfo()
+	{
+		UserInfo rUser = new UserInfo();
+		rUser.setEmail(getEmail());
+		rUser.setId(getId());
+		rUser.setRealName(getRealName());
+		rUser.setUtype(INFO_ONLY);
+		return(rUser);
+	}
+	
     //TODO: Add loop to print out the roles, queries, etc.
     @Override
     public String toString() {

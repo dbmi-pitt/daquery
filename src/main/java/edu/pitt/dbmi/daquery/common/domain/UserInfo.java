@@ -52,6 +52,16 @@ public class UserInfo extends DaqueryObject
     @Column(name="UTYPE", insertable = false, updatable = false)
     protected String utype;
     
+    public UserInfo(){}
+    
+    public UserInfo(DaqueryUser user)
+    {
+    	this.email = user.email;
+    	this.id = user.id;
+    	this.realName = user.realName;
+    	this.utype = INFO_ONLY;
+    }
+    
     public String getId() {
     	if(id == null) return(null);
         return id.trim();
