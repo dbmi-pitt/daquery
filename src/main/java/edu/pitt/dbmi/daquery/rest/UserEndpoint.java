@@ -6,6 +6,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -18,11 +19,14 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
@@ -40,17 +44,30 @@ import javax.ws.rs.core.UriInfo;
 
 import org.hibernate.HibernateException;
 import org.hibernate.NonUniqueResultException;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.annotations.Expose;
+
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.RemoteUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
@@ -140,6 +157,298 @@ public class UserEndpoint extends AbstractEndpoint {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    /**
+     * Retrieve remote users with specific characteristics related to their roles.  If a site_id is
+     * specified and no role is specified, the query will return all users from the
+     * remote site even if they have no specific associated local roles.
+     * 
+     * @param role OPTIONAL The role to query on.  Valid values are AGGREGATE_QUERIER or DATE_QUERIER.
+     * @param siteId  REQUIRED The UUID of a site to constrain the query to.
+     * @param networkId OPTIONAL The UUID of a network to constrain the query to.
+     * 
+     * @return A list of RemoteUser for users that match the criteria. 
+     */
+    @GET
+    @Path("/remote")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response findRemoteUsers(@DefaultValue("") @QueryParam("role") String role,
+    		                  @DefaultValue("") @QueryParam("site-id") String siteId,
+    		                  @DefaultValue("") @QueryParam("network-id") String networkId
+    		                 )
+    {
+    	Session sess = null;
+    	try
+    	{
+	    	boolean hasSite = ! StringHelper.isBlank(siteId);
+	    	Site site = null;
+	    	if(hasSite)
+	    	{
+	    		site = SiteDAO.getSiteByNameOrId(siteId);
+	    		if(site == null)
+	    			return(ResponseHelper.getBasicResponse(400, "A site was not found with id " + siteId));
+	    	}
+	    	else
+	    		return(ResponseHelper.getBasicResponse(400, "site-id is a required paramter."));
+	    	
+	    	boolean hasRole = ! StringHelper.isBlank(role);
+	    	if(hasRole && ! (StringHelper.equalIgnoreCase(role, "AGGREGATE_QUERIER") || StringHelper.equalIgnoreCase(role, "DATA_QUERIER") ))
+	    		return(ResponseHelper.getBasicResponse(400, "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER"));
+	    	
+	    	
+	    	boolean hasNetwork = ! StringHelper.isBlank(networkId);
+	    	Network net = null;
+	    	if(hasNetwork)
+	    	{
+	    		net = NetworkDAO.getNetworkById(networkId);
+	    		if(net == null)
+	    			return(ResponseHelper.getBasicResponse(400, "A network was not found with id " + networkId));
+	    	}
+
+	    	
+	    	String sql = "select user_id, site_id, network_id from remote_user_role";
+	    	boolean firstWhere = true;
+	    	if(hasRole)
+	    	{
+	    		Role dbRole = RoleDAO.queryRoleByName(role);
+	    		long roleId = dbRole.getId();
+	    		sql = sql + " where role_id = " + roleId;
+	    		firstWhere = false;
+	    	}
+	    	if(hasSite)
+	    	{
+	    		sql = sql + " " + (firstWhere?"where":"and") + " site_id = '" + siteId + "'";
+	    		firstWhere = false;
+	    	}
+	    	if(hasNetwork)
+	    	{
+	    		sql = sql + " " + (firstWhere?"where":"and") + " network_id = '" + networkId + "'";
+	    	}
+	    	System.out.println(sql);
+			sess = HibernateConfiguration.openSession();
+			SQLQuery q = sess.createSQLQuery(sql);
+			List<Object []> vals = q.list();
+			Hashtable<String, Hashtable<String, Hashtable<String, RemoteUser>>> remoteUsersByNetworkAndSite = new Hashtable<String, Hashtable<String, Hashtable<String, RemoteUser>>>();
+			Hashtable<String, Hashtable<String, UserInfo>> allUserInfoBySite = new Hashtable<String, Hashtable<String, UserInfo>>();
+			for(Object [] row : vals)
+			{
+				String uId = (String) row[0];
+				String sId = (String) row[1];
+				String nId = (String) row[2];
+				
+				//all users from a site
+				if(! allUserInfoBySite.containsKey(sId))
+					allUserInfoBySite.put(sId, allUsersForSite(sId, false));
+				Hashtable<String, UserInfo> usersInfo = allUserInfoBySite.get(sId);
+				
+				//get by network
+				if(! remoteUsersByNetworkAndSite.containsKey(nId))
+					remoteUsersByNetworkAndSite.put(nId, new Hashtable<String, Hashtable<String, RemoteUser>>());
+				Hashtable<String, Hashtable<String, RemoteUser>> remoteUsersBySite = remoteUsersByNetworkAndSite.get(nId);
+				
+				//organize our output by site
+				if(! remoteUsersBySite.containsKey(sId))
+					remoteUsersBySite.put(sId, new Hashtable<String, RemoteUser>());
+				Hashtable<String, RemoteUser> rUsers = remoteUsersBySite.get(sId);
+				List<String> roles = DaqueryUserDAO.getRemoteUserRoles(uId);
+				
+				UserInfo ui = usersInfo.get(uId);
+				if(ui == null)
+					throw new DaqueryException("User with ID " + uId + " not found at site " + sId);
+				
+				RemoteUser rUser = new RemoteUser(usersInfo.get(uId));
+				rUser.setRoles(roles);
+			}
+	    	
+			//organize all of the networks/sites/users into a tree that can be
+			//returned via json
+			List<ReturnNetwork> returnVals = new ArrayList<ReturnNetwork>();
+			//for networks
+			for(String netId : remoteUsersByNetworkAndSite.keySet())
+			{
+				ReturnNetwork rNet = new ReturnNetwork(netId);
+				returnVals.add(rNet);
+				Hashtable<String, Hashtable<String, RemoteUser>> remoteUsersBySite = remoteUsersByNetworkAndSite.get(netId);
+				//for sites
+				for(String site_id : remoteUsersBySite.keySet())
+				{
+					ReturnSite rSite = new ReturnSite(site_id);
+					rNet.sites.add(rSite);
+					Hashtable<String, RemoteUser> sUsers = remoteUsersBySite.get(site_id);
+					//over all users of a site
+					
+					Hashtable<String, UserInfo> usInfo = allUserInfoBySite.get(site_id);
+					for(String uiKey : usInfo.keySet())
+					{
+						//if a role isn't specified return all users including those we don't hold roles for
+						UserInfo usinf = usInfo.get(uiKey);
+						String uiId = usinf.getId();
+						if(sUsers.containsKey(uiId))
+						{
+							rSite.remoteUsers.add(sUsers.get(uiId));
+						}
+						if(! sUsers.containsKey(uiId) && !hasRole)
+						{
+							RemoteUser rru = new RemoteUser(usinf);
+							rSite.remoteUsers.add(rru);
+						}
+					}
+				}
+			}
+			
+			return(ResponseHelper.getJsonResponseGen(200, returnVals));
+    	}
+    	catch(Throwable t)
+    	{
+    		String msg = "An unexpected error occured while finding remote users.";
+    		logger.log(Level.SEVERE, msg, t);
+    		return(ResponseHelper.getBasicResponse(500, msg + "  Check the server logs for more information."));
+    	}
+    	finally
+    	{
+    		if(sess != null) sess.close();
+    	}
+    }
+    
+    
+    /**
+     * Add a role for a remote (non-local) user.
+     * 
+     * @param userId  The user's UUID.
+     * @param siteId The site UUID of the user's site.
+     * @param netId The network UUID where the user will have permission.
+     * @param role The role (as a string) for the user.  Valid values are AGGREGATE_QUERIER and DATA_QUERIER 
+     * @return
+     */
+    @POST
+    @Path("/remote-role")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addRemoteRole(@DefaultValue("") @QueryParam("user-id") String userId,
+    							  @DefaultValue("") @QueryParam("site-id") String siteId,
+    							  @DefaultValue("") @QueryParam("network-id") String netId,
+    							  @DefaultValue("") @QueryParam("role") String role)
+    {
+    	try
+    	{
+    		if(StringHelper.isEmpty(userId)) return(ResponseHelper.getBasicResponse(400, "user-id is a required parameter"));
+	    	if(StringHelper.isEmpty(siteId)) return(ResponseHelper.getBasicResponse(400, "site-id is a required parameter"));
+	    	if(StringHelper.isEmpty(netId)) return(ResponseHelper.getBasicResponse(400, "network-id is a required parameter"));
+	    	if(StringHelper.isEmpty(role)) return(ResponseHelper.getBasicResponse(400, "role is a required parameter"));
+	    	
+	    	String roleStr = role.toUpperCase().trim();
+	    	if(! (roleStr.equals("AGGREGATE_QUERIER") || roleStr.equals("DATA_QUERIER")))
+	    		return(ResponseHelper.getBasicResponse(400, "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER"));
+
+	    	Role r = RoleDAO.queryRoleByName(role);
+	    	if(r == null) return(ResponseHelper.getBasicResponse(400, "role " + role + " is invalid."));
+	    	RoleDAO.grantRemoteUserRole(r.getId(), userId, siteId, netId);
+	    	return(ResponseHelper.getBasicResponse(200, "saved"));
+    	}
+    	catch(Throwable t)
+    	{
+    		String msg = "Unexpected error while adding a remote role";
+    		logger.log(Level.SEVERE, msg, t);
+    		return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for mor information."));
+    	}
+    	
+    }
+    
+    @GET
+    @Path("/user-info")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllUserInfo(@DefaultValue("") @QueryParam("site-id") String siteId)
+    {
+    	try
+    	{
+    		if(StringHelper.isBlank(siteId))
+    			return(ResponseHelper.getBasicResponse(400, "site-id is a required parameter."));
+    		Hashtable<String, UserInfo> allUsers = allUsersForSite(siteId, true);
+    		List<UserInfo> users = new ArrayList<UserInfo>();
+    		for(String uId : allUsers.keySet())
+    			users.add(allUsers.get(uId));
+    		return(ResponseHelper.getJsonResponseGen(200, users));
+    	}
+    	catch(Throwable t)
+    	{
+    		String msg = "Unexpected error while getting all UserInfo for site " + siteId;
+    		logger.log(Level.SEVERE, msg, t);
+    		return(ResponseHelper.getBasicResponse(400, msg + " Check the server local and site server logs."));
+    	}
+    }
+    private Hashtable<String, UserInfo> allUsersForSite(String siteId, boolean forceLocal) throws Exception
+    {
+    	Site mySite = SiteDAO.getLocalSite();
+    	Hashtable<String, UserInfo> rVal = new Hashtable<String, UserInfo>();
+    	if(mySite.getSiteId().equals(siteId) || forceLocal)
+    	{
+    		List<DaqueryUser> users = DaqueryUserDAO.queryAllUsers();
+    		for(DaqueryUser user : users)
+    			rVal.put(user.getId(), new UserInfo(user));
+    	}
+    	else
+    	{
+    		Site site = SiteDAO.getSiteByNameOrId(siteId);
+    		Map<String, String> args = new HashMap<String, String>();
+    		args.put("site-id", siteId);
+    		Response resp = getFromRemoteSite(site, "users/user-info", args);
+    		String json = resp.readEntity(String.class);
+    		ObjectMapper mapper = new ObjectMapper();
+    		TypeReference<List<UserInfo>> typ = new TypeReference<List<UserInfo>>(){};
+    		List<UserInfo> users = mapper.readValue(json, typ);
+    		for(UserInfo user :users)
+				rVal.put(user.getId(), user);
+    	}
+    	return(rVal);
+    }
+    
+    private class ReturnNetwork extends DaqueryObject
+    {
+    	@Expose
+    	String networkId;
+    	@Expose
+    	List<ReturnSite> sites = new ArrayList<ReturnSite>();
+    	
+    	ReturnNetwork(String id)
+    	{
+    		this.networkId = id;
+    	}
+    }
+    
+    private class ReturnSite extends DaqueryObject
+    {
+    	@Expose
+    	String siteId;
+    	@Expose
+    	List<RemoteUser> remoteUsers = new ArrayList<RemoteUser>();
+    	
+    	ReturnSite(String id){this.siteId = id;}
+    }
+    
+    /**
+     * Get UserInfo for all users..
+     */
+    @GET
+    @Path("/users-info")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsersInfo()
+    {
+    	try
+    	{
+    		List<DaqueryUser> users = DaqueryUserDAO.queryAllUsers();
+    		List<UserInfo> uInfo = new ArrayList<UserInfo>();
+    		for(DaqueryUser user : users)
+    			uInfo.add(user.myInfo());
+    		
+    		return(ResponseHelper.getJsonResponseGen(200, uInfo));
+    	}
+    	catch(Throwable t)
+    	{
+    		String msg = "An error occured while retrieving all users.";
+    		logger.log(Level.SEVERE, msg, t);
+    		return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+    	}
+    }
+    
     
     /**
      * This method uses login information to authenticate a user.  It generates a new JWT
@@ -302,89 +611,6 @@ public class UserEndpoint extends AbstractEndpoint {
     }
 
     /**
-     * Create a new user admin account with the given login.
-     * Example URL: daquery-ws/ws/users/firstadmin?login=adminuser&password=demouser
-     * @param login- a new user login
-     * @return either a javax.ws.rs.core.Response confirming the account creation
-     * or a SERVER ERROR if there was a problem. 
-     */
-    
-/*    @POST
-    @Secured
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/firstadmin")
-    public Response createFirstAdmin(@Context HttpHeaders httpheaders, @QueryParam("login") String login,
-    		@QueryParam("password") String password) {
-
-        Principal principal = securityContext.getUserPrincipal();
-        String username = principal.getName();
-        EntityManagerFactory emf = null;
-        EntityManager em = null;
-        
-        try {
-        	//extract the token sent by the central server
-            // Get the HTTP Authorization header from the request
-            String authorizationHeader = 
-                httpheaders.getHeaderString(HttpHeaders.AUTHORIZATION);
-
-            // Check if the HTTP Authorization header is present and formatted correctly 
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                throw new NotAuthorizedException("Authorization header must be provided");
-            }
-
-            // Extract the token from the HTTP Authorization header
-            String token = authorizationHeader.substring("Bearer".length()).trim();
-        	
-	    	if (login.isEmpty() || password.isEmpty() || !validateAdminToken(token)) 
-	    		return Response.status(BAD_REQUEST).build();
-	    	
-	    	
-	    	//TODO: see if we can combine the validateAdminToken with isValidAdminRequest
-	    	if (!isValidAdminRequest(token)) {
-	    		return Response.status(BAD_REQUEST).build();	    		
-	    	}
-	    	
-	    	String loggermsg = "login=" + login + " password=" + password;
-	        logger.info("Trying to create ADMIN user with: " + loggermsg);
-        
-	        emf = Persistence.createEntityManagerFactory("derby");
-	        em = emf.createEntityManager();
-	
-	        em.getTransaction().begin();
-	
-	        DaqueryUser newUser = new DaqueryUser(login, password);
-	        em.persist(newUser);
-	        
-	        //TODO: Assign this user to the Admin group
-	
-	        em.getTransaction().commit();
-	
-	        logger.info("Done trying to create admin user: " + newUser.toString());
-	        
-	        //TODO: build some JSON into the response.  Return the new UUID
-	        
-	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
-        } catch (ExpiredJwtException expired) {
-        	logger.info("Expired token: " + expired.getLocalizedMessage());
-        	//TODO: This needs to be reported back to the UI so it can handle it
-            try{
-            	return(ResponseHelper.expiredTokenResponse(login, uriInfo));
-            } catch(Throwable t) {
-            	String msg = "Unexpected error while generating an expired token response.";
-            	logger.log(Level.SEVERE, msg, t);
-            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
-            }
-        } catch (Exception e) {
-	        return Response.serverError().build();
-	    } finally {
-	    	if (em != null) {
-	    		em.close();
-	    	}
-	    }
-    } */
-    
-    /**
      * Get a JSON string representing a user given the user's UUID
      * example url: daquery-ws/ws/users/507f5c77-265c-4fc2-bed7-986bf3182786
      * @param id- the user's UUID
@@ -409,9 +635,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     }
     
-    /**
-     * 
-     */
+
     @PUT
     @Secured
     @Path("/update-role/{id}")

@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.dao;
 
+import java.io.IOException;
 import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
@@ -9,13 +10,19 @@ import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 import org.hibernate.NonUniqueResultException;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.RemoteRole;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.rest.UserEndpoint;
 
@@ -294,6 +301,29 @@ public class DaqueryUserDAO extends AbstractDAO {
     		logger.log(Level.SEVERE, "An unexpected exception occured while retrieving the SYSTEM user", t);
     	}
     	return(sysUser);
+    }
+    
+    public static List<String> getRemoteUserRoles(String userId) throws IOException, DaqueryException
+    {
+    	Session s = null;
+    	try
+    	{
+    		s = HibernateConfiguration.openSession();
+    		SQLQuery q = s.createSQLQuery("select distinct role.name from role, remote_user_role where role.id = remote_user_role.role_id and remote_user_role.user_id = '" + userId + "'");
+    		List<Object []> rows = q.list();
+    		List<String> roles = new ArrayList<String>();
+    		for(Object row : rows)
+    			roles.add((String) row);
+    		return(roles);
+    	}
+    	catch(Throwable t)
+    	{
+    		throw t;
+    	}
+    	finally
+    	{
+    		if(s != null) s.close();
+    	}
     }
 }
 
