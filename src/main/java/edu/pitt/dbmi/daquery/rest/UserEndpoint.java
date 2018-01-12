@@ -224,12 +224,20 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	{
 	    		sql = sql + " " + (firstWhere?"where":"and") + " network_id = '" + networkId + "'";
 	    	}
+	    	
+	    	
 	    	System.out.println(sql);
 			sess = HibernateConfiguration.openSession();
 			SQLQuery q = sess.createSQLQuery(sql);
 			List<Object []> vals = q.list();
 			Hashtable<String, Hashtable<String, Hashtable<String, RemoteUser>>> remoteUsersByNetworkAndSite = new Hashtable<String, Hashtable<String, Hashtable<String, RemoteUser>>>();
 			Hashtable<String, Hashtable<String, UserInfo>> allUserInfoBySite = new Hashtable<String, Hashtable<String, UserInfo>>();
+			
+			//if a site-id is specified grab all users from that site
+	    	if(hasSite && !allUserInfoBySite.containsKey(siteId))
+					allUserInfoBySite.put(siteId, allUsersForSite(siteId, false));
+			
+			
 			for(Object [] row : vals)
 			{
 				String uId = (String) row[0];
