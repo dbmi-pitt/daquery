@@ -56,6 +56,13 @@ public class SiteDAO extends AbstractDAO {
     			ParameterItem piId = new ParameterItem("id", Long.parseLong(id));
     			pList.add(piId);
     			site = executeQueryReturnSingle(Site.FIND_BY_ID, pList, logger);
+    			if(site == null)
+    			{
+	    			ParameterItem piUUId = new ParameterItem("uuid", id);
+	    			pList.clear();
+	    			pList.add(piUUId);
+	    			site = executeQueryReturnSingle(Site.FIND_BY_UUID, pList, logger);    				
+    			}
     		}
     		else {
     			ParameterItem piUUId = new ParameterItem("uuid", id);

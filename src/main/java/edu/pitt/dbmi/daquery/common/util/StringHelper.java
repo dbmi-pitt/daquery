@@ -72,4 +72,15 @@ public class StringHelper
 		else
 			return(false);
 	}
+	
+	public static boolean equalIgnoreCase(String val1, String val2)
+	{
+		if(val1 == null && val2 == null) return(true);
+		if(val1 == null || val2 == null) return(false);
+		if(isEmpty(val1) && isEmpty(val2)) return(true);
+		if(isEmpty(val1) || isEmpty(val2)) return(false);
+		
+		return(val1.toUpperCase().trim().equals(val2.toUpperCase().trim()));
+		
+	}
 }
