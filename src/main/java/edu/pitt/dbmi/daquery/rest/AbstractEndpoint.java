@@ -149,7 +149,7 @@ public class AbstractEndpoint {
 					divide = "?";
 					first = false;
 				}
-				args = args + URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(arguments.get(key), "UTF-8");
+				args = args + divide + URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(arguments.get(key), "UTF-8");
 			}
 		}
 		//add a trailing slash to the URL it is missing from the site URL
