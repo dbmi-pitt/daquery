@@ -103,6 +103,16 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return(ResponseHelper.getBasicResponse(200, "Hello Cruel World"));
 	}
     
+	@POST
+	@Path("/echopost")
+	@Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+	public Response echoPost(Site data)
+	{
+		//I know you are, but what am I?
+		return Response.ok(200).entity(data.toJson()).build();
+	}
+    
 	/**
 	 * Check if the site database is set up or not.
 	 * 
