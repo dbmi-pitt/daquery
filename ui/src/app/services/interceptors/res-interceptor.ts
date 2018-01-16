@@ -4,11 +4,14 @@ import { HttpInterceptor } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthenticationService } from '../authentication.service';
+import { Session } from '../../_globals/session';
+
   
 @Injectable()
 export class ResInterceptor implements HttpInterceptor {
 
-constructor(private router: Router) {}
+constructor(private router: Router,
+            private session: Session) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     
@@ -18,9 +21,13 @@ constructor(private router: Router) {}
           throw new HttpErrorResponse({status: event.status});
         }
 
-        // if('token' in event.body){
-        //   localStorage.setItem('jwt', JSON.stringify(event.body.token));
-        // }
+        try{
+          if('token' in event.body){
+            localStorage.setItem('jwt', JSON.stringify(event.body.token));
+          }
+        } catch (e) {
+          console.log("event body is not a standard object.");
+        }
         return event;
       }
     }).catch(error => {

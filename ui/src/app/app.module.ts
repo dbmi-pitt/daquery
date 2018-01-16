@@ -9,6 +9,7 @@ import { JWTInterceptor } from './services/interceptors/jwt-interceptor'
 import { ResInterceptor } from './services/interceptors/res-interceptor'
 
 import { Error } from './_globals/error';
+import { Session } from './_globals/session';
 import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
 import { AuthenticationService } from './services/authentication.service';
@@ -119,6 +120,7 @@ import { MomentModule } from 'angular2-moment';
   providers: [AuthGuard, 
               RoleGuard,
               Error,
+              Session,
               AuthenticationService,
               RequestService,
               ResponseService,

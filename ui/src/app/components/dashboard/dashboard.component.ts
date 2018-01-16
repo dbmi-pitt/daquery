@@ -4,6 +4,7 @@ import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 import { Keepalive } from '@ng-idle/keepalive';
 import { AuthenticationService } from '../../services/authentication.service';
 import { Error } from '../../_globals/error';
+import { Session } from '../../_globals/session';
 
 declare var $:any;
 
@@ -21,14 +22,27 @@ export class DashboardComponent implements OnInit {
               private idle: Idle, 
               private keepalive: Keepalive,
               private authenticationService: AuthenticationService,
-              public error: Error) { 
+              public error: Error,
+              public session: Session) { 
     // sets an idle timeout of 5 minutes(300 seconds)
-    idle.setIdle(300);
+    idle.setIdle(900);
     // sets a timeout period of . after 1 minute(60 seconds) of inactivity, the user will be considered timed out.
     idle.setTimeout(60);
     // sets the default interrupts, in this case, things like clicks, scrolls, touches to the document
     idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
 
+    idle.onInterrupt.subscribe(() => {
+      // console.log("interrupt");
+      // console.log((this.session.server_expiration_time.getTime() - new Date().getTime()) / 1000 / 60);
+      // in second 15 min window
+      try {
+        if ((this.session.serverExpirationTime.getTime() - new Date().getTime()) / 1000 / 60 < 15) {
+          this.authenticationService.renewjwt();
+        }
+      } catch(e) {
+        this.authenticationService.logout();
+      }
+    });
     idle.onIdleEnd.subscribe(() => this.idleState = 'No longer idle.');
     idle.onTimeout.subscribe(() => {
       this.idleState = 'Timed out!';
@@ -43,9 +57,12 @@ export class DashboardComponent implements OnInit {
     });
 
     // sets the ping interval to 15 seconds
-    keepalive.interval(15);
+    // keepalive.interval(20);
 
-    keepalive.onPing.subscribe(() => this.lastPing = new Date());
+    // keepalive.onPing.subscribe(() => {
+    //   this.authenticationService.renewjwt();
+    //   this.lastPing = new Date();
+    // });
 
     this.reset();   
   }

@@ -1,5 +1,5 @@
 <section class="content-header">
-  <h1><i class="fa fa-share-alt"></i> {{ network.name }} <small>patient empowered research</small>
+  <h1><i class="fa fa-share-alt"></i> {{ network?.name }} <small>patient empowered research</small>
     <div class="btn-group open">
       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
         <i class="fa fa-cog"></i>
@@ -74,7 +74,7 @@
                   <p class="pull-right">
                     <small class="label pull-right bg-green">on</small>
                   </p>
-                  <h4><a [routerLink]="['/sites', is.siteId]">{{ is.name }}</a></h4>
+                  <h4><a [routerLink]="['/sites', is.siteId]" [queryParams]="{networkId: network.networkId}">{{ is.name }}</a></h4>
                 </div>
               </div>
             </li>

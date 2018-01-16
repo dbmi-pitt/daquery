@@ -51,6 +51,12 @@ export class AuthenticationService {
      this.router.navigate(['./login']);
   }
 
+  renewjwt(): void {
+    this.http.get('/daquery/ws/renew-jwt').subscribe(() => {
+      console.log('jwt renewed.')
+    });
+  }
+
   jwt() {
     // create authorization header with jwt token
     return JSON.parse(localStorage.getItem('jwt'));

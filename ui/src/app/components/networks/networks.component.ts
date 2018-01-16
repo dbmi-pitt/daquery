@@ -33,11 +33,17 @@ export class NetworksComponent implements OnInit {
                           })
                            n.outgoingQuerySites.forEach((s) => {
                              if(s.siteId in n.sites){
-                              n.sites[s.siteId]['direction'] += '/Out';
+                              if(s.status === 'PENDING')
+                                n.sites[s.siteId]['direction'] = '/Pending';
+                              else
+                                n.sites[s.siteId]['direction'] = '/Out';
                              } else {
                               n.sites[s.siteId] = {};
                               n.sites[s.siteId]['name'] = s.name;
-                              n.sites[s.siteId]['direction'] = 'Out';
+                              if(s.status === 'PENDING')
+                                n.sites[s.siteId]['direction'] = 'Pending';
+                              else
+                                n.sites[s.siteId]['direction'] = 'Out';
                              }
                            });
                            n.sites = Object.values(n.sites);

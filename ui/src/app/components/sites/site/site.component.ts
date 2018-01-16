@@ -13,6 +13,7 @@ export class SiteComponent implements OnInit {
   site: any;
   remote_users: any[];
   showSpin = false;
+  network_id: string;
 
   constructor(private siteService: SiteService,
               private userService: UserService,
@@ -25,6 +26,9 @@ export class SiteComponent implements OnInit {
       this.getSite(id);
       this.getRemoteUser(id);
     });
+    this.activatedRoute.queryParams.subscribe((params: Params) => {
+      this.network_id = params['networkId'];
+    })
   }
 
   getSite(id: string){
@@ -36,7 +40,10 @@ export class SiteComponent implements OnInit {
 
   getRemoteUser(site_id: string){
     this.userService.getUsersBySite(site_id)
-                    .subscribe(users => this.remote_users = users);
+                    .subscribe(res => {
+                      let network = res.find(n => n.networkId === this.network_id);
+                      this.remote_users = network.sites[0].remoteUsers;
+                    });
   }
 
   toggleRight(event: any, right: string){
@@ -53,24 +60,16 @@ export class SiteComponent implements OnInit {
   }
 
   onAggregateToggle(event, role){
-    let user = JSON.parse(`{"id": ${event.target.dataset.userid}, 
-                 "roles": {
-                   "${role}": ${event.target.checked}
-                 }
-                }`);
-    this.userService.toggleUserRole(user)
+    let data = event.target.dataset;
+    this.userService.toggleRemoteUserRole(data.userid, data.siteid, data.networkid, "aggregate_querier", event.target.checked)
                     .subscribe(res => {
                       //this.showSpin = false;
                     });
   }
 
   onDataToggle(event, role){
-    let user = JSON.parse(`{"id": ${event.target.dataset.userid}, 
-                 "roles": {
-                   "${role}": ${event.target.checked}
-                 }
-                }`);
-    this.userService.toggleUserRole(user)
+    let data = event.target.dataset;
+    this.userService.toggleRemoteUserRole(data.userid, data.siteid, data.networkid, "data_querier", event.target.checked)
                     .subscribe(res => {
                       //this.showSpin = false;
                     });

@@ -36,32 +36,32 @@ export class UserService {
 
   remote_users = [];
   getUsersBySite(site_id: string): Observable<any[]>{
-    // const params = new HttpParams().set('site_id', site_id);
-    // return this.http.get('/daquery/ws/remote-site-users', {params: params})
-    //                 .catch(error => {
-    //                   this.error.message = error.message;
-    //                   return Observable.throw(error || 'Server error');
-    //                 });
+    const params = new HttpParams().set('site-id', site_id);
+    return this.http.get('/daquery/ws/users/remote', {params: params})
+                    .catch(error => {
+                      this.error.message = error.message;
+                      return Observable.throw(error || 'Server error');
+                    });
 
-    return Observable.of([
-      {
-        email: "111@pitt.edu",
-        id: "27e9e519-1111-4c9f-af4e-2e34e750c8cd",
-        realName: "AAA",
-        roles: [{
-          id: 4,
-          name: "aggregate_querier"
-        }],
-        utype: "FULL"
-      },
-      {
-        email: "222@pitt.edu",
-        id: "27e9e519-2222-4c9f-af4e-2e34e750c8cd",
-        realName: "BBB",
-        roles: [],
-        utype: "FULL"
-      }
-    ]);
+    // return Observable.of([
+    //   {
+    //     email: "111@pitt.edu",
+    //     id: "27e9e519-1111-4c9f-af4e-2e34e750c8cd",
+    //     realName: "AAA",
+    //     roles: [{
+    //       id: 4,
+    //       name: "aggregate_querier"
+    //     }],
+    //     utype: "FULL"
+    //   },
+    //   {
+    //     email: "222@pitt.edu",
+    //     id: "27e9e519-2222-4c9f-af4e-2e34e750c8cd",
+    //     realName: "BBB",
+    //     roles: [],
+    //     utype: "FULL"
+    //   }
+    // ]);
   }
 
   getLocalRoles(): Observable<string[]> {
@@ -90,6 +90,27 @@ export class UserService {
                       this.error.message = error.message;
                       return Observable.throw(error.json().error || 'Server error');
                     });
+  }
+
+  toggleRemoteUserRole(userid: string, siteid: string, networkid: string, role: string, checked: boolean) {
+    const params = new HttpParams().set("user-id", userid)
+                                   .set("site-id", siteid)
+                                   .set("network-id", networkid)
+                                   .set("role", role);
+
+    if(checked){
+      return this.http.post('/daquery/ws/users/remote-role', params)
+                      .catch(error => {
+                        this.error.message = error.message;
+                        return Observable.throw(error || 'Server error');
+                      });
+    } else {
+      return this.http.request('delete', '/daquery/ws/users/remote-role', { body : params})
+                      .catch(error => {
+                        this.error.message = error.message;
+                        return Observable.throw(error || 'Server error');
+                      });
+    }
   }
 
   toggleUserRight(user: any) {
