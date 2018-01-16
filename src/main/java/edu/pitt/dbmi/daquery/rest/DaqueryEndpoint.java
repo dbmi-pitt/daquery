@@ -378,7 +378,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				if(requester == null)
 					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
 				
-				if(! DaqueryUserDAO.hasRole(requesterId, "AGGREGATE_QUERIER"))
+				if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
 					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
 	
 				

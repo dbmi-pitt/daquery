@@ -154,7 +154,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 @Override
                 public boolean isUserInRole(String role) {
                 	try {
-                		return DaqueryUserDAO.hasRole(userAndIssuer.user, role);
+                		return DaqueryUserDAO.hasRole(userAndIssuer.user, null, role);
                 	} catch (Exception e) {
                 		return false;
                 	}
