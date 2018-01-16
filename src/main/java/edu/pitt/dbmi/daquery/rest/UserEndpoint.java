@@ -192,9 +192,9 @@ public class UserEndpoint extends AbstractEndpoint {
 	    		return(ResponseHelper.getBasicResponse(400, "site-id is a required paramter."));
 	    	
 	    	boolean hasRole = ! StringHelper.isBlank(role);
-	    	if(hasRole && ! (StringHelper.equalIgnoreCase(role, "AGGREGATE_QUERIER") || StringHelper.equalIgnoreCase(role, "DATA_QUERIER") ))
-	    		return(ResponseHelper.getBasicResponse(400, "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER"));
-	    	
+	    	if(hasRole) return(ResponseHelper.getBasicResponse(400, "Query by role not yet supported."));
+	    	//if(hasRole && ! (StringHelper.equalIgnoreCase(role, "AGGREGATE_QUERIER") || StringHelper.equalIgnoreCase(role, "DATA_QUERIER") ))
+	    	//	return(ResponseHelper.getBasicResponse(400, "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER"));
 	    	
 	    	boolean hasNetwork = ! StringHelper.isBlank(networkId);
 	    	Network net = null;
@@ -206,101 +206,88 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	}
 
 	    	
-	    	String sql = "select user_id, site_id, network_id from remote_user_role";
-	    	boolean firstWhere = true;
-	    	if(hasRole)
-	    	{
-	    		Role dbRole = RoleDAO.queryRoleByName(role);
-	    		long roleId = dbRole.getId();
-	    		sql = sql + " where role_id = " + roleId;
-	    		firstWhere = false;
-	    	}
-	    	if(hasSite)
-	    	{
-	    		sql = sql + " " + (firstWhere?"where":"and") + " site_id = '" + siteId + "'";
-	    		firstWhere = false;
-	    	}
+	    	sess = HibernateConfiguration.openSession();
+	    	
+	    	//get a list of networks that the specified site is connected to
+	    	List<String> netIds = new ArrayList<String>();
+	    	String sql = "select distinct network.network_id from site, outgoing_query_sites, network " +
+	    	             " where site.id = outgoing_query_sites.site_id and network.id = outgoing_query_sites.network_id  and upper(trim(site.site_id)) = '" + siteId.trim().toUpperCase() + "'";
+	    	SQLQuery netQ = sess.createSQLQuery(sql);
+	    	List<Object> nIds = netQ.list();
+	    	for(Object nid : netIds)
+	    		netIds.add( ((String) nid));
+	    	
+	    	if(netIds.size() == 0)
+	    		return(ResponseHelper.getBasicResponse(500, "Site " + siteId + " is not a member of any networks."));
+	    	
+	    	if(hasNetwork && ! netIds.contains(networkId))
+	    		return(ResponseHelper.getBasicResponse(400, "Specified site " + siteId + " is not in network " + networkId));
+
 	    	if(hasNetwork)
 	    	{
-	    		sql = sql + " " + (firstWhere?"where":"and") + " network_id = '" + networkId + "'";
+	    		netIds.clear();
+	    		netIds.add(networkId);
 	    	}
 	    	
+	    	//get all users from specified site
+	    	Hashtable<String, UserInfo> allUsers = this.allUsersForSite(siteId, false);
 	    	
-	    	System.out.println(sql);
-			sess = HibernateConfiguration.openSession();
+	    	//get the role info and add it to user info
+	    	String roleSql = "select remote_user_role.user_id, remote_user_role.site_id, remote_user_role.network_id, role.name from remote_user_role, role";
+	    	sql = sql + " " + "where remote_user_role.site_id = '" + siteId + "' and remote_user_role.role_id  = role.id";
+	    	if(hasNetwork)
+	    	{
+	    		sql = sql + " " + "and network_id = '" + networkId + "'";
+	    	}
 			SQLQuery q = sess.createSQLQuery(sql);
 			List<Object []> vals = q.list();
-			Hashtable<String, Hashtable<String, Hashtable<String, RemoteUser>>> remoteUsersByNetworkAndSite = new Hashtable<String, Hashtable<String, Hashtable<String, RemoteUser>>>();
-			Hashtable<String, Hashtable<String, UserInfo>> allUserInfoBySite = new Hashtable<String, Hashtable<String, UserInfo>>();
 			
-			//if a site-id is specified grab all users from that site
-	    	if(hasSite && !allUserInfoBySite.containsKey(siteId))
-					allUserInfoBySite.put(siteId, allUsersForSite(siteId, false));
-			
-			
+			Hashtable<String, Hashtable<String, RemoteUser>> rolesBySiteAndNet = new Hashtable<String, Hashtable<String, RemoteUser>>();
 			for(Object [] row : vals)
 			{
 				String uId = (String) row[0];
 				String sId = (String) row[1];
 				String nId = (String) row[2];
-				
-				//all users from a site
-				if(! allUserInfoBySite.containsKey(sId))
-					allUserInfoBySite.put(sId, allUsersForSite(sId, false));
-				Hashtable<String, UserInfo> usersInfo = allUserInfoBySite.get(sId);
-				
-				//get by network
-				if(! remoteUsersByNetworkAndSite.containsKey(nId))
-					remoteUsersByNetworkAndSite.put(nId, new Hashtable<String, Hashtable<String, RemoteUser>>());
-				Hashtable<String, Hashtable<String, RemoteUser>> remoteUsersBySite = remoteUsersByNetworkAndSite.get(nId);
-				
-				//organize our output by site
-				if(! remoteUsersBySite.containsKey(sId))
-					remoteUsersBySite.put(sId, new Hashtable<String, RemoteUser>());
-				Hashtable<String, RemoteUser> rUsers = remoteUsersBySite.get(sId);
-				List<String> roles = DaqueryUserDAO.getRemoteUserRoles(uId);
-				
-				UserInfo ui = usersInfo.get(uId);
-				if(ui == null)
-					throw new DaqueryException("User with ID " + uId + " not found at site " + sId);
-				
-				RemoteUser rUser = new RemoteUser(usersInfo.get(uId));
-				rUser.setRoles(roles);
+				String rl = (String) row[3];
+
+				//fill a hashtable that has user role info by network and site
+				String netSiteKey = sId.trim() + nId.trim();
+				if(! rolesBySiteAndNet.containsKey(netSiteKey))
+					rolesBySiteAndNet.put(netSiteKey, new Hashtable<String, RemoteUser>());
+				if(! rolesBySiteAndNet.get(netSiteKey).containsKey(uId))
+				{
+					if(! allUsers.containsKey(uId))
+						return(ResponseHelper.getBasicResponse(400, "User " + uId + " is not from site " + siteId));
+					rolesBySiteAndNet.get(netSiteKey).put(uId, new RemoteUser(allUsers.get(uId)));
+				}
+				rolesBySiteAndNet.get(netSiteKey).get(uId).addRole(rl);
 			}
 	    	
 			//organize all of the networks/sites/users into a tree that can be
 			//returned via json
 			List<ReturnNetwork> returnVals = new ArrayList<ReturnNetwork>();
 			//for networks
-			for(String netId : remoteUsersByNetworkAndSite.keySet())
+			for(String netId : netIds)
 			{
 				ReturnNetwork rNet = new ReturnNetwork(netId);
 				returnVals.add(rNet);
-				Hashtable<String, Hashtable<String, RemoteUser>> remoteUsersBySite = remoteUsersByNetworkAndSite.get(netId);
-				//for sites
-				for(String site_id : remoteUsersBySite.keySet())
+
+				ReturnSite rSite = new ReturnSite(siteId);
+				rNet.sites.add(rSite);
+				String nsKey = siteId.trim() + netId.trim();
+				Hashtable<String, RemoteUser> sUsers;
+				if(rolesBySiteAndNet.containsKey(nsKey))
+					sUsers = rolesBySiteAndNet.get(nsKey);
+				else
+					sUsers = new Hashtable<String, RemoteUser>();
+				
+				//over all users of the site
+				for(String uiKey : allUsers.keySet())
 				{
-					ReturnSite rSite = new ReturnSite(site_id);
-					rNet.sites.add(rSite);
-					Hashtable<String, RemoteUser> sUsers = remoteUsersBySite.get(site_id);
-					//over all users of a site
-					
-					Hashtable<String, UserInfo> usInfo = allUserInfoBySite.get(site_id);
-					for(String uiKey : usInfo.keySet())
-					{
-						//if a role isn't specified return all users including those we don't hold roles for
-						UserInfo usinf = usInfo.get(uiKey);
-						String uiId = usinf.getId();
-						if(sUsers.containsKey(uiId))
-						{
-							rSite.remoteUsers.add(sUsers.get(uiId));
-						}
-						if(! sUsers.containsKey(uiId) && !hasRole)
-						{
-							RemoteUser rru = new RemoteUser(usinf);
-							rSite.remoteUsers.add(rru);
-						}
-					}
+					if(sUsers.containsKey(uiKey))
+						rSite.remoteUsers.add(sUsers.get(uiKey));
+					else
+						rSite.remoteUsers.add(new RemoteUser(allUsers.get(uiKey)));
 				}
 			}
 			
@@ -364,13 +351,12 @@ public class UserEndpoint extends AbstractEndpoint {
     @GET
     @Path("/user-info")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllUserInfo(@DefaultValue("") @QueryParam("site-id") String siteId)
+    public Response getAllUserInfo()
     {
     	try
     	{
-    		if(StringHelper.isBlank(siteId))
-    			return(ResponseHelper.getBasicResponse(400, "site-id is a required parameter."));
-    		Hashtable<String, UserInfo> allUsers = allUsersForSite(siteId, true);
+    		Site mySite = SiteDAO.getLocalSite();
+    		Hashtable<String, UserInfo> allUsers = allUsersForSite(mySite.getSiteId(), true);
     		List<UserInfo> users = new ArrayList<UserInfo>();
     		for(String uId : allUsers.keySet())
     			users.add(allUsers.get(uId));
@@ -378,7 +364,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     	catch(Throwable t)
     	{
-    		String msg = "Unexpected error while getting all UserInfo for site " + siteId;
+    		String msg = "Unexpected error while getting all UserInfo for this site";
     		logger.log(Level.SEVERE, msg, t);
     		return(ResponseHelper.getBasicResponse(400, msg + " Check the server local and site server logs."));
     	}
@@ -396,9 +382,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	else
     	{
     		Site site = SiteDAO.getSiteByNameOrId(siteId);
-    		Map<String, String> args = new HashMap<String, String>();
-    		args.put("site-id", siteId);
-    		Response resp = getFromRemoteSite(site, "users/user-info", args);
+    		Response resp = getFromRemoteSite(site, "users/user-info", null);
     		String json = resp.readEntity(String.class);
     		ObjectMapper mapper = new ObjectMapper();
     		TypeReference<List<UserInfo>> typ = new TypeReference<List<UserInfo>>(){};
