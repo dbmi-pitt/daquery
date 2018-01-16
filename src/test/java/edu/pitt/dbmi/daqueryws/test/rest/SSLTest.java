@@ -1,28 +1,13 @@
 package edu.pitt.dbmi.daqueryws.test.rest;
 
-import static io.restassured.RestAssured.given;
+import javax.ws.rs.core.Response;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.security.KeyStore;
-import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
-
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.pitt.dbmi.daquery.rest.util.WSConnectionUtil;
-import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
-import io.restassured.RestAssured;
-import io.restassured.config.RestAssuredConfig;
-import io.restassured.config.SSLConfig;
+import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.rest.AbstractEndpoint;
 
-public class SSLTest extends DaqueryBaseTest {
+public class SSLTest extends DaqueryBaseTest  {
 
 	public static void main(String[] args) {
 //		org.junit.runner.JUnitCore.main("edu.pitt.dbmi.daqueryws.test.rest.SSLTest");
@@ -35,9 +20,42 @@ public class SSLTest extends DaqueryBaseTest {
             .when().get("sites/getKeystoreAliases").then().statusCode(200);
     }*/
 
+	@Test
+	public void checkSSLGetConnection() {
+        try {
+        	//s = SiteDAO.querySiteByID("101");
+        	Site s = new Site();
+        	s.setKeystoreAlias("130.49.213.163");
+        	s.setUrl("https://130.49.213.163:6443/");
+        	System.out.println("Connecting to site: " +  " " + s.getUrl() + " " + s.getKeystoreAlias());
+        	Response r = AbstractEndpoint.getFromRemoteSite(s, "sites/getKeystoreAliases", null);
+        	String json = r.readEntity(String.class);
+        	System.out.println("Response: " + json);
+       } catch (Exception e) {
+        	e.printStackTrace();
+        }
+	}
+	
+	@Test
+	public void checkSSLPostConnection() {
+        try {
+        	//s = SiteDAO.querySiteByID("101");
+        	Site s = new Site();
+        	s.setKeystoreAlias("130.49.213.163");
+        	s.setUrl("https://130.49.213.163:6443/");
+        	System.out.println("Connecting to site: " +  " " + s.getUrl() + " " + s.getKeystoreAlias());
+        	Response r = AbstractEndpoint.postJSONToRemoteSite(s, "echopost", s.toJson(), null);
+        	String json = r.readEntity(String.class);
+        	System.out.println("Response: " + json);
+       } catch (Exception e) {
+        	e.printStackTrace();
+        }
+	}
+	
+	/*
     @Test
     public void checkSSLTest() {
-            String urlString = "https://dbmi-i2b2-dev02.dbmi.pitt.edu:6443/daquery/ws/sites/getKeystoreAliases";
+            String urlString = "https://130.49.213.163:6443/daquery/ws/sites/getKeystoreAliases";
             System.out.println("Checking URL: " + urlString);
             URL url = null;
             URLConnection urlConnection = null;
@@ -66,7 +84,7 @@ public class SSLTest extends DaqueryBaseTest {
 
 
 	}
-	
+	*/
 
 	
 	

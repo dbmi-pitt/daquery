@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -13,8 +14,11 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.SslConfigurator;
+
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.rest.util.WSConnectionUtil;
 
 
 //TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"
@@ -72,12 +76,32 @@ public class AbstractEndpoint {
 	}
 	
 	
-	protected static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
+	//TODO: CDB change this to protected before deployment.  This was made public for testing.
+	public static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
 	{
 		Client client = ClientBuilder.newClient();
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
 		
-		Builder respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
+		Builder respBuilder = null;
+		
+		//handle an HTTPS connection
+		if (site.getUrl().toLowerCase().startsWith("https")) {
+			SslConfigurator sslConfig = SslConfigurator.newInstance()
+					.trustStoreFile(WSConnectionUtil.getKeystorePath())
+					.trustStorePassword(WSConnectionUtil.getKeystorePassword())
+					.trustStoreType("JKS")
+					.securityProtocol("SSL");
+
+			SSLContext sslContext = sslConfig.createSSLContext();
+
+			//redefine the client variable to include the sslContext
+			client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+			System.out.println("IN SSL postJSONToRemoteSite.  Hitting URL: " + site.getUrl() + "daquery/ws/" + serviceName);
+			respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
+		} else {
+			System.out.println("IN HTTP postJSONToRemoteSite.  Hitting URL: " + site.getUrl() + "daquery/ws/" + serviceName);
+			respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
+		}
 		if(securityToken != null)
 			respBuilder = respBuilder.header("Authorization", securityToken);
 		
@@ -86,9 +110,33 @@ public class AbstractEndpoint {
 		return(resp);
 	}
 	
-	protected static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
+	//TODO: CDB change this to protected before deployment.  This was made public for testing.
+	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
 	{
 		Client client = ClientBuilder.newClient();
+		Response resp = null;
+		String getURL = buildGetUrl(site.getUrl(), serviceName, arguments);
+		
+		//handle an HTTPS connection
+		if (site.getUrl().toLowerCase().startsWith("https")) {
+			SslConfigurator sslConfig = SslConfigurator.newInstance()
+					.trustStoreFile(WSConnectionUtil.getKeystorePath())
+					.trustStorePassword(WSConnectionUtil.getKeystorePassword())
+					.trustStoreType("JKS")
+					.securityProtocol("SSL");
+
+			SSLContext sslContext = sslConfig.createSSLContext();
+
+			//redefine the client variable to include the sslContext
+			client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+		}
+		resp = client.target(getURL)
+				.request(MediaType.APPLICATION_JSON).get();
+		return(resp);
+	}
+
+	private static String buildGetUrl(String siteUrl, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException {
+		String retString = null;
 		String args = "";
 		if(arguments != null)
 		{
@@ -104,8 +152,18 @@ public class AbstractEndpoint {
 				args = args + divide + URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(arguments.get(key), "UTF-8");
 			}
 		}
-		String url = site.getUrl() + "daquery/ws/" + serviceName + args;
-		Response resp = client.target(url).request(MediaType.APPLICATION_JSON).get();		
-		return(resp);
-	}		
+//<<<<<<< HEAD
+//		String url = site.getUrl() + "daquery/ws/" + serviceName + args;
+//		Response resp = client.target(url).request(MediaType.APPLICATION_JSON).get();		
+//		return(resp);
+//	}		
+//=======
+		//add a trailing slash to the URL it is missing from the site URL
+		if (!siteUrl.endsWith("/")) {
+			siteUrl = siteUrl + "/";
+		}
+		retString = siteUrl + "daquery/ws/" + serviceName + args;
+		return retString;
+	}
+//>>>>>>> f6e8dd79f9d96b9b8eda41a4bd112d779c94e46a
 }
