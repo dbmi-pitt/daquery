@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.transaction.Transactional;
@@ -126,8 +127,10 @@ public class SiteEndpoint extends AbstractEndpoint {
             else
             	return Response.status(BAD_REQUEST).build();
     	} catch (HibernateException he) {
+    		logger.log(Level.SEVERE, "An unexpected database error occured while getting site information.", he);
     		return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
+        	logger.log(Level.SEVERE, "An unexpected error occured while getting site information.", e);
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
