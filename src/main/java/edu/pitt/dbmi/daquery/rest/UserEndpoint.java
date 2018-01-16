@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -320,6 +321,48 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	if(r == null) return(ResponseHelper.getBasicResponse(400, "role " + role + " is invalid."));
 	    	RoleDAO.grantRemoteUserRole(r.getId(), userId, siteId, netId);
 	    	return(ResponseHelper.getBasicResponse(200, "saved"));
+    	}
+    	catch(Throwable t)
+    	{
+    		String msg = "Unexpected error while adding a remote role";
+    		logger.log(Level.SEVERE, msg, t);
+    		return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for mor information."));
+    	}
+    	
+    }
+    
+    /**
+     * Revoke a role for a remote (non-local) user.
+     * 
+     * @param userId  The user's UUID.
+     * @param siteId The site UUID of the user's site.
+     * @param netId The network UUID where the user will have permission.
+     * @param role The role (as a string) for the user.  Valid values are AGGREGATE_QUERIER and DATA_QUERIER 
+     * @return
+     */
+    @DELETE
+    @Path("/remote-role")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response revokeemoteRole(@DefaultValue("") @FormParam("user-id") String userId,
+									@DefaultValue("") @FormParam("site-id") String siteId,
+									@DefaultValue("") @FormParam("network-id") String netId,
+									@DefaultValue("") @FormParam("role") String role)
+    {
+    	try
+    	{
+    		if(StringHelper.isEmpty(userId)) return(ResponseHelper.getBasicResponse(400, "user-id is a required parameter"));
+	    	if(StringHelper.isEmpty(siteId)) return(ResponseHelper.getBasicResponse(400, "site-id is a required parameter"));
+	    	if(StringHelper.isEmpty(netId)) return(ResponseHelper.getBasicResponse(400, "network-id is a required parameter"));
+	    	if(StringHelper.isEmpty(role)) return(ResponseHelper.getBasicResponse(400, "role is a required parameter"));
+	    	
+	    	String roleStr = role.toUpperCase().trim();
+	    	if(! (roleStr.equals("AGGREGATE_QUERIER") || roleStr.equals("DATA_QUERIER")))
+	    		return(ResponseHelper.getBasicResponse(400, "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER"));
+
+	    	Role r = RoleDAO.queryRoleByName(role);
+	    	if(r == null) return(ResponseHelper.getBasicResponse(400, "role " + role + " is invalid."));
+	    	RoleDAO.deleteRemoteRoleByParams(r.getId(), userId, siteId, netId);
+	    	return(ResponseHelper.getBasicResponse(200, "deleted"));
     	}
     	catch(Throwable t)
     	{
