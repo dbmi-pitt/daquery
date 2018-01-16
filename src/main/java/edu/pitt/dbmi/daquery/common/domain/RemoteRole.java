@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import com.google.gson.annotations.Expose;
@@ -19,6 +21,9 @@ import com.google.gson.annotations.Expose;
 
 @Entity
 @Table(name="REMOTE_USER_ROLE")
+@NamedQueries({
+@NamedQuery(name=RemoteRole.FIND_BY_PARAMS, query="SELECT r FROM RemoteRole r WHERE r.roleId = :roleId and r.userId = :userId and r.siteId = :siteId and r.networkId = :netId"),
+})
 public class RemoteRole
 {
 	/*
@@ -30,6 +35,8 @@ CREATE TABLE REMOTE_USER_ROLE
   NETWORK_ID varchar(50)
 }
 	 */
+	
+	public static final String FIND_BY_PARAMS = "RemoteRole.findByParams";
 	
 	@Expose
 	@Id
