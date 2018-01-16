@@ -29,7 +29,12 @@ public class RoleDAO extends AbstractDAO {
     	{
     		sess = HibernateConfiguration.openSession();
     		RemoteRole role = new RemoteRole(id, userId, siteId, netId);
+    		
+    		sess.getTransaction().begin();
+    			
     		sess.save(role);
+    		
+    		sess.getTransaction().commit();
     	}
     	catch(Throwable t)
     	{
