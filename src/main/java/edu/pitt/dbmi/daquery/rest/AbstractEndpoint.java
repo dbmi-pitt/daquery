@@ -105,10 +105,7 @@ public class AbstractEndpoint {
 			}
 		}
 		String url = site.getUrl() + "daquery/ws/" + serviceName + args;
-		System.out.println(url);
-		System.out.println("http://localhost:8080/daquery/ws/users/user-info");
-		Response resp = client.target(url).request(MediaType.APPLICATION_JSON).get();
-		
+		Response resp = client.target(url).request(MediaType.APPLICATION_JSON).get();		
 		return(resp);
 	}		
 }
