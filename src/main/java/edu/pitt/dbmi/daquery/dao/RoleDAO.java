@@ -75,6 +75,51 @@ public class RoleDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
             throw e;
         }
-    }    
+    }
+
+    public static RemoteRole queryRemoteRoleByParams(long roleId, String userId, String siteId, String netId) throws Exception {
+    	try {
+    		if(StringHelper.isEmpty(userId)) return(null);
+    		if(StringHelper.isEmpty(siteId)) return(null);
+    		if(StringHelper.isEmpty(netId)) return(null);
+    		
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		RemoteRole rr = null;
+    		pList.add( new ParameterItem("roleId", roleId) );
+    		pList.add( new ParameterItem("userId", userId) );
+    		pList.add( new ParameterItem("siteId", siteId) );
+    		pList.add( new ParameterItem("netId", netId) );
+			
+    		rr = executeQueryReturnSingle(RemoteRole.FIND_BY_PARAMS, pList, logger);
+    		
+	        return rr;
+	    
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+        }
+    }
+    
+    public static void deleteRemoteRoleByParams(long roleId, String userId, String siteId, String netId) throws Exception {
+    	Session sess = null;
+    	
+    	try {
+    		sess = HibernateConfiguration.openSession();
+    		
+    		RemoteRole rr = RoleDAO.queryRemoteRoleByParams(roleId, userId, siteId, netId);
+    		
+    		sess.getTransaction().begin();
+			
+    		sess.delete(rr);
+    		
+    		sess.getTransaction().commit();
+    		
+        } catch (Throwable t) {
+        	throw t;
+        } finally {
+    		if(sess != null) sess.close();
+    	}
+    }
 }
 
