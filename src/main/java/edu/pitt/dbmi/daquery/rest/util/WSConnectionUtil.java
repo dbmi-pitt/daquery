@@ -78,7 +78,7 @@ public class WSConnectionUtil {
 		return retString;
 	}
 
-	private static String getKeystorePassword(String keystorePath) {
+	public static String getKeystorePassword() {
 		String retString = null;
 		File configDir = new File(AppProperties.getHomeDirectory(), "lib");
 		File configFile = new File(configDir, "shrine.conf");
@@ -94,7 +94,7 @@ public class WSConnectionUtil {
 		if (keystorePath == null) {
 			throw new Exception("No keystore file found.");
 		}
-		String keystorePassword = getKeystorePassword(keystorePath);
+		String keystorePassword = getKeystorePassword();
 		if (keystorePassword == null) {
 			throw new Exception("No password for keystore found.");
 		}

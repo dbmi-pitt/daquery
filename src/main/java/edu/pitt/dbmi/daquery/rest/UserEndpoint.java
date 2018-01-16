@@ -6,7 +6,6 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
-import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -19,14 +18,11 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
@@ -44,30 +40,17 @@ import javax.ws.rs.core.UriInfo;
 
 import org.hibernate.HibernateException;
 import org.hibernate.NonUniqueResultException;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.annotations.Expose;
-
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
-import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
-import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
-import edu.pitt.dbmi.daquery.common.domain.Network;
-import edu.pitt.dbmi.daquery.common.domain.RemoteUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
@@ -157,7 +140,8 @@ public class UserEndpoint extends AbstractEndpoint {
             return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
+    // start of  diff here    
     /**
      * Retrieve remote users with specific characteristics related to their roles.  If a site_id is
      * specified and no role is specified, the query will return all users from the
@@ -442,6 +426,8 @@ public class UserEndpoint extends AbstractEndpoint {
     }
     
     
+    //end of diff here
+
     /**
      * This method uses login information to authenticate a user.  It generates a new JWT
      * (JSON Web Token) if the user's information is valid.
@@ -603,6 +589,89 @@ public class UserEndpoint extends AbstractEndpoint {
     }
 
     /**
+     * Create a new user admin account with the given login.
+     * Example URL: daquery-ws/ws/users/firstadmin?login=adminuser&password=demouser
+     * @param login- a new user login
+     * @return either a javax.ws.rs.core.Response confirming the account creation
+     * or a SERVER ERROR if there was a problem. 
+     */
+    
+/*    @POST
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/firstadmin")
+    public Response createFirstAdmin(@Context HttpHeaders httpheaders, @QueryParam("login") String login,
+    		@QueryParam("password") String password) {
+
+        Principal principal = securityContext.getUserPrincipal();
+        String username = principal.getName();
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+        
+        try {
+        	//extract the token sent by the central server
+            // Get the HTTP Authorization header from the request
+            String authorizationHeader = 
+                httpheaders.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+            // Check if the HTTP Authorization header is present and formatted correctly 
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                throw new NotAuthorizedException("Authorization header must be provided");
+            }
+
+            // Extract the token from the HTTP Authorization header
+            String token = authorizationHeader.substring("Bearer".length()).trim();
+        	
+	    	if (login.isEmpty() || password.isEmpty() || !validateAdminToken(token)) 
+	    		return Response.status(BAD_REQUEST).build();
+	    	
+	    	
+	    	//TODO: see if we can combine the validateAdminToken with isValidAdminRequest
+	    	if (!isValidAdminRequest(token)) {
+	    		return Response.status(BAD_REQUEST).build();	    		
+	    	}
+	    	
+	    	String loggermsg = "login=" + login + " password=" + password;
+	        logger.info("Trying to create ADMIN user with: " + loggermsg);
+        
+	        emf = Persistence.createEntityManagerFactory("derby");
+	        em = emf.createEntityManager();
+	
+	        em.getTransaction().begin();
+	
+	        DaqueryUser newUser = new DaqueryUser(login, password);
+	        em.persist(newUser);
+	        
+	        //TODO: Assign this user to the Admin group
+	
+	        em.getTransaction().commit();
+	
+	        logger.info("Done trying to create admin user: " + newUser.toString());
+	        
+	        //TODO: build some JSON into the response.  Return the new UUID
+	        
+	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
+        } catch (ExpiredJwtException expired) {
+        	logger.info("Expired token: " + expired.getLocalizedMessage());
+        	//TODO: This needs to be reported back to the UI so it can handle it
+            try{
+            	return(ResponseHelper.expiredTokenResponse(login, uriInfo));
+            } catch(Throwable t) {
+            	String msg = "Unexpected error while generating an expired token response.";
+            	logger.log(Level.SEVERE, msg, t);
+            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            }
+        } catch (Exception e) {
+	        return Response.serverError().build();
+	    } finally {
+	    	if (em != null) {
+	    		em.close();
+	    	}
+	    }
+    } */
+    
+    /**
      * Get a JSON string representing a user given the user's UUID
      * example url: daquery-ws/ws/users/507f5c77-265c-4fc2-bed7-986bf3182786
      * @param id- the user's UUID
@@ -627,7 +696,9 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     }
     
-
+    /**
+     * 
+     */
     @PUT
     @Secured
     @Path("/update-role/{id}")
