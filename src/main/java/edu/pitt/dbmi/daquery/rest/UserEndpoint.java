@@ -6,23 +6,23 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
-import java.security.Key;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
@@ -32,38 +32,35 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
-import org.hibernate.HibernateException;
-import org.hibernate.NonUniqueResultException;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
-import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
-import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.annotations.Expose;
+
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.RemoteUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
-import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.common.util.JSONHelper;
-import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
-
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
-import io.jsonwebtoken.ClaimJwtException;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
 
 
 @Path("/users")
@@ -198,7 +195,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	             " where site.id = outgoing_query_sites.site_id and network.id = outgoing_query_sites.network_id  and upper(trim(site.site_id)) = '" + siteId.trim().toUpperCase() + "'";
 	    	SQLQuery netQ = sess.createSQLQuery(sql);
 	    	List<Object> nIds = netQ.list();
-	    	for(Object nid : netIds)
+	    	for(Object nid : nIds)
 	    		netIds.add( ((String) nid));
 	    	
 	    	if(netIds.size() == 0)
@@ -218,12 +215,12 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	
 	    	//get the role info and add it to user info
 	    	String roleSql = "select remote_user_role.user_id, remote_user_role.site_id, remote_user_role.network_id, role.name from remote_user_role, role";
-	    	sql = sql + " " + "where remote_user_role.site_id = '" + siteId + "' and remote_user_role.role_id  = role.id";
+	    	roleSql = roleSql + " " + "where remote_user_role.site_id = '" + siteId + "' and remote_user_role.role_id  = role.id";
 	    	if(hasNetwork)
 	    	{
-	    		sql = sql + " " + "and network_id = '" + networkId + "'";
+	    		roleSql = roleSql + " " + "and network_id = '" + networkId + "'";
 	    	}
-			SQLQuery q = sess.createSQLQuery(sql);
+			SQLQuery q = sess.createSQLQuery(roleSql);
 			List<Object []> vals = q.list();
 			
 			Hashtable<String, Hashtable<String, RemoteUser>> rolesBySiteAndNet = new Hashtable<String, Hashtable<String, RemoteUser>>();
@@ -379,6 +376,7 @@ public class UserEndpoint extends AbstractEndpoint {
     
     private class ReturnNetwork extends DaqueryObject
     {
+    	private static final long serialVersionUID = 29200238324532342l;
     	@Expose
     	String networkId;
     	@Expose
@@ -392,6 +390,7 @@ public class UserEndpoint extends AbstractEndpoint {
     
     private class ReturnSite extends DaqueryObject
     {
+    	private static final long serialVersionUID = 8478373843239834l;
     	@Expose
     	String siteId;
     	@Expose
@@ -898,12 +897,12 @@ public class UserEndpoint extends AbstractEndpoint {
      * @return true if the central server can validate the request, return false otherwise
      * @throws Exception pass any exception back to the calling method
      */
-    private boolean isValidAdminRequest(String token) throws Exception {
+/*    private boolean isValidAdminRequest(String token) throws Exception {
     	//TODO: open a webservice call to the central server
     	//to validate this token.  This call should return a JSON Object like:
     	//{'valid':'true'}
     	return true;
-    }
+    } */
         
 
     /**
@@ -916,7 +915,7 @@ public class UserEndpoint extends AbstractEndpoint {
      * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
      * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
      */
-    private boolean validateAdminToken(String token) throws Exception {
+/*    private boolean validateAdminToken(String token) throws Exception {
         // Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
     	logger.info("Trying to validate this admin token: " + token);
@@ -947,6 +946,6 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	throw unsupported;
 	    }
 
-     }
+     } */
 
 }
