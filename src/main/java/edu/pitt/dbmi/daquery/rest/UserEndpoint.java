@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
@@ -191,8 +192,8 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	
 	    	//get a list of networks that the specified site is connected to
 	    	List<String> netIds = new ArrayList<String>();
-	    	String sql = "select distinct network.network_id from site, outgoing_query_sites, network " +
-	    	             " where site.id = outgoing_query_sites.site_id and network.id = outgoing_query_sites.network_id  and upper(trim(site.site_id)) = '" + siteId.trim().toUpperCase() + "'";
+	    	String sql = "select distinct network.network_id from site, incoming_query_sites, network " +
+	    	             " where site.id = incoming_query_sites.site_id and network.id = incoming_query_sites.network_id  and upper(trim(site.site_id)) = '" + siteId.trim().toUpperCase() + "'";
 	    	SQLQuery netQ = sess.createSQLQuery(sql);
 	    	List<Object> nIds = netQ.list();
 	    	for(Object nid : nIds)
@@ -298,11 +299,11 @@ public class UserEndpoint extends AbstractEndpoint {
      */
     @POST
     @Path("/remote-role")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response addRemoteRole(@DefaultValue("") @QueryParam("user-id") String userId,
-    							  @DefaultValue("") @QueryParam("site-id") String siteId,
-    							  @DefaultValue("") @QueryParam("network-id") String netId,
-    							  @DefaultValue("") @QueryParam("role") String role)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response addRemoteRole(@DefaultValue("") @FormParam("user-id") String userId,
+    							  @DefaultValue("") @FormParam("site-id") String siteId,
+    							  @DefaultValue("") @FormParam("network-id") String netId,
+    							  @DefaultValue("") @FormParam("role") String role)
     {
     	try
     	{
