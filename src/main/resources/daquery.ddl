@@ -51,7 +51,7 @@ CREATE TABLE REMOTE_USER_ROLE
   ROLE_ID bigint NOT NULL,
   SITE_ID varchar(50),
   NETWORK_ID varchar(50)
-)
+);
 
 CREATE TABLE "APP"."SITE"
 (
