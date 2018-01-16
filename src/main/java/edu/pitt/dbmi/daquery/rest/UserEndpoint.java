@@ -718,7 +718,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        if (user == null)
 	            return Response.status(NOT_FOUND).build();
 	        
-	        boolean hasAdminRole = DaqueryUserDAO.hasRole(loggedInUser.getId(), "admin");
+	        boolean hasAdminRole = DaqueryUserDAO.hasRole(loggedInUser.getId(), null, "admin");
 	        if (!hasAdminRole) {
 	        	return Response.status(UNAUTHORIZED).build();
 	        }
@@ -797,7 +797,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        //1.  has an admin role
 	        // -OR-
 	        //2.  is the same person represented by the updatedUser
-	        boolean hasAdminRole = DaqueryUserDAO.hasRole(loggedInUser.getId(), "admin");
+	        boolean hasAdminRole = DaqueryUserDAO.hasRole(loggedInUser.getId(), null, "admin");
 	        boolean isMatchingUser = loggedInUser.getId().equalsIgnoreCase(user.getId());
 
 	        //if the current user does not match, return a 401

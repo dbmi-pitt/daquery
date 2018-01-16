@@ -89,9 +89,7 @@ public class RoleTest {
 			session.getTransaction().begin();
 			session.update(u);
 			session.getTransaction().commit();
-			
-			assertTrue(DaqueryUserDAO.hasRole(u.getId(), "admin"));
-			
+			assertTrue(DaqueryUserDAO.hasRole(u.getId(), null, "admin"));
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {

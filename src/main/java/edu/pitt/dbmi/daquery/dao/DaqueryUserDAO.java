@@ -9,6 +9,9 @@ import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 import org.hibernate.NonUniqueResultException;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.internal.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
@@ -16,6 +19,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.rest.UserEndpoint;
 
@@ -223,24 +227,44 @@ public class DaqueryUserDAO extends AbstractDAO {
      * False if the user's role list does not contain the role
      * @throws Exception
      */
-    public static boolean hasRole(String uuid, String role) throws Exception
+    public static boolean hasRole(String userUUID, String networkUUID, String role) throws Exception
     {
     	if (role.isEmpty()) {
     		return true;
     	}
+    	if(StringHelper.isEmpty(userUUID)) return(false);
+    	Session sess = null;
+    	
     	try {
-    		DaqueryUser currentUser = queryUserByID(uuid);
-    		List<Role> roleList = currentUser.getRoles();
-    		List<String> roleNames = new ArrayList<String>();
-    		if (roleList == null || roleList.isEmpty()) {
-    			return false;
+    		DaqueryUser currentUser = queryUserByID(userUUID);
+    		if(currentUser != null)
+    		{
+	    		List<Role> roleList = currentUser.getRoles();
+	    		List<String> roleNames = new ArrayList<String>();
+	    		if (roleList == null || roleList.isEmpty()) {
+	    			return false;
+	    		}
+	    		//build a String list of the role names
+	    		//make them lowercase to support case-insensitive matching
+	    		String trimmedRole = role.toLowerCase().trim();
+	    		for (Role r : roleList) {
+	    			if(trimmedRole.equals(r.getName().toLowerCase().trim()))
+	    					return(true);
+	    		}
     		}
-    		//build a String list of the role names
-    		//make them lowercase to support case-insensitive matching
-    		String trimmedRole = role.toLowerCase().trim();
-    		for (Role r : roleList) {
-    			if(trimmedRole.equals(r.getName().toLowerCase().trim()))
-    					return(true);
+    		//if it isn't a local role, maybe it is a remote user
+    		if(networkUUID != null)
+    		{
+    			String sql = "select * from REMOTE_USER_ROLE, ROLE " +
+    						   "where ROLE.id = REMOTE_USER_ROLE.role_id and " +
+    					            "upper(trim(REMOTE_USER_ROLE.user_id)) = '" + userUUID.trim().toUpperCase() + "' and " +
+    						        "upper(trim(REMOTE_USER_ROLE.network_id)) = '" + networkUUID.trim().toUpperCase() + "' and " +
+    					            "upper(trim(ROLE.name)) = '" + role.trim().toUpperCase() + "'";
+    			
+    			sess = HibernateConfiguration.openSession();
+    			SQLQuery q = sess.createSQLQuery(sql);
+    			List vals = q.list();
+    			return(vals != null && vals.size() > 0);
     		}
     		return(false);
         } catch (HibernateException e) {
@@ -249,6 +273,10 @@ public class DaqueryUserDAO extends AbstractDAO {
             throw e;
     	} catch (Exception e) {
 	        throw e;    		
+    	}
+    	finally
+    	{
+    		if(sess != null) sess.close();
     	}
     	
     }
