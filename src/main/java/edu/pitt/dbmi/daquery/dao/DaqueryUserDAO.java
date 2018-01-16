@@ -255,7 +255,7 @@ public class DaqueryUserDAO extends AbstractDAO {
     		//if it isn't a local role, maybe it is a remote user
     		if(networkUUID != null)
     		{
-    			String sql = "select * from REMOTE_USER_ROLE, ROLE " +
+    			String sql = "select REMOTE_USER_ROLE.USER_ID from REMOTE_USER_ROLE, ROLE " +
     						   "where ROLE.id = REMOTE_USER_ROLE.role_id and " +
     					            "upper(trim(REMOTE_USER_ROLE.user_id)) = '" + userUUID.trim().toUpperCase() + "' and " +
     						        "upper(trim(REMOTE_USER_ROLE.network_id)) = '" + networkUUID.trim().toUpperCase() + "' and " +
@@ -267,11 +267,11 @@ public class DaqueryUserDAO extends AbstractDAO {
     			return(vals != null && vals.size() > 0);
     		}
     		return(false);
-        } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
+        } catch (HibernateException he) {
+    		logger.log(Level.SEVERE, "Database error while checking a user role.", he);
+            throw he;
     	} catch (Exception e) {
+    		logger.log(Level.SEVERE, "Unhandled error while checking a user role.", e);
 	        throw e;    		
     	}
     	finally
