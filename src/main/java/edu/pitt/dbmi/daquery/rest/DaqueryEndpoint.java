@@ -1,8 +1,11 @@
 package edu.pitt.dbmi.daquery.rest;
 
 import static edu.pitt.dbmi.daquery.rest.AbstractEndpoint.getFromRemoteSite;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.io.File;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +18,8 @@ import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -52,12 +57,13 @@ import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
 {
-	private final static Logger log = Logger.getLogger(DaqueryEndpoint.class.getName());
+	private final static Logger logger = Logger.getLogger(DaqueryEndpoint.class.getName());
 
     @Context
     private UriInfo uriInfo;
@@ -203,7 +209,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	}
     	catch(Throwable t)
     	{
-    		log.log(Level.SEVERE, "An unexpeced error occured while obtaining a list of available networks and sites from the central server.", t);
+    		logger.log(Level.SEVERE, "An unexpeced error occured while obtaining a list of available networks and sites from the central server.", t);
     		return(ResponseHelper.getBasicResponse(500, "An unexpected error occured while obtaining a list of avaiilable networks and sites from the central server.  See the appication logs for more information."));
     	}
     	
@@ -244,14 +250,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	    	String homeDir = AppProperties.getHomeDirectory();
 	    	if(StringHelper.isEmpty(homeDir))
 	    	{
-	    		log.log(Level.SEVERE, "A configured database directory was not found.  This directory is the Tomcat conf directory which is found with the global environment variable CATALINA_HOME.");
+	    		logger.log(Level.SEVERE, "A configured database directory was not found.  This directory is the Tomcat conf directory which is found with the global environment variable CATALINA_HOME.");
 	    		return(ResponseHelper.getBasicResponse(500, "Unable to find a configured database helper.  It is possible that the CATALINA_HOME environment variable needs to be set globaly."));
 	    	}
 	    	String confDir = AppProperties.getConfDirectory();
 	    	File confDirF = new File(confDir);
 	    	if(! confDirF.exists() || ! confDirF.canWrite())
 	    	{
-	    		log.log(Level.SEVERE, "The database directory, " + confDir + "does not exist or is not writable.");
+	    		logger.log(Level.SEVERE, "The database directory, " + confDir + "does not exist or is not writable.");
 	    		return(ResponseHelper.getBasicResponse(500, "Unable to write to the configured database directory: " + confDir));
 	    	}
 	    	
@@ -306,7 +312,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An unexpected error occured while setting up the site.", t);
+			logger.log(Level.SEVERE, "An unexpected error occured while setting up the site.", t);
 			return(ResponseHelper.getBasicResponse(500, "An unexpected error occured while setting up the site.  Check the application logs for more information."));
 		}
 	}
@@ -392,7 +398,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				}
 				catch(Throwable e)
 				{
-					log.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
+					logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
 					DaqueryResponse response = new DaqueryResponse(true);
 					response.setStatusEnum(ResponseStatus.ERROR);
 					response.setErrorMessage(e.getMessage());
@@ -420,7 +426,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		catch(Throwable t)
 		{
 			String msg = "An unexpected error occured while trying process an InquiryRequest.";
-			log.log(Level.SEVERE, msg, t);
+			logger.log(Level.SEVERE, msg, t);
 			return(ResponseHelper.getBasicResponse(500, msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name") + " for further information."));
 		}
 	}
@@ -453,7 +459,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	catch(Throwable t)
     	{
     		String msg = "An unhandled exception occured while retrieving a response with id: " + id;
-    		log.log(Level.SEVERE, msg, t);
+    		logger.log(Level.SEVERE, msg, t);
     		return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
     	}
     	
@@ -481,7 +487,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			sqlqueryDAO.closeCurrentSessionwithTransaction();
     	} catch (Throwable t) {
 			String msg = "An unhandled exception occured while saving sql query";
-    		log.log(Level.SEVERE, msg, t);
+    		logger.log(Level.SEVERE, msg, t);
 			return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
 		} finally {
 			if(sqlqueryDAO.getCurrentSession() != null)
@@ -504,7 +510,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		return ResponseHelper.getJsonResponseGen(200, RoleDAO.queryAllRoles()); //Response.ok(200).entity(RoleDAO.queryAllRoles().toJson()).build(); 
     	} catch (Throwable t) {
     		String msg = "An unhandled exception occured while getting roles";
-    		log.log(Level.SEVERE, msg, t);
+    		logger.log(Level.SEVERE, msg, t);
 			return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
     	}
     }
@@ -541,6 +547,53 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return(rVal);
 		
 	}
+	
+	/**
+     * renew JWT.
+     * (JSON Web Token) if the user's information is valid.
+     * example URL: daquery-ws/ws/renew-jwt
+     * @return 200 with jwt
+     * otherwise, return a BAD REQUEST.  Return an UNAUTHORIZED for any other failure.
+     */
+    @GET
+    @Secured
+    @Path("/renew-jwt")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response renewJWT(@HeaderParam(HttpHeaders.AUTHORIZATION) String jwt) {
+
+    	DaqueryUser user = null;
+    	Site mySite = null;
+    	try {
+    		mySite = SiteDAO.getLocalSite();
+    		
+    		Principal principal = securityContext.getUserPrincipal();
+            String uuid = principal.getName();
+            user = DaqueryUserDAO.queryUserByID(uuid);
+            
+    		 // Get the HTTP Authorization header from the request
+    		logger.log(Level.INFO, "#### renew jwt : " + jwt);
+            
+            Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), mySite.getSiteId(), null);
+
+            return rVal;
+
+        } catch (ExpiredJwtException expired) {
+        	logger.info("Expired token: " + expired.getLocalizedMessage());
+            try {
+            	String siteId = (mySite == null)?null:mySite.getSiteId();
+            	return(ResponseHelper.expiredTokenResponse(user.getId(), siteId));
+            } catch(Throwable t) {
+            	String msg = "Unexpected error while generating an expired token response.";
+            	logger.log(Level.SEVERE, msg, t);
+            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            }
+        } catch (Exception e) {
+        	e.printStackTrace();
+            return Response.status(UNAUTHORIZED).build();
+        }
+    }
+
 	
 	private static Response callCentralServerAuth(String siteName, String siteKey) throws DaqueryException
 	{
