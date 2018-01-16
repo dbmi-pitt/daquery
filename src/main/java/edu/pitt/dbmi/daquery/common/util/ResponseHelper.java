@@ -34,7 +34,6 @@ public class ResponseHelper {
         long t=date.getTimeInMillis();
         //add fifteen minutes to current time to create
         //a token that expires in 15 minutes (15 * 60 milliseconds)
-        Date fifteenMinuteExpiry = new Date(t + (15 * 60000));
         String jwtToken = Jwts.builder()
                 .setSubject(userUuid)
                 .setIssuer(siteUUID)
