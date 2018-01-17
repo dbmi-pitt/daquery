@@ -30,7 +30,7 @@
       <tr>
         <td><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}" (click)="requestGroup.active = !requestGroup.active"></i> {{requestGroup.key}}</td>
         <td>{{ requestGroup.val[0].direction }}</td>
-        <td>{{ requestGroup.val[0].responses[0].replyTimestamp }}</td>
+        <td>{{ requestGroup.val[0].responses[0].replyTimestamp | amTimeAgo }}</td>
         <td></td>
       </tr>
       <tr *ngIf="requestGroup.active">
