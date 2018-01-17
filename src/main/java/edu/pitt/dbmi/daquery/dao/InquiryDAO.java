@@ -46,9 +46,10 @@ public class InquiryDAO extends AbstractDAO {
 				  				     .list();
 		List ret = new ArrayList();
 		for(Object a : i) {
-			if(((Inquiry) a).getRequests().size() == 0) {
-				ret.add(a);
-			}
+			Inquiry inquiry = ((Inquiry) a);
+			if(inquiry.getRequests().size() == 0)
+				if(inquiry.getDataType().equals("SQL_QUERY")) 
+					ret.add((SQLQuery)inquiry);
 		}
 		
 		return ret;

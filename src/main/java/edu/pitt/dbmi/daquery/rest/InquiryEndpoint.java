@@ -157,7 +157,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             inquiry.setVersion(1);
             inquiry.setInquiryName(form.get("inquiryName").toString());
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
-            ((SQLQuery) inquiry).setCode(form.get("oracleQuery").toString());
+            ((SQLQuery) inquiry).setCode(form.get("sqlQuery").toString());
             dao.save(inquiry);
             dao.closeCurrentSessionwithTransaction();
             
