@@ -32,11 +32,11 @@ export class NewQueryComponent implements OnInit {
         network: new FormControl('', Validators.required),
         sitesToQuery: this.fb.array([]),
         dataType: new FormControl('aggregate'),
-        inquiryName: 'continue edit inquiry',
+        inquiryName: inquiry.inquiryName,
         studyName: '',
-        inquiryDescription: '',
+        inquiryDescription: inquiry.inquiryDescription,
         oracleQuery: '',
-        sqlQuery: ''
+        sqlQuery: inquiry.code
       });
     } else {
       this.inquiryForm = this.fb.group({
@@ -74,27 +74,29 @@ export class NewQueryComponent implements OnInit {
     this.onSending = true;
     const requestGroupUUID = this.generateUUID();
     this.inquiryForm.value.sitesToQuery.forEach((site) => {
-      const request = {
-        requestSite: {
-          siteId: site.siteId,
-        },
-        network: {
-          networkId: this.inquiryForm.value.network
-        },
-        requestGroup: requestGroupUUID,
-        inquiry: {
-          version: 1,
-          dataType: 'SQL_QUERY',
-          aggregate: true,
-          code: this.inquiryForm.value.sqlQuery
-        }
-      };
+      if(site.check){
+        const request = {
+          requestSite: {
+            siteId: site.siteId,
+          },
+          network: {
+            networkId: this.inquiryForm.value.network
+          },
+          requestGroup: requestGroupUUID,
+          inquiry: {
+            version: 1,
+            dataType: 'SQL_QUERY',
+            aggregate: true,
+            code: this.inquiryForm.value.sqlQuery
+          }
+        };
 
-      console.log(request);
-      this.requestService.sendRequest(request)
-                         .subscribe(data => {
-                           location.reload();
-                         });
+        console.log(request);
+        this.requestService.sendRequest(request)
+                          .subscribe(data => {
+                            location.reload();
+                          });
+      }
     })
   }
 

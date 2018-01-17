@@ -3,16 +3,14 @@
     <caption>Inquiries</caption>
     <thead>
       <tr>
-        <th>Inquiry Name</th>
+        <th>Query Name</th>
         <th>Type</th>
-        <th>Date/Time</th>
       </tr>
     </thead>
     <tbody *ngFor="let inquiry of inquiries">
       <tr>
         <td>{{inquiry.inquiryName}}</td>
         <td>{{inquiry.dataType}}</td>
-        <td>{{inquiry.datetime}}</td>
         <td>
           <button class="btn btn-primary" (click)="onEditClick(inquiry)">Continue edit</button>
         </td>
