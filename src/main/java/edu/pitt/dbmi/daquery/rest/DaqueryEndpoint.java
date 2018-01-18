@@ -363,7 +363,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			{	
 				request.setDirection("OUT");
 	
-				String requesterId = request.getRequester().getId();
 				if(request.getInquiry() == null)
 					return(ResponseHelper.getBasicResponse(400, "No inquiry provided."));
 				
@@ -371,7 +370,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 //					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
 
 				if(! DaqueryUserDAO.hasRole(userOrId, net.getNetworkId(), "AGGREGATE_QUERIER"))
-					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
+					return(ResponseHelper.getBasicResponse(403, "User with id: " + userOrId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
 				
 				
 				//TODO decide if this is an immediate response or if it needs to be reviewed
