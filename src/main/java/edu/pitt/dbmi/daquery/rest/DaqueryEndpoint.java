@@ -355,18 +355,12 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			String securityToken = httpHeaders.getHeaderString("Authorization");
 			Jws<Claims> claims = ResponseHelper.parseToken(securityToken);
 			//System.out.println("ISSUER: " + claims.getBody().getIssuer());
-			String userOrId = claims.getBody().getSubject();
-			DaqueryUser requester = DaqueryUserDAO.getUserByNameOrId(userOrId);
-			
-			request.setRequester(requester);
-			
-			if(request.getInquiry().getInquiryId() == null)
-				request.getInquiry().setInquiryId(UUID.randomUUID().toString());
-			
-			
+			String userOrId = claims.getBody().getSubject();			
 			
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
+
+				
 				request.setDirection("OUT");
 				if(request == null || request.getRequester() == null || request.getRequester().getId() == null || StringHelper.isEmpty(request.getRequester().getId()))
 					return(ResponseHelper.getBasicResponse(400, "An Inquery request with a valid requster user object is required."));
@@ -375,12 +369,15 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				if(request.getInquiry() == null)
 					return(ResponseHelper.getBasicResponse(400, "No inquiry provided."));
 				
-				if(requester == null)
-					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
+//				if(requester == null)
+//					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
 				
 				if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
 					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
-	
+
+				if(! DaqueryUserDAO.hasRole(userOrId, net.getNetworkId(), "AGGREGATE_QUERIER"))
+					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
+				
 				
 				//TODO decide if this is an immediate response or if it needs to be reviewed
 				// if it needs to be reviewed create a DaqueryResponse object, mark as pending
