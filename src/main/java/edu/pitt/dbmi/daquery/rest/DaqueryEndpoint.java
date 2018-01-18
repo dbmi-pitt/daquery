@@ -361,11 +361,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
-
-				
 				request.setDirection("OUT");
-				if(request == null || request.getRequester() == null || request.getRequester().getId() == null || StringHelper.isEmpty(request.getRequester().getId()))
-					return(ResponseHelper.getBasicResponse(400, "An Inquery request with a valid requster user object is required."));
 	
 				String requesterId = request.getRequester().getId();
 				if(request.getInquiry() == null)
@@ -373,9 +369,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				
 //				if(requester == null)
 //					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
-				
-				if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
-					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
 
 				if(! DaqueryUserDAO.hasRole(userOrId, net.getNetworkId(), "AGGREGATE_QUERIER"))
 					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
