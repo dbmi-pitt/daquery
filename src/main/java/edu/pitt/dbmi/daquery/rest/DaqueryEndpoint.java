@@ -459,7 +459,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		ResponseTask rTask = (ResponseTask) QueueManager.getNamedQueue(MAIN_QUEUE).getTask(rVal.getResponseId());
     		if(rVal.getStatusEnum().isQueuedOrRunning() && rTask == null)
     		{
-    			rVal.setStatusEnum(ResponseStatus.ABANDONED);
+    			rVal.setStatusEnum(ResponseStatus.STALLED);
     			ResponseDAO.saveOrUpdate(rVal);
     		}
     	}
