@@ -34,6 +34,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
@@ -381,6 +384,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				DaqueryResponse rVal = null;
 				try
 				{
+					request.setId(null);
 					ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
 					QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
 					rVal = task.getResponse();
@@ -411,7 +415,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			else  //send to a remote site
 			{
 				AbstractDAO.save(request);
-				return postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
+				Response response = postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
+				if(response.getStatus() == 200)
+				{
+					String json = response.readEntity(String.class);
+					ObjectMapper mapper = new ObjectMapper();
+					TypeReference<DaqueryResponse> type = new TypeReference<DaqueryResponse>(){};
+					DaqueryResponse resp = mapper.readValue(json, type);
+					resp.setRequest(request);
+					resp.setId(null);
+					ResponseDAO.saveOrUpdate(resp);
+				}
+				return response;			
 			}
 		}
 		catch(Throwable t)
