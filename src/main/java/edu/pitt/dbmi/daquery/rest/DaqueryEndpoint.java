@@ -364,7 +364,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
-				request.setDirection("OUT");
+				
 	
 				if(request.getInquiry() == null)
 					return(ResponseHelper.getBasicResponse(400, "No inquiry provided."));
@@ -375,6 +375,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				if(! DaqueryUserDAO.hasRole(userOrId, net.getNetworkId(), "AGGREGATE_QUERIER"))
 					return(ResponseHelper.getBasicResponse(403, "User with id: " + userOrId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
 				
+				if(DaqueryUserDAO.isLocalUserId(userOrId))
+					request.setDirection("IN-OUT");
+				else
+					request.setDirection("IN");
 				
 				//TODO decide if this is an immediate response or if it needs to be reviewed
 				// if it needs to be reviewed create a DaqueryResponse object, mark as pending
@@ -414,6 +418,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			}
 			else  //send to a remote site
 			{
+				request.setDirection("OUT");
 				AbstractDAO.save(request);
 				Response response = postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 				if(response.getStatus() == 200)
