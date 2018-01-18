@@ -36,7 +36,7 @@ public class DaqueryRequest extends DaqueryObject
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
-	private long id;
+	private Long id;
     
 	@Expose
     @Column(name = "REQUESTID",unique = true, length=50)
@@ -90,8 +90,8 @@ public class DaqueryRequest extends DaqueryObject
 	@JoinColumn(name="NETWORK_ID")
 	private Network network;
 	
-	public long getId(){return(id);}
-	public void setId(long id){this.id = id;}
+	public Long getId(){return(id);}
+	public void setId(Long id){this.id = id;}
 	
 	public String getRequestId(){return(requestId);}
 	public void setRequestId(String id){requestId = id;}
