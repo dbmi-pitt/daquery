@@ -23,7 +23,7 @@ public class URLFilter implements Filter{
 			throws IOException, ServletException {
 		// TODO Auto-generated method stub
 		String url = ((HttpServletRequest)request).getRequestURL().toString();
-		if(!url.contains("/ws/") && !url.matches(".*\\.js$|.*\\.css$|.*\\.txt$|.*\\.jpg$|.*\\.ico$|.*\\.eot$|.*\\.svg$|.*\\.woff2$|.*\\.tff$|.*\\.woff$|.*\\.html$")) {
+		if(!url.contains("/ws/") && !url.matches(".*\\.js$|.*\\.css$|.*\\.txt$|.*\\.jpg$|.*\\.ico$|.*\\.eot$|.*\\.svg$|.*\\.woff2$|.*\\.ttf$|.*\\.woff$|.*\\.html$")) {
 			request.getRequestDispatcher("/index.html").forward(request, response);
 		} else {
 			chain.doFilter(request, response);
