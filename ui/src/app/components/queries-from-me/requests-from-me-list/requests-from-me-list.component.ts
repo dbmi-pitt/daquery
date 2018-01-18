@@ -45,7 +45,7 @@ export class RequestsFromMeListComponent implements OnInit {
 
                          this.requests.forEach((request) => {
                           let response = request.responses[0];
-                          if(!['ERROR', 'COMPLETED'].includes(response.status)){
+                          if(response && !['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
                              let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
                                console.log("calling " + response.id );
                                this.responseService.getResponse(response.responseId)

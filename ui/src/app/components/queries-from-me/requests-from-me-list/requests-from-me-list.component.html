@@ -30,7 +30,7 @@
       <tr>
         <td><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}" (click)="requestGroup.active = !requestGroup.active"></i> {{requestGroup.key}}</td>
         <td>{{ requestGroup.val[0].direction }}</td>
-        <td>{{ requestGroup.val[0].responses[0].replyTimestamp | amTimeAgo }}</td>
+        <td>{{ requestGroup.val[0].responses[0]?.replyTimestamp | amTimeAgo }}</td>
         <td></td>
       </tr>
       <tr *ngIf="requestGroup.active">
@@ -48,8 +48,8 @@
               <tr *ngFor="let request of requestGroup.val">
                 <td>{{ request.requestId }}</td>
                 <td>{{ request.requestSite.name }}</td>
-                <td>{{ request.responses[0].status }}</td>
-                <td>{{ request.responses[0].value }} <i *ngIf="!['ERROR', 'COMPLETED'].includes(request.responses[0].status)" class="fa fa-refresh fa-spin fa-1x fa-fw"></i></td>
+                <td>{{ request.responses[0]?.status }}</td>
+                <td>{{ request.responses[0]?.value }} <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED'].includes(request.responses[0]?.status)" class="fa fa-refresh fa-spin fa-1x fa-fw"></i></td>
               </tr>
             </tbody>
           </table>
