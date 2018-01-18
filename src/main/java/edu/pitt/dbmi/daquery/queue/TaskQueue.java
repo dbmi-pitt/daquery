@@ -24,6 +24,11 @@ public class TaskQueue
 		runNext();
 	}
 	
+	public synchronized Task getTask(String taskId)
+	{
+		return(tasksById.get(taskId));
+	}
+	
 	public synchronized void taskFinished(TaskRunner runner)
 	{
 		runningQueue.remove(runner);
