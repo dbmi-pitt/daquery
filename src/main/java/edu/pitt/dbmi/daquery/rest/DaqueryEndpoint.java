@@ -430,8 +430,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					resp.setRequest(request);
 					resp.setId(null);
 					ResponseDAO.saveOrUpdate(resp);
+					return ResponseHelper.getBasicResponse(200, "");
+				} else {
+					return response;
 				}
-				return response;			
 			}
 		}
 		catch(Throwable t)
