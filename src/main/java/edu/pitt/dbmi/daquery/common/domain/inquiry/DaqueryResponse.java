@@ -33,7 +33,7 @@ public class DaqueryResponse extends DaqueryObject
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
-	private long id;
+	private Long id;
 
     @Expose
     @Column(name = "RESPONSE_ID")
@@ -92,8 +92,8 @@ public class DaqueryResponse extends DaqueryObject
     	responseId = uuid;
     }
     
-    public long getId(){return(id);}
-    public void setId(long id){this.id = id;}
+    public Long getId(){return(id);}
+    public void setId(Long id){this.id = id;}
     
     public Date getReplyTimestamp(){return(replyTimestamp);}
     public void setReplyTimestamp(Date timestamp){replyTimestamp = timestamp;}
