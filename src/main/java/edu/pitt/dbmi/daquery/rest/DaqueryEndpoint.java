@@ -65,6 +65,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 {
 	private final static Logger logger = Logger.getLogger(DaqueryEndpoint.class.getName());
 
+	private final static String MAIN_QUEUE = "main";
+	
     @Context
     private UriInfo uriInfo;
     
@@ -391,7 +393,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				try
 				{
 					ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
-					QueueManager.getNamedQueue("main").addTask(task);
+					QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
 					rVal = task.getResponse();
 					rVal.setRequest(request);
 					ResponseDAO.saveOrUpdate(rVal);
@@ -448,12 +450,20 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	try
     	{
     		rVal = ResponseDAO.getResponseById(id);
+        	if(rVal == null)
+        		return(ResponseHelper.getBasicResponse(404, "Response not found." ));    		
     		Site mySite = SiteDAO.getLocalSite();
     		String requestSiteId = rVal.getRequest().getRequestSite().getSiteId();
     		if( !mySite.getSiteId().equals(requestSiteId))
     		{
     			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
     			return(getFromRemoteSite(remoteSite, "/response/" + id, null));    			
+    		}
+    		ResponseTask rTask = (ResponseTask) QueueManager.getNamedQueue(MAIN_QUEUE).getTask(rVal.getResponseId());
+    		if(rVal.getStatusEnum().isQueuedOrRunning() && rTask == null)
+    		{
+    			rVal.setStatusEnum(ResponseStatus.ABANDONED);
+    			ResponseDAO.saveOrUpdate(rVal);
     		}
     	}
     	catch(Throwable t)
@@ -462,10 +472,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		logger.log(Level.SEVERE, msg, t);
     		return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
     	}
-    	
-    	if(rVal == null)
-    		return(ResponseHelper.getBasicResponse(404, "Response not found." ));
-    	
+        	
         return Response.ok(200).entity(rVal.toJson()).build();    	
     }
     
