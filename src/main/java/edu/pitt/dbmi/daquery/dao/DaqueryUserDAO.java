@@ -99,6 +99,12 @@ public class DaqueryUserDAO extends AbstractDAO {
     	
     }
     
+    public static boolean isLocalUserId(String userUUID) throws Exception
+    {
+    	DaqueryUser user = DaqueryUserDAO.queryUserByID(userUUID);
+    	return(user != null);
+    }
+    
     public static DaqueryUser getUserByNameOrId(String nameOrId) throws Exception
     {
     	DaqueryUser user = queryUserByID(nameOrId);
