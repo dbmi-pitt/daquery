@@ -8,7 +8,8 @@ public enum ResponseStatus
 	QUEUED(TYPES.QUEUED),
 	EXECUTING(TYPES.EXECUTING),
 	COMPLETED(TYPES.COMPLETED),
-	ERROR(TYPES.ERROR);
+	ERROR(TYPES.ERROR),
+	ABANDONED(TYPES.ABANDONED);
 	
 	ResponseStatus(String val)
 	{
@@ -16,6 +17,11 @@ public enum ResponseStatus
 	}
 
 	String val = null;
+	
+	public boolean isQueuedOrRunning()
+	{
+		return(this.equals(QUEUED) || this.equals(EXECUTING));
+	}
 	
 	@Override
 	public String toString()
@@ -32,5 +38,6 @@ public enum ResponseStatus
 		public static final String EXECUTING = "EXECUTING";
 		public static final String ERROR = "ERROR";
 		public static final String COMPLETED = "COMPLETED";
+		public static final String ABANDONED = "ABANDONED";
 	} 
 }
