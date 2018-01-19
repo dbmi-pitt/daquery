@@ -1,7 +1,5 @@
 package edu.pitt.dbmi.daquery.rest;
 
-import static edu.pitt.dbmi.daquery.rest.AbstractEndpoint.getFromRemoteSite;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.io.File;
@@ -19,7 +17,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -114,6 +111,45 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return(ResponseHelper.getBasicResponse(200, "Hello Cruel World"));
 	}
     
+	
+	/**
+	 * Send and error message for testing purposes.
+	 * 
+	 * @param message A test error message.
+	 * @param responseCode An HTML error response code in the range 400 <= x < 600
+	 * @return
+	 */
+	@GET
+	@Path("/error")
+    @Produces(MediaType.APPLICATION_JSON)
+	public Response sendError(@DefaultValue("") @QueryParam("messge") String message, @DefaultValue("") @QueryParam("response-code") String responseCode)
+	{
+		int respCode = 500;
+		if(!StringHelper.isEmpty(responseCode))
+		{
+			try
+			{
+				respCode = Integer.parseInt(responseCode);
+				if(respCode < 400 || respCode >= 600)
+					return(ResponseHelper.getErrorResponse(400, "Response code must be in the range 400 <= x < 600", null, null));
+			}
+			catch(Exception e)
+			{
+				return(ResponseHelper.getErrorResponse(500, "Invalid response code " + responseCode, null, e));
+			}
+		}
+		String msg = (StringHelper.isEmpty(message))?"This is some descriptive text about what the error is.":message;
+		String longMsg = "This is a longer, more descriptive version of the other message.  It could be blank, so be carefull about output format. \n" + msg + "\n\n" + msg + "\n\n " + msg;
+		try
+		{
+			throw new DaqueryException("Generated error");
+		}
+		catch(DaqueryException ex)
+		{
+			return(ResponseHelper.getErrorResponse(respCode, msg, longMsg, ex));
+		}
+	}	
+	
 	@POST
 	@Path("/echopost")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -445,7 +481,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	}
 	
     @GET
-    @Secured
+   // @Secured
     @Path("/response/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
