@@ -162,7 +162,10 @@ public class AbstractEndpoint {
 		if (!siteUrl.endsWith("/")) {
 			siteUrl = siteUrl + "/";
 		}
-		retString = siteUrl + "daquery/ws/" + serviceName + args;
+		String sName = serviceName.trim();
+		if(sName.startsWith("/"))
+			sName = sName.substring(1); 
+		retString = siteUrl + "daquery/ws/" + sName + args;
 		return retString;
 	}
 //>>>>>>> f6e8dd79f9d96b9b8eda41a4bd112d779c94e46a
