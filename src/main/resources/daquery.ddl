@@ -160,7 +160,7 @@ CREATE TABLE DAQUERY_REQUEST
    SENT_TIMESTAMP timestamp,
    REQUESTER_ID varchar(50),
    INQUIRY_ID bigint,
-   DIRECTION varchar(4),
+   DIRECTION varchar(6),
    NETWORK_ID bigint,
    REQUEST_GROUP varchar(50)
 );
