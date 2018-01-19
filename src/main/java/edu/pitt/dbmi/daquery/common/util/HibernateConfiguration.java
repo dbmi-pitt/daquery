@@ -82,7 +82,7 @@ public class HibernateConfiguration {
         hibernateConf.setProperty("hibernate.connection.driver_class", "org.apache.derby.jdbc.EmbeddedDriver" )
         .setProperty("hibernate.connection.username", "")
     	.setProperty("hibernate.connection.password", "")
-    	.setProperty("hibernate.show_sql", "false")
+    	.setProperty("hibernate.show_sql", "true")
         
         .setProperty("hibernate.c3p0.acquire_increment", "1")
         .setProperty("hibernate.c3p0.idle_test_period","240")

@@ -5,12 +5,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -158,6 +160,57 @@ public class ResponseHelper {
    	
     }
 
+    /**
+     * Convert information about an error message into a json formated response.
+     * 
+     * @param responseCode The HTML error response code- should be in the 400-599 range, but is not checked
+     * @param message A short, human readable message. REQUIRED
+     * @param longMessage A more descriptive message.  OPTIONAL
+     * @param cause The root cause of the problem OPTIONAL
+     * 
+     * @return A web response with the error information encoded as json
+     */
+    public static Response getErrorResponse(int responseCode, String message, String longMessage, Throwable cause)
+    {
+    	String msg = null;
+    	ErrorInfo eInfo = null;
+    	try
+    	{
+    		msg = message;
+	    	if(msg == null)
+	    	{
+	    		msg = "Unexplained error recieved.";
+	    		DaqueryException ex;
+	    		if(cause == null)
+	    			ex = new DaqueryException(msg);
+	    		else
+	    			ex = new DaqueryException(msg, cause);
+	    		throw ex;
+	    	}
+    	}
+    	catch(DaqueryException e)
+    	{
+    		eInfo = new ErrorInfo(msg, longMessage, e);
+    	}
+    	
+    	try
+    	{
+    		if(eInfo == null)
+    			eInfo = new ErrorInfo(msg, longMessage, cause);
+    		return(getJsonResponseGen(responseCode, eInfo));
+    	}
+    	catch(Throwable t)
+    	{
+    		logger.log(Level.SEVERE, "Unexplained error while trying to send an error message.", t);
+    		if(eInfo != null && ! StringHelper.isBlank(eInfo.getStackTrace()))
+    			logger.log(Level.SEVERE, eInfo.getStackTrace());
+    		else if(cause != null)
+    			logger.log(Level.SEVERE, "Original Cause:", cause);
+    		return(getBasicResponse(500, "Unexplained error while trying to send another error message.  Please ask a site admin to check the site logs for more information."));
+    	}
+    	
+    }
+    
     /**
      * Given an HTTP status code and extra information for a json response,
      * construct a web response object with a json payload.
