@@ -21,8 +21,10 @@ public class CreateTestNetworks
 {
 	public static void main(String [] args) throws DaqueryException
 	{
-		AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
-		createTestNetworks();
+		//AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
+		//createTestNetworks();
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53/");
+		createShrineTestNetworks();
 	}
 	
 	public static List<Network> createTestNetworks() throws DaqueryException
@@ -103,6 +105,52 @@ public class CreateTestNetworks
 		return(nets);
 	}
 	
+	//create a set of Shrine SSL connections
+	public static List<Network> createShrineTestNetworks() throws DaqueryException
+	{
+		Properties props = PrivateProps.getProps();
+		                       
+		Site bSite = new Site("81590cc9-9bcd-470e-bc10-065080996842");
+		bSite.setName("dev02");
+		bSite.setAccessKey("abc123");
+		bSite.setTempKey(true);
+		bSite.setUrl("http://130.49.213.163:6443/");
+		bSite.setAdminEmail("shirey@pitt.edu");
+		
+		Site cSite = new Site("74059b65-056d-43a8-a705-b606c452ff71");
+		cSite.setName("dev03");
+		cSite.setAccessKey("123abc");
+		cSite.setTempKey(true);
+		cSite.setUrl("http://130.49.213.164:6443/");
+		cSite.setAdminEmail("chuck.borromeo@pitt.edu");		
+		
+		Site dSite = new Site("05b6db4d-a543-4ff6-8b9c-664b6153a104");
+		dSite.setName("shrine-dev01");
+		dSite.setAccessKey("xyz789");
+		dSite.setTempKey(true);
+		dSite.setUrl("http://130.49.213.165:6443/");
+		dSite.setAdminEmail("del20@pitt.edu");
+
+		DataModel modelA = CreateCDMModelInfo.makeModel(props.getProperty("cdm.url"),
+													   props.getProperty("cdm.username"),
+													   props.getProperty("cdm.password"), "CDM-SHRINE");
+		
+		
+		Network allNet = new Network("69fb4043-4de4-4763-b205-80e99c564730");
+		allNet.setOutgoingQuerySites(new HashSet<Site>());
+		allNet.getOutgoingQuerySites().add(bSite);
+		allNet.getOutgoingQuerySites().add(dSite);
+		allNet.getOutgoingQuerySites().add(cSite);
+		allNet.setDataModel(modelA);
+		allNet.setName("SHRINE-SSL");
+		
+		save(allNet);
+		
+		List<Network> nets = new ArrayList<Network>();
+		nets.add(allNet);
+		return(nets);
+	}
+
 	private static void save(Object obj)
 	{
 		Session session = null;
