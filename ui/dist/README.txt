@@ -1,0 +1,1 @@
+This is the directory where the UI project will be build by `npm run prod`
