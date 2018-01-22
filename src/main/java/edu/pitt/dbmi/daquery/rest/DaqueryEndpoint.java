@@ -504,7 +504,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		if( !mySite.getSiteId().equals(requestSiteId))
     		{
     			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
-    			return(getFromRemoteSite(remoteSite, "/response/" + id, null));    			
+    			Response response = getFromRemoteSite(remoteSite, "/response/" + id, null);
+    			if(response.getStatus() == 200)
+				{
+					String json = response.readEntity(String.class);
+					ObjectMapper mapper = new ObjectMapper();
+					TypeReference<DaqueryResponse> type = new TypeReference<DaqueryResponse>(){};
+					DaqueryResponse resp = mapper.readValue(json, type);
+					rVal.setStatus(resp.getStatus());
+					rVal.setValue(resp.getValue());
+					ResponseDAO.saveOrUpdate(rVal);
+				}
+    			return response;
     		}
     		ResponseTask rTask = (ResponseTask) QueueManager.getNamedQueue(MAIN_QUEUE).getTask(rVal.getResponseId());
     		if(rVal.getStatusEnum().isQueuedOrRunning() && rTask == null)
