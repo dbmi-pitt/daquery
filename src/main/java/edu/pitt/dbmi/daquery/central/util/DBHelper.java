@@ -51,9 +51,20 @@ public class DBHelper
 		try
 		{
 			Site site = SiteDAO.querySiteByID(siteNameOrId);
+			System.out.println("Looking for [" + siteNameOrId + "].");
+			if (site == null) 
+				System.out.println("Did not find it");
+			else
+				System.out.println("Found it");
 			if(site == null) site = SiteDAO.querySiteByName(siteNameOrId);
+			System.out.println("Looking for [" + siteNameOrId + "].");
+			if (site == null) 
+				System.out.println("Did not find it");
+			else
+				System.out.println("Found it");
 			if(site == null) return(false);
 			
+			System.out.println("looking for access key");
 			return(sitekey.equals(site.getAccessKey()));
 		}
 		catch(Throwable t)
