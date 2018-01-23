@@ -99,7 +99,7 @@ public class CentralService{
 				additionalVals.put("site-id", site.getSiteId());
 				additionalVals.put("site-url", site.getUrl());
 			}
-			return(ResponseHelper.getTokenResponse(200, null, siteNameOrKey, site.getSiteId(), additionalVals));	
+			return(ResponseHelper.getTokenResponse(200, null, siteNameOrKey, site.getSiteId(), null, additionalVals));	
 		}
 		catch(Throwable dce)
 		{
