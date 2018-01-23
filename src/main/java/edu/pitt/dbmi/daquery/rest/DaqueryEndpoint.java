@@ -38,6 +38,7 @@ import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
@@ -324,7 +325,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
 			    	addtionalVal.put("user", currentUser);
-			    	return(ResponseHelper.getTokenResponse(200, null, currentUser.getId(), siteId, addtionalVal));
+			    	return(ResponseHelper.getTokenResponse(200, null, currentUser.getId(), siteId, null, addtionalVal));
 				}
 				else
 					return(ResponseHelper.getBasicResponse(500, "An error occured while initializing the application database. Check the application logs for more information."));
@@ -394,9 +395,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setNetwork(net);
 			request.getInquiry().setNetwork(net);
 			String securityToken = httpHeaders.getHeaderString("Authorization");
-			Jws<Claims> claims = ResponseHelper.parseToken(securityToken);
 			//System.out.println("ISSUER: " + claims.getBody().getIssuer());
-			String userOrId = claims.getBody().getSubject();			
+			JsonWebToken jwt = new JsonWebToken(securityToken);
+			String userOrId = jwt.getUserId();
 			
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
@@ -614,29 +615,30 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @Path("/renew-jwt")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response renewJWT(@HeaderParam(HttpHeaders.AUTHORIZATION) String jwt) {
+    public Response renewJWT(@HeaderParam(HttpHeaders.AUTHORIZATION) String jwt, @DefaultValue("") @QueryParam("networkId") String networkId) {
 
-    	DaqueryUser user = null;
-    	Site mySite = null;
+    	JsonWebToken token = null;
     	try {
-    		mySite = SiteDAO.getLocalSite();
+    		token = new JsonWebToken(jwt);
     		
-    		Principal principal = securityContext.getUserPrincipal();
+/*    		Principal principal = securityContext.getUserPrincipal();
             String uuid = principal.getName();
-            user = DaqueryUserDAO.queryUserByID(uuid);
+            user = DaqueryUserDAO.queryUserByID(uuid); */
             
     		 // Get the HTTP Authorization header from the request
     		logger.log(Level.INFO, "#### renew jwt : " + jwt);
             
-            Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), mySite.getSiteId(), null);
+    		String netId = (StringHelper.isEmpty(networkId))?token.getNetworkId():networkId;
+    		
+            Response rVal = ResponseHelper.getTokenResponse(200, null, token.getUserId()
+            		, token.getSiteId(), netId, null);
 
             return rVal;
 
         } catch (ExpiredJwtException expired) {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
             try {
-            	String siteId = (mySite == null)?null:mySite.getSiteId();
-            	return(ResponseHelper.expiredTokenResponse(user.getId(), siteId));
+            	return(ResponseHelper.expiredTokenResponse(token.getUserId(), token.getSiteId(), token.getNetworkId()));
             } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);

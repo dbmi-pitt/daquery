@@ -6,6 +6,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -42,14 +44,17 @@ import javax.ws.rs.core.UriInfo;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.auth.TokenInvalidException;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.RemoteUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
@@ -80,7 +85,7 @@ public class UserEndpoint extends AbstractEndpoint {
 		Map<String, Object> extras = new HashMap<String, Object>();
 		//extras.put("token", "abcdefghijklm");
 		extras.put("user", user);
-		ResponseHelper.getTokenResponse(200, null, user.getId(), null, extras);
+		ResponseHelper.getTokenResponse(200, null, user.getId(), null, null, extras);
 		//String val = JSONHelper.toJSON(extras);
 		//System.out.println(val);
 		//System.out.println(user.toJson());
@@ -91,6 +96,8 @@ public class UserEndpoint extends AbstractEndpoint {
     @Context
     private UriInfo uriInfo;
 
+    @Context HttpHeaders httpHeaders;
+    
     /*This take a little explaining.
      * The securityContext is created during the AuthenticationFilter.filter method.
      * This annotations allows the class to extract the username from the securityContext.
@@ -485,8 +492,12 @@ public class UserEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response authenticateUser(@QueryParam("email") String email,
-                                     @QueryParam("password") String password) {
+                                     @QueryParam("password") String password,
+                                     @DefaultValue("") String networkId) {
 
+    	
+    	String netId = (StringHelper.isEmpty(networkId))?null:networkId;
+    	
     	if (email.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
     	
@@ -509,7 +520,7 @@ public class UserEndpoint extends AbstractEndpoint {
             user = DaqueryUserDAO.authenticate(email, password);
 
             if(DaqueryUserDAO.expiredPassword(user.getId()))
-                return(ResponseHelper.expiredPasswordResponse(user.getId(), mySite.getSiteId()));
+                return(ResponseHelper.expiredPasswordResponse(user.getId(), mySite.getSiteId(), null));
             
             if (DaqueryUserDAO.accountDisabled(user.getId()))
                 return(ResponseHelper.accountDisabledResponse(user.getId(), uriInfo));
@@ -519,7 +530,7 @@ public class UserEndpoint extends AbstractEndpoint {
             Map<String, Object> extraObjs = new HashMap<String, Object>();
             extraObjs.put("user", currentUser);
             
-            Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), mySite.getSiteId(), extraObjs);
+            Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), mySite.getSiteId(), netId, extraObjs);
 
             return rVal;
 
@@ -527,7 +538,7 @@ public class UserEndpoint extends AbstractEndpoint {
         	logger.info("Expired token: " + expired.getLocalizedMessage());
             try {
             	String siteId = (mySite == null)?null:mySite.getSiteId();
-            	return(ResponseHelper.expiredTokenResponse(user.getId(), siteId));
+            	return(ResponseHelper.expiredTokenResponse(user.getId(), siteId, netId));
             } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);
@@ -877,7 +888,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        Site mySite = SiteDAO.getLocalSite();
 	        //step 6: is the user's password expired?
 	        if (DaqueryUserDAO.expiredPassword(user.getId())) {
-	            return(ResponseHelper.expiredPasswordResponse(user.getId(), mySite.getSiteId()));	        		        	
+	            return(ResponseHelper.expiredPasswordResponse(user.getId(), mySite.getSiteId(), null));	        		        	
 	        }
 	        
 	        //if you passed all the checks then update the User
@@ -916,80 +927,23 @@ public class UserEndpoint extends AbstractEndpoint {
     	
     }
 
-/*
- * Remove the DELETE methods until we discuss how to "delete" something in
- * this project
-    @DELETE
-    @Secured
-    @Consumes(MediaType.APPLICATION_JSON)
+    @GET
+    @Path("/validateToken")
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}")
-    public Response remove(@PathParam("id") String id) {
-        //em.remove(em.getReference(User.class, id));
-        return Response.noContent().build();
+    public Response validateToken()
+    {
+    	String securityToken = httpHeaders.getHeaderString("Authorization");
+		try {
+			JsonWebToken jwt = new JsonWebToken(securityToken);
+		} catch (JsonParseException e) {
+			return(ResponseHelper.getErrorResponse(400, "Invalid login token recieved.", "", e));
+		} catch (IOException e) {
+			return(ResponseHelper.getErrorResponse(400, "Invalid login token recieved.", "", e));
+		} catch (TokenInvalidException e) {
+			return(ResponseHelper.getErrorResponse(401, "Not Authorized", e.getMessage(), e));
+		} catch (Throwable t) {
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking user credentials at a remote site.", null, t));
+		}
+		return(ResponseHelper.getBasicResponse(200, "valid"));
     }
-  */  
-    // ======================================
-    // =          PRIVATE METHODS           =
-    // ======================================
-    
-    /**
-     * This method detects if the request for an admin account was sent from the
-     * central server.
-     * @param token the token sent from the central server.  This token
-     * is sent back to the central server for validation.
-     * @return true if the central server can validate the request, return false otherwise
-     * @throws Exception pass any exception back to the calling method
-     */
-/*    private boolean isValidAdminRequest(String token) throws Exception {
-    	//TODO: open a webservice call to the central server
-    	//to validate this token.  This call should return a JSON Object like:
-    	//{'valid':'true'}
-    	return true;
-    } */
-        
-
-    /**
-     * Validate a JWT token used to create the initial admin account for a site
-     * @param JWT token with sitename and sitekey in the payload
-     * @return - the UUID extracted from the token
-     * @throws ExpiredJwtException if the token is expired
-     * ClaimJwtException if the validation of an JTW claim failed
-     * MalformedJwtException if the JWT if malformed
-     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
-     * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
-     */
-/*    private boolean validateAdminToken(String token) throws Exception {
-        // Check if it was issued by the server and if it's not expired
-        // Throw an Exception if the token is invalid
-    	logger.info("Trying to validate this admin token: " + token);
-    	KeyGenerator kg = new KeyGenerator();
-        Key key = kg.generateKey();
-        try {
-	        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
-	        logger.info(claims.toString());
-	        
-	        //TODO: add code to validate the token
-	        //      this will make a call to the Central server to authenticate
-	        return true;
-        } catch (ExpiredJwtException expired) {
-        	logger.info("Expired token: " + expired.getLocalizedMessage());
-        	//TODO: This needs to be reported back to the UI so it can handle it
-        	throw expired;
-	    } catch (ClaimJwtException claim) {
-	    	logger.info("Claim error in JWT: " + claim.getLocalizedMessage());
-	    	throw claim;
-	    } catch (MalformedJwtException malformed) {
-	    	logger.info("Malformed error in JWT: " + malformed.getLocalizedMessage());
-	    	throw malformed;
-	    } catch (SignatureException sig) {
-	    	logger.info("Signature error in JWT: " + sig.getLocalizedMessage());
-	    	throw sig;
-	    } catch (UnsupportedJwtException unsupported) {
-	    	logger.info("Unsupported error in JWT: " + unsupported.getLocalizedMessage());
-	    	throw unsupported;
-	    }
-
-     } */
-
 }

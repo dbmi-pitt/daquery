@@ -258,7 +258,7 @@ public class DaqueryUserDAO extends AbstractDAO {
 	    					return(true);
 	    		}
     		}
-    		//if it isn't a local role, maybe it is a remote user
+    		
     		if(networkUUID != null)
     		{
     			String sql = "select REMOTE_USER_ROLE.USER_ID from REMOTE_USER_ROLE, ROLE " +

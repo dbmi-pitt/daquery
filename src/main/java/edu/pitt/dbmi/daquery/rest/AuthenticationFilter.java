@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
@@ -24,9 +26,13 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
+import edu.pitt.dbmi.daquery.common.auth.TokenInvalidException;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
+import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 
 import io.jsonwebtoken.ClaimJwtException;
@@ -70,13 +76,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        //Principal principal = securityContext.getUserPrincipal();
-        String username = "";
-        String siteId = null;
-        /*
-        if (principal != null) 
-        	username = principal.getName();
-*/
         //TODO: Reject any communication coming across anything other than HTTPS:
     	//here is the check:
     	if (!AppProperties.isDebugMode()) {
@@ -113,26 +112,45 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
+        JsonWebToken jwtReporting = null;
         try {
 
-            // Validate the token and extract the users UUID from the token
-            final UserAndIssuer userAndIssuer = validateToken(token);
-            if (!DaqueryUserDAO.isUserValid(userAndIssuer.user)) {
-            	throw new Exception("User account is not valid");
-            }
-            //just set this variable to throw an error
-            username = userAndIssuer.user;
-            siteId = userAndIssuer.issuer;
-            
-            if (DaqueryUserDAO.expiredPassword(userAndIssuer.user)) {
-            	try {
-            		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(userAndIssuer.user, userAndIssuer.issuer));
-            	} catch (Exception e) {
-            		//if there are any problems, just throw an UNAUTHORIZED error
-            		Response.status(Response.Status.UNAUTHORIZED).build();
-            	}
-            }
-            
+        	//get the info from the token, but don't validate yet
+        	final JsonWebToken jwt = new JsonWebToken(token, false);
+        	jwtReporting = new JsonWebToken();
+        	jwtReporting.setUserId(jwt.getUserId());
+        	jwtReporting.setSiteId(jwt.getSiteId());
+        	jwtReporting.setNetworkId(jwt.getNetworkId());
+        	
+        	Site mySite = SiteDAO.getLocalSite();
+        	if(StringHelper.equalIgnoreCase(mySite.getSiteId(), jwt.getSiteId()))
+        	{
+	            if (!DaqueryUserDAO.isUserValid(jwt.getUserId())) {
+	            	throw new Exception("User account is not valid");
+	            }
+	            
+	            if (DaqueryUserDAO.expiredPassword(jwt.getUserId())) {
+	            	try {
+	            		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(jwt.getUserId(), jwt.getSiteId(), jwt.getNetworkId()));
+	            	} catch (Exception e) {
+	            		requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while responding to an expired authorization token.  Please ask an admin to check the server logs for more information.", null, e));
+	            		Response.status(Response.Status.UNAUTHORIZED).build();
+	            	}
+	            }
+	            
+	            //an exception will be thrown if the token isn't valid
+	            jwt.validate();
+        	}
+        	else
+        	{
+        		Site site = SiteDAO.querySiteByID(jwt.getSiteId());
+        		
+        		Response resp = AbstractEndpoint.getFromRemoteSite(site, "users/validateToken", null, jwt.getToken());
+        		if(resp.getStatus() != 200)
+        		{
+        			requestContext.abortWith(resp);
+        		}
+        	}
             
             
             final SecurityContext currentSecurityContext = requestContext.getSecurityContext();
@@ -145,7 +163,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
                         @Override
                         public String getName() {
-                            return userAndIssuer.user;
+                            return jwt.getUserId();
                         }
                         
                     };
@@ -154,7 +172,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 @Override
                 public boolean isUserInRole(String role) {
                 	try {
-                		return DaqueryUserDAO.hasRole(userAndIssuer.user, null, role);
+                		return DaqueryUserDAO.hasRole(jwt.getUserId(), jwt.getNetworkId(), role);
                 	} catch (Exception e) {
                 		return false;
                 	}
@@ -170,69 +188,21 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     return "Bearer";
                 }
             });
-        } catch (ExpiredJwtException expired) {
-        	logger.info("Expired token: " + expired.getLocalizedMessage());
-        	try {
-        		requestContext.abortWith(ResponseHelper.expiredTokenResponse(username, siteId));
-        	} catch (Exception e) {
-        		//if there are any problems, just throw an UNAUTHORIZED error
-        		Response.status(Response.Status.UNAUTHORIZED).build();
-        	}
-        } catch (Exception e) {
-            requestContext.abortWith(
-                Response.status(Response.Status.UNAUTHORIZED).build());
         }
+        catch(TokenInvalidException tie)
+        {
+        	try{requestContext.abortWith(ResponseHelper.expiredTokenResponse(jwtReporting.getUserId(), jwtReporting.getSiteId(), jwtReporting.getNetworkId()));}
+        	catch(Throwable t)
+        	{
+        		requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while responding to an expired authorization token.  Please ask an admin to check the server logs for more information.", null, t));
+        	}
+        } catch (Throwable e) {
+            requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking your login token.  Please ask an admin to check the server logs for more information.", null, e));
+        }
+
     }
 
-    /**
-     * Validate a JWT token
-     * @param JWT token
-     * @return - the UUID extracted from the token
-     * @throws ExpiredJwtException if the token is expired
-     * ClaimJwtException if the validation of an JTW claim failed
-     * MalformedJwtException if the JWT if malformed
-     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
-     * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
-     */
-    private UserAndIssuer validateToken(String token) throws Exception {
-        // Check if it was issued by the server and if it's not expired
-        // Throw an Exception if the token is invalid
-    	logger.info("Trying to validate this token: " + token);
-    	KeyGenerator kg = new KeyGenerator();
-        Key key = kg.generateKey();
-        try {
-	        Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
-	        logger.info(claims.toString());
-	        UserAndIssuer uai = new UserAndIssuer();
-	        uai.issuer = claims.getIssuer();
-	        uai.user = claims.getSubject();
-	        return uai;
-        } catch (ExpiredJwtException expired) {
-        	logger.info("Expired token: " + expired.getLocalizedMessage());
-        	//TODO: This needs to be reported back to the UI so it can handle it
-        	throw expired;
-	    } catch (ClaimJwtException claim) {
-	    	logger.info("Claim error in JWT: " + claim.getLocalizedMessage());
-	    	throw claim;
-	    } catch (MalformedJwtException malformed) {
-	    	logger.info("Malformed error in JWT: " + malformed.getLocalizedMessage());
-	    	throw malformed;
-	    } catch (SignatureException sig) {
-	    	logger.info("Signature error in JWT: " + sig.getLocalizedMessage());
-	    	throw sig;
-	    } catch (UnsupportedJwtException unsupported) {
-	    	logger.info("Unsupported error in JWT: " + unsupported.getLocalizedMessage());
-	    	throw unsupported;
-	    }
 
-     }
-    
-
-    public class UserAndIssuer
-    {
-    	String user;
-    	String issuer;
-    }
     /**
      * Extract the roles granting permission to an annotated web service call.
      * For example, if a method is annotated like this:

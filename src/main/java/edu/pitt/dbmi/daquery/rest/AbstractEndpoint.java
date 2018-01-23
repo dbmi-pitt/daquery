@@ -18,6 +18,7 @@ import org.glassfish.jersey.SslConfigurator;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.rest.util.WSConnectionUtil;
 
 
@@ -113,6 +114,10 @@ public class AbstractEndpoint {
 	//TODO: CDB change this to protected before deployment.  This was made public for testing.
 	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
 	{
+		return(getFromRemoteSite(site, serviceName, arguments, null));
+	}
+	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments, String jwToken) throws UnsupportedEncodingException
+	{
 		Client client = ClientBuilder.newClient();
 		Response resp = null;
 		String getURL = buildGetUrl(site.getUrl(), serviceName, arguments);
@@ -130,8 +135,11 @@ public class AbstractEndpoint {
 			//redefine the client variable to include the sslContext
 			client = ClientBuilder.newBuilder().sslContext(sslContext).build();
 		}
-		resp = client.target(getURL)
-				.request(MediaType.APPLICATION_JSON).get();
+		Builder builder = client.target(getURL)
+				.request(MediaType.APPLICATION_JSON); //.get();
+		if(!StringHelper.isEmpty(jwToken))
+			builder = builder.header("Authorization", "Bearer " + jwToken);
+		resp = builder.get();
 		return(resp);
 	}
 
