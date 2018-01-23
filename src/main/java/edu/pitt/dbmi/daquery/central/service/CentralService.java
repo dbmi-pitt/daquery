@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.central.service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +31,7 @@ import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import javassist.bytecode.Descriptor.Iterator;
 
 @Path("/")
 public class CentralService{
@@ -74,6 +76,19 @@ public class CentralService{
     @Produces(MediaType.APPLICATION_JSON)	
 	public Response authenticateSite(@QueryParam("site") String siteNameOrKey, @QueryParam("key") String key)
 	{
+		try {
+			List<Site> siteList = SiteDAO.queryAllSites();
+			ListIterator<Site> itr = siteList.listIterator();
+			while (itr.hasNext()) 
+			{
+				Site s = itr.next();
+				System.out.println("Found site:" + s.toJson());
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		if(StringHelper.isEmpty(siteNameOrKey) || StringHelper.isEmpty(key))
 			return(ResponseHelper.getBasicResponse(400, "sitename and key parameters required"));
 		
