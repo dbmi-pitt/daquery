@@ -58,9 +58,9 @@ public class DaqueryRequestDAO extends AbstractDAO {
 		return (DaqueryRequest) getCurrentSession().get(DaqueryRequest.class, id);
 	}
 	
-	public List list(String direction) throws DaqueryException{
+	public List list(String[] directions) throws DaqueryException{
 		return getCurrentSession().createCriteria(DaqueryRequest.class)
-								  .add(Restrictions.eq("direction", direction))
+								  .add(Restrictions.in("direction", directions))
 				  				  .list();
 	}
 	
