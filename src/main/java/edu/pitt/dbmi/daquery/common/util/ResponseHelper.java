@@ -12,11 +12,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
+
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
+import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.DefaultClaims;
 
 
 /**
@@ -25,40 +30,14 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class ResponseHelper {
 	private static Logger logger = Logger.getLogger(ResponseHelper.class.getName());
 	
-    /**
-     * Create a JWT based on a user's uuid.  The JWT is set to expire in 15 minutes.
-     * @param uuid- a user's uuid
-     * @return a String representing the JWT for the user set to expire in 15 minutes.
-     */
-    public static String issueToken(String userUuid, String siteUUID) {
-        Key key = KeyGenerator.generateKey();
-        Calendar date = Calendar.getInstance();
-        long t=date.getTimeInMillis();
-        //add thirty minutes to current time to create
-        //a token that expires in 30 minutes (30 * 60 milliseconds)
-        Date fifteenMinuteExpiry = new Date(t + (30 * 60000));
-        String jwtToken = Jwts.builder()
-                .setSubject(userUuid)
-                .setIssuer(siteUUID)
-                .setIssuedAt(new Date())
-                .setExpiration(fifteenMinuteExpiry)
-                .signWith(SignatureAlgorithm.HS512, key)
-                .compact();
-        logger.info("#### generating token for a key : " + jwtToken + " - " + key);
-        return jwtToken;
-
-    }
-    
-    public static Jws<Claims> parseToken(String jwtToken)
-    {
-    	String token = jwtToken.trim();
-    	if(token.toUpperCase().startsWith("BEARER"))
-    		token = token.substring(6).trim();
-		Jws<Claims> claims = Jwts.parser().setSigningKey(KeyGenerator.generateKey())
-		.parseClaimsJws(token);
-	    return(claims);
-    }
-    
+	public static void main(String [] args) throws Exception
+	{
+		JsonWebToken token = new JsonWebToken("USER:abc123", "SITE:abc123", null);
+		String tkn = token.getToken();
+		JsonWebToken jwt = new JsonWebToken(tkn);
+		System.out.println(jwt.getSiteId());
+	}
+   
     /**
      * Returns a web response of 401 with a subcode of 401.2, which stands for
      * expired password.
@@ -67,9 +46,9 @@ public class ResponseHelper {
      * @param uriInfo the URI information from the parent ws call
      * @return A ws Response object
      */
-    public static Response expiredPasswordResponse(String name, String siteUUID) throws DaqueryException
+    public static Response expiredPasswordResponse(String name, String siteUUID, String networkUUID) throws DaqueryException
     {
-    	return(getTokenResponse(401, 2, name, siteUUID, null));
+    	return(getTokenResponse(401, 2, name, siteUUID, networkUUID, null));
     }
 
     /**
@@ -80,9 +59,9 @@ public class ResponseHelper {
      * @param uriInfo the URI information from the parent ws call
      * @return A ws Response object
      */
-    public static Response expiredTokenResponse(String name, String siteUUID) throws DaqueryException
+    public static Response expiredTokenResponse(String name, String siteUUID, String networkUUID) throws DaqueryException
     {
-    	return(getTokenResponse(401, 4, name, siteUUID, null));
+    	return(getTokenResponse(401, 4, name, siteUUID, networkUUID, null));
     }
 
     /**
@@ -114,12 +93,12 @@ public class ResponseHelper {
      * 
      * @throws DaqueryException
      */
-    public static Response getTokenResponse(int responseCode, Integer subcode, String name, String siteUUID, Map<String, Object> additionalReturnValues) throws DaqueryException
+    public static Response getTokenResponse(int responseCode, Integer subcode, String userId, String siteUUID, String networkUUID, Map<String, Object> additionalReturnValues) throws DaqueryException
     {
         // Issue a token for the user
-        String token = ResponseHelper.issueToken(name, siteUUID);
+        JsonWebToken token = new JsonWebToken(userId, siteUUID, networkUUID);
         HashMap<String, Object> vals = new HashMap<String, Object>();
-        vals.put("token", token);
+        vals.put("token", token.getToken());
         if(additionalReturnValues != null)
         	vals.putAll(additionalReturnValues);
         

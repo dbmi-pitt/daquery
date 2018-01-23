@@ -1,10 +1,15 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -29,8 +34,8 @@ public abstract class DaqueryObject implements Serializable{
 	
 	private static final long serialVersionUID = 29220787101312l;
 	
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"); 
 	public String toJson() {
         Gson gson = new GsonBuilder()
         		.excludeFieldsWithoutExposeAnnotation()
@@ -43,6 +48,4 @@ public abstract class DaqueryObject implements Serializable{
                 }).create();
 		return StringHelper.unEscapeQuotes(gson.toJson(this));
 	}
-	
-	
 }

@@ -187,14 +187,19 @@ public class SiteDAO extends AbstractDAO {
 		query.executeUpdate();
     }
 
+    private static Site mySite = null;
+    
     public static Site getLocalSite()
     {
     	try
     	{
-    		String localSiteId = AppProperties.getDBProperty(LOCAL_SITE_ID_PROP_NAME);
-    		if(localSiteId == null) return null;
-    		Site localSite = SiteDAO.querySiteByID(localSiteId);
-    		return(localSite);
+    		if(mySite == null)
+    		{
+	    		String localSiteId = AppProperties.getDBProperty(LOCAL_SITE_ID_PROP_NAME);
+	    		if(localSiteId == null) return null;
+	    		mySite = SiteDAO.querySiteByID(localSiteId);
+    		}
+    		return(mySite);
     	}
     	catch(Throwable t)
     	{
