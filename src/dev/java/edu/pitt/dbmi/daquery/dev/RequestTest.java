@@ -6,6 +6,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
@@ -40,7 +41,8 @@ public class RequestTest
 		Site rSite = new Site(siteId);
 		ir.setRequestSite(rSite);
 		ir.setInquiry(iq);
-		String token = ResponseHelper.issueToken("41050780-5a8a-4a24-af00-f635cb9d90e1", siteId);
+		JsonWebToken jwt = new JsonWebToken("41050780-5a8a-4a24-af00-f635cb9d90e1", siteId, null);
+		String token = jwt.getToken();
 		
 		
 //		DaqueryRequest ir = DaqueryRequestDAO.getRequestById("84a64748-a928-4891-b16f-d3564d478b5f");
