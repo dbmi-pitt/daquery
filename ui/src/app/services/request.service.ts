@@ -62,7 +62,7 @@ export class RequestService {
   }
 
   getRequestsFromMe(): Observable<any[]> {
-    return this.http.get('/daquery/ws/requests?direction=OUT')
+    return this.http.get('/daquery/ws/requests?direction=OUT|IN-OUT')
                     .catch(error => {
                       this.error.message = error.message;
                       return Observable.throw(error || 'Server error');

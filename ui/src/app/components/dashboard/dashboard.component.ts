@@ -17,6 +17,8 @@ export class DashboardComponent implements OnInit {
   idleState = 'Not started.';
   timedOut = false;
   lastPing?: Date = null;
+  
+  showStackTrace = false;
 
   constructor(private router: Router,
               private idle: Idle, 
@@ -82,7 +84,11 @@ export class DashboardComponent implements OnInit {
   }
 
   onAlertDismiss(){
-    this.error.message = null;
+    this.error.error = null;
     console.log("alert dismiss");
+  }
+
+  showErrorInfo(){
+    $('#myErrorModal').modal('show');
   }
 }

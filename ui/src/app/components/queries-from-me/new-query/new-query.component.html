@@ -52,7 +52,7 @@
                 <button class="btn btn-primary" (click)="onSave()">Save</button>
                 <button class="btn btn-success" (click)="onRequest()">Request</button>
               </div>
-              <div *ngIf="showNetworkSitePanel">
+              <!-- <div *ngIf="showNetworkSitePanel">
                 <div class="form-group">
                   <label for="network">Network</label>
                   <select formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
@@ -76,6 +76,45 @@
                 </div>
                 <button class="btn btn-default" (click)="onRequest()">Go Back</button>
                 <button class="btn btn-success" [disabled]="onSending" (click)="onSend()">{{ onSending ? 'Sending...' : 'Send' }}</button>
+              </div> -->
+              <!-- Modal -->
+              <div class="modal fade" id="myRequestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                      <h4 class="modal-title" id="myModalLabel">Please select Network and Site</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="network">Network</label>
+                            <select *ngIf="networks?.length > 1" formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
+                              <option value="">-Select-</option>
+                              <option *ngFor="let network of networks" value="{{network.networkId}}">
+                                {{ network.name }}
+                              </option>
+                            </select>
+                            <p *ngIf="networks?.length == 1">{{ networks[0]?.name }}</p>
+                          </div>
+                          <div *ngIf="inquiryForm.controls.network.dirty || networks?.length == 1" formArrayName="sitesToQuery" class="well well-lg">
+                            <div class="form-group">
+                              <label for="sites">Site to Query</label>
+                              <div class="checkbox">
+                                <ul class="list-unstyled">
+                                  <li *ngFor="let site of inquiryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
+                                    <label class="checkbox-inline"><input type="checkbox" value="{{site.controls.siteId._value}}" formControlName="check">{{site.controls.name._value}}</label>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" (click)="reset()">Cancel</button>
+                      <button class="btn btn-success" [disabled]="onSending" (click)="onSend()">{{ onSending ? 'Sending...' : 'Send' }}</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </form>
           </div>

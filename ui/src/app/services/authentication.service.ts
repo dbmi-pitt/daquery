@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { Error } from '../_globals/error';
 import 'rxjs/add/operator/map'
 
 @Injectable()
@@ -9,7 +10,8 @@ export class AuthenticationService {
   public token: string;
 
   constructor(private http: HttpClient,
-              private router: Router) {
+              private router: Router,
+              private error: Error) {
     // set token if saved in local storage
     // var currentUser = JSON.parse(localStorage.getItem('currentUser'));
     // this.token = currentUser && currentUser.token;
@@ -48,7 +50,8 @@ export class AuthenticationService {
     // clear token remove user from local storage to log user out
     this.token = null;
     localStorage.removeItem('currentUser');
-     this.router.navigate(['./login']);
+    this.error = null;
+    this.router.navigate(['./login']);
   }
 
   renewjwt(): void {

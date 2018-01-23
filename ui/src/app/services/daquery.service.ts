@@ -22,4 +22,12 @@ export class DaqueryService {
                     })
   }
 
+  getError(): Observable<any> {
+    return this.http.get('/daquery/ws/error')
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
+
 }

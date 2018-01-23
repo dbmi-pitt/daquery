@@ -6,6 +6,8 @@ import { SiteService } from '../../../services/site.service';
 import { RequestService } from '../../../services/request.service';
 import { Router } from '@angular/router';
 
+declare var $:any;
+
 @Component({
   selector: 'app-new-query',
   templateUrl: './new-query.component.html',
@@ -54,7 +56,9 @@ export class NewQueryComponent implements OnInit {
 
   ngOnInit() {
     this.networkService.getNetworks()
-                       .subscribe(networks => this.networks = networks);
+                       .subscribe(networks => {
+                         this.networks = networks;
+                        });
     this.createForm(this.editingInquiry);
   }
 
@@ -67,7 +71,21 @@ export class NewQueryComponent implements OnInit {
   }
 
   onRequest() {
-    this.showNetworkSitePanel = !this.showNetworkSitePanel;
+    //this.showNetworkSitePanel = !this.showNetworkSitePanel;
+    $('#myRequestModal').modal('show');
+    if(this.networks.length == 1){
+      let network = this.networks[0];
+      this.siteService.getSites(network)
+                      .subscribe(sites => {
+                        const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
+                        const siteFormArray = this.fb.array(siteFGs);
+                        this.inquiryForm.setControl('sitesToQuery', siteFormArray);
+                      });
+    }
+  }
+
+  reset() {
+    $('#myRequestModal').modal('hide');
   }
 
   onSend(){
@@ -80,7 +98,7 @@ export class NewQueryComponent implements OnInit {
             siteId: site.siteId,
           },
           network: {
-            networkId: this.inquiryForm.value.network
+            networkId: this.inquiryForm.value.network || this.networks[0].networkId
           },
           requestGroup: requestGroupUUID,
           inquiry: {
@@ -124,5 +142,5 @@ export class NewQueryComponent implements OnInit {
         d = Math.floor(d / 16);
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
-}
+  }
 }

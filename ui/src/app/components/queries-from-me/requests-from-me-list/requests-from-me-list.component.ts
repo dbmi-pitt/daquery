@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { forEach } from '@angular/router/src/utils/collection';
 import { environment } from '../../../../environments/environment';
 import { MapValuesPipe } from '../../../pipes/iteratable.pipe';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-requests-from-me-list',
@@ -20,7 +21,8 @@ export class RequestsFromMeListComponent implements OnInit {
   inquiries: any[];
   requestGroups: Map<String, any[]> = new Map<String, any[]>();
   constructor(private requestService: RequestService,
-              private responseService: ResponseService) { 
+              private responseService: ResponseService,
+              private router : Router) { 
   }
 
   ngOnInit() {
@@ -52,11 +54,19 @@ export class RequestsFromMeListComponent implements OnInit {
                                                    .subscribe(res => {
                                                      response.status = res.status;
                                                      response.value = res.value;
-                                                     if(['ERROR', 'COMPLETED'].includes(response.status)){
+                                                     if(['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
                                                        subscription.unsubscribe();
                                                        console.log("unsubscribed");
                                                      }
-                                                   });
+                                                   },
+                                                  error => {
+                                                    response.hasError = true;
+                                                    subscription.unsubscribe();
+                                                  },
+                                                  () => {
+                                                    if(!this.router.url.includes("queries-from-me"))
+                                                      subscription.unsubscribe();
+                                                  });
                              })
                           }
                         });

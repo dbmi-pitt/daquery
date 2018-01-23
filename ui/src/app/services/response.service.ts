@@ -16,7 +16,7 @@ export class ResponseService {
   getResponse(responseId: String) {
     return this.http.get('/daquery/ws/response/' + responseId)
                     .catch(error => {
-                      this.error.message = error.message;
+                      //this.error.message = error.message;
                       return Observable.throw(error || 'Server error');
                     });
   }

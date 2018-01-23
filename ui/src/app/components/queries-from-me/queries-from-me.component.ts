@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DaqueryService } from '../../services/daquery.service';
 
 @Component({
   selector: 'app-queries-from-me',
@@ -8,7 +9,7 @@ import { Component, OnInit } from '@angular/core';
 export class QueriesFromMeComponent implements OnInit {
   showNewQuery = false;
   editingInquiry: any;
-  constructor() { }
+  constructor(private daqueryService: DaqueryService) { }
 
   ngOnInit() {
   }
@@ -16,5 +17,13 @@ export class QueriesFromMeComponent implements OnInit {
   editInquiry(inquiry: any){
     this.editingInquiry = inquiry;
     this.showNewQuery = true;
+  }
+
+  getError() {
+    console.log("getting error");
+    this.daqueryService.getError()
+                       .subscribe(() => {
+                          console.log("should not get to here");
+                       });
   }
 }
