@@ -39,7 +39,7 @@ export class DashboardComponent implements OnInit {
       // in second 15 min window
       try {
         if ((this.session.serverExpirationTime.getTime() - new Date().getTime()) / 1000 / 60 < 15) {
-          this.authenticationService.renewjwt();
+          this.authenticationService.renewjwt('');
         }
       } catch(e) {
         this.authenticationService.logout();

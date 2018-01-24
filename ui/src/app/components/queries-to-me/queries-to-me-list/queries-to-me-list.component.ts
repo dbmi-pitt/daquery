@@ -22,6 +22,8 @@ export class QueriesToMeListComponent implements OnInit {
 
   getRequestsToMe() {
     this.requestService.getRequestsToMe()
-                       .subscribe(requests => this.requests = requests);
+                       .subscribe(requests => {
+                         this.requests = requests;
+                       });
   }
 }

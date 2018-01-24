@@ -3,8 +3,10 @@ import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup, FormControl, Va
 import { NewQuery } from '../../../models/new-query.model';
 import { NetworkService } from '../../../services/network.service';
 import { SiteService } from '../../../services/site.service';
+import { AuthenticationService } from '../../../services/authentication.service';
 import { RequestService } from '../../../services/request.service';
 import { Router } from '@angular/router';
+import { BoundCallbackObservable } from 'rxjs/observable/BoundCallbackObservable';
 
 declare var $:any;
 
@@ -26,33 +28,41 @@ export class NewQueryComponent implements OnInit {
               private networkService: NetworkService,
               private siteService: SiteService,
               private requestService: RequestService,
+              private authenticationService: AuthenticationService,
               private router: Router) { }
 
   createForm(inquiry) {
     if(inquiry){
       this.inquiryForm = this.fb.group({
-        network: new FormControl('', Validators.required),
+        network: '',
         sitesToQuery: this.fb.array([]),
-        dataType: new FormControl('aggregate'),
-        inquiryName: inquiry.inquiryName,
+        dataType:['aggregate'],
+        inquiryName: [inquiry.inquiryName, Validators.required],
         studyName: '',
         inquiryDescription: inquiry.inquiryDescription,
         oracleQuery: '',
-        sqlQuery: inquiry.code
+        sqlQuery: [inquiry.code, Validators.required]
       });
     } else {
       this.inquiryForm = this.fb.group({
-        network: new FormControl('', Validators.required),
+        network: '',
         sitesToQuery: this.fb.array([]),
-        dataType: new FormControl('aggregate'),
-        inquiryName: '',
+        dataType: ['aggregate'],
+        inquiryName: ['', Validators.required],
         studyName: '',
         inquiryDescription: '',
         oracleQuery: '',
-        sqlQuery: ''
+        sqlQuery: ['', Validators.required]
       });
     }
   }
+
+  get inquiryName() { return this.inquiryForm.get('inquiryName'); }
+  get inquiryDescription() { return this.inquiryForm.get('inquiryDescription'); }
+  get sqlQuery() { return this.inquiryForm.get('sqlQuery'); }
+  get network() { return this.inquiryForm.get('network'); }
+  get sitesToQuery() { return this.inquiryForm.get('sitesToQuery'); }
+  get dataType() { return this.inquiryForm.get('dataType'); }
 
   ngOnInit() {
     this.networkService.getNetworks()
@@ -72,20 +82,30 @@ export class NewQueryComponent implements OnInit {
 
   onRequest() {
     //this.showNetworkSitePanel = !this.showNetworkSitePanel;
-    $('#myRequestModal').modal('show');
-    if(this.networks.length == 1){
-      let network = this.networks[0];
-      this.siteService.getSites(network)
-                      .subscribe(sites => {
-                        const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
-                        const siteFormArray = this.fb.array(siteFGs);
-                        this.inquiryForm.setControl('sitesToQuery', siteFormArray);
-                      });
+    if(this.inquiryForm.valid){
+      $('#myRequestModal').modal('show');
+      if(this.networks.length == 1){
+        let network = this.networks[0];
+        this.authenticationService.renewjwt(network.networkId);
+        this.siteService.getSites(network)
+                        .subscribe(sites => {
+                          const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
+                          const siteFormArray = this.fb.array(siteFGs);
+                          this.inquiryForm.setControl('sitesToQuery', siteFormArray);
+                        });
+      }
+    } else {
+      this.inquiryForm.get('inquiryName').markAsTouched();
+      this.inquiryForm.get('sqlQuery').markAsTouched();
     }
   }
 
   reset() {
     $('#myRequestModal').modal('hide');
+  }
+
+  readyToSend() {
+    return this.onSending || !this.inquiryForm.get('network').valid || (<FormArray>this.inquiryForm.get('sitesToQuery')).controls.some(x => (<FormGroup>x).controls.check.value == true);
   }
 
   onSend(){
@@ -105,7 +125,9 @@ export class NewQueryComponent implements OnInit {
             version: 1,
             dataType: 'SQL_QUERY',
             aggregate: true,
-            code: this.inquiryForm.value.sqlQuery
+            code: this.inquiryForm.value.sqlQuery,
+            inquiryName: this.inquiryForm.value.inquiryName,
+            inquiryDescription: this.inquiryForm.value.inquiryDescription
           }
         };
 

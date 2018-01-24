@@ -21,24 +21,51 @@
     <caption>Requests</caption>
     <thead>
       <tr>
-        <th>Request Group ID</th>
+        <th>Request</th>
         <th>Type</th>
         <th>Date/Time</th>
       </tr>
     </thead>
     <tbody *ngFor="let requestGroup of (requestGroups | mapValues)">
       <tr>
-        <td><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}" (click)="requestGroup.active = !requestGroup.active"></i> {{requestGroup.key}}</td>
+        <td (click)="requestGroup.active = !requestGroup.active"><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}"></i> {{ requestGroup.val[0].inquiry.inquiryName }}</td>
         <td>{{ requestGroup.val[0].direction }}</td>
         <td>{{ requestGroup.val[0].responses[0]?.replyTimestamp | amTimeAgo }}</td>
         <td></td>
       </tr>
       <tr *ngIf="requestGroup.active">
         <td colspan="4">
+          <p (click)="requestGroup.showingDetails = !requestGroup.showingDetails">Show Details <i class="fa" [ngClass]="{'fa-chevron-circle-down': !requestGroup.showingDetails, 'fa-chevron-circle-up': requestGroup.showingDetails}" aria-hidden="true"></i></p>
+          <div *ngIf="requestGroup.showingDetails" class="box box-solid">
+            <div class="box-body">
+                <form class="form-horizontal">
+                    <div>
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label">Requester</label>
+                        <div class="col-sm-10" style="padding-top: 7px">
+                          {{ requestGroup.val[0].requester?.realName }}
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label">Description</label>
+                        <div class="col-sm-10" style="padding-top: 7px">
+                          {{ requestGroup.val[0].inquiry.inquiryDescription }}
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label">Code</label>
+                        <div class="col-sm-10" style="padding-top: 7px">
+                          {{ requestGroup.val[0].inquiry.code }}
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+            </div>
+            <!-- /.box-body -->
+            </div>
           <table class="table table-condensed table-striped">
             <thead>
               <tr>
-                <th>Request ID</th>
                 <th>Site</th>
                 <th>Status</th>
                 <th>Result</th>
@@ -46,7 +73,6 @@
             </thead>
             <tbody>
               <tr *ngFor="let request of requestGroup.val">
-                <td>{{ request.requestId }}</td>
                 <td>{{ request.requestSite.name }}</td>
                 <td>{{ request.responses[0]?.status }}</td>
                 <td>{{ request.responses[0]?.value }}

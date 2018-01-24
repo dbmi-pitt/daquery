@@ -54,8 +54,9 @@ export class AuthenticationService {
     this.router.navigate(['./login']);
   }
 
-  renewjwt(): void {
-    this.http.get('/daquery/ws/renew-jwt').subscribe(() => {
+  renewjwt(networkId: string): void {
+    const params = new HttpParams().set('networkId', networkId);
+    this.http.get('/daquery/ws/renew-jwt', {params: params}).subscribe(() => {
       console.log('jwt renewed.')
     });
   }

@@ -16,40 +16,11 @@ export class RequestService {
   queriesToMe = [];
   queriesFromMe = [];
   getRequestsToMe(): Observable<any[]> {
-    //return this.queriesToMe = QUERIES_TO_ME.slice(0);
-    // return this.http.get('/daquery/ws/queries-to-me')
-    //                 .catch(error => {
-    //                   this.error.message = error.message;
-    //                   return Observable.throw(error || 'Server error');
-    //                 });
-    const requests = [
-      {'id': 1,
-      'request_id': '11111111-61ad-44eb-8eef-886adcced18e',
-      'request_site_id': '11111111-61ad-44eb-ssss-886adcced18e',
-      'sent_timestamp': '2012-04-23T18:25:43.511Z',
-      'requester_id': '11111111-61ad-44eb-uuuu-886adcced18e',
-      'inquiry_id': 1,
-      'direction': 'OUT',
-      'network': {
-        'id': 1,
-        'name': 'devALL'
-        }
-      },
-      {'id': 2,
-      'request_id': '22222222-61ad-44eb-8eef-886adcced18e',
-      'request_site_id': '22222222-61ad-44eb-ssss-886adcced18e',
-      'sent_timestamp': '2012-04-23T18:25:43.511Z',
-      'requester_id': '22222222-61ad-44eb-uuuu-886adcced18e',
-      'inquiry_id': 2,
-      'direction': 'OUT',
-      'network': {
-        'id': 1,
-        'name': 'devALL'
-        }
-      },
-    ];
-
-    return Observable.of(requests);
+    return this.http.get('/daquery/ws/requests?direction=IN-OUT')
+                    .catch(error => {
+                      this.error.message = error.message;
+                      return Observable.throw(error || 'Server error');
+                    });
   }
 
   getQueryToMe(id: number){

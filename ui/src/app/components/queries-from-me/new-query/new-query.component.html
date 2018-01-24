@@ -7,7 +7,7 @@
       <div class="box-body">
         <div class="row">
           <div class="col-md-12">
-            <form [formGroup]="inquiryForm">
+            <form #f [formGroup]="inquiryForm">
               <div *ngIf="!showNetworkSitePanel">
                 <div class="form-group">
                   <label for="dataType">Data Type</label>
@@ -16,9 +16,10 @@
                     <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="data">Data</label>
                   </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">
                   <label for="name">Inquiry Name</label>
                   <input type="text" class="form-control" id="inquiry-name" formControlName="inquiryName">
+                  <div class="help-block" *ngIf="inquiryName.invalid && (inquiryName.dirty || inquiryName.touched)">Please enter a inquiry name</div>
                 </div>
                 <!-- <div class="form-group">
                   <label for="name">Study Name</label>
@@ -41,7 +42,10 @@
                     </ul>
                     <div class="tab-content">
                       <div class="tab-pane active" id="tab_1">
-                        <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery" placeholder="enter ANSI SQL query"></textarea>
+                        <div class="form-group has-feedback" [ngClass]="{'has-error': sqlQuery.invalid && (sqlQuery.dirty || sqlQuery.touched), 'has-success': sqlQuery.valid && (sqlQuery.dirty || sqlQuery.touched) }">
+                          <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery" placeholder="enter ANSI SQL query"></textarea>
+                          <div class="help-block" *ngIf="sqlQuery.invalid && (sqlQuery.dirty || sqlQuery.touched)">Please enter a sql query</div>
+                        </div>
                       </div>
                       <!-- <div class="tab-pane" id="tab_2">
                         <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery" placeholder="enter your SQL Server T/SQL query"></textarea>
@@ -86,7 +90,7 @@
                       <h4 class="modal-title" id="myModalLabel">Please select Network and Site</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
+                        <div class="form-group  has-feedback" [ngClass]="{'has-error': network.invalid && (network.dirty || network.touched), 'has-success': network.valid && (network.dirty || network.touched) }">
                             <label for="network">Network</label>
                             <select *ngIf="networks?.length > 1" formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
                               <option value="">-Select-</option>
@@ -94,6 +98,7 @@
                                 {{ network.name }}
                               </option>
                             </select>
+                            <div class="help-block" *ngIf="network.invalid && (network.dirty || network.touched)">Please select a network</div>
                             <p *ngIf="networks?.length == 1">{{ networks[0]?.name }}</p>
                           </div>
                           <div *ngIf="inquiryForm.controls.network.dirty || networks?.length == 1" formArrayName="sitesToQuery" class="well well-lg">
@@ -111,7 +116,7 @@
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-default" (click)="reset()">Cancel</button>
-                      <button class="btn btn-success" [disabled]="onSending" (click)="onSend()">{{ onSending ? 'Sending...' : 'Send' }}</button>
+                      <button class="btn btn-success" [disabled]="!readyToSend()" (click)="onSend()">{{ onSending ? 'Sending...' : 'Send' }}</button>
                     </div>
                   </div>
                 </div>
