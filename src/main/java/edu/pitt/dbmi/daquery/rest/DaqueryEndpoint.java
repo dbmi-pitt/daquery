@@ -31,6 +31,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,6 +44,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
@@ -48,6 +52,7 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
@@ -389,30 +394,88 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			Site mySite = SiteDAO.getLocalSite();
 			
 			Site requestSite = SiteDAO.getSiteByNameOrId(requestSiteId);
+			if(requestSite == null)
+			{
+				return(ResponseHelper.getErrorResponse(403, "Requesting site is not authorized to query.", "The querying site with id " + requestSiteId + " is not configured to work with this site.", null));
+			}
 			request.setRequestSite(requestSite);
-			
+
 			Network net = NetworkDAO.getNetworkById(request.getNetwork().getNetworkId());
+			if(net == null)
+			{
+				return(ResponseHelper.getErrorResponse(403, "The network is not authorized to query.", "The network with id " + request.getNetwork().getNetworkId() + " being queried within is not configured to work with this site.", null));
+			}
 			request.setNetwork(net);
 			request.getInquiry().setNetwork(net);
 			String securityToken = httpHeaders.getHeaderString("Authorization");
-			//System.out.println("ISSUER: " + claims.getBody().getIssuer());
 			JsonWebToken jwt = new JsonWebToken(securityToken);
-			String userOrId = jwt.getUserId();
+			String requesterId = jwt.getUserId();
+			
+			boolean isLocalRequester = DaqueryUserDAO.isLocalUserId(requesterId);
+			UserInfo uInfo = DaqueryUserDAO.getUserInfo(requesterId);
+			
+			//if the requester is not local 
+			//make sure we have the users information stored locally
+			if(! isLocalRequester)
+			{
+				if(uInfo == null)
+				{
+					if(request.getRequester() == null || StringHelper.isEmpty(request.getRequester().getId()) || StringHelper.isEmpty(request.getRequester().getEmail()) || StringHelper.isEmpty(request.getRequester().getRealName()))
+					{
+						return(ResponseHelper.getErrorResponse(400, "Requester user information is required.", "Requester user information with a minimum of user id, email and real name for user with id " + requesterId + ".  This is needed because this user's information isn't currently listed at this site.", null));
+					}
+					if(! request.getRequester().getId().equals(requesterId))
+					{
+						return(ResponseHelper.getErrorResponse(400, "The requester id does not match the authenticated user id.", "User with id " + requesterId + " sent the request, but a user with  id " + request.getId() + " was provided with the request as the requester.", null));
+					}
+					uInfo = new UserInfo();
+					uInfo.setEmail(request.getRequester().getEmail());
+					uInfo.setId(request.getRequester().getId());
+					uInfo.setRealName(request.getRequester().getRealName());
+				}
+				
+				Session sess = null;
+				Transaction trans = null;
+				try
+				{
+					sess = HibernateConfiguration.openSession();
+					trans =  sess.beginTransaction();
+					sess.saveOrUpdate(uInfo);
+					trans.commit();
+				}
+				catch(Throwable t)
+				{
+					if(trans != null) trans.rollback();
+					logger.log(Level.SEVERE, "Error saving UserInfo object with user id " + uInfo.getId(), t);
+					return(ResponseHelper.getErrorResponse(500, "There was an error at the request site while trying to save some request information.", "An error occured while trying to save the requester UserInfo on the local site please contact the site admin.", t));
+				}
+				finally
+				{
+					if(sess != null) sess.close();
+				}
+			}
+			else //if the requester is local make sure they are a valid user
+			{
+				if(uInfo == null)
+				{
+					return(ResponseHelper.getErrorResponse(400, "Requester does not have a local account.", "The requester local to this machine has no user information registered.", null));
+				}
+			}
+			
+			request.setRequester(uInfo);
 			
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
-				
-	
 				if(request.getInquiry() == null)
 					return(ResponseHelper.getBasicResponse(400, "No inquiry provided."));
 				
 //				if(requester == null)
 //					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
 
-				if(! DaqueryUserDAO.hasRole(userOrId, net.getNetworkId(), "AGGREGATE_QUERIER"))
-					return(ResponseHelper.getBasicResponse(403, "User with id: " + userOrId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
+				if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
+					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
 				
-				if(DaqueryUserDAO.isLocalUserId(userOrId))
+				if(DaqueryUserDAO.isLocalUserId(requesterId))
 					request.setDirection("IN-OUT");
 				else
 					request.setDirection("IN");

@@ -19,6 +19,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.rest.UserEndpoint;
@@ -31,7 +32,14 @@ import java.util.logging.Level;
 public class DaqueryUserDAO extends AbstractDAO {
 
     private final static Logger logger = Logger.getLogger(DaqueryUserDAO.class.getName());
-	
+
+    public static void main(String [] args)
+    {
+    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53/");
+    	UserInfo uinfo = DaqueryUserDAO.getUserInfo("abc-123-xyz-nnn"); //("a211840d-185c-456e-9fd8-53b13ffcf30f"); //abc-123-xyz-nnn
+    	System.out.println(uinfo.getRealName());
+    }
+    
     /**
      * Return a list of all the DaqueryUsers for the current site.
      * @return- a List of all the query users
@@ -74,6 +82,37 @@ public class DaqueryUserDAO extends AbstractDAO {
     	
     }
 
+    /**
+     * Get UserInfo information for a given user's UUID.  Returns the UserInfo directly
+     * if it is a remote user who's UserInfo is stored in the local DB, or creates a UserInfo
+     * copy of the full DaqueryUser if the user is local.  If there is no match for the UUID
+     * or an error occurs during the retrieval null is returned. 
+     */
+    public static UserInfo getUserInfo(String userUUID)
+    {
+    	Session sess = null;
+    	try
+    	{
+    		sess = HibernateConfiguration.openSession();
+    		UserInfo user = (UserInfo) sess.get(UserInfo.class, userUUID);
+    		if(user == null)
+    		{
+    			DaqueryUser dUser = (DaqueryUser) sess.get(DaqueryUser.class, userUUID);
+    			if(dUser != null)
+    				user = dUser;
+    		}
+    		return(user);
+    	}
+    	catch(Throwable t)
+    	{
+    		logger.log(Level.SEVERE, "Unexpected error while tring to find UserInfo for user with id " + userUUID);
+    		return(null);
+    	}
+    	finally
+    	{
+    		if(sess != null) sess.close();
+    	}
+    }
     
     /**
      * Return an object representing the user matching the given username
