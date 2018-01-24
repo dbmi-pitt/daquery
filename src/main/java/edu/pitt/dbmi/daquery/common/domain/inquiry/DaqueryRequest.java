@@ -25,6 +25,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 
 @Entity
 @Table(name="DAQUERY_REQUEST")
@@ -59,7 +60,7 @@ public class DaqueryRequest extends DaqueryObject
     @Expose
     @OneToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="REQUESTER_ID")
-    private DaqueryUser requester;
+    private UserInfo requester;
 
     @Expose
 	private String direction;
@@ -105,8 +106,8 @@ public class DaqueryRequest extends DaqueryObject
 	public Date getSentTimestamp(){return(sentTimestamp);}
 	public void setSentTimestamp(Date timestamp){sentTimestamp = timestamp;}
 	
-	public DaqueryUser getRequester(){return(requester);}
-	public void setRequester(DaqueryUser user){requester = user;}
+	public UserInfo getRequester(){return(requester);}
+	public void setRequester(UserInfo user){requester = user;}
 	
 	public String getDirection(){return(direction);}
 	public void setDirection(String direction){this.direction = direction;}
