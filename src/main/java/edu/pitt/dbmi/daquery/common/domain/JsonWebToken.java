@@ -189,7 +189,7 @@ public class JsonWebToken extends DaqueryObject
         clms.put("iat", new Date());
         clms.put("exp", fifteenMinuteExpiry);
         if(! StringHelper.isEmpty(networkUUID))
-        	clms.put("net", "networkUUID");
+        	clms.put("net", networkUUID);
         JwtBuilder builder = Jwts.builder().setClaims(clms);        
         String jwtToken = builder.signWith(SignatureAlgorithm.HS512, key).compact();
         return jwtToken;
