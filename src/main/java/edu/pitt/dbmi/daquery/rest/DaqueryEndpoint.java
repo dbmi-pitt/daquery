@@ -3,7 +3,6 @@ package edu.pitt.dbmi.daquery.rest;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.io.File;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,9 +61,7 @@ import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
 
 @Path("/")
 public class DaqueryEndpoint extends AbstractEndpoint
@@ -183,7 +180,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		else if(dbStatus == AppSetup.DBSTATUS_NONEXISTENT || dbStatus == AppSetup.DBSTATUS_EMPTY)
 			return(ResponseHelper.getBasicResponse(200, "N"));
 		else
-			return(ResponseHelper.getBasicResponse(500, "The application database is in an indeterminate state.  Check the application error logs for more information."));
+			return(ResponseHelper.getErrorResponse(500, "The application database is in an indeterminate state.", "Check the application error logs for more information.  It is likely that you need to delete the database at tomcat/conf/daquery-db and start over.", null));
 	}
 	
 	
@@ -257,7 +254,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	catch(Throwable t)
     	{
     		logger.log(Level.SEVERE, "An unexpeced error occured while obtaining a list of available networks and sites from the central server.", t);
-    		return(ResponseHelper.getBasicResponse(500, "An unexpected error occured while obtaining a list of avaiilable networks and sites from the central server.  See the appication logs for more information."));
+    		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while obtaining a list of avaiilable networks and sites from the central server.  See the appication logs for more information.", t));
     	}
     	
     }
@@ -286,26 +283,27 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		try
 		{
 	    	if (! AppProperties.isDebugMode() && uriInfo.getRequestUri().getScheme() != "https") {
-	            return(ResponseHelper.getBasicResponse(500, "This service must be accessed via https only"));    		
+	            return(ResponseHelper.getErrorResponse(500, "This service must be accessed via https only.", "A call to " + uriInfo.getRequestUri().toString() + " was made.  This needs to be done via https.", null));    		
 	    	}
 	    	
 	    	if(StringHelper.isEmpty(siteName) || StringHelper.isEmpty(adminEmail) || StringHelper.isEmpty(siteKey) || StringHelper.isEmpty(adminPwd))
 	    	{
-	    		return(ResponseHelper.getBasicResponse(400, "Parameters site-name, site-key, admin-email and admin-pwd are required."));
+	    		String longMsg = "Parameters site-name, site-key, admin-email and admin-pwd are required.  Provided site-name: " + siteName + " admin-email: " + adminEmail + " site-key:" + siteKey + " admin-pwd:" + ((StringHelper.isEmpty(adminPwd))?"Not Provided":"Provided");
+	    		return(ResponseHelper.getErrorResponse(400, "Not all parameters provided.", longMsg, null));
 	    	}
 	    	
 	    	String homeDir = AppProperties.getHomeDirectory();
 	    	if(StringHelper.isEmpty(homeDir))
 	    	{
 	    		logger.log(Level.SEVERE, "A configured database directory was not found.  This directory is the Tomcat conf directory which is found with the global environment variable CATALINA_HOME.");
-	    		return(ResponseHelper.getBasicResponse(500, "Unable to find a configured database helper.  It is possible that the CATALINA_HOME environment variable needs to be set globaly."));
+	    		return(ResponseHelper.getErrorResponse(500, "Unable to find a configured database helper.", "A configured database was not found.  It is possible that the CATALINA_HOME environment variable needs to be set globaly.", null));
 	    	}
 	    	String confDir = AppProperties.getConfDirectory();
 	    	File confDirF = new File(confDir);
 	    	if(! confDirF.exists() || ! confDirF.canWrite())
 	    	{
 	    		logger.log(Level.SEVERE, "The database directory, " + confDir + "does not exist or is not writable.");
-	    		return(ResponseHelper.getBasicResponse(500, "Unable to write to the configured database directory: " + confDir));
+	    		return(ResponseHelper.getErrorResponse(500, "Unable to write to the configured database directory.", " The directory " + confDir + " may not be writable or does not exist.", null));
 	    	}
 	    	
 			int dbStatus = AppSetup.getDBStatus();
@@ -333,7 +331,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	return(ResponseHelper.getTokenResponse(200, null, currentUser.getId(), siteId, null, addtionalVal));
 				}
 				else
-					return(ResponseHelper.getBasicResponse(500, "An error occured while initializing the application database. Check the application logs for more information."));
+					return(ResponseHelper.getErrorResponse(500, "An error occured while initializing the application database.", "The error was unreported. Check the application logs for more information.", null));
 			}
 			else
 			{
@@ -352,15 +350,15 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				}
 				else
 				{
-					msg = "This site cannot be set up.  The database is in an unidentifiable state.";
+					msg = "This site cannot be set up.  The database is in an unidentifiable state.  You may need to delete the database in tomcat/conf/daquery-db and start over.";
 				}
-				return(ResponseHelper.getBasicResponse(500, msg));
+				return(ResponseHelper.getErrorResponse(500, "The database could not be set up.", msg, null));
 			}
 		}
 		catch(Throwable t)
 		{
 			logger.log(Level.SEVERE, "An unexpected error occured while setting up the site.", t);
-			return(ResponseHelper.getBasicResponse(500, "An unexpected error occured while setting up the site.  Check the application logs for more information."));
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while setting up the site.", "More information may be available in the application logs.", t));
 		}
 	}
 	
@@ -374,14 +372,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		try
 		{
 			if(request == null || request.getRequestSite() == null || request.getRequestSite().getSiteId() == null)
-				return(ResponseHelper.getBasicResponse(400, "A request site with a valid request site UUID is required."));
+				return(ResponseHelper.getErrorResponse(400, "A request site with a valid request site UUID is required.", null, null));
 
 			if(request.getNetwork() == null || StringHelper.isBlank(request.getNetwork().getNetworkId()))
-					return(ResponseHelper.getBasicResponse(400, "A request must specify a valid network with a network id"));
+					return(ResponseHelper.getErrorResponse(400, "A request must specify a valid network with a network id.", null, null));
 			
 			if(request.getInquiry() == null ||
 			   request.getInquiry().getDataType() == null)
-					return(ResponseHelper.getBasicResponse(400, "A request must have a valid inquiry attached with associated data type and network id"));
+					return(ResponseHelper.getErrorResponse(400, "A request must have a valid inquiry attached with an associated data type ", null, null));
 			
 			if(request.getRequestId() == null)
 				request.setRequestId(UUID.randomUUID().toString());
@@ -467,13 +465,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
 				if(request.getInquiry() == null)
-					return(ResponseHelper.getBasicResponse(400, "No inquiry provided."));
+					return(ResponseHelper.getErrorResponse(400, "No inquiry provided.", "An Inquiry object is required and was not included with the request", null));
 				
-//				if(requester == null)
-//					return(ResponseHelper.getBasicResponse(400, "The requester with user id " + requesterId + " was not found."));
-
 				if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
-					return(ResponseHelper.getBasicResponse(403, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name")));
+					return(ResponseHelper.getErrorResponse(403, "Requester does not have aggregate query role.", "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null));
 				
 				if(DaqueryUserDAO.isLocalUserId(requesterId))
 					request.setDirection("IN-OUT");
@@ -510,7 +505,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				}
 				
 				if(rVal == null)
-					return(ResponseHelper.getBasicResponse(500, "No result returned from aggregate query."));
+					return(ResponseHelper.getErrorResponse(500, "No response recieved for this request.", "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null));
 				else
 				{
 					return(ResponseHelper.getJsonResponseGen(200, rVal));
@@ -540,7 +535,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		{
 			String msg = "An unexpected error occured while trying process an InquiryRequest.";
 			logger.log(Level.SEVERE, msg, t);
-			return(ResponseHelper.getBasicResponse(500, msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name") + " for further information."));
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred", msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name") + " for further information.", t));
 		}
 	}
 	
@@ -552,17 +547,17 @@ public class DaqueryEndpoint extends AbstractEndpoint
     public Response response(@PathParam("id") String id)
     {
     	if(StringHelper.isBlank(id))
-    		return(ResponseHelper.getBasicResponse(400, "Response id required."));
+    		return(ResponseHelper.getErrorResponse(400, "A response id required.", "The response id should be provided as a path parameter in the request url : server/daquery/ws/response/{id}", null));
     	
     	if(!ResponseDAO.containsId(id))
-    		return(ResponseHelper.getBasicResponse(404, "A response with id:" + id + " was not found."));
+    		return(ResponseHelper.getErrorResponse(404, "No response found.", "A response with id:" + id + " was not found.", null));
     	
     	DaqueryResponse rVal = null;
     	try
     	{
     		rVal = ResponseDAO.getResponseById(id);
         	if(rVal == null)
-        		return(ResponseHelper.getBasicResponse(404, "Response not found." ));    		
+        		return(ResponseHelper.getErrorResponse(404, "Response not found.", "A Response with id " + id + " was not found.", null ));    		
     		Site mySite = SiteDAO.getLocalSite();
     		String requestSiteId = rVal.getRequest().getRequestSite().getSiteId();
     		if( !mySite.getSiteId().equals(requestSiteId))
@@ -592,7 +587,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	{
     		String msg = "An unhandled exception occured while retrieving a response with id: " + id;
     		logger.log(Level.SEVERE, msg, t);
-    		return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
+    		return(ResponseHelper.getErrorResponse(500, "An unhandled exception occured.", msg + "Check the site server logs for more information.", t));
     	}
         	
         return Response.ok(200).entity(rVal.toJson()).build();    	
@@ -617,7 +612,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	} catch (Throwable t) {
 			String msg = "An unhandled exception occured while saving sql query";
     		logger.log(Level.SEVERE, msg, t);
-			return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
+			return(ResponseHelper.getErrorResponse(500, msg + "Check the site server logs for more information.", null, t));
 		} finally {
 			if(sqlqueryDAO.getCurrentSession() != null)
 				sqlqueryDAO.closeCurrentSession();
@@ -640,7 +635,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	} catch (Throwable t) {
     		String msg = "An unhandled exception occured while getting roles";
     		logger.log(Level.SEVERE, msg, t);
-			return(ResponseHelper.getBasicResponse(500, msg + "Check the site server logs for more information."));
+			return(ResponseHelper.getErrorResponse(500, msg + "Check the site server logs for more information.", null, t));
     	}
     }
 	
@@ -716,7 +711,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
             } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);
-            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            	return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, t));
             }
         } catch (Exception e) {
         	e.printStackTrace();

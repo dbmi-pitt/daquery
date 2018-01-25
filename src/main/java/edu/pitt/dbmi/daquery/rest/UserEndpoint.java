@@ -176,15 +176,13 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	{
 	    		site = SiteDAO.getSiteByNameOrId(siteId);
 	    		if(site == null)
-	    			return(ResponseHelper.getBasicResponse(400, "A site was not found with id " + siteId));
+	    			return(ResponseHelper.getErrorResponse(400, "Remote site not found", "A site was not found with id " + siteId + " while trying to find the users of this site.", null));
 	    	}
 	    	else
-	    		return(ResponseHelper.getBasicResponse(400, "site-id is a required paramter."));
+	    		return(ResponseHelper.getErrorResponse(400, "site-id is a required paramter.", null, null));
 	    	
 	    	boolean hasRole = ! StringHelper.isBlank(role);
-	    	if(hasRole) return(ResponseHelper.getBasicResponse(400, "Query by role not yet supported."));
-	    	//if(hasRole && ! (StringHelper.equalIgnoreCase(role, "AGGREGATE_QUERIER") || StringHelper.equalIgnoreCase(role, "DATA_QUERIER") ))
-	    	//	return(ResponseHelper.getBasicResponse(400, "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER"));
+	    	if(hasRole) return(ResponseHelper.getErrorResponse(400, "Query by role not yet supported.", null, null));
 	    	
 	    	boolean hasNetwork = ! StringHelper.isBlank(networkId);
 	    	Network net = null;
@@ -192,7 +190,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	{
 	    		net = NetworkDAO.getNetworkById(networkId);
 	    		if(net == null)
-	    			return(ResponseHelper.getBasicResponse(400, "A network was not found with id " + networkId));
+	    			return(ResponseHelper.getErrorResponse(400, "Network not found.", "A network was not found with id " + networkId + " while finding uses in site " + siteId, null));
 	    	}
 
 	    	
@@ -208,10 +206,10 @@ public class UserEndpoint extends AbstractEndpoint {
 	    		netIds.add( ((String) nid));
 	    	
 	    	if(netIds.size() == 0)
-	    		return(ResponseHelper.getBasicResponse(500, "Site " + siteId + " is not a member of any networks."));
+	    		return(ResponseHelper.getErrorResponse(400, "No connected networks found.", "While looking for users of site with id " + siteId + ", the site isn't connected to any networks.", null));
 	    	
 	    	if(hasNetwork && ! netIds.contains(networkId))
-	    		return(ResponseHelper.getBasicResponse(400, "Specified site " + siteId + " is not in network " + networkId));
+	    		return(ResponseHelper.getErrorResponse(400, "Site not in spcified network.", "The specified site " + siteId + " is not in the specified network " + networkId + " while looking for users of the site", null));
 
 	    	if(hasNetwork)
 	    	{
@@ -247,7 +245,7 @@ public class UserEndpoint extends AbstractEndpoint {
 				if(! rolesBySiteAndNet.get(netSiteKey).containsKey(uId))
 				{
 					if(! allUsers.containsKey(uId))
-						return(ResponseHelper.getBasicResponse(400, "User " + uId + " is not from site " + siteId));
+						return(ResponseHelper.getErrorResponse(400, "User not a member of the specified site", "The user with id " + uId + " is not from site with id " + siteId, null));
 					rolesBySiteAndNet.get(netSiteKey).put(uId, new RemoteUser(allUsers.get(uId)));
 				}
 				rolesBySiteAndNet.get(netSiteKey).get(uId).addRole(rl);
@@ -287,7 +285,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	{
     		String msg = "An unexpected error occured while finding remote users.";
     		logger.log(Level.SEVERE, msg, t);
-    		return(ResponseHelper.getBasicResponse(500, msg + "  Check the server logs for more information."));
+    		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", null, t));
     	}
     	finally
     	{
@@ -315,17 +313,17 @@ public class UserEndpoint extends AbstractEndpoint {
     {
     	try
     	{
-    		if(StringHelper.isEmpty(userId)) return(ResponseHelper.getBasicResponse(400, "user-id is a required parameter"));
-	    	if(StringHelper.isEmpty(siteId)) return(ResponseHelper.getBasicResponse(400, "site-id is a required parameter"));
-	    	if(StringHelper.isEmpty(netId)) return(ResponseHelper.getBasicResponse(400, "network-id is a required parameter"));
-	    	if(StringHelper.isEmpty(role)) return(ResponseHelper.getBasicResponse(400, "role is a required parameter"));
+    		if(StringHelper.isEmpty(userId)) return(ResponseHelper.getErrorResponse(400, "user-id is a required parameter", null, null));
+	    	if(StringHelper.isEmpty(siteId)) return(ResponseHelper.getErrorResponse(400, "site-id is a required parameter", null, null));
+	    	if(StringHelper.isEmpty(netId)) return(ResponseHelper.getErrorResponse(400, "network-id is a required parameter", null, null));
+	    	if(StringHelper.isEmpty(role)) return(ResponseHelper.getErrorResponse(400, "role is a required parameter", null, null));
 	    	
 	    	String roleStr = role.toUpperCase().trim();
 	    	if(! (roleStr.equals("AGGREGATE_QUERIER") || roleStr.equals("DATA_QUERIER")))
-	    		return(ResponseHelper.getBasicResponse(400, "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER"));
+	    		return(ResponseHelper.getErrorResponse(400, "Invalid role specified", "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER, " + roleStr + " was provided.", null));
 
 	    	Role r = RoleDAO.queryRoleByName(role);
-	    	if(r == null) return(ResponseHelper.getBasicResponse(400, "role " + role + " is invalid."));
+	    	if(r == null) return(ResponseHelper.getErrorResponse(400, "Role not found", "The specified role, " + role + ", was not found..", null));
 	    	RoleDAO.grantRemoteUserRole(r.getId(), userId, siteId, netId);
 	    	return(ResponseHelper.getBasicResponse(200, "saved"));
     	}
@@ -333,7 +331,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	{
     		String msg = "Unexpected error while adding a remote role";
     		logger.log(Level.SEVERE, msg, t);
-    		return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for mor information."));
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for mor information.", null, t));
     	}
     	
     }
@@ -357,17 +355,17 @@ public class UserEndpoint extends AbstractEndpoint {
     {
     	try
     	{
-    		if(StringHelper.isEmpty(userId)) return(ResponseHelper.getBasicResponse(400, "user-id is a required parameter"));
-	    	if(StringHelper.isEmpty(siteId)) return(ResponseHelper.getBasicResponse(400, "site-id is a required parameter"));
-	    	if(StringHelper.isEmpty(netId)) return(ResponseHelper.getBasicResponse(400, "network-id is a required parameter"));
-	    	if(StringHelper.isEmpty(role)) return(ResponseHelper.getBasicResponse(400, "role is a required parameter"));
+    		if(StringHelper.isEmpty(userId)) return(ResponseHelper.getErrorResponse(400, "user-id is a required parameter", null, null));
+	    	if(StringHelper.isEmpty(siteId)) return(ResponseHelper.getErrorResponse(400, "site-id is a required parameter", null, null));
+	    	if(StringHelper.isEmpty(netId)) return(ResponseHelper.getErrorResponse(400, "network-id is a required parameter", null, null));
+	    	if(StringHelper.isEmpty(role)) return(ResponseHelper.getErrorResponse(400, "role is a required parameter", null, null));
 	    	
 	    	String roleStr = role.toUpperCase().trim();
 	    	if(! (roleStr.equals("AGGREGATE_QUERIER") || roleStr.equals("DATA_QUERIER")))
-	    		return(ResponseHelper.getBasicResponse(400, "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER"));
+	    		return(ResponseHelper.getErrorResponse(400, "Invalid role specified", "Valid values for role are AGGREGATE_QUERIER and DATA_QUERIER, " + roleStr + " was provided.", null));
 
 	    	Role r = RoleDAO.queryRoleByName(role);
-	    	if(r == null) return(ResponseHelper.getBasicResponse(400, "role " + role + " is invalid."));
+	    	if(r == null) return(ResponseHelper.getErrorResponse(400, "Role not found.", "Role " + role + " was not found when deleting from user " + userId  + ".", null));
 	    	RoleDAO.deleteRemoteRoleByParams(r.getId(), userId, siteId, netId);
 	    	return(ResponseHelper.getBasicResponse(200, "deleted"));
     	}
@@ -375,7 +373,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	{
     		String msg = "Unexpected error while adding a remote role";
     		logger.log(Level.SEVERE, msg, t);
-    		return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for mor information."));
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for mor information.", null, t));
     	}
     	
     }
@@ -398,7 +396,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	{
     		String msg = "Unexpected error while getting all UserInfo for this site";
     		logger.log(Level.SEVERE, msg, t);
-    		return(ResponseHelper.getBasicResponse(400, msg + " Check the server local and site server logs."));
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server local and site server logs.", null, t));
     	}
     }
     private Hashtable<String, UserInfo> allUsersForSite(String siteId, boolean forceLocal) throws Exception
@@ -471,7 +469,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	{
     		String msg = "An error occured while retrieving all users.";
     		logger.log(Level.SEVERE, msg, t);
-    		return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, t));
     	}
     }
     
@@ -542,7 +540,7 @@ public class UserEndpoint extends AbstractEndpoint {
             } catch(Throwable t) {
             	String msg = "Unexpected error while generating an expired token response.";
             	logger.log(Level.SEVERE, msg, t);
-            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
+            	return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, t));
             }
         } catch (Exception e) {
         	e.printStackTrace();
@@ -641,89 +639,6 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	
 	    }
     }
-
-    /**
-     * Create a new user admin account with the given login.
-     * Example URL: daquery-ws/ws/users/firstadmin?login=adminuser&password=demouser
-     * @param login- a new user login
-     * @return either a javax.ws.rs.core.Response confirming the account creation
-     * or a SERVER ERROR if there was a problem. 
-     */
-    
-/*    @POST
-    @Secured
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/firstadmin")
-    public Response createFirstAdmin(@Context HttpHeaders httpheaders, @QueryParam("login") String login,
-    		@QueryParam("password") String password) {
-
-        Principal principal = securityContext.getUserPrincipal();
-        String username = principal.getName();
-        EntityManagerFactory emf = null;
-        EntityManager em = null;
-        
-        try {
-        	//extract the token sent by the central server
-            // Get the HTTP Authorization header from the request
-            String authorizationHeader = 
-                httpheaders.getHeaderString(HttpHeaders.AUTHORIZATION);
-
-            // Check if the HTTP Authorization header is present and formatted correctly 
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                throw new NotAuthorizedException("Authorization header must be provided");
-            }
-
-            // Extract the token from the HTTP Authorization header
-            String token = authorizationHeader.substring("Bearer".length()).trim();
-        	
-	    	if (login.isEmpty() || password.isEmpty() || !validateAdminToken(token)) 
-	    		return Response.status(BAD_REQUEST).build();
-	    	
-	    	
-	    	//TODO: see if we can combine the validateAdminToken with isValidAdminRequest
-	    	if (!isValidAdminRequest(token)) {
-	    		return Response.status(BAD_REQUEST).build();	    		
-	    	}
-	    	
-	    	String loggermsg = "login=" + login + " password=" + password;
-	        logger.info("Trying to create ADMIN user with: " + loggermsg);
-        
-	        emf = Persistence.createEntityManagerFactory("derby");
-	        em = emf.createEntityManager();
-	
-	        em.getTransaction().begin();
-	
-	        DaqueryUser newUser = new DaqueryUser(login, password);
-	        em.persist(newUser);
-	        
-	        //TODO: Assign this user to the Admin group
-	
-	        em.getTransaction().commit();
-	
-	        logger.info("Done trying to create admin user: " + newUser.toString());
-	        
-	        //TODO: build some JSON into the response.  Return the new UUID
-	        
-	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
-        } catch (ExpiredJwtException expired) {
-        	logger.info("Expired token: " + expired.getLocalizedMessage());
-        	//TODO: This needs to be reported back to the UI so it can handle it
-            try{
-            	return(ResponseHelper.expiredTokenResponse(login, uriInfo));
-            } catch(Throwable t) {
-            	String msg = "Unexpected error while generating an expired token response.";
-            	logger.log(Level.SEVERE, msg, t);
-            	return(ResponseHelper.getBasicResponse(500, msg + " Check the server logs for more information."));
-            }
-        } catch (Exception e) {
-	        return Response.serverError().build();
-	    } finally {
-	    	if (em != null) {
-	    		em.close();
-	    	}
-	    }
-    } */
     
     /**
      * Get a JSON string representing a user given the user's UUID
