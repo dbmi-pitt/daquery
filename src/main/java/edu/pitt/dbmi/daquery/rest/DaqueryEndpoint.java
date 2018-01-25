@@ -501,14 +501,15 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					response.setReplyTimestamp(new Date());
 					response.setRequest(request);
 					ResponseDAO.saveOrUpdate(response);
-					ResponseHelper.getJsonResponseGen(500, response);
+					
+					return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, response));
 				}
 				
 				if(rVal == null)
 					return(ResponseHelper.getErrorResponse(500, "No response recieved for this request.", "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null));
 				else
 				{
-					return(ResponseHelper.getJsonResponseGen(200, rVal));
+					return(ResponseHelper.getJsonResponseGen(200, wrapResponse(rVal)));
 				}
 			}
 			else  //send to a remote site
@@ -537,6 +538,13 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			logger.log(Level.SEVERE, msg, t);
 			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred", msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name") + " for further information.", t));
 		}
+	}
+	
+	private HashMap<String, Object> wrapResponse(DaqueryResponse response)
+	{
+		HashMap<String, Object> responseWrapper = new HashMap<String, Object>();
+		responseWrapper.put("response", response);
+		return(responseWrapper);
 	}
 	
     @GET
@@ -582,6 +590,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     			rVal.setStatusEnum(ResponseStatus.STALLED);
     			ResponseDAO.saveOrUpdate(rVal);
     		}
+    		return ResponseHelper.getJsonResponseGen(200, wrapResponse(rVal));
     	}
     	catch(Throwable t)
     	{
@@ -589,8 +598,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		logger.log(Level.SEVERE, msg, t);
     		return(ResponseHelper.getErrorResponse(500, "An unhandled exception occured.", msg + "Check the site server logs for more information.", t));
     	}
-        	
-        return Response.ok(200).entity(rVal.toJson()).build();    	
     }
     
     /**
