@@ -15,6 +15,7 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
 
 @Entity
@@ -68,21 +69,24 @@ public class SQLQuery extends Inquiry
 					response.setStatusEnum(ResponseStatus.ERROR);
 					response.setErrorMessage(analyze.getRejectionMessage());
 				}
-				SQLDataSource ds = (SQLDataSource) model.getDataSource(SourceType.SQL);
-				if(ds == null)
+				else
 				{
-					response.setStatusEnum(ResponseStatus.ERROR);
-					response.setErrorMessage("A SQL data source attached to data model " + getNetwork().getDataModel().getName() + " was not found.");
+					SQLDataSource ds = (SQLDataSource) model.getDataSource(SourceType.SQL);
+					if(ds == null)
+					{
+						response.setStatusEnum(ResponseStatus.ERROR);
+						response.setErrorMessage("A SQL data source attached to data model " + getNetwork().getDataModel().getName() + " was not found.");
+					}
+					//String sql = "select count(patid) from demographic;";
+					String sql = ((SQLQuery) response.getRequest().getInquiry()).getCode();
+					response.setValue(ds.executeAggregate(sql).toString());
+					response.setStatusEnum(ResponseStatus.COMPLETED);
 				}
-				//String sql = "select count(patid) from demographic;";
-				String sql = ((SQLQuery) response.getRequest().getInquiry()).getCode();
-				response.setValue(ds.executeAggregate(sql).toString());
-				response.setStatusEnum(ResponseStatus.COMPLETED);
 			}
 			else
 			{
 				response.setStatusEnum(ResponseStatus.ERROR);
-				response.setErrorMessage("Non-aggregate queries are not supported at this time.");
+				response.setErrorMessage("Only queries that return a single aggregate result are supported at this time.");
 			}
 				
 			return(response);
@@ -92,6 +96,7 @@ public class SQLQuery extends Inquiry
 			log.log(Level.SEVERE, "Unexpected error while executing query: " + code, t);
 			response.setStatusEnum(ResponseStatus.ERROR);
 			response.setErrorMessage("An unexpected error occured. Check the site logs for more information." + t.getMessage());
+			response.setStackTrace(StringHelper.stackToString(t));
 			return(response);
 		}
 	}	
