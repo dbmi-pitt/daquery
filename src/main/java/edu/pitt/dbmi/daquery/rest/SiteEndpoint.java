@@ -417,13 +417,13 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response approveConnectRequest(LinkedHashMap<?, ?> object) {
     	if(object == null)
-    		return(ResponseHelper.getBasicResponse(400, "network_id and from_site_id are required parameters."));
+    		return(ResponseHelper.getErrorResponse(400, "network_id and from_site_id are required parameters.", null, null));
     	Object netObj = object.get("network_id");
     	if(netObj == null || StringHelper.isBlank(netObj.toString()))
-    		return(ResponseHelper.getBasicResponse(400, "network_id is a required parameter."));
+    		return(ResponseHelper.getErrorResponse(400, "network_id is a required parameter.", null, null));
     	Object fromSiteObj = object.get("from_site_id");
     	if(fromSiteObj == null || StringHelper.isBlank(fromSiteObj.toString()))
-    		return(ResponseHelper.getBasicResponse(400, "from_site_id is a required parameter."));
+    		return(ResponseHelper.getErrorResponse(400, "from_site_id is a required parameter.", null, null));
     		
     	String networkId = netObj.toString();
     	String fromSiteId = fromSiteObj.toString();
