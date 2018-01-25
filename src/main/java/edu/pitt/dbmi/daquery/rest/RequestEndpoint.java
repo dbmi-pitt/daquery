@@ -78,7 +78,7 @@ public class RequestEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            String[] directions = direction.split("\\|");
+            String[] directions = direction.split("\\!");
             
             DaqueryRequestDAO dao = new DaqueryRequestDAO();
             dao.openCurrentSession();
