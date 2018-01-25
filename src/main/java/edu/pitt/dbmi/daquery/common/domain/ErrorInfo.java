@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.util.ExceptionHelper;
 
 public class ErrorInfo extends DaqueryObject
@@ -16,6 +17,9 @@ public class ErrorInfo extends DaqueryObject
 	
 	@Expose
 	public String stackTrace;
+	
+	@Expose
+	public DaqueryResponse response;
 	
 	public ErrorInfo(){}
 	
@@ -41,4 +45,8 @@ public class ErrorInfo extends DaqueryObject
 		else
 			stackTrace = null;
 	}
+	
+	public DaqueryResponse getResponse(){return(response);}
+	public void setResponse(DaqueryResponse resp){response = resp;}
+
 }

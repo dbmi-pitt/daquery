@@ -1,8 +1,5 @@
 package edu.pitt.dbmi.daquery.common.util;
 
-import java.security.Key;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -12,16 +9,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.StringUtils;
-
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.DefaultClaims;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 
 
 /**
@@ -32,10 +22,23 @@ public class ResponseHelper {
 	
 	public static void main(String [] args) throws Exception
 	{
-		JsonWebToken token = new JsonWebToken("USER:abc123", "SITE:abc123", null);
+		/*JsonWebToken token = new JsonWebToken("USER:abc123", "SITE:abc123", null);
 		String tkn = token.getToken();
 		JsonWebToken jwt = new JsonWebToken(tkn);
-		System.out.println(jwt.getSiteId());
+		System.out.println(jwt.getSiteId()); */
+		
+		/*			Exception e = new Exception("Just a message.");
+					DaqueryResponse response = new DaqueryResponse(true);
+					response.setStatusEnum(ResponseStatus.ERROR);
+					response.setErrorMessage(e.getMessage());
+					String trace = StringHelper.stackToString(e);
+					response.setStackTrace(trace);
+					response.setReplyTimestamp(new Date());
+					response.setRequest(new DaqueryRequest());
+					//ResponseDAO.saveOrUpdate(response);
+					HashMap<String, Object> vals = new HashMap<String, Object>();
+					vals.put("response", response);
+					ResponseHelper.getJsonResponseGen(500, vals); */		
 	}
    
     /**
@@ -140,7 +143,7 @@ public class ResponseHelper {
     }
 
     /**
-     * Convert information about an error message into a json formated response.
+     * Convert information about an error message into a json formated response with specific error information included.
      * 
      * @param responseCode The HTML error response code- should be in the 400-599 range, but is not checked
      * @param message A short, human readable message. REQUIRED
@@ -150,6 +153,24 @@ public class ResponseHelper {
      * @return A web response with the error information encoded as json
      */
     public static Response getErrorResponse(int responseCode, String message, String longMessage, Throwable cause)
+    {
+    	return(getErrorResponse(responseCode, message, longMessage,cause, null));
+    }
+    
+    /**
+     * Convert information about an error message into a json formated response with specific error information included.
+     * 
+     * @param responseCode The HTML error response code- should be in the 400-599 range, but is not checked
+     * @param message A short, human readable message. REQUIRED
+     * @param longMessage A more descriptive message.  OPTIONAL
+     * @param cause The root cause of the problem OPTIONAL
+     * @param response A DaqueryResponse generated in error from a request with a DaqueryRequest.  THis is only generated in
+     *        the rare case that an unforseen exception is thrown when generating a request.  The response info will be needed
+     *        in addition to the error information.
+     * 
+     * @return A web response with the error information encoded as json
+     */    
+    public static Response getErrorResponse(int responseCode, String message, String longMessage, Throwable cause, DaqueryResponse response)
     {
     	String msg = null;
     	ErrorInfo eInfo = null;
@@ -176,6 +197,9 @@ public class ResponseHelper {
     	{
     		if(eInfo == null)
     			eInfo = new ErrorInfo(msg, longMessage, cause);
+    		if(response != null)
+    			eInfo.setResponse(response);
+    		
     		return(getJsonResponseGen(responseCode, eInfo));
     	}
     	catch(Throwable t)
