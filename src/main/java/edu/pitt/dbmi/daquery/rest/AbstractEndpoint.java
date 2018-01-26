@@ -76,9 +76,19 @@ public class AbstractEndpoint {
 		
 	}
 	
-	
-	//TODO: CDB change this to protected before deployment.  This was made public for testing.
-	public static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
+	/**
+	 * This method executes a POST against a remote site.  If the connection is made via https, 
+	 * the local site's keystore is examined.  The keystore file and keystore password are used 
+	 * to create an SSL connection to the remote site.  For this call to work, the local site's
+	 * certificate must be included in the remote site's keystore.  The alias for the certificate
+	 * must match the local site's IP address or a resolvable server name.
+	 * @param site- an object representing the remote site.
+	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
+	 * @param json- JSON encoded data to be POSTed
+	 * @param securityToken- the current security token 
+	 * @return- a Response object representing the data returned by the remote site
+	 */
+	protected static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
 	{
 		Client client = ClientBuilder.newClient();
 		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
@@ -97,10 +107,9 @@ public class AbstractEndpoint {
 
 			//redefine the client variable to include the sslContext
 			client = ClientBuilder.newBuilder().sslContext(sslContext).build();
-			System.out.println("IN SSL postJSONToRemoteSite.  Hitting URL: " + site.getUrl() + "daquery/ws/" + serviceName);
 			respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
+		//handle an HTTP connection
 		} else {
-			System.out.println("IN HTTP postJSONToRemoteSite.  Hitting URL: " + site.getUrl() + "daquery/ws/" + serviceName);
 			respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
 		}
 		if(securityToken != null)
@@ -111,12 +120,38 @@ public class AbstractEndpoint {
 		return(resp);
 	}
 	
-	//TODO: CDB change this to protected before deployment.  This was made public for testing.
-	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
+	/**
+	 * This method performs the same function as the other getFromRemoteSite except it does not
+	 * include the JWToken.If the connection is made via https, 
+	 * the local site's keystore is examined.  The keystore file and keystore password are used 
+	 * to create an SSL connection to the remote site.  For this call to work, the local site's
+	 * certificate must be included in the remote site's keystore.  The alias for the certificate
+	 * must match the local site's IP address or a resolvable server name.
+	 * @param site- an object representing the remote site.
+	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
+	 * @param arguments- a Map of the parameters for the serviceName
+	 * @return- a Response object representing the response from the remote site (most likely JSON)
+	 * @throws UnsupportedEncodingException
+	 */
+	protected static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
 	{
 		return(getFromRemoteSite(site, serviceName, arguments, null));
 	}
-	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments, String jwToken) throws UnsupportedEncodingException
+	
+	/**
+	 * This method executes a GET against a remote site.  If the connection is made via https, 
+	 * the local site's keystore is examined.  The keystore file and keystore password are used 
+	 * to create an SSL connection to the remote site.  For this call to work, the local site's
+	 * certificate must be included in the remote site's keystore.  The alias for the certificate
+	 * must match the local site's IP address or a resolvable server name.
+	 * @param site- an object representing the remote site.
+	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
+	 * @param arguments- a Map of the parameters for the serviceName
+	 * @param jwToken- the current JWToken
+	 * @return- a Response object representing the response from the remote site (most likely JSON)
+	 * @throws UnsupportedEncodingException
+	 */
+	protected static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments, String jwToken) throws UnsupportedEncodingException
 	{
 		Client client = ClientBuilder.newClient();
 		Response resp = null;
@@ -160,13 +195,7 @@ public class AbstractEndpoint {
 				args = args + divide + URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(arguments.get(key), "UTF-8");
 			}
 		}
-//<<<<<<< HEAD
-//		String url = site.getUrl() + "daquery/ws/" + serviceName + args;
-//		Response resp = client.target(url).request(MediaType.APPLICATION_JSON).get();		
-//		return(resp);
-//	}		
-//=======
-		//add a trailing slash to the URL it is missing from the site URL
+		//add a trailing slash to the URL if it is missing from the site URL
 		if (!siteUrl.endsWith("/")) {
 			siteUrl = siteUrl + "/";
 		}
@@ -176,5 +205,4 @@ public class AbstractEndpoint {
 		retString = siteUrl + "daquery/ws/" + sName + args;
 		return retString;
 	}
-//>>>>>>> f6e8dd79f9d96b9b8eda41a4bd112d779c94e46a
 }
