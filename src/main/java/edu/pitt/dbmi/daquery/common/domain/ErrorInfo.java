@@ -27,7 +27,7 @@ public class ErrorInfo extends DaqueryObject
 	{
 		setDisplayMessage(message);
 		setLongMessage(longMessage);
-		setStackTrace(cause);
+		setStackTraceWithThrowable(cause);
 	}
 	
 	public String getDisplayMessage(){return(displayMessage);}
@@ -38,7 +38,7 @@ public class ErrorInfo extends DaqueryObject
 	
 	public String getStackTrace(){return(stackTrace);}
 	public void setStackTrace(String trace){stackTrace = trace;}
-	public void setStackTrace(Throwable t)
+	public void setStackTraceWithThrowable(Throwable t)
 	{
 		if(t != null)
 			stackTrace = ExceptionHelper.toString(t, true);

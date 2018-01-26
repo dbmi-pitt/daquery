@@ -16,7 +16,8 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	
 	public static void main(String [] args)
 	{
-		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(patid) from demographic");
+		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(*) from demographic;");
+		System.out.println(a);
 		
 	}
 	
@@ -52,7 +53,7 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 			{
 				countFound = true;
 				if(firstCtxNode.children.size() == 0)
-					setRejection("Aggregate select count function contains no arguments");
+					setRejection("Aggregate select count function contains no arguments or contains a star.  Only a single column name is supported.");
 				else if(firstCtxNode.children.size() > 2)
 					setRejection("Aggregate select count functions can only count a single field.");
 				else if(firstCtxNode.children.size() == 2)
