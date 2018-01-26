@@ -181,10 +181,11 @@ public class InquiryEndpoint extends AbstractEndpoint {
      * @throws 401 Unauthorized	
      */
     @PUT
+    @Path("/{id}")
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateInquiry(LinkedHashMap<?, ?> form) {
+    public Response updateInquiry(@PathParam("id") String id, LinkedHashMap<?, ?> form) {
     	try {
 
             logger.info("#### returning all inquires");
@@ -197,16 +198,18 @@ public class InquiryEndpoint extends AbstractEndpoint {
             
             InquiryDAO dao = new InquiryDAO();
             dao.openCurrentSessionwithTransaction();
-            Inquiry inquiry = dao.get((Long) form.get("id"));
-            inquiry.setAggregate(form.get("datatype").toString().toLowerCase().equals("aggregate"));
+            Inquiry inquiry = dao.getByUUID(id);
+            inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
             inquiry.setAuthor(currentUser);
-            inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network_id").toString()));
             inquiry.setVersion(inquiry.getVersion() + 1);
+            inquiry.setInquiryName(form.get("inquiryName").toString());
+            inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
+            ((SQLQuery)inquiry).setCode(form.get("sqlQuery").toString());
             dao.update(inquiry.getId(), inquiry);
             dao.closeCurrentSessionwithTransaction();
             
             String jsonString = inquiry.toJson();
-            return Response.ok(201).entity(jsonString).build();
+            return Response.ok(200).entity(jsonString).build();
 
     	} catch (NumberFormatException nfe) {
     		return Response.status(BAD_REQUEST).build();

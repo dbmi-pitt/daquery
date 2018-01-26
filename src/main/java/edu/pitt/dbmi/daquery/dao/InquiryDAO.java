@@ -28,6 +28,12 @@ public class InquiryDAO extends AbstractDAO {
 		return (SQLQuery) getCurrentSession().get(Inquiry.class, id);
 	}
 	
+	public Inquiry getByUUID(String id) {
+		return (SQLQuery) getCurrentSession().createCriteria(Inquiry.class)
+											 .add(Restrictions.eq("inquiryId", id))
+											 .uniqueResult();
+	}
+	
 	public List list() throws DaqueryException{
 		return getCurrentSession().createCriteria(Inquiry.class)
 				  				  .list();
