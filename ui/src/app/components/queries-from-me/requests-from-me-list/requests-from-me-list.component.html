@@ -1,5 +1,5 @@
-<div class="table-responsive">
-  <table class="table table-striped">
+<div>
+  <table *ngIf="inquiries" class="table table-striped">
     <caption>Inquiries</caption>
     <thead>
       <tr>
@@ -17,7 +17,13 @@
       </tr>
     </tbody>
   </table>
-  <table class="table table-striped">
+  <div *ngIf="!inquiries" class="row">
+    <div class="col-md-4 col-md-offset-4 text-center">
+      <span sytle="margin: auto">Loading inquiries...</span><br />
+      <i sytle="margin: auto" class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+    </div>
+  </div>
+  <table *ngIf="requests" class="table table-striped">
     <caption>Requests</caption>
     <thead>
       <tr>
@@ -88,4 +94,10 @@
       </tr>
     </tbody>
   </table>
+  <div *ngIf="!requests" class="row">
+      <div class="col-md-4 col-md-offset-4 text-center">
+        <span>Loading requests...</span><br />
+        <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+      </div>
+    </div>
 </div>
