@@ -1,5 +1,7 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -35,8 +37,8 @@ public class UserInfo extends DaqueryObject
 	
     @Expose
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+//    @GeneratedValue(generator = "uuid")
+//    @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "ID", unique = true, length=50)
     protected String id;
     
@@ -53,6 +55,15 @@ public class UserInfo extends DaqueryObject
     protected String utype;
     
     public UserInfo(){}
+    
+    public UserInfo(boolean createUUID)
+    {
+    	if(createUUID)
+    	{
+    		UUID newUUID = UUID.randomUUID();
+    		this.setId(newUUID.toString());
+    	}
+    }
     
     public UserInfo(DaqueryUser user)
     {

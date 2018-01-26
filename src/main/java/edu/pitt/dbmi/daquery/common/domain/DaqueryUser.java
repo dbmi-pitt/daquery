@@ -88,13 +88,17 @@ public class DaqueryUser extends UserInfo {
     public DaqueryUser() {
     }
 
+    public DaqueryUser(boolean createUUID){
+    	super(createUUID);
+    }
     public DaqueryUser(String realName, String login, String password) {
         this.realName = realName;
         this.username = login;
         this.setPassword(password);
     }
 
-    public DaqueryUser(String login, String password) {
+    public DaqueryUser(String login, String password, boolean createUUID) {
+    	super(createUUID);
         this.username = login;
         this.setPassword(password);
     }
