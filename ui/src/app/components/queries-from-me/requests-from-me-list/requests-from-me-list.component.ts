@@ -1,4 +1,4 @@
-import { Component, OnInit,  EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Input, SimpleChange } from '@angular/core';
 import { RequestService } from '../../../services/request.service';
 import { ResponseService } from '../../../services/response.service';
 import { Observable } from 'rxjs/Observable';
@@ -20,6 +20,9 @@ export class RequestsFromMeListComponent implements OnInit {
   requests: any[];
   inquiries: any[];
   requestGroups: Map<String, any[]> = new Map<String, any[]>();
+
+  @Input() requestSent: boolean = false;
+
   constructor(private requestService: RequestService,
               private responseService: ResponseService,
               private router : Router) { 
@@ -28,6 +31,12 @@ export class RequestsFromMeListComponent implements OnInit {
   ngOnInit() {
     this.getRequestsFromMe();
     this.getSavedInquiries();
+  }
+
+  ngOnChanges(change: SimpleChange) {
+    this.requestSent = !this.requestSent;
+    this.getSavedInquiries();
+    this.getRequestsFromMe();
   }
 
   getRequestsFromMe() {

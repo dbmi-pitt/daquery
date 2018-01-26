@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { NewQuery } from '../../../models/new-query.model';
 import { NetworkService } from '../../../services/network.service';
@@ -23,6 +23,8 @@ export class NewQueryComponent implements OnInit {
 
   showNetworkSitePanel = false;
   onSending = false;
+
+  @Output() requestSent: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(private fb: FormBuilder,
               private networkService: NetworkService,
@@ -75,8 +77,8 @@ export class NewQueryComponent implements OnInit {
   onSave() {
     this.requestService.saveInquires(this.inquiryForm.value)
                        .subscribe(data => {
-                          console.log(data);
-                          location.reload();
+                        $('#myRequestModal').modal('hide');
+                        this.requestSent.emit(true);
                        });
   }
 
@@ -131,10 +133,11 @@ export class NewQueryComponent implements OnInit {
           }
         };
 
-        console.log(request);
         this.requestService.sendRequest(request)
                           .subscribe(data => {
-                            location.reload();
+                            //location.reload();
+                            $('#myRequestModal').modal('hide');
+                            this.requestSent.emit(true);
                           });
       }
     })

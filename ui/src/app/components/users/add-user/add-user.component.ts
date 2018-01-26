@@ -25,7 +25,7 @@ export class AddUserComponent implements OnInit {
       email: [null, [Validators.required, Validators.email]],
       password: [null, [Validators.required, Validators.minLength(8)]],
       password_confirmation: [null, [Validators.required, Validators.minLength(8)]],
-      realname: ''
+      realname: [null, Validators.required]
     });
 
     this.userForm.valueChanges.subscribe(data => this.onValueChange(data));
