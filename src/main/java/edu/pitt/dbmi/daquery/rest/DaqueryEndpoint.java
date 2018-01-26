@@ -40,6 +40,7 @@ import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
@@ -528,6 +529,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					ResponseDAO.saveOrUpdate(resp);
 					return ResponseHelper.getBasicResponse(200, "");
 				} else {
+					String json = response.readEntity(String.class);
+					ObjectMapper mapper = new ObjectMapper();
+					TypeReference<ErrorInfo> type = new TypeReference<ErrorInfo>(){};
+					ErrorInfo errorInfo = mapper.readValue(json, type);
+					DaqueryResponse resp = errorInfo.getResponse();
+					resp.setRequest(request);
+					resp.setId(null);
+					ResponseDAO.saveOrUpdate(resp);					
 					return response;
 				}
 			}
@@ -571,10 +580,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		if( !mySite.getSiteId().equals(requestSiteId))
     		{
     			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
-    			Response response = getFromRemoteSite(remoteSite, "/response/" + id, null);
-    			if(response.getStatus() == 200)
+    			Response httpResponse = getFromRemoteSite(remoteSite, "/response/" + id, null);
+    			if(httpResponse.getStatus() == 200)
 				{
-					String json = response.readEntity(String.class);
+					String json = httpResponse.readEntity(String.class);
 					ObjectMapper mapper = new ObjectMapper();
 					TypeReference<DaqueryResponse> type = new TypeReference<DaqueryResponse>(){};
 					DaqueryResponse resp = mapper.readValue(json, type);
@@ -582,7 +591,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					rVal.setValue(resp.getValue());
 					ResponseDAO.saveOrUpdate(rVal);
 				}
-    			return response;
+    			else
+    			{
+					String json = httpResponse.readEntity(String.class);
+					ObjectMapper mapper = new ObjectMapper();
+					TypeReference<ErrorInfo> type = new TypeReference<ErrorInfo>(){};
+					ErrorInfo errorInfo = mapper.readValue(json, type);
+					DaqueryResponse resp = errorInfo.getResponse();
+					rVal.setStatus(resp.getStatus());
+					rVal.setValue(resp.getValue());
+					ResponseDAO.saveOrUpdate(rVal);    				
+    			}
+    			return httpResponse;
     		}
     		ResponseTask rTask = (ResponseTask) QueueManager.getNamedQueue(MAIN_QUEUE).getTask(rVal.getResponseId());
     		if(rVal.getStatusEnum().isQueuedOrRunning() && rTask == null)
