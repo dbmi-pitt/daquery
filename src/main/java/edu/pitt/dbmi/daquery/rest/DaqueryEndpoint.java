@@ -609,7 +609,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     			rVal.setStatusEnum(ResponseStatus.STALLED);
     			ResponseDAO.saveOrUpdate(rVal);
     		}
-    		return ResponseHelper.getJsonResponseGen(200, wrapResponse(rVal));
+    		return ResponseHelper.getJsonResponseGen(200, rVal);
     	}
     	catch(Throwable t)
     	{
