@@ -6,9 +6,20 @@ import org.junit.Test;
 
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.rest.AbstractEndpoint;
+import edu.pitt.dbmi.daquery.rest.EndpointHelper;
 
-public class SSLTest extends DaqueryBaseTest  {
+/**
+ * NOTE: For this class to work, a network of sites complete with certificates and keystores
+ * must exist.  You will need to include the ip addresses for the sites when you run this code.
+ * @author devuser
+ *
+ */
+public class SSLT3st extends DaqueryBaseTest  {
 
+	
+	private String sitePort = "6443";
+	private String siteIP = "130.49.213.163";
+	private String siteURL = "https://" + siteIP + ":" + sitePort + "/";
 	public static void main(String[] args) {
 //		org.junit.runner.JUnitCore.main("edu.pitt.dbmi.daqueryws.test.rest.SSLTest");
 	}
@@ -20,15 +31,15 @@ public class SSLTest extends DaqueryBaseTest  {
             .when().get("sites/getKeystoreAliases").then().statusCode(200);
     }*/
 
-	@Test
+	//@Test
 	public void checkSSLGetConnection() {
         try {
         	//s = SiteDAO.querySiteByID("101");
         	Site s = new Site();
-        	s.setKeystoreAlias("130.49.213.163");
-        	s.setUrl("https://130.49.213.163:6443/");
+        	s.setKeystoreAlias(siteIP);
+        	s.setUrl(siteURL);
         	System.out.println("Connecting to site: " +  " " + s.getUrl() + " " + s.getKeystoreAlias());
-        	Response r = AbstractEndpoint.getFromRemoteSite(s, "sites/getKeystoreAliases", null);
+        	Response r = EndpointHelper.getFromRemoteSite(s, "sites/getKeystoreAliases", null);
         	String json = r.readEntity(String.class);
         	System.out.println("Response: " + json);
        } catch (Exception e) {
@@ -36,15 +47,15 @@ public class SSLTest extends DaqueryBaseTest  {
         }
 	}
 	
-	@Test
+	//@Test
 	public void checkSSLPostConnection() {
         try {
         	//s = SiteDAO.querySiteByID("101");
         	Site s = new Site();
-        	s.setKeystoreAlias("130.49.213.163");
-        	s.setUrl("https://130.49.213.163:6443/");
+        	s.setKeystoreAlias(siteIP);
+        	s.setUrl(siteURL);
         	System.out.println("Connecting to site: " +  " " + s.getUrl() + " " + s.getKeystoreAlias());
-        	Response r = AbstractEndpoint.postJSONToRemoteSite(s, "echopost", s.toJson(), null);
+        	Response r = EndpointHelper.postJSONToRemoteSite(s, "echopost", s.toJson(), null);
         	String json = r.readEntity(String.class);
         	System.out.println("Response: " + json);
        } catch (Exception e) {
