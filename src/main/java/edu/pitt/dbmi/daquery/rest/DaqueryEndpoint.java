@@ -502,7 +502,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					response.setReplyTimestamp(new Date());
 					response.setRequest(request);
 					ResponseDAO.saveOrUpdate(response);
-					
 					return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, response));
 				}
 				
@@ -510,7 +509,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					return(ResponseHelper.getErrorResponse(500, "No response recieved for this request.", "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null));
 				else
 				{
-					return(ResponseHelper.getJsonResponseGen(200, wrapResponse(rVal)));
+					return(ResponseHelper.getJsonResponseGen(200, rVal));
 				}
 			}
 			else  //send to a remote site
