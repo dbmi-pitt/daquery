@@ -174,7 +174,7 @@ public class PopulateDevData
 	}
 	private static DaqueryUser createTestUser() throws Exception
 	{
-		DaqueryUser user = new DaqueryUser();
+		DaqueryUser user = new DaqueryUser(true);
 		user.setEmail("tester@somewhere.com");
 		user.setRealName("Test User");
 		user.setStatusEnum(UserStatus.ACTIVE);
