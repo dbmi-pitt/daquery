@@ -8,6 +8,12 @@ import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.rest.AbstractEndpoint;
 import edu.pitt.dbmi.daquery.rest.EndpointHelper;
 
+/**
+ * NOTE: For this class to work, a network of sites complete with certificates and keystores
+ * must exist.  You will need to include the ip addresses for the sites when you run this code.
+ * @author devuser
+ *
+ */
 public class SSLT3st extends DaqueryBaseTest  {
 
 	
