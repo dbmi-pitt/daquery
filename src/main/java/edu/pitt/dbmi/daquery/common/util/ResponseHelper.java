@@ -227,7 +227,11 @@ public class ResponseHelper {
      */    
     public static Response getJsonResponseGen(int responseCode, Object additionalResponseValues) throws DaqueryException
     {
-        String returnedJSON = JSONHelper.toJSON(additionalResponseValues);
+    	String returnedJSON = null;
+    	if(additionalResponseValues instanceof String)
+    		returnedJSON = (String) additionalResponseValues;
+    	else
+    		returnedJSON = JSONHelper.toJSON(additionalResponseValues);
         
         return Response.status(responseCode).entity(returnedJSON).build(); 
     }
