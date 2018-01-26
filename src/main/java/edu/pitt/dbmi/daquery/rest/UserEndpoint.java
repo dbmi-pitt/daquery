@@ -576,7 +576,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	
 	        s.getTransaction().begin();
 	
-	        DaqueryUser newUser = new DaqueryUser(login, password);
+	        DaqueryUser newUser = new DaqueryUser(login, password, true);
 	        s.persist(newUser);
 	
 	        s.getTransaction().commit();
