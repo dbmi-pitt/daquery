@@ -16,7 +16,7 @@ export class NetworkService {
   getNetworks(): Observable<Network[]> {
     return this.http.get('/daquery/ws/networks')
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -24,7 +24,7 @@ export class NetworkService {
   getNetwork(id: number): Observable<Network> {
     return this.http.get(`/daquery/ws/networks/${id}`)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -32,7 +32,7 @@ export class NetworkService {
   getDatamodel(network_id: number): Observable<any> {
     return this.http.get(`/daquery/ws/networks/${network_id}/datamodel`)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -40,7 +40,7 @@ export class NetworkService {
   getSqlDatasource(network_id: number): Observable<any> {
     return this.http.get(`/daquery/ws/networks/${network_id}/sqldatasource`)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -48,7 +48,7 @@ export class NetworkService {
   createNetwork(networkForm: any): Observable<Network> {
     return this.http.post('/daquery/ws/networks', networkForm)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -56,7 +56,7 @@ export class NetworkService {
   getAvailableNetworks(): Observable<any[]>{
     return this.http.get('/daquery/ws/available-networks-to-query')
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     })
   }
@@ -64,7 +64,7 @@ export class NetworkService {
   joinNetwork(network: any): Observable<any[]>{
     return this.http.put('/daquery/ws/networks/join', network)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     })
   }

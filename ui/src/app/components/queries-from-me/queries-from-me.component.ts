@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { DaqueryService } from '../../services/daquery.service';
+import { RequestsFromMeListComponent } from './requests-from-me-list/requests-from-me-list.component';
 
 @Component({
   selector: 'app-queries-from-me',
@@ -10,6 +11,9 @@ export class QueriesFromMeComponent implements OnInit {
   showNewQuery = false;
   editingInquiry: any;
   requestSent: boolean;
+
+  @ViewChild(RequestsFromMeListComponent)
+  private requestsFromMeList: RequestsFromMeListComponent;
 
   constructor(private daqueryService: DaqueryService) { }
 
@@ -30,9 +34,7 @@ export class QueriesFromMeComponent implements OnInit {
   }
 
   onRequestSent(value: boolean) {
-    this.requestSent = value;
-    if(this.requestSent){
-      this.showNewQuery = false;
-    }
+    this.showNewQuery = false;
+    this.requestsFromMeList.notifyMe();
   }
 }

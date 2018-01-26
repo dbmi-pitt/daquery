@@ -18,7 +18,7 @@ export class RequestService {
   getRequestsToMe(): Observable<any[]> {
     return this.http.get('/daquery/ws/requests?direction=IN!IN-OUT')
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -27,7 +27,7 @@ export class RequestService {
     //return QUERIES_TO_ME.slice(0).find(query => query.id === id);
     return this.http.get(`/daquery/ws/query-to-me/${id}`)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -35,7 +35,7 @@ export class RequestService {
   getRequestsFromMe(): Observable<any[]> {
     return this.http.get('/daquery/ws/requests?direction=OUT!IN-OUT')
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -43,40 +43,23 @@ export class RequestService {
   getSavedInquiries(): Observable<any[]> {
     return this.http.get('/daquery/ws/inquiries')
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
-
-    // const inquires = [
-    //   {'id': 3,
-    //    'inquiry_id': '33333333-61ad-44eb-8eef-886adcced18e',
-    //    'version': 1,
-    //    'inquiry_type': 'SQL',
-    //    'AUTHOR_ID': '33333333-61ad-44eb-aaaa-886adcced18e',
-    //    'network': {
-    //      'id': 1,
-    //      'name': 'devALL'
-    //    }
-    //   },
-    //   {'id': 4,
-    //   'inquiry_id': '44444444-61ad-44eb-8eef-886adcced18e',
-    //   'version': 1,
-    //   'inquiry_type': 'SQL',
-    //   'AUTHOR_ID': '44444444-61ad-44eb-aaaa-886adcced18e',
-    //   'network': {
-    //     'id': 1,
-    //     'name': 'devALL'
-    //   }
-    //  }
-    // ];
-
-    // return Observable.of(inquires);
   }
 
   saveInquires(inquiry: any) {
     return this.http.post('/daquery/ws/inquiries', inquiry)
                     .catch(error => {
-                        this.error.message = error.message;
+                        this.error.error = error;
+                        return Observable.throw(error || 'Server error');
+                    });
+  }
+
+  updateInquiry(id: string, inquiry: any){
+    return this.http.put(`/daquery/ws/inquiries/${id}`, inquiry)
+                    .catch(error => {
+                        this.error.error = error;
                         return Observable.throw(error || 'Server error');
                     });
   }
@@ -84,7 +67,7 @@ export class RequestService {
   sendRequest(inquiry: any) {
     return this.http.post('/daquery/ws/request', inquiry)
                     .catch(error => {
-                        this.error.message = error.message;
+                        this.error.error = error;
                         return Observable.throw(error || 'Server error');
                     });
   }

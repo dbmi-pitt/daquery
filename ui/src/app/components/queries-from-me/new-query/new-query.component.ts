@@ -23,6 +23,7 @@ export class NewQueryComponent implements OnInit {
 
   showNetworkSitePanel = false;
   onSending = false;
+  editing: boolean = false;
 
   @Output() requestSent: EventEmitter<boolean> = new EventEmitter<boolean>();
 
@@ -75,11 +76,17 @@ export class NewQueryComponent implements OnInit {
   }
 
   onSave() {
-    this.requestService.saveInquires(this.inquiryForm.value)
-                       .subscribe(data => {
-                        $('#myRequestModal').modal('hide');
-                        this.requestSent.emit(true);
-                       });
+    if(this.editingInquiry) {
+      this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
+                         .subscribe(data => {
+                           this.requestSent.emit(true);
+                         });
+    } else {
+      this.requestService.saveInquires(this.inquiryForm.value)
+                        .subscribe(data => {
+                          this.requestSent.emit(true);
+                        });
+    }
   }
 
   onRequest() {
@@ -94,6 +101,8 @@ export class NewQueryComponent implements OnInit {
                           const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
                           const siteFormArray = this.fb.array(siteFGs);
                           this.inquiryForm.setControl('sitesToQuery', siteFormArray);
+                        }, error => {
+                          $('#myRequestModal').modal('hide');
                         });
       }
     } else {
@@ -138,6 +147,10 @@ export class NewQueryComponent implements OnInit {
                             //location.reload();
                             $('#myRequestModal').modal('hide');
                             this.requestSent.emit(true);
+                          },
+                          error => {
+                            $('#myRequestModal').modal('hide');
+                            this.requestSent.emit(true);
                           });
       }
     })
@@ -145,6 +158,7 @@ export class NewQueryComponent implements OnInit {
 
   networkOnChange(value){
     let network = this.networks.find(n => n.networkId === value);
+    this.authenticationService.renewjwt(network.networkId);
     if(network === undefined) {
       this.inquiryForm.setControl('sitesToQuery', this.fb.array([]));
     } else {
@@ -153,6 +167,8 @@ export class NewQueryComponent implements OnInit {
                         const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
                         const siteFormArray = this.fb.array(siteFGs);
                         this.inquiryForm.setControl('sitesToQuery', siteFormArray);
+                      }, error => {
+                        $('#myRequestModal').modal('hide');
                       });
     }
   }

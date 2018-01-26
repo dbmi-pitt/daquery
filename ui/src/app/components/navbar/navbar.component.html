@@ -18,7 +18,7 @@
     <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
         <!-- Notifications: style can be found in dropdown.less -->
-        <li class="dropdown notifications-menu">
+        <!-- <li class="dropdown notifications-menu">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-bell-o"></i>
             <span class="label label-warning">{{ notifications.length }}</span>
@@ -26,7 +26,7 @@
           <ul class="dropdown-menu">
             <li class="header">You have {{ notifications.length }} notifications</li>
             <li>
-              <!-- inner menu: contains the actual data -->
+              <!-- inner menu: contains the actual data >
               <ul class="menu">
                 <li *ngFor="let noty of notifications">
                   <a href="#">
@@ -35,9 +35,9 @@
                 </li>
               </ul>
             </li>
-            <!-- <li class="footer"><a href="#">View all</a></li> -->
+            <!-- <li class="footer"><a href="#">View all</a></li> >
           </ul>
-        </li>
+        </li> -->
         <li>
           <a (click)="logout()">Logout</a>
         </li>

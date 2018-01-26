@@ -13,7 +13,7 @@
                   <label for="dataType">Data Type</label>
                   <div class="radio">
                     <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="aggregate">Aggregate</label>
-                    <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="data">Data</label>
+                    <label class="radio-inline"><input type="radio" name="dataType" formControlName="dataType" value="data" disabled>Data</label>
                   </div>
                 </div>
                 <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">

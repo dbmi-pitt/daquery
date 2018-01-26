@@ -30,7 +30,7 @@ export class SiteService {
                                    
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -40,7 +40,7 @@ export class SiteService {
 
     return this.http.get('/daquery/ws/sites/available', {params: params})
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -51,7 +51,7 @@ export class SiteService {
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -62,7 +62,7 @@ export class SiteService {
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -73,7 +73,7 @@ export class SiteService {
 
     return this.http.get('/daquery/ws/sites', {params: params})
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -81,7 +81,7 @@ export class SiteService {
   requestConnectSite(siteForm: any): Observable<any> {
     return this.http.post('/daquery/ws/sites?type=outgoing', siteForm)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -94,7 +94,7 @@ export class SiteService {
 
     return this.http.put('/daquery/ws/sites/approve-connectrequest', payload)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
 
@@ -108,7 +108,7 @@ export class SiteService {
 
     return this.http.put('/daquery/ws/sites/deny-connectrequest', payload)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }

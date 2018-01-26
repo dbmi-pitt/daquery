@@ -20,7 +20,7 @@ export class UserService {
   getUsers(): Observable<User[]> {
     return this.http.get('/daquery/ws/users')
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -29,7 +29,7 @@ export class UserService {
     const params = new HttpParams().set('user_id', user_id.toString());
     return this.http.get('/daquery/ws/roles', {params: params})
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -39,35 +39,15 @@ export class UserService {
     const params = new HttpParams().set('site-id', site_id);
     return this.http.get('/daquery/ws/users/remote', {params: params})
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
-
-    // return Observable.of([
-    //   {
-    //     email: "111@pitt.edu",
-    //     id: "27e9e519-1111-4c9f-af4e-2e34e750c8cd",
-    //     realName: "AAA",
-    //     roles: [{
-    //       id: 4,
-    //       name: "aggregate_querier"
-    //     }],
-    //     utype: "FULL"
-    //   },
-    //   {
-    //     email: "222@pitt.edu",
-    //     id: "27e9e519-2222-4c9f-af4e-2e34e750c8cd",
-    //     realName: "BBB",
-    //     roles: [],
-    //     utype: "FULL"
-    //   }
-    // ]);
   }
 
   getLocalRoles(): Observable<string[]> {
     return this.http.get('/daquery/ws/local-roles')
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -79,7 +59,7 @@ export class UserService {
     user['utype'] = 'FULL';
     return this.http.post('/daquery/ws/users', user)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
@@ -87,7 +67,7 @@ export class UserService {
   toggleUserRole(user: any) {
     return this.http.put(`/daquery/ws/users/update-role/${user.id}`, user)
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error.json().error || 'Server error');
                     });
   }
@@ -101,13 +81,13 @@ export class UserService {
     if(checked){
       return this.http.post('/daquery/ws/users/remote-role', params)
                       .catch(error => {
-                        this.error.message = error.message;
+                        this.error.error = error;
                         return Observable.throw(error || 'Server error');
                       });
     } else {
       return this.http.request('delete', '/daquery/ws/users/remote-role', { body : params})
                       .catch(error => {
-                        this.error.message = error.message;
+                        this.error.error = error;
                         return Observable.throw(error || 'Server error');
                       });
     }
@@ -117,7 +97,7 @@ export class UserService {
     let userObj = JSON.parse(user);
     return this.http.patch(`/daquery/ws/users/${userObj.id}`, user, this.authenticationService.jwt())
                     .catch(error => {
-                      this.error.message = error.message;
+                      this.error.error = error;
                       return Observable.throw(error.json().error || 'Server error');
                     });
   }

@@ -21,22 +21,19 @@ export class RequestsFromMeListComponent implements OnInit {
   inquiries: any[];
   requestGroups: Map<String, any[]> = new Map<String, any[]>();
 
-  @Input() requestSent: boolean = false;
-
   constructor(private requestService: RequestService,
               private responseService: ResponseService,
               private router : Router) { 
   }
 
-  ngOnInit() {
+  notifyMe() {
     this.getRequestsFromMe();
     this.getSavedInquiries();
   }
 
-  ngOnChanges(change: SimpleChange) {
-    this.requestSent = !this.requestSent;
-    this.getSavedInquiries();
+  ngOnInit() {
     this.getRequestsFromMe();
+    this.getSavedInquiries();
   }
 
   getRequestsFromMe() {
@@ -58,14 +55,12 @@ export class RequestsFromMeListComponent implements OnInit {
                           let response = request.responses[0];
                           if(response && !['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
                              let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
-                               console.log("calling " + response.id );
                                this.responseService.getResponse(response.responseId)
                                                    .subscribe(res => {
                                                      response.status = res.status;
                                                      response.value = res.value;
                                                      if(['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
                                                        subscription.unsubscribe();
-                                                       console.log("unsubscribed");
                                                      }
                                                    },
                                                   error => {
