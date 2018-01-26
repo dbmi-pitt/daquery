@@ -42,6 +42,14 @@ public class WSConnectionUtil {
 			System.err.println("Unable to set daquerySSLFactory" + e.getMessage());
 		}
 	}
+	
+	/**
+	 * Return an SSLSocetFactory based on the Shrine keystore files found on this machine.
+	 * The code assumes the keystore files are stored in the standard locations according to 
+	 * Shrine's configuration file (ex: /opt/shrine/shrine.conf)
+	 * @return- an SSLSocketFactory using the keystore information found on this machine. 
+	 * @throws Exception
+	 */
 	public static SSLSocketFactory getDaqueryKeyStoreSSLFactory() throws Exception
 	{
 		if(daquerySSLFactory == null)
@@ -66,8 +74,13 @@ public class WSConnectionUtil {
 		return(daquerySSLFactory);
 	}
 	
-	//NOTE: The shrine.conf file is a HOCON format: https://open.med.harvard.edu/wiki/display/SHRINE/Shrine.conf+File+-+SHRINE+1.22.8
-	//It looks like JSON, but the format is slightly different.
+	/**
+	 * This method returns the keystore path for this machine's Shrine setup.  The keystore path is found within the
+	 * shrine.conf file. The shrine.conf file is a HOCON format: 
+	 * https://open.med.harvard.edu/wiki/display/SHRINE/Shrine.conf+File+-+SHRINE+1.22.8.
+	 * It looks like JSON, but the format is slightly different.
+	 * @return- a String containing the keystore path found in shrine.conf
+	 */
 	public static String getKeystorePath() {
 		String retString = null;
 		File configDir = new File(AppProperties.getHomeDirectory(), "lib");
@@ -78,6 +91,13 @@ public class WSConnectionUtil {
 		return retString;
 	}
 
+	/**
+	 * This method returns the keystore password for this machine's Shrine setup.  The keystore password is found within the
+	 * shrine.conf file. The shrine.conf file is a HOCON format: 
+	 * https://open.med.harvard.edu/wiki/display/SHRINE/Shrine.conf+File+-+SHRINE+1.22.8.
+	 * It looks like JSON, but the format is slightly different.
+	 * @return- a String containing the keystore password found in shrine.conf
+	 */
 	public static String getKeystorePassword() {
 		String retString = null;
 		File configDir = new File(AppProperties.getHomeDirectory(), "lib");
