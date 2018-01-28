@@ -366,15 +366,16 @@ public class DBHelper
 		}
 	}
 
-	public static String getOutgoingSiteStatus(String fromSiteId, String toSiteId, String networkId)
+	public static String getOutgoingSiteStatus(String fromSiteId, String toSiteId, String networkId) throws DaqueryException
 	{
 		Session s = null;
 		try
 		{
+			s = HibernateConfiguration.openSession();
 			String sql = "select status from connection_request where network_id = '" + networkId +"' and to_site_id = '" + toSiteId + "' and from_site_id = '" + fromSiteId + "'";
 			SQLQuery q = s.createSQLQuery(sql);
 			List<String> vals = q.list();
-			if(vals.size() == 1)
+			if(vals != null && vals.size() == 1)
 				return(vals.get(0));
 			else
 				return(null);

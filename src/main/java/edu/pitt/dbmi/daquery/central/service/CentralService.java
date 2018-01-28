@@ -61,15 +61,13 @@ public class CentralService{
     }
     
 	@GET
-	@Path("/site-status")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)	
+	@Path("site-status")
 	public Response checkSiteStatus(@QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId, @QueryParam("network-id") String networkId)
 	{
 		try
 		{
 			if(StringHelper.isEmpty(fromSiteId) || StringHelper.isEmpty(toSiteId) || StringHelper.isEmpty(networkId))
-				ResponseHelper.getErrorResponse(400, "Error calling central server, invalid parameter list.", "from-site-id, to-site-id and network-id are required parameters", null);
+				return(ResponseHelper.getErrorResponse(400, "Error calling central server, invalid parameter list.", "from-site-id, to-site-id and network-id are required parameters", null));
 	
 			String status = DBHelper.getOutgoingSiteStatus(fromSiteId, toSiteId, networkId);
 			
