@@ -171,7 +171,7 @@ public class DaqueryUserDAO extends AbstractDAO {
 	        DaqueryUser user = AbstractDAO.executeQueryReturnSingle(DaqueryUser.FIND_BY_EMAIL_PASSWORD, pList, logger);
 	        if (user == null)
 	        {
-	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / " + password);
+	    		logger.info("Invalid email/password.  Tried to login using: " + email + " / *******");
 	            throw new SecurityException("Invalid email/password");
 	        }
 	        
