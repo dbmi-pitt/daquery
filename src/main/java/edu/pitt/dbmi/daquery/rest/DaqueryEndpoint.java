@@ -56,6 +56,7 @@ import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
@@ -211,7 +212,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		
 			Map<String, String> idParam = new HashMap<String, String>();
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = callCentralServer("availableNetworks",  idParam);
+			Response resp = WSConnectionUtil.callCentralServer("availableNetworks",  idParam);
 			if(resp.getStatus() == 200)
 			{
 				if(nonConnNetsOnly)
@@ -310,7 +311,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			int dbStatus = AppSetup.getDBStatus();
 			if(dbStatus == AppSetup.DBSTATUS_NONEXISTENT)
 			{
-				Response centralAuthResponse = callCentralServerAuth(siteName, siteKey);
+				Response centralAuthResponse = WSConnectionUtil.callCentralServerAuth(siteName, siteKey);
 		    	if(centralAuthResponse.getStatus() != 200)
 		    		return(centralAuthResponse);
 
@@ -666,38 +667,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	}
     }
 	
-	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
-	{
-		String siteId = AppProperties.getDBProperty("site.id");
-		String siteKey = AppProperties.getDBProperty("central.site.key");
-		Response auth = callCentralServerAuth(siteId, siteKey);
-		if(auth.getStatus() != 200)
-			return(auth);
-		//TODO grab the token from the auth response and send it along with the call
-		String url = AppProperties.getCentralServerURL() + "/daquery-central/" +  serviceName;
-		if(additionalParameters != null)
-		{
-			String paramDivider = "?";
-			if(url.contains("?"))
-				paramDivider = "&";			
-			boolean firstParam = true;
-			for(String key :additionalParameters.keySet())
-			{
-				url = url + paramDivider + key + "=" + additionalParameters.get(key);
-				if(firstParam)
-				{
-					paramDivider = "&";
-					firstParam = false;
-				}
-			}
-		}
-		
-		Client client = ClientBuilder.newClient();
-		
-		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
-		return(rVal);
-		
-	}
+
 	
 	/**
      * renew JWT.
@@ -745,16 +715,4 @@ public class DaqueryEndpoint extends AbstractEndpoint
             return Response.status(UNAUTHORIZED).build();
         }
     }
-
-	
-	private static Response callCentralServerAuth(String siteName, String siteKey) throws DaqueryException
-	{
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("site", siteName);
-		params.put("key", siteKey);
-		Client client = ClientBuilder.newClient();
-		String url = AppProperties.getCentralServerURL() + "/daquery-central/authenticateSite?site=" +siteName + "&key=" + siteKey;
-		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
-		return(rVal);
-	}	
 }

@@ -1,7 +1,6 @@
 package edu.pitt.dbmi.daquery.rest;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -18,8 +17,7 @@ import org.glassfish.jersey.SslConfigurator;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.rest.util.WSConnectionUtil;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 
 //TODO: Possible improvement: see if I can abstract the "getall", "getbyidentifier"
@@ -135,74 +133,6 @@ public class AbstractEndpoint {
 	 */
 	protected static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
 	{
-		return(getFromRemoteSite(site, serviceName, arguments, null));
-	}
-	
-	/**
-	 * This method executes a GET against a remote site.  If the connection is made via https, 
-	 * the local site's keystore is examined.  The keystore file and keystore password are used 
-	 * to create an SSL connection to the remote site.  For this call to work, the local site's
-	 * certificate must be included in the remote site's keystore.  The alias for the certificate
-	 * must match the local site's IP address or a resolvable server name.
-	 * @param site- an object representing the remote site.
-	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
-	 * @param arguments- a Map of the parameters for the serviceName
-	 * @param jwToken- the current JWToken
-	 * @return- a Response object representing the response from the remote site (most likely JSON)
-	 * @throws UnsupportedEncodingException
-	 */
-	protected static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments, String jwToken) throws UnsupportedEncodingException
-	{
-		Client client = ClientBuilder.newClient();
-		Response resp = null;
-		String getURL = buildGetUrl(site.getUrl(), serviceName, arguments);
-		
-		//handle an HTTPS connection
-		if (site.getUrl().toLowerCase().startsWith("https")) {
-			SslConfigurator sslConfig = SslConfigurator.newInstance()
-					.trustStoreFile(WSConnectionUtil.getKeystorePath())
-					.trustStorePassword(WSConnectionUtil.getKeystorePassword())
-					.trustStoreType("JKS")
-					.securityProtocol("SSL");
-
-			SSLContext sslContext = sslConfig.createSSLContext();
-
-			//redefine the client variable to include the sslContext
-			client = ClientBuilder.newBuilder().sslContext(sslContext).build();
-		}
-		Builder builder = client.target(getURL)
-				.request(MediaType.APPLICATION_JSON); //.get();
-		if(!StringHelper.isEmpty(jwToken))
-			builder = builder.header("Authorization", "Bearer " + jwToken);
-		resp = builder.get();
-		return(resp);
-	}
-
-	private static String buildGetUrl(String siteUrl, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException {
-		String retString = null;
-		String args = "";
-		if(arguments != null)
-		{
-			boolean first = true;
-			for(String key : arguments.keySet())
-			{
-				String divide = "&";
-				if(first)
-				{
-					divide = "?";
-					first = false;
-				}
-				args = args + divide + URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(arguments.get(key), "UTF-8");
-			}
-		}
-		//add a trailing slash to the URL if it is missing from the site URL
-		if (!siteUrl.endsWith("/")) {
-			siteUrl = siteUrl + "/";
-		}
-		String sName = serviceName.trim();
-		if(sName.startsWith("/"))
-			sName = sName.substring(1); 
-		retString = siteUrl + "daquery/ws/" + sName + args;
-		return retString;
+		return(WSConnectionUtil.getFromRemoteSite(site, serviceName, arguments, null));
 	}
 }

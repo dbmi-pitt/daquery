@@ -33,6 +33,7 @@ import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 
 import io.jsonwebtoken.ClaimJwtException;
@@ -145,7 +146,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         	{
         		Site site = SiteDAO.querySiteByID(jwt.getSiteId());
         		
-        		Response resp = AbstractEndpoint.getFromRemoteSite(site, "users/validateToken", null, jwt.getToken());
+        		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/validateToken", null, jwt.getToken());
         		if(resp.getStatus() != 200)
         		{
         			requestContext.abortWith(resp);

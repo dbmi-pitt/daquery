@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 /**
  * This class is an instantiation of the abstract AbstractEndpoint class
@@ -19,11 +20,11 @@ public class EndpointHelper extends AbstractEndpoint {
 	}
 	
 	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException {
-		return AbstractEndpoint.getFromRemoteSite(site, serviceName, arguments, null); 
+		return WSConnectionUtil.getFromRemoteSite(site, serviceName, arguments, null); 
 	}
 	
 	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments, String jwToken) throws UnsupportedEncodingException {
-		return AbstractEndpoint.getFromRemoteSite(site, serviceName, arguments, jwToken);
+		return WSConnectionUtil.getFromRemoteSite(site, serviceName, arguments, jwToken);
 	}
 
 
