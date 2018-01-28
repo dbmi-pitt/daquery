@@ -78,6 +78,7 @@ public class NetworkDAO extends AbstractDAO {
     public static List<Network> queryAllNetworks() throws Exception {
     	try { 		
     	    List<Network> networks = executeQueryReturnList(Network.FIND_ALL, null, logger);
+    	    SiteDAO.updatePendingSitesByNetwork(networks);
 	        return networks;
 	    
         } catch (HibernateException e) {

@@ -1,21 +1,29 @@
 package edu.pitt.dbmi.daquery.common.dao;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.ws.rs.core.Response;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.internal.util.StringHelper;
 
+import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 public class SiteDAO extends AbstractDAO {
 
@@ -113,19 +121,21 @@ public class SiteDAO extends AbstractDAO {
     }
     
     /** Get sites by network_id
-     *  @param network_id
+     *  @param netId
      *  @return List<Site>
      * @throws Exception 
      */
-    public static List<Site> queryConnectedOutgoingSitesByNetworkId(long network_id) throws Exception{
+    public static List<Site> queryConnectedOutgoingSitesByNetworkId(long netId) throws Exception{
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
-			
-			String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='CONNECTED' and n.id = :network_id";
+    		
+    		updatePendingSitesByNetwork(netId, s);
+    		
+    		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='CONNECTED' and n.id = :network_id";
 			Query query = s.createSQLQuery(sql)
 						   .addEntity(Site.class)
-						   .setParameter("network_id", network_id);
+						   .setParameter("network_id", netId);
 			
 			List result = query.list();
     		
@@ -136,8 +146,87 @@ public class SiteDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
             throw e;
         }
+    	finally
+    	{
+    		if(s != null) s.close();
+    	}
     }
     
+    /**
+     * Check the central server to see if any outstanding PENDING sites for a network
+     * have responded and update accordingly.  This uses the Network database id (not UUID).
+     * 
+     * @param netId The database id for the Network to check (id field, not network_id/UUID field)
+     *
+     */
+    public static void updatePendingSitesByNetwork(long netId, Session s) throws DaqueryException
+    {
+		//before getting connected sites see if there are any pending sites that have been approved or disapproved
+		String sql = "SELECT s.site_id, n.network_id FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='CONNECTED' and n.id = " + netId;    		
+		
+		Query q1 = s.createSQLQuery(sql);
+		List<Object[]> idList = q1.list();
+		if(idList.size() > 0)
+		{
+			Site mySite = SiteDAO.getLocalSite();
+			for(Object [] ids : idList)
+			{
+				String siteUUID = (String) ids[0];
+				String netUUID = (String) ids[1];
+				String status = checkSiteStatusAtCentral(mySite.getSiteId(), siteUUID, netUUID, s);
+				if(StringHelper.isEmpty(status) || status.equals("PENDING"))
+				{
+					updateOutgoingSiteStatus(siteUUID, netId, status, s);
+				}
+			}
+		}    	
+    }
+    
+    public static void updatePendingSitesByNetwork(List<Network> nets)
+    {
+    	Session s = null;
+    	try
+    	{
+    		s = HibernateConfiguration.openSession();
+    		for(Network net : nets)
+    			updatePendingSitesByNetwork(net.getId(), s);
+    	}
+    	catch(Throwable t)
+    	{
+    		logger.log(Level.SEVERE, "Unhandled error while updating networks pending status.", t);
+    	}
+    	finally
+    	{
+    		if(s != null) s.close();
+    	}
+    }
+    private static String checkSiteStatusAtCentral(String fromSiteId, String toSiteId, String networkId, Session s) throws DaqueryException
+    {
+    	Map<String, String> params = new HashMap<String, String>();
+    	params.put("to-site-id", toSiteId);
+    	params.put("from-site-id", fromSiteId);
+    	params.put("network-id", networkId);
+    	Response resp = WSConnectionUtil.callCentralServer("site-status", params);
+    	if(resp.getStatus() == 200)
+    		return(resp.readEntity(String.class));
+    	else
+    		return(null);
+    }
+    
+    private static void updateOutgoingSiteStatus(String siteUUID, long networkId, String status, Session s)
+    {
+		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE n.id = :network_id and s.site_id = :siteId";
+		Transaction t = s.beginTransaction();
+		Query query = s.createSQLQuery(sql)
+					   .addEntity(Site.class)
+					   .setParameter("network_id", networkId)
+					   .setParameter("siteID", siteUUID);
+		List<Site> vals = query.list();
+		for(Site site : vals)
+			s.update(site);
+		t.commit();
+    }
+
     /** Get sites by network_id
      *  @param network_id
      *  @return List<Site>
