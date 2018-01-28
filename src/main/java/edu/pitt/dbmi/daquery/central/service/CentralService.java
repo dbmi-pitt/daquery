@@ -59,6 +59,30 @@ public class CentralService{
     {
     	return(ResponseHelper.getBasicResponse(200, "Hello Cruel Central World"));
     }
+    
+	@GET
+	@Path("/site-status")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)	
+	public Response checkSiteStatus(@QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId, @QueryParam("network-id") String networkId)
+	{
+		try
+		{
+			if(StringHelper.isEmpty(fromSiteId) || StringHelper.isEmpty(toSiteId) || StringHelper.isEmpty(networkId))
+				ResponseHelper.getErrorResponse(400, "Error calling central server, invalid parameter list.", "from-site-id, to-site-id and network-id are required parameters", null);
+	
+			String status = DBHelper.getOutgoingSiteStatus(fromSiteId, toSiteId, networkId);
+			
+			if(!StringHelper.isEmpty(status))
+				return(ResponseHelper.getBasicResponse(200, status));
+			else
+				return(ResponseHelper.getBasicResponse(404, "Site not found" ));
+		}
+		catch(Throwable t)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unexpected error on the central server.", "An unexpected error occured while checking contacting the central server to find site status for from-site:" + fromSiteId + " to-site:" + toSiteId + " network:" + networkId, t));
+		}
+	}
 	/**
 	 * Authenticate a site/key pair.  On success a jwt will be sent back.  If the site key
 	 * is flagged as temporary a new key is generated and sent back along with the site id

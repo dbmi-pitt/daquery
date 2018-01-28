@@ -366,4 +366,28 @@ public class DBHelper
 		}
 	}
 
+	public static String getOutgoingSiteStatus(String fromSiteId, String toSiteId, String networkId)
+	{
+		Session s = null;
+		try
+		{
+			String sql = "select status from connection_request where network_id = '" + networkId +"' and to_site_id = '" + toSiteId + "' and from_site_id = '" + fromSiteId + "'";
+			SQLQuery q = s.createSQLQuery(sql);
+			List<String> vals = q.list();
+			if(vals.size() == 1)
+				return(vals.get(0));
+			else
+				return(null);
+				
+		}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "Error while getting outging site status for fromSite:" + fromSiteId + " toSite:" + toSiteId + " networkId:" + networkId, t);
+			throw t;
+		}
+		finally
+		{
+			if(s != null) s.close();
+		}
+	}
 }
