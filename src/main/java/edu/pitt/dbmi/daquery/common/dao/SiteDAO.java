@@ -162,7 +162,7 @@ public class SiteDAO extends AbstractDAO {
     public static void updatePendingSitesByNetwork(long netId, Session s) throws DaqueryException
     {
 		//before getting connected sites see if there are any pending sites that have been approved or disapproved
-		String sql = "SELECT s.site_id, n.network_id FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='CONNECTED' and n.id = " + netId;    		
+		String sql = "SELECT s.site_id, n.network_id FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='PENDING' and n.id = " + netId;    		
 		
 		Query q1 = s.createSQLQuery(sql);
 		List<Object[]> idList = q1.list();
@@ -174,9 +174,15 @@ public class SiteDAO extends AbstractDAO {
 				String siteUUID = (String) ids[0];
 				String netUUID = (String) ids[1];
 				String status = checkSiteStatusAtCentral(mySite.getSiteId(), siteUUID, netUUID, s);
-				if(StringHelper.isEmpty(status) || status.equals("PENDING"))
+				if(! StringHelper.isEmpty(status))
 				{
-					updateOutgoingSiteStatus(siteUUID, netId, status, s);
+					if(!status.equals("PENDING"))
+					{
+						if(status.equals("APPROVED"))
+							updateOutgoingSiteStatus(siteUUID, netId, "CONNECTED", s);
+						else
+							updateOutgoingSiteStatus(siteUUID, netId, status, s);
+					}
 				}
 			}
 		}    	
@@ -215,7 +221,7 @@ public class SiteDAO extends AbstractDAO {
     
     private static void updateOutgoingSiteStatus(String siteUUID, long networkId, String status, Session s)
     {
-		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE n.id = :network_id and s.site_id = :siteId";
+		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE n.id = :network_id and s.site_id = :siteID";
 		Transaction t = s.beginTransaction();
 		Query query = s.createSQLQuery(sql)
 					   .addEntity(Site.class)
@@ -223,7 +229,10 @@ public class SiteDAO extends AbstractDAO {
 					   .setParameter("siteID", siteUUID);
 		List<Site> vals = query.list();
 		for(Site site : vals)
+		{
+			site.setStatus(status);
 			s.update(site);
+		}
 		t.commit();
     }
 
