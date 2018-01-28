@@ -19,7 +19,7 @@
         I was encountering an UnsupportedClassVersionError when deploying to Eclipse's Tomcat 6 server
         this link helped: https://stackoverflow.com/questions/33010871/issue-java-lang-unsupportedclassversionerror-org-glassfish-jersey-servlet-serv -->
   	<!-- <jersey.version>2.19</jersey.version> -->
-  	  <jersey.version>2.25.1</jersey.version>        
+  	    <jersey.version>2.25.1</jersey.version>        
         <jaxrs.version>2.0.1</jaxrs.version>
         <logback.version>1.2.3</logback.version>
         <jjwt.version>0.7.0</jjwt.version>   
@@ -34,7 +34,7 @@
         <restassured.version>3.0.3</restassured.version>
         <javaxjson.version>1.0.4</javaxjson.version>
         <derby.version>10.12.1.1</derby.version>
-        <config.version>1.2.1</config.version>
+        <typesafe.config.version>1.2.1</typesafe.config.version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <ui_project.Directory>../daquery/ui</ui_project.Directory>
@@ -241,7 +241,7 @@
 		<dependency>
 		    <groupId>com.typesafe</groupId>
 		    <artifactId>config</artifactId>
-		    <version>${config.version}</version>
+		    <version>${typesafe.config.version}</version>
 		</dependency>
 		
 	    

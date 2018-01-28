@@ -47,10 +47,10 @@ import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
+import edu.pitt.dbmi.daquery.common.util.KeystoreAlias;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.rest.util.KeystoreAlias;
-import edu.pitt.dbmi.daquery.rest.util.WSConnectionUtil;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 
 @Path("/sites")
@@ -115,7 +115,7 @@ public class SiteEndpoint extends AbstractEndpoint {
                 Map<String, String> idParam = new HashMap<String, String>();
                 idParam.put("network-id", network.getNetworkId());
     			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-    			Response resp = DaqueryEndpoint.callCentralServer("pending-sites",  idParam);
+    			Response resp = WSConnectionUtil.callCentralServer("pending-sites",  idParam);
     			
     			if(resp.getStatus() == 200) {
     				String json = resp.readEntity(String.class);
@@ -161,7 +161,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             
             Map<String, String> idParam = new HashMap<String, String>();
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = DaqueryEndpoint.callCentralServer("availableNetworks",  idParam);
+			Response resp = WSConnectionUtil.callCentralServer("availableNetworks",  idParam);
 			Network network = NetworkDAO.queryNetwork(String.valueOf(networkId));
 			
 			if(resp.getStatus() == 200)
@@ -233,7 +233,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             Map<String, String> idParam = new HashMap<String, String>();
             idParam.put("network-id", network.getNetworkId());
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = DaqueryEndpoint.callCentralServer("pending-sites",  idParam);
+			Response resp = WSConnectionUtil.callCentralServer("pending-sites",  idParam);
 			
 			if(resp.getStatus() == 200)
 			{
@@ -323,7 +323,7 @@ public class SiteEndpoint extends AbstractEndpoint {
                 idParam.put("network-id", network.getNetworkId());
                 idParam.put("from-site-id", AppProperties.getDBProperty("site.id"));
                 idParam.put("to-site-id", site_out.getSiteId());
- 				Response resp = DaqueryEndpoint.callCentralServer("request-connection",  idParam);
+ 				Response resp = WSConnectionUtil.callCentralServer("request-connection",  idParam);
  				
  				if(resp.getStatus() == 200) {
 		        	network.getOutgoingQuerySites().add(site_out);
@@ -435,7 +435,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             idParam.put("network-id", networkId);
             idParam.put("from-site-id", fromSiteId);
 			idParam.put("to-site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = DaqueryEndpoint.callCentralServer("approve-connectrequest",  idParam);
+			Response resp = WSConnectionUtil.callCentralServer("approve-connectrequest",  idParam);
 			
 			if(resp.getStatus() == 200) {
 				s = HibernateConfiguration.openSession(); 
@@ -443,7 +443,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 	        	idParam = new HashMap<String, String>();
     			idParam.put("site-id", fromSiteId);
-    			resp = DaqueryEndpoint.callCentralServer("sites",  idParam);
+    			resp = WSConnectionUtil.callCentralServer("sites",  idParam);
     			String json = resp.readEntity(String.class);
     			ObjectMapper mapper = new ObjectMapper();
     			Map<String, Object> map= new LinkedHashMap<>();
@@ -503,7 +503,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             idParam.put("network-id", networkId);
             idParam.put("from-site-id", fromSiteId);
 			idParam.put("to-site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = DaqueryEndpoint.callCentralServer("deny-connectrequest",  idParam);
+			Response resp = WSConnectionUtil.callCentralServer("deny-connectrequest",  idParam);
 			
 			if(resp.getStatus() == 200) {
 				s = HibernateConfiguration.openSession(); 
@@ -511,7 +511,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 	        	idParam = new HashMap<String, String>();
     			idParam.put("site-id", fromSiteId);
-    			resp = DaqueryEndpoint.callCentralServer("sites",  idParam);
+    			resp = WSConnectionUtil.callCentralServer("sites",  idParam);
     			String json = resp.readEntity(String.class);
     			ObjectMapper mapper = new ObjectMapper();
     			Map<String, Object> map= new LinkedHashMap<>();
