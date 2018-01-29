@@ -128,10 +128,10 @@ public class SiteEndpoint extends AbstractEndpoint {
             	return Response.status(BAD_REQUEST).build();
     	} catch (HibernateException he) {
     		logger.log(Level.SEVERE, "An unexpected database error occured while getting site information.", he);
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
-        } catch (Exception e) {
-        	logger.log(Level.SEVERE, "An unexpected error occured while getting site information.", e);
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		return(ResponseHelper.getErrorResponse(500, "An unexpected database error occured while looking up all site information.", "Looking for status:" + status + " type:" + type, he));
+        } catch (Throwable t) {
+        	logger.log(Level.SEVERE, "An unexpected error occured while getting site information.", t);
+        	return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while looking up all site information.", "Looking for status:" + status + " type:" + type, t));
         }
     }
 
