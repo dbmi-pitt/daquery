@@ -13,8 +13,8 @@
           <i *ngIf="loadingAvailableSites" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
           <select *ngIf="!loadingAvailableSites" class="form-control" formControlName="site" id="site" (change)="onChange()">
             <option value="">-Select-</option>
-            <option *ngFor="let site of sites" [value]="site.siteId">
-              {{ site.name }}
+            <option *ngFor="let site of sites" [value]="site.siteId" [disabled]="site.connected">
+              {{ site.name }} {{ site.connected ? " - connected" : ""}}
             </option>
             <!-- <option value="new">
               New Site
@@ -26,7 +26,7 @@
             <label for="alias">Key Alias</label>
             <select *ngIf="!loadingAlias" class="form-control" formControlName="alias" id="alias">
               <option value="">-Select-</option>
-              <option *ngFor="let alias of aliases" [value]="alias.aliasId">
+              <option *ngFor="let alias of aliases">
                 {{ alias.aliasName }}
               </option>
               <!-- <option value="new">
