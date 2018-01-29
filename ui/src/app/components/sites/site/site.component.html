@@ -6,8 +6,13 @@
     <div class="box-header with-border">
       <h3 class="box-title">Users from {{ site?.name }}</h3>
     </div>
-    {{ remote_users | json }}
     <div class="box-body">
+      <div *ngIf="remote_users.length == 0" class="row">
+        <div class="col-md-4 col-md-offset-4 text-center">
+          <span>Loading users from {{ site?.name }} ...</span><br />
+          <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+        </div>
+      </div>
       <ul class="list-unstyled">
         <li *ngFor="let user of remote_users">
           <div class="row">

@@ -11,7 +11,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 export class SiteComponent implements OnInit {
 
   site: any;
-  remote_users: any[];
+  remote_users: any[] = [];
   showSpin = false;
   network_id: string;
 
