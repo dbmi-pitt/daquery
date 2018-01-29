@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -175,6 +176,11 @@ public class DaqueryUser extends UserInfo {
 		rUser.setRealName(getRealName());
 		rUser.setUtype(INFO_ONLY);
 		return(rUser);
+	}
+	
+	public void assignUUID() {
+		UUID newUUID = UUID.randomUUID();
+		super.setId(newUUID.toString());
 	}
 	
     //TODO: Add loop to print out the roles, queries, etc.
