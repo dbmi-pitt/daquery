@@ -318,7 +318,10 @@ public class SiteEndpoint extends AbstractEndpoint {
 						 				 (String)newSite.get("url"),
 						 				 (String)newSite.get("admin_email"));
 	        	site_out.setStatus(SiteStatus.PENDING.toString());
-	        	
+	        	site_out.setKeystoreAlias((String)newSite.get("alias"));
+	        	String keystorepath = WSConnectionUtil.getKeystorePath();
+	        	site_out.setKeystorePath(keystorepath);
+		        
 	        	Map<String, String> idParam = new HashMap<String, String>();
                 idParam.put("network-id", network.getNetworkId());
                 idParam.put("from-site-id", AppProperties.getDBProperty("site.id"));
