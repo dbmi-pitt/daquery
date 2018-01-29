@@ -617,6 +617,8 @@ public class UserEndpoint extends AbstractEndpoint {
         
     	Session s = null;
     	try {
+    		new_user.assignUUID();
+    		
     		s = HibernateConfiguration.openSession();
 	
 	        s.getTransaction().begin();
