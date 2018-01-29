@@ -15,11 +15,12 @@ export class AddSiteComponent implements OnInit {
   network: any;
   sites: any[];
   aliases: any[];
-  loadingAvailableSites = false;
+  loadingAvailableSites = true;
   loadingAlias = false;
 
   connectSiteForm: FormGroup;
-  submitted= false;
+  submitted = false;
+  submitting = false;
   constructor(private fb: FormBuilder,
               private networkService: NetworkService,
               private siteService: SiteService,
@@ -82,12 +83,15 @@ export class AddSiteComponent implements OnInit {
   }
 
   onSubmit(){
+    this.submitting = true;
     this.submitted = true;
     if(this.connectSiteForm.valid){
       this.siteService.requestConnectSite(this.connectSiteForm.value)
                       .subscribe(site => {
                         this.router.navigate([`/networks/${this.network.id}`]);
                       });
+    } else {
+      this.submitting = false;
     }
   }
 
@@ -107,7 +111,6 @@ export class AddSiteComponent implements OnInit {
   }
 
   getAvailableSites(network: any){
-    this.loadingAvailableSites = true;
     this.siteService.getAvailableSites(network)
                     .subscribe(data => {
                       this.loadingAvailableSites = false;

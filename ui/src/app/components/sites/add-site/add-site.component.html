@@ -10,6 +10,7 @@
       <form #f [formGroup]="connectSiteForm" (ngSubmit)="onSubmit()" novalidate>
         <div class="form-group has-feedback" [ngClass]="{'has-error': site.invalid && (submitted || site.dirty || site.touched), 'has-success': site.valid && (submitted || site.dirty || site.touched) }">
           <label for="site">Site</label>
+          <i *ngIf="loadingAvailableSites" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
           <select *ngIf="!loadingAvailableSites" class="form-control" formControlName="site" id="site" (change)="onChange()">
             <option value="">-Select-</option>
             <option *ngFor="let site of sites" [value]="site.siteId">
@@ -19,7 +20,6 @@
               New Site
             </option> -->
           </select>
-          <i *ngIf="loadingAvailableSites" class="fa fa-spinner fa-spin fa-fw"></i>
           <div class="help-block" *ngIf="site.invalid && (submitted || site.dirty || site.touched)">Please select a site</div>
         </div>
         <div class="form-group has-feedback" [ngClass]="{'has-error': alias.invalid && (submitted || alias.dirty || alias.touched), 'has-success': alias.valid && (submitted || alias.dirty || alias.touched) }">
@@ -51,8 +51,17 @@
             <input type="text" formControlName="admin_email" class="form-control" id="admin_email" placeholder="Admin Email">
             <div class="help-block" *ngIf="admin_email.invalid && (submitted || admin_email.dirty || admin_email.touched)">Please enter a Admin Email Address</div>
           </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-        <button class="btn btn-default" (click)="onCancel()">Cancel</button>
+        <div class="row">
+          <div class="col-xs-1">
+            <button [disabled]="submitting" type="submit" class="btn btn-primary btn-block btn-flat">
+              <i *ngIf="submitting" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+              <span *ngIf="!submitting">Submit</span>
+            </button>
+          </div>
+          <div class="col-xs-1">
+            <button class="btn btn-default btn-block btn-flat" (click)="onCancel()">Cancel</button>
+          </div>
+        </div>
       </form>
     </div>
   </div>

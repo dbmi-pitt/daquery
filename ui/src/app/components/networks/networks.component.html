@@ -12,6 +12,12 @@
   </div>
   <app-add-network *ngIf="showJoinNetwork" (newNetwork)="addNewNetwork($event)"></app-add-network>
   <app-create-network *ngIf="showCreateNetwork" (newNetwork)="addNewNetwork($event)"></app-create-network>
+  <div *ngIf="networks.length == 0" class="row">
+    <div class="col-md-4 col-md-offset-4 text-center">
+      <span>Loading networks...</span><br />
+      <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+    </div>
+  </div>
   <div *ngFor="let network of networks">
     <div class="row">
       <div class="col-md-12">

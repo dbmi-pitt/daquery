@@ -26,7 +26,8 @@
         </div>
         <div class="col-xs-4">
           <button [disabled]="loading" class="btn btn-primary btn-block btn-flat">
-            {{ loading ? '...' : 'Sign in' }}
+            <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+            <span *ngIf="!loading">Sign In</span>
           </button>
         </div>
       </div>

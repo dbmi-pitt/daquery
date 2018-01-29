@@ -18,6 +18,8 @@ export class NetworkComponent implements OnInit {
   outSites = [];
   pendingSites = [];
   error: string;
+  approving: boolean = false;
+  denying: boolean = false;
   constructor(private siteService: SiteService,
               private networkService: NetworkService,
               private activatedRoute: ActivatedRoute) { }
@@ -82,6 +84,7 @@ export class NetworkComponent implements OnInit {
   }
 
   approveConnect(pendingSite: any){
+    this.approving = true;
     const connectRequest = {
       network_id: this.network.networkId,
       from_site_id: pendingSite.siteId
@@ -92,6 +95,8 @@ export class NetworkComponent implements OnInit {
                       this.getPendingSites();
                       this.getOutgoingSites();
                       this.getIncomingSites();
+
+                      this.approving = false;
                     },
                     error => {
                       this.error = error;

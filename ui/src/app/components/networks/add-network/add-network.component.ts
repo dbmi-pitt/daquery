@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./add-network.component.css']
 })
 export class AddNetworkComponent implements OnInit {
-  loadingAvailableNetworks = false;
+  loadingAvailableNetworks = true;
   availableNetworks: any[];
   submitted = false;
   joinNetworkForm: FormGroup;
@@ -44,7 +44,6 @@ export class AddNetworkComponent implements OnInit {
   get driver() { return this.joinNetworkForm.get('driver'); }
 
   getAvailableNetworks(){
-    this.loadingAvailableNetworks = true;
     this.networkServier.getAvailableNetworks()
                        .subscribe(data => {
                           this.loadingAvailableNetworks = false;

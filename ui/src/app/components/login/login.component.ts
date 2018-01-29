@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
                                   this.error = 'Email or password is incorrect';
                                   this.loading = false;
                                 } else if (result === 'error'){
-                                  this.error = 'Unexcepted problem happened';
+                                  this.error = 'Daquery Server is down.';
                                   this.loading = false;
                                 }
                               });
