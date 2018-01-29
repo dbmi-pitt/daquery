@@ -54,7 +54,8 @@
                   </div>
                 </div>
                 <button class="btn btn-primary" (click)="onSave()">Save</button>
-                <button class="btn btn-success" (click)="onRequest()">Request</button>
+                <button class="btn btn-success" (click)="onRequest()">Save and Request</button>
+                <button class="btn btn-link" (click)="onCancel()">Cancel</button>
               </div>
               <!-- <div *ngIf="showNetworkSitePanel">
                 <div class="form-group">
@@ -116,7 +117,10 @@
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-default" (click)="reset()">Cancel</button>
-                      <button class="btn btn-success" [disabled]="!readyToSend()" (click)="onSend()">{{ onSending ? 'Sending...' : 'Send' }}</button>
+                      <button class="btn btn-success" [disabled]="!readyToSend()" (click)="onSend()">
+                        <i *ngIf="onSending" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+                        <span *ngIf="!onSending">Send</span>
+                      </button>
                     </div>
                   </div>
                 </div>

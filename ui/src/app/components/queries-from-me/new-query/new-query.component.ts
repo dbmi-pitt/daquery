@@ -90,6 +90,13 @@ export class NewQueryComponent implements OnInit {
   }
 
   onRequest() {
+    if(this.editingInquiry) {
+      this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
+                         .subscribe();
+    } else {
+      this.requestService.saveInquires(this.inquiryForm.value)
+                        .subscribe();
+    }
     //this.showNetworkSitePanel = !this.showNetworkSitePanel;
     if(this.inquiryForm.valid){
       $('#myRequestModal').modal('show');
@@ -111,12 +118,16 @@ export class NewQueryComponent implements OnInit {
     }
   }
 
+  onCancel() {
+    this.requestSent.emit(true);
+  }
+
   reset() {
     $('#myRequestModal').modal('hide');
   }
 
   readyToSend() {
-    return this.onSending || !this.inquiryForm.get('network').valid || (<FormArray>this.inquiryForm.get('sitesToQuery')).controls.some(x => (<FormGroup>x).controls.check.value == true);
+    return !this.onSending && this.inquiryForm.get('network').valid && (<FormArray>this.inquiryForm.get('sitesToQuery')).controls.some(x => (<FormGroup>x).controls.check.value == true);
   }
 
   onSend(){
