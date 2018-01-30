@@ -80,6 +80,7 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 	{
 		try
 		{
+			if(! sql.trim().endsWith(";")) sql = sql.trim() + ";";
 			CharStream charStream = CharStreams.fromString(sql);
 	        SQLiteLexer lexer = new SQLiteLexer(charStream);
 	        TokenStream tokens = new CommonTokenStream(lexer);
