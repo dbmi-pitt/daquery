@@ -21,7 +21,7 @@
               <!-- <input type="text" formControlName="driver" class="form-control" name="driver" placeholder="Data source driver"> -->
               <select formControlName="driver" class="form-control" name="driver" (change)="onChange($event)">
                 <option value="oracle.jdbc.driver.OracleDriver" data-urlexample="jdbc:oracle:thin:@server.url:1521:sid">Oracle</option>
-                <option value="sqlserver.jdbc.driver.SQLServerDriver" data-urlexample="jdbc:sqlserver://server.name:1433;databaseName=DB_NAME;integratedSecurity=true;">SQL Server</option>
+                <option value="com.microsoft.sqlserver.jdbc.SQLServerDriver" data-urlexample="jdbc:sqlserver://server.name:1433;databaseName=DB_NAME;integratedSecurity=true;">SQL Server</option>
               </select>
               <div class="help-block" *ngIf="driver.invalid && (submitted || driver.dirty || driver.touched)">Please enter the data source driver</div>
             </div>
