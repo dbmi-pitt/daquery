@@ -12,7 +12,7 @@ export class NetworksComponent implements OnInit {
   showJoinNetwork = false;
   showCreateNetwork = false;
 
-  networks: any[] = [];
+  networks: any[];
   constructor(private networkService: NetworkService) {
   }
 

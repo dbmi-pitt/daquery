@@ -117,7 +117,7 @@ export class AddSiteComponent implements OnInit {
                       this.sites = data.full;
                       data.outgoing.forEach(e => {
                         this.sites.map(s => {
-                          if(s.id === e.id)
+                          if(s.siteId === e.siteId)
                             s["connected"] = true;
                         });
                       });
