@@ -155,6 +155,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		}
 	}	
 	
+	/** assume this method is for testing? */
 	@POST
 	@Path("/echopost")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -176,13 +177,20 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @Produces(MediaType.TEXT_PLAIN)
 	public Response isSiteSetup()
 	{
-		int dbStatus = AppSetup.getDBStatus();
-		if(dbStatus == AppSetup.DBSTATUS_ALL_GOOD)
-			return(ResponseHelper.getBasicResponse(200, "Y"));
-		else if(dbStatus == AppSetup.DBSTATUS_NONEXISTENT || dbStatus == AppSetup.DBSTATUS_EMPTY)
-			return(ResponseHelper.getBasicResponse(200, "N"));
-		else
-			return(ResponseHelper.getErrorResponse(500, "The application database is in an indeterminate state.", "Check the application error logs for more information.  It is likely that you need to delete the database at tomcat/conf/daquery-db and start over.", null));
+		try
+		{
+			int dbStatus = AppSetup.getDBStatus();
+			if(dbStatus == AppSetup.DBSTATUS_ALL_GOOD)
+				return(ResponseHelper.getBasicResponse(200, "Y"));
+			else if(dbStatus == AppSetup.DBSTATUS_NONEXISTENT || dbStatus == AppSetup.DBSTATUS_EMPTY)
+				return(ResponseHelper.getBasicResponse(200, "N"));
+			else
+				return(ResponseHelper.getErrorResponse(500, "The application database is in an indeterminate state.", "Check the application error logs for more information.  It is likely that you need to delete the database at tomcat/conf/daquery-db and start over.", null));
+		}
+		catch(Throwable t)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unexpected error while checking to see if the site is set up.", null, t));
+		}
 	}
 	
 	
