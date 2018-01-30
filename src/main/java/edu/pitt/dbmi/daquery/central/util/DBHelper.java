@@ -46,20 +46,19 @@ public class DBHelper
 	 * @param sitekey The key to check against.
 	 * @return true if the site key matches, false otherwise.
 	 */
-	public static boolean authenticateSite(String siteNameOrId, String sitekey)
+	public static boolean authenticateSite(String siteNameOrId, String sitekey) throws DaqueryException
 	{
 		try
 		{
 			Site site = SiteDAO.querySiteByID(siteNameOrId);
 			if(site == null) site = SiteDAO.querySiteByName(siteNameOrId);
-			if(site == null) return(false);
-			
+			if(site == null || StringHelper.isEmpty(site.getAccessKey())) return(false);
 			return(sitekey.equals(site.getAccessKey()));
 		}
 		catch(Throwable t)
 		{
 			log.log(Level.SEVERE, "An error occured while checking a site authorization when accessing the daquery-central application database.", t);
-			return(false);
+			throw new DaqueryException("An unexpected error occured on the central server while trying to authenticate " + siteNameOrId, t);
 		}
 		
 		

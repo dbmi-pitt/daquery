@@ -16,6 +16,7 @@ import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
@@ -33,10 +34,11 @@ public class CentralServiceT3st {
 				System.out.println("Found site:" + s.toJson());
 				
 			}
+			t3stAuthenticateSite();  
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		t3stAuthenticateSite();  
+		
 	}
 	
 	//@BeforeClass
@@ -51,7 +53,7 @@ public class CentralServiceT3st {
  	}	
 	
 	//@Test
-	public static void t3stAuthenticateSite() {
+	public static void t3stAuthenticateSite() throws DaqueryException {
 		String siteNameOrKey = "dev-zero-three";
 		String key = "vKZoNo9bOIop3s9W81ZKGyxl";
 		if(StringHelper.isEmpty(siteNameOrKey) || StringHelper.isEmpty(key))

@@ -95,18 +95,18 @@ public class CentralService{
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)	
 	public Response authenticateSite(@QueryParam("site") String siteNameOrKey, @QueryParam("key") String key)
-	{		
-		if(StringHelper.isEmpty(siteNameOrKey) || StringHelper.isEmpty(key))
-			return(ResponseHelper.getBasicResponse(400, "sitename and key parameters required"));
-		
-		//TODO: check the sender ip/site name as an extra verification step
-		if(! DBHelper.authenticateSite(siteNameOrKey, key))
-			return(ResponseHelper.getBasicResponse(401, siteNameOrKey + " is not authorized to use this server.  Possibly a bad key or site name was provided."));
-
-		Map<String, Object> additionalVals = null;
-		
+	{
 		try
 		{
+			if(StringHelper.isEmpty(siteNameOrKey) || StringHelper.isEmpty(key))
+				return(ResponseHelper.getBasicResponse(400, "sitename and key parameters required"));
+			
+			//TODO: check the sender ip/site name as an extra verification step
+			if(! DBHelper.authenticateSite(siteNameOrKey, key))
+				return(ResponseHelper.getBasicResponse(401, siteNameOrKey + " is not authorized to use this server.  Possibly a bad key or site name was provided."));
+	
+			Map<String, Object> additionalVals = null;
+
 			Site site = SiteDAO.getSiteByNameOrId(siteNameOrKey);
 			if(site.isTempKey())
 			{
@@ -126,7 +126,7 @@ public class CentralService{
 		catch(Throwable dce)
 		{
 			log.log(Level.SEVERE, "An unexpected error occured while authenticating a user.", dce);
-			return(ResponseHelper.getBasicResponse(500, "An unexpected error occured while authenticating a site.  Check the central server logs for more information."));
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while authenticating a site with the central server.", "Occured while authenticating site:" + siteNameOrKey, dce) );
 		}
 	}
 	
