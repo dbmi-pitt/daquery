@@ -10,10 +10,10 @@ import { UserService } from '../../../services/user.service';
 export class AddUserComponent implements OnInit {
 
   userForm: FormGroup;
-  @Output()
-  showAddUser = new EventEmitter<boolean>();
-  @Output()
-  newUser = new EventEmitter<any>();
+  @Output() showAddUser = new EventEmitter<boolean>();
+  @Output() newUser = new EventEmitter<any>();
+  submitting = false;
+  
   constructor(private fb: FormBuilder, private userService: UserService) { }
 
   ngOnInit() {
@@ -54,6 +54,7 @@ export class AddUserComponent implements OnInit {
   }
 
   onSubmit() {
+    this.submitting = true;
     this.userService.createUser(this.userForm.value)
                     .subscribe(res => {
                       location.reload();

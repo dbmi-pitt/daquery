@@ -116,7 +116,7 @@
                           </div>
                     </div>
                     <div class="modal-footer">
-                      <button type="button" class="btn btn-default" (click)="reset()">Cancel</button>
+                      <button type="button" class="btn btn-default" [disabled]="onSending" (click)="reset()">Cancel</button>
                       <button class="btn btn-success" [disabled]="!readyToSend()" (click)="onSend()">
                         <i *ngIf="onSending" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
                         <span *ngIf="!onSending">Send</span>
