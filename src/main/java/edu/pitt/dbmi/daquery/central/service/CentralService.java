@@ -24,6 +24,7 @@ import edu.pitt.dbmi.daquery.central.ConnectionRequestStatus;
 import edu.pitt.dbmi.daquery.central.util.DBHelper;
 import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
 import edu.pitt.dbmi.daquery.central.util.EmailHelper;
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
@@ -74,7 +75,8 @@ public class CentralService{
 			if(!StringHelper.isEmpty(status))
 				return(ResponseHelper.getBasicResponse(200, status));
 			else
-				return(ResponseHelper.getBasicResponse(404, "Site not found" ));
+				return(ResponseHelper.getErrorResponse(404, "Site not found.", "The site status was not found for networkId: " + networkId +
+						                                    " toSiteId:" + toSiteId + " fromSiteId:" + fromSiteId, null));
 		}
 		catch(Throwable t)
 		{
@@ -99,11 +101,11 @@ public class CentralService{
 		try
 		{
 			if(StringHelper.isEmpty(siteNameOrKey) || StringHelper.isEmpty(key))
-				return(ResponseHelper.getBasicResponse(400, "sitename and key parameters required"));
+				return(ResponseHelper.getErrorResponse(400, "sitename and key parameters required", null, null));
 			
 			//TODO: check the sender ip/site name as an extra verification step
 			if(! DBHelper.authenticateSite(siteNameOrKey, key))
-				return(ResponseHelper.getBasicResponse(401, siteNameOrKey + " is not authorized to use this server.  Possibly a bad key or site name was provided."));
+				return(ResponseHelper.getErrorResponse(401, siteNameOrKey + " is not authorized to use this server.  Possibly a bad key or site name was provided.", null, null));
 	
 			Map<String, Object> additionalVals = null;
 
@@ -145,7 +147,7 @@ public class CentralService{
 		{
 			String msg = "An error occurred while looking up allowed networks for site with id:" + siteId;
 			log.log(Level.SEVERE, msg, t);
-			return(ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
+			return(ResponseHelper.getErrorResponse(500, "Error while retrieving available networks.",  msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -171,24 +173,31 @@ public class CentralService{
 			// create connection request
 			ConnectionRequest cr = DBHelper.getConnectionRequest(networkId, fromSiteId, toSiteId);
 			if (cr != null)
-				return (ResponseHelper.getBasicResponse(500, "Connection Request is already existed."));
+				return (ResponseHelper.getBasicResponse(500, "This connection request already exists."));
 
-			Site s = DBHelper.getSite(toSiteId);
+			Site requestingSite = DBHelper.getSite(toSiteId);
+			Site requestedFromSite = DBHelper.getSite(fromSiteId);
+			Network net = NetworkDAO.getNetworkById(networkId);
 			// send email to toSite admin
 			if (DBHelper.createConnectionRequest(networkId, fromSiteId, toSiteId)) {
 				EmailHelper eh = new EmailHelper();
-				eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", s.getAdminEmail());
+				eh.sendMail("Daquery Connection Request", "Daquery site " + requestingSite.getName() + 
+						  " is requesting to connect to your site, " + requestedFromSite.getName() + 
+						  ", to run queries on the network " + net.getName() +
+						  ".  Please log into your site, got to Network and choose Edit Sites under the network " +
+						  " to approve or deny the request.", requestingSite.getAdminEmail());
+				
 				// esi.adminEmail);
 				// eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", "del20@pitt.edu");
-				return ResponseHelper.getJsonResponseGen(200, s);
+				return ResponseHelper.getJsonResponseGen(200, requestingSite);
 			} else {
-				return ResponseHelper.getBasicResponse(500, "An unexpected error occured while authenticating a site.  Check the central server logs for more information.");
+				return ResponseHelper.getErrorResponse(500, "Error while saving a connection request",  "An unexpected error occured while authenticating a site.  Check the central server logs for more information.", null);
 			}
 		} catch (Throwable t) {
-			String msg = "An error occurred while create connection request with network_id:" + networkId
+			String msg = "An error occurred while creating a connection request with network_id:" + networkId
 					+ " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
+			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to create a connection request.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 
@@ -214,7 +223,7 @@ public class CentralService{
 		} catch (Throwable t) {
 			String msg = "An error occurred while getting pending site with site_id:" + siteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
+			return (ResponseHelper.getErrorResponse(500, "An error occured while attempting to retrieve pending sites.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -238,7 +247,7 @@ public class CentralService{
 		} catch (Throwable t) {
 			String msg = "An error occurred while getting pending site with site_id:" + siteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
+			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to retrieve a site definition.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -256,18 +265,18 @@ public class CentralService{
 	@Path("approve-connectrequest")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response approveConnectReques(@QueryParam("network-id") String networkId, @QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId) {
+	public Response approveConnectRequest(@QueryParam("network-id") String networkId, @QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId) {
 		try {
 			// get pending sites
 			if(DBHelper.updateConnectionRequest(networkId, fromSiteId, toSiteId, "APPROVED"))
 				return ResponseHelper.getBasicResponse(200, "");
 			else
-				return ResponseHelper.getBasicResponse(500,
-						"An unexpected error occured while approving connect request.  Check the central server logs for more information.");
+				return ResponseHelper.getErrorResponse(500, "An error occured while registering a site connection request approval.", 
+						"An unexpected error occured while approving connect request.  Check the central server logs for more information.", null);
 		} catch (Throwable t) {
 			String msg = "An error occurred while approving connect request network_id:" + networkId + " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
+			return (ResponseHelper.getErrorResponse(500, "An error occured while registering a site connection request approval.",  msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -285,18 +294,18 @@ public class CentralService{
 	@Path("deny-connectrequest")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response denyConnectReques(@QueryParam("network-id") String networkId, @QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId) {
+	public Response denyConnectRequest(@QueryParam("network-id") String networkId, @QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId) {
 		try {
 			// get pending sites
 			if(DBHelper.updateConnectionRequest(networkId, fromSiteId, toSiteId, "DENIED"))
 				return ResponseHelper.getBasicResponse(200, "");
 			else
-				return ResponseHelper.getBasicResponse(500,
-						"An unexpected error occured while approving connect request.  Check the central server logs for more information.");
+				return ResponseHelper.getErrorResponse(500, "An error occured while registering a site connection request denial",
+						"An unexpected error occured while marking a connection request as denied. Check the central server logs for more information.", null);
 		} catch (Throwable t) {
 			String msg = "An error occurred while approving connect request network_id:" + networkId + " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getBasicResponse(500, msg + " Check the central server logs for more information."));
+			return (ResponseHelper.getErrorResponse(500, "An error occured while registering a site request denial.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 }
