@@ -631,7 +631,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	       
 	        logger.info("Done trying to create user: " + new_user.toString());
 	        
-	        return Response.created(uriInfo.getAbsolutePathBuilder().path(new_user.getId() + "").build()).build();
+	        return Response.created(uriInfo.getAbsolutePathBuilder().path(new_user.getId() + "").build()).entity("{}").build();
         } catch (Exception e) {
 	        return Response.serverError().build();
 	    } finally {
