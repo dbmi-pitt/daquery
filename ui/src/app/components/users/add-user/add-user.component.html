@@ -8,12 +8,12 @@
         <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
           <div class="form-group has-feedback"  [ngClass]="{'has-error': email.invalid && (email.dirty || email.touched), 'has-success': email.valid && (email.dirty || email.touched) }">
             <label for="email">Email</label>
-            <input type="text" class="form-control" id="email" placeholder="Email" formControlName="email">
+            <input type="text" class="form-control" id="newuser-email" placeholder="Email" formControlName="email">
             <div class="help-block" *ngIf="email.invalid && (email.dirty || email.touched)">Please enter a valid email</div>
           </div>
           <div class="form-group has-feedback"  [ngClass]="{'has-error': password.invalid && (password.dirty || password.touched), 'has-success': password.valid && (password.dirty || password.touched) }">
             <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Password" formControlName="password" validateEqual="password_confirmation" reverse="true" />
+            <input type="password" class="form-control" id="newuser-password" placeholder="Password" formControlName="password" validateEqual="password_confirmation" reverse="true" />
             <div class="help-block" *ngIf="password.hasError('required') && (password.dirty || password.touched)">Please enter a password</div>
             <div class="help-block" *ngIf="password.hasError('minlength') && (password.dirty || password.touched)">Password at least 8 characters</div>
           </div>
