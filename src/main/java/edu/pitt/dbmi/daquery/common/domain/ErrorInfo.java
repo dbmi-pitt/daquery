@@ -8,6 +8,7 @@ import edu.pitt.dbmi.daquery.common.util.ExceptionHelper;
 public class ErrorInfo extends DaqueryObject
 {
 	private static final long serialVersionUID = 9038388393843434l;
+	public static final String ERROR_INFO_TYPE_VERSION = "ErrorInfoTypev1";
 	
 	@Expose
 	public String displayMessage;
@@ -20,6 +21,9 @@ public class ErrorInfo extends DaqueryObject
 	
 	@Expose
 	public DaqueryResponse response;
+	
+	@Expose
+	public String type = ERROR_INFO_TYPE_VERSION;
 	
 	public ErrorInfo(){}
 	
