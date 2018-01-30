@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.common.util;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -8,6 +9,11 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
@@ -22,6 +28,9 @@ public class ResponseHelper {
 	
 	public static void main(String [] args) throws Exception
 	{
+		Response resp = getBasicResponse(444, null);
+		ErrorInfo ei = decodeErrorResponse(resp);
+		System.out.println(ei);
 		/*JsonWebToken token = new JsonWebToken("USER:abc123", "SITE:abc123", null);
 		String tkn = token.getToken();
 		JsonWebToken jwt = new JsonWebToken(tkn);
@@ -142,6 +151,89 @@ public class ResponseHelper {
    	
     }
 
+    
+    /**
+     * Given a response that comes from a server, check to see if it is an error and
+     * wrap it in another ErrorResponse, otherwise just return the response from the server.
+     * This only works on incoming responses, which are converted to outgoing responses
+     * in the case that ErrorInfo is found encoded within the response.
+     *  
+     * @param resp
+     * @return
+     */
+    public static Response wrapServerResponse(Response resp, String serverName)
+    {
+    	if(resp == null) return(null);
+    	if(resp.getStatus() >= 400)
+    	{
+    		ErrorInfo info = decodeErrorResponse(resp);
+    		if(info != null)
+    		{
+    			String msg = info.getDisplayMessage();
+    			String longMsg = null;
+    			if(StringHelper.isEmpty(msg))
+    			{
+    				msg = "An error was recieved from " + serverName;
+    				longMsg = info.getLongMessage();
+    			}
+    			else
+    				longMsg = "This error was recieved from " + serverName +"<\br><\br> " + ((StringHelper.isEmpty(info.getLongMessage()))?"":info.getLongMessage());
+    			info.setDisplayMessage(msg);
+    			info.setLongMessage(longMsg);
+    			
+    			try{return(getJsonResponseGen(resp.getStatus(), info));}
+    			catch(Throwable t)
+    			{
+    				logger.log(Level.SEVERE, "Error occured while transmiting an error from " + serverName + ".\n\tmessage:" + info.displayMessage + "\n\tlongMessage:" + info.longMessage + "\n\tstackTrace:" + info.stackTrace + "\n", t);
+    				return(getBasicResponse(500, "Error occured while transmiting an error from " + serverName + ".  Check the site logs for more information."));
+    			}
+    		}
+    		else
+    			return(resp);
+    	}
+    	else
+    		return(resp);
+    }
+    
+    
+    /**
+     * Check the response to see if it contains a json encoded ErrorInfo, if
+     * so decode it and send back an ErrorInfo object.  If it isn't an encoded
+     * Error response return null;
+     * 
+     * @param resp
+     * @return
+     * @throws IOException 
+     * @throws JsonMappingException 
+     * @throws JsonParseException 
+     */
+    public static ErrorInfo decodeErrorResponse(Response resp)
+    {
+    	try
+    	{
+	    	if(resp == null) return(null);
+	    	String val = resp.readEntity(String.class);
+	    	if(StringHelper.isEmpty(val)) return(null);
+			ObjectMapper mapper = new ObjectMapper();
+			TypeReference<ErrorInfo> type = new TypeReference<ErrorInfo>(){};
+			ErrorInfo errorInfo = null;
+			try{errorInfo = mapper.readValue(val, type);}
+			catch(JsonParseException jpe){return(null);}
+			catch(JsonMappingException jpe){return(null);}
+			catch(IOException jpe){return(null);}
+			if(errorInfo == null || StringHelper.isEmpty(errorInfo.type)) return(null);
+			if(errorInfo.type.equals(ErrorInfo.ERROR_INFO_TYPE_VERSION))
+				return(errorInfo);
+			else
+				return(null);
+    	}
+    	catch(Throwable t)
+    	{
+    		//if were here, probably an outbound message was provided, which is a no-no
+    		return(null);
+    	}
+    }
+    
     /**
      * Convert information about an error message into a json formated response with specific error information included.
      * 
@@ -211,9 +303,8 @@ public class ResponseHelper {
     			logger.log(Level.SEVERE, "Original Cause:", cause);
     		return(getBasicResponse(500, "Unexplained error while trying to send another error message.  Please ask a site admin to check the site logs for more information."));
     	}
-    	
     }
-    
+
     /**
      * Given an HTTP status code and extra information for a json response,
      * construct a web response object with a json payload.
