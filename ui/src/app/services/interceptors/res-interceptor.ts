@@ -15,7 +15,7 @@ constructor(private router: Router,
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     
-    return next.handle(req).map((event: HttpEvent<any>) => {
+    return next.handle(req).do((event: HttpEvent<any>) => {
       if (event instanceof HttpResponse){
         if(event.status === 401){
           throw new HttpErrorResponse({status: event.status});
