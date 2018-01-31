@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.NoResultException;
@@ -35,6 +36,7 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 
@@ -94,9 +96,13 @@ public class NetworkEndpoint extends AbstractEndpoint {
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "A database error occured while getting a list of networks.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", "This error usually indicates that the database is down or cannot be accessed.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error occured while getting a list of networks.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", null, e));
         }
     }
     
@@ -133,9 +139,13 @@ public class NetworkEndpoint extends AbstractEndpoint {
 
             return Response.ok(200).entity(json).build();
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when retrieving inquiry [" + id + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered when retrieving inquiry  [" + id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
     
@@ -197,10 +207,10 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String json = network.toJson();
 
             return Response.ok(200).entity(json).build();
-    	} catch (NoResultException nre) {
-    		return Response.status(NOT_FOUND).build();
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered when joining a network.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     	
     }
@@ -234,9 +244,13 @@ public class NetworkEndpoint extends AbstractEndpoint {
 
             return Response.ok(200).entity(json).build();
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when retrieving datamodel data for network [" + id + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered retrieving datamodel data for network  [" + id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
     
@@ -269,9 +283,13 @@ public class NetworkEndpoint extends AbstractEndpoint {
 
             return Response.ok(200).entity(json).build();
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when retrieving SQL datasource data for network [" + id + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered retrieving SQL datasource data for network  [" + id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
 }
