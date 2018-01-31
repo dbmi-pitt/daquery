@@ -93,7 +93,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     	
     	try {
 
-            logger.info("#### returning all sites");
+            logger.info("#### returning all sites for network [" + network_id + "] with type = [" + type + "] and status = " + status + "]");
             
             String[] types = {"outgoing", "incoming", "pending"};
             if(!Arrays.asList(types).contains(type)) {
@@ -127,11 +127,13 @@ public class SiteEndpoint extends AbstractEndpoint {
             else
             	return Response.status(BAD_REQUEST).build();
     	} catch (HibernateException he) {
-    		logger.log(Level.SEVERE, "An unexpected database error occured while getting site information.", he);
-    		return(ResponseHelper.getErrorResponse(500, "An unexpected database error occured while looking up all site information.", "Looking for status:" + status + " type:" + type, he));
-        } catch (Throwable t) {
-        	logger.log(Level.SEVERE, "An unexpected error occured while getting site information.", t);
-        	return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while looking up all site information.", "Looking for status:" + status + " type:" + type, t));
+    		String msg = "Could not access the database when returning all sites for network [" + network_id + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered returning all sites for network [" + network_id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
 
@@ -198,9 +200,13 @@ public class SiteEndpoint extends AbstractEndpoint {
 			}
 			
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when returning all sites for network [" + networkId + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered returning all sites for network [" + networkId + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
 	
@@ -244,9 +250,13 @@ public class SiteEndpoint extends AbstractEndpoint {
 			}
 			
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when returning pending sites for network [" + networkId + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered returning pending sites for network [" + networkId + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
 
@@ -263,7 +273,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response retrieveNetworkByID(@PathParam("id") String id) {
+    public Response retrieveSiteByID(@PathParam("id") String id) {
     	try {
 
             logger.info("#### returning site by id=" + id);
@@ -282,9 +292,13 @@ public class SiteEndpoint extends AbstractEndpoint {
 
             return Response.ok(200).entity(json).build();
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when retrieving site [" + id + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered retrieving site  [" + id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
 
@@ -342,11 +356,10 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        } else {
 	        	return Response.status(BAD_REQUEST).build();
 	        }
-    	} catch (Exception e) {
-    		logger.info(e.getMessage());
-    		e.printStackTrace();
-    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
-
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered while creating a site based on information from the central server.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
     	} finally {
     		if (s != null) {
     			s.close();
@@ -469,11 +482,10 @@ public class SiteEndpoint extends AbstractEndpoint {
 			} else {
 				return(resp);
 			}
-    	} catch (Exception e) {
-    		logger.info(e.getMessage());
-    		e.printStackTrace();
-    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
-
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered attempting to approve a connection request from network [" + networkId + "] and site ["+ fromSiteId + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
     	} finally {
     		if (s != null) {
     			s.close();
@@ -497,6 +509,15 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response denyConnectRequest(LinkedHashMap<?, ?> object) {
+    	if(object == null)
+    		return(ResponseHelper.getErrorResponse(400, "network_id and from_site_id are required parameters.", null, null));
+    	Object netObj = object.get("network_id");
+    	if(netObj == null || StringHelper.isBlank(netObj.toString()))
+    		return(ResponseHelper.getErrorResponse(400, "network_id is a required parameter.", null, null));
+    	Object fromSiteObj = object.get("from_site_id");
+    	if(fromSiteObj == null || StringHelper.isBlank(fromSiteObj.toString()))
+    		return(ResponseHelper.getErrorResponse(400, "from_site_id is a required parameter.", null, null));
+
     	String networkId = object.get("network_id").toString();
     	String fromSiteId = object.get("from_site_id").toString();
     	Session s = null;
@@ -538,9 +559,9 @@ public class SiteEndpoint extends AbstractEndpoint {
 				return(resp);
 			}
     	} catch (Exception e) {
-    		logger.info(e.getMessage());
-    		e.printStackTrace();
-    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
+    		String msg = "An unexpected error was encountered attempting to deny a connection request from network [" + networkId + "] and site ["+ fromSiteId + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
 
     	} finally {
     		if (s != null) {
@@ -593,9 +614,9 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        return updateSite(site);
 	        	        
     	} catch (Exception e) {
-    		logger.info(e.getMessage());
-    		e.printStackTrace();
-    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
+    		String msg = "An unexpected error was encountered attempting to update site [" + id + "] using alias ["+ alias + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
 
     	} finally {
     		if (s != null) {
@@ -635,9 +656,9 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        return Response.ok(201).entity(updatedSite).build();
 	        
     	} catch (Exception e) {
-    		logger.info(e.getMessage());
-    		e.printStackTrace();
-    		return Response.status(INTERNAL_SERVER_ERROR).build();	        		
+    		String msg = "An unexpected error was encountered attempting to update the site.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
 
     	} finally {
     		if (s != null) {
@@ -670,8 +691,9 @@ public class SiteEndpoint extends AbstractEndpoint {
     		retMap.put("aliases", retList);
     		json = JSONHelper.toJSON(retMap);
     	} catch (Exception e) {
-    		logger.info(e.getMessage());
-    		Response.status(500).build();
+    		String msg = "An unexpected error was encountered attempting to access the keystore aliases.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.  THe admin should ensure the keystore file exists and its path is correclty set in the shrine.conf file.", e));
     	}
         return Response.ok(200).entity(json).build();
     }

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.transaction.Transactional;
@@ -35,6 +36,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 
@@ -72,7 +74,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     public Response getRequests(@QueryParam("direction") String direction) {
     	try {
 
-            logger.info("#### returning all inquires");
+            logger.info("#### returning all requests with direction [" + direction + "]");
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -89,9 +91,13 @@ public class RequestEndpoint extends AbstractEndpoint {
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when retrieving requests for direction [" + direction + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered retrieving requests for direction [" + direction + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
     
@@ -110,7 +116,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     public Response getRequest(@PathParam("id") String id) {
     	try {
 
-            logger.info("#### returning all inquires");
+            logger.info("#### returning a single request with id [" + id + "]");
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -125,11 +131,17 @@ public class RequestEndpoint extends AbstractEndpoint {
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (NumberFormatException nfe) {
-    		return Response.status(BAD_REQUEST).build();
+    		String msg = "Could not convert [" + id + "] to a valid request id.";
+    		logger.log(Level.SEVERE, msg, nfe);
+    		return(ResponseHelper.getErrorResponse(BAD_REQUEST.getStatusCode(), msg, "Please ask the admin to check the log files for more information.", nfe));
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when retrieving data for request [" + id + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered retrieving data for request  [" + id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
     
@@ -147,7 +159,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     public Response createRequest(LinkedHashMap<?, ?> form) {
     	try {
 
-            logger.info("#### returning all inquires");
+            logger.info("#### creating a new request");
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -184,12 +196,14 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             return Response.ok(201).build();
 
-    	} catch (NumberFormatException nfe) {
-    		return Response.status(BAD_REQUEST).build();
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when creating a new request.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered creating a new request.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
     
@@ -207,7 +221,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     public Response updateRequest(LinkedHashMap<?, ?> form) {
     	try {
 
-            logger.info("#### returning all inquires");
+            logger.info("#### updating a request");
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -224,12 +238,14 @@ public class RequestEndpoint extends AbstractEndpoint {
             String jsonString = request.toJson();
             return Response.ok(201).entity(jsonString).build();
 
-    	} catch (NumberFormatException nfe) {
-    		return Response.status(BAD_REQUEST).build();
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when updating a new request.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered updating a new request.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
 }

@@ -7,6 +7,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.transaction.Transactional;
@@ -29,6 +30,7 @@ import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.InquiryDAO;
 
@@ -81,9 +83,13 @@ public class InquiryEndpoint extends AbstractEndpoint {
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "A database error occured while getting a list of inquiries.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", "This error usually indicates that the database is down or cannot be accessed.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error occured while getting a list of inquiries.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", null, e));
         }
     }
     
@@ -102,7 +108,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
     public Response getInquiry(@PathParam("id") String id) {
     	try {
 
-            logger.info("#### returning all inquires");
+            logger.info("#### returning single inquiry [" + id + "]");
 
             Principal principal = securityContext.getUserPrincipal();
             String username = principal.getName();
@@ -117,11 +123,17 @@ public class InquiryEndpoint extends AbstractEndpoint {
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (NumberFormatException nfe) {
-    		return Response.status(BAD_REQUEST).build();
+    		String msg = "Could not convert [" + id + "] to an integer.";
+    		logger.log(Level.SEVERE, msg, nfe);
+    		return(ResponseHelper.getErrorResponse(400, msg, "This error indicates that the URL contained an invalid Inquiry id.", nfe));
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when retrieving inquiry [" + id + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered when retrieving inquiry  [" + id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
     
@@ -164,12 +176,14 @@ public class InquiryEndpoint extends AbstractEndpoint {
             String jsonString = inquiry.toJson();
             return Response.ok(201).entity(jsonString).build();
 
-    	} catch (NumberFormatException nfe) {
-    		return Response.status(BAD_REQUEST).build();
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when creating a new inquiry.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error was encountered when creating a new inquiry.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
     
@@ -211,12 +225,14 @@ public class InquiryEndpoint extends AbstractEndpoint {
             String jsonString = inquiry.toJson();
             return Response.ok(200).entity(jsonString).build();
 
-    	} catch (NumberFormatException nfe) {
-    		return Response.status(BAD_REQUEST).build();
     	} catch (HibernateException he) {
-    		return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "Could not access the database when updating inquiry [" + id + "].";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    		String msg = "An unexpected error occurred when updating inquiry [" + id + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
 }

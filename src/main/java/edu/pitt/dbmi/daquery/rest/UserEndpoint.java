@@ -41,6 +41,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
@@ -142,8 +143,14 @@ public class UserEndpoint extends AbstractEndpoint {
             String jsonString = toJsonArray(user_list);
             return Response.ok(200).entity(jsonString).build();
 
-    	} catch (Exception e) {
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+    	} catch (HibernateException he) {
+    		String msg = "Could not access the database when retrieving all the users.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered retrieving all the users";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
     }
 
@@ -543,8 +550,9 @@ public class UserEndpoint extends AbstractEndpoint {
             	return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, t));
             }
         } catch (Exception e) {
-        	e.printStackTrace();
-            return Response.status(UNAUTHORIZED).build();
+    		String msg = "An unexpected error occured while authenticating your login.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(UNAUTHORIZED.getStatusCode(), msg + " Check the server logs for more information.", null, e));
         }
     }
 
@@ -582,11 +590,13 @@ public class UserEndpoint extends AbstractEndpoint {
 	        s.getTransaction().commit();
 	
 	       
-	        logger.info("Done trying to create user: " + newUser.toString());
+	        logger.info("Done creating user: " + newUser.toString());
 	        
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
         } catch (Exception e) {
-	        return Response.serverError().build();
+    		String msg = "An unexpected error occured while creating a new account for user [" + login + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 	    } finally {
 	    	if (s != null) {
 	    		s.close();
@@ -633,7 +643,9 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(new_user.getId() + "").build()).entity("{}").build();
         } catch (Exception e) {
-	        return Response.serverError().build();
+    		String msg = "An unexpected error occured while creating a new user.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 	    } finally {
 	    	if (s != null) {
 	    		s.close();
@@ -663,7 +675,9 @@ public class UserEndpoint extends AbstractEndpoint {
 	        String json = user.toJson();	
 	        return Response.ok(200).entity(json).build();
     	} catch (Exception e) {
-	        return Response.serverError().build();    		
+    		String msg = "An unexpected error occured while retrieving account information user [" + id + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
     	}
     }
     
@@ -721,9 +735,9 @@ public class UserEndpoint extends AbstractEndpoint {
  
 	        return Response.ok(200).build();
     	} catch (Exception e) {
-    		logger.info(e.getMessage());
-    		e.printStackTrace();
-    		return Response.status(UNAUTHORIZED).build();  		
+    		String msg = "An unexpected error occured while retrieving account information user [" + id + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 
     	} finally {
     		if (s != null) {
@@ -831,9 +845,9 @@ public class UserEndpoint extends AbstractEndpoint {
 	        return Response.ok(200).build();
 	        
     	} catch (Exception e) {
-    		logger.info(e.getMessage());
-    		e.printStackTrace();
-    		return Response.status(UNAUTHORIZED).build();	        		
+    		String msg = "An unexpected error occured while updating account information  for user [" + id + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 
     	} finally {
     		if (s != null) {
