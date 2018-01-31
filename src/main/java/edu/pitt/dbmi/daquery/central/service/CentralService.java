@@ -175,21 +175,21 @@ public class CentralService{
 			if (cr != null)
 				return (ResponseHelper.getBasicResponse(500, "This connection request already exists."));
 
-			Site requestingSite = DBHelper.getSite(toSiteId);
-			Site requestedFromSite = DBHelper.getSite(fromSiteId);
+			Site site = DBHelper.getSite(toSiteId);
+			Site requestedToSite = DBHelper.getSite(fromSiteId);
 			Network net = NetworkDAO.getNetworkById(networkId);
 			// send email to toSite admin
 			if (DBHelper.createConnectionRequest(networkId, fromSiteId, toSiteId)) {
 				EmailHelper eh = new EmailHelper();
-				eh.sendMail("Daquery Connection Request", "Daquery site " + requestingSite.getName() + 
-						  " is requesting to connect to your site, " + requestedFromSite.getName() + 
+				eh.sendMail("Daquery Connection Request", "Daquery site " + requestedToSite.getName() + 
+						  " is requesting to connect to your site, " + site.getName() + 
 						  ", to run queries on the network " + net.getName() +
-						  ".  Please log into your site, got to Network and choose Edit Sites under the network " +
-						  " to approve or deny the request.", requestingSite.getAdminEmail());
+						  ".  Please log into your site, go to Network and choose Edit Sites under the network " +
+						  " to approve or deny the request.", requestedToSite.getAdminEmail());
 				
 				// esi.adminEmail);
 				// eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", "del20@pitt.edu");
-				return ResponseHelper.getJsonResponseGen(200, requestingSite);
+				return ResponseHelper.getJsonResponseGen(200, site);
 			} else {
 				return ResponseHelper.getErrorResponse(500, "Error while saving a connection request",  "An unexpected error occured while authenticating a site.  Check the central server logs for more information.", null);
 			}
