@@ -213,7 +213,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         		requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while responding to an expired authorization token.", "Your user token was expired.  Please login again to get a new token.", t));
         	}
         } catch (Throwable e) {
-            requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking your login token.", "There was an issue with your token.  Please login again to get a new token.", e));
+    		String msg = "An unexpected error occured while checking your login token.";
+    		logger.log(Level.SEVERE, msg, e);	            		
+            requestContext.abortWith(ResponseHelper.getErrorResponse(500, msg, "There was an issue with your token.  Please login again to get a new token.", e));
         }
 
     }
