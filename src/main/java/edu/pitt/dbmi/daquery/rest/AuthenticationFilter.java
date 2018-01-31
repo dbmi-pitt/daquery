@@ -8,6 +8,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.Priority;
@@ -82,7 +83,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     	if (!AppProperties.isDebugMode()) {
     	
 	    	if (requestContext.getUriInfo().getRequestUri().getScheme() != "https") {
-	            throw new NotAuthorizedException("You must access web services using https");    		
+	    		String msg = "This site is secured.  You must access web this service: " + requestContext.getUriInfo().getRequestUri() +" using https.";
+	    		logger.log(Level.SEVERE, msg);
+	            throw new NotAuthorizedException(msg);    		
 	    	}
     	}
         // Get the HTTP Authorization header from the request
@@ -91,7 +94,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         // Check if the HTTP Authorization header is present and formatted correctly 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new NotAuthorizedException("Authorization header must be provided");
+    		String msg = "The website does not recognize your authorization.";
+    		logger.log(Level.SEVERE, msg + "  Found this authorizationHeader: [" + authorizationHeader + "]");
+            throw new NotAuthorizedException(msg + "  " + "Authorization header must be provided");    		
         }
         
         //Check the user's status.  If their password is expired, 
@@ -127,14 +132,18 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         	if(StringHelper.equalIgnoreCase(mySite.getSiteId(), jwt.getSiteId()))
         	{
 	            if (!DaqueryUserDAO.isUserValid(jwt.getUserId())) {
-	            	throw new Exception("User account is not valid");
+	        		String msg = "User account [" + jwt.getUserId() +"] is not valid.";
+	        		logger.log(Level.SEVERE, msg);
+	                throw new Exception(msg);
 	            }
 	            
 	            if (DaqueryUserDAO.expiredPassword(jwt.getUserId())) {
 	            	try {
 	            		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(jwt.getUserId(), jwt.getSiteId(), jwt.getNetworkId()));
 	            	} catch (Exception e) {
-	            		requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while responding to an expired authorization token.  Please ask an admin to check the server logs for more information.", null, e));
+	            		String msg = "An unexpected error occured while responding to an expired authorization token for user [" +jwt.getUserId() + "]";
+	            		logger.log(Level.SEVERE, msg, e);	            		
+	            		requestContext.abortWith(ResponseHelper.getErrorResponse(500, msg, "Your user token was expired.  Please login again to get a new token.", e));
 	            		Response.status(Response.Status.UNAUTHORIZED).build();
 	            	}
 	            }
@@ -175,6 +184,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 	try {
                 		return DaqueryUserDAO.hasRole(jwt.getUserId(), jwt.getNetworkId(), role);
                 	} catch (Exception e) {
+	            		String msg = "An error occured while determining if user [" +jwt.getUserId() + "] in network [" + jwt.getNetworkId() + "] has role [" + role + "]";
+	            		logger.log(Level.SEVERE, msg, e);	            		
                 		return false;
                 	}
                 }
@@ -192,13 +203,19 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
         catch(TokenInvalidException tie)
         {
+    		String msg = "Encountered a TokenInvalidException.";
+    		logger.log(Level.SEVERE, msg, tie);	            		
         	try{requestContext.abortWith(ResponseHelper.expiredTokenResponse(jwtReporting.getUserId(), jwtReporting.getSiteId(), jwtReporting.getNetworkId()));}
         	catch(Throwable t)
         	{
-        		requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while responding to an expired authorization token.  Please ask an admin to check the server logs for more information.", null, t));
+        		String msg2 = "Encountered an error handling a TokenInvalidException.";
+        		logger.log(Level.SEVERE, msg2, t);	            		
+        		requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while responding to an expired authorization token.", "Your user token was expired.  Please login again to get a new token.", t));
         	}
         } catch (Throwable e) {
-            requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking your login token.  Please ask an admin to check the server logs for more information.", null, e));
+    		String msg = "An unexpected error occured while checking your login token.";
+    		logger.log(Level.SEVERE, msg, e);	            		
+            requestContext.abortWith(ResponseHelper.getErrorResponse(500, msg, "There was an issue with your token.  Please login again to get a new token.", e));
         }
 
     }

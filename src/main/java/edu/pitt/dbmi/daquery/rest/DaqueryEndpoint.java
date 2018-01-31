@@ -155,7 +155,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		}
 	}	
 	
-	/** assume this method is for testing? */
+	/** assume this method is for testing? 
+	 * CDB- Yes, this is for testing*/
 	@POST
 	@Path("/echopost")
 	@Consumes(MediaType.APPLICATION_JSON)
