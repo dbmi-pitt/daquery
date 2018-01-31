@@ -538,15 +538,22 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					ResponseDAO.saveOrUpdate(resp);
 					return ResponseHelper.getBasicResponse(200, "");
 				} else {
-					String json = response.readEntity(String.class);
-					ObjectMapper mapper = new ObjectMapper();
-					TypeReference<ErrorInfo> type = new TypeReference<ErrorInfo>(){};
-					ErrorInfo errorInfo = mapper.readValue(json, type);
-					DaqueryResponse resp = errorInfo.getResponse();
-					resp.setRequest(request);
-					resp.setId(null);
-					ResponseDAO.saveOrUpdate(resp);					
-					return response;
+					ErrorInfo errorInfo = ResponseHelper.decodeErrorResponse(response);
+					if(errorInfo != null)
+					{
+						DaqueryResponse resp = errorInfo.getResponse();
+						if(resp != null)
+						{
+							resp.setRequest(request);
+							resp.setId(null);
+							ResponseDAO.saveOrUpdate(resp);												
+						}
+						return ResponseHelper.getJsonResponseGen(response.getStatus(), errorInfo);
+					}
+					else
+					{
+						return(ResponseHelper.getErrorResponse(response.getStatus(), "Unhandled error during a remote request.", "Site " + requestSite.getName() + " responded with an error.  Check the site logs for more information.", null));
+					}
 				}
 			}
 		}
