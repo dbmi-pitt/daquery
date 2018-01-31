@@ -8,9 +8,11 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.cert.Certificate;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -23,9 +25,12 @@ import java.util.logging.Level;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -176,6 +181,23 @@ public class WSConnectionUtil {
 		return aliasList;
 	}
 
+	private static TrustManager [] allowSelfSignedTM = null;
+	private static TrustManager [] getTrustingManager()
+	{
+		if(allowSelfSignedTM == null)
+		{
+			allowSelfSignedTM = new TrustManager[]
+					{
+						new X509TrustManager()
+						{
+							public java.security.cert.X509Certificate[] getAcceptedIssuers() {return null;}
+							public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType){}
+							public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+				       }
+					}; 			
+		}
+		return(allowSelfSignedTM);
+	}
 	/**
 	 * This method executes a GET against a remote site.  If the connection is made via https, 
 	 * the local site's keystore is examined.  The keystore file and keystore password are used 
@@ -191,23 +213,17 @@ public class WSConnectionUtil {
 	 */
 	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments, String jwToken) throws UnsupportedEncodingException
 	{
-		Client client = ClientBuilder.newClient();
+		Client client = null;
 		Response resp = null;
 		String getURL = buildGetUrl(site.getUrl(), serviceName, arguments);
 		
-		//handle an HTTPS connection
-		if (site.getUrl().toLowerCase().startsWith("https")) {
-			SslConfigurator sslConfig = SslConfigurator.newInstance()
-					.trustStoreFile(WSConnectionUtil.getKeystorePath())
-					.trustStorePassword(WSConnectionUtil.getKeystorePassword())
-					.trustStoreType("JKS")
-					.securityProtocol("SSL");
-
-			SSLContext sslContext = sslConfig.createSSLContext();
-
-			//redefine the client variable to include the sslContext
-			client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+		try{client = getRemoteClient(site.getUrl());}
+		catch(KeyManagementException kme)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site " + site.getName(), "An error happened while configuring the secure key management for the site GET connection.", kme));
 		}
+
+
 		Builder builder = client.target(getURL)
 				.request(MediaType.APPLICATION_JSON); //.get();
 		if(!StringHelper.isEmpty(jwToken))
@@ -215,6 +231,31 @@ public class WSConnectionUtil {
 		resp = builder.get();
 		return(resp);
 	}
+	
+	private static Client getRemoteClient(String url) throws KeyManagementException
+	{
+		Client client = null;
+		//handle an HTTPS connection
+		if (url.trim().startsWith("https")) {
+			SslConfigurator sslConfig = SslConfigurator.newInstance()
+					.securityProtocol("SSL");
+					//.trustStoreFile(WSConnectionUtil.getKeystorePath())
+					//.trustStorePassword(WSConnectionUtil.getKeystorePassword())
+					//.trustStoreType("JKS")
+			SSLContext sslContext = sslConfig.createSSLContext();
+			
+			sslContext.init(null, getTrustingManager(), new SecureRandom());
+			
+			//redefine the client variable to include the sslContext
+			client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+		}
+		else
+		{
+			client = ClientBuilder.newClient();
+		}
+		return(client);
+	}
+	
 	private static String buildGetUrl(String siteUrl, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException {
 		String retString = null;
 		String args = "";
@@ -243,6 +284,41 @@ public class WSConnectionUtil {
 		return retString;
 	}
 
+	/**
+	 * This method executes a POST against a remote site.  If the connection is made via https, 
+	 * the local site's keystore is examined.  The keystore file and keystore password are used 
+	 * to create an SSL connection to the remote site.  For this call to work, the local site's
+	 * certificate must be included in the remote site's keystore.  The alias for the certificate
+	 * must match the local site's IP address or a resolvable server name.
+	 * @param site- an object representing the remote site.
+	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
+	 * @param json- JSON encoded data to be POSTed
+	 * @param securityToken- the current security token 
+	 * @return- a Response object representing the data returned by the remote site
+	 */
+	public static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
+	{
+		Client client = null;
+		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
+		
+		Builder respBuilder = null;
+		
+		try{client = getRemoteClient(site.getUrl());}
+		catch(KeyManagementException kme)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site " + site.getName(), "An error happened while configuring the secure key management for the site POST connection.", kme));
+		}
+		
+		respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
+
+		if(securityToken != null)
+			respBuilder = respBuilder.header("Authorization", securityToken);
+		
+		Response resp  = respBuilder.post(ent);
+		
+		return(resp);
+	}	
+	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
 		String siteId = AppProperties.getDBProperty("site.id");
@@ -270,6 +346,11 @@ public class WSConnectionUtil {
 		}
 		
 		Client client = ClientBuilder.newClient();
+		try{client = getRemoteClient(url);}
+		catch(KeyManagementException kme)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server.", "An error happened while configuring the secure key management for the site connection.", kme));
+		}
 		
 		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
 		return(rVal);
@@ -281,8 +362,13 @@ public class WSConnectionUtil {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("site", siteName);
 		params.put("key", siteKey);
-		Client client = ClientBuilder.newClient();
 		String url = AppProperties.getCentralServerURL() + "/daquery-central/authenticateSite?site=" +siteName + "&key=" + siteKey;
+		Client client = ClientBuilder.newClient();
+		try{client = getRemoteClient(url);}
+		catch(KeyManagementException kme)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server during authentication.", "An error happened while configuring the secure key management for the site connection.", kme));
+		}		
 		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
 		return(rVal);
 	}		
