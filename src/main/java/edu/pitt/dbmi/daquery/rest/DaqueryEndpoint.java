@@ -526,7 +526,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			{
 				request.setDirection("OUT");
 				AbstractDAO.save(request);
-				Response response = postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
+				Response response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 				if(response.getStatus() == 200)
 				{
 					String json = response.readEntity(String.class);

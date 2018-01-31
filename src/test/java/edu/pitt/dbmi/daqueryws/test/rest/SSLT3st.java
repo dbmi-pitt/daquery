@@ -2,11 +2,8 @@ package edu.pitt.dbmi.daqueryws.test.rest;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.Test;
-
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.rest.AbstractEndpoint;
-import edu.pitt.dbmi.daquery.rest.EndpointHelper;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 /**
  * NOTE: For this class to work, a network of sites complete with certificates and keystores
@@ -39,7 +36,7 @@ public class SSLT3st extends DaqueryBaseTest  {
         	s.setKeystoreAlias(siteIP);
         	s.setUrl(siteURL);
         	System.out.println("Connecting to site: " +  " " + s.getUrl() + " " + s.getKeystoreAlias());
-        	Response r = EndpointHelper.getFromRemoteSite(s, "sites/getKeystoreAliases", null);
+        	Response r = WSConnectionUtil.getFromRemoteSite(s, "sites/getKeystoreAliases", null, null);
         	String json = r.readEntity(String.class);
         	System.out.println("Response: " + json);
        } catch (Exception e) {
@@ -55,7 +52,7 @@ public class SSLT3st extends DaqueryBaseTest  {
         	s.setKeystoreAlias(siteIP);
         	s.setUrl(siteURL);
         	System.out.println("Connecting to site: " +  " " + s.getUrl() + " " + s.getKeystoreAlias());
-        	Response r = EndpointHelper.postJSONToRemoteSite(s, "echopost", s.toJson(), null);
+        	Response r = WSConnectionUtil.postJSONToRemoteSite(s, "echopost", s.toJson(), null);
         	String json = r.readEntity(String.class);
         	System.out.println("Response: " + json);
        } catch (Exception e) {

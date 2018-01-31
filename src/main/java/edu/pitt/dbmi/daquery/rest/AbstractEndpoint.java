@@ -74,49 +74,7 @@ public class AbstractEndpoint {
 		
 	}
 	
-	/**
-	 * This method executes a POST against a remote site.  If the connection is made via https, 
-	 * the local site's keystore is examined.  The keystore file and keystore password are used 
-	 * to create an SSL connection to the remote site.  For this call to work, the local site's
-	 * certificate must be included in the remote site's keystore.  The alias for the certificate
-	 * must match the local site's IP address or a resolvable server name.
-	 * @param site- an object representing the remote site.
-	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
-	 * @param json- JSON encoded data to be POSTed
-	 * @param securityToken- the current security token 
-	 * @return- a Response object representing the data returned by the remote site
-	 */
-	protected static Response postJSONToRemoteSite(Site site, String serviceName, String json, String securityToken)
-	{
-		Client client = ClientBuilder.newClient();
-		Entity<String> ent = Entity.entity(json, MediaType.APPLICATION_JSON_TYPE);
-		
-		Builder respBuilder = null;
-		
-		//handle an HTTPS connection
-		if (site.getUrl().toLowerCase().startsWith("https")) {
-			SslConfigurator sslConfig = SslConfigurator.newInstance()
-					.trustStoreFile(WSConnectionUtil.getKeystorePath())
-					.trustStorePassword(WSConnectionUtil.getKeystorePassword())
-					.trustStoreType("JKS")
-					.securityProtocol("SSL");
 
-			SSLContext sslContext = sslConfig.createSSLContext();
-
-			//redefine the client variable to include the sslContext
-			client = ClientBuilder.newBuilder().sslContext(sslContext).build();
-			respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
-		//handle an HTTP connection
-		} else {
-			respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
-		}
-		if(securityToken != null)
-			respBuilder = respBuilder.header("Authorization", securityToken);
-		
-		Response resp  = respBuilder.post(ent);
-		
-		return(resp);
-	}
 	
 	/**
 	 * This method performs the same function as the other getFromRemoteSite except it does not
