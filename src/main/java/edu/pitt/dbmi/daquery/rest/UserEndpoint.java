@@ -61,6 +61,7 @@ import edu.pitt.dbmi.daquery.common.domain.RemoteUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
+import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
@@ -628,20 +629,18 @@ public class UserEndpoint extends AbstractEndpoint {
     	Session s = null;
     	try {
     		new_user.assignUUID();
+    		new_user.setStatusEnum(UserStatus.ACTIVE);
+    		new_user.setRoles(new ArrayList<Role>());
     		
     		s = HibernateConfiguration.openSession();
 	
 	        s.getTransaction().begin();
-	
-//	        DaqueryUser newUser = new DaqueryUser(login, password);
 	        s.persist(new_user);
-	
 	        s.getTransaction().commit();
 	
-	       
 	        logger.info("Done trying to create user: " + new_user.toString());
 	        
-	        return Response.created(uriInfo.getAbsolutePathBuilder().path(new_user.getId() + "").build()).entity("{}").build();
+	        return Response.created(uriInfo.getAbsolutePathBuilder().path(new_user.getId() + "").build()).entity(new_user).build();
         } catch (Exception e) {
     		String msg = "An unexpected error occured while creating a new user.";
     		logger.log(Level.SEVERE, msg, e);
