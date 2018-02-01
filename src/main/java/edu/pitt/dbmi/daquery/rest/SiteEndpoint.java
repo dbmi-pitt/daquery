@@ -342,7 +342,7 @@ public class SiteEndpoint extends AbstractEndpoint {
                 idParam.put("to-site-id", site_out.getSiteId());
  				Response resp = WSConnectionUtil.callCentralServer("request-connection",  idParam);
  				
- 				if(resp.getStatus() == 200) {
+ 				if(resp.getStatus() == 200 || resp.getStatus() == 201) {
 		        	network.getOutgoingQuerySites().add(site_out);
 		        	
 		        	s.getTransaction().begin();
@@ -352,9 +352,9 @@ public class SiteEndpoint extends AbstractEndpoint {
  					return Response.ok(201).build();
  				}
  				else
- 					return Response.status(INTERNAL_SERVER_ERROR).entity("Dauqery Center Server return error").build();
-	        } else {
-	        	return Response.status(BAD_REQUEST).build();
+ 					return ResponseHelper.wrapServerResponse(resp, site_out.getName());
+	        } else {	        	
+	        	return ResponseHelper.getErrorResponse(BAD_REQUEST.getStatusCode(), "Can only request connections with outgoing sites.", "Invalid type parameter [" + type + "] found in URL" , null);
 	        }
         } catch (Exception e) {
     		String msg = "An unexpected error was encountered while creating a site based on information from the central server.";
