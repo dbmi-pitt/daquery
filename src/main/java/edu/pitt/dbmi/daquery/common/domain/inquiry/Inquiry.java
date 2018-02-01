@@ -116,6 +116,9 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Transient
 	public InquiryType getDataTypeEnum()
 	{
+		if (dataType == null) {
+			return null;
+		}
 		return(InquiryType.valueOf(dataType));
 	}
 	

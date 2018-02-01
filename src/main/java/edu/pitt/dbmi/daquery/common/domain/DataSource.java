@@ -86,6 +86,10 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 	@Transient
 	public SourceType getSourceTypeEnum()
 	{
+		//check for null
+		if (dtype == null) {
+			return null;
+		}
 		return(SourceType.valueOf(dtype));
 	}
 }
