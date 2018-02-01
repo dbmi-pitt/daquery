@@ -629,7 +629,9 @@ public class UserEndpoint extends AbstractEndpoint {
     	Session s = null;
     	try {
     		new_user.assignUUID();
-    		new_user.setStatusEnum(UserStatus.ACTIVE);
+    		if (new_user.getStatusEnum() == null) {
+    			new_user.setStatusEnum(UserStatus.ACTIVE);
+    		}
     		new_user.setRoles(new ArrayList<Role>());
     		
     		s = HibernateConfiguration.openSession();
