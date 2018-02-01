@@ -509,7 +509,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				{
 					String msg = "Requester does not have aggregate query role.";
 					DaqueryResponse eResp = assembleErrorResponse(msg, null);					
-					return(ResponseHelper.getErrorResponse(403, msg, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
+					return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
 				}
 				
 				if(DaqueryUserDAO.isLocalUserId(requesterId))
