@@ -200,11 +200,18 @@ public class Site extends DaqueryObject implements Serializable {
 
 	@Transient
 	public SiteStatus getStatusValue() {
+		if (status == null) {
+			return null;
+		}
 		return SiteStatus.valueOf(status);
 	}
 
 	public void setStatusValue(SiteStatus statusValue) {
-		status = statusValue.name();
+		if (statusValue == null) {
+			status = null;
+		} else {
+			status = statusValue.name();
+		}
 	}
 
 	/**
@@ -232,8 +239,23 @@ public class Site extends DaqueryObject implements Serializable {
 	public String getCommEncType(){return(commEncType);}
 	public void setCommEncType(String type){this.commEncType = type;}	
 	@Transient
-	public EncryptionType getCommTypeValue(){return(EncryptionType.valueOf(commEncType));}
-	public void setCommTypeValue(EncryptionType et){commEncType = et.toString();}
+	public EncryptionType getCommTypeValue()
+	{
+		if (commEncType == null) {
+			return null;
+		}
+		return(EncryptionType.valueOf(commEncType));
+	}
+	public void setCommTypeValue(EncryptionType et)
+	{
+		if (et == null) {
+			commEncType = null;
+		}
+		else
+		{
+			commEncType = et.toString();
+		}
+	}
 	
 	public String getKeystoreAlias() {
 		return keystoreAlias;

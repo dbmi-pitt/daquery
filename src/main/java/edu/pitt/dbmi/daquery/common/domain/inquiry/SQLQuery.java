@@ -47,11 +47,18 @@ public class SQLQuery extends Inquiry
 	@Transient
 	public SQLDialect getSqlDialectEnum()
 	{
+		if (sqldialect == null) {
+			return null;
+		}
 		return(SQLDialect.valueOf(sqldialect));
 	}
 	public void setSqlDialectEnum(SQLDialect dialect)
 	{
-		sqldialect = dialect.toString();
+		if (dialect == null) {
+			sqldialect = null;
+		} else {
+			sqldialect = dialect.toString();			
+		}
 	}
 	
 	public String getCode(){return(code);}

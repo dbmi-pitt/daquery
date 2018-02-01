@@ -118,8 +118,25 @@ public class DaqueryRequest extends DaqueryObject
 	public Set<DaqueryResponse> getResponses(){return(responses);}
 	public void setResponses(Set<DaqueryResponse> resps){responses = resps;}
 	
-	public RequestDirection getDirectionEnum(){return(RequestDirection.valueOf(direction));}
-	public void setDirectionEnum(RequestDirection dir){direction = dir.toString();}
+	public RequestDirection getDirectionEnum()
+	{
+		//check for null
+		if (direction == null) {
+			return null;
+		}
+		return(RequestDirection.valueOf(direction));
+	}
+	public void setDirectionEnum(RequestDirection dir)
+	{
+		//check for null
+		if (dir == null) {
+			direction = null;
+		} 
+		else 
+		{
+			direction = dir.toString();
+		}
+	}
 	
 	public Network getNetwork(){return(network);}
 	public void setNetwork(Network net){network = net;}

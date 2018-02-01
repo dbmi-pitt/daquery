@@ -101,8 +101,23 @@ public class DaqueryResponse extends DaqueryObject
     public String getStatus(){return(status);}
     public void setStatus(String stat){status = stat;}
     
-    public ResponseStatus getStatusEnum(){return(ResponseStatus.valueOf(status));}
-    public void setStatusEnum(ResponseStatus stat){status = stat.name();}
+    public ResponseStatus getStatusEnum()
+    {
+    	if (status == null) {
+    		return null;
+    	}
+    	return(ResponseStatus.valueOf(status));
+    }
+    public void setStatusEnum(ResponseStatus stat)
+    {
+    	if (stat == null) {
+    		status = null;
+    	}
+    	else
+    	{
+    		status = stat.name();
+    	}
+    }
     
     public String getValue(){return(value);}
     public void setValue(String val){value = val;}
