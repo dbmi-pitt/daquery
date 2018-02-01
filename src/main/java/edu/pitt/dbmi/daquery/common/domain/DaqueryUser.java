@@ -151,13 +151,27 @@ public class DaqueryUser extends UserInfo {
     }
     
     @Transient
+    /**
+     * Return a UserStatus enum representing the user's status
+     * @return- a null (if the status is null) or the UserStatus enum value of the status
+     */
     public UserStatus getStatusEnum()
     {
-    	return UserStatus.valueOf(status);
+    	//need to check for a null first...
+    	if (this.status == null) {
+    		return null;
+    	}
+    	return UserStatus.valueOf(this.status);
     }
+    
     public void setStatusEnum(UserStatus stat)
     {
-    	setStatus(stat.toString());
+    	//need to check for a null first...
+    	if (stat == null) {
+    		this.setStatus(null);
+    	} else {
+    		this.setStatus(stat.toString());
+    	}
     }
 	
 	public List<Role> getRoles() {
