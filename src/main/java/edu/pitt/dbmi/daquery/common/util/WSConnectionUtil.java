@@ -6,6 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.security.cert.Certificate;
 import java.security.KeyManagementException;
@@ -58,6 +62,30 @@ public class WSConnectionUtil {
 			log.log(Level.SEVERE, "Unable to set daquerySSLFactory");
 			System.err.println("Unable to set daquerySSLFactory" + e.getMessage());
 		}
+	}
+	
+	public static void main(String [] args)
+	{
+		System.out.println(checkConnection("dbmi-shrine-dev01.dbmi.pitt.edu", 2342));
+	}
+	
+	/**
+	 * Check a TCP connection.  Try to connect to a port, if it times out after two seconds
+	 * @param server The DNS name or ip of the server
+	 * @param port The port to try to connect to.
+	 * @return
+	 */
+	public static boolean checkConnection(String server, Integer port)
+	{
+		try{
+			Socket s = new Socket();
+			s.connect(new InetSocketAddress(server, port), 2000);
+			try{s.close();}catch(Throwable t){}
+			return true;
+	    } catch (Exception ex) {
+	        /* ignore */
+	    }
+	    return false;
 	}
 	
 	/**
@@ -217,10 +245,22 @@ public class WSConnectionUtil {
 		Response resp = null;
 		String getURL = buildGetUrl(site.getUrl(), serviceName, arguments);
 		
-		try{client = getRemoteClient(site.getUrl());}
+		
+		try
+		{
+			URL url = new URL(getURL);
+			if(!checkConnection(url.getHost(), url.getPort()))
+					return(ResponseHelper.getErrorResponse(500, "Server is not reachable for site " + site.getName() + ".", "Cannot connect to " + url.getHost(), null));
+
+			client = getRemoteClient(site.getUrl());
+		}
 		catch(KeyManagementException kme)
 		{
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site " + site.getName(), "An error happened while configuring the secure key management for the site GET connection.", kme));
+		}
+		catch(MalformedURLException mue)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site, bad site address for site " + site.getName() + ".", "This was due to a malformed url: " + getURL, mue));
 		}
 
 
@@ -303,10 +343,21 @@ public class WSConnectionUtil {
 		
 		Builder respBuilder = null;
 		
-		try{client = getRemoteClient(site.getUrl());}
+		try
+		{
+			URL url = new URL(site.getUrl());
+			if(!checkConnection(url.getHost(), url.getPort()))
+					return(ResponseHelper.getErrorResponse(500, "Server is not reachable at site " + site.getName(), "Cannot connect to " + url.getHost(), null));
+			
+			client = getRemoteClient(site.getUrl());
+		}
 		catch(KeyManagementException kme)
 		{
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site " + site.getName(), "An error happened while configuring the secure key management for the site POST connection.", kme));
+		}
+		catch(MalformedURLException mue)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site, bad site address.  Site:" + site.getName(), "This was due to a malformed url: " + site.getUrl(), mue));
 		}
 		
 		respBuilder = client.target(site.getUrl() + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON);
@@ -327,7 +378,8 @@ public class WSConnectionUtil {
 		if(auth.getStatus() != 200)
 			return(auth);
 		//TODO grab the token from the auth response and send it along with the call
-		String url = AppProperties.getCentralServerURL() + "/daquery-central/" +  serviceName;
+		String centServerURL = AppProperties.getCentralServerURL();
+		String url = centServerURL + "/daquery-central/" +  serviceName;
 		if(additionalParameters != null)
 		{
 			String paramDivider = "?";
@@ -345,11 +397,21 @@ public class WSConnectionUtil {
 			}
 		}
 		
-		Client client = ClientBuilder.newClient();
-		try{client = getRemoteClient(url);}
+		Client client = null;
+		try
+		{
+			URL cUrl = new URL(centServerURL);
+			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
+					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + centServerURL, null));			
+			client = getRemoteClient(url);			
+		}
 		catch(KeyManagementException kme)
 		{
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server.", "An error happened while configuring the secure key management for the site connection.", kme));
+		}
+		catch(MalformedURLException mue)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url: " + centServerURL, mue));
 		}
 		
 		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
@@ -362,13 +424,25 @@ public class WSConnectionUtil {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("site", siteName);
 		params.put("key", siteKey);
-		String url = AppProperties.getCentralServerURL() + "/daquery-central/authenticateSite?site=" +siteName + "&key=" + siteKey;
-		Client client = ClientBuilder.newClient();
-		try{client = getRemoteClient(url);}
+		String centServerURL = AppProperties.getCentralServerURL();
+		String url = centServerURL + "/daquery-central/authenticateSite?site=" +siteName + "&key=" + siteKey;
+		Client client = null;
+		try
+		{
+			URL cUrl = new URL(centServerURL);
+			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
+					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + centServerURL, null));			
+			client = getRemoteClient(url);
+		}
 		catch(KeyManagementException kme)
 		{
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server during authentication.", "An error happened while configuring the secure key management for the site connection.", kme));
-		}		
+		}
+		catch(MalformedURLException mue)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url: " + centServerURL, mue));
+		}
+
 		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
 		return(rVal);
 	}		
