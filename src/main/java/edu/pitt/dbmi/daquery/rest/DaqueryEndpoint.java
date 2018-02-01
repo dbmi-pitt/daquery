@@ -383,15 +383,26 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		try
 		{
 			if(request == null || request.getRequestSite() == null || request.getRequestSite().getSiteId() == null)
-				return(ResponseHelper.getErrorResponse(400, "A request site with a valid request site UUID is required.", null, null));
+			{
+				String msg = "A request site with a valid request site UUID is required.";
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);
+				return(ResponseHelper.getErrorResponse(400, msg, null, null, eResp));
+			}
 
 			if(request.getNetwork() == null || StringHelper.isBlank(request.getNetwork().getNetworkId()))
-					return(ResponseHelper.getErrorResponse(400, "A request must specify a valid network with a network id.", null, null));
+			{
+				String msg = "A request must specify a valid network with a network id.";
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);
+				return(ResponseHelper.getErrorResponse(400, msg, null, null, eResp));
+			}
 			
 			if(request.getInquiry() == null ||
 			   request.getInquiry().getDataType() == null)
-					return(ResponseHelper.getErrorResponse(400, "A request must have a valid inquiry attached with an associated data type ", null, null));
-			
+			{
+				String msg = "A request must have a valid inquiry attached with an associated data type ";
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);				
+				return(ResponseHelper.getErrorResponse(400, msg, null, null, eResp));
+			}
 			if(request.getRequestId() == null)
 				request.setRequestId(UUID.randomUUID().toString());
 
@@ -405,14 +416,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			Site requestSite = SiteDAO.getSiteByNameOrId(requestSiteId);
 			if(requestSite == null)
 			{
-				return(ResponseHelper.getErrorResponse(403, "Requesting site is not authorized to query.", "The querying site with id " + requestSiteId + " is not configured to work with this site.", null));
+				String msg = "A request must have a valid inquiry attached with an associated data type ";
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);
+				return(ResponseHelper.getErrorResponse(403, msg, "The querying site with id " + requestSiteId + " is not configured to work with this site.", null, eResp));
 			}
 			request.setRequestSite(requestSite);
 
 			Network net = NetworkDAO.getNetworkById(request.getNetwork().getNetworkId());
 			if(net == null)
 			{
-				return(ResponseHelper.getErrorResponse(403, "The network is not authorized to query.", "The network with id " + request.getNetwork().getNetworkId() + " being queried within is not configured to work with this site.", null));
+				String msg = "The network is not authorized to query."; 
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);				
+				return(ResponseHelper.getErrorResponse(403, msg, "The network with id " + request.getNetwork().getNetworkId() + " being queried within is not configured to work with this site.", null, eResp));
 			}
 			request.setNetwork(net);
 			request.getInquiry().setNetwork(net);
@@ -431,11 +446,15 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				{
 					if(request.getRequester() == null || StringHelper.isEmpty(request.getRequester().getId()) || StringHelper.isEmpty(request.getRequester().getEmail()) || StringHelper.isEmpty(request.getRequester().getRealName()))
 					{
-						return(ResponseHelper.getErrorResponse(400, "Requester user information is required.", "Requester user information with a minimum of user id, email and real name for user with id " + requesterId + ".  This is needed because this user's information isn't currently listed at this site.", null));
+						String msg = "Requester user information is required.";
+						DaqueryResponse eResp = assembleErrorResponse(msg, null);
+						return(ResponseHelper.getErrorResponse(400, msg, "Requester user information with a minimum of user id, email and real name for user with id " + requesterId + ".  This is needed because this user's information isn't currently listed at this site.", null, eResp));
 					}
 					if(! request.getRequester().getId().equals(requesterId))
 					{
-						return(ResponseHelper.getErrorResponse(400, "The requester id does not match the authenticated user id.", "User with id " + requesterId + " sent the request, but a user with  id " + request.getId() + " was provided with the request as the requester.", null));
+						String msg = "The requester id does not match the authenticated user id.";
+						DaqueryResponse eResp = assembleErrorResponse(msg, null);
+						return(ResponseHelper.getErrorResponse(400, msg, "User with id " + requesterId + " sent the request, but a user with  id " + request.getId() + " was provided with the request as the requester.", null, eResp));
 					}
 					uInfo = new UserInfo();
 					uInfo.setEmail(request.getRequester().getEmail());
@@ -456,7 +475,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				{
 					if(trans != null) trans.rollback();
 					logger.log(Level.SEVERE, "Error saving UserInfo object with user id " + uInfo.getId(), t);
-					return(ResponseHelper.getErrorResponse(500, "There was an error at the request site while trying to save some request information.", "An error occured while trying to save the requester UserInfo on the local site please contact the site admin.", t));
+					String msg = "There was an error at the request site while trying to save some request information.";
+					DaqueryResponse eResp = assembleErrorResponse(msg, t);
+					return(ResponseHelper.getErrorResponse(500, msg, "An error occured while trying to save the requester UserInfo on the local site please contact the site admin.", t, eResp));
 				}
 				finally
 				{
@@ -467,7 +488,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			{
 				if(uInfo == null)
 				{
-					return(ResponseHelper.getErrorResponse(400, "Requester does not have a local account.", "The requester local to this machine has no user information registered.", null));
+					String msg = "Requester does not have a local account.";
+					DaqueryResponse eResp = assembleErrorResponse(msg, null);
+					return(ResponseHelper.getErrorResponse(400, msg, "The requester local to this machine has no user information registered.", null, eResp));
 				}
 			}
 			
@@ -476,10 +499,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
 			{	
 				if(request.getInquiry() == null)
-					return(ResponseHelper.getErrorResponse(400, "No inquiry provided.", "An Inquiry object is required and was not included with the request", null));
+				{
+					String msg = "No inquiry provided.";
+					DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+					return(ResponseHelper.getErrorResponse(400, msg, "An Inquiry object is required and was not included with the request", null, eResp));
+				}
 				
 				if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
-					return(ResponseHelper.getErrorResponse(403, "Requester does not have aggregate query role.", "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null));
+				{
+					String msg = "Requester does not have aggregate query role.";
+					DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+					return(ResponseHelper.getErrorResponse(403, msg, "User with id: " + requesterId + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
+				}
 				
 				if(DaqueryUserDAO.isLocalUserId(requesterId))
 					request.setDirection("IN-OUT");
@@ -516,7 +547,11 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				}
 				
 				if(rVal == null)
-					return(ResponseHelper.getErrorResponse(500, "No response recieved for this request.", "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null));
+				{
+					String msg = "No response recieved for this request.";
+					DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+					return(ResponseHelper.getErrorResponse(500, msg, "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null, eResp));
+				}
 				else
 				{
 					return(ResponseHelper.getJsonResponseGen(200, rVal));
@@ -536,18 +571,28 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					resp.setRequest(request);
 					resp.setId(null);
 					ResponseDAO.saveOrUpdate(resp);
-					return ResponseHelper.getBasicResponse(200, "");
+					return ResponseHelper.getJsonResponseGen(200, resp);
 				} else {
 					ErrorInfo errorInfo = ResponseHelper.decodeErrorResponse(response);
 					if(errorInfo != null)
 					{
 						DaqueryResponse resp = errorInfo.getResponse();
-						if(resp != null)
+						if(resp == null)
 						{
-							resp.setRequest(request);
-							resp.setId(null);
-							ResponseDAO.saveOrUpdate(resp);												
+							resp = new DaqueryResponse(true);
 						}
+						if(StringHelper.isBlank(resp.getResponseId())){resp.setResponseId(UUID.randomUUID().toString());}
+						resp.setStatusEnum(ResponseStatus.ERROR);
+						if(StringHelper.isBlank(resp.getErrorMessage())){resp.setErrorMessage(errorInfo.getDisplayMessage());}
+						if(StringHelper.isBlank(resp.getStackTrace()) && ! StringHelper.isBlank(errorInfo.getStackTrace()))
+						{
+							String trace = errorInfo.getStackTrace();
+							if(trace.length() > 10000) trace = trace.substring(0, 9999);
+							resp.setStackTrace(trace);
+						}
+						resp.setRequest(request);
+						resp.setId(null);
+						ResponseDAO.saveOrUpdate(resp);																		
 						return ResponseHelper.getJsonResponseGen(response.getStatus(), errorInfo);
 					}
 					else
@@ -564,6 +609,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred", msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name") + " for further information.", t));
 		}
 	}
+	
+	private DaqueryResponse assembleErrorResponse(String message, Throwable t) throws DaqueryException
+	{
+		DaqueryResponse response = new DaqueryResponse(true);
+		response.setStatusEnum(ResponseStatus.ERROR);
+		response.setErrorMessage(message);
+		if(t != null)
+			response.setStackTrace(StringHelper.stackToString(t));
+		ResponseDAO.saveOrUpdate(response);
+		return(response);
+	}
+	
 	
 	private HashMap<String, Object> wrapResponse(DaqueryResponse response)
 	{
