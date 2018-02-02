@@ -153,14 +153,6 @@ public class SiteDAO extends AbstractDAO {
 			List result = query.list();
     		
 	        return result;
-<<<<<<< HEAD
-	    
-        } catch (HibernateException e) {
-        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
-        	logger.log(Level.SEVERE, e.getLocalizedMessage());
-            throw e;
-=======
->>>>>>> branch 'master' of https://cborromeo@github.com/dbmi-pitt/daquery-common.git
         }
     	finally
     	{
