@@ -72,6 +72,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRequests(@QueryParam("direction") String direction) {
+        DaqueryRequestDAO dao = new DaqueryRequestDAO();
     	try {
 
             logger.info("#### returning all requests with direction [" + direction + "]");
@@ -82,7 +83,6 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             String[] directions = direction.split("\\!");
             
-            DaqueryRequestDAO dao = new DaqueryRequestDAO();
             dao.openCurrentSession();
             List requests = dao.list(directions);
             dao.closeCurrentSession();
@@ -98,6 +98,10 @@ public class RequestEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error was encountered retrieving requests for direction [" + direction + "]";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
         }
     }
     
@@ -114,6 +118,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRequest(@PathParam("id") String id) {
+        DaqueryRequestDAO dao = new DaqueryRequestDAO();
     	try {
 
             logger.info("#### returning a single request with id [" + id + "]");
@@ -122,7 +127,6 @@ public class RequestEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            DaqueryRequestDAO dao = new DaqueryRequestDAO();
             dao.openCurrentSession();
             DaqueryRequest request = dao.get(Long.parseLong(id));
             dao.closeCurrentSession();
@@ -142,6 +146,10 @@ public class RequestEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error was encountered retrieving data for request  [" + id + "]";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
         }
     }
     
@@ -157,6 +165,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createRequest(LinkedHashMap<?, ?> form) {
+        DaqueryRequestDAO dao = new DaqueryRequestDAO();
     	try {
 
             logger.info("#### creating a new request");
@@ -167,7 +176,6 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
             
-            DaqueryRequestDAO dao = new DaqueryRequestDAO();
             dao.openCurrentSessionwithTransaction();
             
             UUID requestGroupUUID = UUID.randomUUID();
@@ -204,6 +212,10 @@ public class RequestEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error was encountered creating a new request.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
         }
     }
     
@@ -219,6 +231,7 @@ public class RequestEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateRequest(LinkedHashMap<?, ?> form) {
+        DaqueryRequestDAO dao = new DaqueryRequestDAO();
     	try {
 
             logger.info("#### updating a request");
@@ -229,7 +242,6 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
             
-            DaqueryRequestDAO dao = new DaqueryRequestDAO();
             dao.openCurrentSessionwithTransaction();
             DaqueryRequest request = dao.get((Long) form.get("id"));
             dao.update(request.getId(), request);
@@ -246,6 +258,10 @@ public class RequestEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error was encountered updating a new request.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
         }
     }
 }
