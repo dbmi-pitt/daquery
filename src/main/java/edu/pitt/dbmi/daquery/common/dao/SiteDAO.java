@@ -44,8 +44,8 @@ public class SiteDAO extends AbstractDAO {
 	        return site_list;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
         }
             
@@ -81,9 +81,13 @@ public class SiteDAO extends AbstractDAO {
 	        return site;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
+        } catch (Throwable t) {
+        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve site by id [" + id + "]");
+        	logger.log(Level.SEVERE, t.getLocalizedMessage());
+            throw t;        	
         }
     }
     
@@ -98,9 +102,13 @@ public class SiteDAO extends AbstractDAO {
 	        return site;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
     		logger.info(e.getLocalizedMessage());
             throw e;
+        } catch (Throwable t) {
+        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve site by name [" + name + "]");
+    		logger.info(t.getLocalizedMessage());
+            throw t;        	
         }
     }
 
@@ -114,7 +122,7 @@ public class SiteDAO extends AbstractDAO {
 	}
 	catch(Throwable t)
 	{
-	    String msg = "Unexcpected error while querying a site by name or id.";
+	    String msg = "Unexpected error while querying a site by name or id.";
 	    logger.log(Level.SEVERE, msg, t);
 	    throw new DaqueryException(msg + "  Check server logs for more information.", t);
 	}
@@ -142,8 +150,8 @@ public class SiteDAO extends AbstractDAO {
 	        return result;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
         }
     	finally
@@ -256,8 +264,8 @@ public class SiteDAO extends AbstractDAO {
 	        return result;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
         }
     }
