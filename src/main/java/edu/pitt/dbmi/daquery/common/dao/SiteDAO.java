@@ -47,9 +47,11 @@ public class SiteDAO extends AbstractDAO {
 	        return site_list;
 	    
         } catch (HibernateException e) {
-        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
-        	logger.log(Level.SEVERE, e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings." ,e);
             throw e;
+        } catch (Throwable t) {
+        	logger.log(Level.SEVERE, "Unexpected error querying all sites." ,t);
+            throw t;
         }
             
     }
@@ -84,12 +86,10 @@ public class SiteDAO extends AbstractDAO {
 	        return site;
 	    
         } catch (HibernateException e) {
-        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
-        	logger.log(Level.SEVERE, e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings." ,e);
             throw e;
         } catch (Throwable t) {
-        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve site by id [" + id + "]");
-        	logger.log(Level.SEVERE, t.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve site by id [" + id + "]", t);
             throw t;        	
         }
     }
@@ -105,30 +105,28 @@ public class SiteDAO extends AbstractDAO {
 	        return site;
 	    
         } catch (HibernateException e) {
-        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
             throw e;
         } catch (Throwable t) {
-        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve site by name [" + name + "]");
-    		logger.info(t.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve site by name [" + name + "]", t);
             throw t;        	
         }
     }
 
     public static Site getSiteByNameOrId(String nameOrId) throws DaqueryException
     {
-	try
-	{
-	    Site site = querySiteByID(nameOrId);
-	    if(site == null) site = querySiteByName(nameOrId);
-	    return(site);
-	}
-	catch(Throwable t)
-	{
-	    String msg = "Unexpected error while querying a site by name or id.";
-	    logger.log(Level.SEVERE, msg, t);
-	    throw new DaqueryException(msg + "  Check server logs for more information.", t);
-	}
+		try
+		{
+		    Site site = querySiteByID(nameOrId);
+		    if(site == null) site = querySiteByName(nameOrId);
+		    return(site);
+		}
+		catch(Throwable t)
+		{
+		    String msg = "Unexpected error while querying a site by name or id: [" + nameOrId + "].";
+		    logger.log(Level.SEVERE, msg, t);
+		    throw new DaqueryException(msg + "  Check server logs for more information.", t);
+		}
     }
     
     /** Get sites by network_id
@@ -153,6 +151,12 @@ public class SiteDAO extends AbstractDAO {
 			List result = query.list();
     		
 	        return result;
+        } catch (HibernateException e) {
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
+            throw e;
+        } catch (Throwable t) {
+        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve outgoing sites site by network id [" + netId + "]", t);
+            throw t;        	
         }
     	finally
     	{
@@ -204,12 +208,19 @@ public class SiteDAO extends AbstractDAO {
     		s = HibernateConfiguration.openSession();
     		for(Network net : nets)
     			updatePendingSitesByNetwork(net.getId(), s);
+    	} catch (HibernateException e) {
+    		logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
+    		throw e;
+    	} catch (Throwable t) {
+    		logger.log(Level.SEVERE, "Unexpected error encountered trying to update pending sites site by network", t);
+    		throw t;        	
     	}
     	finally
     	{
     		if(s != null) s.close();
     	}
     }
+    
     private static String checkSiteStatusAtCentral(String fromSiteId, String toSiteId, String networkId, Session s) throws DaqueryErrorException, DaqueryException
     {
     	Map<String, String> params = new HashMap<String, String>();
@@ -266,10 +277,12 @@ public class SiteDAO extends AbstractDAO {
 	        return result;
 	    
         } catch (HibernateException e) {
-        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
-        	logger.log(Level.SEVERE, e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
             throw e;
-        }
+    	} catch (Throwable t) {
+    		logger.log(Level.SEVERE, "Unexpected error encountered trying to query incoming sites site by networkid [" + network_id + "]", t);
+    		throw t;        	
+    	}
     }
     
     public long createSite(Site site) throws Exception {
@@ -277,22 +290,47 @@ public class SiteDAO extends AbstractDAO {
     }
     
     public void createOutogingSites(long network_id, long site_id) throws Exception {
+    	Session s = null;
+    	try {			
+			String sql = "INSERT INTO OUTGOING_QUERY_SITES (site_id, network_id) VALUES (:site_id, :network_id)";
+			Query query = getCurrentSession().createSQLQuery(sql)
+											 .setParameter("site_id", site_id)
+											 .setParameter("network_id", network_id);
 			
-		String sql = "INSERT INTO OUTGOING_QUERY_SITES (site_id, network_id) VALUES (:site_id, :network_id)";
-		Query query = getCurrentSession().createSQLQuery(sql)
-										 .setParameter("site_id", site_id)
-										 .setParameter("network_id", network_id);
-		
-		query.executeUpdate();
+			query.executeUpdate();
+        } catch (HibernateException e) {
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
+            throw e;
+    	} catch (Throwable t) {
+    		logger.log(Level.SEVERE, "Unexpected error encountered trying to create outgoing site for networkid [" + network_id + "], site id [" + site_id + "]", t);
+    		throw t;        	
+    	} finally {
+    		if (s != null) {
+    			s.close();
+    		}
+    	}
     }
     
     public void createIncomingSites(long network_id, long site_id) throws Exception {
-		String sql = "INSERT INTO INCOMING_QUERY_SITES (site_id, network_id) VALUES (:site_id, :network_id)";
-		Query query = getCurrentSession().createSQLQuery(sql)
-					   .setParameter("site_id", site_id)
-					   .setParameter("network_id", network_id);
-		
-		query.executeUpdate();
+    	Session s = null;
+    	try {
+			String sql = "INSERT INTO INCOMING_QUERY_SITES (site_id, network_id) VALUES (:site_id, :network_id)";
+			Query query = getCurrentSession().createSQLQuery(sql)
+						   .setParameter("site_id", site_id)
+						   .setParameter("network_id", network_id);
+			
+			query.executeUpdate();
+        } catch (HibernateException e) {
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
+            throw e;
+    	} catch (Throwable t) {
+    		logger.log(Level.SEVERE, "Unexpected error encountered trying to create outgoing site for networkid [" + network_id + "], site id [" + site_id + "]", t);
+    		throw t;        	
+    	} finally {
+    		if (s != null) {
+    			s.close();
+    		}
+    	}
     }
 
     private static Site mySite = null;

@@ -52,9 +52,15 @@ public class NetworkDAO extends AbstractDAO {
 	        return network;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	String msg = "Error unable to connect to database.  Please check database settings.";
+        	logger.log(Level.SEVERE, msg);
+        	logger.log(Level.SEVERE, msg, e);
             throw e;
+        } catch (Throwable t) {
+        	String msg = "Unexpected error when accessing network id [" + id + "].";
+        	logger.log(Level.SEVERE, msg);
+        	logger.log(Level.SEVERE, msg, t);
+            throw t;        	
         }
     }
 
@@ -68,11 +74,15 @@ public class NetworkDAO extends AbstractDAO {
 	        return network;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
+        } catch (Throwable t) {
+        	String msg = "Unexpected error when accessing network named [" + networkname + "].";
+        	logger.log(Level.SEVERE, msg);
+        	logger.log(Level.SEVERE, msg, t);
+            throw t;        	
         }
-            
     }
     
     public static List<Network> queryAllNetworks() throws Exception {
@@ -82,11 +92,15 @@ public class NetworkDAO extends AbstractDAO {
 	        return networks;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
+        } catch (Throwable t) {
+        	String msg = "Unexpected error when retriving all networks.";
+        	logger.log(Level.SEVERE, msg);
+        	logger.log(Level.SEVERE, msg, t);
+            throw t;        	
         }
-            
     }
     
 	
@@ -108,9 +122,14 @@ public class NetworkDAO extends AbstractDAO {
 	        return network;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
+        } catch (Throwable t) {
+        	String msg = "Unexpected error when creating network.";
+        	logger.log(Level.SEVERE, msg);
+        	logger.log(Level.SEVERE, msg, t);
+            throw t;        	
         } finally {
         	if (s != null) {
 	    		s.close();
@@ -133,7 +152,8 @@ public class NetworkDAO extends AbstractDAO {
 	        return net;
 	    
         } catch (Throwable t) {
-    		logger.log(Level.SEVERE, "Unable to get a network for an incoming site due to an unexpected error.", t);
+        	String msg = "Unable to get a network for an incoming site due to an unexpected error.";
+        	logger.log(Level.SEVERE, msg, t);
     		return(null);
         } finally {
         	if (s != null) {
@@ -156,8 +176,8 @@ public class NetworkDAO extends AbstractDAO {
 	        return result;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	String msg = "Error unable to connect to database.  Please check database settings.";
+        	logger.log(Level.SEVERE, msg, e);
             throw e;
         }
     	finally
@@ -189,7 +209,7 @@ public class NetworkDAO extends AbstractDAO {
     	}
     	catch(Throwable t)
     	{
-    		String msg = "An unexpeced error occured while trying to retrieve a network with id " + networkId;
+    		String msg = "An unexpected error occured while trying to retrieve a network with id " + networkId;
     		logger.log(Level.SEVERE, msg, t);
     		throw new DaqueryException(msg + "  Check the local server logs for more information.", t);
     	}
@@ -218,10 +238,14 @@ public class NetworkDAO extends AbstractDAO {
 	        return result;
 	    
         } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
-        }
+        } catch(Throwable t) {
+    		String msg = "An unexpected error occured while trying to retrieve SQL Datasource for a network:  " + network.toString();
+    		logger.log(Level.SEVERE, msg, t);
+    		throw new DaqueryException(msg + "  Check the local server logs for more information.", t);
+    	}
     }
 }
 
