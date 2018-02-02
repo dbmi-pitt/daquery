@@ -36,6 +36,7 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
@@ -95,7 +96,21 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String jsonString = toJsonArray(networks);
             return Response.ok(200).entity(jsonString).build();
 
-    	} catch (HibernateException he) {
+    	}
+    	catch(DaqueryErrorException de)
+    	{
+    		if(de != null && de.getErrorInfo() != null)
+    		{
+    			logger.log(Level.SEVERE, de.getErrorInfo().getDisplayMessage(), de);
+    			return(ResponseHelper.getErrorResponse(500, de.getErrorInfo().getDisplayMessage(), de.getErrorInfo().getLongMessage(), de.getCause()));
+    		}
+    		else
+    		{
+    			logger.log(Level.SEVERE, de.getMessage(), de);
+    			return(ResponseHelper.getErrorResponse(500, "An unhandled error occured while retrieving all network information.", null, de));
+    		}    		
+    	}
+    	catch (HibernateException he) {
     		String msg = "A database error occured while getting a list of networks.";
     		logger.log(Level.SEVERE, msg, he);
     		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", "This error usually indicates that the database is down or cannot be accessed.", he));

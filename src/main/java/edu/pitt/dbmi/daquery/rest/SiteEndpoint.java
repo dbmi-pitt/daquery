@@ -45,6 +45,7 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeystoreAlias;
@@ -121,12 +122,26 @@ public class SiteEndpoint extends AbstractEndpoint {
     				String json = resp.readEntity(String.class);
     				return(ResponseHelper.getBasicResponse(200, json));
     			} else {
-    				return(resp);
+    				return(ResponseHelper.wrapServerResponse(resp, "Central Server"));
     			}
             }
             else
-            	return Response.status(BAD_REQUEST).build();
-    	} catch (HibernateException he) {
+            	return ResponseHelper.getErrorResponse(400, "Invalid site type " + type + " received.", "", null);
+    	}
+    	catch(DaqueryErrorException de)
+    	{
+    		if(de != null && de.getErrorInfo() != null)
+    		{
+    			logger.log(Level.SEVERE, de.getErrorInfo().getDisplayMessage(), de);
+    			return(ResponseHelper.getErrorResponse(500, de.getErrorInfo().getDisplayMessage(), de.getErrorInfo().getLongMessage(), de.getCause()));
+    		}
+    		else
+    		{
+    			logger.log(Level.SEVERE, de.getMessage(), de);
+    			return(ResponseHelper.getErrorResponse(500, "An unhandled error occured while retrieving all site information.", null, de));
+    		}
+    	}
+    	catch (HibernateException he) {
     		String msg = "Could not access the database when returning all sites for network [" + network_id + "]";
     		logger.log(Level.SEVERE, msg, he);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
@@ -246,17 +261,17 @@ public class SiteEndpoint extends AbstractEndpoint {
 				String json = resp.readEntity(String.class);
 				return(ResponseHelper.getJsonResponseGen(200, json));
 			} else {
-				return(resp);
+				return(ResponseHelper.wrapServerResponse(resp, "Central Server"));
 			}
 			
     	} catch (HibernateException he) {
     		String msg = "Could not access the database when returning pending sites for network [" + networkId + "]";
     		logger.log(Level.SEVERE, msg, he);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
-        } catch (Exception e) {
-    		String msg = "An unexpected error was encountered returning pending sites for network [" + networkId + "]";
+        } catch (Throwable e) {
+    		String msg = "An unexpected error was encountered returning pending sites for a network";
     		logger.log(Level.SEVERE, msg, e);
-    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information regarding networkId " + networkId + ".  The problem could have originated at your site server or on the central server.", e));
         }
     }
 
@@ -295,7 +310,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     		String msg = "Could not access the database when retrieving site [" + id + "]";
     		logger.log(Level.SEVERE, msg, he);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
-        } catch (Exception e) {
+        } catch (Throwable e) {
     		String msg = "An unexpected error was encountered retrieving site  [" + id + "]";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
@@ -356,7 +371,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        } else {	        	
 	        	return ResponseHelper.getErrorResponse(BAD_REQUEST.getStatusCode(), "Can only request connections with outgoing sites.", "Invalid type parameter [" + type + "] found in URL" , null);
 	        }
-        } catch (Exception e) {
+        } catch (Throwable e) {
     		String msg = "An unexpected error was encountered while creating a site based on information from the central server.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
@@ -432,20 +447,23 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response approveConnectRequest(LinkedHashMap<?, ?> object) {
-    	if(object == null)
-    		return(ResponseHelper.getErrorResponse(400, "network_id and from_site_id are required parameters.", null, null));
-    	Object netObj = object.get("network_id");
-    	if(netObj == null || StringHelper.isBlank(netObj.toString()))
-    		return(ResponseHelper.getErrorResponse(400, "network_id is a required parameter.", null, null));
-    	Object fromSiteObj = object.get("from_site_id");
-    	if(fromSiteObj == null || StringHelper.isBlank(fromSiteObj.toString()))
-    		return(ResponseHelper.getErrorResponse(400, "from_site_id is a required parameter.", null, null));
-    		
-    	String networkId = netObj.toString();
-    	String fromSiteId = fromSiteObj.toString();
-    	
     	Session s = null;
-    	try {
+    	String networkId = null;
+    	String fromSiteId = null;
+    	try
+    	{
+	    	if(object == null)
+	    		return(ResponseHelper.getErrorResponse(400, "network_id and from_site_id are required parameters.", null, null));
+	    	Object netObj = object.get("network_id");
+	    	if(netObj == null || StringHelper.isBlank(netObj.toString()))
+	    		return(ResponseHelper.getErrorResponse(400, "network_id is a required parameter.", null, null));
+	    	Object fromSiteObj = object.get("from_site_id");
+	    	if(fromSiteObj == null || StringHelper.isBlank(fromSiteObj.toString()))
+	    		return(ResponseHelper.getErrorResponse(400, "from_site_id is a required parameter.", null, null));
+	    		
+	    	networkId = netObj.toString();
+	    	fromSiteId = fromSiteObj.toString();
+
     		// tell daquery central you approve this site
     		Map<String, String> idParam = new HashMap<String, String>();
             idParam.put("network-id", networkId);
@@ -482,7 +500,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 			} else {
 				return(resp);
 			}
-        } catch (Exception e) {
+        } catch (Throwable e) {
     		String msg = "An unexpected error was encountered attempting to approve a connection request from network [" + networkId + "] and site ["+ fromSiteId + "].";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
@@ -509,19 +527,23 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response denyConnectRequest(LinkedHashMap<?, ?> object) {
-    	if(object == null)
-    		return(ResponseHelper.getErrorResponse(400, "network_id and from_site_id are required parameters.", null, null));
-    	Object netObj = object.get("network_id");
-    	if(netObj == null || StringHelper.isBlank(netObj.toString()))
-    		return(ResponseHelper.getErrorResponse(400, "network_id is a required parameter.", null, null));
-    	Object fromSiteObj = object.get("from_site_id");
-    	if(fromSiteObj == null || StringHelper.isBlank(fromSiteObj.toString()))
-    		return(ResponseHelper.getErrorResponse(400, "from_site_id is a required parameter.", null, null));
+    	String networkId = null;
+    	String fromSiteId = null;
+	    Session s = null;    	
+    	try
+    	{
+	    	if(object == null)
+	    		return(ResponseHelper.getErrorResponse(400, "network_id and from_site_id are required parameters.", null, null));
+	    	Object netObj = object.get("network_id");
+	    	if(netObj == null || StringHelper.isBlank(netObj.toString()))
+	    		return(ResponseHelper.getErrorResponse(400, "network_id is a required parameter.", null, null));
+	    	Object fromSiteObj = object.get("from_site_id");
+	    	if(fromSiteObj == null || StringHelper.isBlank(fromSiteObj.toString()))
+	    		return(ResponseHelper.getErrorResponse(400, "from_site_id is a required parameter.", null, null));
+	
+	    	networkId = object.get("network_id").toString();
+	    	fromSiteId = object.get("from_site_id").toString();
 
-    	String networkId = object.get("network_id").toString();
-    	String fromSiteId = object.get("from_site_id").toString();
-    	Session s = null;
-    	try {
     		// tell daquery central you deny this site
     		Map<String, String> idParam = new HashMap<String, String>();
             idParam.put("network-id", networkId);
@@ -558,7 +580,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 			} else {
 				return(resp);
 			}
-    	} catch (Exception e) {
+    	} catch (Throwable e) {
     		String msg = "An unexpected error was encountered attempting to deny a connection request from network [" + networkId + "] and site ["+ fromSiteId + "].";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
@@ -613,7 +635,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        site.setKeystorePath(keystorepath);
 	        return updateSite(site);
 	        	        
-    	} catch (Exception e) {
+    	} catch (Throwable e) {
     		String msg = "An unexpected error was encountered attempting to update site [" + id + "] using alias ["+ alias + "].";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
@@ -655,7 +677,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 
 	        return Response.ok(201).entity(updatedSite).build();
 	        
-    	} catch (Exception e) {
+    	} catch (Throwable e) {
     		String msg = "An unexpected error was encountered attempting to update the site.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
@@ -690,7 +712,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     		List<KeystoreAlias>retList = WSConnectionUtil.getAliasList();
     		retMap.put("aliases", retList);
     		json = JSONHelper.toJSON(retMap);
-    	} catch (Exception e) {
+    	} catch (Throwable e) {
     		String msg = "An unexpected error was encountered attempting to access the keystore aliases.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.  THe admin should ensure the keystore file exists and its path is correclty set in the shrine.conf file.", e));
