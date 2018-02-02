@@ -18,6 +18,7 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
@@ -75,18 +76,10 @@ public class NetworkDAO extends AbstractDAO {
             
     }
     
-    public static List<Network> queryAllNetworks() throws Exception {
-    	try { 		
+    public static List<Network> queryAllNetworks() throws DaqueryException, DaqueryErrorException {
     	    List<Network> networks = executeQueryReturnList(Network.FIND_ALL, null, logger);
     	    SiteDAO.updatePendingSitesByNetwork(networks);
 	        return networks;
-	    
-        } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
-        }
-            
     }
     
 	

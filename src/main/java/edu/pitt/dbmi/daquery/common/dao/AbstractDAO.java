@@ -97,6 +97,7 @@ public abstract class AbstractDAO {
 	 * @param params- the parameters to pass into the namedQuery (this may be null if no
 	 * parameters are required by the namedQuery).
 	 * @param logger- a logger instance to record any problems
+	 * @throws DaqueryException 
 	 * @return- a List of objects returned by a successful execution of namedQuery.  Returns
 	 * empty list if no data is returned.
 	 * @throws Exception
@@ -105,7 +106,7 @@ public abstract class AbstractDAO {
 	//TODO: Add LIMIT and OFFSET options for query
 	//check to see how to manage this in JPA
 	//try this: https://stackoverflow.com/questions/25008472/pagination-in-spring-data-jpa-limit-and-offset
-    public static <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+    public static <T> List<T> executeQueryReturnList(String namedQuery, List<ParameterItem> params, Logger logger) throws DaqueryException {
     	logger.info("executing query: " + namedQuery);
     	Session s = null;
     	try {
@@ -125,9 +126,6 @@ public abstract class AbstractDAO {
     		logger.info("Error unable to connect to database.  Please check database settings.");
     		logger.info(he.getLocalizedMessage());
             throw he;
-        } catch (Exception e) {
-    		logger.info(e.getLocalizedMessage());
-        	throw e;
         }
     	finally {
     		if (s != null) {
