@@ -155,6 +155,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response joinNetwork(LinkedHashMap<?, ?> payload) {
+        SiteDAO sitedao = new SiteDAO();
     	try {
 
             logger.info("#### joining network by id=" + ((LinkedHashMap<?, ?>)payload.get("form")).get("network"));
@@ -197,7 +198,6 @@ public class NetworkEndpoint extends AbstractEndpoint {
             
             Network network = NetworkDAO.createNetwork(network_params, dModel);
             Site site = SiteDAO.getLocalSite();
-            SiteDAO sitedao = new SiteDAO();
             
             sitedao.openCurrentSessionwithTransaction();
             sitedao.createOutogingSites(network.getId(), site.getId());
@@ -211,6 +211,10 @@ public class NetworkEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error was encountered when joining a network.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (sitedao.getCurrentSession() != null) {
+        		sitedao.closeCurrentSession();
+        	}
         }
     	
     }
