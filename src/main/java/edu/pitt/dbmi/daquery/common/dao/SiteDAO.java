@@ -18,11 +18,14 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.internal.util.StringHelper;
 
+import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 public class SiteDAO extends AbstractDAO {
@@ -123,9 +126,11 @@ public class SiteDAO extends AbstractDAO {
     /** Get sites by network_id
      *  @param netId
      *  @return List<Site>
+     * @throws DaqueryErrorException 
+     * @throws DaqueryException 
      * @throws Exception 
      */
-    public static List<Site> queryConnectedOutgoingSitesByNetworkId(long netId) throws Exception{
+    public static List<Site> queryConnectedOutgoingSitesByNetworkId(long netId) throws DaqueryException, DaqueryErrorException {
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
@@ -140,11 +145,6 @@ public class SiteDAO extends AbstractDAO {
 			List result = query.list();
     		
 	        return result;
-	    
-        } catch (HibernateException e) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(e.getLocalizedMessage());
-            throw e;
         }
     	finally
     	{
@@ -159,7 +159,7 @@ public class SiteDAO extends AbstractDAO {
      * @param netId The database id for the Network to check (id field, not network_id/UUID field)
      *
      */
-    public static void updatePendingSitesByNetwork(long netId, Session s) throws DaqueryException
+    public static void updatePendingSitesByNetwork(long netId, Session s) throws DaqueryException, DaqueryErrorException
     {
 		//before getting connected sites see if there are any pending sites that have been approved or disapproved
 		String sql = "SELECT s.site_id, n.network_id FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='PENDING' and n.id = " + netId;    		
@@ -188,7 +188,7 @@ public class SiteDAO extends AbstractDAO {
 		}    	
     }
     
-    public static void updatePendingSitesByNetwork(List<Network> nets)
+    public static void updatePendingSitesByNetwork(List<Network> nets) throws DaqueryException, DaqueryErrorException
     {
     	Session s = null;
     	try
@@ -197,16 +197,12 @@ public class SiteDAO extends AbstractDAO {
     		for(Network net : nets)
     			updatePendingSitesByNetwork(net.getId(), s);
     	}
-    	catch(Throwable t)
-    	{
-    		logger.log(Level.SEVERE, "Unhandled error while updating networks pending status.", t);
-    	}
     	finally
     	{
     		if(s != null) s.close();
     	}
     }
-    private static String checkSiteStatusAtCentral(String fromSiteId, String toSiteId, String networkId, Session s) throws DaqueryException
+    private static String checkSiteStatusAtCentral(String fromSiteId, String toSiteId, String networkId, Session s) throws DaqueryErrorException, DaqueryException
     {
     	Map<String, String> params = new HashMap<String, String>();
     	params.put("to-site-id", toSiteId);
@@ -216,7 +212,13 @@ public class SiteDAO extends AbstractDAO {
     	if(resp.getStatus() == 200)
     		return(resp.readEntity(String.class));
     	else
-    		return(null);
+    	{
+    		ErrorInfo ei = ResponseHelper.decodeErrorResponse(resp);
+    		if(ei == null)
+    			throw new DaqueryException("Error while checking site status at the Central Site");
+    		else
+    			throw new DaqueryErrorException(ei);
+    	}
     }
     
     private static void updateOutgoingSiteStatus(String siteUUID, long networkId, String status, Session s)
