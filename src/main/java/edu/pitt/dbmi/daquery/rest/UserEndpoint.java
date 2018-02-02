@@ -333,7 +333,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	Role r = RoleDAO.queryRoleByName(role);
 	    	if(r == null) return(ResponseHelper.getErrorResponse(400, "Role not found", "The specified role, " + role + ", was not found..", null));
 	    	RoleDAO.grantRemoteUserRole(r.getId(), userId, siteId, netId);
-	    	return(ResponseHelper.getBasicResponse(200, "saved"));
+	    	return(ResponseHelper.getBasicResponse(200, "{}"));
     	}
     	catch(Throwable t)
     	{
@@ -375,7 +375,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	Role r = RoleDAO.queryRoleByName(role);
 	    	if(r == null) return(ResponseHelper.getErrorResponse(400, "Role not found.", "Role " + role + " was not found when deleting from user " + userId  + ".", null));
 	    	RoleDAO.deleteRemoteRoleByParams(r.getId(), userId, siteId, netId);
-	    	return(ResponseHelper.getBasicResponse(200, "deleted"));
+	    	return(ResponseHelper.getBasicResponse(200, "{}"));
     	}
     	catch(Throwable t)
     	{
