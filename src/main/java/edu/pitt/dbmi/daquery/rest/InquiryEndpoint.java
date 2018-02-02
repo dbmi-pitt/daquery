@@ -66,6 +66,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getInquiries() {
+        InquiryDAO dao = new InquiryDAO();
     	try {
 
             logger.info("#### returning all inquires");
@@ -74,7 +75,6 @@ public class InquiryEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            InquiryDAO dao = new InquiryDAO();
             dao.openCurrentSession();
             List inquiries = dao.listSavedInquiries();
             dao.closeCurrentSession();
@@ -90,6 +90,10 @@ public class InquiryEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error occured while getting a list of inquiries.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", null, e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
         }
     }
     
@@ -106,6 +110,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getInquiry(@PathParam("id") String id) {
+        InquiryDAO dao = new InquiryDAO();
     	try {
 
             logger.info("#### returning single inquiry [" + id + "]");
@@ -114,7 +119,6 @@ public class InquiryEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            InquiryDAO dao = new InquiryDAO();
             dao.openCurrentSession();
             Inquiry inquiry = dao.get(Long.parseLong(id));
             dao.closeCurrentSession();
@@ -134,6 +138,10 @@ public class InquiryEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error was encountered when retrieving inquiry  [" + id + "]";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
         }
     }
     
@@ -149,6 +157,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createInquiry(LinkedHashMap<?, ?> form) {
+        InquiryDAO dao = new InquiryDAO();
     	try {
 
             logger.info("#### returning all inquires");
@@ -159,7 +168,6 @@ public class InquiryEndpoint extends AbstractEndpoint {
             
             DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
             
-            InquiryDAO dao = new InquiryDAO();
             dao.openCurrentSessionwithTransaction();
             // only create SQLQuery for now
             Inquiry inquiry = new SQLQuery(true);
@@ -184,6 +192,10 @@ public class InquiryEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error was encountered when creating a new inquiry.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
         }
     }
     
@@ -200,6 +212,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateInquiry(@PathParam("id") String id, LinkedHashMap<?, ?> form) {
+        InquiryDAO dao = new InquiryDAO();
     	try {
 
             logger.info("#### returning all inquires");
@@ -210,7 +223,6 @@ public class InquiryEndpoint extends AbstractEndpoint {
             
             DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
             
-            InquiryDAO dao = new InquiryDAO();
             dao.openCurrentSessionwithTransaction();
             Inquiry inquiry = dao.getByUUID(id);
             inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
@@ -233,6 +245,10 @@ public class InquiryEndpoint extends AbstractEndpoint {
     		String msg = "An unexpected error occurred when updating inquiry [" + id + "].";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
         }
     }
 }
