@@ -51,6 +51,7 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
+import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
@@ -261,6 +262,20 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			}
 			else
 				return(resp);
+    	}
+    	catch(DaqueryErrorException de)
+    	{
+    		if(de != null && de.getErrorInfo() != null)
+    		{
+    			logger.log(Level.SEVERE, de.getErrorInfo().getDisplayMessage(), de);
+    			return(ResponseHelper.getErrorResponse(500, de.getErrorInfo().getDisplayMessage(), de.getErrorInfo().getLongMessage(), de.getCause()));
+    		}
+    		else
+    		{
+    			logger.log(Level.SEVERE, de.getMessage(), de);
+    			return(ResponseHelper.getErrorResponse(500, "An unhandled error occured while retrieving available network information.", null, de));
+    		}
+    		
     	}
     	catch(Throwable t)
     	{
