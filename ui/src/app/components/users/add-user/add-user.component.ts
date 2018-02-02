@@ -57,8 +57,8 @@ export class AddUserComponent implements OnInit {
     this.submitting = true;
     this.userService.createUser(this.userForm.value)
                     .subscribe(res => {
-                      location.reload();
-                      //this.newUser.emit(res);
+                      //location.reload();
+                      this.newUser.emit(res);
                     });
     //this.showAddUser.emit(false);
   }

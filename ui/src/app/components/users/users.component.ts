@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
+import { LocalUserComponent } from 'app/components/users/local-user/local-user.component';
 
 @Component({
   selector: 'app-users',
@@ -9,8 +10,8 @@ import { User } from '../../models/user.model';
 })
 export class UsersComponent implements OnInit {
   showAddUser = false;
-
   users: User[];
+  @ViewChild(LocalUserComponent)  private localUserComponent: LocalUserComponent;
   constructor(private userService: UserService) {
   }
 
@@ -30,6 +31,8 @@ export class UsersComponent implements OnInit {
   }
 
   addNewUser(user: any) {
+    this.showAddUser = false;
     this.users.push(user);
+    this.localUserComponent.getLocalRoles();
   }
 }

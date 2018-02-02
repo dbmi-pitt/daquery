@@ -36,6 +36,14 @@ constructor(private router: Router,
       //     this.router.navigate(['/login']);
       //   }
       // }
+      if(error.status === 0){
+        error = {
+          error:{
+            displayMessage: "Connection Lost", //
+            longMessage: error.statusText //
+          }
+        }
+      }
       return Observable.throw(error || 'Server error');
     });
   }
