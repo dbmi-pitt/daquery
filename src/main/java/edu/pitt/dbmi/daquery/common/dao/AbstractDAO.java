@@ -36,12 +36,18 @@ public abstract class AbstractDAO {
     }
 
     public void closeCurrentSession() {
-	currentSession.close();
+    	if (currentSession.isOpen()) {
+    		currentSession.close();
+    	}
     }
 
     public void closeCurrentSessionwithTransaction() {
-	currentTransaction.commit();
-	currentSession.close();
+    	if (currentTransaction.isActive()) {
+    		currentTransaction.commit();
+    	}
+    	if (currentSession.isOpen()) {
+    		currentSession.close();
+    	}
     }
 
     public Session getCurrentSession() {
