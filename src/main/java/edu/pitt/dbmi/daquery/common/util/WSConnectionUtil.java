@@ -226,51 +226,6 @@ public class WSConnectionUtil {
 		}
 		return(allowSelfSignedTM);
 	}
-	/**
-	 * This method executes a GET against a remote site.  If the connection is made via https, 
-	 * the local site's keystore is examined.  The keystore file and keystore password are used 
-	 * to create an SSL connection to the remote site.  For this call to work, the local site's
-	 * certificate must be included in the remote site's keystore.  The alias for the certificate
-	 * must match the local site's IP address or a resolvable server name.
-	 * @param site- an object representing the remote site.
-	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
-	 * @param arguments- a Map of the parameters for the serviceName
-	 * @param jwToken- the current JWToken
-	 * @return- a Response object representing the response from the remote site (most likely JSON)
-	 * @throws UnsupportedEncodingException
-	 */
-	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments, String jwToken) throws UnsupportedEncodingException
-	{
-		Client client = null;
-		Response resp = null;
-		String getURL = buildGetUrl(site.getUrl(), serviceName, arguments);
-		
-		
-		try
-		{
-			URL url = new URL(getURL);
-			if(!checkConnection(url.getHost(), url.getPort()))
-					return(ResponseHelper.getErrorResponse(500, "Server is not reachable for site " + site.getName() + ".", "Cannot connect to " + url.getHost(), null));
-
-			client = getRemoteClient(site.getUrl());
-		}
-		catch(KeyManagementException kme)
-		{
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site " + site.getName(), "An error happened while configuring the secure key management for the site GET connection.", kme));
-		}
-		catch(MalformedURLException mue)
-		{
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site, bad site address for site " + site.getName() + ".", "This was due to a malformed url: " + getURL, mue));
-		}
-
-
-		Builder builder = client.target(getURL)
-				.request(MediaType.APPLICATION_JSON); //.get();
-		if(!StringHelper.isEmpty(jwToken))
-			builder = builder.header("Authorization", "Bearer " + jwToken);
-		resp = builder.get();
-		return(resp);
-	}
 	
 	private static Client getRemoteClient(String url) throws KeyManagementException
 	{
@@ -369,41 +324,88 @@ public class WSConnectionUtil {
 		
 		return(resp);
 	}	
-	
-	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
+	/**
+	 * This method executes a GET against a remote site.  If the connection is made via https, 
+	 * the local site's keystore is examined.  The keystore file and keystore password are used 
+	 * to create an SSL connection to the remote site.  For this call to work, the local site's
+	 * certificate must be included in the remote site's keystore.  The alias for the certificate
+	 * must match the local site's IP address or a resolvable server name.
+	 * @param site- an object representing the remote site.
+	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
+	 * @param arguments- a Map of the parameters for the serviceName
+	 * @param jwToken- the current JWToken
+	 * @return- a Response object representing the response from the remote site (most likely JSON)
+	 * @throws UnsupportedEncodingException
+	 */
+	public static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments, String jwToken) throws UnsupportedEncodingException
 	{
-		String siteId = AppProperties.getDBProperty("site.id");
-		String siteKey = AppProperties.getDBProperty("central.site.key");
-		Response auth = callCentralServerAuth(siteId, siteKey);
-		if(auth.getStatus() != 200)
-			return(auth);
-		//TODO grab the token from the auth response and send it along with the call
-		String centServerURL = AppProperties.getCentralServerURL();
-		String url = centServerURL + "/daquery-central/" +  serviceName;
-		if(additionalParameters != null)
-		{
-			String paramDivider = "?";
-			if(url.contains("?"))
-				paramDivider = "&";			
-			boolean firstParam = true;
-			for(String key :additionalParameters.keySet())
-			{
-				url = url + paramDivider + key + "=" + additionalParameters.get(key);
-				if(firstParam)
-				{
-					paramDivider = "&";
-					firstParam = false;
-				}
-			}
-		}
-		
 		Client client = null;
+		Response resp = null;
+		String getURL = buildGetUrl(site.getUrl(), serviceName, arguments);
+		
+		
 		try
 		{
+			URL url = new URL(getURL);
+			if(!checkConnection(url.getHost(), url.getPort()))
+					return(ResponseHelper.getErrorResponse(500, "Server is not reachable for site " + site.getName() + ".", "Cannot connect to " + url.getHost(), null));
+
+			client = getRemoteClient(site.getUrl());
+		}
+		catch(KeyManagementException kme)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site " + site.getName(), "An error happened while configuring the secure key management for the site GET connection.", kme));
+		}
+		catch(MalformedURLException mue)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact remote site, bad site address for site " + site.getName() + ".", "This was due to a malformed url: " + getURL, mue));
+		}
+
+
+		Builder builder = client.target(getURL)
+				.request(MediaType.APPLICATION_JSON); //.get();
+		if(!StringHelper.isEmpty(jwToken))
+			builder = builder.header("Authorization", "Bearer " + jwToken);
+		resp = builder.get();
+		return(resp);
+	}	
+	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
+	{
+		Response authResp = null;
+		String centServerURL = null;
+		try
+		{
+			String siteId = AppProperties.getDBProperty("site.id");
+			String siteKey = AppProperties.getDBProperty("central.site.key");
+			authResp = callCentralServerAuth(siteId, siteKey);
+			if(authResp.getStatus() != 200)
+				return(ResponseHelper.wrapServerResponse(authResp, "Central Server Auth"));
+			//TODO grab the token from the auth response and send it along with the call
+			centServerURL = AppProperties.getCentralServerURL();
+			String url = centServerURL + "/daquery-central/" +  serviceName;
+			if(additionalParameters != null)
+			{
+				String paramDivider = "?";
+				if(url.contains("?"))
+					paramDivider = "&";			
+				boolean firstParam = true;
+				for(String key :additionalParameters.keySet())
+				{
+					url = url + paramDivider + key + "=" + additionalParameters.get(key);
+					if(firstParam)
+					{
+						paramDivider = "&";
+						firstParam = false;
+					}
+				}
+			}
+			
 			URL cUrl = new URL(centServerURL);
 			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
 					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + centServerURL, null));			
-			client = getRemoteClient(url);			
+			Client client = getRemoteClient(url);			
+			Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
+			return(rVal);			
 		}
 		catch(KeyManagementException kme)
 		{
@@ -413,10 +415,10 @@ public class WSConnectionUtil {
 		{
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url: " + centServerURL, mue));
 		}
-		
-		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
-		return(rVal);
-		
+		finally
+		{
+			if(authResp != null) authResp.close();
+		}
 	}
 	
 	public static Response callCentralServerAuth(String siteName, String siteKey) throws DaqueryException
@@ -433,6 +435,9 @@ public class WSConnectionUtil {
 			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
 					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + centServerURL, null));			
 			client = getRemoteClient(url);
+			Response answer = client.target(url).request(MediaType.APPLICATION_JSON).get();
+			return(answer);
+
 		}
 		catch(KeyManagementException kme)
 		{
@@ -442,8 +447,5 @@ public class WSConnectionUtil {
 		{
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url: " + centServerURL, mue));
 		}
-
-		Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
-		return(rVal);
 	}		
 }
