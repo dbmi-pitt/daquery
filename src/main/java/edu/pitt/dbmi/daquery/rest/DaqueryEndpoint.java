@@ -187,7 +187,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			else if(dbStatus == AppSetup.DBSTATUS_NONEXISTENT || dbStatus == AppSetup.DBSTATUS_EMPTY)
 				return(ResponseHelper.getBasicResponse(200, "N"));
 			else
-				return(ResponseHelper.getErrorResponse(500, "The application database is in an indeterminate state.", "Check the application error logs for more information.  It is likely that you need to delete the database at tomcat/conf/daquery-db and start over.", null));
+				return(ResponseHelper.getErrorResponse(500, "The application database is in an indeterminate state.", "Check the application error logs for more information.  You may need to delete the database at tomcat/conf/daquery-db and set the site up over again.", null));
 		}
 		catch(Throwable t)
 		{
