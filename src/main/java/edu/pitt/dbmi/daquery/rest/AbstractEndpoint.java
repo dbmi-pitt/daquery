@@ -73,24 +73,4 @@ public class AbstractEndpoint {
         return jsonString;
 		
 	}
-	
-
-	
-	/**
-	 * This method performs the same function as the other getFromRemoteSite except it does not
-	 * include the JWToken.If the connection is made via https, 
-	 * the local site's keystore is examined.  The keystore file and keystore password are used 
-	 * to create an SSL connection to the remote site.  For this call to work, the local site's
-	 * certificate must be included in the remote site's keystore.  The alias for the certificate
-	 * must match the local site's IP address or a resolvable server name.
-	 * @param site- an object representing the remote site.
-	 * @param serviceName- the portion of the URL to be contacted at the remote site (ex: sites/all)
-	 * @param arguments- a Map of the parameters for the serviceName
-	 * @return- a Response object representing the response from the remote site (most likely JSON)
-	 * @throws UnsupportedEncodingException
-	 */
-	protected static Response getFromRemoteSite(Site site, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException
-	{
-		return(WSConnectionUtil.getFromRemoteSite(site, serviceName, arguments, null));
-	}
 }

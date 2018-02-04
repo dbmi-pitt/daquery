@@ -92,6 +92,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     							@DefaultValue("all") @QueryParam("type") String type,
     							@DefaultValue("") @QueryParam("status") String status) {
     	
+    	Response pendResp = null;
     	try {
 
             logger.info("#### returning all sites for network [" + network_id + "] with type = [" + type + "] and status = " + status + "]");
@@ -116,13 +117,14 @@ public class SiteEndpoint extends AbstractEndpoint {
                 Map<String, String> idParam = new HashMap<String, String>();
                 idParam.put("network-id", network.getNetworkId());
     			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-    			Response resp = WSConnectionUtil.callCentralServer("pending-sites",  idParam);
+    			pendResp = WSConnectionUtil.callCentralServer("pending-sites",  idParam);
     			
-    			if(resp.getStatus() == 200) {
-    				String json = resp.readEntity(String.class);
+    			if(pendResp.getStatus() == 200) {
+    				String json = pendResp.readEntity(String.class);
     				return(ResponseHelper.getBasicResponse(200, json));
     			} else {
-    				return(ResponseHelper.wrapServerResponse(resp, "Central Server"));
+    				Response rVal = ResponseHelper.wrapServerResponse(pendResp, "Central Server"); 
+    				return(rVal);
     			}
             }
             else
@@ -150,6 +152,10 @@ public class SiteEndpoint extends AbstractEndpoint {
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
+    	finally
+    	{
+    		if(pendResp != null) pendResp.close();
+    	}
     }
 
     /**
@@ -168,6 +174,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAvailableSites(@QueryParam("network_id") long networkId) {
     	
+		Response netResp = null;
     	try {
 
             logger.info("#### returning available sites for network id: " + networkId);
@@ -178,12 +185,12 @@ public class SiteEndpoint extends AbstractEndpoint {
             
             Map<String, String> idParam = new HashMap<String, String>();
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = WSConnectionUtil.callCentralServer("availableNetworks",  idParam);
+			netResp = WSConnectionUtil.callCentralServer("availableNetworks",  idParam);
 			Network network = NetworkDAO.queryNetwork(String.valueOf(networkId));
 			
-			if(resp.getStatus() == 200)
+			if(netResp.getStatus() == 200)
 			{
-				String json = resp.readEntity(String.class);
+				String json = netResp.readEntity(String.class);
 				Network[] ninfo = JSONHelper.gson.fromJson(json, Network[].class);
 				Network network_info = null;
 				for(Network nin : ninfo) {
@@ -211,7 +218,8 @@ public class SiteEndpoint extends AbstractEndpoint {
 				rmap.put("outgoing", outgoings);
 				return(ResponseHelper.getJsonResponseGen(200, rmap));
 			} else {
-				return(resp);
+				Response rVal = ResponseHelper.wrapServerResponse(netResp, "Central Server");
+				return(rVal);
 			}
 			
     	} catch (HibernateException he) {
@@ -223,6 +231,10 @@ public class SiteEndpoint extends AbstractEndpoint {
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
+    	finally
+    	{
+    		if(netResp != null) netResp.close();
+    	}
     }
 	
 	/**
@@ -450,6 +462,8 @@ public class SiteEndpoint extends AbstractEndpoint {
     	Session s = null;
     	String networkId = null;
     	String fromSiteId = null;
+    	Response acResp = null;
+    	Response sitesResponse = null;
     	try
     	{
 	    	if(object == null)
@@ -469,16 +483,16 @@ public class SiteEndpoint extends AbstractEndpoint {
             idParam.put("network-id", networkId);
             idParam.put("from-site-id", fromSiteId);
 			idParam.put("to-site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = WSConnectionUtil.callCentralServer("approve-connectrequest",  idParam);
+			acResp = WSConnectionUtil.callCentralServer("approve-connectrequest",  idParam);
 			
-			if(resp.getStatus() == 200) {
+			if(acResp.getStatus() == 200) {
 				s = HibernateConfiguration.openSession(); 
 	        	Network network = NetworkDAO.queryNetwork(networkId);
 	        	
 	        	idParam = new HashMap<String, String>();
     			idParam.put("site-id", fromSiteId);
-    			resp = WSConnectionUtil.callCentralServer("sites",  idParam);
-    			String json = resp.readEntity(String.class);
+    			sitesResponse = WSConnectionUtil.callCentralServer("sites",  idParam);
+    			String json = sitesResponse.readEntity(String.class);
     			ObjectMapper mapper = new ObjectMapper();
     			Map<String, Object> map= new LinkedHashMap<>();
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
@@ -498,7 +512,8 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 		        return Response.ok(201).build();
 			} else {
-				return(resp);
+				Response rVal = ResponseHelper.wrapServerResponse(acResp, "Central Server");
+				return(rVal);
 			}
         } catch (Throwable e) {
     		String msg = "An unexpected error was encountered attempting to approve a connection request from network [" + networkId + "] and site ["+ fromSiteId + "].";
@@ -508,6 +523,8 @@ public class SiteEndpoint extends AbstractEndpoint {
     		if (s != null) {
     			s.close();
     		}
+    		if(acResp != null) acResp.close();
+    		if(sitesResponse != null) sitesResponse.close();
     		
     	}
     }
@@ -529,7 +546,9 @@ public class SiteEndpoint extends AbstractEndpoint {
     public Response denyConnectRequest(LinkedHashMap<?, ?> object) {
     	String networkId = null;
     	String fromSiteId = null;
-	    Session s = null;    	
+	    Session s = null;
+	    Response denyResp = null;
+	    Response sitesResp = null;
     	try
     	{
 	    	if(object == null)
@@ -549,16 +568,16 @@ public class SiteEndpoint extends AbstractEndpoint {
             idParam.put("network-id", networkId);
             idParam.put("from-site-id", fromSiteId);
 			idParam.put("to-site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = WSConnectionUtil.callCentralServer("deny-connectrequest",  idParam);
+			denyResp = WSConnectionUtil.callCentralServer("deny-connectrequest",  idParam);
 			
-			if(resp.getStatus() == 200) {
+			if(denyResp.getStatus() == 200) {
 				s = HibernateConfiguration.openSession(); 
 	        	Network network = NetworkDAO.queryNetwork(networkId);
 	        	
 	        	idParam = new HashMap<String, String>();
     			idParam.put("site-id", fromSiteId);
-    			resp = WSConnectionUtil.callCentralServer("sites",  idParam);
-    			String json = resp.readEntity(String.class);
+    			sitesResp = WSConnectionUtil.callCentralServer("sites",  idParam);
+    			String json = sitesResp.readEntity(String.class);
     			ObjectMapper mapper = new ObjectMapper();
     			Map<String, Object> map= new LinkedHashMap<>();
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
@@ -578,7 +597,8 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 		       return Response.ok(201).build();
 			} else {
-				return(resp);
+				Response rVal = ResponseHelper.wrapServerResponse(denyResp, "Central Server");
+				return(rVal);
 			}
     	} catch (Throwable e) {
     		String msg = "An unexpected error was encountered attempting to deny a connection request from network [" + networkId + "] and site ["+ fromSiteId + "].";
@@ -589,7 +609,8 @@ public class SiteEndpoint extends AbstractEndpoint {
     		if (s != null) {
     			s.close();
     		}
-    		
+    		if(denyResp != null) denyResp.close();
+    		if(sitesResp != null) sitesResp.close();
     	}
     }
     

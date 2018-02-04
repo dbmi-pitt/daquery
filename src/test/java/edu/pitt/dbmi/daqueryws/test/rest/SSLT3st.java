@@ -30,34 +30,44 @@ public class SSLT3st extends DaqueryBaseTest  {
 
 	//@Test
 	public void checkSSLGetConnection() {
+		Response r = null;
         try {
         	//s = SiteDAO.querySiteByID("101");
         	Site s = new Site();
         	s.setKeystoreAlias(siteIP);
         	s.setUrl(siteURL);
         	System.out.println("Connecting to site: " +  " " + s.getUrl() + " " + s.getKeystoreAlias());
-        	Response r = WSConnectionUtil.getFromRemoteSite(s, "sites/getKeystoreAliases", null, null);
+        	r = WSConnectionUtil.getFromRemoteSite(s, "sites/getKeystoreAliases", null, null);
         	String json = r.readEntity(String.class);
         	System.out.println("Response: " + json);
        } catch (Exception e) {
         	e.printStackTrace();
-        }
+       }
+       finally
+       {
+    	   if(r != null) r.close();
+       }
 	}
 	
 	//@Test
 	public void checkSSLPostConnection() {
+		Response r = null;
         try {
         	//s = SiteDAO.querySiteByID("101");
         	Site s = new Site();
         	s.setKeystoreAlias(siteIP);
         	s.setUrl(siteURL);
         	System.out.println("Connecting to site: " +  " " + s.getUrl() + " " + s.getKeystoreAlias());
-        	Response r = WSConnectionUtil.postJSONToRemoteSite(s, "echopost", s.toJson(), null);
+        	r = WSConnectionUtil.postJSONToRemoteSite(s, "echopost", s.toJson(), null);
         	String json = r.readEntity(String.class);
         	System.out.println("Response: " + json);
        } catch (Exception e) {
         	e.printStackTrace();
-        }
+       }
+       finally
+       {
+    	   if(r != null) r.close();
+       }
 	}
 	
 	/*

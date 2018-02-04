@@ -215,6 +215,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     public Response availableNetworks(@DefaultValue("false") @PathParam("only-non-connected-networks") String nonConnectedNetsOnly) {
     	boolean nonConnNetsOnly = false;
     	List<String> connectedNetworkIds = new ArrayList<String>();
+    	Response resp  = null;
     	try
     	{
     		String c = nonConnectedNetsOnly.trim().toUpperCase();
@@ -222,7 +223,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		
 			Map<String, String> idParam = new HashMap<String, String>();
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = WSConnectionUtil.callCentralServer("availableNetworks",  idParam);
+			resp = WSConnectionUtil.callCentralServer("availableNetworks",  idParam);
 			if(resp.getStatus() == 200)
 			{
 				if(nonConnNetsOnly)
@@ -261,7 +262,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				return(ResponseHelper.getJsonResponseGen(200, rlist));
 			}
 			else
-				return(resp);
+			{
+				Response rVal = ResponseHelper.wrapServerResponse(resp, "Central Server");
+				return(rVal);
+			}
     	}
     	catch(DaqueryErrorException de)
     	{
@@ -282,7 +286,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		logger.log(Level.SEVERE, "An unexpeced error occured while obtaining a list of available networks and sites from the central server.", t);
     		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while obtaining a list of avaiilable networks and sites from the central server.  See the appication logs for more information.", t));
     	}
-    	
+    	finally
+    	{
+    		if(resp != null) resp.close();
+    	}
     }
 	
 	
@@ -395,6 +402,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @Produces(MediaType.APPLICATION_JSON)
 	public Response request(DaqueryRequest request) throws DaqueryException
 	{
+		Response response = null;
 		try
 		{
 			if(request == null || request.getRequestSite() == null || request.getRequestSite().getSiteId() == null)
@@ -550,15 +558,15 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				catch(Throwable e)
 				{
 					logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
-					DaqueryResponse response = new DaqueryResponse(true);
-					response.setStatusEnum(ResponseStatus.ERROR);
-					response.setErrorMessage(e.getMessage());
+					DaqueryResponse dqResponse = new DaqueryResponse(true);
+					dqResponse.setStatusEnum(ResponseStatus.ERROR);
+					dqResponse.setErrorMessage(e.getMessage());
 					String trace = StringHelper.stackToString(e);
-					response.setStackTrace(trace);
-					response.setReplyTimestamp(new Date());
-					response.setRequest(request);
-					ResponseDAO.saveOrUpdate(response);
-					return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, response));
+					dqResponse.setStackTrace(trace);
+					dqResponse.setReplyTimestamp(new Date());
+					dqResponse.setRequest(request);
+					ResponseDAO.saveOrUpdate(dqResponse);
+					return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, dqResponse));
 				}
 				
 				if(rVal == null)
@@ -576,7 +584,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			{
 				request.setDirection("OUT");
 				AbstractDAO.save(request);
-				Response response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
+				response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 				if(response.getStatus() == 200)
 				{
 					String json = response.readEntity(String.class);
@@ -623,6 +631,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			logger.log(Level.SEVERE, msg, t);
 			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred", msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name") + " for further information.", t));
 		}
+		finally
+		{
+			if(response != null) response.close();
+		}
 	}
 	
 	private DaqueryResponse assembleErrorResponse(String message, Throwable t) throws DaqueryException
@@ -658,6 +670,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		return(ResponseHelper.getErrorResponse(404, "No response found.", "A response with id:" + id + " was not found.", null));
     	
     	DaqueryResponse rVal = null;
+    	Response httpResponse = null;
     	try
     	{
     		rVal = ResponseDAO.getResponseById(id);
@@ -668,7 +681,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		if( !mySite.getSiteId().equals(requestSiteId))
     		{
     			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
-    			Response httpResponse = getFromRemoteSite(remoteSite, "/response/" + id, null);
+    			httpResponse = WSConnectionUtil.getFromRemoteSite(remoteSite, "/response/" + id, null, null);
     			String json = httpResponse.readEntity(String.class);
     			if(httpResponse.getStatus() == 200)
 				{
@@ -706,6 +719,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		String msg = "An unhandled exception occured while retrieving a response with id: " + id;
     		logger.log(Level.SEVERE, msg, t);
     		return(ResponseHelper.getErrorResponse(500, "An unhandled exception occured.", msg + "Check the site server logs for more information.", t));
+    	}
+    	finally
+    	{
+    		if(httpResponse != null) httpResponse.close();
     	}
     }
     
