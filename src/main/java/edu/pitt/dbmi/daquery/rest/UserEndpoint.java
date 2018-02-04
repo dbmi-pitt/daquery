@@ -67,6 +67,7 @@ import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -420,13 +421,14 @@ public class UserEndpoint extends AbstractEndpoint {
     	else
     	{
     		Site site = SiteDAO.getSiteByNameOrId(siteId);
-    		Response resp = getFromRemoteSite(site, "users/user-info", null);
+    		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/user-info", null, null);
     		String json = resp.readEntity(String.class);
     		ObjectMapper mapper = new ObjectMapper();
     		TypeReference<List<UserInfo>> typ = new TypeReference<List<UserInfo>>(){};
     		List<UserInfo> users = mapper.readValue(json, typ);
     		for(UserInfo user :users)
 				rVal.put(user.getId(), user);
+    		resp.close();
     	}
     	return(rVal);
     }
