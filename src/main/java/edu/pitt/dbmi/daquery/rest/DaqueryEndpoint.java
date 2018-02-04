@@ -234,7 +234,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				}
 				String json = resp.readEntity(String.class);
 				Network[] ninfo = JSONHelper.gson.fromJson(json, Network[].class);
-				DaqueryEndpoint de = new DaqueryEndpoint();
 				List<Network> nets = NetworkDAO.queryAllNetworks();
 				List<Site> sitesToRemove = new ArrayList<Site>();
 				for(Network nin : ninfo)
@@ -682,9 +681,11 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		{
     			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
     			httpResponse = WSConnectionUtil.getFromRemoteSite(remoteSite, "/response/" + id, null, null);
+    			
     			String json = httpResponse.readEntity(String.class);
+    			
     			if(httpResponse.getStatus() == 200)
-				{
+				{	
 					ObjectMapper mapper = new ObjectMapper();
 					TypeReference<DaqueryResponse> type = new TypeReference<DaqueryResponse>(){};
 					DaqueryResponse resp = mapper.readValue(json, type);
