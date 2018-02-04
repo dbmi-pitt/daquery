@@ -215,7 +215,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         } catch (Throwable e) {
     		String msg = "An unexpected error occured while checking your login token.";
     		logger.log(Level.SEVERE, msg, e);	            		
-            requestContext.abortWith(ResponseHelper.getErrorResponse(500, msg, "There was an issue with your token.  Please login again to get a new token.", e));
+            requestContext.abortWith(ResponseHelper.getErrorResponse(500, msg, "There was an issue with your authentication token.  Please login again to get a new token.", e));
         }
 
     }
