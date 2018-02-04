@@ -172,8 +172,8 @@ public class HibernateConfiguration {
 		thread.start(); */	            
 		
         StandardServiceRegistryBuilder ssrb = new StandardServiceRegistryBuilder().applySettings(hibernateConf.getProperties());
-        
-    	return hibernateConf.buildSessionFactory(ssrb.build());
+        sessFact = hibernateConf.buildSessionFactory(ssrb.build());
+        return sessFact;
 	}
 	
 }
