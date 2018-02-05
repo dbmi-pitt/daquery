@@ -185,7 +185,7 @@ public class CentralService{
 						  " is requesting to connect to your site, " + site.getName() + 
 						  ", to run queries on the network " + net.getName() +
 						  ".  Please log into your site, go to Network and choose Edit Sites under the network " +
-						  " to approve or deny the request.", requestedToSite.getAdminEmail());
+						  " to approve or deny the request.", site.getAdminEmail());
 				
 				// esi.adminEmail);
 				// eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", "del20@pitt.edu");
