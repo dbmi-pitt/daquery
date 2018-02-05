@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
@@ -29,8 +30,8 @@ public class ResponseHelper {
 	public static void main(String [] args) throws Exception
 	{
 		Response resp = getBasicResponse(444, null);
-		ErrorInfo ei = decodeErrorResponse(resp);
-		System.out.println(ei);
+		DecodedErrorInfo ei = decodeErrorResponse(resp);
+		System.out.println(ei.getErrorInfo());
 		/*JsonWebToken token = new JsonWebToken("USER:abc123", "SITE:abc123", null);
 		String tkn = token.getToken();
 		JsonWebToken jwt = new JsonWebToken(tkn);
@@ -166,9 +167,10 @@ public class ResponseHelper {
     	if(resp == null) return(null);
     	if(resp.getStatus() >= 400)
     	{
-    		ErrorInfo info = decodeErrorResponse(resp);
-    		if(info != null)
+    		DecodedErrorInfo decodedInfo = decodeErrorResponse(resp);
+    		if(decodedInfo != null && decodedInfo.getErrorInfo() != null)
     		{
+    			ErrorInfo info = decodedInfo.getErrorInfo();
     			String msg = info.getDisplayMessage();
     			String longMsg = null;
     			if(StringHelper.isEmpty(msg))
@@ -187,6 +189,10 @@ public class ResponseHelper {
     				logger.log(Level.SEVERE, "Error occured while transmiting an error from " + serverName + ".\n\tmessage:" + info.displayMessage + "\n\tlongMessage:" + info.longMessage + "\n\tstackTrace:" + info.stackTrace + "\n", t);
     				return(getBasicResponse(500, "Error occured while transmiting an error from " + serverName + ".  Check the site logs for more information."));
     			}
+    		}
+    		else if(decodedInfo != null && decodedInfo.getErrorMessage() != null)
+    		{
+    			return(getErrorResponse(500, "An unknown error occured on server " + serverName, "Error Information:" + decodedInfo.getErrorMessage(), null));
     		}
     		else
     			return(resp);
@@ -207,7 +213,7 @@ public class ResponseHelper {
      * @throws JsonMappingException 
      * @throws JsonParseException 
      */
-    public static ErrorInfo decodeErrorResponse(Response resp)
+    public static DecodedErrorInfo decodeErrorResponse(Response resp)
     {
     	try
     	{
@@ -223,9 +229,16 @@ public class ResponseHelper {
 			catch(IOException jpe){return(null);}
 			if(errorInfo == null || StringHelper.isEmpty(errorInfo.type)) return(null);
 			if(errorInfo.type.equals(ErrorInfo.ERROR_INFO_TYPE_VERSION))
-				return(errorInfo);
+				return(new DecodedErrorInfo(errorInfo, null));
 			else
-				return(null);
+			{
+				if(val != null)
+				{
+					return(new DecodedErrorInfo(null, val));
+				}
+				else
+					return(null);
+			}
     	}
     	catch(Throwable t)
     	{

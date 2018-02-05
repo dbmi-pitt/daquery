@@ -18,6 +18,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.internal.util.StringHelper;
 
+import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
@@ -232,11 +233,16 @@ public class SiteDAO extends AbstractDAO {
     		return(resp.readEntity(String.class));
     	else
     	{
-    		ErrorInfo ei = ResponseHelper.decodeErrorResponse(resp);
-    		if(ei == null)
-    			throw new DaqueryException("Error while checking site status at the Central Site");
+    		DecodedErrorInfo decodedInfo = ResponseHelper.decodeErrorResponse(resp);
+    		if(decodedInfo != null && decodedInfo.getErrorInfo() != null)
+    			throw new DaqueryErrorException(decodedInfo.getErrorInfo());
     		else
-    			throw new DaqueryErrorException(ei);
+    		{
+    			String addlInfo = "";
+    			if(decodedInfo != null && decodedInfo.getErrorMessage() != null)
+    				addlInfo = "  Additional Information: " + decodedInfo.getErrorMessage();
+    			throw new DaqueryException("Error while checking site status at the Central Site." + addlInfo);
+    		}	
     	}
     }
     
