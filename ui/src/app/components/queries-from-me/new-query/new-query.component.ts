@@ -68,10 +68,6 @@ export class NewQueryComponent implements OnInit {
   get dataType() { return this.inquiryForm.get('dataType'); }
 
   ngOnInit() {
-    this.networkService.getNetworks()
-                       .subscribe(networks => {
-                         this.networks = networks;
-                        });
     this.createForm(this.editingInquiry);
   }
 
@@ -100,21 +96,25 @@ export class NewQueryComponent implements OnInit {
     //this.showNetworkSitePanel = !this.showNetworkSitePanel;
     if(this.inquiryForm.valid){
       $('#myRequestModal').modal('show');
-      if(this.networks.length == 1){
-        let network = this.networks[0];
-        this.authenticationService.renewjwt(network.networkId);
-        this.siteService.getSites(network)
-                        .subscribe(sites => {
-                          const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
-                          const siteFormArray = this.fb.array(siteFGs);
-                          this.inquiryForm.setControl('sitesToQuery', siteFormArray);
-                        }, error => {
-                          $('#myRequestModal').modal('hide');
+      this.networkService.getNetworks()
+                       .subscribe(networks => {
+                         this.networks = networks;
+                         if(this.networks && this.networks.length === 1){
+                            let network = this.networks[0];
+                            this.authenticationService.renewjwt(network.networkId);
+                            this.siteService.getSites(network)
+                                            .subscribe(sites => {
+                                              const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
+                                              const siteFormArray = this.fb.array(siteFGs);
+                                              this.inquiryForm.setControl('sitesToQuery', siteFormArray);
+                                            }, error => {
+                                              $('#myRequestModal').modal('hide');
+                                            });
+                          } else {
+                            this.inquiryForm.get('inquiryName').markAsTouched();
+                            this.inquiryForm.get('sqlQuery').markAsTouched();
+                          }
                         });
-      }
-    } else {
-      this.inquiryForm.get('inquiryName').markAsTouched();
-      this.inquiryForm.get('sqlQuery').markAsTouched();
     }
   }
 
