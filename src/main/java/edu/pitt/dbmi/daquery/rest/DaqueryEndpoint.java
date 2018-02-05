@@ -40,6 +40,7 @@ import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
@@ -595,9 +596,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					ResponseDAO.saveOrUpdate(resp);
 					return ResponseHelper.getJsonResponseGen(200, resp);
 				} else {
-					ErrorInfo errorInfo = ResponseHelper.decodeErrorResponse(response);
-					if(errorInfo != null)
+					DecodedErrorInfo decodedInfo = ResponseHelper.decodeErrorResponse(response);
+					if(decodedInfo != null && decodedInfo.getErrorInfo() != null)
 					{
+						ErrorInfo errorInfo = decodedInfo.getErrorInfo();
 						DaqueryResponse resp = errorInfo.getResponse();
 						if(resp == null)
 						{
@@ -619,7 +621,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					}
 					else
 					{
-						return(ResponseHelper.getErrorResponse(response.getStatus(), "Unhandled error during a remote request.", "Site " + requestSite.getName() + " responded with an error.  Check the site logs for more information.", null));
+						String addlInfo = "";
+						if(decodedInfo != null && decodedInfo.getErrorMessage() != null)
+							addlInfo = " Additional Info: " + decodedInfo.getErrorMessage();
+						return(ResponseHelper.getErrorResponse(response.getStatus(), "Unhandled error during a remote request.", "Site " + requestSite.getName() + " responded with an error.  Check the site logs for more information." + addlInfo, null));
 					}
 				}
 			}
@@ -682,30 +687,37 @@ public class DaqueryEndpoint extends AbstractEndpoint
     			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
     			httpResponse = WSConnectionUtil.getFromRemoteSite(remoteSite, "/response/" + id, null, null);
     			
-    			String json = httpResponse.readEntity(String.class);
-    			
     			if(httpResponse.getStatus() == 200)
-				{	
+				{
+    				String json = httpResponse.readEntity(String.class);
 					ObjectMapper mapper = new ObjectMapper();
 					TypeReference<DaqueryResponse> type = new TypeReference<DaqueryResponse>(){};
 					DaqueryResponse resp = mapper.readValue(json, type);
 					rVal.setStatus(resp.getStatus());
 					rVal.setValue(resp.getValue());
 					ResponseDAO.saveOrUpdate(rVal);
+					return ResponseHelper.getJsonResponseGen(200, json);	
 				}
     			else
     			{
-					ObjectMapper mapper = new ObjectMapper();
-					TypeReference<ErrorInfo> type = new TypeReference<ErrorInfo>(){};
-					ErrorInfo errorInfo = mapper.readValue(json, type);
-					DaqueryResponse resp = errorInfo.getResponse();
-					rVal.setStatus(resp.getStatus());
-					rVal.setValue(resp.getValue());
-					ResponseDAO.saveOrUpdate(rVal);    				
+    				DecodedErrorInfo decodedInfo = ResponseHelper.decodeErrorResponse(httpResponse);
+    				if(decodedInfo != null && decodedInfo.getErrorInfo() != null)
+    				{
+						DaqueryResponse resp = decodedInfo.getErrorInfo().getResponse();
+						rVal.setStatus(resp.getStatus());
+						rVal.setValue(resp.getValue());
+						ResponseDAO.saveOrUpdate(rVal);
+    				}
+    				else
+    				{
+    					String addlInfo = "";
+    					if(decodedInfo != null && decodedInfo.getErrorMessage() != null)
+    						addlInfo = "  Additional Information: " + decodedInfo.getErrorMessage();
+    					rVal.setStatusEnum(ResponseStatus.ERROR);
+    					rVal.setErrorMessage("An error was returned. " + addlInfo);
+    					ResponseDAO.saveOrUpdate(rVal);
+    				}
     			}
-    			
-    			int responseCode = httpResponse.getStatus();
-    			return ResponseHelper.getJsonResponseGen(responseCode, json);
     		}
     		ResponseTask rTask = (ResponseTask) QueueManager.getNamedQueue(MAIN_QUEUE).getTask(rVal.getResponseId());
     		if(rVal.getStatusEnum().isQueuedOrRunning() && rTask == null)
