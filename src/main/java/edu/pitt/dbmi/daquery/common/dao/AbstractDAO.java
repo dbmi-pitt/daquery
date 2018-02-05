@@ -122,12 +122,11 @@ public abstract class AbstractDAO {
 	        return resultList;
 	    
         } catch (HibernateException he) {
-    		logger.info("Error unable to connect to database.  Please check database settings.");
-    		logger.info(he.getLocalizedMessage());
+    		logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", he);
             throw he;
-        } catch (Exception e) {
-    		logger.info(e.getLocalizedMessage());
-        	throw e;
+        } catch (Throwable t) {
+    		logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", t);
+        	throw t;
         }
     	finally {
     		if (s != null) {

@@ -152,7 +152,7 @@ public class NetworkDAO extends AbstractDAO {
 	        return net;
 	    
         } catch (Throwable t) {
-        	String msg = "Unable to get a network for an incoming site due to an unexpected error.";
+        	String msg = "Unable to get a network for an incoming site [" + site.getSiteId() + "] due to an unexpected error.";
         	logger.log(Level.SEVERE, msg, t);
     		return(null);
         } finally {
@@ -163,6 +163,9 @@ public class NetworkDAO extends AbstractDAO {
     }
     
     public static DataModel getDatamodelbyNetworkId(Network network) throws DaqueryException {
+    	if (network == null) {
+    		return (null);
+    	}
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
@@ -179,9 +182,11 @@ public class NetworkDAO extends AbstractDAO {
         	String msg = "Error unable to connect to database.  Please check database settings.";
         	logger.log(Level.SEVERE, msg, e);
             throw e;
-        }
-    	finally
-    	{
+        } catch (Throwable t) {
+        	String msg = "Unable to get a network for an incoming site [" + network.getId() + "] due to an unexpected error.";
+        	logger.log(Level.SEVERE, msg, t);
+    		return(null);
+        } finally {
     		if(s != null) s.close();
     	}
     }
@@ -221,6 +226,8 @@ public class NetworkDAO extends AbstractDAO {
     }
     
     public static SQLDataSource getSQLDataSourcebyNetworkId(Network network) throws DaqueryException {
+        if (network == null)
+        	return (null);
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
