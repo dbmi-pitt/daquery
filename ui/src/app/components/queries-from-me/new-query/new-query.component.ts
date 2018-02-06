@@ -7,6 +7,9 @@ import { AuthenticationService } from '../../../services/authentication.service'
 import { RequestService } from '../../../services/request.service';
 import { Router } from '@angular/router';
 import { BoundCallbackObservable } from 'rxjs/observable/BoundCallbackObservable';
+import { sendRequest } from 'selenium-webdriver/http';
+import { Promise } from 'q';
+import { Observable } from 'rxjs/Observable';
 
 declare var $:any;
 
@@ -25,7 +28,7 @@ export class NewQueryComponent implements OnInit {
   onSending = false;
   editing: boolean = false;
 
-  @Output() requestSent: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() requestSent: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(private fb: FormBuilder,
               private networkService: NetworkService,
@@ -130,10 +133,12 @@ export class NewQueryComponent implements OnInit {
     return !this.onSending && this.inquiryForm.get('network').valid && (<FormArray>this.inquiryForm.get('sitesToQuery')).controls.some(x => (<FormGroup>x).controls.check.value == true);
   }
 
-  onSend(){
+  onSend() {
     this.onSending = true;
     const requestGroupUUID = this.generateUUID();
-    this.inquiryForm.value.sitesToQuery.forEach((site) => {
+    let responses = [];
+      
+    let aa = this.inquiryForm.value.sitesToQuery.map((site) => {      
       if(site.check){
         const request = {
           requestSite: {
@@ -153,18 +158,25 @@ export class NewQueryComponent implements OnInit {
           }
         };
 
-        this.requestService.sendRequest(request)
-                          .subscribe(data => {
-                            //location.reload();
-                            $('#myRequestModal').modal('hide');
-                            this.requestSent.emit(true);
-                          },
-                          error => {
-                            $('#myRequestModal').modal('hide');
-                            this.requestSent.emit(true);
-                          });
+        return this.requestService.sendRequest(request)
+                                  .map(data => {
+                                    responses.push(data);
+                                  })
+                                  .catch(error => {
+                                    responses.push(error);
+                                    return Observable.throw(error);
+                                  })
       }
-    })
+    });
+
+    Observable.forkJoin(aa).subscribe(() => {
+      $('#myRequestModal').modal('hide');
+      this.requestSent.emit(true);
+    },
+    error => {
+      $('#myRequestModal').modal('hide');
+      this.requestSent.emit(true);
+    });
   }
 
   networkOnChange(value){

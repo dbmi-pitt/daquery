@@ -15,7 +15,7 @@
         <td>{{request.inquiry.aggregate ? "AGGREGATE" : "DATA"}}</td>
         <td>{{request.requester?.realName}}</td>
         <td>{{request.responses[0]?.status}}</td>
-        <td>{{request.responses[0].value}}</td>
+        <td>{{ request.responses[0]?.status === 'ERROR' ? request.responses[0]?.errorMessage : request.responses[0]?.value }}</td>
       </tr>
     </tbody>
   </table>

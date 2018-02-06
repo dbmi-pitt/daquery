@@ -7,9 +7,7 @@ export class RoleGuard implements CanActivate {
   currentUserRoles: string[] = JSON.parse(localStorage.getItem('currentUser')).roles.map(r => r.name.toLowerCase());
   constructor(private router: Router,
               private userService: UserService) {
-    if(this.currentUserRoles.length === 0){
-      this.getCurrentUserRoles();
-    }
+    this.getCurrentUserRoles();
   }
 
   async canActivate(route: ActivatedRouteSnapshot,
@@ -24,17 +22,12 @@ export class RoleGuard implements CanActivate {
   }
 
   allowed(allowedRoles: string[]) {
+    this.getCurrentUserRoles();
     return this.userRolePermitted(allowedRoles, this.currentUserRoles);
   }
 
-  getCurrentUserRoles(): Promise<boolean>{
-    return new Promise((resolve, reject) => {
-          this.userService.getRoles(JSON.parse(localStorage.getItem('currentUser')).id)
-                          .subscribe(roles => {
-                            this.currentUserRoles = roles;
-                            resolve();
-                          })
-                        });
+  getCurrentUserRoles(){
+    this.currentUserRoles = JSON.parse(localStorage.getItem('currentUser')).roles.map(r => r.name.toLowerCase());
   }
 
   userRolePermitted(allowedRoles: Array<string>, currentUserRoles: Array<string>): boolean{

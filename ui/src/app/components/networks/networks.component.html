@@ -1,5 +1,5 @@
 <section class="content-header">
-  <h1>Network Configuration <small>share your data</small></h1>
+  <h1>Networks <small>share your data</small></h1>
 </section>
 <section class="content">
   <div class="row">
@@ -24,7 +24,7 @@
         <div class="box box-default">
           <div class="box-header with-border">
             <h3 class="box-title">{{network.name}}</h3> <small>Description of the network</small>
-            <a class="btn btn-link" [routerLink]="['/networks', network.id]">Edit Sites</a>
+            <a class="btn btn-link" [routerLink]="['/networks', network.id]">Edit Network</a>
             <div class="box-tools pull-right">
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
               </button>
@@ -33,9 +33,9 @@
           </div>
           <!-- /.box-header -->
           <div class="box-body">
-            <ul>
+            <!-- <ul>
               <li *ngFor="let site of network.sites">{{ site.name }} {{ site.direction }}</li>
-            </ul>
+            </ul> -->
           </div>
           <!-- /.box-body -->
         </div>

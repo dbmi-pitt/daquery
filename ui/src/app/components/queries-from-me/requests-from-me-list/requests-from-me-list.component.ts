@@ -58,6 +58,7 @@ export class RequestsFromMeListComponent implements OnInit {
                                this.responseService.getResponse(response.responseId)
                                                    .subscribe(res => {
                                                      response.status = res.status;
+                                                     response.errorMessage = res.errorMessage
                                                      response.value = res.value;
                                                      if(['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
                                                        subscription.unsubscribe();

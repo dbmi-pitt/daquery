@@ -81,7 +81,7 @@
               <tr *ngFor="let request of requestGroup.val">
                 <td>{{ request.requestSite.name }}</td>
                 <td>{{ request.responses[0]?.status }}</td>
-                <td>{{ request.responses[0]?.value }}
+                <td>{{ request.responses[0]?.status === 'ERROR' ? request.responses[0]?.errorMessage : request.responses[0]?.value }}
                     <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
                     <span *ngIf="request.responses[0]?.hasError" class="pull-right-container">
                       <small class="label bg-red">Network Error</small>

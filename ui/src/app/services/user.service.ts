@@ -27,7 +27,7 @@ export class UserService {
 
   getRoles(user_id: number): Observable<string[]> {
     const params = new HttpParams().set('user_id', user_id.toString());
-    return this.http.get('/daquery/ws/roles', {params: params})
+    return this.http.get('/daquery/ws/local-roles', {params: params})
                     .catch(error => {
                       this.error.error = error;
                       return Observable.throw(error || 'Server error');
