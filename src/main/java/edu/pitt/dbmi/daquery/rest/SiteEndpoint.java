@@ -91,7 +91,6 @@ public class SiteEndpoint extends AbstractEndpoint {
     public Response getAllSites(@QueryParam("network_id") long network_id,
     							@DefaultValue("all") @QueryParam("type") String type,
     							@DefaultValue("") @QueryParam("status") String status) {
-    	
     	Response pendResp = null;
     	try {
 

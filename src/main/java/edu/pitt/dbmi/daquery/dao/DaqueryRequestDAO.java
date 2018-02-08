@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
@@ -61,6 +62,7 @@ public class DaqueryRequestDAO extends AbstractDAO {
 	public List list(String[] directions) throws DaqueryException{
 		return getCurrentSession().createCriteria(DaqueryRequest.class)
 								  .add(Restrictions.in("direction", directions))
+								  .addOrder(Order.desc("sentTimestamp"))
 				  				  .list();
 	}
 	
