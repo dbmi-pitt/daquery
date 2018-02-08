@@ -10,6 +10,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -218,7 +220,15 @@ public class ResponseHelper {
     	try
     	{
 	    	if(resp == null) return(null);
-	    	String val = resp.readEntity(String.class);
+	    	String val = null;
+    		if(resp instanceof OutboundJaxrsResponse)
+    		{
+    			OutboundJaxrsResponse outResp = (OutboundJaxrsResponse) resp;
+    			Object ent = outResp.getEntity();
+    			if(ent != null) val = ent.toString();
+    		}	    	
+    		else
+    			val = resp.readEntity(String.class);
 	    	if(StringHelper.isEmpty(val)) return(null);
 			ObjectMapper mapper = new ObjectMapper();
 			TypeReference<ErrorInfo> type = new TypeReference<ErrorInfo>(){};
