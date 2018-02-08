@@ -67,6 +67,8 @@ import { DataSourceComponent } from './components/networks/network/data-source/d
 // External Libs
 import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
 import { MomentModule } from 'angular2-moment';
+import { RecentQueryComponent } from './components/queries-from-me/recent-query/recent-query.component';
+import { SavedQueriesComponent } from './components/queries-from-me/saved-queries/saved-queries.component';
 
 @NgModule({
   declarations: [
@@ -106,6 +108,8 @@ import { MomentModule } from 'angular2-moment';
     ChangePasswordComponent,
     DataSourceComponent,
     MapValuesPipe,
+    RecentQueryComponent,
+    SavedQueriesComponent,
   ],
   imports: [
     BrowserModule,

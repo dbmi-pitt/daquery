@@ -90,6 +90,10 @@
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                       <h4 class="modal-title" id="myModalLabel">Please select Network and Site</h4>
                     </div>
+                    <div *ngIf="error?.error" class="alert alert-danger alert-dismissible">
+                      <button type="button" class="close" data-dismiss="alert" aria-hidden="true" (click)="onAlertDismiss()">×</button>
+                      {{ error?.error?.displayMessage }}
+                    </div>
                     <div *ngIf="networks" class="modal-body">
                         <div class="form-group  has-feedback" [ngClass]="{'has-error': network.invalid && (network.dirty || network.touched), 'has-success': network.valid && (network.dirty || network.touched) }">
                             <label for="network">Network</label>

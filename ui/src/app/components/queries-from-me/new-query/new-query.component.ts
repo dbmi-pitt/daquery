@@ -27,6 +27,7 @@ export class NewQueryComponent implements OnInit {
   showNetworkSitePanel = false;
   onSending = false;
   editing: boolean = false;
+  error: any;
 
   @Output() requestSent: EventEmitter<any> = new EventEmitter<any>();
 
@@ -111,13 +112,19 @@ export class NewQueryComponent implements OnInit {
                                               const siteFormArray = this.fb.array(siteFGs);
                                               this.inquiryForm.setControl('sitesToQuery', siteFormArray);
                                             }, error => {
-                                              $('#myRequestModal').modal('hide');
+                                              //$('#myRequestModal').modal('hide');
+                                              this.error = error;
                                             });
                           } else {
                             this.inquiryForm.get('inquiryName').markAsTouched();
                             this.inquiryForm.get('sqlQuery').markAsTouched();
                           }
+                        }, error => {
+                          this.error = error;
                         });
+    } else {
+      this.inquiryForm.get('inquiryName').markAsTouched();
+      this.inquiryForm.get('sqlQuery').markAsTouched();
     }
   }
 
@@ -170,13 +177,16 @@ export class NewQueryComponent implements OnInit {
     });
 
     Observable.forkJoin(aa).subscribe(() => {
-      $('#myRequestModal').modal('hide');
-      this.requestSent.emit(true);
+      // $('#myRequestModal').modal('hide');
+      // this.requestSent.emit(true);
     },
     error => {
-      $('#myRequestModal').modal('hide');
-      this.requestSent.emit(true);
+      // $('#myRequestModal').modal('hide');
+      // this.requestSent.emit(true);
     });
+
+    $('#myRequestModal').modal('hide');
+    this.requestSent.emit(true);
   }
 
   networkOnChange(value){
