@@ -1,0 +1,1 @@
+-agentpath:/home/devuser/yjp/YourKit-JavaProfiler-2017.02/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,exceptions=disable,delay=10000,sessionname=Tomcat -Djdk.tls.ephemeralDHKeySize=2048
