@@ -71,7 +71,12 @@ public class TaskQueue
 		{
 			try{task.startup();}catch(Throwable t){task.errorState(Task.ErrorPeriod.STARTUP, t);}
 			try{task.execute();}catch(Throwable t){task.errorState(Task.ErrorPeriod.EXECUTE, t);}
-			try{task.shutdown();}catch(Throwable t){task.errorState(Task.ErrorPeriod.SHUTDOWN, t);}
+			try
+			{
+				task.shutdown();
+				taskFinished(this);
+			}
+			catch(Throwable t){task.errorState(Task.ErrorPeriod.SHUTDOWN, t);}
 		}
 	}
 }
