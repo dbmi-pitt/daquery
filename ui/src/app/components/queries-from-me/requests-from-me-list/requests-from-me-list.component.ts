@@ -2,7 +2,6 @@ import { Component, OnInit, EventEmitter, Output, Input, SimpleChange } from '@a
 import { RequestService } from '../../../services/request.service';
 import { ResponseService } from '../../../services/response.service';
 import { Observable } from 'rxjs/Observable';
-import { forEach } from '@angular/router/src/utils/collection';
 import { environment } from '../../../../environments/environment';
 import { MapValuesPipe } from '../../../pipes/iteratable.pipe';
 import { Router } from '@angular/router';
@@ -13,9 +12,6 @@ import { Router } from '@angular/router';
   styleUrls: ['./requests-from-me-list.component.css']
 })
 export class RequestsFromMeListComponent implements OnInit {
-
-  @Output()
-  editInquiry = new EventEmitter<any>();
 
   requests: any[];
   inquiries: any[];
@@ -28,12 +24,10 @@ export class RequestsFromMeListComponent implements OnInit {
 
   notifyMe() {
     this.getRequestsFromMe();
-    this.getSavedInquiries();
   }
 
   ngOnInit() {
     this.getRequestsFromMe();
-    this.getSavedInquiries();
   }
 
   getRequestsFromMe() {
@@ -81,10 +75,6 @@ export class RequestsFromMeListComponent implements OnInit {
   getSavedInquiries(){
     this.requestService.getSavedInquiries()
                        .subscribe(inquiries => this.inquiries = inquiries);
-  }
-
-  onEditClick(inquiry: any){
-    this.editInquiry.emit(inquiry);
   }
 
   createRequestStatusSummary(query: any): string{

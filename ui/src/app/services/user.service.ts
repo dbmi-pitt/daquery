@@ -114,4 +114,8 @@ export class UserService {
                         return Observable.throw(error.json().error || 'Server error');
                     })
   }
+
+  getCurrentUser() {
+    return JSON.parse(localStorage.getItem('currentUser'));
+  }
 }

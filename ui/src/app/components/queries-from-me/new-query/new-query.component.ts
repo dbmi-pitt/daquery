@@ -8,8 +8,8 @@ import { RequestService } from '../../../services/request.service';
 import { Router } from '@angular/router';
 import { BoundCallbackObservable } from 'rxjs/observable/BoundCallbackObservable';
 import { sendRequest } from 'selenium-webdriver/http';
-import { Promise } from 'q';
 import { Observable } from 'rxjs/Observable';
+import { UserService } from 'app/services/user.service';
 
 declare var $:any;
 
@@ -30,11 +30,13 @@ export class NewQueryComponent implements OnInit {
   error: any;
 
   @Output() requestSent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() requests: EventEmitter<any[]> = new EventEmitter<any[]>();;
 
   constructor(private fb: FormBuilder,
               private networkService: NetworkService,
               private siteService: SiteService,
               private requestService: RequestService,
+              private userServier: UserService,
               private authenticationService: AuthenticationService,
               private router: Router) { }
 
@@ -145,11 +147,12 @@ export class NewQueryComponent implements OnInit {
     const requestGroupUUID = this.generateUUID();
     let responses = [];
       
-    let aa = this.inquiryForm.value.sitesToQuery.map((site) => {      
+    let requests = this.inquiryForm.value.sitesToQuery.map((site) => {      
       if(site.check){
-        const request = {
+        return {
           requestSite: {
             siteId: site.siteId,
+            name: site.name
           },
           network: {
             networkId: this.inquiryForm.value.network || this.networks[0].networkId
@@ -165,28 +168,29 @@ export class NewQueryComponent implements OnInit {
           }
         };
 
-        return this.requestService.sendRequest(request)
-                                  .map(data => {
-                                    responses.push(data);
-                                  })
-                                  .catch(error => {
-                                    responses.push(error);
-                                    return Observable.throw(error);
-                                  })
+        // return this.requestService.sendRequest(request)
+        //                           .map(data => {
+        //                             responses.push(data);
+        //                           })
+        //                           .catch(error => {
+        //                             responses.push(error);
+        //                             return Observable.throw(error);
+        //                           })
       }
     });
 
-    Observable.forkJoin(aa).subscribe(() => {
-      // $('#myRequestModal').modal('hide');
-      // this.requestSent.emit(true);
-    },
-    error => {
-      // $('#myRequestModal').modal('hide');
-      // this.requestSent.emit(true);
-    });
+    // Observable.forkJoin(aa).subscribe(() => {
+    //   // $('#myRequestModal').modal('hide');
+    //   // this.requestSent.emit(true);
+    // },
+    // error => {
+    //   // $('#myRequestModal').modal('hide');
+    //   // this.requestSent.emit(true);
+    // });
 
     $('#myRequestModal').modal('hide');
     this.requestSent.emit(true);
+    this.requests.emit(requests.filter(r => { return r != undefined }));
   }
 
   networkOnChange(value){

@@ -37,8 +37,10 @@
   </div>
   <div class="row">
     <div class="col-md-12">
-      <app-new-query *ngIf="showNewQuery" [editingInquiry]="editingInquiry" (requestSent)="onRequestSent($event)"></app-new-query>
-      <app-requests-from-me-list (editInquiry)="editInquiry($event)"></app-requests-from-me-list>
+      <app-new-query *ngIf="showNewQuery" [editingInquiry]="editingInquiry" (requestSent)="onRequestSent($event)" (requests)="onRequests($event)"></app-new-query>
+      <app-saved-queries (editInquiry)="editInquiry($event)"></app-saved-queries>
+      <app-recent-query></app-recent-query>
+      <app-requests-from-me-list></app-requests-from-me-list>
     </div>
   </div>
 </section>

@@ -1,4 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { RequestService } from '../../../services/request.service';
+import { Observable } from 'rxjs/Observable';
+import { UserService } from 'app/services/user.service';
+import { environment } from '../../../../environments/environment';
+import { ResponseService } from '../../../services/response.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-recent-query',
@@ -7,9 +13,45 @@ import { Component, OnInit } from '@angular/core';
 })
 export class RecentQueryComponent implements OnInit {
 
-  constructor() { }
+  requests: any[];
+  constructor(private requestService: RequestService,
+              private userService: UserService,
+              private responseService: ResponseService,
+              private router : Router) { }
 
   ngOnInit() {
   }
 
+  notifyMe(requests: any[]) {
+    this.requests = requests;
+    requests.forEach((request) => {
+      this.requestService.sendRequest(request)
+                         .subscribe(response => {
+                          request['response'] = response;
+                          if(response && !['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
+                            let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
+                              this.responseService.getResponse(response.responseId)
+                                                  .subscribe(res => {
+                                                    response.status = res.status;
+                                                    response.errorMessage = res.errorMessage
+                                                    response.value = res.value;
+                                                    if(['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
+                                                      subscription.unsubscribe();
+                                                    }
+                                                  },
+                                                 error => {
+                                                   response.hasError = true;
+                                                   subscription.unsubscribe();
+                                                 },
+                                                 () => {
+                                                   if(!this.router.url.includes("queries-from-me"))
+                                                     subscription.unsubscribe();
+                                                 });
+                            })
+                         }
+                         }, error => {
+                          return Observable.throw(error);
+                         });
+    });
+  }
 }

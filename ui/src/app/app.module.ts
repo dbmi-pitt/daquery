@@ -63,12 +63,13 @@ import { Step2Component } from './components/setup/step2/step2.component';
 import { Step3Component } from './components/setup/step3/step3.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { DataSourceComponent } from './components/networks/network/data-source/data-source.component';
+import { RecentQueryComponent } from './components/queries-from-me/recent-query/recent-query.component';
+import { SavedQueriesComponent } from './components/queries-from-me/saved-queries/saved-queries.component';
 
 // External Libs
 import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
 import { MomentModule } from 'angular2-moment';
-import { RecentQueryComponent } from './components/queries-from-me/recent-query/recent-query.component';
-import { SavedQueriesComponent } from './components/queries-from-me/saved-queries/saved-queries.component';
+
 
 @NgModule({
   declarations: [

@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DaqueryService } from '../../services/daquery.service';
 import { RequestsFromMeListComponent } from './requests-from-me-list/requests-from-me-list.component';
+import { RecentQueryComponent } from 'app/components/queries-from-me/recent-query/recent-query.component';
 
 @Component({
   selector: 'app-queries-from-me',
@@ -10,10 +11,9 @@ import { RequestsFromMeListComponent } from './requests-from-me-list/requests-fr
 export class QueriesFromMeComponent implements OnInit {
   showNewQuery = false;
   editingInquiry: any;
-  requestSent: boolean;
 
-  @ViewChild(RequestsFromMeListComponent)
-  private requestsFromMeList: RequestsFromMeListComponent;
+  @ViewChild(RequestsFromMeListComponent) private requestsFromMeList: RequestsFromMeListComponent;
+  @ViewChild(RecentQueryComponent) private recentQuery: RecentQueryComponent;
 
   constructor(private daqueryService: DaqueryService) { }
 
@@ -36,5 +36,10 @@ export class QueriesFromMeComponent implements OnInit {
   onRequestSent(value: boolean) {
     this.showNewQuery = false;
     this.requestsFromMeList.notifyMe();
+  }
+
+  onRequests(value: any[]) {
+    this.showNewQuery = false;
+    this.recentQuery.notifyMe(value);
   }
 }
