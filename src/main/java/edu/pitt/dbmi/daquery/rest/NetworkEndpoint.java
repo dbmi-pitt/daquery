@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +30,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.hibernate.HibernateException;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
@@ -37,7 +40,10 @@ import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 
@@ -203,15 +209,17 @@ public class NetworkEndpoint extends AbstractEndpoint {
             
             Set<DataSource> dsset = new HashSet<DataSource>();
             
-            DataModel dModel = new DataModel(true);
+           
             //dModel.setName(((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
-            dModel.setName("temp");
+            String netId = network_params.get("network_id");
+            DataModel dModel = getDataModelFromCentral(netId);
             dsset.add(sqlDataSource);
             
-            dModel.setDataSources(dsset);
-            sqlDataSource.setDataModel(dModel);
+            if(dModel != null)
+	            dModel.setDataSources(dsset);
+	        sqlDataSource.setDataModel(dModel);
+	        Network network = NetworkDAO.createNetwork(network_params, dModel);
             
-            Network network = NetworkDAO.createNetwork(network_params, dModel);
             Site site = SiteDAO.getLocalSite();
             
             sitedao.openCurrentSessionwithTransaction();
@@ -233,6 +241,16 @@ public class NetworkEndpoint extends AbstractEndpoint {
         }
     	
     }
+    
+    private DataModel getDataModelFromCentral(String networkId) throws DaqueryException
+    {
+	    Map<String, String> netIdParam = new HashMap<String, String>();
+	    netIdParam.put("network-id", networkId);
+	    Response resp = WSConnectionUtil.callCentralServer("data-model", netIdParam);
+	    DataModel dm = (DataModel) JSONHelper.decodeResponse(resp, new TypeReference<DataModel>(){});
+	    return(dm);
+    }
+    
     
     /**
      * Get data mode by network ID or UUID
