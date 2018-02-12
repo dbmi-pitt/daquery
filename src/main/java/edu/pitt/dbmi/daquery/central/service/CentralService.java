@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -15,6 +16,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import org.hibernate.Session;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,6 +32,7 @@ import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
@@ -306,6 +310,44 @@ public class CentralService{
 			String msg = "An error occurred while approving connect request network_id:" + networkId + " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
 			return (ResponseHelper.getErrorResponse(500, "An error occured while registering a site request denial.", msg + " Check the central server logs for more information.", t));
+		}
+	}
+	
+	/**
+	 * Get a DataModel attached to a network with a specified id.
+	 * 
+	 * @param netId The network UUID.
+	 * @return 200 with a data model, 404 if the network or model is not found.
+	 */
+	@GET
+	@Path("data-model")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response checkSiteStatus(@DefaultValue("") @QueryParam("network-id") String netId)
+	{
+		Session sess = null;
+		try
+		{
+			sess = HibernateConfiguration.openSession();
+			
+			if(StringHelper.isEmpty(netId))
+				return(ResponseHelper.getErrorResponse(400, "Network id is a required parameter", null, null));
+			
+			Network net = NetworkDAO.getNetworkById(netId);
+			if(net == null)
+				return(ResponseHelper.getErrorResponse(404, "Network not found.", "Network with id " + netId + " was not found.", null));
+			
+			if(net.getDataModel() == null)
+				return(ResponseHelper.getErrorResponse(404, "Data model not found.", "The network with id " + netId + " does not have a data model associated with it.", null));
+			
+			return(ResponseHelper.getJsonResponseGen(200, net.getDataModel()));			
+		}
+		catch(Throwable t)
+		{
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while on the central server while retrieving a data model", "Error while retrieving data model from network with id " + netId, t));
+		}
+		finally
+		{
+			if(sess != null) sess.close();
 		}
 	}
 }

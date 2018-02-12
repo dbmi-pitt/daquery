@@ -35,7 +35,7 @@ public class CreateTestNetworks
 		bSite.setName("bill-dev");
 		bSite.setAccessKey("abc123");
 		bSite.setTempKey(true);
-		bSite.setUrl("http://shirey-dt-032.dbmi.pitt.edu:8080/");
+		bSite.setUrl("http://localhost:8080/");
 		bSite.setAdminEmail("shirey@pitt.edu");
 		
 		Site cSite = new Site("0f2378ec-d9ce-489a-b338-c8f82e567f40");
