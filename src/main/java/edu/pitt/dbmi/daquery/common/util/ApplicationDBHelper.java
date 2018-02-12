@@ -14,6 +14,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 public class ApplicationDBHelper
 {
 	private static Logger log = Logger.getLogger(ApplicationDBHelper.class.getName());
+
+	public static final String DDL_SCANNER_PATTERN = "(;(\r)?\n)|((\r)?\n)?(--)?.*(--(\r)?\n)";
 	
 	private static ComboPooledDataSource dataSource = null;
 	public static Connection getConnection()
@@ -111,20 +113,16 @@ public class ApplicationDBHelper
 			log.log(Level.SEVERE, "An error occurred while trying to close a connect, statement or result set", t);
 		}	
 	}
-
-	private static final String SCANNER_PATTERN = "(;(\r)?\n)|((\r)?\n)?(--)?.*(--(\r)?\n)";
 	
 	public static boolean createTables(InputStream input)
 	{
 		Connection dbConn = null;
 	    Scanner inputScanner = new Scanner(input);
-	    inputScanner.useDelimiter(SCANNER_PATTERN);
+	    inputScanner.useDelimiter(DDL_SCANNER_PATTERN);
 	    Statement dbStatement = null;
 	    try
 	    {
 	    	dbConn = getConnection();
-	        dbStatement = dbConn.createStatement();
-	        
 	        executeDDL(dbStatement, inputScanner);
 
 	        return(true);
@@ -142,7 +140,7 @@ public class ApplicationDBHelper
 	    }
 	}
 	
-	private static void executeDDL(Statement dbStat, Scanner ddlScanner) throws DaqueryException
+	public static void executeDDL(Statement dbStat, Scanner ddlScanner) throws DaqueryException
 	{
         while (ddlScanner.hasNext())
         {
@@ -161,7 +159,7 @@ public class ApplicationDBHelper
             		String includeFile = l2.substring(8).trim();
             		InputStream is = FileHelper.streamFromBaseResource(includeFile);
             	    Scanner inputScanner = new Scanner(is);
-            	    inputScanner.useDelimiter(SCANNER_PATTERN);
+            	    inputScanner.useDelimiter(DDL_SCANNER_PATTERN);
             	    executeDDL(dbStat, inputScanner);
             	}
             	else
