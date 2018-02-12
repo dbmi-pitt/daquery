@@ -1,0 +1,226 @@
+package edu.pitt.dbmi.daquery.update;
+
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.transaction.Transaction;
+
+import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
+import edu.pitt.dbmi.daquery.common.util.ApplicationPropertiesFile;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.FileHelper;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
+
+public class UpdateDBForVersion
+{
+	private static Logger log = Logger.getLogger(UpdateDBForVersion.class.getName());
+	
+	private static final String BASE_DB_PACKAGE = "edu.pitt.dbmi.daquery.update.db";
+	
+	  private static File[] getResourceFolderFiles (String folder)
+	  {
+		  ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		  URL url = loader.getResource(folder);
+		  String path = url.getPath();
+		  return new File(path).listFiles();
+	  }
+
+	public static void main (String[] args)
+	{
+		updateDB();
+	}
+	public static void updateDB()
+	{
+		Connection conn = null;
+		try
+		{
+			Integer version = null;
+			conn = ApplicationDBHelper.getConnection();
+			conn.setAutoCommit(false);
+			Statement st = conn.createStatement();
+			ResultSet rs = st.executeQuery("select * from property where name = 'db.version'");
+			if(rs.next())
+			{
+				try{
+					String strVer = rs.getString("value");
+					int v = Integer.parseInt(strVer);
+					version = new Integer(v);
+				}
+				catch(Throwable t)
+				{
+					log.log(Level.SEVERE, "Error while reading DB version during strtup.", t);
+					HibernateConfiguration.setErroredStartup(true);
+					return;
+				}
+			}
+			if(version == null) version = new Integer(-1);
+			List<UpdateInfo> updates = getDBUpdateClasses();
+			Collections.sort(updates);
+			int maxVersion = version.intValue();
+			for(UpdateInfo ui : updates)
+			{
+				if(ui.version > version.intValue())
+				{
+					updateDDL(ui, conn);
+					maxVersion = ui.version;
+				}
+			}
+			conn.commit();
+			for(UpdateInfo ui : updates)
+			{
+				if(ui.version > version.intValue())
+					updateData(ui, conn);
+			}
+			if(maxVersion > version.intValue())
+			{
+				updateVersion(version, maxVersion, conn);
+			}
+			conn.commit();
+		}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "Unexpeded error during DB configuration during startup.", t);
+			HibernateConfiguration.setErroredStartup(true);
+			try{if(conn != null) conn.rollback();}
+			catch(SQLException e)
+			{
+				log.log(Level.SEVERE, "Error while rolling back database changes.", e);
+			}
+		}
+		finally
+		{
+			try{if(conn != null) conn.close();}
+			catch(SQLException e)
+			{
+				log.log(Level.SEVERE, "Error while closing connection during db updates.", e);
+			}
+		}		
+	}
+	private static void updateVersion(Integer currentVersion, int newVersion, Connection conn) throws SQLException
+	{
+		Statement st = conn.createStatement();
+		//no version present, need to insert
+		if(currentVersion.intValue() == -1)
+		{
+			st.executeUpdate("insert into property (name, value) values ('db.version', '" + newVersion + "')");
+		}
+		else //otherwise update
+		{
+			st.executeUpdate("update property set value = '" + newVersion + "' where name = 'db.version'");
+		}
+	}
+	private static void updateData(UpdateInfo ui, Connection conn) throws Exception
+	{
+		Object obj = ui.cls.newInstance();
+		DBUpdater updater = (DBUpdater) obj;
+		updater.updateData(conn);
+	}
+	
+	private static List<UpdateInfo> getDBUpdateClasses()
+	{
+		List<UpdateInfo> rVal = new ArrayList<UpdateInfo>();
+		for (File f : getResourceFolderFiles("edu/pitt/dbmi/daquery/update/db"))
+		{
+			String clsStr = classNameFromPath(f.toString());
+			if(clsStr != null)
+			{
+				try
+				{
+					Class<?> tstCls = Class.forName(clsStr);
+					if(DBUpdater.class.isAssignableFrom(tstCls))
+					{
+						DBVersion vsn = tstCls.getAnnotation(DBVersion.class);
+						if(vsn != null)
+						{
+							UpdateInfo uInfo = new UpdateInfo();
+							uInfo.cls = tstCls;
+							uInfo.version = vsn.version();
+							uInfo.ddlFile = vsn.ddlFile();
+							rVal.add(uInfo);
+						}
+					}
+				}
+				catch(ClassNotFoundException e){e.printStackTrace();}
+			}
+		}
+		return(rVal);
+	}
+	
+	private static class UpdateInfo implements Comparable<UpdateInfo>
+	{
+		Class<?> cls;
+		int version;
+		String ddlFile;
+		
+		@Override
+		public int compareTo(UpdateInfo val)
+		{
+			return this.version < val.version ? -1 : this.version > val.version ? 1 : 0;
+		}
+	}
+	
+	private static String classNameFromPath(String path)
+	{
+		String rVal = path.trim();
+		if(rVal.toLowerCase().endsWith(".class"))
+			rVal = rVal.substring(0, rVal.length() - 6);
+		else
+			return(null);
+		  
+		int lastSlash = rVal.lastIndexOf("/");
+		if(lastSlash == -1) lastSlash = rVal.lastIndexOf("\\");
+		if(lastSlash != -1)
+			rVal = rVal.substring(lastSlash + 1);
+		return(BASE_DB_PACKAGE + "." + rVal);
+	  }
+
+	private static void updateDDL(UpdateInfo info, Connection conn) throws DaqueryException, SQLException
+	{
+		InputStream is = ApplicationPropertiesFile.class.getResourceAsStream("/edu/pitt/dbmi/daquery/update/db/" + info.ddlFile);
+	    Scanner inputScanner = new Scanner(is);
+	    inputScanner.useDelimiter(ApplicationDBHelper.DDL_SCANNER_PATTERN);
+	    Statement dbStatement = null;
+	    dbStatement = conn.createStatement();
+	    ApplicationDBHelper.executeDDL(dbStatement, inputScanner);
+	}
+	
+	/*	public static boolean updateDB()
+	{
+		Connection dbConn = null;
+	    Scanner inputScanner = new Scanner(input);
+	    inputScanner.useDelimiter(ApplicationDBHelper.DDL_SCANNER_PATTERN);
+	    Statement dbStatement = null;
+	    try
+	    {
+	    	dbConn = getConnection();
+	        dbStatement = dbConn.createStatement();
+	        return(ApplicationPropertiesFile.getPropertiesFromFile().getProperty("initialization.ddl.file"));
+	        executeDDL(dbStatement, inputScanner);
+	
+	        return(true);
+	    }
+	    catch(Throwable t)
+	    {
+	    	log.log(Level.SEVERE, "An error occurred while trying to import a DDL file.", t);
+	    	return(false);
+	    }
+	    finally
+	    {
+	    	if(inputScanner != null)
+	    		inputScanner.close();
+	        closeConnection(dbConn, dbStatement, null);
+	    }
+	} */
+}	
