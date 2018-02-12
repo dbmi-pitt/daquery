@@ -38,9 +38,12 @@
             <td>{{ request?.requestSite.name }}</td>
             <td>{{ request?.response?.status }}</td>
             <td>{{ request?.response?.status === 'ERROR' ? request.response?.errorMessage : request.response?.value }}
-                <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED'].includes(request?.response?.status) && !request?.response?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+                <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED'].includes(request?.response?.status) && !request?.response?.hasError && !request?.error" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
                 <span *ngIf="request?.response?.hasError" class="pull-right-container">
                   <small class="label bg-red">Network Error</small>
+                </span>
+                <span *ngIf="request?.error" class="pull-right-container">
+                  <small class="label bg-red" data-toggle="tooltip" data-placement="top" [title]="request?.error?.error?.longMessage">{{ request?.error?.error?.displayMessage }}</small>
                 </span>
             </td>
           </tr>

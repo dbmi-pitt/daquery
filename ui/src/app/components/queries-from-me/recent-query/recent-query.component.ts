@@ -25,7 +25,7 @@ export class RecentQueryComponent implements OnInit {
   notifyMe(requests: any[]) {
     this.requests = requests;
     requests.forEach((request) => {
-      this.requestService.sendRequest(request)
+      this.requestService.sendRequest(request, false)
                          .subscribe(response => {
                           request['response'] = response;
                           if(response && !['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
@@ -50,7 +50,8 @@ export class RecentQueryComponent implements OnInit {
                             })
                          }
                          }, error => {
-                          return Observable.throw(error);
+                           request['error'] = error;
+                           return Observable.throw(error);
                          });
     });
   }

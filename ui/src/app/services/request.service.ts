@@ -64,10 +64,10 @@ export class RequestService {
                     });
   }
 
-  sendRequest(inquiry: any) {
+  sendRequest(inquiry: any, showError: boolean) {
     return this.http.post('/daquery/ws/request', inquiry)
                     .catch(error => {
-                        this.error.error = error;
+                        if(showError) this.error.error = error;
                         return Observable.throw(error || 'Server error');
                     });
   }
