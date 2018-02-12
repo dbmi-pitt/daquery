@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
@@ -28,7 +29,21 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
 public class NetworkDAO extends AbstractDAO {
 
     private final static Logger logger = Logger.getLogger(NetworkDAO.class.getName());
-	
+
+    public static List<Network> getAllNetworks()
+    {
+    	Session sess = null;
+    	try
+    	{
+    		Criteria c = sess.createCriteria(Network.class);
+    		return c.list();
+    	}
+    	finally
+    	{
+    		if(sess != null) sess.close();
+    	}
+    }
+    
     public static Network queryNetwork(String id) throws Exception {
     	// auto generated ID
         if(id.matches("^\\d+$"))
