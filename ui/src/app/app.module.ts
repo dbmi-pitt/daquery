@@ -69,6 +69,7 @@ import { SavedQueriesComponent } from './components/queries-from-me/saved-querie
 // External Libs
 import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
 import { MomentModule } from 'angular2-moment';
+import { EditUserComponent } from './components/users/edit-user/edit-user.component';
 
 
 @NgModule({
@@ -111,6 +112,7 @@ import { MomentModule } from 'angular2-moment';
     MapValuesPipe,
     RecentQueryComponent,
     SavedQueriesComponent,
+    EditUserComponent,
   ],
   imports: [
     BrowserModule,

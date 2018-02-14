@@ -1,0 +1,73 @@
+<section class="content-header">
+  <h1>
+    User Profile
+  </h1>
+</section>
+<section class="content">
+  <div class="row">
+    <div class="col-md-4 col-md-offset-4">
+      <div *ngIf="(user$ | async) as user; else loading" class="box box-primary">
+        <div *ngIf="!editMode" class="box-body box-profile">
+          <img class="profile-user-img img-responsive img-circle" [src]="'assets/admin-lte/dist/img/avatar5.png'" alt="User profile picture">
+          <h3 class="profile-username text-center">{{ user.realName }}</h3>
+          <p class="text-muted text-center">{{ listRoles(user.roles) | uppercase }}</p>
+          <ul class="list-group list-group-unbordered">
+            <li class="list-group-item">
+              <b>Email</b> <a class="pull-right">{{ user.email }}</a>
+            </li>
+            <li class="list-group-item">
+              <b>Password</b> <a class="pull-right">********</a>
+            </li>
+          </ul>
+          <a class="btn btn-primary btn-block" (click)="editMode = true">Edit</a>
+        </div>
+        <div *ngIf="editMode" class="box-body box-profile">
+          <form #f [formGroup]="profileForm" (ngSubmit)="onSubmit()" novalidate>
+            <img class="profile-user-img img-responsive img-circle" [src]="'assets/admin-lte/dist/img/avatar5.png'" alt="User profile picture">
+            <h3 class="profile-username text-center">{{ user.realName }}</h3>
+            <div class="form-group has-feedback" [ngClass]="{'has-error': realName.invalid && (realName.dirty || realName.touched), 'has-success': realName.valid && (realName.dirty || realName.touched) }">
+              <input type="text" formControlName="realName" class="form-control" name="realName" placeholder="Real Name" [(ngModel)]="user.realName" />
+              <span class="fa fa-file-text-o form-control-feedback"></span>
+              <div class="help-block" *ngIf="realName.invalid && (realName.dirty || realName.touched)">Please enter a real name</div>
+            </div>
+            <p class="text-muted text-center">{{ listRoles(user.roles) | uppercase }}</p>
+            <ul class="list-group list-group-unbordered">
+              <li class="list-group-item">
+                <b>Email</b> <a class="pull-right">{{ user.email }}</a>
+                <div class="form-group has-feedback" [ngClass]="{'has-error': email.invalid && (email.dirty || email.touched), 'has-success': email.valid && (email.dirty || email.touched) }">
+                  <input type="text" formControlName="email" class="form-control" name="email" placeholder="Email" [(ngModel)]="user.email" />
+                  <span class="fa fa-file-text-o form-control-feedback"></span>
+                  <div class="help-block" *ngIf="email.invalid && (email.dirty || email.touched)">Please enter a email address</div>
+                </div>
+              </li>
+              <li class="list-group-item">
+                <b>Password</b> <a class="pull-right">********</a>
+                <div class="form-group has-feedback" [ngClass]="{'has-error': newPassword.invalid && (newPassword.dirty || newPassword.touched), 'has-success': newPassword.valid && (newPassword.dirty || newPassword.touched) }">
+                  <input type="newPassword" formControlName="newPassword" class="form-control" name="newPassword" placeholder="Password" [(ngModel)]="user.password" />
+                  <span class="fa fa-file-text-o form-control-feedback"></span>
+                  <div class="help-block" *ngIf="newPassword.hasError('required') && (newPassword.dirty || newPassword.touched)">Please enter a Password</div>
+                  <div class="help-block" *ngIf="newPassword.hasError('minlength') && (newPassword.dirty || newPassword.touched)">Password at least 8 characters</div>
+                </div>
+              </li>
+            </ul>
+            <button [disabled]="profileForm.invalid || submitting" class="btn btn-primary btn-block btn-flat">
+                <i *ngIf="submitting" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+                <span *ngIf="!submitting">submit</span>
+              </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<ng-template #loading>
+    <div class="box box-primary">
+      <div class="box-body">
+        <div class="col-md-4 col-md-offset-4 text-center">
+          <span>Loading user...</span><br />
+          <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+        </div>
+      </div>
+    </div>
+</ng-template>

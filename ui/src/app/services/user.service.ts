@@ -25,6 +25,14 @@ export class UserService {
                     });
   }
 
+  getUser(user_id: string): Observable<any> {
+    return this.http.get(`/daquery/ws/users/${user_id}`)
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
+
   getRoles(user_id: number): Observable<string[]> {
     const params = new HttpParams().set('user_id', user_id.toString());
     return this.http.get('/daquery/ws/local-roles', {params: params})
@@ -103,15 +111,21 @@ export class UserService {
   }
 
   changePassword(user: any): Observable<boolean> {
-    return this.http.put(`/daquery/ws/users/${user.id}`, user, this.authenticationService.jwt())
-                    .map(response => {
-                        return true;
-                    })
+    return this.http.put(`/daquery/ws/users/${user.id}`, user)
                     .catch(error => {
-                      if(error.status === 401)
-                        return Observable.of(false);
-                      else
-                        return Observable.throw(error.json().error || 'Server error');
+                      if(error.status != 401)
+                        this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  updateUser(user: any): Observable<boolean> {
+    return this.http.put(`/daquery/ws/users/${user.id}`, user)
+                    .catch(error => {
+                      if(error.status != 401){
+                        this.error.error = error;
+                      }
+                      return Observable.throw(error || 'Server error');
                     })
   }
 
