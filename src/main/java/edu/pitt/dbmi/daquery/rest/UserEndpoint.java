@@ -676,7 +676,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        if (user == null)
 	            return Response.status(NOT_FOUND).build();
 	        String json = user.toJson();	
-	        return Response.ok(200).entity(json).build();
+	        return Response.ok().entity(json).build();
     	} catch (Exception e) {
     		String msg = "An unexpected error occured while retrieving account information user [" + id + "].";
     		logger.log(Level.SEVERE, msg, e);
