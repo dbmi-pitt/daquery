@@ -845,7 +845,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        s.getTransaction().commit();
 
-	        return Response.ok(200).build();
+	        return Response.ok("{}").build();
 	        
     	} catch (Exception e) {
     		String msg = "An unexpected error occured while updating account information  for user [" + id + "].";
