@@ -816,7 +816,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	}
 	        //step 5: check if this is an admin initiated password change	        
 	        } else if (hasAdminRole && updatedUser.getNewPassword() != null) {
-	        	user.setPassword(updatedUser.getNewPassword());
+        		user.setPassword(updatedUser.getNewPassword());
 	        }
 	        
 	        Site mySite = SiteDAO.getLocalSite();
@@ -830,8 +830,13 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        if(updatedUser.getRealName() != null)
 	        	user.setRealName(updatedUser.getRealName());
-	        if(updatedUser.getRoles() != null)
-	        	user.setRoles(updatedUser.getRoles());
+	        if(updatedUser.getRoles() != null) {
+	        	user.getRoles().clear();
+	        	for(Role r : updatedUser.getRoles()) {
+	        		user.getRoles().add(RoleDAO.queryRoleByName(r.getName()));
+	        	}
+	        	
+	        }
 	        if(updatedUser.getStatus() != null)
 	        	user.setStatus(updatedUser.getStatus());
 	        if(updatedUser.getEmail() != null)
