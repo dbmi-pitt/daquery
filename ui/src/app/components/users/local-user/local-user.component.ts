@@ -18,7 +18,6 @@ export class LocalUserComponent implements OnInit {
 
   ngOnInit() {
     this.roles = this.user.roles.map(r => r.name).join(', ');
-    this.getLocalRoles();
   }
 
   getLocalRoles() {

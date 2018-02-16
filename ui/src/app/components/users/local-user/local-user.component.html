@@ -2,7 +2,7 @@
   <div class="col-md-12">
     <div class="box box-default">
       <div class="box-header with-border">
-        <h3>{{user.realName}}</h3>
+        <a [routerLink]="['/users', user.id]"><h3>{{user.realName}}</h3></a>
         <span>{{user.email}}</span>
         <br />
       </div>
