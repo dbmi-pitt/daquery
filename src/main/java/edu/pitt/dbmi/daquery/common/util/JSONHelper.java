@@ -1,15 +1,24 @@
 package edu.pitt.dbmi.daquery.common.util;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -19,9 +28,30 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
+import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 
 public class JSONHelper
 {
+	public static void main(String [] args) throws Exception
+	{
+		DataModel dm = new DataModel(true);
+		dm.setName("TestDM");
+		DataAttribute da = new DataAttribute();
+		da.setFieldName("F1");
+		da.setEntityName("BLECH");
+		DataAttribute da2 = new DataAttribute();
+		da.setFieldName("F2");
+		da.setEntityName("BLECH");
+		Set<DataAttribute> das = new HashSet<DataAttribute>();
+		das.add(da);
+		das.add(da2);
+		dm.setAttributes(das);
+		Object v = decodeResponse(ResponseHelper.getJsonResponseGen(200, dm), new TypeReference<DataModel>(){});
+		System.out.println(v);
+	}
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"); 
     public static Gson gson = new GsonBuilder()
     		.excludeFieldsWithoutExposeAnnotation()
@@ -146,4 +176,25 @@ public class JSONHelper
 			return("\"" + obj.toString() + "\"");
 		}
 	}
+	
+    public static Object decodeResponse(Response resp, TypeReference<?> type)
+    {
+    	if(resp == null) return(null);
+    	String val = null;
+    	if(resp instanceof OutboundJaxrsResponse)
+    		val = resp.getEntity().toString();
+    	else
+    		val = resp.readEntity(String.class);
+    	
+    	if(StringHelper.isEmpty(val)) return(null);
+		ObjectMapper mapper = new ObjectMapper();
+		Object rVal = null;
+		try{rVal = mapper.readValue(val, type);}
+		catch(JsonParseException jpe){return(null);}
+		catch(JsonMappingException jpe){return(null);}
+		catch(IOException jpe){return(null);}
+		if(rVal == null) return(val);
+		return(rVal);
+    }
+	
 }

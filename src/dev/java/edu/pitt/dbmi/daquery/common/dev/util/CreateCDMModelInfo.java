@@ -76,7 +76,6 @@ public class CreateCDMModelInfo
 			while (rs.next())
 			{
 				DataAttribute da = new DataAttribute();
-				da.setAggregatable(false);
 				da.setDataModel(dm);
 				da.setEntityName(rs.getString("TABLE_NAME"));
 				da.setFieldName(rs.getString("COLUMN_NAME"));
@@ -86,6 +85,10 @@ public class CreateCDMModelInfo
 					da.setPhi(true);
 				else
 					da.setPhi(false);
+				if(da.getFieldName().toUpperCase().equals("PATID") && da.getEntityName().toUpperCase().equals("DEMOGRAPHIC"))
+					da.setAggregatable(true);
+				else
+					da.setAggregatable(false);				
 				attribs.add(da);
 			}
 			dm.setAttributes(attribs);

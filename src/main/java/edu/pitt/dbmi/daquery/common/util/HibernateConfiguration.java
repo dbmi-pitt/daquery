@@ -37,6 +37,8 @@ public class HibernateConfiguration {
 	
 	private static SessionFactory sessFact = null;
 
+	private static boolean erroredStartup = false;
+	
 	/**
 	 * Open a new session/db connection
 	 * 
@@ -53,6 +55,8 @@ public class HibernateConfiguration {
 	 */
 	public static SessionFactory getSessionFactory() throws DaqueryException
 	{
+		if(erroredStartup) return(null);
+		
 		if(sessFact != null)
 			return(sessFact);
 		
@@ -176,4 +180,8 @@ public class HibernateConfiguration {
         return sessFact;
 	}
 	
+	public static void setErroredStartup(boolean val)
+	{
+		erroredStartup = val;
+	}
 }
