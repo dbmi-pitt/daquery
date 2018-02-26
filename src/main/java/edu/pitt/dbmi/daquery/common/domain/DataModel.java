@@ -45,6 +45,9 @@ public class DataModel extends DaqueryObject implements Serializable
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="dataModel")
 	private Set<DataAttribute> attributes;	
 	
+	@Column(name = "DATA_EXPORT_CONF")
+	private String dataExportConf;
+	
 	public DataModel(){}
 	
 	public DataModel(boolean createUUID)
@@ -75,6 +78,9 @@ public class DataModel extends DaqueryObject implements Serializable
 	
 	public Set<DataAttribute> getAttributes(){return(attributes);}
 	public void setAttributes(Set<DataAttribute> attribs){attributes = attribs;}
+	
+	public String getDataExportConf() { return this.dataExportConf; }
+	public void setDataExportConf(String dataExportConf) { this.dataExportConf = dataExportConf; }
 
 	@Transient
 	public DataSource getDataSource(SourceType type)
