@@ -1,3 +1,5 @@
+<!-- daquery.data.version=1.3 -->
+
 CREATE TABLE "APP"."NETWORK"
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
@@ -176,7 +178,9 @@ CREATE TABLE DAQUERY_RESPONSE
    FILESET_ID bigint,
    ERROR_MESSAGE varchar(1024),
    RESPONSE_ID varchar(50),
-   USER_ID varchar(50)
+   USER_ID varchar(50),
+   DOWNLOAD_INQUIRY_ID bigint,
+   DOWNLOAD_AVAILABLE boolean
 );
 
 CREATE TABLE SQL_QUERY
@@ -195,3 +199,10 @@ CREATE TABLE FILEPATH
 	fileset_id bigint,
 	path varchar(3000)
 );
+
+CREATE TABLE SQL_DOWNLOAD
+(
+   INQ_ID bigint NOT NULL,
+   CODE varchar(32000)   
+);
+

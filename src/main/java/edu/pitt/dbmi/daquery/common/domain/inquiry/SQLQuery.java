@@ -64,6 +64,7 @@ public class SQLQuery extends Inquiry
 	public String getCode(){return(code);}
 	public void setCode(String code){this.code = code;}
 
+	@Override
 	public DaqueryResponse run(DaqueryResponse response, DataModel model)
 	{
 		try
@@ -87,6 +88,14 @@ public class SQLQuery extends Inquiry
 					//String sql = "select count(patid) from demographic;";
 					String sql = ((SQLQuery) response.getRequest().getInquiry()).getCode();
 					response.setValue(ds.executeAggregate(sql).toString());
+					String aggregateValueSql = analyze.convertToValuesSql();
+					if(! StringHelper.isEmpty(aggregateValueSql))
+					{
+						response.setDownloadAvailable(true);
+						SQLDownload dLoad = new SQLDownload(true);
+						dLoad.setCode(aggregateValueSql);
+						response.setDownloadDirective(dLoad);
+					}
 					response.setStatusEnum(ResponseStatus.COMPLETED);
 				}
 			}

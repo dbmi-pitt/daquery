@@ -34,6 +34,8 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 	
 	private boolean debug = true;
 	
+	protected String baseSQL = null;
+	
 	public boolean isRejected(){return(rejected);}
 	public String getRejectionMessage(){return(rejectMessage);}
 	
@@ -80,7 +82,9 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 	{
 		try
 		{
+			
 			if(! sql.trim().endsWith(";")) sql = sql.trim() + ";";
+			baseSQL = sql;
 			CharStream charStream = CharStreams.fromString(sql);
 	        SQLiteLexer lexer = new SQLiteLexer(charStream);
 	        TokenStream tokens = new CommonTokenStream(lexer);

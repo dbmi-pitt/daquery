@@ -234,10 +234,30 @@ public class ResponseHelper {
 			TypeReference<ErrorInfo> type = new TypeReference<ErrorInfo>(){};
 			ErrorInfo errorInfo = null;
 			try{errorInfo = mapper.readValue(val, type);}
-			catch(JsonParseException jpe){return(null);}
-			catch(JsonMappingException jpe){return(null);}
-			catch(IOException jpe){return(null);}
-			if(errorInfo == null || StringHelper.isEmpty(errorInfo.type)) return(null);
+			catch(JsonParseException jpe)
+			{
+				DecodedErrorInfo dei = new DecodedErrorInfo(new ErrorInfo(), val);
+				dei.getErrorInfo().setDisplayMessage(val);
+				return(dei);
+			}
+			catch(JsonMappingException jpe)
+			{
+				DecodedErrorInfo dei = new DecodedErrorInfo(new ErrorInfo(), val);
+				dei.getErrorInfo().setDisplayMessage(val);
+				return(dei);
+			}			
+			catch(IOException jpe)
+			{
+				DecodedErrorInfo dei = new DecodedErrorInfo(new ErrorInfo(), val);
+				dei.getErrorInfo().setDisplayMessage(val);
+				return(dei);
+			}			
+			if(errorInfo == null || StringHelper.isEmpty(errorInfo.type))
+			{
+				DecodedErrorInfo dei = new DecodedErrorInfo(new ErrorInfo(), val);
+				dei.getErrorInfo().setDisplayMessage(val);
+				return(dei);
+			}				
 			if(errorInfo.type.equals(ErrorInfo.ERROR_INFO_TYPE_VERSION))
 				return(new DecodedErrorInfo(errorInfo, null));
 			else
