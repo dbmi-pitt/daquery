@@ -123,8 +123,8 @@ public class ApplicationDBHelper
 	    try
 	    {
 	    	dbConn = getConnection();
+	    	dbStatement = dbConn.createStatement();
 	        executeDDL(dbStatement, inputScanner);
-
 	        return(true);
 	    }
 	    catch(Throwable t)
@@ -170,6 +170,7 @@ public class ApplicationDBHelper
 	                catch(Throwable t)
 	                {
 	                	System.err.println("Error executing the following DDL \n" + l2); t.printStackTrace();
+	                	log.log(Level.SEVERE, "Error while executing ddl\n" + l2, t);
 	                	throw new DaqueryException("Error executing the following DDL \n" + l2);  //Eclipse reports a resource leak here, but this isn't true it is handled in the finally clause below
 	                }
             	}

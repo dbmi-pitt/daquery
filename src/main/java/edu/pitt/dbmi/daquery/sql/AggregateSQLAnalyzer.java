@@ -1,24 +1,32 @@
 package edu.pitt.dbmi.daquery.sql;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_nameContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Count_functionContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.DbColumnExprContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Distinct_keywordContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_columnContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Table_nameContext;
 
 public class AggregateSQLAnalyzer extends SQLAnalyzer
 {
 	
 	private boolean countFound = false;
 	private boolean firstResultFound = false;
+	private String aggregateColumnName = null;
+	private String aggregateTableName = null;
+	private boolean aggregateDistinct = false;
+	
 	
 	public static void main(String [] args)
 	{
-		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(*) from demographic;");
-		System.out.println(a);
-		
+		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("sElEct coUNt( distinct blech.patid) from demographic;");
+		System.out.println(a.isRejected());
+		System.out.println(a.convertToValuesSql());
 	}
 	
 	public AggregateSQLAnalyzer(String sql)
@@ -49,6 +57,7 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 			ParserRuleContext firstCtx = firstCtxNode.self;
 			ParserRuleContext columnExpr = null;
 
+			//aggregate functions must start with a select count(...)
 			if(firstCtx instanceof Count_functionContext)
 			{
 				countFound = true;
@@ -60,16 +69,34 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 				{
 					if(! (firstCtxNode.children.get(0).self instanceof Distinct_keywordContext))
 						setRejection("Aggregte count function modifiers can only be of type \"distinct\"");
+					else
+						aggregateDistinct = true;
 					
 					columnExpr = firstCtxNode.children.get(1).self;
 				}
 				else //only one argument in count function
 					columnExpr  = firstCtxNode.children.get(0).self;
-				
-				
-				if( ! (columnExpr instanceof DbColumnExprContext))
-					setRejection("Aggregate count function con only contain a single column as an argument");
 
+				if(! isRejected())
+				{				
+					//we only aggregate for a single db column
+					if( columnExpr instanceof DbColumnExprContext)
+					{
+						DbColumnExprContext dbColContext = (DbColumnExprContext) columnExpr;
+						int nChildren = dbColContext.children.size();
+						for(int i = 0; i < nChildren; i++)
+						{
+							ParseTree child = dbColContext.children.get(i);
+							if(child instanceof Column_nameContext)
+								aggregateColumnName = child.getText();
+							else if(child instanceof Table_nameContext)
+								aggregateTableName = child.getText();
+						}
+					}
+					else
+						setRejection("Aggregate count function con only contain a single column as an argument");
+				}
+				
 				//TODO: check that columnExpr is allowable aggregate field
 			}
 		}
@@ -82,4 +109,27 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 		}		
 	}
 	
+	public String getAaggregateColumnName(){return(aggregateColumnName );}
+	public String getAggregateTableName(){return(aggregateTableName);}
+	public boolean isAggregateDistinct(){return(aggregateDistinct);}
+	
+	/**
+	 * Convert the original aggregate sql to return the values that are being counted
+	 * 
+	 * @return The SQL that will return the values or null if it can't be created.
+	 */
+	public String convertToValuesSql()
+	{
+		if(isRejected()) return(null);
+		if(StringHelper.isEmpty(aggregateColumnName)) return(null);
+		
+		String rSQL = baseSQL.trim();
+		rSQL = rSQL.replaceFirst("(?i)select\\s+count\\(.*\\)", "");
+		String selectClause = "select ";
+		if(aggregateDistinct) selectClause = selectClause + "distinct ";
+		if(!StringHelper.isEmpty(aggregateTableName)) selectClause = selectClause + aggregateTableName + ".";
+		selectClause = selectClause + aggregateColumnName;
+		rSQL = selectClause + " " + rSQL.trim();
+		return(rSQL);
+	}
 }

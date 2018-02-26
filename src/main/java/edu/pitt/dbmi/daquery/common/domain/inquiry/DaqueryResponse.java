@@ -77,6 +77,15 @@ public class DaqueryResponse extends DaqueryObject
     private String errorMessage;
     
     @Expose
+    @Column(name = "DOWNLOAD_AVAILABLE")
+    private boolean downloadAvailable;
+    
+    @ManyToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
+    @JoinColumn(name = "DOWNLOAD_INQUIRY_ID")
+    private Inquiry downloadDirective;
+
+    
+    @Expose
     @Transient
     private String stackTrace;
     
@@ -142,5 +151,11 @@ public class DaqueryResponse extends DaqueryObject
     
     public String getStackTrace(){return(stackTrace);}
     public void setStackTrace(String trace){stackTrace = trace;}
+    
+    public Inquiry getDownloadDirective(){return(downloadDirective);}
+    public void setDownloadDirective(Inquiry directive){downloadDirective = directive;}
+    
+    public boolean isDownloadAvailable(){return(downloadAvailable);}
+    public void setDownloadAvailable(boolean available){downloadAvailable = available;}
     
 }
