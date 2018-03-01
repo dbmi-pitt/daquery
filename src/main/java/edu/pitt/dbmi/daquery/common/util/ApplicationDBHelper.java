@@ -13,9 +13,24 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class ApplicationDBHelper
 {
+	public static void main(String [] args)
+	{
+		InputStream is = FileHelper.streamFromBaseResource("daquery.ddl");
+	    Scanner inputScanner = new Scanner(is);
+	    inputScanner.useDelimiter("(;(\r)?\n)|((\r)?\n)?(--)?.*(--(\r)?\n)|(-->(\r)?\n)");
+	    while(inputScanner.hasNext())
+    	{
+	    	String val = inputScanner.next();
+	    	if(val.matches("(?i)<!--\\s*daquery.data.version\\s*=\\s*.*"))
+	    		System.out.println("true");
+	    	System.out.println(val);
+    	}
+		
+	}
+	
 	private static Logger log = Logger.getLogger(ApplicationDBHelper.class.getName());
 
-	public static final String DDL_SCANNER_PATTERN = "(;(\r)?\n)|((\r)?\n)?(--)?.*(--(\r)?\n)";
+	public static final String DDL_SCANNER_PATTERN = "(;(\r)?\n)|((\r)?\n)?(--)?.*(--(\r)?\n)|(-->(\r)?\n)";
 	
 	private static ComboPooledDataSource dataSource = null;
 	public static Connection getConnection()
@@ -119,12 +134,41 @@ public class ApplicationDBHelper
 		Connection dbConn = null;
 	    Scanner inputScanner = new Scanner(input);
 	    inputScanner.useDelimiter(DDL_SCANNER_PATTERN);
-	    Statement dbStatement = null;
+	    Statement dbSt1 = null;
+	    Statement dbSt2 = null;
+	    Statement dbSt3 = null;
 	    try
 	    {
 	    	dbConn = getConnection();
-	    	dbStatement = dbConn.createStatement();
-	        executeDDL(dbStatement, inputScanner);
+	    	dbSt1 = dbConn.createStatement();
+	    	dbSt2 = dbConn.createStatement();
+	    	dbSt3 = dbConn.createStatement();
+	        Float dbVersion = executeDDL(dbSt1, inputScanner);
+	        dbConn.commit();
+	        if(dbVersion != null)
+	        {
+	        	Float currentVersion = null;
+	        	ResultSet rs = dbSt2.executeQuery("select * from property where name = 'db.version'");
+	        	String strVer = null;
+	        	float v = -1.0f;
+	        	if(rs.next())
+	        	{
+	        		strVer = rs.getString("value");
+	        		v = Float.parseFloat(strVer);
+	        		currentVersion = new Float(v);	        	
+	        	}
+				
+				
+				if(currentVersion == null || currentVersion.floatValue() < 0.0f)
+				{
+					dbSt3.executeUpdate("insert into property (name, value) values ('db.version', '" + dbVersion + "')");
+				}
+				else //otherwise update
+				{
+					dbSt3.executeUpdate("update property set value = '" + dbVersion + "' where name = 'db.version'");
+				}
+				dbConn.commit();
+	        }
 	        return(true);
 	    }
 	    catch(Throwable t)
@@ -136,12 +180,24 @@ public class ApplicationDBHelper
 	    {
 	    	if(inputScanner != null)
 	    		inputScanner.close();
-	        closeConnection(dbConn, dbStatement, null);
+	        closeConnection(dbConn, dbSt1, null);
+	        closeConnection(null, dbSt2, null);
+	        closeConnection(null, dbSt3, null);
 	    }
 	}
 	
-	public static void executeDDL(Statement dbStat, Scanner ddlScanner) throws DaqueryException
+	/**
+	 * Execute a ddl file if a line in the file is found like <!-- version=xx.xx -> extract the 
+	 * version number and pass it back as a float. 
+	 * 
+	 * @param dbStat
+	 * @param ddlScanner
+	 * @return
+	 * @throws DaqueryException
+	 */
+	public static Float executeDDL(Statement dbStat, Scanner ddlScanner) throws DaqueryException
 	{
+		Float version = null;
         while (ddlScanner.hasNext())
         {
             String line = ddlScanner.next();
@@ -154,13 +210,23 @@ public class ApplicationDBHelper
             if (line.trim().length() > 0)
             {
             	String l2 = line.trim();
-            	if(l2.startsWith("#include"))
+            	if(version == null && l2.matches("(?i)<!--\\s*daquery.data.version\\s*=\\s*.*"))
+            	{
+            		String v = l2.replaceFirst("(?i)<!--\\s*daquery.data.version\\s*=\\s*", "");
+            		try{version = Float.parseFloat(v.trim());}
+            		catch(Throwable t)
+            		{
+            			log.log(Level.SEVERE, "Couldn't convert specified version number " + v + " in ddl file to a float", t);
+            		}
+            	}
+            	else if(l2.startsWith("#include"))
             	{
             		String includeFile = l2.substring(8).trim();
             		InputStream is = FileHelper.streamFromBaseResource(includeFile);
             	    Scanner inputScanner = new Scanner(is);
             	    inputScanner.useDelimiter(DDL_SCANNER_PATTERN);
-            	    executeDDL(dbStat, inputScanner);
+            	    Float incVers = executeDDL(dbStat, inputScanner);
+            	    if(version == null) version = incVers;
             	}
             	else
             	{
@@ -175,6 +241,7 @@ public class ApplicationDBHelper
 	                }
             	}
             }
-        }		
+        }
+        return(version);
 	}
 }
