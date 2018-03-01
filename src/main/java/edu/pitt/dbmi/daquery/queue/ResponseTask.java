@@ -19,14 +19,12 @@ public class ResponseTask extends AbstractTask implements Task
 	
 	private DaqueryResponse response;
 	private Inquiry inquiry;
-	private DaqueryRequest request;
 	private DataModel model;
 	
 	
 	
 	public ResponseTask(DaqueryRequest request, UserInfo responder, DataModel dm) throws DaqueryException
 	{
-		this.request = request;
 		this.inquiry = request.getInquiry();
 		response = new DaqueryResponse(true);
 		this.setQueueId(response.getResponseId());

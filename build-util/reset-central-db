@@ -1,0 +1,9 @@
+if [ -z "$1" ]; then
+  echo "Must provide a site to reset."
+  echo "usage: reset-central-db sitename"
+  exit 1
+fi
+ssh root@dbmi-shrine-dev01.dbmi.pitt.edu "service tomcat stop"
+sleep 10
+ssh root@dbmi-shrine-dev01.dbmi.pitt.edu "/opt/shrine/tomcat/daq-build/reset-central-db $1"
+ssh root@dbmi-shrine-dev01.dbmi.pitt.edu "service tomcat start"
