@@ -4,6 +4,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
+import java.io.FileNotFoundException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,12 +34,17 @@ import org.hibernate.HibernateException;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
+import edu.pitt.dbmi.daquery.util.DataExporter;
+import edu.pitt.dbmi.daquery.util.properties.DataExport;
+import edu.pitt.dbmi.daquery.util.properties.DataExportPropertyFile;
 
 @Path("/requests")
 @Produces(APPLICATION_JSON)
@@ -263,5 +269,53 @@ public class RequestEndpoint extends AbstractEndpoint {
         		dao.closeCurrentSession();
         	}
         }
+    }
+    
+    /**
+     * Export Data
+     * 
+     * @param request_id
+     * example URL: daquery-ws/ws/requests/d2dd12f4-6b2e-430a-90db-dfe0c1617a48/export
+     * @return 200 OK Request
+     * @throws FileNotFoundException 
+     * @throws 500 Server Error	error message
+     * @throws 401 Unauthorized	
+     */
+    @GET
+    @Path("/{id}/data")
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response data(@PathParam("id") String id) {
+    	//validate the user
+    	// new thread
+	    	// ask for patid list
+	    	
+	    	// load the xml into java objects (JAXB)
+	    	
+	    	// test if output file location available
+	    	
+	    	// pass in export function
+	    	
+    	// return response
+    	
+    	try {
+    		DaqueryRequest dq = DaqueryRequestDAO.getRequestById(id);
+    		if(dq.getDirection().equals("IN-OUT")) {
+    			// local request
+    			
+    			// Send Data
+        		
+    		} else {
+    			// outgoing request
+    			
+    		}
+    	} catch(Throwable t) {
+    		String msg = "An unexpected error was encountered updating a new request.";
+    		logger.log(Level.SEVERE, msg, t);
+    		return ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", t);
+    	} 
+    	
+    	return Response.ok(200).entity("{}").build();
     }
 }

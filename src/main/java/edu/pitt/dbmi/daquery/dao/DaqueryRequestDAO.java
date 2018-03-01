@@ -35,7 +35,10 @@ public class DaqueryRequestDAO extends AbstractDAO {
 		{	
 			if(StringHelper.isBlank(requestId)) return(null);
 			sess = HibernateConfiguration.openSession();
-			Query q = sess.createQuery("SELECT r FROM DaqueryRequest r WHERE upper(r.requestId) = '" + requestId.toUpperCase().trim() + "'");
+			Query q = sess.createQuery("SELECT r FROM DaqueryRequest r "
+									 + "join fetch r.network"
+									 + " WHERE upper(r.requestId) = :request_id")
+						  .setParameter("request_id", requestId.toUpperCase().trim());
 			DaqueryRequest req = (DaqueryRequest) q.uniqueResult();
 			return(req);
 		}
