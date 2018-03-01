@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface DBVersion {
 
 	//should ignore this test?
-	public int version();
+	public float version();
 	public String ddlFile();
 
 }

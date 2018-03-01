@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import javax.transaction.Transaction;
 
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 import edu.pitt.dbmi.daquery.common.util.ApplicationPropertiesFile;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -46,7 +47,13 @@ public class UpdateDBForVersion
 		Connection conn = null;
 		try
 		{
-			Integer version = null;
+			//if the database hasn't been set up yet, do nothing
+			String dbDir = AppProperties.getDBDir();
+			File dbDirF = new File(dbDir);
+			if(! dbDirF.exists())			
+				return;
+			
+			Float version = null;
 			conn = ApplicationDBHelper.getConnection();
 			conn.setAutoCommit(false);
 			Statement st = conn.createStatement();
@@ -55,8 +62,8 @@ public class UpdateDBForVersion
 			{
 				try{
 					String strVer = rs.getString("value");
-					int v = Integer.parseInt(strVer);
-					version = new Integer(v);
+					float v = Float.parseFloat(strVer);
+					version = new Float(v);
 				}
 				catch(Throwable t)
 				{
@@ -65,25 +72,25 @@ public class UpdateDBForVersion
 					return;
 				}
 			}
-			if(version == null) version = new Integer(-1);
+			if(version == null) version = new Float(-1.0);
 			List<UpdateInfo> updates = getDBUpdateClasses();
 			Collections.sort(updates);
-			int maxVersion = version.intValue();
+			float maxVersion = version.floatValue();
 			for(UpdateInfo ui : updates)
 			{
-				if(ui.version > version.intValue())
+				if(ui.version > version.floatValue())
 				{
 					updateDDL(ui, conn);
+					conn.commit();
+					updateData(ui, conn);
+					conn.commit();
 					maxVersion = ui.version;
+					
 				}
 			}
-			conn.commit();
-			for(UpdateInfo ui : updates)
-			{
-				if(ui.version > version.intValue())
-					updateData(ui, conn);
-			}
-			if(maxVersion > version.intValue())
+
+
+			if(maxVersion > version.floatValue())
 			{
 				updateVersion(version, maxVersion, conn);
 			}
@@ -108,11 +115,11 @@ public class UpdateDBForVersion
 			}
 		}		
 	}
-	private static void updateVersion(Integer currentVersion, int newVersion, Connection conn) throws SQLException
+	private static void updateVersion(Float currentVersion, float newVersion, Connection conn) throws SQLException
 	{
 		Statement st = conn.createStatement();
 		//no version present, need to insert
-		if(currentVersion.intValue() == -1)
+		if(currentVersion.floatValue() < 0.0f)
 		{
 			st.executeUpdate("insert into property (name, value) values ('db.version', '" + newVersion + "')");
 		}
@@ -161,7 +168,7 @@ public class UpdateDBForVersion
 	private static class UpdateInfo implements Comparable<UpdateInfo>
 	{
 		Class<?> cls;
-		int version;
+		float version;
 		String ddlFile;
 		
 		@Override
