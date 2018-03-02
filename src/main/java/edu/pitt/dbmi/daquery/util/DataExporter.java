@@ -113,39 +113,52 @@ public class DataExporter {
 		this.dateShift = StringHelper.stringToBool(AppProperties.getDBProperty("date.shift"));
 	}
 	
-	private void buildConceptCDsMap() {
+	private void buildConceptCDsMap(DaqueryRequest daqueryRequest) throws Throwable {
 		conceptCDs = new Hashtable<>();
+		Connection conn = null;
+		Statement s = null;
+		ResultSet rs = null;
+		try {
 		// Get all the concept_cd from ontology
-		Connection ontologyConnection = PathDBHelper.getOntologyConnection(project_id);
-		String ontologySchemaPrefix = PathDBHelper.getOntologySchemaPrefix(project_id);
-		for(OutputFile outputFile : dataExportConfig.outputFiles){
-			if (outputFile.pivotLevel != null && outputFile.pivotLevel.equals("concept")){
-				for(ConceptColumn CC : outputFile.conceptColumns){
-					conceptCDs.put(CC.conceptCD, outputFile);
-					if(CC.type != null && CC.type.equals("value-list")){
-						for(ValueCode vc : CC.valueCodes){
-							conceptCDs.put(vc.code, outputFile);
+			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModel().getDataSource(SourceType.SQL);
+			conn = ds.getConnection();
+			//Connection ontologyConnection = PathDBHelper.getOntologyConnection(project_id);
+			//String ontologySchemaPrefix = PathDBHelper.getOntologySchemaPrefix(project_id);
+			for(OutputFile outputFile : dataExportConfig.outputFiles){
+				if (outputFile.pivotLevel != null && outputFile.pivotLevel.equals("concept")){
+					for(ConceptColumn CC : outputFile.conceptColumns){
+						conceptCDs.put(CC.conceptCD, outputFile);
+						if(CC.type != null && CC.type.equals("value-list")){
+							for(ValueCode vc : CC.valueCodes){
+								conceptCDs.put(vc.code, outputFile);
+							}
+						}
+					}
+				} else {
+					for(OntologyTable ot : outputFile.ontologyTables){
+						s = conn.createStatement();
+						String query = "select c_basecode from "
+									+ ot.name
+									+ " where c_basecode is not null"
+									+ buildInExClause(ot, "");
+						
+						rs = s.executeQuery(query);
+						while (rs.next()) {
+							conceptCDs.put(rs.getString(1), outputFile);
 						}
 					}
 				}
-			} else {
-				for(OntologyTable ot : outputFile.ontologyTables){
-					Statement s = ontologyConnection.createStatement();
-					String query = "select c_basecode from "
-								+ ot.name
-								+ " where c_basecode is not null"
-								+ buildInExClause(ot, ontologySchemaPrefix);
-					
-					ResultSet rs = s.executeQuery(query);
-					while (rs.next()) {
-						conceptCDs.put(rs.getString(1), outputFile);
-					}
-				}
 			}
+		}catch (Throwable t) {
+			logger.log(Level.SEVERE, "Unexpected error while build ConceptCD map.", t);
+			throw t;
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, s, rs);
 		}
 	}
 	
-	public void export(List<Long> pList) throws IOException {
+	public void export(List<Long> pList) throws Throwable {
+		try {
 		this.patientList = pList;
 		int pageSize = this.dataExportConfig.pageSize;
 		int pageCount = (int) Math.ceil((double)pList.size() / pageSize);
@@ -155,7 +168,8 @@ public class DataExporter {
 		boolean filesent = false;
 		for (int currPage = 1; currPage <= pageCount; currPage++) {
 			File tmpDir = FileHelper.createTempDirectory();
-			File zipFile = dumpData(tmpDir, dauqeryRequest, currPage, pageCount, pageSize);
+			File zipFile;
+			zipFile = dumpData(tmpDir, dauqeryRequest, currPage, pageCount, pageSize);
 			zipFileName = zipFile.getName();
 			fileNames += "<li>" + zipFileName + "</li>";
 			//send the file to remote requester
@@ -181,9 +195,13 @@ public class DataExporter {
 			//accept Request
 			//acceptRequestLocally(request_site_table_id, zipFileName.replaceAll("-\\d+\\.", "-n."), sender_username, dataDir, siteName, securityKey);
 		}
+		} catch (Throwable t) {
+			logger.log(Level.SEVERE, "Error occurs on data export", t);
+			throw t;
+		}
 	}
 	
-	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currPage, int pageCount, int pageSize) {
+	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currPage, int pageCount, int pageSize) throws Throwable {
 		String filename = "";
 		if (pageCount == 1)
 			filename = daqueryRequest.getInquiry().getInquiryName() + "_" + SiteDAO.getLocalSite().getName() + "_" + daqueryRequest.getRequestId() + "_" + dateTime;
@@ -206,7 +224,7 @@ public class DataExporter {
 			}
 		}
 		
-		writeOntologyCSVFile(outputStreams, currPage, pageSize, ConceptCDs);	
+		writeOntologyCSVFile(outputStreams, daqueryRequest, currPage, pageSize, this.conceptCDs);	
 		
 		for(OutputStreamWriter w : outputStreams.values()){
 			w.close();
