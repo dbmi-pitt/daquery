@@ -78,7 +78,7 @@ public class DaqueryResponse extends DaqueryObject
     
     @Expose
     @Column(name = "DOWNLOAD_AVAILABLE")
-    private boolean downloadAvailable;
+    private Boolean downloadAvailable;
     
     @ManyToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
     @JoinColumn(name = "DOWNLOAD_INQUIRY_ID")
