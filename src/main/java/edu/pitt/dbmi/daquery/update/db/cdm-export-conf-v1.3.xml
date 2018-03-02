@@ -1,5 +1,13 @@
-<sample xml="file to see if this works">
-  <nest tag=1>
-     something here
-  </nest>
-</sample>
+<dataExportConfig>
+<outputFile name="demographics.csv" source="patient_dimension">
+        <custom-column-set>
+                <field name="Vital Status" colName="VITAL_STATUS_CD" />
+                <field name="Birth Date" colName="BIRTH_DATE" deid="birthday" />
+                <field name="Death Date" colName="DEATH_DATE" />
+                <field name="Sex" colName="SEX_CD" />
+                <field name="Zip Code" colName="ZIP_CD" deid="zip" />
+                <field name="Language" colName="LANGUAGE_CD" />
+                <field name="Race" colName="RACE_CD" />
+        </custom-column-set>
+</outputFile>
+</dataExportConfig>
