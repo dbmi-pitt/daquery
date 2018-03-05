@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.3 -->
+<!-- daquery.data.version=1.32 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -203,7 +203,6 @@ CREATE TABLE FILEPATH
 
 CREATE TABLE SQL_DOWNLOAD
 (
-   INQ_ID bigint NOT NULL,
-   CODE varchar(32000)   
+   INQ_ID bigint NOT NULL
 );
 
