@@ -84,7 +84,7 @@ public class DataExporter {
 	DataExportConfig dataExportConfig;
 	String dataDir;
 	boolean deliverData;
-	List<Long> patientList;
+	List<String> patientList;
 	private final int pientBlockSize = 500;
 	boolean debugDataExport;
 	boolean threeDigitZip;
@@ -157,7 +157,7 @@ public class DataExporter {
 		}
 	}
 	
-	public void export(List<Long> pList) throws Throwable {
+	public void export(List<String> pList) throws Throwable {
 		try {
 		this.patientList = pList;
 		int pageSize = this.dataExportConfig.pageSize;
@@ -374,7 +374,7 @@ public class DataExporter {
 			
 			buildCSVHeader(writer, outputFile.custom_column_set);
 			
-			ArrayList<Long> patients = getPatientIDofCurrPage(currPage, pageSize); 
+			ArrayList<String> patients = getPatientIDofCurrPage(currPage, pageSize); 
 			int patientsPerLoad = this.pientBlockSize;
 //			if(outputFile.source.equals("patient_dimension")){
 //				patientsPerLoad = this.propFile.getPatientDimensionPatientBlockSize() == null ? this.patientDimensionPatientBlockSize : this.propFile.getPatientDimensionPatientBlockSize();
@@ -518,7 +518,7 @@ public class DataExporter {
 			modiferPivotCoreColumns.put("Source System", 8);
 			modiferPivotCoreColumns.put("Value", 9);
 			
-			ArrayList<Long> patients = getPatientIDofCurrPage(currPage, pageSize);
+			ArrayList<String> patients = getPatientIDofCurrPage(currPage, pageSize);
 			int nLoads = (int) Math.ceil(((double) patients.size()) / ((double) patientsPerLoad));
 			
 			for (int i = 0; i < nLoads; i++) {
@@ -655,8 +655,8 @@ public class DataExporter {
 		writer.write("\n");
 	}
 	
-	private ArrayList<Long> getPatientIDofCurrPage(int curr_page, int patient_page_size){
-		ArrayList<Long> patients = new ArrayList<>();
+	private ArrayList<String> getPatientIDofCurrPage(int curr_page, int patient_page_size){
+		ArrayList<String> patients = new ArrayList<>();
 		int firstPatientIndex = (curr_page - 1) * patient_page_size;
 		int lastPatientIndex = Math.min(firstPatientIndex + patient_page_size - 1, this.patientList.size() - 1);
 		
@@ -667,7 +667,7 @@ public class DataExporter {
 		return patients;
 	}
 	
-	private String buildQueryInClause(ArrayList<Long> patients, int load, int patientPerLoad){
+	private String buildQueryInClause(ArrayList<String> patients, int load, int patientPerLoad){
 		int firstPatient = load * patientPerLoad;
 		int lastPatient = Math.min(firstPatient + patientPerLoad - 1, patients.size() - 1);
 		String inClause = "";

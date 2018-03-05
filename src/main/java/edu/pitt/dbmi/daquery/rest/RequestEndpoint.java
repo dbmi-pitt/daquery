@@ -44,7 +44,6 @@ import edu.pitt.dbmi.daquery.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 //import edu.pitt.dbmi.daquery.util.DataExporter;
 import edu.pitt.dbmi.daquery.util.properties.DataExport;
-import edu.pitt.dbmi.daquery.util.properties.DataExportPropertyFile;
 
 @Path("/requests")
 @Produces(APPLICATION_JSON)

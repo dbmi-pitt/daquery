@@ -43,6 +43,8 @@ public class SendData implements Runnable {
 		
 		} catch (IOException | DaqueryException e) {
 			logger.log(Level.SEVERE, "Can't load the data export configuration", e);
+		} catch (Throwable e) {
+			logger.log(Level.SEVERE, "Can't export data", e);
 		}
 	}
 
