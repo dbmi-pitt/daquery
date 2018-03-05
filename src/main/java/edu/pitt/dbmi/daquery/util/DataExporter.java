@@ -204,7 +204,7 @@ public class DataExporter {
 //				Files.copy(zipFile.toPath(), Paths.get(dataDir, zipFile.getName()), StandardCopyOption.REPLACE_EXISTING );
 //			}
 			
-			FileHelper.deleteDirectory(tmpDir);
+			// FileHelper.deleteDirectory(tmpDir);
 		}
 		
 		fileNames += "</ul>";
@@ -244,7 +244,7 @@ public class DataExporter {
 			}
 		}
 		
-		writeOntologyCSVFile(outputStreams, daqueryRequest, currPage, pageSize, this.conceptCDs);	
+		// writeOntologyCSVFile(outputStreams, daqueryRequest, currPage, pageSize, this.conceptCDs);	
 		
 		for(OutputStreamWriter w : outputStreams.values()){
 			w.close();
@@ -414,9 +414,9 @@ public class DataExporter {
 			for (int i = 0; i < nLoads; i++) {
 				String inClause = buildQueryInClause(patients, i, patientsPerLoad);
 				s = conn.createStatement();
-				String query = "select " + outputFile.id_column.field + ", " + columns + " from " + outputFile.source
-								+ " where " + outputFile.id_column.field + " IN (" + inClause + ")"
-								+ " order by " + outputFile.id_column.field;
+				String query = "select " + outputFile.idColumn + ", " + columns + " from " + outputFile.source
+								+ " where " + outputFile.idColumn + " IN (" + inClause + ")"
+								+ " order by " + outputFile.idColumn;
 				rs = s.executeQuery(query);
 				
 				String[] outLine = new String[2 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
@@ -426,9 +426,9 @@ public class DataExporter {
 					outLine = new String[outLine.length];
 					Arrays.fill(outLine, "");
 					
-					BigDecimal patientNum = rs.getBigDecimal(1);
+					String patientNum = rs.getString(1);
 					outLine[0] = patientNum.toString();
-					outLine[1] = csvSafeString(getSerializedId(patientNum));
+					outLine[1] = csvSafeString(patientNum);
 					int outLineEnd = debugDataExport ? outLine.length - 3 : outLine.length - 1;
 					for(int j = 2; j <= outLineEnd; j++){
 						if(outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("zip"))
@@ -452,7 +452,7 @@ public class DataExporter {
 					if (debugDataExport) {
 						outLine[outLine.length - 2] = outLine[0];
 						if (dateShift) {
-							outLine[outLine.length - 1] = Integer.toString(getShiftDays(new BigDecimal(outLine[0])));
+							outLine[outLine.length - 1] = Integer.toString(getShiftDays(outLine[0]));
 						} else {
 							outLine[outLine.length - 1] = "0";
 						}
@@ -563,7 +563,7 @@ public class DataExporter {
 								writeToStream(outLine, outputStreams, outputFile, 5, conceptPivotCoreColumns, outputFile.defaultValues);
 							}
 							
-							BigDecimal patientNum = rs.getBigDecimal("PATIENT_NUM");
+							String patientNum = rs.getString("PATIENT_NUM");
 							BigDecimal encounterNum = rs.getBigDecimal("ENCOUNTER_NUM");
 							String conceptCD = rs.getString("CONCEPT_CD");
 							String startDate = dateShift(patientNum, rs.getDate("START_DATE"));
@@ -574,7 +574,7 @@ public class DataExporter {
 							String SourceSystem = rs.getString("SOURCESYSTEM_CD");
 							//SourceSystem = source_system_mapping.get(SourceSystem) == null ? SourceSystem : source_system_mapping.get(SourceSystem);
 							outLine[0] = patientNum.toString();
-							outLine[1] = csvSafeString(getSerializedId(patientNum));
+							outLine[1] = csvSafeString(patientNum);
 							outLine[2] = csvSafeString(encounterNum.toString());
 							outLine[3] = csvSafeString(startDate);
 							outLine[4] = csvSafeString(endDate);		
@@ -602,7 +602,7 @@ public class DataExporter {
 								writeToStream(outLine, outputStreams, outputFile, 6, modiferPivotCoreColumns, outputFile.defaultValues);
 							}
 							
-							BigDecimal patientNum = rs.getBigDecimal("PATIENT_NUM");
+							String patientNum = rs.getString("PATIENT_NUM");
 							BigDecimal encounterNum = rs.getBigDecimal("ENCOUNTER_NUM");
 							String conceptCD = rs.getString("CONCEPT_CD");
 							String startDate = dateShift(patientNum, rs.getDate("START_DATE"));
@@ -613,7 +613,7 @@ public class DataExporter {
 							String SourceSystem = rs.getString("SOURCESYSTEM_CD");
 							//SourceSystem = source_system_mapping.get(SourceSystem) == null ? SourceSystem : source_system_mapping.get(SourceSystem);
 							outLine[0] = patientNum.toString();
-							outLine[1] = csvSafeString(getSerializedId(patientNum));
+							outLine[1] = csvSafeString(patientNum);
 							outLine[2] = csvSafeString(encounterNum.toString());
 							outLine[3] = csvSafeString(conceptCD);
 							outLine[4] = csvSafeString(startDate);
@@ -697,12 +697,12 @@ public class DataExporter {
 				inClause = inClause + " ,";
 			else
 				first = false;
-			inClause = inClause + patients.get(j);
+			inClause = inClause + "'" + patients.get(j) + "'";
 		}
 		return inClause;
 	}
 	
-	private String dateShift(BigDecimal ptId, Date date) throws DaqueryException {
+	private String dateShift(String ptId, Date date) throws DaqueryException {
 		return (dateShiftToString(getShiftDays(ptId), date));
 	}
 	
@@ -716,10 +716,10 @@ public class DataExporter {
 		return (dateFormat.format(dt));
 	}
 	
-	private Hashtable<BigDecimal, Integer> shiftDaysByPatientId = new Hashtable<BigDecimal, Integer>();
+	private Hashtable<String, Integer> shiftDaysByPatientId = new Hashtable<String, Integer>();
 	private Random rand = new Random();
 	
-	private int getShiftDays(BigDecimal patientId) throws DaqueryException {
+	private int getShiftDays(String patientId) throws DaqueryException {
 		if (!shiftDaysByPatientId.containsKey(patientId)) {
 			Integer shiftDays;
 			String scheme = AppProperties.getDBProperty("date.shift.scheme").trim().toUpperCase();
@@ -805,7 +805,7 @@ public class DataExporter {
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	// if data shifting is turned on and a shifted age is > 85
 	// change it to exactly 85
-	protected String handleBirthday(BigDecimal ptId, Date birthday) throws DaqueryException {
+	protected String handleBirthday(String ptId, Date birthday) throws DaqueryException {
 		Date bDay = null;
 		if (birthday == null) {
 			return "";
@@ -1075,7 +1075,7 @@ public class DataExporter {
 		if (distinct != null && distinct.equals("patient")){
 			return outLine == null || !(rs.getBigDecimal("PATIENT_NUM").toString().equals(outLine[0]));
 		} else {
-			return outLine == null || !(rs.getBigDecimal("PATIENT_NUM").toString().equals(outLine[0]) && rs.getBigDecimal("ENCOUNTER_NUM").toString().equals(outLine[2]) && csvSafeString(dateShift(rs.getBigDecimal("PATIENT_NUM"), rs.getDate("START_DATE"))).equals(outLine[3]) && String.valueOf(rs.getLong("INSTANCE_NUM")).equals(outLine[5]));
+			return outLine == null || !(rs.getBigDecimal("PATIENT_NUM").toString().equals(outLine[0]) && rs.getBigDecimal("ENCOUNTER_NUM").toString().equals(outLine[2]) && csvSafeString(dateShift(rs.getString("PATIENT_NUM"), rs.getDate("START_DATE"))).equals(outLine[3]) && String.valueOf(rs.getLong("INSTANCE_NUM")).equals(outLine[5]));
 		}
 	}
 	
@@ -1091,7 +1091,7 @@ public class DataExporter {
 		if (debugDataExport) {
 			outLine[outLine.length - 2] = outLine[0];
 			if (dateShift) {
-				outLine[outLine.length - 1] = Integer.toString(getShiftDays(new BigDecimal(outLine[0])));
+				outLine[outLine.length - 1] = Integer.toString(getShiftDays(outLine[0]));
 			} else {
 				outLine[outLine.length - 1] = "0";
 			}
@@ -1201,7 +1201,7 @@ public class DataExporter {
 	}
 	
 	private boolean isNewEntry(ResultSet rs, String[] outLine) throws SQLException, DaqueryException {
-		return outLine == null || !(rs.getBigDecimal("PATIENT_NUM").toString().equals(outLine[0]) && rs.getBigDecimal("ENCOUNTER_NUM").toString().equals(outLine[2]) && rs.getString("CONCEPT_CD").equals(outLine[3]) && csvSafeString(dateShift(rs.getBigDecimal("PATIENT_NUM"), rs.getDate("START_DATE"))).equals(outLine[4]) && String.valueOf(rs.getLong("INSTANCE_NUM")).equals(outLine[6]));
+		return outLine == null || !(rs.getBigDecimal("PATIENT_NUM").toString().equals(outLine[0]) && rs.getBigDecimal("ENCOUNTER_NUM").toString().equals(outLine[2]) && rs.getString("CONCEPT_CD").equals(outLine[3]) && csvSafeString(dateShift(rs.getString("PATIENT_NUM"), rs.getDate("START_DATE"))).equals(outLine[4]) && String.valueOf(rs.getLong("INSTANCE_NUM")).equals(outLine[6]));
 	}
 	
 	private boolean isEmptyArray(String[] outLine) {
