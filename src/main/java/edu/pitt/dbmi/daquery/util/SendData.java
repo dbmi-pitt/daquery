@@ -36,7 +36,7 @@ public class SendData implements Runnable {
 		DataModel dm = n.getDataModel();
 		DataExport de = new DataExport(dm.getDataExportConf());
 		
-		DataExporter dataExporter = new DataExporter(this.dq, de.dataModel, AppProperties.getDBProperty("output.path"));
+		DataExporter dataExporter = new DataExporter(this.dq, de.dataExportConfig, AppProperties.getDBProperty("output.path"));
 		de = new DataExport(dm.getDataExportConf());
 		dataExporter.export(pList);
 		

@@ -50,8 +50,10 @@ import org.glassfish.jersey.client.ClientResponse;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.JerseyWebTarget;
+import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
@@ -59,19 +61,37 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.FileHelper;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.util.properties.ConceptColumn;
 import edu.pitt.dbmi.daquery.util.properties.CustomColumnSet;
+import edu.pitt.dbmi.daquery.util.properties.DataExport;
 import edu.pitt.dbmi.daquery.util.properties.DataExportConfig;
 import edu.pitt.dbmi.daquery.util.properties.DefaultValue;
 import edu.pitt.dbmi.daquery.util.properties.Field;
 import edu.pitt.dbmi.daquery.util.properties.ModifierColumn;
 import edu.pitt.dbmi.daquery.util.properties.OntologyTable;
 import edu.pitt.dbmi.daquery.util.properties.OutputFile;
+import edu.pitt.dbmi.daquery.util.properties.PropfileException;
 import edu.pitt.dbmi.daquery.util.properties.ValueCode;
 
 public class DataExporter {
+	
+	public static void main(String[] args) throws Throwable {
+        AppProperties.setDevHomeDir("C:\\Users\\del20");
+        Session s = HibernateConfiguration.openSession();
+        DaqueryRequest r = (DaqueryRequest) s.get(DaqueryRequest.class, Long.parseLong("2201"));
+        DataModel dm = (DataModel) s.get(DataModel.class, Long.parseLong("1"));
+        DataExport de = new DataExport(dm.getDataExportConf());
+        
+        DataExporter dataExporter = new DataExporter(r, de.dataExportConfig, AppProperties.getDBProperty("output.path"));
+        List<String> pList = new ArrayList<String>();
+        pList.add("PIT686766");
+        pList.add("PIT637837");
+        pList.add("PIT982221");
+        dataExporter.export(pList);
+	}
 	
 	private static final int BASICINFO_COLUMN_COUNT = 9;
 	private static final int VALUE_INDEX = BASICINFO_COLUMN_COUNT;
@@ -102,9 +122,9 @@ public class DataExporter {
 	
 	private String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 	
-	public DataExporter(DaqueryRequest daqueryRequest, DataExportConfig dataModel, String dataDir) throws DaqueryException {
+	public DataExporter(DaqueryRequest daqueryRequest, DataExportConfig dataExportConfig, String dataDir) throws DaqueryException {
 		this.dauqeryRequest = daqueryRequest;
-		this.dataExportConfig = dataModel;
+		this.dataExportConfig = dataExportConfig;
 		this.dataDir = dataDir;
 		this.deliverData = StringHelper.stringToBool(AppProperties.getDBProperty("deliver.data"));
 		
@@ -204,9 +224,9 @@ public class DataExporter {
 	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currPage, int pageCount, int pageSize) throws Throwable {
 		String filename = "";
 		if (pageCount == 1)
-			filename = daqueryRequest.getInquiry().getInquiryName() + "_" + SiteDAO.getLocalSite().getName() + "_" + daqueryRequest.getRequestId() + "_" + dateTime;
+			filename = "testfile"; // daqueryRequest.getInquiry().getInquiryName() + "_" + SiteDAO.getLocalSite().getName() + "_" + daqueryRequest.getRequestId() + "_" + dateTime;
 		else
-			filename = daqueryRequest.getInquiry().getInquiryName() + "_" + SiteDAO.getLocalSite().getName() + "_" + daqueryRequest.getRequestId() + "_" + dateTime + "_patient-set-" + currPage;
+			filename = "testfile"; //daqueryRequest.getInquiry().getInquiryName() + "_" + SiteDAO.getLocalSite().getName() + "_" + daqueryRequest.getRequestId() + "_" + dateTime + "_patient-set-" + currPage;
 		String zipFilename = filename + ".zip";
 		String logFilename = filename + ".log";
 		
