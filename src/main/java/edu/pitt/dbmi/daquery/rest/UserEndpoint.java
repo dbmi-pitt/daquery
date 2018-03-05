@@ -522,7 +522,10 @@ public class UserEndpoint extends AbstractEndpoint {
     	try {
     		
     		mySite = SiteDAO.getLocalSite();
-            logger.info("#### email : " + email);
+    		if(mySite == null)
+    		{
+    			return(ResponseHelper.getErrorResponse(500, "Invalid local site information.", "Unable to find the local site.  Possibly the local application database is currupted or is in an invalid interim state.", null));
+    		}
             
             // Authenticate the user using the credentials provided
             user = DaqueryUserDAO.authenticate(email, password);

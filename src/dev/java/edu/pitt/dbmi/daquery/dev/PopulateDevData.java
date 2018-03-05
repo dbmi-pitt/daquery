@@ -41,6 +41,7 @@ public class PopulateDevData
 	public static void main(String [] args) throws Exception
 	{
 		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		
 //		AppProperties.setDevHomeDir("/home/devuser/dq-data");
 /*		assembleRequest();
 		Session s = HibernateConfiguration.openSession();
