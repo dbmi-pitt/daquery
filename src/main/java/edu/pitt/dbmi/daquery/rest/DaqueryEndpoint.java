@@ -304,6 +304,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	 * 
 	 * @return On success a 200 http response with the site-id encoded in json.  On failure a 500 http response.
 	 */
+    
 	@GET
 	@Path("setupSite")
 	public Response setupSite(@DefaultValue("") @QueryParam("site-name") String siteName,
