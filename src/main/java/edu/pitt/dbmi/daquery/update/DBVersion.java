@@ -11,6 +11,6 @@ public @interface DBVersion {
 
 	//should ignore this test?
 	public float version();
-	public String ddlFile();
+	public String ddlFile() default "";
 
 }

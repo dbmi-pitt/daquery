@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 
 import javax.transaction.Transaction;
 
+import org.hibernate.internal.util.StringHelper;
+
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 import edu.pitt.dbmi.daquery.common.util.ApplicationPropertiesFile;
@@ -80,6 +82,7 @@ public class UpdateDBForVersion
 			{
 				if(ui.version > version.floatValue())
 				{
+					log.log(Level.INFO, "Updating database to version " + ui.version);
 					updateDDL(ui, conn);
 					conn.commit();
 					updateData(ui, conn);
@@ -195,6 +198,9 @@ public class UpdateDBForVersion
 
 	private static void updateDDL(UpdateInfo info, Connection conn) throws DaqueryException, SQLException
 	{
+		if(StringHelper.isEmpty(info.ddlFile))
+			return;
+		log.log(Level.INFO, "Updating database with " + "/edu/pitt/dbmi/daquery/update/db/" + info.ddlFile);
 		InputStream is = ApplicationPropertiesFile.class.getResourceAsStream("/edu/pitt/dbmi/daquery/update/db/" + info.ddlFile);
 	    Scanner inputScanner = new Scanner(is);
 	    inputScanner.useDelimiter(ApplicationDBHelper.DDL_SCANNER_PATTERN);
