@@ -10,14 +10,17 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 @Entity
 @Table(name = "SQL_DOWNLOAD")
 @DiscriminatorValue(value = InquiryType.TYPES.SQL_DOWNALOAD)
-@PrimaryKeyJoinColumn(name = "inq_id", referencedColumnName = "id")
+@PrimaryKeyJoinColumn(name = "inq_id", referencedColumnName = "inq_id")
 public class SQLDownload extends SQLQuery implements Download
 {
 	private static final long serialVersionUID = 99923842342l;
 	
-	SQLDownload(){}
+	public SQLDownload()
+	{
+		dataType = InquiryType.TYPES.SQL_DOWNALOAD;
+	}
 	
-	SQLDownload(boolean generateUUID)
+	public SQLDownload(boolean generateUUID)
 	{
 		super(generateUUID);
 	}
