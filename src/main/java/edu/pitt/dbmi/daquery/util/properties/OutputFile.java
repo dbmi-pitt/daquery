@@ -16,8 +16,8 @@ public class OutputFile {
 	public String distinct;
 	@XmlElement(name="defaultValue")
 	public List<DefaultValue> defaultValues = new ArrayList<>();
-	@XmlElement(name="id-column")
-	public IDColumn id_column = new IDColumn();
+	@XmlElement(name="idColumn")
+	public String idColumn = new String();
 	@XmlElement(name="custom-column-set")
 	public CustomColumnSet custom_column_set = new CustomColumnSet();
 	@XmlElement(name="valueMatch")
