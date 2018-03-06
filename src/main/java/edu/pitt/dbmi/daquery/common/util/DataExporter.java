@@ -69,13 +69,13 @@ public class DataExporter {
         DaqueryRequest r = (DaqueryRequest) s.get(DaqueryRequest.class, Long.parseLong("2201"));
         DataModel dm = (DataModel) s.get(DataModel.class, Long.parseLong("1"));
         //DataExport de = new DataExport(dm.getDataExportConf());
-        
-        DataExporter dataExporter = new DataExporter(r, dm.getExportConfig(), AppProperties.getDBProperty("output.path"));
         List<String> pList = new ArrayList<String>();
         pList.add("PIT686766");
         pList.add("PIT637837");
-        pList.add("PIT982221");
-        dataExporter.export(pList);
+        pList.add("PIT982221");        
+        DataExporter dataExporter = new DataExporter(r, dm.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
+        while(dataExporter.hasNextExport())
+        	dataExporter.exportNext();
 	}
 	
 	private static final int BASICINFO_COLUMN_COUNT = 9;
@@ -89,12 +89,15 @@ public class DataExporter {
 	DataExportConfig dataExportConfig;
 	String dataDir;
 	boolean deliverData;
-	List<String> patientList;
+	List<String> idList;
 	private final int pientBlockSize = 500;
 	boolean debugDataExport;
 	boolean threeDigitZip;
 	boolean dateShift;
 	Hashtable<String, OutputFile> conceptCDs = null;
+	int casesPerFile;
+	int nFiles;
+	int currentFile = 0;
 	
 	protected static SSLSocketFactory daquerySSLFactory;
 	static{
@@ -107,15 +110,18 @@ public class DataExporter {
 	
 	private String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 	
-	public DataExporter(DaqueryRequest daqueryRequest, DataExportConfig dataExportConfig, String dataDir) throws DaqueryException {
+	public DataExporter(DaqueryRequest daqueryRequest, DataExportConfig dataExportConfig, String dataDir, List<String> idList) throws DaqueryException {
 		this.dauqeryRequest = daqueryRequest;
 		this.dataExportConfig = dataExportConfig;
 		this.dataDir = dataDir;
 		this.deliverData = AppProperties.getDeliverData();
-		
 		this.debugDataExport = AppProperties.getDebugDataExport();
 		this.threeDigitZip = AppProperties.getThreeDigitZip();
 		this.dateShift = AppProperties.getDateShift();
+		this.idList = idList;
+		
+		casesPerFile = this.dataExportConfig.pageSize;
+		nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);		
 	}
 	
 	private void buildConceptCDsMap(DaqueryRequest daqueryRequest) throws Throwable {
@@ -162,48 +168,46 @@ public class DataExporter {
 		}
 	}
 	
-	public void export(List<String> pList) throws Throwable {
+	public boolean hasNextExport()
+	{
+		if(currentFile < nFiles)
+			return(true);
+		else
+			return(false);
+	}
+	public void exportNext() throws Throwable {
 		try {
-		this.patientList = pList;
-		int pageSize = this.dataExportConfig.pageSize;
-		int pageCount = (int) Math.ceil((double)pList.size() / pageSize);
+				if(! hasNextExport()) return;
+				currentFile++;
 		
-		String zipFileName = "";
-		String fileNames = "<ul>";
-		boolean filesent = false;
-		for (int currPage = 1; currPage <= pageCount; currPage++) {
-			File tmpDir = FileHelper.createTempDirectory();
-			File zipFile;
-			zipFile = dumpData(tmpDir, dauqeryRequest, currPage, pageCount, pageSize);
-			zipFileName = zipFile.getName();
-			fileNames += "<li>" + zipFileName + "</li>";
-			//send the file to remote requester
-//			if(deliverData) {				
-//				//send the zip file to the central shrine
-//				sendFileToShrine(zipFile, zipFileName, siteName, request_site_table_id, sender_username, sender_email, securityKey);
-//				filesent = true;
-//				//delete the temporary directory
-//				FileHelper.deleteDirectory(tmpDir);
-//			}
-//			else { //just copy the file locally and send an email to the current user
-//				Files.copy(zipFile.toPath(), Paths.get(dataDir, zipFile.getName()), StandardCopyOption.REPLACE_EXISTING );
-//			}
+				File tmpDir = FileHelper.createTempDirectory();
+				File zipFile;
+				zipFile = dumpData(tmpDir, dauqeryRequest, currentFile, nFiles, casesPerFile);
+				
+				//send the file to remote requester
+		//			if(deliverData) {				
+		//				//send the zip file to the central shrine
+		//				sendFileToShrine(zipFile, zipFileName, siteName, request_site_table_id, sender_username, sender_email, securityKey);
+		//				filesent = true;
+		//				//delete the temporary directory
+		//				FileHelper.deleteDirectory(tmpDir);
+		//			}
+		//			else { //just copy the file locally and send an email to the current user
+		//				Files.copy(zipFile.toPath(), Paths.get(dataDir, zipFile.getName()), StandardCopyOption.REPLACE_EXISTING );
+		//			}
+					
+					// FileHelper.deleteDirectory(tmpDir);
 			
-			// FileHelper.deleteDirectory(tmpDir);
-		}
-		
-		fileNames += "</ul>";
-		
-		if(deliverData){
-			//acceptRequestFinish(request_site_table_id, fileNames, sender_username, siteName, securityKey);
-		} else {
-			//accept Request
-			//acceptRequestLocally(request_site_table_id, zipFileName.replaceAll("-\\d+\\.", "-n."), sender_username, dataDir, siteName, securityKey);
-		}
-		} catch (Throwable t) {
-			logger.log(Level.SEVERE, "Error occurs on data export", t);
-			throw t;
-		}
+				if(deliverData){
+					//acceptRequestFinish(request_site_table_id, fileNames, sender_username, siteName, securityKey);
+				} else {
+					//accept Request
+					//acceptRequestLocally(request_site_table_id, zipFileName.replaceAll("-\\d+\\.", "-n."), sender_username, dataDir, siteName, securityKey);
+				}
+				} catch (Throwable t) {
+					logger.log(Level.SEVERE, "Error occurs on data export", t);
+					throw t;
+				}
 	}
 	
 	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currPage, int pageCount, int pageSize) throws Throwable {
@@ -664,10 +668,10 @@ public class DataExporter {
 	private ArrayList<String> getPatientIDofCurrPage(int curr_page, int patient_page_size){
 		ArrayList<String> patients = new ArrayList<>();
 		int firstPatientIndex = (curr_page - 1) * patient_page_size;
-		int lastPatientIndex = Math.min(firstPatientIndex + patient_page_size - 1, this.patientList.size() - 1);
+		int lastPatientIndex = Math.min(firstPatientIndex + patient_page_size - 1, this.idList.size() - 1);
 		
 		for (int i = firstPatientIndex; i <= lastPatientIndex; i++) {
-			patients.add(this.patientList.get(i));
+			patients.add(this.idList.get(i));
 		}
 		
 		return patients;
