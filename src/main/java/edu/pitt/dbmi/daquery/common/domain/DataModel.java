@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
 import java.io.Serializable;
+import java.io.StringReader;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,10 +15,15 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 
 @Entity
 @Table(name="DATA_MODEL")
@@ -93,5 +99,19 @@ public class DataModel extends DaqueryObject implements Serializable
 			}
 		}
 		return(null);
+	}
+	
+	@Transient
+	public DataExportConfig getExportConfig() throws DaqueryException
+	{
+				try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			StringReader reader = new StringReader(dataExportConf);
+			DataExportConfig exportConfig = (DataExportConfig) jaxbUnmarshaller.unmarshal(reader);
+			return(exportConfig);
+		} catch(JAXBException je) {
+			throw new DaqueryException("Error data export configuration.  Possibly the XML is not formated correctly.", je);
+		}
 	}
 }
