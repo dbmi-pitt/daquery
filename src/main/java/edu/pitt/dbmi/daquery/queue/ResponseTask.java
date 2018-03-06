@@ -59,7 +59,6 @@ public class ResponseTask extends AbstractTask implements Task
 		ResponseDAO.saveOrUpdate(response);
 		response = inquiry.run(response, model);
 		ResponseDAO.saveOrUpdate(response);
-		
 	}
 
 	@Override
