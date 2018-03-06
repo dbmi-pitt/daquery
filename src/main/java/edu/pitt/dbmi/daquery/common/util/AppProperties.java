@@ -82,10 +82,16 @@ public class AppProperties
 	}
 	public static boolean getDebugDataExport()
 	{
+		try
+		{
 		String debugDataExport = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("debug.data.export");
 		if(debugDataExport == null)
 			return(false);
 		return Boolean.parseBoolean(debugDataExport);
+		} catch (Throwable t) {
+			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the deliver data from the application database.", t);
+			return(false);	
+		}		
 	}
 	public static int getCurrentTableCount()
 	{

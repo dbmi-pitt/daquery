@@ -89,8 +89,10 @@ public class SQLDownload extends SQLQuery implements Download
 
 			Network net = response.getRequest().getNetwork();
 			DataModel dm = net.getDataModel();			
-			DataExporter dataExporter = new DataExporter(response.getRequest(), model.getExportConfig(), AppProperties.getDBProperty("output.path"));
-			dataExporter.export(pList);
+			DataExporter dataExporter = new DataExporter(response.getRequest(), model.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
+			while(dataExporter.hasNextExport())
+				dataExporter.exportNext();
+			
 			response.setStatusEnum(ResponseStatus.COMPLETED);
 			return(response);
 		}
