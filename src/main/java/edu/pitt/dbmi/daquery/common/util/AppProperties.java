@@ -80,6 +80,13 @@ public class AppProperties
 			throw new Exception("Unable to get database name, db.name, from application.properties file.");
 		return(dbName);
 	}
+	public static boolean getDebugDataExport() throws Exception
+	{
+		String debugDataExport = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("debug.data.export");
+		if(debugDataExport == null)
+			throw new Exception("Unable to get debugDataExport, debug.data.export, from application.properties file.");
+		return Boolean.parseBoolean(debugDataExport);
+	}
 	public static int getCurrentTableCount()
 	{
 		try{
@@ -240,6 +247,51 @@ public class AppProperties
 		if(max <= 0) throw new DaqueryException("The maximum task queue length must be greater than zero.");
 		String maxStr = Integer.toString(max);
 		setDBProperty("task.queue.length", maxStr);
+	}
+	
+	private static final boolean defaultDeliverData = true; 
+	public static boolean getDeliverData() {
+		try {
+			String val = getDBProperty("deliver.data");
+			if(StringHelper.isEmpty(val)) return(defaultDeliverData);
+			return Boolean.parseBoolean(val);
+		} catch (Throwable t) {
+			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the deliver data from the application database.", t);
+			return(defaultDeliverData);	
+		}
+	}
+	public static void setDeliverData(boolean val) throws DaqueryException {
+		setDBProperty("deliver.data", Boolean.toString(val));
+	}
+	
+	private static final boolean defaultThreeDigitZip = true;
+	public static boolean getThreeDigitZip() {
+		try {
+			String val = getDBProperty("three.digit.zip");
+			if(StringHelper.isEmpty(val)) return(defaultThreeDigitZip);
+			return Boolean.parseBoolean(val);
+		} catch (Throwable t) {
+			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the three digit zip from the application database.", t);
+			return(defaultThreeDigitZip);	
+		}
+	}
+	public static void setThreeDigitZip(boolean val) throws DaqueryException {
+		setDBProperty("three.digit.zip", Boolean.toString(val));
+	}
+	
+	private static final boolean defaultDateShift = true;
+	public static boolean getDateShift() {
+		try {
+			String val = getDBProperty("date.shift");
+			if(StringHelper.isEmpty(val)) return(defaultDateShift);
+			return Boolean.parseBoolean(val);
+		} catch (Throwable t) {
+			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the date shift from the application database.", t);
+			return(defaultDateShift);	
+		}
+	}
+	public static void setDateShift(boolean val) throws DaqueryException {
+		setDBProperty("date.shift", Boolean.toString(val));
 	}
 	/**
 	 * Check for the existence of a property in the application database table PROPERTY.
