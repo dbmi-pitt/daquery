@@ -1,0 +1,16 @@
+package edu.pitt.dbmi.daquery.common.util;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import edu.pitt.dbmi.daquery.download.properties.OutputFile;
+
+@XmlRootElement(name = "dataExportConfig")
+public class DataExportConfig {;
+	@XmlElement(name="outputFile")
+	public List<OutputFile> outputFiles = new ArrayList<>();
+	@XmlElement(name="pageSize")
+	public int pageSize;
+}

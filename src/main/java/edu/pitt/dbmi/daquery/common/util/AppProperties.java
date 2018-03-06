@@ -80,11 +80,11 @@ public class AppProperties
 			throw new Exception("Unable to get database name, db.name, from application.properties file.");
 		return(dbName);
 	}
-	public static boolean getDebugDataExport() throws Exception
+	public static boolean getDebugDataExport()
 	{
 		String debugDataExport = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("debug.data.export");
 		if(debugDataExport == null)
-			throw new Exception("Unable to get debugDataExport, debug.data.export, from application.properties file.");
+			return(false);
 		return Boolean.parseBoolean(debugDataExport);
 	}
 	public static int getCurrentTableCount()
