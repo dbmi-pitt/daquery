@@ -4,6 +4,8 @@ import { QueryToMe } from '../../../models/query-to-me.model';
 
 import { Observable } from 'rxjs/Observable';
 
+declare var $:any;
+
 @Component({
   selector: 'app-queries-to-me-list',
   templateUrl: './queries-to-me-list.component.html',
@@ -12,6 +14,7 @@ import { Observable } from 'rxjs/Observable';
 export class QueriesToMeListComponent implements OnInit {
 
   requests: QueryToMe[];
+  selectedRequest: QueryToMe;
   constructor(private requestService: RequestService) {
 
   }
@@ -25,5 +28,21 @@ export class QueriesToMeListComponent implements OnInit {
                        .subscribe(requests => {
                          this.requests = requests;
                        });
+  }
+
+  onRequestSelect(request: any){
+    this.selectedRequest = request;
+    $('#tb').DataTable();
+  }
+
+  getRequestStatusLabelClass(request: any){
+    switch(request.responses[0].status.toUpperCase()) {
+      case "COMPLETED":
+        return "bg-green";
+      case "ERROR":
+        return "bg-red";
+      default:
+        return "bg-grey";
+    }
   }
 }

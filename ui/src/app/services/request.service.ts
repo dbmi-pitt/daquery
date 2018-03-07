@@ -72,6 +72,13 @@ export class RequestService {
                     });
   }
 
+  requestData(request: any){
+    return this.http.post('daquery/ws/request', request)
+                    .catch(error => {
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
   private jwt() {
     // create authorization header with jwt token
     // let currentUser = JSON.parse(localStorage.getItem('currentUser'));

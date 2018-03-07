@@ -51,6 +51,7 @@
                 <th>Site</th>
                 <th>Status</th>
                 <th>Result</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -62,6 +63,9 @@
                     <span *ngIf="request.responses[0]?.hasError" class="pull-right-container">
                       <small class="label bg-red">Network Error</small>
                     </span>
+                </td>
+                <td>
+                  <button [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
                 </td>
               </tr>
             </tbody>

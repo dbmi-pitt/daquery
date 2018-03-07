@@ -88,4 +88,31 @@ export class RequestsFromMeListComponent implements OnInit {
 
     return ret;
   }
+
+  requestData(request: any) {
+    let dataRequest = {
+      requestSite: {
+        siteId: request.requestSite.siteId,
+        name: request.requestSite.name
+      },
+      network: {
+        networkId: request.network.networkId
+      },
+      requestGroup: request.requestGroup + ":DataRequest",
+      inquiry: {
+        version: 1,
+        dataType: 'SQL_DOWNLOAD',
+        inquiryId: request.responses[0].downloadDirective.inquiryId,
+        aggregate: false,
+        inquiryName: request.inquiry.inquiryName + "(Data)",
+        inquiryDescription: request.inquiry.inquiryDescription,
+        code: request.responses[0].downloadDirective.code
+      }
+    };
+    this.requestService.requestData(dataRequest)
+                       .subscribe(() => {
+                          console.log("done");
+                       });
+
+  }
 }

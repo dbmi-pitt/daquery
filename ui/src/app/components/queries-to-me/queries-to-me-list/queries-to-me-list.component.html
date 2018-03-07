@@ -1,22 +1,150 @@
-<div class="table-responsive">
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Query Name</th>
-        <th>Type</th>
-        <th>From</th>
-        <th>Status</th>
-        <th>Result</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let request of requests">
-        <td>{{request.inquiry.inquiryName}}</td>
-        <td>{{request.inquiry.aggregate ? "AGGREGATE" : "DATA"}}</td>
-        <td>{{request.requester?.realName}}</td>
-        <td>{{request.responses[0]?.status}}</td>
-        <td>{{ request.responses[0]?.status === 'ERROR' ? request.responses[0]?.errorMessage : request.responses[0]?.value }}</td>
-      </tr>
-    </tbody>
-  </table>
+<div class="row">
+  <div class="col-md-3">
+    <div *ngFor="let request of requests" class="info-box" (click)="onRequestSelect(request)">
+      <span class="info-box-icon bg-aqua"><i class="fa fa-caret-right"></i></span>
+
+      <div class="info-box-content">
+        <span class="info-box-text">{{request.inquiry.inquiryName}} <small class="label pull-right" [ngClass]="getRequestStatusLabelClass(request)">{{ request.responses[0].status }}</small></span> 
+        <span class="info-box-number">{{request.requester?.realName}}</span>
+        <span class="info-box-number">{{request.responses[0]?.value }}</span>
+      </div>
+      <!-- /.info-box-content -->
+    </div>
+      <!-- <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Query Name</th>
+              <th>Type</th>
+              <th>From</th>
+              <th>Status</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let request of requests">
+              <td>{{request.inquiry.inquiryName}}</td>
+              <td>{{request.inquiry.aggregate ? "AGGREGATE" : "DATA"}}</td>
+              <td>{{request.requester?.realName}}</td>
+              <td>{{request.responses[0]?.status}}</td>
+              <td>{{request.responses[0]?.status === 'ERROR' ? request.responses[0]?.errorMessage : request.responses[0]?.value }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div> -->
+  </div>
+  <div class="col-md-9">
+      <div *ngIf="selectedRequest" class="box box-default color-palette-box">
+          <div class="box-header with-border">
+            <h3 class="box-title"> {{ selectedRequest.inquiry.inquiryName }} </h3> <small class="label pull-right" [ngClass]="getRequestStatusLabelClass(selectedRequest)">{{ selectedRequest.responses[0].status }}</small>
+          </div>
+          <div class="box-body">
+            <div *ngIf="selectedRequest.responses[0].status === 'ERROR'" class="callout callout-danger">
+              <p>{{ selectedRequest.responses[0]?.errorMessage }}</p>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="user-block">
+                  <i class="fa fa-user-circle-o fa-3x" style="float: left" aria-hidden="true"></i>
+                  <span class="username">{{selectedRequest.requester?.realName}}</span>
+                  <span class="description">{{ selectedRequest.requestSite.name }} | {{ selectedRequest.requester.email }}</span>
+                </div>
+              </div>
+              <div *ngIf="selectedRequest.responses[0].status === 'COMPLETED'" class="col-md-6">
+                <button class="btn btn-success">Approve</button>
+                <button class="btn btn-danger">Deny</button>
+              </div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-md-12">
+                <pre>
+                  <code>
+                    {{ selectedRequest.inquiry.code }}
+                  </code>
+                </pre>
+              </div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-md-12">
+                <div class="table-responsive">
+                    <table id="tb" class="row-border hover dataTable">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>First name</th>
+                            <th>Last name</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>Foo</td>
+                            <td>Bar</td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>Someone</td>
+                            <td>Youknow</td>
+                          </tr>
+                          <tr>
+                            <td>3</td>
+                            <td>Iamout</td>
+                            <td>Ofinspiration</td>
+                          </tr>
+                          <tr>
+                            <td>4</td>
+                            <td>Yoda</td>
+                            <td>Skywalker</td>
+                          </tr>
+                          <tr>
+                            <td>5</td>
+                            <td>Patrick</td>
+                            <td>Dupont</td>
+                          </tr>
+                          <tr>
+                            <td>6</td>
+                            <td>Barack</td>
+                            <td>Obama</td>
+                          </tr>
+                          <tr>
+                            <td>7</td>
+                            <td>François</td>
+                            <td>Holland</td>
+                          </tr>
+                          <tr>
+                            <td>8</td>
+                            <td>Michel</td>
+                            <td>Popo</td>
+                          </tr>
+                          <tr>
+                            <td>9</td>
+                            <td>Chuck</td>
+                            <td>Norris</td>
+                          </tr>
+                          <tr>
+                            <td>10</td>
+                            <td>Simon</td>
+                            <td>Robin</td>
+                          </tr>
+                          <tr>
+                            <td>11</td>
+                            <td>Louis</td>
+                            <td>Lin</td>
+                          </tr>
+                          <tr>
+                            <td>12</td>
+                            <td>Zelda</td>
+                            <td>Link</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.box-body -->
+        </div>
+  </div>
 </div>
