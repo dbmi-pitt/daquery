@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.dao;
 
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +12,7 @@ import org.hibernate.criterion.Restrictions;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
@@ -26,6 +28,11 @@ public class DaqueryRequestDAO extends AbstractDAO {
 		AppProperties.setDevHomeDir("/home/devuser/dq-data");
 		DaqueryRequest r = getRequestById("35866a75-9d3b-400b-9462-c103b2226be8");
 		System.out.println(r);
+	}
+	
+	public static void saveOrUpdate(DaqueryRequest request) throws DaqueryException
+	{
+		AbstractDAO.save(request);
 	}
 	
 	public static DaqueryRequest getRequestById(String requestId) throws DaqueryException
