@@ -836,6 +836,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		try
 		{
 			request.setId(null);
+			request.setSentTimestamp(new Date());
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
 			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();
@@ -1046,6 +1047,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		
 		try
 		{
+			request.setSentTimestamp(new Date());
 			DaqueryResponse dr = new DaqueryResponse();
 			dr.setStatusEnum(ResponseStatus.QUEUED);
 			dr.setRequest(request);

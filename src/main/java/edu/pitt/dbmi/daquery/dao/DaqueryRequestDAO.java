@@ -78,10 +78,10 @@ public class DaqueryRequestDAO extends AbstractDAO {
 			String comma = "";
 			for(String dir : directions)
 			{
-				directs = comma + dir;
+				directs += comma + "'" + dir + "'";
 				comma = ", ";
 			}
-			String hql = "select req from DaqueryRequest req where direction in(" + directs + ")";
+			String hql = "select req from DaqueryRequest req where direction in (" + directs + ") order by sentTimestamp desc";
 			sess = HibernateConfiguration.openSession();
 			Query q = sess.createQuery(hql);
 			List<DaqueryRequest> requests = q.list();
