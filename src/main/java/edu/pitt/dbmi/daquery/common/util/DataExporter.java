@@ -123,7 +123,12 @@ public class DataExporter {
 		casesPerFile = this.dataExportConfig.pageSize;
 		nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);		
 	}
-	
+
+	public int getNumFiles()
+	{
+		return(nFiles);
+	}
+
 	private void buildConceptCDsMap(DaqueryRequest daqueryRequest) throws Throwable {
 		conceptCDs = new Hashtable<>();
 		Connection conn = null;
