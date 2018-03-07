@@ -12,6 +12,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
@@ -90,8 +91,17 @@ public class SQLDownload extends SQLQuery implements Download
 			Network net = response.getRequest().getNetwork();
 			DataModel dm = net.getDataModel();			
 			DataExporter dataExporter = new DataExporter(response.getRequest(), model.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
+			int totalFiles = dataExporter.getNumFiles();
+			int fileCount = 1;
 			while(dataExporter.hasNextExport())
+			{
+				response.setStatus("File " + fileCount + " of " + totalFiles + " exporting.");
+				Transaction t2 = sess.beginTransaction();
+				sess.saveOrUpdate(response);
+				t2.commit();
 				dataExporter.exportNext();
+				fileCount++;
+			}
 			
 			response.setStatusEnum(ResponseStatus.COMPLETED);
 			return(response);
