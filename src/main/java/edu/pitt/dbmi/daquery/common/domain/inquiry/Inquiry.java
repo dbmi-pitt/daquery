@@ -33,7 +33,8 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,include = JsonTypeInfo.As.PROPERTY, property = "dataType")
-@JsonSubTypes({@Type(value = SQLQuery.class, name = InquiryType.TYPES.SQL_VAL)})
+@JsonSubTypes({@Type(value = SQLQuery.class, name = InquiryType.TYPES.SQL_VAL),
+	           @Type(value = SQLDownload.class, name = InquiryType.TYPES.SQL_DOWNALOAD)})
 @JsonIgnoreProperties(ignoreUnknown = true)
 
 @Entity

@@ -86,7 +86,7 @@ public class DaqueryRequest extends DaqueryObject
 	}
 	
 	@Expose
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="NETWORK_ID")
 	private Network network;
 	
