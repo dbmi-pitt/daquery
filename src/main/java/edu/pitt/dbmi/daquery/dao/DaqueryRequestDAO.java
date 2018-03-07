@@ -69,11 +69,36 @@ public class DaqueryRequestDAO extends AbstractDAO {
 		return (DaqueryRequest) getCurrentSession().get(DaqueryRequest.class, id);
 	}
 	
-	public List list(String[] directions) throws DaqueryException{
-		return getCurrentSession().createCriteria(DaqueryRequest.class)
-								  .add(Restrictions.in("direction", directions))
-								  .addOrder(Order.desc("sentTimestamp"))
-				  				  .list();
+	public List<DaqueryRequest> list(String[] directions) throws DaqueryException
+	{
+		Session sess = null;
+		try
+		{
+			String directs = "";
+			String comma = "";
+			for(String dir : directions)
+			{
+				directs = comma + dir;
+				comma = ", ";
+			}
+			String hql = "select req from DaqueryRequest req where direction in(" + directs + ")";
+			sess = HibernateConfiguration.openSession();
+			Query q = sess.createQuery(hql);
+			List<DaqueryRequest> requests = q.list();
+			return(requests);
+/*			return getCurrentSession().createCriteria(DaqueryRequest.class)
+									  .add(Restrictions.in("direction", directions))
+									  .addOrder(Order.desc("sentTimestamp"))
+					  				  .list(); */
+		}
+		catch(Throwable t)
+		{
+			throw new DaqueryException("Error while retrieving requests.", t);
+		}
+		finally
+		{
+			if(sess != null) sess.close();
+		}
 	}
 	
 	public void update(long id, DaqueryRequest request) throws DaqueryException {
