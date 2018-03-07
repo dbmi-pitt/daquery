@@ -3,6 +3,7 @@ package edu.pitt.dbmi.daquery.rest;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,7 +34,9 @@ import javax.ws.rs.core.UriInfo;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
@@ -59,6 +62,7 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
+import edu.pitt.dbmi.daquery.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
@@ -462,170 +466,34 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			boolean isLocalRequester = DaqueryUserDAO.isLocalUserId(requesterId);
 			UserInfo uInfo = DaqueryUserDAO.getUserInfo(requesterId);
 			
-			//if the requester is not local 
-			//make sure we have the users information stored locally
-			if(! isLocalRequester)
+			if(request.getInquiry().isAggregate())
 			{
-				if(uInfo == null)
-				{
-					if(request.getRequester() == null || StringHelper.isEmpty(request.getRequester().getId()) || StringHelper.isEmpty(request.getRequester().getEmail()) || StringHelper.isEmpty(request.getRequester().getRealName()))
-					{
-						String msg = "Requester user information is required.";
-						DaqueryResponse eResp = assembleErrorResponse(msg, null);
-						return(ResponseHelper.getErrorResponse(400, msg, "Requester user information with a minimum of user id, email and real name for user with id " + requesterId + ".  This is needed because this user's information isn't currently listed at this site.", null, eResp));
-					}
-					if(! request.getRequester().getId().equals(requesterId))
-					{
-						String msg = "The requester id does not match the authenticated user id.";
-						DaqueryResponse eResp = assembleErrorResponse(msg, null);
-						return(ResponseHelper.getErrorResponse(400, msg, "User with id " + requesterId + " sent the request, but a user with  id " + request.getId() + " was provided with the request as the requester.", null, eResp));
-					}
-					uInfo = new UserInfo();
-					uInfo.setEmail(request.getRequester().getEmail());
-					uInfo.setId(request.getRequester().getId());
-					uInfo.setRealName(request.getRequester().getRealName());
-				}
-				
-				Session sess = null;
-				Transaction trans = null;
-				try
-				{
-					sess = HibernateConfiguration.openSession();
-					trans =  sess.beginTransaction();
-					sess.saveOrUpdate(uInfo);
-					trans.commit();
-				}
-				catch(Throwable t)
-				{
-					if(trans != null) trans.rollback();
-					logger.log(Level.SEVERE, "Error saving UserInfo object with user id " + uInfo.getId(), t);
-					String msg = "There was an error at the request site while trying to save some request information.";
-					DaqueryResponse eResp = assembleErrorResponse(msg, t);
-					return(ResponseHelper.getErrorResponse(500, msg, "An error occured while trying to save the requester UserInfo on the local site please contact the site admin.", t, eResp));
-				}
-				finally
-				{
-					if(sess != null) sess.close();
-				}
-			}
-			else //if the requester is local make sure they are a valid user
-			{
-				if(uInfo == null)
-				{
-					String msg = "Requester does not have a local account.";
-					DaqueryResponse eResp = assembleErrorResponse(msg, null);
-					return(ResponseHelper.getErrorResponse(400, msg, "The requester local to this machine has no user information registered.", null, eResp));
-				}
-			}
-			
-			request.setRequester(uInfo);
-			
-			if(mySite.getSiteId().equals(requestSiteId))  //handle request locally 
-			{	
-				if(request.getInquiry() == null)
-				{
-					String msg = "No inquiry provided.";
-					DaqueryResponse eResp = assembleErrorResponse(msg, null);					
-					return(ResponseHelper.getErrorResponse(400, msg, "An Inquiry object is required and was not included with the request", null, eResp));
-				}
-				
-				if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
-				{
-					String msg = "Requester does not have aggregate query role.";
-					DaqueryResponse eResp = assembleErrorResponse(msg, null);					
-					return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
-				}
-				
-				if(DaqueryUserDAO.isLocalUserId(requesterId))
-					request.setDirection("IN-OUT");
-				else
-					request.setDirection("IN");
-				
-				//TODO decide if this is an immediate response or if it needs to be reviewed
-				// if it needs to be reviewed create a DaqueryResponse object, mark as pending
-				//  and return- maybe send a message to someone??
-				// else do the below..
-				
-				DaqueryResponse rVal = null;
-				try
-				{
-					request.setId(null);
-					ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
-					QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
-					rVal = task.getResponse();
-					rVal.setRequest(request);
-					ResponseDAO.saveOrUpdate(rVal);
-				}
-				catch(Throwable e)
-				{
-					logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
-					DaqueryResponse dqResponse = new DaqueryResponse(true);
-					dqResponse.setStatusEnum(ResponseStatus.ERROR);
-					dqResponse.setErrorMessage(e.getMessage());
-					String trace = StringHelper.stackToString(e);
-					dqResponse.setStackTrace(trace);
-					dqResponse.setReplyTimestamp(new Date());
-					dqResponse.setRequest(request);
-					ResponseDAO.saveOrUpdate(dqResponse);
-					return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, dqResponse));
-				}
-				
-				if(rVal == null)
-				{
-					String msg = "No response recieved for this request.";
-					DaqueryResponse eResp = assembleErrorResponse(msg, null);					
-					return(ResponseHelper.getErrorResponse(500, msg, "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null, eResp));
-				}
-				else
-				{
-					return(ResponseHelper.getJsonResponseGen(200, rVal));
-				}
-			}
-			else  //send to a remote site
-			{
-				request.setDirection("OUT");
-				AbstractDAO.save(request);
-				response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
-				if(response.getStatus() == 200)
-				{
-					String json = response.readEntity(String.class);
-					ObjectMapper mapper = new ObjectMapper();
-					TypeReference<DaqueryResponse> type = new TypeReference<DaqueryResponse>(){};
-					DaqueryResponse resp = mapper.readValue(json, type);
-					resp.setRequest(request);
-					resp.setId(null);
-					ResponseDAO.saveOrUpdate(resp);
-					return ResponseHelper.getJsonResponseGen(200, resp);
+				// Aggregate Request
+				if(!isLocalRequester) {
+					// Local Request (From Site)
+					return handleAggregateRequestFromSite(uInfo, request, requesterId, net);
 				} else {
-					DecodedErrorInfo decodedInfo = ResponseHelper.decodeErrorResponse(response);
-					if(decodedInfo != null && decodedInfo.getErrorInfo() != null)
-					{
-						ErrorInfo errorInfo = decodedInfo.getErrorInfo();
-						DaqueryResponse resp = errorInfo.getResponse();
-						if(resp == null)
-						{
-							resp = new DaqueryResponse(true);
-						}
-						if(StringHelper.isBlank(resp.getResponseId())){resp.setResponseId(UUID.randomUUID().toString());}
-						resp.setStatusEnum(ResponseStatus.ERROR);
-						if(StringHelper.isBlank(resp.getErrorMessage())){resp.setErrorMessage(errorInfo.getDisplayMessage());}
-						if(StringHelper.isBlank(resp.getStackTrace()) && ! StringHelper.isBlank(errorInfo.getStackTrace()))
-						{
-							String trace = errorInfo.getStackTrace();
-							if(trace.length() > 10000) trace = trace.substring(0, 9999);
-							resp.setStackTrace(trace);
-						}
-						resp.setRequest(request);
-						resp.setId(null);
-						ResponseDAO.saveOrUpdate(resp);																		
-						return ResponseHelper.getJsonResponseGen(response.getStatus(), errorInfo);
+					if(mySite.getSiteId().equals(requestSiteId)) {	
+						// Local Request (From UI)
+						return handleLocalAggregateRequestFromUI(request, requesterId, net, uInfo);
+					} else {
+						// Remote Request (From UI)
+						return handleRemoteAggregateRequestFromUI(request, response, requestSite, securityToken);
 					}
-					else
-					{
-						String addlInfo = "";
-						if(decodedInfo != null && decodedInfo.getErrorMessage() != null)
-							addlInfo = " Additional Info: " + decodedInfo.getErrorMessage();
-						return(ResponseHelper.getErrorResponse(response.getStatus(), "Unhandled error during a remote request.", "Site " + requestSite.getName() + " responded with an error.  Check the site logs for more information." + addlInfo, null));
+				}
+		
+			} else {
+				// Data Request
+				if(!isLocalRequester) {
+					// Local Request (From Site)
+					return handleDataRequestFromSite(uInfo, request, requesterId, net);
+				} else {
+					if(mySite.getSiteId().equals(requestSiteId)) {	
+						// Local Request (From UI)
+						return handleLocalDataRequestFromUI(request, requesterId, net, uInfo);
+					} else {
+						// Remote Request (From UI)
+						return handleRemoteDataRequestFromUI(request, response, requestSite, securityToken);
 					}
 				}
 			}
@@ -640,6 +508,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		{
 			if(response != null) response.close();
 		}
+			
 	}
 	
 	private DaqueryResponse assembleErrorResponse(String message, Throwable t) throws DaqueryException
@@ -833,5 +702,408 @@ public class DaqueryEndpoint extends AbstractEndpoint
         	e.printStackTrace();
             return Response.status(UNAUTHORIZED).build();
         }
+    }
+    
+    private Response handleAggregateRequestFromSite(UserInfo uInfo, DaqueryRequest request, String requesterId, Network net) throws Exception {
+    	if(uInfo == null)
+		{
+			if(request.getRequester() == null || StringHelper.isEmpty(request.getRequester().getId()) || StringHelper.isEmpty(request.getRequester().getEmail()) || StringHelper.isEmpty(request.getRequester().getRealName()))
+			{
+				String msg = "Requester user information is required.";
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);
+				return(ResponseHelper.getErrorResponse(400, msg, "Requester user information with a minimum of user id, email and real name for user with id " + requesterId + ".  This is needed because this user's information isn't currently listed at this site.", null, eResp));
+			}
+			if(! request.getRequester().getId().equals(requesterId))
+			{
+				String msg = "The requester id does not match the authenticated user id.";
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);
+				return(ResponseHelper.getErrorResponse(400, msg, "User with id " + requesterId + " sent the request, but a user with  id " + request.getId() + " was provided with the request as the requester.", null, eResp));
+			}
+			uInfo = new UserInfo();
+			uInfo.setEmail(request.getRequester().getEmail());
+			uInfo.setId(request.getRequester().getId());
+			uInfo.setRealName(request.getRequester().getRealName());
+		}
+		
+		Session sess = null;
+		Transaction trans = null;
+		try
+		{
+			sess = HibernateConfiguration.openSession();
+			trans =  sess.beginTransaction();
+			sess.saveOrUpdate(uInfo);
+			trans.commit();
+		}
+		catch(Throwable t)
+		{
+			if(trans != null) trans.rollback();
+			logger.log(Level.SEVERE, "Error saving UserInfo object with user id " + uInfo.getId(), t);
+			String msg = "There was an error at the request site while trying to save some request information.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, t);
+			return(ResponseHelper.getErrorResponse(500, msg, "An error occured while trying to save the requester UserInfo on the local site please contact the site admin.", t, eResp));
+		}
+		finally
+		{
+			if(sess != null) sess.close();
+		}
+		
+		if(request.getInquiry() == null)
+		{
+			String msg = "No inquiry provided.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(400, msg, "An Inquiry object is required and was not included with the request", null, eResp));
+		}
+		
+		if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
+		{
+			String msg = "Requester does not have aggregate query role.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
+		}
+		
+		if(DaqueryUserDAO.isLocalUserId(requesterId))
+			request.setDirection("IN-OUT");
+		else
+			request.setDirection("IN");
+		
+		//TODO decide if this is an immediate response or if it needs to be reviewed
+		// if it needs to be reviewed create a DaqueryResponse object, mark as pending
+		//  and return- maybe send a message to someone??
+		// else do the below..
+		
+		DaqueryResponse rVal = null;
+		try
+		{
+			request.setId(null);
+			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
+			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
+			rVal = task.getResponse();
+			rVal.setRequest(request);
+			ResponseDAO.saveOrUpdate(rVal);
+		}
+		catch(Throwable e)
+		{
+			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
+			DaqueryResponse dqResponse = new DaqueryResponse(true);
+			dqResponse.setStatusEnum(ResponseStatus.ERROR);
+			dqResponse.setErrorMessage(e.getMessage());
+			String trace = StringHelper.stackToString(e);
+			dqResponse.setStackTrace(trace);
+			dqResponse.setReplyTimestamp(new Date());
+			dqResponse.setRequest(request);
+			ResponseDAO.saveOrUpdate(dqResponse);
+			return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, dqResponse));
+		}
+		
+		if(rVal == null)
+		{
+			String msg = "No response recieved for this request.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(500, msg, "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null, eResp));
+		}
+		else
+		{
+			return(ResponseHelper.getJsonResponseGen(200, rVal));
+		}
+    }
+    
+    private Response handleLocalAggregateRequestFromUI(DaqueryRequest request, String requesterId, Network net, UserInfo uInfo) throws Exception {
+    	if(request.getInquiry() == null)
+		{
+			String msg = "No inquiry provided.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(400, msg, "An Inquiry object is required and was not included with the request", null, eResp));
+		}
+		
+		if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "AGGREGATE_QUERIER"))
+		{
+			String msg = "Requester does not have aggregate query role.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
+		}
+		
+		if(DaqueryUserDAO.isLocalUserId(requesterId))
+			request.setDirection("IN-OUT");
+		else
+			request.setDirection("IN");
+		
+		//TODO decide if this is an immediate response or if it needs to be reviewed
+		// if it needs to be reviewed create a DaqueryResponse object, mark as pending
+		//  and return- maybe send a message to someone??
+		// else do the below..
+		
+		DaqueryResponse rVal = null;
+		try
+		{
+			request.setId(null);
+			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
+			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
+			rVal = task.getResponse();
+			rVal.setRequest(request);
+			ResponseDAO.saveOrUpdate(rVal);
+		}
+		catch(Throwable e)
+		{
+			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
+			DaqueryResponse dqResponse = new DaqueryResponse(true);
+			dqResponse.setStatusEnum(ResponseStatus.ERROR);
+			dqResponse.setErrorMessage(e.getMessage());
+			String trace = StringHelper.stackToString(e);
+			dqResponse.setStackTrace(trace);
+			dqResponse.setReplyTimestamp(new Date());
+			dqResponse.setRequest(request);
+			ResponseDAO.saveOrUpdate(dqResponse);
+			return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, dqResponse));
+		}
+		
+		if(rVal == null)
+		{
+			String msg = "No response recieved for this request.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(500, msg, "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null, eResp));
+		}
+		else
+		{
+			return(ResponseHelper.getJsonResponseGen(200, rVal));
+		}
+    }
+    
+    private Response handleRemoteAggregateRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
+    	request.setDirection("OUT");
+		AbstractDAO.save(request);
+		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
+		if(response.getStatus() == 200)
+		{
+			String json = response.readEntity(String.class);
+			ObjectMapper mapper = new ObjectMapper();
+			TypeReference<DaqueryResponse> type = new TypeReference<DaqueryResponse>(){};
+			DaqueryResponse resp = mapper.readValue(json, type);
+			resp.setRequest(request);
+			resp.setId(null);
+			ResponseDAO.saveOrUpdate(resp);
+			return ResponseHelper.getJsonResponseGen(200, resp);
+		} else {
+			DecodedErrorInfo decodedInfo = ResponseHelper.decodeErrorResponse(response);
+			if(decodedInfo != null && decodedInfo.getErrorInfo() != null)
+			{
+				ErrorInfo errorInfo = decodedInfo.getErrorInfo();
+				DaqueryResponse resp = errorInfo.getResponse();
+				if(resp == null)
+				{
+					resp = new DaqueryResponse(true);
+				}
+				if(StringHelper.isBlank(resp.getResponseId())){resp.setResponseId(UUID.randomUUID().toString());}
+				resp.setStatusEnum(ResponseStatus.ERROR);
+				if(StringHelper.isBlank(resp.getErrorMessage())){resp.setErrorMessage(errorInfo.getDisplayMessage());}
+				if(StringHelper.isBlank(resp.getStackTrace()) && ! StringHelper.isBlank(errorInfo.getStackTrace()))
+				{
+					String trace = errorInfo.getStackTrace();
+					if(trace.length() > 10000) trace = trace.substring(0, 9999);
+					resp.setStackTrace(trace);
+				}
+				resp.setRequest(request);
+				resp.setId(null);
+				ResponseDAO.saveOrUpdate(resp);																		
+				return ResponseHelper.getJsonResponseGen(response.getStatus(), errorInfo);
+			}
+			else
+			{
+				String addlInfo = "";
+				if(decodedInfo != null && decodedInfo.getErrorMessage() != null)
+					addlInfo = " Additional Info: " + decodedInfo.getErrorMessage();
+				return(ResponseHelper.getErrorResponse(response.getStatus(), "Unhandled error during a remote request.", "Site " + requestSite.getName() + " responded with an error.  Check the site logs for more information." + addlInfo, null));
+			}
+		}
+    }
+
+    private Response handleDataRequestFromSite(UserInfo uInfo, DaqueryRequest request, String requesterId, Network net) throws Exception {
+    	if(uInfo == null)
+		{
+			if(request.getRequester() == null || StringHelper.isEmpty(request.getRequester().getId()) || StringHelper.isEmpty(request.getRequester().getEmail()) || StringHelper.isEmpty(request.getRequester().getRealName()))
+			{
+				String msg = "Requester user information is required.";
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);
+				return(ResponseHelper.getErrorResponse(400, msg, "Requester user information with a minimum of user id, email and real name for user with id " + requesterId + ".  This is needed because this user's information isn't currently listed at this site.", null, eResp));
+			}
+			if(! request.getRequester().getId().equals(requesterId))
+			{
+				String msg = "The requester id does not match the authenticated user id.";
+				DaqueryResponse eResp = assembleErrorResponse(msg, null);
+				return(ResponseHelper.getErrorResponse(400, msg, "User with id " + requesterId + " sent the request, but a user with  id " + request.getId() + " was provided with the request as the requester.", null, eResp));
+			}
+			uInfo = new UserInfo();
+			uInfo.setEmail(request.getRequester().getEmail());
+			uInfo.setId(request.getRequester().getId());
+			uInfo.setRealName(request.getRequester().getRealName());
+		}
+		
+		Session sess = null;
+		Transaction trans = null;
+		try
+		{
+			sess = HibernateConfiguration.openSession();
+			trans =  sess.beginTransaction();
+			sess.saveOrUpdate(uInfo);
+			trans.commit();
+		}
+		catch(Throwable t)
+		{
+			if(trans != null) trans.rollback();
+			logger.log(Level.SEVERE, "Error saving UserInfo object with user id " + uInfo.getId(), t);
+			String msg = "There was an error at the request site while trying to save some request information.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, t);
+			return(ResponseHelper.getErrorResponse(500, msg, "An error occured while trying to save the requester UserInfo on the local site please contact the site admin.", t, eResp));
+		}
+		finally
+		{
+			if(sess != null) sess.close();
+		}
+		
+		if(request.getInquiry() == null)
+		{
+			String msg = "No inquiry provided.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(400, msg, "An Inquiry object is required and was not included with the request", null, eResp));
+		}
+		
+		if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "DATA_QUERIER"))
+		{
+			String msg = "Requester does not have data query role.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
+		}
+		
+		if(DaqueryUserDAO.isLocalUserId(requesterId))
+			request.setDirection("IN-OUT");
+		else
+			request.setDirection("IN");
+		
+		//TODO decide if this is an immediate response or if it needs to be reviewed
+		// if it needs to be reviewed create a DaqueryResponse object, mark as pending
+		//  and return- maybe send a message to someone??
+		// else do the below..
+		
+		DaqueryResponse rVal = null;
+		try
+		{
+			request.setId(null);
+			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
+			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
+			rVal = task.getResponse();
+			rVal.setRequest(request);
+			ResponseDAO.saveOrUpdate(rVal);
+		}
+		catch(Throwable e)
+		{
+			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
+			DaqueryResponse dqResponse = new DaqueryResponse(true);
+			dqResponse.setStatusEnum(ResponseStatus.ERROR);
+			dqResponse.setErrorMessage(e.getMessage());
+			String trace = StringHelper.stackToString(e);
+			dqResponse.setStackTrace(trace);
+			dqResponse.setReplyTimestamp(new Date());
+			dqResponse.setRequest(request);
+			ResponseDAO.saveOrUpdate(dqResponse);
+			return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, dqResponse));
+		}
+		
+		if(rVal == null)
+		{
+			String msg = "No response recieved for this request.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(500, msg, "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null, eResp));
+		}
+		else
+		{
+			return(ResponseHelper.getJsonResponseGen(200, rVal));
+		}
+    }
+    
+    private Response handleLocalDataRequestFromUI(DaqueryRequest request, String requesterId, Network net, UserInfo uInfo) throws Exception {
+    	if(request.getInquiry() == null)
+		{
+			String msg = "No inquiry provided.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(400, msg, "An Inquiry object is required and was not included with the request", null, eResp));
+		}
+		
+		if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "DATA_QUERIER"))
+		{
+			String msg = "Requester does not have aggregate query role.";
+			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
+			return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
+		}
+		
+		if(DaqueryUserDAO.isLocalUserId(requesterId))
+			request.setDirection("IN-OUT");
+		else
+			request.setDirection("IN");
+		
+		//TODO decide if this is an immediate response or if it needs to be reviewed
+		// if it needs to be reviewed create a DaqueryResponse object, mark as pending
+		//  and return- maybe send a message to someone??
+		// else do the below..
+		
+		try
+		{
+			DaqueryResponse dr = new DaqueryResponse();
+			dr.setStatusEnum(ResponseStatus.QUEUED);
+			dr.setRequest(request);
+			ResponseDAO.saveOrUpdate(dr);
+			return ResponseHelper.getBasicResponse(201, "{}");
+		}
+		catch(Throwable e)
+		{
+			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
+			return(ResponseHelper.getErrorResponse(500, "Error while saving a data request.", "An unexpected error occured while saving the data request with id:"  + request.getRequestId(), e));
+		}
+    }
+    
+    private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
+    	request.setDirection("OUT");
+		AbstractDAO.save(request);
+		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
+		if(response.getStatus() == 200)
+		{
+			String json = response.readEntity(String.class);
+			ObjectMapper mapper = new ObjectMapper();
+			TypeReference<DaqueryResponse> type = new TypeReference<DaqueryResponse>(){};
+			DaqueryResponse resp = mapper.readValue(json, type);
+			resp.setRequest(request);
+			resp.setId(null);
+			ResponseDAO.saveOrUpdate(resp);
+			return ResponseHelper.getJsonResponseGen(200, resp);
+		} else {
+			DecodedErrorInfo decodedInfo = ResponseHelper.decodeErrorResponse(response);
+			if(decodedInfo != null && decodedInfo.getErrorInfo() != null)
+			{
+				ErrorInfo errorInfo = decodedInfo.getErrorInfo();
+				DaqueryResponse resp = errorInfo.getResponse();
+				if(resp == null)
+				{
+					resp = new DaqueryResponse(true);
+				}
+				if(StringHelper.isBlank(resp.getResponseId())){resp.setResponseId(UUID.randomUUID().toString());}
+				resp.setStatusEnum(ResponseStatus.ERROR);
+				if(StringHelper.isBlank(resp.getErrorMessage())){resp.setErrorMessage(errorInfo.getDisplayMessage());}
+				if(StringHelper.isBlank(resp.getStackTrace()) && ! StringHelper.isBlank(errorInfo.getStackTrace()))
+				{
+					String trace = errorInfo.getStackTrace();
+					if(trace.length() > 10000) trace = trace.substring(0, 9999);
+					resp.setStackTrace(trace);
+				}
+				resp.setRequest(request);
+				resp.setId(null);
+				ResponseDAO.saveOrUpdate(resp);																		
+				return ResponseHelper.getJsonResponseGen(response.getStatus(), errorInfo);
+			}
+			else
+			{
+				String addlInfo = "";
+				if(decodedInfo != null && decodedInfo.getErrorMessage() != null)
+					addlInfo = " Additional Info: " + decodedInfo.getErrorMessage();
+				return(ResponseHelper.getErrorResponse(response.getStatus(), "Unhandled error during a remote request.", "Site " + requestSite.getName() + " responded with an error.  Check the site logs for more information." + addlInfo, null));
+			}
+		}
     }
 }
