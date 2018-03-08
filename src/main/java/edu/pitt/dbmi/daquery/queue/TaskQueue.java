@@ -13,6 +13,14 @@ public class TaskQueue
 	private static Hashtable<String, Task> tasksById = new Hashtable<String, Task>();
 	private static LinkedList<Task> waitingQueue = new LinkedList<Task>();
 	private static List<TaskRunner> runningQueue = new ArrayList<TaskRunner>();
+	private int maxRunLength = AppProperties.getTaskQueueMaxLength();
+	
+	public TaskQueue(){}
+	
+	public TaskQueue(int maxRunLength)
+	{
+		this.maxRunLength = maxRunLength;
+	}
 	
 	public synchronized void addTask(Task task) throws DaqueryException
 	{
@@ -48,7 +56,7 @@ public class TaskQueue
 	//because it is called from synchronized methods
 	private void runNext()
 	{
-		if(runningQueue.size() < AppProperties.getTaskQueueMaxLength() && waitingQueue.size() > 0)
+		if(runningQueue.size() < maxRunLength && waitingQueue.size() > 0)
 		{
 			Task task = waitingQueue.poll();
 			TaskRunner runner = new TaskRunner(task);
