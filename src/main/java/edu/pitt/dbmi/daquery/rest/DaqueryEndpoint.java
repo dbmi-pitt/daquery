@@ -465,6 +465,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			
 			boolean isLocalRequester = DaqueryUserDAO.isLocalUserId(requesterId);
 			UserInfo uInfo = DaqueryUserDAO.getUserInfo(requesterId);
+			request.setRequester(uInfo);
 			
 			if(request.getInquiry().isAggregate())
 			{
