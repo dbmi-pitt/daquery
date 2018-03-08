@@ -465,7 +465,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			
 			boolean isLocalRequester = DaqueryUserDAO.isLocalUserId(requesterId);
 			UserInfo uInfo = DaqueryUserDAO.getUserInfo(requesterId);
-			request.setRequester(uInfo);
 			
 			if(request.getInquiry().isAggregate())
 			{
@@ -474,6 +473,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					// Local Request (From Site)
 					return handleAggregateRequestFromSite(uInfo, request, requesterId, net);
 				} else {
+					request.setRequester(uInfo);
 					if(mySite.getSiteId().equals(requestSiteId)) {	
 						// Local Request (From UI)
 						return handleLocalAggregateRequestFromUI(request, requesterId, net, uInfo);
@@ -489,6 +489,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					// Local Request (From Site)
 					return handleDataRequestFromSite(uInfo, request, requesterId, net);
 				} else {
+					request.setRequester(uInfo);
 					if(mySite.getSiteId().equals(requestSiteId)) {	
 						// Local Request (From UI)
 						return handleLocalDataRequestFromUI(request, requesterId, net, uInfo);
