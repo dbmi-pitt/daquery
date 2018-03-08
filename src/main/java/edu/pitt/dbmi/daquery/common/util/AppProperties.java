@@ -233,6 +233,8 @@ public class AppProperties
 	} */
 	
 	private static final int defaultTaskQueueMaxLength = 4;
+	private static final int defaultDownloadTaskQueueMaxLength = 1;
+	
 	public static int getTaskQueueMaxLength()
 	{
 		try
@@ -253,6 +255,21 @@ public class AppProperties
 		if(max <= 0) throw new DaqueryException("The maximum task queue length must be greater than zero.");
 		String maxStr = Integer.toString(max);
 		setDBProperty("task.queue.length", maxStr);
+	}
+	
+	public static int getDownloadTaskQueueMaxLength()
+	{
+		try
+		{
+			String mLen = getDBProperty("download.task.queue.length");
+			if(StringHelper.isEmpty(mLen)) return(defaultDownloadTaskQueueMaxLength);
+			return(Integer.parseInt(mLen));
+		}
+		catch(Throwable t)
+		{
+			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the download task queue length from the application database.", t);
+			return(defaultDownloadTaskQueueMaxLength);			
+		}		
 	}
 	
 	private static final boolean defaultDeliverData = true; 
