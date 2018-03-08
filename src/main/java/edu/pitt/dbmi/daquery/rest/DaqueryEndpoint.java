@@ -837,6 +837,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		{
 			request.setId(null);
 			request.setSentTimestamp(new Date());
+			request.setRequester(uInfo);
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
 			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();
@@ -987,36 +988,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		DaqueryResponse rVal = null;
 		try
 		{
-			request.setId(null);
-			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
-			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
-			rVal = task.getResponse();
-			rVal.setRequest(request);
-			ResponseDAO.saveOrUpdate(rVal);
+			request.setSentTimestamp(new Date());
+			request.setRequester(uInfo);
+			DaqueryResponse dr = new DaqueryResponse();
+			dr.setStatusEnum(ResponseStatus.PENDING);
+			dr.setRequest(request);
+			ResponseDAO.saveOrUpdate(dr);
+			return ResponseHelper.getBasicResponse(201, "{}");
 		}
 		catch(Throwable e)
 		{
 			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
-			DaqueryResponse dqResponse = new DaqueryResponse(true);
-			dqResponse.setStatusEnum(ResponseStatus.ERROR);
-			dqResponse.setErrorMessage(e.getMessage());
-			String trace = StringHelper.stackToString(e);
-			dqResponse.setStackTrace(trace);
-			dqResponse.setReplyTimestamp(new Date());
-			dqResponse.setRequest(request);
-			ResponseDAO.saveOrUpdate(dqResponse);
-			return(ResponseHelper.getErrorResponse(500, "Error while executing a request.", "An unexpected error occured while executing the request with id:"  + request.getRequestId(), e, dqResponse));
-		}
-		
-		if(rVal == null)
-		{
-			String msg = "No response recieved for this request.";
-			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
-			return(ResponseHelper.getErrorResponse(500, msg, "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null, eResp));
-		}
-		else
-		{
-			return(ResponseHelper.getJsonResponseGen(200, rVal));
+			return(ResponseHelper.getErrorResponse(500, "Error while saving a data request.", "An unexpected error occured while saving the data request with id:"  + request.getRequestId(), e));
 		}
     }
     
@@ -1048,8 +1031,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		try
 		{
 			request.setSentTimestamp(new Date());
+			request.setRequester(uInfo);
 			DaqueryResponse dr = new DaqueryResponse();
-			dr.setStatusEnum(ResponseStatus.QUEUED);
+			dr.setStatusEnum(ResponseStatus.PENDING);
 			dr.setRequest(request);
 			ResponseDAO.saveOrUpdate(dr);
 			return ResponseHelper.getBasicResponse(201, "{}");
