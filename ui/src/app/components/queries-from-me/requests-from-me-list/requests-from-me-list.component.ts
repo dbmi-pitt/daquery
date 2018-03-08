@@ -111,7 +111,7 @@ export class RequestsFromMeListComponent implements OnInit {
     };
     this.requestService.requestData(dataRequest)
                        .subscribe(() => {
-                          console.log("done");
+                          this.getRequestsFromMe();
                        });
 
   }

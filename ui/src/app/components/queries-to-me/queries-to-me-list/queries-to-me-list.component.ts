@@ -41,6 +41,8 @@ export class QueriesToMeListComponent implements OnInit {
         return "bg-green";
       case "ERROR":
         return "bg-red";
+      case "PENDING":
+        return "bg-yellow";
       default:
         return "bg-grey";
     }

@@ -12,7 +12,7 @@
       <tr>
         <td (click)="requestGroup.active = !requestGroup.active"><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}"></i> {{ requestGroup.val[0].inquiry.inquiryName }}</td>
         <td>{{ requestGroup.val[0].direction }}</td>
-        <td>{{ requestGroup.val[0].responses[0]?.replyTimestamp | amTimeAgo }}</td>
+        <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</td>
         <td></td>
       </tr>
       <tr *ngIf="requestGroup.active">
