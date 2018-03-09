@@ -3,7 +3,13 @@ package edu.pitt.dbmi.daquery.rest;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,6 +19,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -31,6 +38,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -1059,6 +1069,50 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
 			return(ResponseHelper.getErrorResponse(500, "Error while saving a data request.", "An unexpected error occured while saving the data request with id:"  + request.getRequestId(), e));
 		}
+    }
+    
+    @Context
+    HttpServletRequest servletRequest;
+    
+    @POST
+    @Path("/receive-data-file")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    //@Produces(MediaType.APPLICATION_JSON)
+    public Response receiveDataFile(@FormDataParam("file") InputStream is,
+    								@QueryParam("filename") String filename)
+    {
+	
+              try {
+                        if (StringHelper.isBlank(filename)) {
+                                logger.log(Level.SEVERE, "Did not recieve a file name when trying to copy a file.");
+                                return ResponseHelper.getErrorResponse(400, "Required parameter filename not received during a file transfer.", null, null);
+                        }
+                        String directory = "/home/devuser/daq-download";
+                        String windowzHappyFilename = filename.replace(':', '-');
+                        File outFile = Paths.get(directory, windowzHappyFilename).toFile();
+                        OutputStream out = new FileOutputStream(outFile);
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while((bytesRead = is.read(buffer)) != -1)
+                        {
+                        	out.write(buffer, 0, bytesRead);
+                        }
+                        is.close();
+                        out.close();
+                } catch (Throwable e) {
+                        logger.log(Level.SEVERE, "Unable to copy file a file.", e);
+//                        NotifyUserWithErrorMessage(request_site_table_id, filename,
+//                                        senderUsername, i2b2AdminEmail, senderEmail, e);
+                        return ResponseHelper.getErrorResponse(500, "Unable to transfer file " + filename, null, e);
+                } finally {
+                        try {
+                                if(is != null) is.close();
+                        } catch (Throwable t) {
+                        }
+                } 
+                return Response.status(200).type("text/plain")
+                                .entity("File succesfully transfered").build();
+    	
     }
     
     private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
