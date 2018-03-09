@@ -1,19 +1,14 @@
 package edu.pitt.dbmi.daquery.common.util;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Target;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -29,14 +24,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -44,14 +34,9 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.glassfish.jersey.SslConfigurator;
-import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.glassfish.jersey.client.JerseyWebTarget;
 import org.glassfish.jersey.client.RequestEntityProcessing;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -397,6 +382,54 @@ public class WSConnectionUtil {
 			if(! localFileAndPath.exists())
 				throw new DaqueryException("File " + localFileAndPath.getName() + " being sent to site " + toSite.getName() + " does not exist.");
 			
+			Client client = ClientBuilder.newBuilder().build();
+				   //client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
+			WebTarget target = client.target(buildGetUrl(toSite.getUrl(), "receive-data-file", args));
+			target.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
+			target.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
+			InputStream is = new FileInputStream(localFileAndPath);
+			//Response response = target.request(MediaType.APPLICATION_OCTET_STREAM).post(Entity.entity(is, MediaType.APPLICATION_OCTET_STREAM));
+			Response response = target.request().post(Entity.entity(is, MediaType.APPLICATION_OCTET_STREAM));
+		
+			if(response.getStatus() != 200)
+			{
+				ErrorInfo ei = new ErrorInfo();
+				String msg = "An error occured while transfering " + outputFilename + " to site " + toSite.getName();
+				ei.setDisplayMessage(msg);
+				DaqueryErrorException dee = new DaqueryErrorException(msg, ei);
+				throw dee;
+			}
+			
+		}
+		catch(DaqueryErrorException dee)
+		{
+			throw dee;
+		}
+		catch(Throwable t)
+		{
+				ErrorInfo ei = new ErrorInfo();
+				String msg = "An unexpected error occured while transfering " + outputFilename + " to site " + toSite.getName();
+				ei.setDisplayMessage(msg);
+				DaqueryErrorException dee = new DaqueryErrorException(msg, t, ei);
+				throw dee;			
+		}
+		finally
+		{
+			try{if(fdmp1 != null) fdmp1.close();}catch(Throwable t1){log.log(Level.SEVERE, "", t1);}
+		}
+	}
+
+	public static void sendFileToSiteBK(File localFileAndPath, String outputFilename, Site toSite) throws DaqueryErrorException
+	{
+		FormDataMultiPart fdmp1 = null;
+		try
+		{
+			Map<String, String> args = new HashMap<String, String>();
+			args.put("filename", URLEncoder.encode(outputFilename, "UTF-8"));			
+			
+			if(! localFileAndPath.exists())
+				throw new DaqueryException("File " + localFileAndPath.getName() + " being sent to site " + toSite.getName() + " does not exist.");
+			
 			Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
 				   client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
 			FileDataBodyPart filePart = new FileDataBodyPart("file", localFileAndPath);
@@ -435,6 +468,7 @@ public class WSConnectionUtil {
 			try{if(fdmp1 != null) fdmp1.close();}catch(Throwable t1){log.log(Level.SEVERE, "", t1);}
 		}
 	}
+	
 	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
