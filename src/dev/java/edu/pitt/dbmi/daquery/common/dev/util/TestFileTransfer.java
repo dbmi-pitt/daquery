@@ -14,15 +14,15 @@ public class TestFileTransfer
 {
 	public static void main(String [] args)
 	{
-		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
+		AppProperties.setDevHomeDir("/Users/bill/daquery-data");
 		Session sess = null;
 		try
 		{
 			sess = HibernateConfiguration.openSession();
 			Site localSite = SiteDAO.getLocalSite();
-			//File localFileAndPath = new File("/home/devuser/jars.tar.gz");
-			File localFileAndPath = new File("/home/devuser/big");
-			WSConnectionUtil.sendFileToSite(localFileAndPath, "tester.out.big", localSite);
+			File localFileAndPath = new File("/Users/bill/big");
+			//File localFileAndPath = new File("/home/devuser/big");
+			WSConnectionUtil.sendFileToSite(localFileAndPath, "big.out", localSite);
 		}
 		catch(Throwable t)
 		{
