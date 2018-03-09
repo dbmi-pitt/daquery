@@ -1057,14 +1057,13 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		}
     }
     
-    @Context
-    HttpServletRequest servletRequest;
-    
     @POST
     @Path("/receive-data-file")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    //@Consumes(MediaType.MULTIPART_FORM_DATA)
     //@Produces(MediaType.APPLICATION_JSON)
-    public Response receiveDataFile(@FormDataParam("file") InputStream is,
+//    public Response receiveDataFile(@FormDataParam("file") InputStream is,
+    public Response receiveDataFile(InputStream is,
     								@QueryParam("filename") String filename)
     {
 	
@@ -1073,7 +1072,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
                                 logger.log(Level.SEVERE, "Did not recieve a file name when trying to copy a file.");
                                 return ResponseHelper.getErrorResponse(400, "Required parameter filename not received during a file transfer.", null, null);
                         }
-                        String directory = "/home/devuser/daq-download";
+                        String directory = "/Users/bill/daq-download";
                         String windowzHappyFilename = filename.replace(':', '-');
                         File outFile = Paths.get(directory, windowzHappyFilename).toFile();
                         OutputStream out = new FileOutputStream(outFile);
