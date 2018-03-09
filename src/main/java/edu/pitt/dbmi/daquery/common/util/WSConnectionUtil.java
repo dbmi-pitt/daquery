@@ -1,57 +1,73 @@
 package edu.pitt.dbmi.daquery.common.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Target;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.cert.Certificate;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.glassfish.jersey.SslConfigurator;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.JerseyClient;
+import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.client.JerseyWebTarget;
+import org.glassfish.jersey.client.RequestEntityProcessing;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
 
 public class WSConnectionUtil {
  
-	
-	protected static SSLSocketFactory daquerySSLFactory = null;
 	private final static Logger log = Logger.getLogger(WSConnectionUtil.class.getName());
+/*	protected static SSLSocketFactory daquerySSLFactory = null;
+	
 	
 	
 	static
@@ -62,7 +78,7 @@ public class WSConnectionUtil {
 			log.log(Level.SEVERE, "Unable to set daquerySSLFactory");
 			System.err.println("Unable to set daquerySSLFactory" + e.getMessage());
 		}
-	}
+	} */
 	
 	public static void main(String [] args)
 	{
@@ -95,7 +111,7 @@ public class WSConnectionUtil {
 	 * @return- an SSLSocketFactory using the keystore information found on this machine. 
 	 * @throws Exception
 	 */
-	public static SSLSocketFactory getDaqueryKeyStoreSSLFactory() throws Exception
+/*	public static SSLSocketFactory getDaqueryKeyStoreSSLFactory() throws Exception
 	{
 		if(daquerySSLFactory == null)
 		{
@@ -117,7 +133,7 @@ public class WSConnectionUtil {
 			daquerySSLFactory = ctx.getSocketFactory();
 		}
 		return(daquerySSLFactory);
-	}
+	} */
 	
 	/**
 	 * This method returns the keystore path for this machine's Shrine setup.  The keystore path is found within the
@@ -368,7 +384,58 @@ public class WSConnectionUtil {
 			builder = builder.header("Authorization", "Bearer " + jwToken);
 		resp = builder.get();
 		return(resp);
-	}	
+	}
+	
+	public static void sendFileToSite(File localFileAndPath, String outputFilename, Site toSite) throws DaqueryErrorException
+	{
+		FormDataMultiPart fdmp1 = null;
+		try
+		{
+			Map<String, String> args = new HashMap<String, String>();
+			args.put("filename", URLEncoder.encode(outputFilename, "UTF-8"));			
+			
+			if(! localFileAndPath.exists())
+				throw new DaqueryException("File " + localFileAndPath.getName() + " being sent to site " + toSite.getName() + " does not exist.");
+			
+			Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
+				   client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
+			FileDataBodyPart filePart = new FileDataBodyPart("file", localFileAndPath);
+			fdmp1 = new FormDataMultiPart();
+			FormDataMultiPart fdmp = (FormDataMultiPart) fdmp1.bodyPart(filePart);
+			WebTarget target = client.target(buildGetUrl(toSite.getUrl(), "receive-data-file", args));
+			target.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
+			target.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
+			
+			Response response = target.request(fdmp.getMediaType()).post(Entity.entity(fdmp, fdmp.getMediaType()));
+		
+			if(response.getStatus() != 200)
+			{
+				ErrorInfo ei = new ErrorInfo();
+				String msg = "An error occured while transfering " + outputFilename + " to site " + toSite.getName();
+				ei.setDisplayMessage(msg);
+				DaqueryErrorException dee = new DaqueryErrorException(msg, ei);
+				throw dee;
+			}
+			
+		}
+		catch(DaqueryErrorException dee)
+		{
+			throw dee;
+		}
+		catch(Throwable t)
+		{
+				ErrorInfo ei = new ErrorInfo();
+				String msg = "An unexpected error occured while transfering " + outputFilename + " to site " + toSite.getName();
+				ei.setDisplayMessage(msg);
+				DaqueryErrorException dee = new DaqueryErrorException(msg, t, ei);
+				throw dee;			
+		}
+		finally
+		{
+			try{if(fdmp1 != null) fdmp1.close();}catch(Throwable t1){log.log(Level.SEVERE, "", t1);}
+		}
+	}
+	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
 		Response authResp = null;

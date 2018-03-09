@@ -1,19 +1,12 @@
 package edu.pitt.dbmi.daquery.common.util;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
 import java.nio.file.NoSuchFileException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -31,18 +24,6 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.JerseyClient;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.glassfish.jersey.client.JerseyWebTarget;
 import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
@@ -98,18 +79,7 @@ public class DataExporter {
 	int casesPerFile;
 	int nFiles;
 	int currentFile = 0;
-	
-	protected static SSLSocketFactory daquerySSLFactory;
-	static{
-		try {
-			daquerySSLFactory = WSConnectionUtil.getDaqueryKeyStoreSSLFactory();
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Unable to set daquerySSLFactory.", e);
-		}
-	}
-	
-	private String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-	
+		
 	public DataExporter(DaqueryRequest daqueryRequest, DataExportConfig dataExportConfig, String dataDir, List<String> idList) throws DaqueryException {
 		this.dauqeryRequest = daqueryRequest;
 		this.dataExportConfig = dataExportConfig;
@@ -270,70 +240,6 @@ public class DataExporter {
 		return zipFile;
 	}
 	
-	private void sendFileToRequester(File inputFileAndPath, String outputFilename, String siteName, String siteURL, String request_site_table_id, String senderUsername, String senderEmail, String securityKey) throws IOException
-	{
-		BufferedReader reader = null;
-		HttpURLConnection conn = null;
-		InputStream input = null;
-		OutputStream os = null;
-		StringBuilder stringBuilder;
-		try
-		{
-			String sContentDisposition = "attachment; filename=\"" + outputFilename +"\"";
-			// ** need to be changed
-//			siteURL = siteURL + "path-ws/PaTHShrineWebServices/sendDataFile?filename=" + URLEncoder.encode(outputFilename, "UTF-8") + 
-//																				"&siteName=" + siteName + 
-//																				"&i2b2AdminEmail=" + URLEncoder.encode(propFile.getAdminEmail(), "UTF-8") + 
-//																				"&request_site_table_id=" + request_site_table_id + 
-//																				"&senderUsername=" + senderUsername + 
-//																				"&senderEmail=" + senderEmail + 
-//																				"&siteSecurityKey=" + securityKey;
-			input = new FileInputStream(inputFileAndPath);
-			URL url = new URL(siteURL);
-			String scheme = url.getProtocol();
-			String userInfo = url.getUserInfo();
-			String host = url.getHost();
-			int port = url.getPort();
-			String path = url.getPath();
-			String query = url.getQuery();
-			URI uri = new URI(scheme, userInfo, host, port, path, query, null);
-			conn = (HttpURLConnection) uri.toURL().openConnection();
-			if(scheme.trim().toUpperCase().startsWith("HTTPS"))
-				((HttpsURLConnection)conn).setSSLSocketFactory(daquerySSLFactory);
-
-			ClientConfig config = new ClientConfig();
-			JerseyClient client;
-			if(scheme.trim().toUpperCase().startsWith("HTTPS")){
-				client = new JerseyClientBuilder().sslContext(SSLContext.getInstance("TLS"))
-												  .hostnameVerifier(new HostnameVerifier() {	
-											            @Override
-											            public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
-											                return true;
-											            }})
-												  .build();
-			} else {
-				client = new JerseyClientBuilder().build();
-			}
-			
-			//client.setChunkedEncodingSize(1024);
-			JerseyWebTarget target = client.target(siteURL);
-			Response response = target
-										.request(MediaType.APPLICATION_OCTET_STREAM).header("Content-Disposition", sContentDisposition)
-										.post(Entity.entity(input, MediaType.APPLICATION_OCTET_STREAM));
-			
-		}
-		catch(Throwable t)
-		{
-			throw new IOException("An unexpected error occurred while attempting to send a file to SHRINE+", t);
-		}
-		finally
-		{
-			try{if(reader != null) reader.close();}catch(Throwable t1){logger.log(Level.SEVERE, "", t1);}
-			try{if(conn != null) conn.disconnect();}catch(Throwable t2){logger.log(Level.SEVERE, "", t2);}
-			try{if(input != null) input.close();}catch(Throwable t3){logger.log(Level.SEVERE, "", t3);}
-			try{if(os != null) os.close();}catch(Throwable t4){logger.log(Level.SEVERE, "", t4);}
-		}
-	}
 	
 	private String extractErrorMsg(Throwable t){
 		String errorMsg = "";
