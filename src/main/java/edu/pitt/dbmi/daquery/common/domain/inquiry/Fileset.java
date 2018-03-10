@@ -1,5 +1,7 @@
 package edu.pitt.dbmi.daquery.common.domain.inquiry;
 
+import java.io.File;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CollectionTable;
@@ -12,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 
@@ -49,5 +52,12 @@ public class Fileset extends DaqueryObject
 
 	public void setFilepaths(Set<String> filepaths) {
 		this.filepaths = filepaths;
+	}
+	
+	@Transient
+	public void addFile(File file)
+	{
+		if(filepaths == null) filepaths = new HashSet<String>();
+		filepaths.add(file.getAbsolutePath());
 	}
 }
