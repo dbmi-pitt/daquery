@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.common.dev.util;
 
 import java.io.File;
+import java.net.SocketException;
 
 import org.hibernate.Session;
 
@@ -14,19 +15,23 @@ public class TestFileTransfer
 {
 	public static void main(String [] args)
 	{
-		AppProperties.setDevHomeDir("/Users/bill/daquery-data");
+		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
 		Session sess = null;
 		try
 		{
 			sess = HibernateConfiguration.openSession();
 			Site localSite = SiteDAO.getLocalSite();
-			File localFileAndPath = new File("/Users/bill/big");
-			//File localFileAndPath = new File("/home/devuser/big");
+			//File localFileAndPath = new File("/Users/bill/big");
+			File localFileAndPath = new File("/home/devuser/big");
 			WSConnectionUtil.sendFileToSite(localFileAndPath, "big.out", localSite);
 		}
 		catch(Throwable t)
 		{
 			t.printStackTrace();
+			if(t instanceof SocketException ||
+				(t.getCause() != null && t.getCause() instanceof SocketException) ||
+				(t.getCause() != null && t.getCause().getCause() != null && t.getCause().getCause() instanceof SocketException))
+				   System.out.println("Connection to site lost during file transfer.");
 		}
 		finally
 		{

@@ -27,6 +27,11 @@ public class ErrorInfo extends DaqueryObject
 	
 	public ErrorInfo(){}
 	
+	public ErrorInfo(String displayMessage)
+	{
+		setDisplayMessage(displayMessage);
+	}
+	
 	public ErrorInfo(String message, String longMessage, Throwable cause)
 	{
 		setDisplayMessage(message);

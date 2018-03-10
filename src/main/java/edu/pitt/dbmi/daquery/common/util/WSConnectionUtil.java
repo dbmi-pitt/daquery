@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -45,6 +46,7 @@ import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 
@@ -87,6 +89,12 @@ public class WSConnectionUtil {
 	        /* ignore */
 	    }
 	    return false;
+	}
+	
+	public static boolean checkConnection(Site site) throws MalformedURLException
+	{
+			URL url = new URL(site.getUrl());
+			return(checkConnection(url.getHost(), url.getPort()));		
 	}
 	
 	/**
@@ -376,11 +384,27 @@ public class WSConnectionUtil {
 		FormDataMultiPart fdmp1 = null;
 		try
 		{
+			String errMsg = "";
+			
+			if(! localFileAndPath.exists())
+				errMsg = "File " + localFileAndPath.getName() + " being sent to site " + toSite.getName() + " as " + outputFilename + " does not exist.";
+			
+			if(! checkConnection(toSite))
+				errMsg = errMsg + "Unable to connect to site " + toSite.getName() + " while transfering file " + outputFilename;
+			
+			if(! StringHelper.isEmpty(errMsg))
+			{
+				ErrorInfo ei = new ErrorInfo();
+				ei.setDisplayMessage("Unable to send a file to " + toSite.getName());
+				ei.setLongMessage(errMsg);
+				DaqueryErrorException dee = new DaqueryErrorException(errMsg, ei);
+				log.log(Level.SEVERE, errMsg);
+				throw dee;	
+			}
+				
 			Map<String, String> args = new HashMap<String, String>();
 			args.put("filename", URLEncoder.encode(outputFilename, "UTF-8"));			
 			
-			if(! localFileAndPath.exists())
-				throw new DaqueryException("File " + localFileAndPath.getName() + " being sent to site " + toSite.getName() + " does not exist.");
 			
 			Client client = ClientBuilder.newBuilder().build();
 				   //client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
@@ -393,9 +417,18 @@ public class WSConnectionUtil {
 		
 			if(response.getStatus() != 200)
 			{
-				ErrorInfo ei = new ErrorInfo();
-				String msg = "An error occured while transfering " + outputFilename + " to site " + toSite.getName();
-				ei.setDisplayMessage(msg);
+				String msg = "An error at the site occured while transfering " + outputFilename + " to site " + toSite.getName();
+				ErrorInfo ei = null;
+				DecodedErrorInfo dei = ResponseHelper.decodeErrorResponse(response);
+				if(dei != null)
+				{
+					if(dei.getErrorInfo() != null)
+						ei = dei.getErrorInfo();
+					else if(! StringHelper.isEmpty(dei.getErrorMessage()))
+						ei = new ErrorInfo(dei.getErrorMessage());
+				}
+				else
+					ei = new ErrorInfo(msg);
 				DaqueryErrorException dee = new DaqueryErrorException(msg, ei);
 				throw dee;
 			}
@@ -407,10 +440,17 @@ public class WSConnectionUtil {
 		}
 		catch(Throwable t)
 		{
+			String msg = null;
+			if(t instanceof SocketException ||
+				(t.getCause() != null && t.getCause() instanceof SocketException) ||
+				(t.getCause() != null && t.getCause().getCause() != null && t.getCause().getCause() instanceof SocketException))
+					msg = "Connection to site " + toSite.getName() + " lost during transfer of " + outputFilename + ".";
+			else
+					msg = "An unexpected error occured while transfering " + outputFilename + " to site " + toSite.getName();
 				ErrorInfo ei = new ErrorInfo();
-				String msg = "An unexpected error occured while transfering " + outputFilename + " to site " + toSite.getName();
 				ei.setDisplayMessage(msg);
 				DaqueryErrorException dee = new DaqueryErrorException(msg, t, ei);
+				log.log(Level.SEVERE, msg, t);
 				throw dee;			
 		}
 		finally
@@ -418,57 +458,6 @@ public class WSConnectionUtil {
 			try{if(fdmp1 != null) fdmp1.close();}catch(Throwable t1){log.log(Level.SEVERE, "", t1);}
 		}
 	}
-
-	public static void sendFileToSiteBK(File localFileAndPath, String outputFilename, Site toSite) throws DaqueryErrorException
-	{
-		FormDataMultiPart fdmp1 = null;
-		try
-		{
-			Map<String, String> args = new HashMap<String, String>();
-			args.put("filename", URLEncoder.encode(outputFilename, "UTF-8"));			
-			
-			if(! localFileAndPath.exists())
-				throw new DaqueryException("File " + localFileAndPath.getName() + " being sent to site " + toSite.getName() + " does not exist.");
-			
-			Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
-				   client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
-			FileDataBodyPart filePart = new FileDataBodyPart("file", localFileAndPath);
-			fdmp1 = new FormDataMultiPart();
-			FormDataMultiPart fdmp = (FormDataMultiPart) fdmp1.bodyPart(filePart);
-			WebTarget target = client.target(buildGetUrl(toSite.getUrl(), "receive-data-file", args));
-			target.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
-			target.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
-			
-			Response response = target.request(fdmp.getMediaType()).post(Entity.entity(fdmp, fdmp.getMediaType()));
-		
-			if(response.getStatus() != 200)
-			{
-				ErrorInfo ei = new ErrorInfo();
-				String msg = "An error occured while transfering " + outputFilename + " to site " + toSite.getName();
-				ei.setDisplayMessage(msg);
-				DaqueryErrorException dee = new DaqueryErrorException(msg, ei);
-				throw dee;
-			}
-			
-		}
-		catch(DaqueryErrorException dee)
-		{
-			throw dee;
-		}
-		catch(Throwable t)
-		{
-				ErrorInfo ei = new ErrorInfo();
-				String msg = "An unexpected error occured while transfering " + outputFilename + " to site " + toSite.getName();
-				ei.setDisplayMessage(msg);
-				DaqueryErrorException dee = new DaqueryErrorException(msg, t, ei);
-				throw dee;			
-		}
-		finally
-		{
-			try{if(fdmp1 != null) fdmp1.close();}catch(Throwable t1){log.log(Level.SEVERE, "", t1);}
-		}
-	}
-	
 	
 	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
