@@ -61,12 +61,14 @@ import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.FileHelper;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
@@ -1060,44 +1062,100 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @POST
     @Path("/receive-data-file")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    //@Consumes(MediaType.MULTIPART_FORM_DATA)
     //@Produces(MediaType.APPLICATION_JSON)
-//    public Response receiveDataFile(@FormDataParam("file") InputStream is,
     public Response receiveDataFile(InputStream is,
-    								@QueryParam("filename") String filename)
+    								@DefaultValue("") @QueryParam("filename") String filename,
+    								@DefaultValue("") @QueryParam("response-id") String responseId,
+    								@DefaultValue("") @QueryParam("from-site-id") String fromSiteId)
     {
-	
-              try {
-                        if (StringHelper.isBlank(filename)) {
-                                logger.log(Level.SEVERE, "Did not recieve a file name when trying to copy a file.");
-                                return ResponseHelper.getErrorResponse(400, "Required parameter filename not received during a file transfer.", null, null);
-                        }
-                        String directory = "/Users/bill/daq-download";
-                        String windowzHappyFilename = filename.replace(':', '-');
-                        File outFile = Paths.get(directory, windowzHappyFilename).toFile();
-                        OutputStream out = new FileOutputStream(outFile);
-                        byte[] buffer = new byte[1024];
-                        int bytesRead;
-                        while((bytesRead = is.read(buffer)) != -1)
-                        {
-                        	out.write(buffer, 0, bytesRead);
-                        }
-                        is.close();
-                        out.close();
-                } catch (Throwable e) {
-                        logger.log(Level.SEVERE, "Unable to copy file a file.", e);
-//                        NotifyUserWithErrorMessage(request_site_table_id, filename,
-//                                        senderUsername, i2b2AdminEmail, senderEmail, e);
-                        return ResponseHelper.getErrorResponse(500, "Unable to transfer file " + filename, null, e);
-                } finally {
-                        try {
-                                if(is != null) is.close();
-                        } catch (Throwable t) {
-                        }
-                } 
-                return Response.status(200).type("text/plain")
-                                .entity("File succesfully transfered").build();
-    	
+    	OutputStream out = null;
+    	try
+    	{
+    		if (StringHelper.isBlank(filename))
+    		{
+    			logger.log(Level.SEVERE, "Did not recieve a file name when trying to copy a file.");
+    			return ResponseHelper.getErrorResponse(400, "Required parameter filename not received during a file transfer.", null, null);
+    		}    
+    		if(StringHelper.isEmpty(responseId))
+    		{
+    			return ResponseHelper.getErrorResponse(400, "Required response id parameter not recieved during file transfer.", "Request id not recieved when for transfer of file " + filename, null);
+    		}
+    		if(StringHelper.isEmpty(fromSiteId))
+    		{
+    			return ResponseHelper.getErrorResponse(400, "Required site id parameter not recieved during file transfer.", "Request id not recieved when for transfer of file " + filename, null);
+    		}
+    		
+	        DaqueryResponse response = ResponseDAO.getResponseById(responseId);
+	        if(response == null)
+	        {
+	        	return ResponseHelper.getErrorResponse(500, "Unable to find response.", "A response with id " + responseId + " was not found.", null);
+	        }
+	        if(response.getRequest() == null || StringHelper.isEmpty(response.getRequest().getRequestGroup()))
+	        {
+	        	return ResponseHelper.getErrorResponse(500, "Unable to get a reponse or group id when receiving ", "Response with id " + responseId + " does not have an associated Request or the Request is not part of a group of requests", null);
+	        }
+	        
+	        Site fromSite = SiteDAO.querySiteByID(fromSiteId);
+	        if(fromSite == null)
+	        {
+	        	return ResponseHelper.getErrorResponse(500, "Unable to find site.", "The sending site with id " + responseId + " was not found when sending file " + filename + ".", null);
+	        }
+	        
+	        //construct the output directory, if needed
+	        //the output directory is the application set output dir (defaults to sys temp)
+	        //plus the request group id for this request
+	        String outputDirectoryPath = AppProperties.getFileOutputDir();
+	        File outputDirectory = new File(outputDirectoryPath);
+	        if(! outputDirectory.exists())
+	        {
+	        	if(! outputDirectory.mkdirs())
+	        		return ResponseHelper.getErrorResponse(500, "Unable to create output directory.", "The directory " + outputDirectoryPath + " could not be created when sending file " + filename + ".", null);
+	        }
+	        File groupOutputDir = Paths.get(outputDirectoryPath, response.getRequest().getRequestGroup()).toFile();
+	        if(! groupOutputDir.exists())
+	        {
+	        	if(! groupOutputDir.mkdirs())
+	        		return ResponseHelper.getErrorResponse(500, "Unable to create output directory.", "The directory " + groupOutputDir.getAbsolutePath() + " could not be created when sending file " + filename + ".", null);
+	        }
+	        
+	        //construct the output file name by prefixing the site name
+	        //to it and postfixing a serializer if it already exists
+	        //also replace any colons with dashes because Windows doesn't like the colons
+	        String outputFilename = fromSite.getName().trim() + "_" + filename.replace(':', '-');
+    		File outFileTemp = Paths.get(groupOutputDir.getAbsolutePath(), outputFilename).toFile();
+    		File outFile = FileHelper.serializeFilename(outFileTemp);
+    		if(!outFile.canWrite())
+    			return ResponseHelper.getErrorResponse(500, "Unable to write output file.", "The file " + outFile.getAbsolutePath() + " could not be created.", null); 
+    		
+    		out = new FileOutputStream(outFile);
+    		byte[] buffer = new byte[1024];
+    		int bytesRead;
+    		while((bytesRead = is.read(buffer)) != -1)
+    		{
+    			out.write(buffer, 0, bytesRead);
+    		}
+	        if(response.getFiles() == null)
+	        	response.setFiles(new Fileset());
+	        response.getFiles().addFile(outFile);
+	        ResponseDAO.saveOrUpdate(response);
+    	}
+    	catch (Throwable e)
+    	{
+    		logger.log(Level.SEVERE, "Unable to copy file a file.", e);
+    		//NotifyUserWithErrorMessage(request_site_table_id, filename,
+    		//senderUsername, i2b2AdminEmail, senderEmail, e);
+	            return ResponseHelper.getErrorResponse(500, "Unable to transfer file " + filename, null, e);
+    	}
+    	finally
+    	{
+    		try {if(is != null) is.close();}
+    		catch (Throwable t){logger.log(Level.SEVERE, "Error while closing input stream during ");}
+    		try {if(out != null) out.close();}
+    		catch (Throwable t){logger.log(Level.SEVERE, "Error while closing output stream during ");}
+    		
+    	}
+    	return Response.status(200).type("text/plain")
+    			.entity("File succesfully transfered").build();
     }
     
     private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
