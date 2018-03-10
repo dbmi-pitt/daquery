@@ -316,6 +316,16 @@ public class AppProperties
 	public static void setDateShift(boolean val) throws DaqueryException {
 		setDBProperty("date.shift", Boolean.toString(val));
 	}
+	
+	public static String getFileOutputDir() throws DaqueryException
+	{
+		String val = getDBProperty("file.output.dir");
+		if(val == null)
+			return(System.getProperty("java.io.tmpdir"));
+		else
+			return(val);
+	}
+	
 	/**
 	 * Check for the existence of a property in the application database table PROPERTY.
 	 * @param propertyName  The name of the property to check for.

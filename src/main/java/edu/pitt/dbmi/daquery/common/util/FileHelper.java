@@ -96,6 +96,11 @@ public class FileHelper
 		makeZip(directory, zipFile, recursive);
 	}
 	
+	public static File serializeFilename(File f)
+	{
+		return(f);
+	}
+	
 	private static int makeZip(File zipDirectory, File outputFile, boolean recursive) throws FileNotFoundException, IOException
 	{
 		// if the archive exists already delete it and start over
