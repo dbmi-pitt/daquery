@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,19 @@ import java.util.zip.ZipOutputStream;
 
 public class FileHelper
 {
+	public static void main(String [] args)
+	{
+		String testFile = "/Users/bill/ndir/f1.zip";
+		File sf = serializeFilename(new File(testFile));
+		if(sf == null) System.out.println("is null");
+		else System.out.println(sf.getAbsolutePath());
+		/*ExtendedFile ef = new ExtendedFile(testFile);
+		System.out.println("dir:" + ef.dir);
+		System.out.println("extension:" + ef.extension);
+		System.out.println("filename:" + ef.filename);
+		System.out.println("filenameNoExtension:" + ef.filenameNoExtension);
+		System.out.println("serializer:" + ef.serializer); */
+	}
 	public static InputStream streamFromBaseResource(String filename)
 	{
 		InputStream is = ApplicationPropertiesFile.class.getResourceAsStream("/" + filename);
@@ -40,7 +55,7 @@ public class FileHelper
 			
 	}
 	
-	public static File createTempDirectory()throws IOException
+	public static File createTempDirectory() throws IOException
 	{
 	    File temp = null;
 
@@ -96,10 +111,136 @@ public class FileHelper
 		makeZip(directory, zipFile, recursive);
 	}
 	
-	public static File serializeFilename(File f)
+
+
+    /**
+    * Look for existing files with the pattern /any/directory/filename-serializer.extension.  If one
+    * exists increment the serializer by one.
+    * @param f The file to look at.
+    * @return
+    */
+    public static File serializeFilename(File f)
+    {
+    	if(f.isDirectory())
+    		return(null);
+
+    	File dir = f.getParentFile();
+    	if(dir == null)
+    		return(null);
+    	
+    	ExtendedFile ef = new ExtendedFile(f);
+    	if(ef.filenameNoExtension == null)
+    		return(f);
+    	String [] filesToCheck = dir.list(new FileStartsAndEndsWith(ef.filenameNoExtension, ef.extension));
+    	int maxSerial = 0;
+    	boolean first = true;
+    	if(filesToCheck != null)
+    	{
+	    	for(String toCheck : filesToCheck)
+	    	{
+	    		if(first)
+	    		{
+	    			maxSerial = 1;
+	    			first = false;
+	    		}
+	    		ExtendedFile efc = new ExtendedFile(toCheck);
+	    		if(efc != null && efc.serializer != null && efc.serializer.intValue() > maxSerial)
+	    			maxSerial = efc.serializer.intValue();
+	    	}
+    	}
+    	if(maxSerial > 0)
+    	{
+    		String fName = ef.filenameNoExtension + "-" + (maxSerial + 1);
+    		if(ef.extension != null)
+    			fName = fName + "." + ef.extension;
+    		File fAndPath = Paths.get(dir.getAbsolutePath(), fName).toFile();
+    		return(fAndPath);
+    	}
+    	else
+    		return(f);
+    }
+
+    private static class ExtendedFile
+    {
+    	public File dir = null;
+    	public String filename = null;
+    	public String extension = null;
+    	public String filenameNoExtension = null;
+    	public Integer serializer = null;
+    	
+    	public ExtendedFile(String fileAndPath)
+    	{
+    		parse(new File(fileAndPath));
+    	}
+    	public ExtendedFile(File fileAndPath)
+    	{
+    		parse(fileAndPath);
+    	}
+    	private void parse(File path)
+    	{
+    		File dir = path.getParentFile();
+    		if(dir != null && dir.isDirectory())
+    			this.dir = dir;
+    		filename = path.getName();
+    		if(filename != null) filename = filename.trim();
+    		FileParts fps = parseFilename(filename);
+    		serializer = fps.serializer;
+    		extension = fps.extension;
+    		filenameNoExtension = fps.fileNoExtension;
+    	}
+    	
+    	static FileParts parseFilename(String  filename)
+    	{
+    		if(StringHelper.isBlank(filename))
+    			return(null);
+    		FileParts fps = new FileParts();
+    		String fn = filename.trim();
+    		int dotPos = fn.lastIndexOf(".");
+    		String t;
+    		if(dotPos > 0 && dotPos < fn.length())
+    		{
+    			fps.extension = fn.substring(dotPos + 1);
+    			fps.fileNoExtension = fn.substring(0, dotPos);
+    			t = fps.fileNoExtension;
+    		}
+    		else
+    		{
+    			fps.fileNoExtension = fn;
+    			t = fn;
+    		}
+    		if(t.matches(".*-[0-9]+$"))
+    		{
+    			int dashLoc = t.lastIndexOf("-");
+    			fps.serializer = Integer.parseInt(t.substring(dashLoc + 1));
+    			fps.fileNoExtension = t.substring(0, dashLoc);
+    		}
+    		return(fps);
+    	}
+    }
+    private static class FileParts
 	{
-		return(f);
+		Integer serializer = null;
+		String extension = null;
+		String fileNoExtension = null;
 	}
+
+    private static class FileStartsAndEndsWith implements FilenameFilter
+    {
+    	private String start;
+    	private String end;
+    	boolean checkEnd;
+    	public FileStartsAndEndsWith(String fileStart, String fileEnd)
+    	{
+    		start = fileStart;
+    		end = fileEnd;
+    		checkEnd = !StringHelper.isEmpty(fileEnd);
+    	}
+		@Override
+		public boolean accept(File dir, String name) {
+			if(StringHelper.isEmpty(name)) return(false);
+			return((checkEnd)?(name.startsWith(start)&&name.endsWith(end)):name.startsWith(start));
+		}    	
+    }
 	
 	private static int makeZip(File zipDirectory, File outputFile, boolean recursive) throws FileNotFoundException, IOException
 	{
