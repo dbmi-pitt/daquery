@@ -18,6 +18,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 
@@ -25,6 +26,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 @Entity
 @Table(name="DAQUERY_REQUEST")
@@ -139,5 +141,20 @@ public class DaqueryRequest extends DaqueryObject
 	
 	public Network getNetwork(){return(network);}
 	public void setNetwork(Network net){network = net;}
+	
+	@Transient
+	public String getFilePrefix()
+	{
+		String username = "";
+		String inqName = "";
+		String dtTime = "";
+		if(getRequester() != null && !StringHelper.isEmpty(getRequester().getEmail()))
+			username = StringHelper.usernameFromEmail(getRequester().getEmail()) + "-";
+		if(getInquiry() != null && ! StringHelper.isEmpty(getInquiry().getInquiryName()))
+			inqName = getInquiry().getInquiryName().replaceAll(" ", "_") + "-";
+		if(this.getSentTimestamp() != null)
+			dtTime = StringHelper.formatDate(getSentTimestamp());
+		return username + inqName + dtTime;
+	}
 
 }

@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -91,7 +94,7 @@ public class DataExporter {
 		this.idList = idList;
 		
 		casesPerFile = this.dataExportConfig.pageSize;
-		nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);		
+		nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
 	}
 
 	public int getNumFiles()
@@ -150,61 +153,53 @@ public class DataExporter {
 		else
 			return(false);
 	}
-	public void exportNext() throws Throwable {
-		try {
-				if(! hasNextExport()) return;
+	public void exportNext() throws Throwable
+	{
+		try
+		{
+			if(! hasNextExport()) return;
 				currentFile++;
+	
+			File tmpDir = FileHelper.createTempDirectory();
+			File zipFile = dumpData(tmpDir, dauqeryRequest, currentFile, nFiles, casesPerFile);
+	
+			//send the file to remote requester
+			String outputFilename = dauqeryRequest.getFilePrefix() + "-" + currentFile + ".zip";
+			if(deliverData) {
+				WSConnectionUtil.sendFileToSite(zipFile, outputFilename, dauqeryRequest.getRequestSite());
+			}
+			else
+			{ //just copy the file locally and send an email to the current user
+				Files.copy(zipFile.toPath(), Paths.get(AppProperties.getLocalDeliveryDir(), outputFilename), StandardCopyOption.REPLACE_EXISTING );
+			}	
+			FileHelper.deleteDirectory(tmpDir);
 		
-				File tmpDir = FileHelper.createTempDirectory();
-				File zipFile;
-				zipFile = dumpData(tmpDir, dauqeryRequest, currentFile, nFiles, casesPerFile);
-				
-				//send the file to remote requester
-		//			if(deliverData) {				
-		//				//send the zip file to the central shrine
-		//				sendFileToShrine(zipFile, zipFileName, siteName, request_site_table_id, sender_username, sender_email, securityKey);
-		//				filesent = true;
-		//				//delete the temporary directory
-		//				FileHelper.deleteDirectory(tmpDir);
-		//			}
-		//			else { //just copy the file locally and send an email to the current user
-		//				Files.copy(zipFile.toPath(), Paths.get(dataDir, zipFile.getName()), StandardCopyOption.REPLACE_EXISTING );
-		//			}
-					
-					// FileHelper.deleteDirectory(tmpDir);
-			
-				if(deliverData){
-					//acceptRequestFinish(request_site_table_id, fileNames, sender_username, siteName, securityKey);
-				} else {
-					//accept Request
-					//acceptRequestLocally(request_site_table_id, zipFileName.replaceAll("-\\d+\\.", "-n."), sender_username, dataDir, siteName, securityKey);
-				}
-				} catch (Throwable t) {
-					logger.log(Level.SEVERE, "Error occurs on data export", t);
-					throw t;
-				}
+			if(deliverData){
+				//acceptRequestFinish(request_site_table_id, fileNames, sender_username, siteName, securityKey);
+			} else {
+				//accept Request
+				//acceptRequestLocally(request_site_table_id, zipFileName.replaceAll("-\\d+\\.", "-n."), sender_username, dataDir, siteName, securityKey);
+			}
+		} catch (Throwable t) {
+			logger.log(Level.SEVERE, "Error occurs on data export", t);
+			throw t;
+		}
 	}
 	
-	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currPage, int pageCount, int pageSize) throws Throwable {
-		String filename = "";
-		if (pageCount == 1)
-			filename = "testfile"; // daqueryRequest.getInquiry().getInquiryName() + "_" + SiteDAO.getLocalSite().getName() + "_" + daqueryRequest.getRequestId() + "_" + dateTime;
-		else
-			filename = "testfile"; //daqueryRequest.getInquiry().getInquiryName() + "_" + SiteDAO.getLocalSite().getName() + "_" + daqueryRequest.getRequestId() + "_" + dateTime + "_patient-set-" + currPage;
-		String zipFilename = filename + ".zip";
-		String logFilename = filename + ".log";
-		
+	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currPage, int pageCount, int pageSize) throws Throwable
+	{
+		String filenamePrefix = daqueryRequest.getFilePrefix();
 		Hashtable<OutputFile, OutputStreamWriter> outputStreams = new Hashtable<>();
 		for(OutputFile outputfile : this.dataExportConfig.outputFiles){
 			if(outputfile.source == null){
 				FileOutputStream ontologyOutputStream = null;
-				String ontologyFilename = filename + "-" + outputfile.name;
+				String ontologyFilename = filenamePrefix + "-" + outputfile.name;
 				ontologyOutputStream = new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + ontologyFilename));
 				
 				outputStreams.put(outputfile, new OutputStreamWriter(ontologyOutputStream));
 				
 			}else{
-				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filename + "-" + outputfile.name))), daqueryRequest, currPage, pageSize, outputfile);
+				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currPage, pageSize, outputfile);
 			}
 		}
 		
@@ -234,7 +229,7 @@ public class DataExporter {
 //		}
 
 		//create a zip file containing the two files that we just wrote			
-		File zipFile = new File(tmpDir.getAbsolutePath() + File.separator + zipFilename);
+		File zipFile = new File(tmpDir.getAbsolutePath() + File.separator + daqueryRequest.getFilePrefix() + ".zip");
 		FileHelper.zipDirectory(tmpDir, zipFile, false);
 		
 		return zipFile;

@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -385,7 +386,7 @@ public class WSConnectionUtil {
 		try
 		{
 			String errMsg = "";
-			
+
 			if(! localFileAndPath.exists())
 				errMsg = "File " + localFileAndPath.getName() + " being sent to site " + toSite.getName() + " as " + outputFilename + " does not exist.";
 			
@@ -408,7 +409,7 @@ public class WSConnectionUtil {
 			
 			Client client = ClientBuilder.newBuilder().build();
 				   //client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
-			WebTarget target = client.target(buildGetUrl(toSite.getUrl(), "receive-data-file", args));
+			WebTarget target = client.target(buildGetUrl(toSite.getUrl(), "data-file", args));
 			target.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
 			target.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
 			InputStream is = new FileInputStream(localFileAndPath);
@@ -459,12 +460,72 @@ public class WSConnectionUtil {
 		}
 	}
 	
-	public static Response callCentralServer(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
+	public static Response centralServerPost(String serviceName, Object postObject, MediaType postType, Map<String, String> additionalParameters) throws DaqueryException
 	{
-		Response authResp = null;
-		String centServerURL = null;
+		URL cUrl = null;
 		try
 		{
+			Object obj = getCentralServerURL(serviceName, additionalParameters);
+			if(obj instanceof Response) return((Response) obj);
+			cUrl = (URL) obj;
+			//
+			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
+					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + ((cUrl != null)?cUrl.toString():"null"), null));
+			String url = AppProperties.getCentralServerURL();
+			Client client = getRemoteClient(url);
+			WebTarget target = client.target(cUrl.toURI());
+			Response response;
+			if(postType != null)
+				response = target.request().post(Entity.entity(postObject, postType));
+			else
+				response = target.request().post(Entity.entity(postObject, MediaType.APPLICATION_JSON));
+			return(response);			
+		}
+		catch(KeyManagementException kme)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server.", "An error happened while configuring the secure key management for the site connection during a post request.", kme));
+		}
+		catch(MalformedURLException mue)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url during a post request, " + ((cUrl != null)?cUrl.toString():"null")  , mue));
+		} catch (URISyntaxException e) {
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site URL." , "This was due to a malformed url during a post request, " + ((cUrl != null)?cUrl.toString():"null")  , e));
+		}
+		
+	}
+	
+	public static Response centralServerGet(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
+	{
+		URL cUrl = null;
+		try
+		{
+			Object obj = getCentralServerURL(serviceName, additionalParameters);
+			if(obj instanceof Response) return((Response) obj);
+			cUrl = (URL) obj;
+			//
+			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
+					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + ((cUrl != null)?cUrl.toString():"null"), null));
+			String url = AppProperties.getCentralServerURL();
+			Client client = getRemoteClient(url);			
+			Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
+			return(rVal);			
+		}
+		catch(KeyManagementException kme)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server.", "An error happened while configuring the secure key management for the site connection during a get request.", kme));
+		}
+		catch(MalformedURLException mue)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url during a get request, " + ((cUrl != null)?cUrl.toString():"null")  , mue));
+		}
+	}
+	
+	private static Object getCentralServerURL(String serviceName, Map<String, String> additionalParameters) throws DaqueryException, MalformedURLException
+	{
+		Response authResp = null;
+		try
+		{
+			String centServerURL = null;
 			String siteId = AppProperties.getDBProperty("site.id");
 			String siteKey = AppProperties.getDBProperty("central.site.key");
 			authResp = callCentralServerAuth(siteId, siteKey);
@@ -489,28 +550,18 @@ public class WSConnectionUtil {
 					}
 				}
 			}
-			
 			URL cUrl = new URL(centServerURL);
-			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
-					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + centServerURL, null));			
-			Client client = getRemoteClient(url);			
-			Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
-			return(rVal);			
+			return(cUrl);
 		}
-		catch(KeyManagementException kme)
+		catch(Throwable t)
 		{
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server.", "An error happened while configuring the secure key management for the site connection.", kme));
-		}
-		catch(MalformedURLException mue)
-		{
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url: " + centServerURL, mue));
+			throw t;
 		}
 		finally
 		{
 			if(authResp != null) authResp.close();
 		}
 	}
-	
 	public static Response callCentralServerAuth(String siteName, String siteKey) throws DaqueryException
 	{
 		Map<String, String> params = new HashMap<String, String>();
