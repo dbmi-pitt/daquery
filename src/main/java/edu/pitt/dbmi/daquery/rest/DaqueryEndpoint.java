@@ -240,7 +240,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		
 			Map<String, String> idParam = new HashMap<String, String>();
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-			resp = WSConnectionUtil.callCentralServer("availableNetworks",  idParam);
+			resp = WSConnectionUtil.centralServerGet("availableNetworks",  idParam);
 			if(resp.getStatus() == 200)
 			{
 				if(nonConnNetsOnly)
@@ -1060,7 +1060,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     }
     
     @POST
-    @Path("/receive-data-file")
+    @Path("/data-file")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     //@Produces(MediaType.APPLICATION_JSON)
     public Response receiveDataFile(InputStream is,

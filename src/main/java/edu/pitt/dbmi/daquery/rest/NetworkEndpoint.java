@@ -246,7 +246,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
     {
 	    Map<String, String> netIdParam = new HashMap<String, String>();
 	    netIdParam.put("network-id", networkId);
-	    Response resp = WSConnectionUtil.callCentralServer("data-model", netIdParam);
+	    Response resp = WSConnectionUtil.centralServerGet("data-model", netIdParam);
 	    DataModel dm = (DataModel) JSONHelper.decodeResponse(resp, new TypeReference<DataModel>(){});
 	    return(dm);
     }
