@@ -326,6 +326,15 @@ public class AppProperties
 			return(val);
 	}
 	
+	public static String getLocalDeliveryDir() throws DaqueryException
+	{
+		String val = getDBProperty("local.delivery.dir");
+		if(val == null)
+			return(System.getProperty("java.io.tmpdir"));
+		else
+			return(val);
+	}
+	
 	/**
 	 * Check for the existence of a property in the application database table PROPERTY.
 	 * @param propertyName  The name of the property to check for.

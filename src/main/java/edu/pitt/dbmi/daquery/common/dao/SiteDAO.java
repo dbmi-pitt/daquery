@@ -228,7 +228,7 @@ public class SiteDAO extends AbstractDAO {
     	params.put("to-site-id", toSiteId);
     	params.put("from-site-id", fromSiteId);
     	params.put("network-id", networkId);
-    	Response resp = WSConnectionUtil.callCentralServer("site-status", params);
+    	Response resp = WSConnectionUtil.centralServerGet("site-status", params);
     	if(resp.getStatus() == 200)
     		return(resp.readEntity(String.class));
     	else

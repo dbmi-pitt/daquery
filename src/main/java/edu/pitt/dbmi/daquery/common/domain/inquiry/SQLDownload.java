@@ -95,7 +95,7 @@ public class SQLDownload extends SQLQuery implements Download
 			int fileCount = 1;
 			while(dataExporter.hasNextExport())
 			{
-				response.setStatus("File " + fileCount + " of " + totalFiles + " exporting.");
+				response.setStatus("Exporting file " + fileCount + " of " + totalFiles + ".");
 				Transaction t2 = sess.beginTransaction();
 				sess.saveOrUpdate(response);
 				t2.commit();

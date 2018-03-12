@@ -59,7 +59,7 @@ public class FileHelper
 	{
 	    File temp = null;
 
-	    Path p = Files.createTempDirectory("pathcdrn");
+	    Path p = Files.createTempDirectory("dqexport");
 	    temp = p.toFile();
 	    return(temp);
 	}

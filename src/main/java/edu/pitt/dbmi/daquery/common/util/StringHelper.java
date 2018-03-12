@@ -3,6 +3,8 @@ package edu.pitt.dbmi.daquery.common.util;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class StringHelper
 {
@@ -72,7 +74,21 @@ public class StringHelper
 		else
 			return(false);
 	}
-	
+	public static String usernameFromEmail(String email)
+	{
+		if(isEmpty(email)) return(email);
+		String rVal = email.trim();
+		int atPos = rVal.indexOf("@");
+		if(atPos > 0)
+			rVal = rVal.substring(0, atPos);
+		return(rVal);
+	}
+	public static SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd_kk-mm-ss");
+	public static String formatDate(Date dte)
+	{
+		if(dte == null) return(null);
+		return dateTimeFormat.format(dte);
+	}
 	public static boolean equalIgnoreCase(String val1, String val2)
 	{
 		if(val1 == null && val2 == null) return(true);
