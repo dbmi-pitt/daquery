@@ -15,10 +15,13 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExporter;
+import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
@@ -89,7 +92,6 @@ public class SQLDownload extends SQLQuery implements Download
 			}
 
 			Network net = response.getRequest().getNetwork();
-			DataModel dm = net.getDataModel();			
 			DataExporter dataExporter = new DataExporter(response.getRequest(), model.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
 			int totalFiles = dataExporter.getNumFiles();
 			int fileCount = 1;
@@ -103,7 +105,61 @@ public class SQLDownload extends SQLQuery implements Download
 				fileCount++;
 			}
 			
-			response.setStatusEnum(ResponseStatus.COMPLETED);
+			boolean deliverData = AppProperties.getDeliverData();
+			
+			EmailContents emailContents = new EmailContents();
+			DaqueryRequest req = response.getRequest();
+			String inqName = "";
+			String dt = "";
+			String siteName = "";
+			String requesterEmail = null;
+			if(req != null)
+			{
+				if(req.getRequester() != null && !StringHelper.isEmpty(req.getRequester().getEmail()))
+					requesterEmail = req.getRequester().getEmail();
+				if(req.getInquiry() != null && ! StringHelper.isEmpty(req.getInquiry().getInquiryName()))
+					inqName = req.getInquiry().getInquiryName();
+				if(req.getSentTimestamp() != null)
+					dt = StringHelper.formatDate(req.getSentTimestamp());
+				if(req.getRequestSite() != null && ! StringHelper.isEmpty(req.getRequestSite().getName()))
+					siteName = req.getRequestSite().getName();
+			}
+			
+			if(deliverData)
+			{
+				emailContents.subject = "Data Request Delivered";
+				emailContents.message = "The data that you requested has been uploaded to your Daquery server.<br \\><br \\>";
+				response.setStatusEnum(ResponseStatus.COMPLETED);
+			}
+			else
+			{
+				emailContents.subject = "Data Request Delivered Locally";
+				emailContents.message = "The data that you requested has not been sent to your server.  It has been uploaded locally to the responding site's server.<br \\><br \\>";				
+				response.setStatusEnum(ResponseStatus.COMPLETED_LOCAL);
+			}
+			if(requesterEmail != null)
+			{
+				emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Delivered From:</b>" + siteName;
+				emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Requested Date:</b>" + dt;
+				emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Query Name:</b>" + inqName;
+				try{EmailUtil.sendEmail(emailContents);}
+				catch(Throwable t)
+				{
+					if(t instanceof DaqueryErrorException)
+					{
+						DaqueryErrorException dee = (DaqueryErrorException) t;
+						if(dee.getErrorInfo() != null)
+						{
+							log.log(Level.SEVERE, "\n\t" + dee.getErrorInfo().displayMessage + "\n\t" + dee.getErrorInfo().getLongMessage() + "\n\t" + dee.getErrorInfo().getStackTrace());
+						}
+					}
+					log.log(Level.SEVERE, "Unable to send an email for request with id: " + req.getRequestId() + " because an error occurred.", t);
+				}
+			}
+			else
+				log.log(Level.SEVERE, "Unable to send an email for request with id: " + req.getRequestId() + " because the requester or requester's email was not set.");
+
+			
 			return(response);
 		}
 		catch (DaqueryException de)

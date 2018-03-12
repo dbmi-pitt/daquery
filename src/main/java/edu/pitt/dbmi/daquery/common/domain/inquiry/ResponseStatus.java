@@ -7,6 +7,7 @@ public enum ResponseStatus
 	QUEUED(TYPES.QUEUED),
 	EXECUTING(TYPES.EXECUTING),
 	COMPLETED(TYPES.COMPLETED),
+	COMPLETED_LOCAL(TYPES.COMPLETED_LOCAL),
 	ERROR(TYPES.ERROR),
 	STALLED(TYPES.STALLED);
 	
@@ -36,6 +37,7 @@ public enum ResponseStatus
 		public static final String EXECUTING = "EXECUTING";
 		public static final String ERROR = "ERROR";
 		public static final String COMPLETED = "COMPLETED";
+		public static final String COMPLETED_LOCAL = "COMPLETED_LOCAL";
 		public static final String STALLED = "STALLED";
 	} 
 }
