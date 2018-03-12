@@ -173,13 +173,7 @@ public class DataExporter {
 				Files.copy(zipFile.toPath(), Paths.get(AppProperties.getLocalDeliveryDir(), outputFilename), StandardCopyOption.REPLACE_EXISTING );
 			}	
 			FileHelper.deleteDirectory(tmpDir);
-		
-			if(deliverData){
-				//acceptRequestFinish(request_site_table_id, fileNames, sender_username, siteName, securityKey);
-			} else {
-				//accept Request
-				//acceptRequestLocally(request_site_table_id, zipFileName.replaceAll("-\\d+\\.", "-n."), sender_username, dataDir, siteName, securityKey);
-			}
+
 		} catch (Throwable t) {
 			logger.log(Level.SEVERE, "Error occurs on data export", t);
 			throw t;
