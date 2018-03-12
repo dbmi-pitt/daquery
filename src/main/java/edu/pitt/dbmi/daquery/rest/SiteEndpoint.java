@@ -116,7 +116,7 @@ public class SiteEndpoint extends AbstractEndpoint {
                 Map<String, String> idParam = new HashMap<String, String>();
                 idParam.put("network-id", network.getNetworkId());
     			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-    			pendResp = WSConnectionUtil.callCentralServer("pending-sites",  idParam);
+    			pendResp = WSConnectionUtil.centralServerGet("pending-sites",  idParam);
     			
     			if(pendResp.getStatus() == 200) {
     				String json = pendResp.readEntity(String.class);
@@ -184,7 +184,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             
             Map<String, String> idParam = new HashMap<String, String>();
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-			netResp = WSConnectionUtil.callCentralServer("availableNetworks",  idParam);
+			netResp = WSConnectionUtil.centralServerGet("availableNetworks",  idParam);
 			Network network = NetworkDAO.queryNetwork(String.valueOf(networkId));
 			
 			if(netResp.getStatus() == 200)
@@ -265,7 +265,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             Map<String, String> idParam = new HashMap<String, String>();
             idParam.put("network-id", network.getNetworkId());
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
-			Response resp = WSConnectionUtil.callCentralServer("pending-sites",  idParam);
+			Response resp = WSConnectionUtil.centralServerGet("pending-sites",  idParam);
 			
 			if(resp.getStatus() == 200)
 			{
@@ -366,7 +366,7 @@ public class SiteEndpoint extends AbstractEndpoint {
                 idParam.put("network-id", network.getNetworkId());
                 idParam.put("from-site-id", AppProperties.getDBProperty("site.id"));
                 idParam.put("to-site-id", site_out.getSiteId());
- 				Response resp = WSConnectionUtil.callCentralServer("request-connection",  idParam);
+ 				Response resp = WSConnectionUtil.centralServerGet("request-connection",  idParam);
  				
  				if(resp.getStatus() == 200 || resp.getStatus() == 201) {
 		        	network.getOutgoingQuerySites().add(site_out);
@@ -482,7 +482,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             idParam.put("network-id", networkId);
             idParam.put("from-site-id", fromSiteId);
 			idParam.put("to-site-id", AppProperties.getDBProperty("site.id"));
-			acResp = WSConnectionUtil.callCentralServer("approve-connectrequest",  idParam);
+			acResp = WSConnectionUtil.centralServerGet("approve-connectrequest",  idParam);
 			
 			if(acResp.getStatus() == 200) {
 				s = HibernateConfiguration.openSession(); 
@@ -490,7 +490,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 	        	idParam = new HashMap<String, String>();
     			idParam.put("site-id", fromSiteId);
-    			sitesResponse = WSConnectionUtil.callCentralServer("sites",  idParam);
+    			sitesResponse = WSConnectionUtil.centralServerGet("sites",  idParam);
     			String json = sitesResponse.readEntity(String.class);
     			ObjectMapper mapper = new ObjectMapper();
     			Map<String, Object> map= new LinkedHashMap<>();
@@ -567,7 +567,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             idParam.put("network-id", networkId);
             idParam.put("from-site-id", fromSiteId);
 			idParam.put("to-site-id", AppProperties.getDBProperty("site.id"));
-			denyResp = WSConnectionUtil.callCentralServer("deny-connectrequest",  idParam);
+			denyResp = WSConnectionUtil.centralServerGet("deny-connectrequest",  idParam);
 			
 			if(denyResp.getStatus() == 200) {
 				s = HibernateConfiguration.openSession(); 
@@ -575,7 +575,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 	        	idParam = new HashMap<String, String>();
     			idParam.put("site-id", fromSiteId);
-    			sitesResp = WSConnectionUtil.callCentralServer("sites",  idParam);
+    			sitesResp = WSConnectionUtil.centralServerGet("sites",  idParam);
     			String json = sitesResp.readEntity(String.class);
     			ObjectMapper mapper = new ObjectMapper();
     			Map<String, Object> map= new LinkedHashMap<>();
