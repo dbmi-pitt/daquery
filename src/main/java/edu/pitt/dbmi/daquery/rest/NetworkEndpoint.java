@@ -292,6 +292,43 @@ public class NetworkEndpoint extends AbstractEndpoint {
     }
     
     /**
+     * Get data mode by network ID or UUID
+     * example url: daquery-ws/ws/networks/1/datamodel
+     *           or daquery-ws/ws/networks/a3477419-657d-4ddd-8750-c014e2033937/datamodel
+     * @return 200 OK			Datamodel information for one network
+     * @throws 500 Server Error	error message
+     * @throws 401 Unauthorized	
+     */
+    @PUT
+    @Secured
+    @Path("/{id}/sqldatasource")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateSQLDataSourceByNetworkId(@PathParam("id") String id, SQLDataSource ds) {
+    	try {
+
+            logger.info("#### returning network by uuid=" + id);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            Network network = NetworkDAO.queryNetwork(id);
+            NetworkDAO.updateSQLDataSource(network, ds);
+
+            return Response.ok(200).entity("{}").build();
+    	} catch (HibernateException he) {
+    		String msg = "Could not access the database when retrieving datamodel data for network [" + id + "]";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered retrieving datamodel data for network  [" + id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        }
+    }
+    
+    /**
      * Get SQL data source by network ID or UUID
      * example url: daquery-ws/ws/networks/1/sqldatasource
      *           or daquery-ws/ws/networks/a3477419-657d-4ddd-8750-c014e2033937/sqldatasource
