@@ -14,14 +14,17 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import oracle.net.aso.n;
 
 
 
@@ -267,6 +270,33 @@ public class NetworkDAO extends AbstractDAO {
     		String msg = "An unexpected error occured while trying to retrieve SQL Datasource for a network:  " + network.toString();
     		logger.log(Level.SEVERE, msg, t);
     		throw new DaqueryException(msg + "  Check the local server logs for more information.", t);
+    	} finally {
+    		if(s != null) s.close();
+    	}
+    }
+    
+    public static void updateSQLDataSource(Network network, SQLDataSource sqlDatasource) throws DaqueryException {
+    	if(network == null || sqlDatasource == null)
+    		return;
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+    		Transaction t = s.beginTransaction();
+    		
+			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setConnectionUrl(sqlDatasource.getConnectionUrl());
+			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setUsername(sqlDatasource.getUsername());
+			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setPassword(sqlDatasource.getPassword());
+			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setDriverClass(sqlDatasource.getDriverClass());
+			
+			s.saveOrUpdate(network.getDataModel().getDataSource(SourceType.SQL));
+			t.commit();
+			return;
+    	} catch(HibernateException e) {
+    		logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
+            throw e;
+    	} finally {
+    		if(s != null) s.close();
     	}
     }
 }
