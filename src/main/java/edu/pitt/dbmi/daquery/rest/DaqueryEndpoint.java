@@ -1155,6 +1155,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     
     private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
     	request.setDirection("OUT");
+    	request.setSentTimestamp(new Date());
 		AbstractDAO.save(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if(response.getStatus() == 200)
