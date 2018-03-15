@@ -11,8 +11,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,10 +46,13 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
+import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
@@ -69,7 +74,6 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
@@ -82,6 +86,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	private final static Logger logger = Logger.getLogger(DaqueryEndpoint.class.getName());
 
 	private final static String MAIN_QUEUE = "main";
+	public final static String EXPORT_QUEUE = "export_queue";
 	
     @Context
     private UriInfo uriInfo;
@@ -102,7 +107,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		String json = iq.toJson();
 		System.out.println(json); */
 	}
-	
+		
 	private static boolean containsSiteWhoIQuery(List<Network> networks, String siteId)
 	{
 		for(Network net : networks)
@@ -1055,10 +1060,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @POST
     @Path("/data-file")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    //@Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response receiveDataFile(InputStream is,
     								@DefaultValue("") @QueryParam("filename") String filename,
-    								@DefaultValue("") @QueryParam("response-id") String responseId,
+    								@DefaultValue("") @QueryParam("output-dir") String outputDirName,
     								@DefaultValue("") @QueryParam("from-site-id") String fromSiteId)
     {
     	OutputStream out = null;
@@ -1069,29 +1074,19 @@ public class DaqueryEndpoint extends AbstractEndpoint
     			logger.log(Level.SEVERE, "Did not recieve a file name when trying to copy a file.");
     			return ResponseHelper.getErrorResponse(400, "Required parameter filename not received during a file transfer.", null, null);
     		}    
-    		if(StringHelper.isEmpty(responseId))
+    		if(StringHelper.isEmpty(outputDirName))
     		{
-    			return ResponseHelper.getErrorResponse(400, "Required response id parameter not recieved during file transfer.", "Request id not recieved when for transfer of file " + filename, null);
+    			return ResponseHelper.getErrorResponse(400, "Required output directory name parameter not recieved during file transfer.", "Output directory name not recieved on transfer of file " + filename, null);
     		}
     		if(StringHelper.isEmpty(fromSiteId))
     		{
     			return ResponseHelper.getErrorResponse(400, "Required site id parameter not recieved during file transfer.", "Request id not recieved when for transfer of file " + filename, null);
     		}
-    		
-	        DaqueryResponse response = ResponseDAO.getResponseById(responseId);
-	        if(response == null)
-	        {
-	        	return ResponseHelper.getErrorResponse(500, "Unable to find response.", "A response with id " + responseId + " was not found.", null);
-	        }
-	        if(response.getRequest() == null || StringHelper.isEmpty(response.getRequest().getRequestGroup()))
-	        {
-	        	return ResponseHelper.getErrorResponse(500, "Unable to get a reponse or group id when receiving ", "Response with id " + responseId + " does not have an associated Request or the Request is not part of a group of requests", null);
-	        }
 	        
 	        Site fromSite = SiteDAO.querySiteByID(fromSiteId);
 	        if(fromSite == null)
 	        {
-	        	return ResponseHelper.getErrorResponse(500, "Unable to find site.", "The sending site with id " + responseId + " was not found when sending file " + filename + ".", null);
+	        	return ResponseHelper.getErrorResponse(500, "Unable to find site.", "The sending site with id " + fromSiteId + " was not found when sending file " + filename + ".", null);
 	        }
 	        
 	        //construct the output directory, if needed
@@ -1104,7 +1099,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	        	if(! outputDirectory.mkdirs())
 	        		return ResponseHelper.getErrorResponse(500, "Unable to create output directory.", "The directory " + outputDirectoryPath + " could not be created when sending file " + filename + ".", null);
 	        }
-	        File groupOutputDir = Paths.get(outputDirectoryPath, response.getRequest().getRequestGroup()).toFile();
+	        File groupOutputDir = Paths.get(outputDirectoryPath, outputDirName).toFile();
 	        if(! groupOutputDir.exists())
 	        {
 	        	if(! groupOutputDir.mkdirs())
@@ -1117,7 +1112,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	        String outputFilename = fromSite.getName().trim() + "_" + filename.replace(':', '-');
     		File outFileTemp = Paths.get(groupOutputDir.getAbsolutePath(), outputFilename).toFile();
     		File outFile = FileHelper.serializeFilename(outFileTemp);
-    		if(!outFile.canWrite())
+    		if(!groupOutputDir.canWrite())
     			return ResponseHelper.getErrorResponse(500, "Unable to write output file.", "The file " + outFile.getAbsolutePath() + " could not be created.", null); 
     		
     		out = new FileOutputStream(outFile);
@@ -1127,10 +1122,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		{
     			out.write(buffer, 0, bytesRead);
     		}
-	        if(response.getFiles() == null)
-	        	response.setFiles(new Fileset());
-	        response.getFiles().addFile(outFile);
-	        ResponseDAO.saveOrUpdate(response);
+    		
+    		return(ResponseHelper.getBasicResponse(200, outFile.getAbsolutePath()));
     	}
     	catch (Throwable e)
     	{
@@ -1147,8 +1140,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		catch (Throwable t){logger.log(Level.SEVERE, "Error while closing output stream during ");}
     		
     	}
-    	return Response.status(200).type("text/plain")
-    			.entity("File succesfully transfered").build();
     }
     
     private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
