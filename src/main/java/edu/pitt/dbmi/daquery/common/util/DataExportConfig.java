@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.common.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -14,7 +15,7 @@ public class DataExportConfig
 	
 	@XmlElement(name="outputFile")
 	public List<OutputFile> outputFiles = new ArrayList<>();
-	@XmlElement(name="cases-per-file")
+	@XmlAttribute(name="cases-per-file")
 	public Integer casesPerFile = null;
 	
 	public int getCasesPerFile()

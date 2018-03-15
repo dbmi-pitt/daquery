@@ -25,7 +25,7 @@ public class TestFileTransfer
 			Site localSite = SiteDAO.getLocalSite();
 			//File localFileAndPath = new File("/Users/bill/big");
 			File localFileAndPath = new File("/home/devuser/big");
-			WSConnectionUtil.sendFileToSite(localFileAndPath, "big.out", localSite, null);
+			WSConnectionUtil.sendFileToSite(localFileAndPath, "big.out", localSite, "testdir");
 		}
 		catch(Throwable t)
 		{
