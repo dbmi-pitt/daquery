@@ -439,7 +439,7 @@ public class WSConnectionUtil {
 			Site mySite = SiteDAO.getLocalSite();
 			Map<String, String> args = new HashMap<String, String>();
 			args.put("filename", URLEncoder.encode(outputFilename, "UTF-8"));			
-			args.put("output-dir", outputDirName);
+			args.put("output-dir", (StringHelper.isEmpty(outputDirName)?"default-output":outputDirName));
 			args.put("from-site-id", mySite.getSiteId());
 			
 			Client client = ClientBuilder.newBuilder().build();
