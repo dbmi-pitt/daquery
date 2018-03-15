@@ -4,9 +4,11 @@ import java.io.File;
 import java.net.SocketException;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
@@ -23,7 +25,7 @@ public class TestFileTransfer
 			Site localSite = SiteDAO.getLocalSite();
 			//File localFileAndPath = new File("/Users/bill/big");
 			File localFileAndPath = new File("/home/devuser/big");
-			WSConnectionUtil.sendFileToSite(localFileAndPath, "big.out", localSite);
+			WSConnectionUtil.sendFileToSite(localFileAndPath, "big.out", localSite, null);
 		}
 		catch(Throwable t)
 		{

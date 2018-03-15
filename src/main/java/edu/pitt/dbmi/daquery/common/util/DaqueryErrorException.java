@@ -20,7 +20,7 @@ public class DaqueryErrorException extends Exception
 	}
 	public DaqueryErrorException(ErrorInfo eInfo)
 	{
-		super();
+		super(eInfo.getDisplayMessage());
 		this.errorInfo = eInfo;
 	}
 	public DaqueryErrorException(String message, ErrorInfo eInfo)

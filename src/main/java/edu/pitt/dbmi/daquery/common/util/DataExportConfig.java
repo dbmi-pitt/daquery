@@ -8,9 +8,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 import edu.pitt.dbmi.daquery.download.properties.OutputFile;
 
 @XmlRootElement(name = "dataExportConfig")
-public class DataExportConfig {;
+public class DataExportConfig
+{
+	private static final int defaultCasesPerFile = 70000;
+	
 	@XmlElement(name="outputFile")
 	public List<OutputFile> outputFiles = new ArrayList<>();
-	@XmlElement(name="pageSize")
-	public int pageSize;
+	@XmlElement(name="cases-per-file")
+	public Integer casesPerFile = null;
+	
+	public int getCasesPerFile()
+	{
+		if(casesPerFile == null || casesPerFile.intValue() <= 0) return(defaultCasesPerFile);
+		return(casesPerFile.intValue());
+	}
 }

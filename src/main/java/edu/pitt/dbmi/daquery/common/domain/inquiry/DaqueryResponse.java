@@ -23,6 +23,7 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 @Entity
 @Table(name="DAQUERY_RESPONSE")
@@ -48,6 +49,10 @@ public class DaqueryResponse extends DaqueryObject
 	private String status;
 	
     @Expose
+    @Column(name="STATUS_MESSAGE")
+    private String statusMessage;
+    
+    @Expose
 	@Column(name="RESPONSE_VALUE")
 	private String value;
 	
@@ -56,6 +61,7 @@ public class DaqueryResponse extends DaqueryObject
     @JoinColumn(name="USER_ID")
 	private UserInfo responder;
     
+	@Expose
     @OneToOne(fetch=FetchType.EAGER, cascade={CascadeType.ALL})
 	@JoinColumn(name="fileset_id", nullable=false)
 	private Fileset files;
@@ -113,7 +119,7 @@ public class DaqueryResponse extends DaqueryObject
     
     public ResponseStatus getStatusEnum()
     {
-    	if (status == null) {
+    	if (StringHelper.isBlank(status)) {
     		return null;
     	}
     	return(ResponseStatus.valueOf(status));
@@ -128,6 +134,9 @@ public class DaqueryResponse extends DaqueryObject
     		status = stat.name();
     	}
     }
+    
+    public String getStatusMessage(){return(statusMessage);}
+    public void setStatusMessage(String message){statusMessage = message;}
     
     public String getValue(){return(value);}
     public void setValue(String val){value = val;}
