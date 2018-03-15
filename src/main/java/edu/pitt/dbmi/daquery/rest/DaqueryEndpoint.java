@@ -565,7 +565,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		Site mySite = SiteDAO.getLocalSite();
     		String requestSiteId = rVal.getRequest().getRequestSite().getSiteId();
     		if( !mySite.getSiteId().equals(requestSiteId))
-    		{
+    		{	// remote response
     			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
     			httpResponse = WSConnectionUtil.getFromRemoteSite(remoteSite, "/response/" + id, null, null);
     			
@@ -577,6 +577,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					DaqueryResponse resp = mapper.readValue(json, type);
 					rVal.setStatus(resp.getStatus());
 					rVal.setValue(resp.getValue());
+					rVal.setDownloadAvailable(resp.isDownloadAvailable());
 					ResponseDAO.saveOrUpdate(rVal);
 					return ResponseHelper.getJsonResponseGen(200, json);	
 				}
@@ -884,6 +885,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     
     private Response handleRemoteAggregateRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
     	request.setDirection("OUT");
+    	request.setSentTimestamp(new Date());
 		AbstractDAO.save(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if(response.getStatus() == 200)
@@ -1144,6 +1146,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     
     private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
     	request.setDirection("OUT");
+    	request.setSentTimestamp(new Date());
 		AbstractDAO.save(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if(response.getStatus() == 200)
