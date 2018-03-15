@@ -208,11 +208,13 @@ public class CentralService{
 	}
 
 	private EmailHelper emailHelper = new EmailHelper();
+	
 	@POST
 	@Path("send-mail")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response sendEmail(EmailContents message)
 	{
+		
 		if(message == null ||
 				StringHelper.isEmpty(message.message) ||
 				StringHelper.isEmpty(message.subject) ||
@@ -223,13 +225,44 @@ public class CentralService{
 		try
 		{
 			emailHelper.sendMail(message.subject, message.message, message.toAddresses.get(0));
+				
 			return ResponseHelper.getBasicResponse(200, "Message sent.");
 		}
 		catch(Throwable t)
 		{
 			return ResponseHelper.getErrorResponse(500, "Unable to send email message.", null, t);
 		}
-	}
+	}	
+	
+	
+/*	@GET
+	@Path("send-mail")
+	//@Consumes(MediaType.APPLICATION_JSON)
+	//@Produces(MediaType.APPLICATION_JSON)
+	public Response sendEmail()
+	{
+		EmailContents message = new EmailContents();
+		message.subject = "tester";
+		message.message = "hello<br //><br //>&nbsp;&nbsp;&nbsp;&nbsp;<b>hola</b> eh?";
+		message.toAddresses.add("shirey@pitt.edu");
+*/		
+/*		if(message == null ||
+				StringHelper.isEmpty(message.message) ||
+				StringHelper.isEmpty(message.subject) ||
+				message.toAddresses == null || 
+				message.toAddresses.size() == 0)
+			return ResponseHelper.getErrorResponse(400, "Invalid email message.", "Email message with a subject and one to address is required to send an email.", null);
+			*/
+/*		try
+		{
+			emailHelper.sendMail(message.subject, message.message, message.toAddresses.get(0));
+			return ResponseHelper.getBasicResponse(200, "Message sent.");
+		}
+		catch(Throwable t)
+		{
+			return ResponseHelper.getErrorResponse(500, "Unable to send email message.", null, t);
+		}
+	} */
 	
 	/**
 	 * Get sites pending for you response
