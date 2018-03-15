@@ -10,7 +10,6 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -21,6 +20,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,15 +41,20 @@ import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.RequestEntityProcessing;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
+import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
 
 public class WSConnectionUtil {
  
@@ -68,9 +73,23 @@ public class WSConnectionUtil {
 		}
 	} */
 	
-	public static void main(String [] args)
+	public static void main(String [] args) throws Exception
 	{
-		System.out.println(checkConnection("dbmi-shrine-dev01.dbmi.pitt.edu", 2342));
+
+	}
+	
+	public static boolean checkConnection(String url)
+	{
+		try{return(checkConnection(new URL(url)));}
+		catch(MalformedURLException e)
+		{
+			return(false);
+		}
+	}
+	
+	public static boolean checkConnection(URL url)
+	{
+		return(checkConnection(url.getHost(), url.getPort()));
 	}
 	
 	/**
@@ -83,19 +102,26 @@ public class WSConnectionUtil {
 	{
 		try{
 			Socket s = new Socket();
-			s.connect(new InetSocketAddress(server, port), 2000);
+			InetSocketAddress add = new InetSocketAddress(server, port); 
+			s.connect(add, 2000);
 			try{s.close();}catch(Throwable t){}
 			return true;
 	    } catch (Exception ex) {
+	    	ex.printStackTrace();
 	        /* ignore */
 	    }
 	    return false;
 	}
 	
-	public static boolean checkConnection(Site site) throws MalformedURLException
+	public static boolean checkConnection(Site site)
 	{
-			URL url = new URL(site.getUrl());
-			return(checkConnection(url.getHost(), url.getPort()));		
+		URL url = null;
+		try{url = new URL(site.getUrl());}
+		catch(MalformedURLException e){return false;}
+		if(url != null)
+			return(checkConnection(url.getHost(), url.getPort()));
+		else
+			return(false);
 	}
 	
 	/**
@@ -288,7 +314,7 @@ public class WSConnectionUtil {
 		retString = siteUrl + "daquery/ws/" + sName + args;
 		return retString;
 	}
-
+	
 	/**
 	 * This method executes a POST against a remote site.  If the connection is made via https, 
 	 * the local site's keystore is examined.  The keystore file and keystore password are used 
@@ -380,11 +406,19 @@ public class WSConnectionUtil {
 		return(resp);
 	}
 	
-	public static void sendFileToSite(File localFileAndPath, String outputFilename, Site toSite) throws DaqueryErrorException
+	public static String sendFileToSite(File localFileAndPath, String outputFilename, Site toSite, String outputDirName) throws DaqueryErrorException
 	{
 		FormDataMultiPart fdmp1 = null;
+		Session sess = null;
 		try
 		{
+			if(!checkConnection(toSite))
+			{
+				ErrorInfo ei = new ErrorInfo();
+				ei.setDisplayMessage("Site unreachable during file transfer.");
+				ei.setLongMessage("Cannot contact site " + toSite.getName() + " at " + toSite.getUrl());
+				throw new DaqueryErrorException(ei);
+			}			
 			String errMsg = "";
 
 			if(! localFileAndPath.exists())
@@ -402,25 +436,24 @@ public class WSConnectionUtil {
 				log.log(Level.SEVERE, errMsg);
 				throw dee;	
 			}
-				
+			Site mySite = SiteDAO.getLocalSite();
 			Map<String, String> args = new HashMap<String, String>();
 			args.put("filename", URLEncoder.encode(outputFilename, "UTF-8"));			
-			
+			args.put("output-dir", outputDirName);
+			args.put("from-site-id", mySite.getSiteId());
 			
 			Client client = ClientBuilder.newBuilder().build();
-				   //client.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
 			WebTarget target = client.target(buildGetUrl(toSite.getUrl(), "data-file", args));
 			target.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
 			target.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
 			InputStream is = new FileInputStream(localFileAndPath);
-			//Response response = target.request(MediaType.APPLICATION_OCTET_STREAM).post(Entity.entity(is, MediaType.APPLICATION_OCTET_STREAM));
-			Response response = target.request().post(Entity.entity(is, MediaType.APPLICATION_OCTET_STREAM));
+			Response wsResponse = target.request().post(Entity.entity(is, MediaType.APPLICATION_OCTET_STREAM));
 		
-			if(response.getStatus() != 200)
+			if(wsResponse.getStatus() != 200)
 			{
 				String msg = "An error at the site occured while transfering " + outputFilename + " to site " + toSite.getName();
 				ErrorInfo ei = null;
-				DecodedErrorInfo dei = ResponseHelper.decodeErrorResponse(response);
+				DecodedErrorInfo dei = ResponseHelper.decodeErrorResponse(wsResponse);
 				if(dei != null)
 				{
 					if(dei.getErrorInfo() != null)
@@ -429,9 +462,15 @@ public class WSConnectionUtil {
 						ei = new ErrorInfo(dei.getErrorMessage());
 				}
 				else
+				{	
 					ei = new ErrorInfo(msg);
+				}
 				DaqueryErrorException dee = new DaqueryErrorException(msg, ei);
-				throw dee;
+				throw dee;				
+			}
+			else
+			{
+				return (String) wsResponse.readEntity(String.class);
 			}
 			
 		}
@@ -456,59 +495,87 @@ public class WSConnectionUtil {
 		}
 		finally
 		{
+			if(sess != null) sess.close();
 			try{if(fdmp1 != null) fdmp1.close();}catch(Throwable t1){log.log(Level.SEVERE, "", t1);}
 		}
 	}
 	
-	public static Response centralServerPost(String serviceName, Object postObject, MediaType postType, Map<String, String> additionalParameters) throws DaqueryException
+/*	public static Response centralServerPostJSON(String serviceName, Object postObject, Map<String, String> additionalParameters) throws DaqueryException
 	{
-		URL cUrl = null;
+		String centURL = null;
 		try
 		{
-			Object obj = getCentralServerURL(serviceName, additionalParameters);
-			if(obj instanceof Response) return((Response) obj);
-			cUrl = (URL) obj;
+			String json;
+			if(postObject instanceof String) json = (String) postObject;
+			else if(postObject instanceof DaqueryObject) json = ((DaqueryObject) postObject).toJson();
+			else throw new DaqueryException("Cannot post an object of type " + postObject.getClass().getName());
+			centURL = getCentralServerURL(serviceName, additionalParameters);
 			//
-			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
-					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + ((cUrl != null)?cUrl.toString():"null"), null));
+			if(!checkConnection(centURL))
+					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + ((!StringHelper.isEmpty(centURL))?centURL:"null"), null));
 			String url = AppProperties.getCentralServerURL();
 			Client client = getRemoteClient(url);
-			WebTarget target = client.target(cUrl.toURI());
+			WebTarget target = client.target(centURL);
 			Response response;
-			if(postType != null)
-				response = target.request().post(Entity.entity(postObject, postType));
-			else
-				response = target.request().post(Entity.entity(postObject, MediaType.APPLICATION_JSON));
+			response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));
 			return(response);			
 		}
+		catch(DaqueryErrorException dee)
+		{
+			String msg;
+			String lMsg = "While contacting the central server at " + AppProperties.getCentralServerURL();
+
+			if(dee.getErrorInfo() != null)
+			{
+				msg = dee.getErrorInfo().getDisplayMessage();
+				lMsg = dee.getErrorInfo().getLongMessage();
+			}
+			else if(!StringHelper.isEmpty(dee.getMessage()))
+				msg = dee.getMessage();
+			else
+				msg = "Unhandled exception while doing a get from the central server.";
+				
+			return(ResponseHelper.getErrorResponse(500, msg, lMsg, null));
+		}		
 		catch(KeyManagementException kme)
 		{
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server.", "An error happened while configuring the secure key management for the site connection during a post request.", kme));
 		}
 		catch(MalformedURLException mue)
 		{
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url during a post request, " + ((cUrl != null)?cUrl.toString():"null")  , mue));
-		} catch (URISyntaxException e) {
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site URL." , "This was due to a malformed url during a post request, " + ((cUrl != null)?cUrl.toString():"null")  , e));
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url during a post request, " + ((!StringHelper.isEmpty(centURL))?centURL:"null")  , mue));
 		}
-		
-	}
+	} */
 	
 	public static Response centralServerGet(String serviceName, Map<String, String> additionalParameters) throws DaqueryException
 	{
-		URL cUrl = null;
+		String centURL = null;
 		try
 		{
-			Object obj = getCentralServerURL(serviceName, additionalParameters);
-			if(obj instanceof Response) return((Response) obj);
-			cUrl = (URL) obj;
-			//
-			if(!checkConnection(cUrl.getHost(), cUrl.getPort()))
-					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + ((cUrl != null)?cUrl.toString():"null"), null));
+			centURL = getCentralServerURL(serviceName, additionalParameters);
+			if(!checkConnection(centURL))
+					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + ((! StringHelper.isEmpty(centURL))?centURL:"null"), null));
 			String url = AppProperties.getCentralServerURL();
 			Client client = getRemoteClient(url);			
-			Response rVal = client.target(url).request(MediaType.APPLICATION_JSON).get();
+			Response rVal = client.target(centURL).request(MediaType.APPLICATION_JSON).get();
 			return(rVal);			
+		}
+		catch(DaqueryErrorException dee)
+		{
+			String msg;
+			String lMsg = "While contacting the central server at " + AppProperties.getCentralServerURL();
+
+			if(dee.getErrorInfo() != null)
+			{
+				msg = dee.getErrorInfo().getDisplayMessage();
+				lMsg = dee.getErrorInfo().getLongMessage();
+			}
+			else if(!StringHelper.isEmpty(dee.getMessage()))
+				msg = dee.getMessage();
+			else
+				msg = "Unhandled exception while doing a get from the central server.";
+				
+			return(ResponseHelper.getErrorResponse(500, msg, lMsg, null));
 		}
 		catch(KeyManagementException kme)
 		{
@@ -516,11 +583,43 @@ public class WSConnectionUtil {
 		}
 		catch(MalformedURLException mue)
 		{
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url during a get request, " + ((cUrl != null)?cUrl.toString():"null")  , mue));
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url during a get request, " + ((! StringHelper.isEmpty(centURL))?centURL:"null")  , mue));
 		}
 	}
 	
-	private static Object getCentralServerURL(String serviceName, Map<String, String> additionalParameters) throws DaqueryException, MalformedURLException
+	public static Response centralServerPostJSON(String serviceName, EmailContents email) throws DaqueryException	
+	{
+		Client client = null;
+		Entity<String> ent = Entity.entity(email.toJson(), MediaType.APPLICATION_JSON);
+		
+		Builder respBuilder = null;
+		String centServerURL = null;
+		try
+		{
+			centServerURL = AppProperties.getCentralServerURL();
+			URL url = new URL(centServerURL);
+			if(!checkConnection(url.getHost(), url.getPort()))
+					return(ResponseHelper.getErrorResponse(500, "Central server is not reachable at site " + centServerURL, "Cannot connect to " + url.getHost(), null));
+			
+			client = getRemoteClient(centServerURL);
+		}
+		catch(KeyManagementException kme)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server at " + centServerURL, "An error happened while configuring the secure key management for the site POST connection.", kme));
+		}
+		catch(MalformedURLException mue)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server, bad site address.  Site:" + centServerURL, "This was due to a malformed url: " + centServerURL, mue));
+		}
+		
+		respBuilder = client.target(StringHelper.ensureTrailingSlash(centServerURL) + "daquery-central/" + serviceName).request(MediaType.APPLICATION_JSON_TYPE);
+		
+		Response resp  = respBuilder.post(ent);
+		
+		return(resp);
+	}	
+	
+	private static String getCentralServerURL(String serviceName, Map<String, String> additionalParameters) throws DaqueryException, MalformedURLException, DaqueryErrorException
 	{
 		Response authResp = null;
 		try
@@ -530,7 +629,20 @@ public class WSConnectionUtil {
 			String siteKey = AppProperties.getDBProperty("central.site.key");
 			authResp = callCentralServerAuth(siteId, siteKey);
 			if(authResp.getStatus() != 200)
-				return(ResponseHelper.wrapServerResponse(authResp, "Central Server Auth"));
+			{
+				DecodedErrorInfo ei = ResponseHelper.decodeErrorResponse(authResp);
+				if(ei != null)
+				{
+					if(ei.getErrorInfo() != null)
+						throw new DaqueryErrorException(ei.getErrorInfo());
+					else if(! StringHelper.isEmpty(ei.getErrorMessage()))
+						throw new DaqueryErrorException(new ErrorInfo("Error authenticating site with central server.", ei.getErrorMessage(), null));
+					else
+						throw new DaqueryErrorException(new ErrorInfo("Error authenticating site with central server.", "Central server contacted at " + AppProperties.getCentralServerURL(), null));
+				}
+				else
+					throw new DaqueryErrorException(new ErrorInfo("Error authenticating site with central server.", "Central server contacted at " + AppProperties.getCentralServerURL(), null));
+			}
 			//TODO grab the token from the auth response and send it along with the call
 			centServerURL = AppProperties.getCentralServerURL();
 			String url = centServerURL + "/daquery-central/" +  serviceName;
@@ -550,8 +662,7 @@ public class WSConnectionUtil {
 					}
 				}
 			}
-			URL cUrl = new URL(centServerURL);
-			return(cUrl);
+			return(url);
 		}
 		catch(Throwable t)
 		{

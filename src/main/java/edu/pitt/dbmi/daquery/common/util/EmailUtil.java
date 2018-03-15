@@ -8,9 +8,19 @@ import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 
 public class EmailUtil
 {
+	public static void main(String [] args) throws Exception
+	{
+		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
+		EmailContents ec = new EmailContents();
+		ec.subject = "tester";
+		ec.message = "hello<br //><br //>&nbsp;&nbsp;&nbsp;&nbsp;<b>hola</b> eh?";
+		ec.toAddresses.add("shirey@pitt.edu");
+		sendEmail(ec);
+	}
+	
 	public static void sendEmail(EmailContents contents) throws DaqueryException, DaqueryErrorException
 	{
-		Response resp = WSConnectionUtil.centralServerPost("send-mail", contents, null, null);
+		Response resp = WSConnectionUtil.centralServerPostJSON("send-mail", contents);
 		if(resp.getStatus() != 200)
 		{
 			DecodedErrorInfo info = ResponseHelper.decodeErrorResponse(resp);

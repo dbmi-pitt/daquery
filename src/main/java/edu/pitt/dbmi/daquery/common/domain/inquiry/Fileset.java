@@ -31,7 +31,8 @@ public class Fileset extends DaqueryObject
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
 	private long id;
-    	
+    
+    @Expose
 	@ElementCollection
 	@CollectionTable(name="filepath", joinColumns=@JoinColumn(name="fileset_id"))
 	@Column(name="path")

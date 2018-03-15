@@ -104,7 +104,7 @@ public class DataModel extends DaqueryObject implements Serializable
 	@Transient
 	public DataExportConfig getExportConfig() throws DaqueryException
 	{
-				try {
+		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			StringReader reader = new StringReader(dataExportConf);

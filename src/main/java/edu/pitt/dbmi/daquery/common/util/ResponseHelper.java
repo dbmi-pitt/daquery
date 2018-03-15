@@ -228,7 +228,9 @@ public class ResponseHelper {
     			if(ent != null) val = ent.toString();
     		}	    	
     		else
-    			val = resp.readEntity(String.class);
+    		{
+    			val = "[" + resp.getStatus() + "]" + resp.readEntity(String.class);
+    		}
 	    	if(StringHelper.isEmpty(val)) return(null);
 			ObjectMapper mapper = new ObjectMapper();
 			TypeReference<ErrorInfo> type = new TypeReference<ErrorInfo>(){};

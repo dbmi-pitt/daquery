@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
@@ -33,6 +34,7 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.download.properties.Concept;
 import edu.pitt.dbmi.daquery.download.properties.ConceptColumn;
 import edu.pitt.dbmi.daquery.download.properties.CustomColumnSet;
@@ -57,7 +59,7 @@ public class DataExporter {
         pList.add("PIT686766");
         pList.add("PIT637837");
         pList.add("PIT982221");        
-        DataExporter dataExporter = new DataExporter(r, dm.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
+        DataExporter dataExporter = new DataExporter(r.getResponses().iterator().next(), dm.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
         while(dataExporter.hasNextExport())
         	dataExporter.exportNext();
 	}
@@ -69,7 +71,8 @@ public class DataExporter {
 	
 	private final static Logger logger = Logger.getLogger(DataExporter.class.getName());
 	
-	DaqueryRequest dauqeryRequest;
+	DaqueryResponse daqueryResponse;
+	DaqueryRequest daqueryRequest;
 	DataExportConfig dataExportConfig;
 	String dataDir;
 	boolean deliverData;
@@ -83,8 +86,9 @@ public class DataExporter {
 	int nFiles;
 	int currentFile = 0;
 		
-	public DataExporter(DaqueryRequest daqueryRequest, DataExportConfig dataExportConfig, String dataDir, List<String> idList) throws DaqueryException {
-		this.dauqeryRequest = daqueryRequest;
+	public DataExporter(DaqueryResponse daqueryResponse, DataExportConfig dataExportConfig, String dataDir, List<String> idList) throws DaqueryException {
+		this.daqueryResponse = daqueryResponse;
+		this.daqueryRequest = daqueryResponse.getRequest();
 		this.dataExportConfig = dataExportConfig;
 		this.dataDir = dataDir;
 		this.deliverData = AppProperties.getDeliverData();
@@ -93,7 +97,7 @@ public class DataExporter {
 		this.dateShift = AppProperties.getDateShift();
 		this.idList = idList;
 		
-		casesPerFile = this.dataExportConfig.pageSize;
+		casesPerFile = this.dataExportConfig.getCasesPerFile();
 		nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
 	}
 
@@ -153,26 +157,33 @@ public class DataExporter {
 		else
 			return(false);
 	}
-	public void exportNext() throws Throwable
+	
+	//returns the file and path where the exported file is stored
+	//either remotely or locally 
+	public String exportNext() throws Throwable
 	{
 		try
 		{
-			if(! hasNextExport()) return;
+			if(! hasNextExport()) return null;
 				currentFile++;
 	
 			File tmpDir = FileHelper.createTempDirectory();
-			File zipFile = dumpData(tmpDir, dauqeryRequest, currentFile, nFiles, casesPerFile);
+			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile);
 	
 			//send the file to remote requester
-			String outputFilename = dauqeryRequest.getFilePrefix() + "-" + currentFile + ".zip";
+			String outputFilename = daqueryRequest.getFilePrefix() + "_" + currentFile + ".zip";
+			String filename = null;
 			if(deliverData) {
-				WSConnectionUtil.sendFileToSite(zipFile, outputFilename, dauqeryRequest.getRequestSite());
+				filename = WSConnectionUtil.sendFileToSite(zipFile, outputFilename, daqueryRequest.getRequestSite(), daqueryResponse.getRequest().getRequestGroup());
 			}
 			else
-			{ //just copy the file locally and send an email to the current user
-				Files.copy(zipFile.toPath(), Paths.get(AppProperties.getLocalDeliveryDir(), outputFilename), StandardCopyOption.REPLACE_EXISTING );
+			{
+				Path p = Paths.get(AppProperties.getLocalDeliveryDir(), outputFilename);
+				Files.copy(zipFile.toPath(), p, StandardCopyOption.REPLACE_EXISTING );
+				filename = p.toString();
 			}	
 			FileHelper.deleteDirectory(tmpDir);
+			return(filename);
 
 		} catch (Throwable t) {
 			logger.log(Level.SEVERE, "Error occurs on data export", t);
@@ -180,7 +191,7 @@ public class DataExporter {
 		}
 	}
 	
-	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currPage, int pageCount, int pageSize) throws Throwable
+	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile) throws Throwable
 	{
 		String filenamePrefix = daqueryRequest.getFilePrefix();
 		Hashtable<OutputFile, OutputStreamWriter> outputStreams = new Hashtable<>();
@@ -193,7 +204,7 @@ public class DataExporter {
 				outputStreams.put(outputfile, new OutputStreamWriter(ontologyOutputStream));
 				
 			}else{
-				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currPage, pageSize, outputfile);
+				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile);
 			}
 		}
 		
@@ -273,7 +284,7 @@ public class DataExporter {
 		// send finish locally msg to requester site.
 	}
 
-	private void writeCustomCSVFile(OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currPage, int pageSize, OutputFile outputFile) throws Throwable {
+	private void writeCustomCSVFile(OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile) throws Throwable {
 		Connection conn = null;
 		Statement s = null;
 		ResultSet rs = null;
@@ -283,7 +294,7 @@ public class DataExporter {
 			
 			buildCSVHeader(writer, outputFile.custom_column_set);
 			
-			ArrayList<String> patients = getPatientIDofCurrPage(currPage, pageSize); 
+			ArrayList<String> patients = getPatientIDofCurrPage(currentFileNum, patientsPerFile); 
 			int patientsPerLoad = this.pientBlockSize;
 //			if(outputFile.source.equals("patient_dimension")){
 //				patientsPerLoad = this.propFile.getPatientDimensionPatientBlockSize() == null ? this.patientDimensionPatientBlockSize : this.propFile.getPatientDimensionPatientBlockSize();
