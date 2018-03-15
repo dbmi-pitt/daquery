@@ -1,4 +1,4 @@
-<dataExportConfig cases-per-file="500">
+<dataExportConfig cases-per-file="70000">
 <outputFile name="demographics.csv" source="demographic">
 	<idColumn>PATID</idColumn>
     <custom-column-set>
