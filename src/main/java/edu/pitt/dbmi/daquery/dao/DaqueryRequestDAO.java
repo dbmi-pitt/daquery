@@ -61,6 +61,7 @@ public class DaqueryRequestDAO extends AbstractDAO {
 		}		
 	}
 
+
 	public long save(DaqueryRequest request) {
 		return (Long) getCurrentSession().save(request);
 	}

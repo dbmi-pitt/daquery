@@ -18,6 +18,7 @@ import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -41,8 +42,10 @@ import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.DataBaseTestResult;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.TestConnection;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
@@ -362,6 +365,38 @@ public class NetworkEndpoint extends AbstractEndpoint {
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
     		String msg = "An unexpected error was encountered retrieving SQL datasource data for network  [" + id + "]";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        }
+    }
+    
+    @POST
+    @Secured
+    @Path("/test-data-source")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response testDataSource(LinkedHashMap<?, ?> databaseInfo) {
+    	try {
+
+            logger.info("#### testing datbase connection");
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            if(!TestConnection.checkConnection((String)databaseInfo.get("connectionUrl"))) {
+            	String msg = "Unable to connect to url " + databaseInfo.get("connectionUrl");
+            	logger.log(Level.WARNING, msg);
+            	
+            	return Response.ok(200).entity("{\"result\": true, \"errorMsg\": \"" + msg + "\", \"detailErrorMsg\": \"\"}").build();
+            }
+            
+            String q = ((String)databaseInfo.get("driver")).contains("oracle") ? "select * from dual" : "select 'sql'";
+            DataBaseTestResult result = TestConnection.runQuery((String) databaseInfo.get("connectionUrl"), (String) databaseInfo.get("username"), (String) databaseInfo.get("password"), (String) databaseInfo.get("driver"), q);
+            
+            return Response.ok(200).entity(result.toJson()).build();
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered testing datasource connection";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
