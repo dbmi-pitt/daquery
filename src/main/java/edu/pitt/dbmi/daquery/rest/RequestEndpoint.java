@@ -30,6 +30,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.hibernate.HibernateException;
 
+import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
@@ -37,7 +38,6 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;

@@ -190,13 +190,8 @@ public class DaqueryUserDAO extends AbstractDAO {
     
     /**
      * Return an first created user object
-<<<<<<< HEAD:src/main/java/edu/pitt/dbmi/daquery/dao/DaqueryUserDAO.java
      * @return- a DaqueryUser object of first created
      * @throws PersistenceException if the database is incorrectly configured
-=======
-     * @return- a Site_User object of first created
-     * @throws HibernateException if the database is incorrectly configured
->>>>>>> master:src/main/java/edu/pitt/dbmi/daquery/dao/Site_UserDAO.java
      * Exception for any other issue
      */
     public static DaqueryUser getAdminUser() throws Exception {
