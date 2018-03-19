@@ -3,6 +3,7 @@ package edu.pitt.dbmi.daquery.queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
@@ -10,7 +11,6 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
-import edu.pitt.dbmi.daquery.dao.ResponseDAO;
 
 
 public class ResponseTask extends AbstractTask implements Task

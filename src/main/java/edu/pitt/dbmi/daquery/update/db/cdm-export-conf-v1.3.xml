@@ -1,13 +1,11 @@
-<dataExportConfig>
-<outputFile name="demographics.csv" source="patient_dimension">
-        <custom-column-set>
-                <field name="Vital Status" colName="VITAL_STATUS_CD" />
-                <field name="Birth Date" colName="BIRTH_DATE" deid="birthday" />
-                <field name="Death Date" colName="DEATH_DATE" />
-                <field name="Sex" colName="SEX_CD" />
-                <field name="Zip Code" colName="ZIP_CD" deid="zip" />
-                <field name="Language" colName="LANGUAGE_CD" />
-                <field name="Race" colName="RACE_CD" />
-        </custom-column-set>
+<dataExportConfig cases-per-file="70000">
+<outputFile name="demographics.csv" source="demographic">
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name="Sex" colName="SEX" />
+	    <field name="Birth Date" colName="BIRTH_DATE" deid="birthday" />
+	    <field name="Hispanic" colName="HISPANIC" />
+	    <field name="Race" colName="RACE"/>
+    </custom-column-set>
 </outputFile>
 </dataExportConfig>

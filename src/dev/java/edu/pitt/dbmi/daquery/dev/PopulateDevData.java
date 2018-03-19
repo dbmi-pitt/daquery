@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.dev;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.RoleDAO;
 
 /**
@@ -40,8 +42,7 @@ public class PopulateDevData
 {
 	public static void main(String [] args) throws Exception
 	{
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		
+	
 //		AppProperties.setDevHomeDir("/home/devuser/dq-data");
 /*		assembleRequest();
 		Session s = HibernateConfiguration.openSession();
@@ -73,11 +74,11 @@ public class PopulateDevData
 		System.out.println("Test user id: " + tu.getId());
 		//assembleOutgoingRequest(); */
 		
-		DaqueryRequest r = assembleOutgoingRequest();
+/*		DaqueryRequest r = assembleOutgoingRequest();
 		System.out.println("Request Id = : " + r.getRequestId());
 		System.out.println("Network Id = : " + r.getNetwork().getNetworkId());
 		System.out.println("From Site Id = : " + r.getRequestSite().getSiteId());
-		System.exit(0);
+		System.exit(0); */
 	}
 	
 	public static DaqueryRequest assembleOutgoingRequest() throws DaqueryException, Exception

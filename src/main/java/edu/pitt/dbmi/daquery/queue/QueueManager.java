@@ -21,7 +21,7 @@ public class QueueManager
 		return(queues.get(key));
 	}
 
-	public synchronized static void addQueue(String queueName, int maxRunLength) throws DaqueryException
+	public synchronized static TaskQueue addQueue(String queueName, int maxRunLength) throws DaqueryException
 	{
 		if(StringHelper.isEmpty(queueName))
 			throw new DaqueryException("Queue name must not be blank.");
@@ -34,7 +34,9 @@ public class QueueManager
 		if(maxRunLength <= 0)
 			throw new DaqueryException("Task queue max run size must be greter than zero.");
 		
-		queues.put(key, new TaskQueue(maxRunLength));
+		TaskQueue q = new TaskQueue(maxRunLength);
+		queues.put(key, q);
+		return(q);
 	}
 
 	public synchronized static boolean containsQueue(String queueName)
