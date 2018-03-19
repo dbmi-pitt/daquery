@@ -99,22 +99,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             throw new NotAuthorizedException(msg + "  " + "Authorization header must be provided");    		
         }
         
-        //Check the user's status.  If their password is expired, 
 
-        // Get the resource class which matches with the requested URL
-        // Extract the roles declared by it
-        Class<?> resourceClass = resourceInfo.getResourceClass();
-        List<String> classRoles = extractRoles(resourceClass);
-
-        // Get the resource method which matches with the requested URL
-        // Extract the roles declared by it
-        Method resourceMethod = resourceInfo.getResourceMethod();
-        List<String> methodRoles = extractRoles(resourceMethod);
-        
-        List<String> roleSuperset = new ArrayList<String>();
-        roleSuperset.addAll(classRoles);
-        roleSuperset.addAll(methodRoles);
-        
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
@@ -129,8 +114,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         	jwtReporting.setNetworkId(jwt.getNetworkId());
         	
         	Site mySite = SiteDAO.getLocalSite();
+        	//check if the user is a local user or remote user 
         	if(StringHelper.equalIgnoreCase(mySite.getSiteId(), jwt.getSiteId()))
         	{
+        		//validate a local user
 	            if (!DaqueryUserDAO.isUserValid(jwt.getUserId())) {
 	        		String msg = "User account [" + jwt.getUserId() +"] is not valid.";
 	        		logger.log(Level.SEVERE, msg);
@@ -153,6 +140,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         	}
         	else
         	{
+        		//validate a remote user via a web service call
         		Site site = SiteDAO.querySiteByID(jwt.getSiteId());
         		
         		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/validateToken", null, jwt.getToken());
@@ -161,6 +149,44 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         			requestContext.abortWith(resp);
         		}
         	}
+        	//last check, can the user access this web service call?  
+        	//this is determined by the roles listed in connection with the @Secured annotation 
+            // Get the resource class which matches with the requested URL
+            // Extract the roles declared by it
+            Class<?> resourceClass = resourceInfo.getResourceClass();
+            List<String> classRoles = extractRoles(resourceClass);
+
+            // Get the resource method which matches with the requested URL
+            // Extract the roles declared by it
+            Method resourceMethod = resourceInfo.getResourceMethod();
+            List<String> methodRoles = extractRoles(resourceMethod);
+            
+            List<String> roleSuperset = new ArrayList<String>();
+            roleSuperset.addAll(classRoles);
+            roleSuperset.addAll(methodRoles);
+            
+            boolean userHasRole = false;
+            //if there are no roles specified, then just set userHasRole to true and move along
+            if (roleSuperset.isEmpty()) {
+            	userHasRole = true;
+            }
+            else {
+            	for (String role : roleSuperset) {
+            		//if the user is in one of the roles, set userHasRole to true and return
+            		if (DaqueryUserDAO.hasRole(jwt.getUserId(), jwt.getNetworkId(), role) == true) {
+            			userHasRole = true;
+            			break;
+            		}
+            			
+            	}
+            }
+            if (!userHasRole) {
+        		String msg = "You are not authorized to access this functionality in the website.";
+        		logger.log(Level.SEVERE, msg + "  Found this user: [" + jwt.getUserId() + "] trying to access this method: [" 
+        				+ resourceMethod.toString() +"].  This method requires one of these role(s): [" + roleSuperset.toString()  + "] ");
+                throw new NotAuthorizedException(msg + "  " + "Authorization header must be provided");    		
+            }
+            
             
             
             final SecurityContext currentSecurityContext = requestContext.getSecurityContext();
