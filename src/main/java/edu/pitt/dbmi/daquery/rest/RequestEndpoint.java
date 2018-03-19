@@ -296,13 +296,13 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             TaskQueue queue = null;
             if(!QueueManager.containsQueue(DaqueryEndpoint.EXPORT_QUEUE))
-                            queue = QueueManager.addQueue(DaqueryEndpoint.EXPORT_QUEUE, 1);
+            	queue = QueueManager.addQueue(DaqueryEndpoint.EXPORT_QUEUE, 1);
             else
-                            queue = QueueManager.getNamedQueue(DaqueryEndpoint.EXPORT_QUEUE);
-            ResponseTask task = new ResponseTask(req, DaqueryUserDAO.getSysUser(), req.getNetwork().getDataModel());
+                queue = QueueManager.getNamedQueue(DaqueryEndpoint.EXPORT_QUEUE);
+            ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), request.getNetwork().getDataModel());
             queue.addTask(task);
 
-            String jsonString = request.toJson();
+            String jsonString = task.getResponse().toJson();
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (HibernateException he) {
