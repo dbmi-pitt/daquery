@@ -997,13 +997,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		DaqueryResponse rVal = null;
 		try
 		{
+			request.setId(null);
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
-			DaqueryResponse dr = new DaqueryResponse();
-			dr.setStatusEnum(ResponseStatus.PENDING);
-			dr.setRequest(request);
-			ResponseDAO.saveOrUpdate(dr);
-			return ResponseHelper.getBasicResponse(201, "{}");
+			rVal = new DaqueryResponse();
+			rVal.setStatusEnum(ResponseStatus.PENDING);
+			rVal.setRequest(request);
+			ResponseDAO.saveOrUpdate(rVal);
+			return ResponseHelper.getJsonResponseGen(201, rVal);
 		}
 		catch(Throwable e)
 		{
@@ -1158,7 +1159,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	request.setSentTimestamp(new Date());
 		AbstractDAO.save(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
-		if(response.getStatus() == 200)
+		if(response.getStatus() == 201)
 		{
 			String json = response.readEntity(String.class);
 			ObjectMapper mapper = new ObjectMapper();
@@ -1167,7 +1168,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			resp.setRequest(request);
 			resp.setId(null);
 			ResponseDAO.saveOrUpdate(resp);
-			return ResponseHelper.getJsonResponseGen(200, resp);
+			return ResponseHelper.getJsonResponseGen(201, resp);
 		} else {
 			DecodedErrorInfo decodedInfo = ResponseHelper.decodeErrorResponse(response);
 			if(decodedInfo != null && decodedInfo.getErrorInfo() != null)

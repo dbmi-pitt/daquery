@@ -77,4 +77,41 @@ public class ResponseDAO extends AbstractDAO
 			if(sess != null) sess.close();
 		}
 	}
+	
+	public static boolean approveDataRequest(Long reqId) {
+		Session sess = null;
+		try {
+			sess = HibernateConfiguration.openSession();
+			Query q = sess.createQuery("UPDATE DaqueryResponse set status='APPROVED' WHERE reqid = :req_id")
+						  .setParameter("req_id", reqId);
+			
+			return true;
+		} catch (Throwable t) {
+			String msg = "Unhandled exception while approving DaqueryRequest  id: " + reqId;
+			log.log(Level.SEVERE, msg, t);
+			return(false);
+		} finally {
+			if(sess != null) sess.close();
+		}
+	}
+	
+	public static void denyDataRequest(Long reqId) throws Throwable {
+		Session sess = null;
+		try {
+			sess = HibernateConfiguration.openSession();
+			Transaction t = sess.beginTransaction();
+			Query q = sess.createQuery("UPDATE DaqueryResponse set status='DENIED' WHERE reqid = :req_id")
+						  .setParameter("req_id", reqId);
+			
+			q.executeUpdate();
+			t.commit();
+			return;
+		} catch (Throwable t) {
+			String msg = "Unhandled exception while denying DaqueryRequest  id: " + reqId;
+			log.log(Level.SEVERE, msg, t);
+			throw t;
+		} finally {
+			if(sess != null) sess.close();
+		}
+	}
 }
