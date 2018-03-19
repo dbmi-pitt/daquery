@@ -39,6 +39,10 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
+import edu.pitt.dbmi.daquery.dao.ResponseDAO;
+import edu.pitt.dbmi.daquery.queue.QueueManager;
+import edu.pitt.dbmi.daquery.queue.ResponseTask;
+import edu.pitt.dbmi.daquery.queue.TaskQueue;
 
 @Path("/requests")
 @Produces(APPLICATION_JSON)
@@ -263,6 +267,96 @@ public class RequestEndpoint extends AbstractEndpoint {
         		dao.closeCurrentSession();
         	}
         }
+    }
+    
+    /**
+     * Approve request
+     * example url: daquery/ws/requests/1/approve
+     * @return 200 OK Request
+     * @throws 500 Server Error	error message
+     * @throws 401 Unauthorized	
+     */
+    @PUT
+    @Path("/{id}/approve")
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response approveDataRequest(@PathParam("id") String id) {
+    	try {
+
+            logger.info("#### updating a request");
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
+            
+            DaqueryRequest request = DaqueryRequestDAO.getRequestById(id);
+            
+            TaskQueue queue = null;
+            if(!QueueManager.containsQueue(DaqueryEndpoint.EXPORT_QUEUE))
+                            queue = QueueManager.addQueue(DaqueryEndpoint.EXPORT_QUEUE, 1);
+            else
+                            queue = QueueManager.getNamedQueue(DaqueryEndpoint.EXPORT_QUEUE);
+            ResponseTask task = new ResponseTask(req, DaqueryUserDAO.getSysUser(), req.getNetwork().getDataModel());
+            queue.addTask(task);
+
+            String jsonString = request.toJson();
+            return Response.ok(200).entity(jsonString).build();
+
+    	} catch (HibernateException he) {
+    		String msg = "Could not access the database when updating a new request.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered updating a new request.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        }
+    }
+    
+    /**
+     * Deny request
+     * example url: daquery/ws/requests/1/deny
+     * @return 200 OK Request
+     * @throws 500 Server Error	error message
+     * @throws 401 Unauthorized	
+     */
+    @PUT
+    @Path("/{id}/deny")
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response denyDataRequest(@PathParam("id") String id) {
+    	try {
+
+            logger.info("#### updating a request");
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
+            
+            DaqueryRequest request = DaqueryRequestDAO.getRequestById(id);
+            ResponseDAO.denyDataRequest(request.getId());
+            
+            String jsonString = request.toJson();
+            return Response.ok(200).entity(jsonString).build();
+    	} catch (HibernateException he) {
+    		String msg = "Could not access the database when denying a pending request.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered denying a pending request.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } catch (Throwable e) {
+        	String msg = "An unexpected error was encountered denying a pending request.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+		}
     }
     
     /**
