@@ -149,6 +149,7 @@ public class RoleRestTest extends DaqueryBaseTest {
     	createTestUser(aqUsername, aqUseremail, userpassword, "aggregate_querier");
     	createTestUser(dqUsername, dqUseremail, userpassword, "data_querier");
     	createTestUser(nrUsername, nrUseremail, userpassword, null);*/
+		System.out.println("in AdminTest");
 		performLogin(adminUseremail, userpassword);
 		given().with().contentType("application/json")
 		.headers("Authorization", "Bearer " + currentToken)
