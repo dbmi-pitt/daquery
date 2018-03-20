@@ -52,8 +52,10 @@ export class RequestsFromMeListComponent implements OnInit {
                                this.responseService.getResponse(response.responseId)
                                                    .subscribe(res => {
                                                      response.status = res.status;
-                                                     response.errorMessage = res.errorMessage
+                                                     response.errorMessage = res.errorMessage;
                                                      response.value = res.value;
+                                                     response.statusMessage = res.statusMessage;
+                                                     response.files = res.files;
                                                      if(['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
                                                        subscription.unsubscribe();
                                                      }
@@ -90,29 +92,49 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   requestData(request: any) {
-    let dataRequest = {
-      requestSite: {
-        siteId: request.requestSite.siteId,
-        name: request.requestSite.name
-      },
-      network: {
-        networkId: request.network.networkId
-      },
-      requestGroup: request.requestGroup + ":DataRequest",
-      inquiry: {
-        version: 1,
-        dataType: 'SQL_DOWNLOAD',
-        inquiryId: request.responses[0].downloadDirective.inquiryId,
-        aggregate: false,
-        inquiryName: request.inquiry.inquiryName + "(Data)",
-        inquiryDescription: request.inquiry.inquiryDescription,
-        code: request.responses[0].downloadDirective.code
-      }
-    };
-    this.requestService.requestData(dataRequest)
-                       .subscribe(() => {
-                          this.getRequestsFromMe();
-                       });
+    if(confirm("Are you sure to request data?")){
+      let dataRequest = {
+        requestSite: {
+          siteId: request.requestSite.siteId,
+          name: request.requestSite.name
+        },
+        network: {
+          networkId: request.network.networkId
+        },
+        requestGroup: request.requestGroup + ":DataRequest",
+        inquiry: {
+          version: 1,
+          dataType: 'SQL_DOWNLOAD',
+          inquiryId: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.inquiryId : '',
+          aggregate: false,
+          inquiryName: request.inquiry.inquiryName + "(Data)",
+          inquiryDescription: request.inquiry.inquiryDescription,
+          code: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.code : ''
+        }
+      };
+      this.requestService.requestData(dataRequest)
+                        .subscribe(() => {
+                            this.getRequestsFromMe();
+                        });
+    }
+  }
 
+  getRequestResult(response: any){
+    if(!response) return '';
+    if(response.status === 'ERROR'){
+      return response.errorMessage;
+    } else {
+      if (response.value) {
+        return response.value;
+      } else{
+        return response.statusMessage;
+      }
+    }
+  }
+
+  getFilePaths(response: any){
+    if(response.files){
+      return response.files.filepaths.join('\n');
+    }
   }
 }

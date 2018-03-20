@@ -58,14 +58,15 @@
               <tr *ngFor="let request of requestGroup.val">
                 <td>{{ request.requestSite.name }}</td>
                 <td>{{ request.responses[0]?.status }}</td>
-                <td>{{ request.responses[0]?.status === 'ERROR' ? request.responses[0]?.errorMessage : request.responses[0]?.value }}
+                <td>{{ getRequestResult(request.responses[0]) }}
                     <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
                     <span *ngIf="request.responses[0]?.hasError" class="pull-right-container">
                       <small class="label bg-red">Network Error</small>
                     </span>
+                    <a title="{{ getFilePaths(request.responses[0]) }}" data-toggle="tooltip" data-placement="top"><i *ngIf="request.responses[0]?.files" class="fa fa-question-circle"></i></a>
                 </td>
                 <td>
-                  <button [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
+                  <button *ngIf="request.inquiry.aggregate" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
                 </td>
               </tr>
             </tbody>

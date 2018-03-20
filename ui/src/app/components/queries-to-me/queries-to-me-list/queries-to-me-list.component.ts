@@ -13,8 +13,8 @@ declare var $:any;
 })
 export class QueriesToMeListComponent implements OnInit {
 
-  requests: QueryToMe[];
-  selectedRequest: QueryToMe;
+  requests: any[];
+  selectedRequest: any;
   constructor(private requestService: RequestService) {
 
   }
@@ -43,8 +43,28 @@ export class QueriesToMeListComponent implements OnInit {
         return "bg-red";
       case "PENDING":
         return "bg-yellow";
+      case "DENIED":
+        return "bg-gray";
       default:
-        return "bg-grey";
+        return "bg-gray";
+    }
+  }
+
+  approveRequest(){
+    if(confirm("Are you sure to approve this request?")){
+    this.requestService.approveDataRequest(this.selectedRequest.requestId)
+                       .subscribe(res => {
+                          this.selectedRequest.responses[0] = res;
+                       });
+    }
+  }
+
+  denyRequest(){
+    if(confirm("Are you sure to deny this request?")){
+      this.requestService.denyDataRequest(this.selectedRequest.requestId)
+                        .subscribe(res => {
+                          this.selectedRequest.responses[0] = res;
+                        });
     }
   }
 }

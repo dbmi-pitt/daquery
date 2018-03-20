@@ -41,6 +41,7 @@
             <div class="help-block" *ngIf="password.invalid && (submitted || password.dirty || password.touched)">Please enter the datamodel password</div>
           </div>
           <button class="btn btn-primary">Join</button>
+          <button class="btn btn-info" (click)="testDataSource($event)">Test</button>
         </form>
       </div>
     </div>

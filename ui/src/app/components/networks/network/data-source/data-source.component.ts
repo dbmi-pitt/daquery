@@ -20,6 +20,11 @@ export class DataSourceComponent implements OnInit {
   datamodel: any = null;
   sqldatasource: any = null;
   datasourceForm: FormGroup;
+  error: any;
+  loading = false;
+  success = false;
+  testResult: any;
+
   constructor(private siteService: SiteService,
               private networkService: NetworkService,
               private activatedRoute: ActivatedRoute,
@@ -30,21 +35,21 @@ export class DataSourceComponent implements OnInit {
       this.network_id = params['id'];
       this.getNetwork(this.network_id);
       this.getDatamodel(this.network_id);
-      await this.getSqlDatasource(this.network_id);
       this.createForm();
     });
   }
 
   createForm() {
     this.datasourceForm = this.fb.group({
-      url: ['', Validators.required],
+      connectionUrl: ['', Validators.required],
       username: ['', Validators.required],
       password: ['', Validators.required],
-      driver: ['', Validators.required]
+      driver: ['', Validators.required],
+      dtype: ['SQL']
     })
   }
 
-  get url() { return this.datasourceForm.get('url'); }
+  get connectionUrl() { return this.datasourceForm.get('connectionUrl'); }
   get username() { return this.datasourceForm.get('username'); }
   get password() { return this.datasourceForm.get('password'); }
   get driver() { return this.datasourceForm.get('driver'); }
@@ -74,6 +79,29 @@ export class DataSourceComponent implements OnInit {
   }
 
   onSubmit(){
+    this.loading = true;
+    this.networkService.updateNetworkSQLDataSource(this.network.networkId, this.datasourceForm.value)
+                       .subscribe(res => {
+                          this.error = '';
+                          this.loading = false;
+                          this.success = true;
+                          this.datasourceForm.reset();
+                          setTimeout(() => {
+                            this.success = false;
+                          }, 3000);
+                       }, error => {
+                        if(error.status === 401){
+                          this.error = 'Your password is incorrect';
+                          this.loading = false;
+                        }
+                      });
+  }
 
+  testDataSource(e) {
+    e.preventDefault();
+    this.networkService.testDataSource(this.datasourceForm.value)
+                       .subscribe( res => {
+                          this.testResult = res;
+                       });
   }
 }

@@ -13,13 +13,14 @@ export class AddNetworkComponent implements OnInit {
   availableNetworks: any[];
   submitted = false;
   joinNetworkForm: FormGroup;
+  testResult: any;
 
   urlexample: String = "";
   @Output()
   newNetwork = new EventEmitter<any>();
 
   constructor(private fb: FormBuilder,
-              private networkServier: NetworkService,
+              private networkService: NetworkService,
               private router: Router) { }
 
   ngOnInit() {
@@ -44,8 +45,8 @@ export class AddNetworkComponent implements OnInit {
   get driver() { return this.joinNetworkForm.get('driver'); }
 
   getAvailableNetworks(){
-    this.networkServier.getAvailableNetworks()
-                       .subscribe(data => {
+    this.networkService.getAvailableNetworks()
+                      .subscribe(data => {
                           this.loadingAvailableNetworks = false;
                           this.availableNetworks = data;
                           this.createForm();
@@ -56,7 +57,7 @@ export class AddNetworkComponent implements OnInit {
     this.submitted = true;
     if(this.joinNetworkForm.valid){
       const selectedNetwork = this.availableNetworks.find(e => e.networkId === this.joinNetworkForm.value.network);
-      this.networkServier.joinNetwork({"form": this.joinNetworkForm.value, "network": selectedNetwork})
+      this.networkService.joinNetwork({"form": this.joinNetworkForm.value, "network": selectedNetwork})
                         .subscribe(data => {
                           this.newNetwork.emit(data);
                         });
@@ -65,6 +66,14 @@ export class AddNetworkComponent implements OnInit {
 
   onChange(e) {
     this.urlexample = e.target.options[e.target.selectedIndex].getAttribute('data-urlexample');
+  }
+
+  testDataSource(e) {
+    e.preventDefault();
+    this.networkService.testDataSource(this.joinNetworkForm.value)
+                       .subscribe( res => {
+                          this.testResult = res;
+                       });
   }
 
 }

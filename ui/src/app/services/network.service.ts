@@ -68,4 +68,20 @@ export class NetworkService {
                       return Observable.throw(error || 'Server error');
                     })
   }
+
+  updateNetworkSQLDataSource(network_id: string, sqldatasource: any): Observable<any>{
+    return this.http.put(`/daquery/ws/networks/${network_id}/sqldatasource`, sqldatasource)
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  testDataSource(sqldatasource: any) {
+    return this.http.post('/daquery/ws/networks/test-data-source', sqldatasource)
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
 }

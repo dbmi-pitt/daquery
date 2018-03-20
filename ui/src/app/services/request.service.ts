@@ -73,8 +73,25 @@ export class RequestService {
   }
 
   requestData(request: any){
-    return this.http.post('daquery/ws/request', request)
+    return this.http.post('/daquery/ws/request', request)
                     .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  approveDataRequest(requestId: string){
+    return this.http.put(`/daquery/ws/requests/${requestId}/approve`, '')
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  denyDataRequest(requestId: string){
+    return this.http.put(`/daquery/ws/requests/${requestId}/deny`, '')
+                    .catch(error => {
+                      this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     })
   }

@@ -51,8 +51,8 @@
                 </div>
               </div>
               <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
-                <button class="btn btn-success">Approve</button>
-                <button class="btn btn-danger">Deny</button>
+                <button class="btn btn-success" (click)="approveRequest()">Approve</button>
+                <button class="btn btn-danger" (click)="denyRequest()">Deny</button>
               </div>
             </div>
             <hr />
@@ -66,7 +66,7 @@
               </div>
             </div>
             <hr />
-            <div class="row">
+            <!-- <div class="row">
               <div class="col-md-12">
                 <div class="table-responsive">
                     <table id="tb" class="row-border hover dataTable">
@@ -142,7 +142,7 @@
                       </table>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
           <!-- /.box-body -->
         </div>
