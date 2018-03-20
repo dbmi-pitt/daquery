@@ -53,7 +53,18 @@ public class StringHelper
 		return(rVal);
 	}
 	
-	public static String ensureTrailingSlash(String path)
+	public static String ensureTrailingSlashURL(String path)
+	{
+		if(path == null) return(null);
+		String tPath = path.trim();
+		if(! tPath.endsWith("/"))
+		{
+			tPath = tPath + "/";
+		}
+		return(tPath);
+	}
+
+	public static String ensureTrailingSlashFile(String path)
 	{
 		if(path == null) return(null);
 		String tPath = path.trim();
@@ -62,8 +73,7 @@ public class StringHelper
 			tPath = tPath + File.separator;
 		}
 		return(tPath);
-	}
-		
+	}	
 	public static boolean stringToBool(String val)
 	{
 		if(isBlank(val))
