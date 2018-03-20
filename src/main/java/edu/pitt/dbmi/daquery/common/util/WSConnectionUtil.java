@@ -612,7 +612,7 @@ public class WSConnectionUtil {
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server, bad site address.  Site:" + centServerURL, "This was due to a malformed url: " + centServerURL, mue));
 		}
 		
-		respBuilder = client.target(StringHelper.ensureTrailingSlash(centServerURL) + "daquery-central/" + serviceName).request(MediaType.APPLICATION_JSON_TYPE);
+		respBuilder = client.target(StringHelper.ensureTrailingSlashURL(centServerURL) + "daquery-central/" + serviceName).request(MediaType.APPLICATION_JSON_TYPE);
 		
 		Response resp  = respBuilder.post(ent);
 		
