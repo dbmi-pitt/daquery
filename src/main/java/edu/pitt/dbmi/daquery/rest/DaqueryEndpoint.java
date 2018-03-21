@@ -578,6 +578,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					rVal.setStatus(resp.getStatus());
 					rVal.setValue(resp.getValue());
 					rVal.setDownloadAvailable(resp.isDownloadAvailable());
+					rVal.setDownloadDirective(resp.getDownloadDirective());
+					rVal.setStatusMessage(resp.getStatusMessage());
+					rVal.setFiles(resp.getFiles());
 					ResponseDAO.saveOrUpdate(rVal);
 					return ResponseHelper.getJsonResponseGen(200, json);	
 				}
@@ -1005,8 +1008,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setId(null);
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
-			rVal = new DaqueryResponse();
+			rVal = new DaqueryResponse(true);
 			rVal.setStatusEnum(ResponseStatus.PENDING);
+			rVal.setDownloadAvailable(false);
 			rVal.setRequest(request);
 			ResponseDAO.saveOrUpdate(rVal);
 			return ResponseHelper.getJsonResponseGen(201, rVal);
@@ -1047,7 +1051,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		{
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
-			DaqueryResponse dr = new DaqueryResponse();
+			DaqueryResponse dr = new DaqueryResponse(true);
 			dr.setStatusEnum(ResponseStatus.PENDING);
 			dr.setRequest(request);
 			ResponseDAO.saveOrUpdate(dr);
