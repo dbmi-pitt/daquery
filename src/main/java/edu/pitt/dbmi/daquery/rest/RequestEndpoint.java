@@ -341,8 +341,9 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             DaqueryRequest request = DaqueryRequestDAO.getRequestById(id);
             ResponseDAO.denyDataRequest(request.getId());
+            request = DaqueryRequestDAO.getRequestById(id);
             
-            String jsonString = request.toJson();
+            String jsonString = request.getResponses().iterator().next().toJson();
             return Response.ok(200).entity(jsonString).build();
     	} catch (HibernateException he) {
     		String msg = "Could not access the database when denying a pending request.";
