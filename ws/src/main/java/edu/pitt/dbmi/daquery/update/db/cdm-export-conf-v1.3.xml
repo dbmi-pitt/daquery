@@ -1,0 +1,11 @@
+<dataExportConfig cases-per-file="70000">
+<outputFile name="demographics.csv" source="demographic">
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name="Sex" colName="SEX" />
+	    <field name="Birth Date" colName="BIRTH_DATE" deid="birthday" />
+	    <field name="Hispanic" colName="HISPANIC" />
+	    <field name="Race" colName="RACE"/>
+    </custom-column-set>
+</outputFile>
+</dataExportConfig>

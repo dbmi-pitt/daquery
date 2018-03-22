@@ -1,0 +1,26 @@
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+             version="2.1">
+             
+  <persistence-unit name="derby" transaction-type="RESOURCE_LOCAL">
+  	<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+  <class>edu.pitt.dbmi.daquery.domain.InboundQuery</class>
+  <class>edu.pitt.dbmi.daquery.domain.Network</class>
+  <class>edu.pitt.dbmi.daquery.domain.Notification</class>
+  <class>edu.pitt.dbmi.daquery.domain.OutboundQuery</class>
+  <class>edu.pitt.dbmi.daquery.domain.Role</class>
+  <class>edu.pitt.dbmi.daquery.domain.Site</class>
+  <class>edu.pitt.dbmi.daquery.domain.User</class>
+  <properties>
+    <property name="javax.persistence.jdbc.url" value="jdbc:derby:C:\Users\del20\conf\daquery-db" />
+    <property name="javax.persistence.jdbc.user" value="" />
+    <property name="javax.persistence.jdbc.password" value="" />
+    <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver" />
+    <property name="hibernate.connection.isolation" value="2" />
+    <property name="hibernate.show_sql" value="true"/>
+	<property name="hibernate.format_sql" value="true"/>
+    </properties>
+  </persistence-unit>
+</persistence>

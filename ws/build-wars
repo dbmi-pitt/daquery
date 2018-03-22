@@ -1,0 +1,6 @@
+cd ../daquery-common/
+mvn clean install
+cd ../daquery-central/
+mvn clean install
+cd ../daquery-ws/
+mvn clean install

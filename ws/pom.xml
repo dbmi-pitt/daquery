@@ -1,0 +1,511 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>edu.pitt.dbmi</groupId>
+    <artifactId>daquery</artifactId>
+    <packaging>war</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>Distributed Data Query Application</name>
+    <url>http://maven.apache.org</url>
+    <properties>
+        <hibernate-validator.version>5.4.1.Final</hibernate-validator.version>
+        <hibernate.version>4.3.6.Final</hibernate.version>
+        <mysql-connector.version>5.1.38</mysql-connector.version>
+        <commons-dbcp.version>1.4</commons-dbcp.version>
+        <jstl.version>1.2</jstl.version>
+        <junit.version>4.11</junit.version>
+        <oraclejdbc.version>11.1.0.7.0</oraclejdbc.version>
+        <!-- NOTE: Jersey 2.6 and below are compatible with Java 1.6
+        I was encountering an UnsupportedClassVersionError when deploying to Eclipse's Tomcat 6 server
+        this link helped: https://stackoverflow.com/questions/33010871/issue-java-lang-unsupportedclassversionerror-org-glassfish-jersey-servlet-serv -->
+  	<!-- <jersey.version>2.19</jersey.version> -->
+  	    <jersey.version>2.25.1</jersey.version>        
+        <jaxrs.version>2.0.1</jaxrs.version>
+        <logback.version>1.2.3</logback.version>
+        <jjwt.version>0.7.0</jjwt.version>   
+        <cdi.version>2.0</cdi.version> 
+        <transaction.version>1.2</transaction.version> 
+        <entitymanager.version>4.3.6.Final</entitymanager.version>
+        <jackson.version>2.5.2</jackson.version>
+        <gson.version>2.6.2</gson.version>
+        <jadira.version>3.1.0.GA</jadira.version>
+        <c3p0.version>0.9.1.2</c3p0.version>
+        <hamcrest.version>1.3</hamcrest.version>
+        <restassured.version>3.0.3</restassured.version>
+        <javaxjson.version>1.0.4</javaxjson.version>
+        <derby.version>10.12.1.1</derby.version>
+        <sqlserver.version>6.2.2.jre7</sqlserver.version>
+        <typesafe.config.version>1.2.1</typesafe.config.version>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <ui_project.Directory>../daquery/ui</ui_project.Directory>
+        
+        <!-- This is only temporary.  
+        //TODO:  We need to find a way to launch
+        RestAssured tests automatically -->
+        <!--  <maven.test.skip>true</maven.test.skip>  -->
+    </properties>
+	
+    <dependencies>
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.1.0</version>
+    <scope>provided</scope>
+</dependency>    
+<!--     <dependency>
+	    <groupId>javax.servlet</groupId>
+	    <artifactId>servlet-api</artifactId>
+	    <version>2.5</version>
+	    <scope>provided</scope>
+	</dependency> -->
+    <dependency>
+    	  <groupId>com.oracle</groupId>
+    	  <artifactId>ojdbc6</artifactId>
+	  <version>${oraclejdbc.version}</version>
+	</dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql-connector.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>${commons-dbcp.version}</version>
+        </dependency>
+ <!-- 
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>${jstl.version}</version>
+        </dependency>
+-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <version>${jersey.version}</version>
+		</dependency>
+		
+	    <dependency>
+	    	<groupId>org.glassfish.jersey.media</groupId>
+	    	<artifactId>jersey-media-multipart</artifactId>
+	    	<version>${jersey.version}</version>
+	    </dependency>
+		
+		<!--  Start Testing Framework -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>${hamcrest.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+		      <groupId>io.rest-assured</groupId>
+		      <artifactId>rest-assured</artifactId>
+		      <version>${restassured.version}</version>
+		      <scope>test</scope>
+		</dependency>
+		<!--  End Testing Framework -->
+		
+		<dependency>
+		  <groupId>org.glassfish</groupId>
+		  <artifactId>javax.json</artifactId>
+		  <version>${javaxjson.version}</version>
+		</dependency>
+				
+		<dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>${jaxrs.version}</version>
+        </dependency>
+		
+		<!-- Gson makes it easy to convert between JSON and Java objects -->
+		<dependency>
+	    	<groupId>com.google.code.gson</groupId>
+	    	<artifactId>gson</artifactId>
+	    	<version>${gson.version}</version>
+		</dependency>
+		
+		
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt</artifactId>
+		    <version>${jjwt.version}</version>
+		</dependency>
+		
+		<!-- This is for converting POJOs to JSON -->
+		<dependency>
+	        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+	        <artifactId>jackson-jaxrs-json-provider</artifactId>
+	        <version>${jackson.version}</version>
+		</dependency>		
+		
+		<!-- The Jackson files are needed at runtime for JWT 
+		If you don't keep JWT and Jackson in sync, you will get runtime ClassNotFound errors
+		when building JWT tokens.-->
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-annotations</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+		
+		
+		<dependency>
+		    <groupId>javax.enterprise</groupId>
+		    <artifactId>cdi-api</artifactId>
+		    <version>${cdi.version}</version>
+		    <scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+	        <groupId>javax.transaction</groupId>
+	        <artifactId>javax.transaction-api</artifactId>
+	        <version>${transaction.version}</version>
+ 		</dependency>
+ 		
+		<dependency>
+	    	<groupId>org.apache.derby</groupId>
+	    	<artifactId>derby</artifactId>
+	    	<version>${derby.version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.jadira.usertype</groupId>
+		    <artifactId>usertype.core</artifactId>
+		    <version>${jadira.version}</version>
+		</dependency>
+		
+ 		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-core</artifactId>
+		    <version>${hibernate.version}</version>
+		</dependency>
+		
+	    <dependency>
+	        <groupId>org.hibernate</groupId>
+	        <artifactId>hibernate-validator</artifactId>
+	        <version>4.3.2.Final</version>
+	        <exclusions>
+	            <exclusion>
+	                <groupId>org.slf4j</groupId>
+	                <artifactId>slf4j-api</artifactId>
+	            </exclusion>
+	        </exclusions>
+	    </dependency>
+	    
+	    <dependency>
+	        <groupId>org.hibernate</groupId>
+	        <artifactId>hibernate-entitymanager</artifactId>
+	        <version>${hibernate.version}</version>
+	    </dependency>
+	    
+	    <dependency>
+	        <groupId>org.hibernate</groupId>
+	        <artifactId>hibernate-ehcache</artifactId>
+	        <version>${hibernate.version}</version>
+	    </dependency>
+	    
+	    <dependency>
+			<groupId>c3p0</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>${c3p0.version}</version> 
+		</dependency> 
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>${hibernate.version}</version> 
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.typesafe</groupId>
+		    <artifactId>config</artifactId>
+		    <version>${typesafe.config.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>${sqlserver.version}</version>
+		</dependency>
+	    
+	    <dependency>
+		   	<groupId>edu.pitt.dbmi.daquery</groupId>
+			<artifactId>daquery-common</artifactId>
+			<version>1.0</version>
+		</dependency>  	    
+  	    
+    </dependencies>
+    <profiles>
+	    <profile>
+		    <id>dev</id>
+		    <activation>
+		      <activeByDefault>true</activeByDefault>
+		    </activation>		 
+		    <build>
+			    <finalName>daquery</finalName>
+		        <plugins>
+		        <plugin>
+		           <artifactId>maven-antrun-plugin</artifactId>
+		           <executions>
+		             <execution>
+		               <phase>dev</phase>
+		               <goals>
+		                 <goal>run</goal>
+		               </goals>
+		               <configuration>
+		                 <tasks>
+		                   <delete file="${project.build.outputDirectory}/application.properties"/>
+		                   <copy file="src/main/resources/application.properties"
+		                         tofile="${project.build.outputDirectory}/application.properties"/>
+		                 </tasks>
+		               </configuration>
+		             </execution>
+		           </executions>
+		         </plugin>
+		            <plugin>
+		                <groupId>org.eclipse.jetty</groupId>
+		                <artifactId>jetty-maven-plugin</artifactId>
+		                <version>9.2.11.v20150529</version>
+		                <configuration>
+		                    <scanIntervalSeconds>10</scanIntervalSeconds>
+		                    <webApp>
+		                        <contextPath>/</contextPath>
+		                    </webApp>
+		                </configuration>
+		            </plugin>
+		        </plugins>
+		    </build>
+		</profile>
+	    <profile>
+		    <id>test</id>
+		    <build>
+			    <finalName>daquery</finalName>
+		        <plugins>
+		        <plugin>
+		           <artifactId>maven-antrun-plugin</artifactId>
+		           <executions>
+		             <execution>
+		               <phase>test</phase>
+		               <goals>
+		                 <goal>run</goal>
+		               </goals>
+		               <configuration>
+		                 <tasks>
+		                   <delete file="${project.build.outputDirectory}/application.properties"/>
+		                   <copy file="src/main/resources/application.test.properties"
+		                         tofile="${project.build.outputDirectory}/application.properties"/>
+		                 </tasks>
+		               </configuration>
+		             </execution>
+		           </executions>
+		         </plugin>
+		            <plugin>
+		                <groupId>org.eclipse.jetty</groupId>
+		                <artifactId>jetty-maven-plugin</artifactId>
+		                <version>9.2.11.v20150529</version>
+		                <configuration>
+		                    <scanIntervalSeconds>10</scanIntervalSeconds>
+		                    <webApp>
+		                        <contextPath>/</contextPath>
+		                    </webApp>
+		                </configuration>
+		            </plugin>
+		        </plugins>
+		    </build>
+		</profile>
+	  	<profile>
+	  	<id>unix</id>
+	    <activation>
+	      <os>
+	        <family>!windows</family>
+	      </os>
+	    </activation>
+	    <build>
+	      <plugins>
+	        <plugin>
+         		<groupId>org.codehaus.mojo</groupId>
+         		<artifactId>exec-maven-plugin</artifactId>
+         		<executions>
+         			<execution>
+         				<id>cp-builded-ui</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+						<verbose>true</verbose>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>cp dist/* ${project.basedir}/src/main/webapp/</argument>
+                            </arguments>  
+						
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         		</executions>
+         	</plugin>
+	      </plugins>
+	    </build>
+	  </profile>
+	  	<profile>
+	  	<id>windows</id>
+	    <activation>
+	      <os>
+	        <family>windows</family>
+	      </os>
+	    </activation>
+	    <build>
+	      <plugins>
+	        <plugin>
+         		<groupId>org.codehaus.mojo</groupId>
+         		<artifactId>exec-maven-plugin</artifactId>
+         		<executions>
+         			<execution>
+         				<id>cp-builded-ui</id>
+         				<phase>generate-sources</phase>
+         				<configuration>
+         					<workingDirectory>${ui_project.Directory}</workingDirectory>
+         					<executable>cmd</executable>
+         					<arguments>
+         						<argument>/C</argument>
+         						<argument>copy ".\dist\*.*" "${project.basedir}\src\main\webapp\"</argument>
+         					</arguments>
+         				</configuration>
+         				<goals>
+         					<goal>exec</goal>
+         				</goals>
+         			</execution>
+         		</executions>
+         	</plugin>
+	      </plugins>
+	    </build>
+	  </profile>
+	</profiles>
+    <build>
+	    <finalName>daquery</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.2.11.v20150529</version>
+                <configuration>
+                    <scanIntervalSeconds>10</scanIntervalSeconds>
+                    <webApp>
+                        <contextPath>/</contextPath>
+                    </webApp>
+                </configuration>
+            </plugin>
+	    <plugin>
+	      <groupId>org.apache.maven.plugins</groupId>
+	      <artifactId>maven-war-plugin</artifactId>
+	      <version>2.6</version>
+	      <configuration>
+	        <failOnMissingWebXml>false</failOnMissingWebXml>
+	        <packagingExcludes>
+	          **/private-data.props,
+	          **/ojdbc*.jar
+	        </packagingExcludes>
+	      </configuration>
+	    </plugin>
+	    <!-- copy the resources needed for database updates (from edu.pitt.dbmi.daquery.update.db directory) -->
+	    <!-- currenlty ddl and xml files are supported -->
+	    <plugin>
+	      <artifactId>maven-antrun-plugin</artifactId>
+	      <executions>
+		<execution>
+		  <phase>test</phase>
+		  <goals>
+		    <goal>run</goal>
+		  </goals>
+		  <configuration>
+		    <tasks>
+		      <copy todir="${project.build.outputDirectory}/">
+			<fileset dir="src/main/java/">
+			  <include name="**/*.ddl"/>
+			  <include name="**/*.xml"/>
+			</fileset>
+		      </copy>
+		    </tasks>
+		  </configuration>
+		</execution>
+	      </executions>
+	    </plugin>
+        </plugins>
+        <pluginManagement>
+        	<plugins>
+        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        		<plugin>
+        			<groupId>org.eclipse.m2e</groupId>
+        			<artifactId>lifecycle-mapping</artifactId>
+        			<version>1.0.0</version>
+        			<configuration>
+        				<lifecycleMappingMetadata>
+        					<pluginExecutions>
+        						<pluginExecution>
+        							<pluginExecutionFilter>
+        								<groupId>
+        									org.codehaus.mojo
+        								</groupId>
+        								<artifactId>
+        									exec-maven-plugin
+        								</artifactId>
+        								<versionRange>
+        									[1.6.0,)
+        								</versionRange>
+        								<goals>
+        									<goal>exec</goal>
+        								</goals>
+        							</pluginExecutionFilter>
+        							<action>
+        								<ignore></ignore>
+        							</action>
+        						</pluginExecution>
+        					</pluginExecutions>
+        				</lifecycleMappingMetadata>
+        			</configuration>
+        		</plugin>
+        	</plugins>
+        </pluginManagement>
+    </build>
+</project>
