@@ -1,0 +1,27 @@
+package edu.pitt.dbmi.daquery.common.domain.inquiry;
+
+public enum InquiryType
+{	
+	SQL_QUERY(TYPES.SQL_VAL), SAS_INQUIRY(TYPES.SAS_VAL), R_INQUIRY(TYPES.R_VAL), SQL_DOWNLOAD(TYPES.SQL_DOWNALOAD);
+	
+	String val = null;
+	
+	InquiryType(String val)
+	{
+		this.val = val;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return(val);
+	}
+	
+	public static class TYPES
+	{
+		public static final String SQL_VAL = "SQL_QUERY";
+		public static final String SAS_VAL = "SAS_INQUIRY";
+		public static final String R_VAL = "R_INQUIRY";
+		public static final String SQL_DOWNALOAD = "SQL_DOWNLOAD";
+	}
+}
