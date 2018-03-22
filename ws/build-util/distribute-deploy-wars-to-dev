@@ -1,19 +1,19 @@
 #echo enter password:
 #read -s PSWD
 #sshpass -p $PSWD ssh shirey@dbmi-shrine-dev01.dbmi.pitt.edu "rm -f /home/shirey/*.war"
-#sshpass -p $PSWD scp /home/devuser/projects/daquery-ws/target/daquery.war  shirey@dbmi-shrine-dev01.dbmi.pitt.edu:/home/shirey
+#sshpass -p $PSWD scp /home/devuser/projects/daquery/ws/target/daquery.war  shirey@dbmi-shrine-dev01.dbmi.pitt.edu:/home/shirey
 #sshpass -p $PSWD ssh shirey@dbmi-shrine-dev01.dbmi.pitt.edu "/home/shirey/daquery-clean-deploy"
 
 ssh root@dbmi-shrine-dev01.dbmi.pitt.edu "rm -f /opt/shrine/tomcat/daq-build/*.war"
-scp /home/devuser/projects/daquery-ws/target/daquery.war  root@dbmi-shrine-dev01.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
-scp /home/devuser/projects/daquery-central/target/daquery-central.war  root@dbmi-shrine-dev01.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
+scp /home/devuser/projects/daquery/ws/target/daquery.war  root@dbmi-shrine-dev01.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
+scp /home/devuser/projects/daquery/central/target/daquery-central.war  root@dbmi-shrine-dev01.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
 ssh root@dbmi-shrine-dev01.dbmi.pitt.edu "/opt/shrine/tomcat/daq-build/daquery-clean-deploy $1"
 
 ssh root@dbmi-i2b2-dev02.dbmi.pitt.edu "rm -f /opt/shrine/tomcat/daq-build/*.war"
-scp /home/devuser/projects/daquery-ws/target/daquery.war  root@dbmi-i2b2-dev02.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
+scp /home/devuser/projects/daquery/ws/target/daquery.war  root@dbmi-i2b2-dev02.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
 ssh root@dbmi-i2b2-dev02.dbmi.pitt.edu "/opt/shrine/tomcat/daq-build/daquery-clean-deploy $1"
 
 ssh root@dbmi-i2b2-dev03.dbmi.pitt.edu "rm -f /opt/shrine/tomcat/daq-build/*.war"
-scp /home/devuser/projects/daquery-ws/target/daquery.war  root@dbmi-i2b2-dev03.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
+scp /home/devuser/projects/daquery/ws/target/daquery.war  root@dbmi-i2b2-dev03.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
 ssh root@dbmi-i2b2-dev03.dbmi.pitt.edu "/opt/shrine/tomcat/daq-build/daquery-clean-deploy $1"
 
