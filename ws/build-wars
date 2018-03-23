@@ -3,4 +3,5 @@ mvn clean install
 cd ../central/
 mvn clean install
 cd ../ws/
-mvn clean install
+./build-no-test.sh
+
