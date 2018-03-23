@@ -2,7 +2,7 @@ node {
   
     //checkout the project
     checkout( [$class: 'GitSCM',
-       branches: [[name: jenkins-branch ]],
+       branches: [[name: '*/jenkins-branch' ]],
        userRemoteConfigs: [[
            credentialsId: 'git-readonly',
            url: 'https://dbmi-jenkins@github.com/dbmi-pitt/daquery.git']]])
