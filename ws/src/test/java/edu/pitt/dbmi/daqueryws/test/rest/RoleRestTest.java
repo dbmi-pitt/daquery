@@ -125,10 +125,12 @@ public class RoleRestTest extends DaqueryBaseTest {
 		Builder respBuilder = null;
 		String newURL = null;
 		String serviceName = "users";
+		String baseURI = "localhost";
+		int port = 9090;
 		try
 		{
-			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(RestAssured.baseURI, RestAssured.port));
-			newURL = RestAssured.baseURI + ":" + RestAssured.port;
+			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(baseURI, port));
+			newURL = "http://" + baseURI + ":" + port;
 			client = WSConnectionUtil.getRemoteClient(newURL);
 		} catch (Exception e) {
 			//any exception fails the test
