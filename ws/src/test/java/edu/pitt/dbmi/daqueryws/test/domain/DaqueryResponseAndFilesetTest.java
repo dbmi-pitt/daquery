@@ -97,7 +97,7 @@ public class DaqueryResponseAndFilesetTest {
 			
 			siteUUID = s.getSiteId();
 			
-			DaqueryUser u = new DaqueryUser();
+			DaqueryUser u = new DaqueryUser(true);
 			u.setUsername(username);
 			u.setEmail(email);
 			u.setPassword(password);
