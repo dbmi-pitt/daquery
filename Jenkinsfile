@@ -1,7 +1,11 @@
 node {
   
     //checkout the project
-    git url: 'https://dbmi-jenkins@github.com/dbmi-pitt/daquery.git', credentialsId: 'git-readonly'
+    checkout( [$class: 'GitSCM',
+       branches: [[name: jenkins-branch ]],
+       userRemoteConfigs: [[
+           credentialsId: 'git-readonly',
+           url: 'https://dbmi-jenkins@github.com/dbmi-pitt/daquery.git']]])
 
     //env.JAVA_HOME="usr/lib/jvm/java-1.7.0-openjdk-1.7.0.99.x86_64/jre"
     
