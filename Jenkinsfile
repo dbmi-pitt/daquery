@@ -3,26 +3,26 @@ node {
     //env.JAVA_HOME="usr/lib/jvm/java-1.7.0-openjdk-1.7.0.99.x86_64/jre"
     
     stage('Dependency: daquery common') {
-        dir('common') {
+        dir('daquery/common') {
             echo 'Building daquery common'
             sh "mvn -B -DskipTests clean install"
         }
     }
     stage('Dependency: daquery UI') {
-        dir('ui') {
+        dir('daquery/ui') {
             echo 'Building daquery UI'
             sh "npm install"
             sh "npm run prod"
         }
     }
     stage('Checkout and Build Web Services') {
-        dir('ws') {
+        dir('daquery/ws') {
             echo 'Building daquery Web Services'
             sh "mvn -B -DskipTests clean install"
        }
     }
     stage('Deploy web ui to Tomcat') {
-         dir('ws') {
+         dir('daquery/ws') {
             sh '/opt/apache-tomcat-6.0.53/clean.sh'
             sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
             //delete the database at the filesystem level
