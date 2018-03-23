@@ -26,7 +26,7 @@ public class NetworkTest {
 		Session session = null;
 		try {
 	    	session = HibernateConfiguration.openSession();
-			Network n = new Network();
+			Network n = new Network(true);
 			n.setName(networkname);	
 			session.getTransaction().begin();
 			session.persist(n);
