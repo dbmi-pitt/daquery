@@ -131,7 +131,7 @@ public class DomainTestSuite {
 	}
 	
 	private static void newTestNetwork(String networkName, String UUID) {
-		Network n = new Network();
+		Network n = new Network(true);
 		n.setName(networkName);
 		n.setNetworkId(UUID);
 		save(n);
@@ -149,7 +149,7 @@ public class DomainTestSuite {
 	}
 	
 	private static void newTestSite(String siteName, String UUID) {
-		Site s = new Site();
+		Site s = new Site(true);
 		s.setName(siteName);
 		s.setSiteId(UUID);
 		save(s);
@@ -157,7 +157,7 @@ public class DomainTestSuite {
 	
 	private static void newTestUser(String username, String email, String password) throws Exception
 	{
-		DaqueryUser user = new DaqueryUser();
+		DaqueryUser user = new DaqueryUser(true);
 		user.setEmail(email);
 		user.setRealName("Test User");
 		user.setStatusEnum(UserStatus.ACTIVE);
