@@ -1,5 +1,8 @@
 node {
   
+    //checkout the project
+    git url: 'https://dbmi-jenkins@github.com/dbmi-pitt/daquery.git', credentialsId: 'git-readonly'
+
     //env.JAVA_HOME="usr/lib/jvm/java-1.7.0-openjdk-1.7.0.99.x86_64/jre"
     
     stage('Dependency: daquery common') {
