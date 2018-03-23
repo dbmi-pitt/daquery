@@ -263,7 +263,7 @@ public class WSConnectionUtil {
 		return(allowSelfSignedTM);
 	}
 	
-	private static Client getRemoteClient(String url) throws KeyManagementException
+	public static Client getRemoteClient(String url) throws KeyManagementException
 	{
 		Client client = null;
 		//handle an HTTPS connection
