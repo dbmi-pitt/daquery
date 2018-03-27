@@ -45,7 +45,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 
-public class RoleRestTest extends DaqueryBaseTest {
+public class RoleRestTest2 extends DaqueryBaseTest {
 
 	private static String userpassword = "demouser";
 	//append a string to the end of the user accounts to avoid overwriting existing users
@@ -75,7 +75,7 @@ public class RoleRestTest extends DaqueryBaseTest {
 
     public static void main(String [] args) throws Exception
     {
-    	RoleRestTest.createTestUser("tester3", "tester3@pitt.edu", "abc1233", "ADMIN");
+    	RoleRestTest2.createTestUser("tester3", "tester3@pitt.edu", "abc1233", "ADMIN");
     }
     
     @BeforeClass
@@ -119,7 +119,7 @@ public class RoleRestTest extends DaqueryBaseTest {
 	{
 
 		//performUserLogin(DomainTestSuite.adminEmail, DomainTestSuite.adminPassword);
-		login("shirey@pitt.edu", "demouser");
+		login("newemail@email.com", "demouser");
         //Map<String, String> user = new HashMap<>();
 		JsonObject user = new JsonObject();
         user.addProperty("email", email);
@@ -259,8 +259,8 @@ public class RoleRestTest extends DaqueryBaseTest {
 		Client client = null;
 		Response resp = null;
 		Map<String, String> args = new HashMap<String, String>();
-		args.put("email", "shirey@pitt.edu");
-		args.put("password", "demouser");
+		args.put("email", username);
+		args.put("password", password);
 		String getURL = WSConnectionUtil.buildGetUrl("http://localhost:8080", "users/login", args);
 		try
 		{
