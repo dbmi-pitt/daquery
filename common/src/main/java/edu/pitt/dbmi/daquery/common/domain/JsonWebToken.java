@@ -93,7 +93,7 @@ public class JsonWebToken extends DaqueryObject
 		token = issueToken(userId, siteId, networkId);
 	}
 	
-	
+	@Expose
 	private String token;
 	
 	//subject- user name or user UUID
@@ -123,6 +123,7 @@ public class JsonWebToken extends DaqueryObject
 	public void setNetworkId(String networkUUID){net = networkUUID;}
 	
 	public String getToken(){return(token);}
+	
 	
     /**
      * Validate a JWT token
@@ -173,6 +174,9 @@ public class JsonWebToken extends DaqueryObject
      * @return a String representing the JWT for the user set to expire in 15 minutes.
      */
     private String issueToken(String userUuid, String siteUUID, String networkUUID) {
+    	sub = userUuid;
+    	iss = siteUUID;
+    	net = networkUUID;
         Key key = KeyGenerator.generateKey();
         Calendar date = Calendar.getInstance();
         long t=date.getTimeInMillis();
