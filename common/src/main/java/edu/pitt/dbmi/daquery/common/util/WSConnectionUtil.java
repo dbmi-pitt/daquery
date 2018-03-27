@@ -287,7 +287,7 @@ public class WSConnectionUtil {
 		return(client);
 	}
 	
-	private static String buildGetUrl(String siteUrl, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException {
+	public static String buildGetUrl(String siteUrl, String serviceName, Map<String, String> arguments) throws UnsupportedEncodingException {
 		String retString = null;
 		String args = "";
 		if(arguments != null)
