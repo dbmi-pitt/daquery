@@ -126,7 +126,7 @@ public class RoleRestTest extends DaqueryBaseTest {
 		String newURL = null;
 		String serviceName = "users";
 		String baseURI = "localhost";
-		int port = 9090;
+		int port = 8080;
 		try
 		{
 			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(baseURI, port));
