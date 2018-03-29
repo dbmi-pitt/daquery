@@ -205,7 +205,7 @@ public class RoleRestTest extends DaqueryBaseTest {
 		Map<String, String> args = new HashMap<String, String>();
 		args.put("email", username);
 		args.put("password", password);
-		String getURL = WSConnectionUtil.buildGetUrl("http://localhost:8080", "users/login", args);
+		String getURL = WSConnectionUtil.buildGetUrl("http://"+defaultServerName + ":" + defaultPort, "users/login", args);
 		try
 		{
 			URL url = new URL(getURL);
