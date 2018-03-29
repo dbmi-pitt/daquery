@@ -43,9 +43,9 @@ import edu.pitt.dbmi.daquery.dao.RoleDAO;
 public class DomainTestSuite {
 	
     private final static Logger logger = Logger.getLogger(DomainTestSuite.class.getName());
-
+  
     public static String databaseHomeDir = "/opt/apache-tomcat-6.0.53";
-    public static String adminEmail = "newemail@email.com";
+    public static String adminEmail = "shirey@pitt.edu";
     public static String adminPassword = "demouser";
     public static String adminRealName = "Test User";
 
