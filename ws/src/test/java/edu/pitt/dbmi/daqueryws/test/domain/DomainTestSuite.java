@@ -47,16 +47,16 @@ public class DomainTestSuite {
     public static String databaseHomeDir = "/opt/apache-tomcat-6.0.53";
     public static String adminEmail = "shirey@pitt.edu";
     public static String adminPassword = "demouser";
-    public static String adminRealName = "Test User";
+    public static String adminRealName = "Test UserAdmin Account";
 
     @BeforeClass
     public static void init() {
     	AppProperties.setDevHomeDir(DomainTestSuite.databaseHomeDir);
     	String siteName = "dq-test-site";
     	String localSiteURL = "http://localhost:8008/";
-    	String adminEmail = "dqadmin@pitt.edu";
-    	String adminPassword = "temppassword";
-    	String adminRealName = "Test User";
+    	//String adminEmail = "dqadmin@pitt.edu";
+    	//String adminPassword = "temppassword";
+    	//String adminRealName = "Test User";
     	try {
 			assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), siteName, localSiteURL, adminEmail, adminPassword, adminRealName));
 			if(AppSetup.isErroredSetup())
