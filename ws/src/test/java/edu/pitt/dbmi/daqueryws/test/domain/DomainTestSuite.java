@@ -131,7 +131,7 @@ public class DomainTestSuite {
 	}
 	
 	private static void newTestNetwork(String networkName, String UUID) {
-		Network n = new Network(true);
+		Network n = new Network();
 		n.setName(networkName);
 		n.setNetworkId(UUID);
 		save(n);
@@ -149,7 +149,7 @@ public class DomainTestSuite {
 	}
 	
 	private static void newTestSite(String siteName, String UUID) {
-		Site s = new Site(true);
+		Site s = new Site();
 		s.setName(siteName);
 		s.setSiteId(UUID);
 		save(s);
