@@ -28,6 +28,8 @@ import java.util.List;
 public class DaqueryBaseTest {
 	
 	public static String currentToken = "";
+	public static Integer defaultPort = 8080;
+	public static String defaultServerName = "localhost";
 		
     @BeforeClass
     public static void setup() {
@@ -35,7 +37,7 @@ public class DaqueryBaseTest {
     	
         String port = System.getProperty("server.port");
         if (port == null) {
-            RestAssured.port = Integer.valueOf(9090);
+            RestAssured.port = Integer.valueOf(defaultPort);
         }
         else{
             RestAssured.port = Integer.valueOf(port);
@@ -50,7 +52,7 @@ public class DaqueryBaseTest {
 
         String baseHost = System.getProperty("server.host");
         if(baseHost==null){
-            baseHost = "http://localhost";
+            baseHost = "http://" + defaultServerName;
         }
         RestAssured.baseURI = baseHost;
         System.out.println("Starting server..." + RestAssured.baseURI + ":" + RestAssured.port + RestAssured.basePath);
@@ -68,8 +70,8 @@ public class DaqueryBaseTest {
 	//I have to login before running any of the other testing methods...
     //I need a valid token for all the other calls
 	public static void checkLogin() {
-        currentToken = given().pathParam("email", DomainTestSuite.testUserEmail1)
-               .pathParam("password", DomainTestSuite.testUserPassword1)
+        currentToken = given().pathParam("email", DomainTestSuite.adminEmail)
+               .pathParam("password", DomainTestSuite.adminPassword)
         .when().get("users/login?email={email}&password={password}")
         .then().statusCode(200)
         .extract().path("token");

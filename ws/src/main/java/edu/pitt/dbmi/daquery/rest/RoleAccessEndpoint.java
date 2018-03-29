@@ -52,6 +52,7 @@ import edu.pitt.dbmi.daquery.common.util.KeystoreAlias;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
+import edu.pitt.dbmi.daquery.dao.RoleDAO;
 
 @Path("/roleaccesstest")
 @Produces(APPLICATION_JSON)
@@ -67,6 +68,26 @@ public class RoleAccessEndpoint extends AbstractEndpoint  {
     @Context
     SecurityContext securityContext;
 	
+    @GET
+    @Path("/allroles")
+    //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
+    @Secured({"ADMIN"})
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    /**
+     * This method returns a JSON list of the available roles.
+     * @return a 200 if list of roles is successfully returned
+     * returns a 500 error on failure 
+     */
+    public Response getAllRoles() {
+    	try {
+    		return(ResponseHelper.getJsonResponseGen(200, RoleDAO.queryAllRoles()));
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered returning all roles.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        }
+    }
 	
     @GET
     @Path("/admin")
@@ -88,7 +109,7 @@ public class RoleAccessEndpoint extends AbstractEndpoint  {
     @GET
     @Path("/aggregate")
     //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Secured({"AGGREGATE"})
+    @Secured({"AGGREGATE_QUERIER"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
@@ -104,7 +125,7 @@ public class RoleAccessEndpoint extends AbstractEndpoint  {
     @GET
     @Path("/datadownload")
     //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Secured({"DATADOWNLOAD"})
+    @Secured({"DATA_QUERIER"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
