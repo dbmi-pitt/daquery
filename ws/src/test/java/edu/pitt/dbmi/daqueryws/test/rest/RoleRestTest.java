@@ -149,7 +149,7 @@ public class RoleRestTest extends DaqueryBaseTest {
 		
 		javax.ws.rs.core.Response resp  = respBuilder.header("Authorization", "Bearer " + currentToken).post(ent);
 		
-		assertTrue("Error expected status of 201, got: " + resp.getStatus(), resp.getStatus() == 201);
+		assertTrue("Error expected status of 201, got: " + resp.getStatus() + " Request details: " + respBuilder.toString() + " Reply details: " + resp.toString(), resp.getStatus() == 201);
 		System.out.println("Successfully created user account: " + email);
 
 		Gson gson = new Gson();
@@ -239,6 +239,7 @@ public class RoleRestTest extends DaqueryBaseTest {
 		}
 		String json = answer.readEntity(String.class);
 		JsonWebToken jwt = JSONHelper.gson.fromJson(json, JsonWebToken.class);
+		System.out.println("in login  Authenticated user: " + DomainTestSuite.adminEmail + " returned token: " + currentToken);
 		currentToken = jwt.getToken();
 		return(jwt.getToken());
 	}	
