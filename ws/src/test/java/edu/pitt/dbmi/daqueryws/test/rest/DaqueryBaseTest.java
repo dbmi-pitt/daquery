@@ -28,7 +28,7 @@ import java.util.List;
 public class DaqueryBaseTest {
 	
 	public static String currentToken = "";
-	public static Integer defaultPort = 8080;
+	public static Integer defaultPort = 9090;
 	public static String defaultServerName = "localhost";
 		
     @BeforeClass
