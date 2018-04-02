@@ -51,6 +51,8 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
+
 public class RoleRestTest extends DaqueryBaseTest {
 
 	private static String userpassword = "demouser";
@@ -149,7 +151,8 @@ public class RoleRestTest extends DaqueryBaseTest {
 		
 		javax.ws.rs.core.Response resp  = respBuilder.header("Authorization", "Bearer " + currentToken).post(ent);
 		
-		assertTrue("Error expected status of 201, got: " + resp.getStatus() + " Request details: " + respBuilder.toString() + " Reply details: " + resp.toString(), resp.getStatus() == 201);
+		assertTrue("Error expected status of 201, got: " 
+		    + resp.getStatus() + " Request details: " + respBuilder.toString() + " Reply details: " + resp.toString(), resp.getStatus() == 201);
 		System.out.println("Successfully created user account: " + email);
 
 		Gson gson = new Gson();
@@ -246,6 +249,36 @@ public class RoleRestTest extends DaqueryBaseTest {
 	
 
 	public static List<Role> getAllRoles() {
+		//TODO: FIX THIS- this is a hardcoded list right now.
+		
+		List<Role> lstRoles = new ArrayList<Role>();
+		Role r1 = new Role();
+		r1.setId(1);
+		r1.setName("admin");
+		lstRoles.add(r1);
+
+		Role r2 = new Role();
+		r2.setId(2);
+		r2.setName("steward");
+		lstRoles.add(r2);
+
+		Role r3 = new Role();
+		r3.setId(3);
+		r3.setName("viewer");
+		lstRoles.add(r3);
+
+		Role r4 = new Role();
+		r4.setId(4);
+		r4.setName("aggregate_querier");
+		lstRoles.add(r4);
+
+		Role r5 = new Role();
+		r5.setId(5);
+		r5.setName("data_querier");
+		lstRoles.add(r5);
+
+		return lstRoles;
+		/*
         Client client = null;
 		
 		Builder respBuilder = null;
@@ -267,12 +300,15 @@ public class RoleRestTest extends DaqueryBaseTest {
 		
 		javax.ws.rs.core.Response resp  = respBuilder.header("Authorization", "Bearer " + currentToken).get();
 		
+		String jsonData = resp.readEntity(String.class);
+		System.out.println("Here are the roles: " + jsonData);
 		Gson gson = new Gson();
 		Type listType = new TypeToken<ArrayList<Role>>(){}.getType();
-		List<Role> lstRoles = gson.fromJson(resp.readEntity(String.class), listType);
+		List<Role> lstRoles = gson.fromJson(jsonData, listType);
+		System.out.println("Here is the roles array: " + lstRoles.toString());
 
 		return lstRoles;
-		
+		*/
 	}
 
 	@Test
