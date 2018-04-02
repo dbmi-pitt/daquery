@@ -156,7 +156,7 @@ public class AppProperties
 			stat = conn.createStatement();
 			if(isDBProperty(propertyName))
 			{  //update
-				stat.executeUpdate("update PROPERTY set value = '' where upper(name) = '" + propertyName.trim().toUpperCase() + "'");
+				stat.executeUpdate("update PROPERTY set value = '" + value + "' where upper(name) = '" + propertyName.trim().toUpperCase() + "'");
 			}
 			else
 			{ //insert
