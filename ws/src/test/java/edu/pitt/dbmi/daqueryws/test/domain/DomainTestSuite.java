@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Role;
@@ -48,21 +49,26 @@ public class DomainTestSuite {
     public static String adminEmail = "shirey@pitt.edu";
     public static String adminPassword = "demouser";
     public static String adminRealName = "Test UserAdmin Account";
+    public static String localSiteName = "testSite1";
 
     @BeforeClass
     public static void init() {
     	AppProperties.setDevHomeDir(DomainTestSuite.databaseHomeDir);
-    	String siteName = "dq-test-site";
     	String localSiteURL = "http://localhost:8008/";
     	//String adminEmail = "dqadmin@pitt.edu";
     	//String adminPassword = "temppassword";
     	//String adminRealName = "Test User";
     	try {
-			assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), siteName, localSiteURL, adminEmail, adminPassword, adminRealName));
+			assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), localSiteName, localSiteURL, adminEmail, adminPassword, adminRealName));
 			if(AppSetup.isErroredSetup())
 				throw new DaqueryException(AppSetup.getErrorMessage());
 			else if(!AppSetup.isValidSetup())
 				throw new DaqueryException("Invalid DB setup, but no error was reported.");
+			//set the local site information
+			Site localSite = SiteDAO.getSiteByNameOrId(localSiteName);
+			AppProperties.setDBProperty("site.id",localSite.getSiteId());
+			AppProperties.setDBProperty("site.name",localSiteName);
+			System.out.println("The local site's id is: " + localSite.getSiteId());
 	   	} catch (Exception e) {
 	    		System.out.println(e.getMessage());
 	    		logger.info(e.getMessage());
