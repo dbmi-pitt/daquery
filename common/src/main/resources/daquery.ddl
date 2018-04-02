@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.33 -->
+<!-- daquery.data.version=1.34 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -160,6 +160,7 @@ CREATE TABLE DAQUERY_REQUEST
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    REQUESTID varchar(50),
    REQUEST_SITE_ID bigint,
+   REQUESTER_SITE_ID bigint,
    SENT_TIMESTAMP timestamp,
    REQUESTER_ID varchar(50),
    INQUIRY_ID bigint,

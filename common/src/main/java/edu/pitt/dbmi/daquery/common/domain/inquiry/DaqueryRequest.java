@@ -49,9 +49,14 @@ public class DaqueryRequest extends DaqueryObject
 	private String requestGroup;
 	
 	@Expose
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="REQUEST_SITE_ID")
     private Site requestSite;
+	
+	@Expose
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name="REQUESTER_SITE_ID")
+    private Site requesterSite;
     
     @Expose
     @Temporal(TemporalType.TIMESTAMP)
@@ -103,6 +108,9 @@ public class DaqueryRequest extends DaqueryObject
 	
 	public Site getRequestSite(){return(requestSite);}
 	public void setRequestSite(Site site){requestSite = site;}
+	
+	public Site getRequesterSite(){return(requesterSite);}
+	public void setRequesterSite(Site site){requesterSite = site;}
 	
 	public Date getSentTimestamp(){return(sentTimestamp);}
 	public void setSentTimestamp(Date timestamp){sentTimestamp = timestamp;}

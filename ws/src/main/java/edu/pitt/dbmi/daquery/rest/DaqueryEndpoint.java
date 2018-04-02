@@ -24,6 +24,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -48,6 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.PropertyDAO;
 import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
@@ -56,6 +58,7 @@ import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.Property;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
@@ -474,6 +477,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			String requesterId = jwt.getUserId();
 			
 			boolean isLocalRequester = DaqueryUserDAO.isLocalUserId(requesterId);
+			if(isLocalRequester)
+				request.setRequesterSite(mySite);
+			
 			UserInfo uInfo = DaqueryUserDAO.getUserInfo(requesterId);
 			
 			if(request.getInquiry().isAggregate())
@@ -716,9 +722,128 @@ public class DaqueryEndpoint extends AbstractEndpoint
             }
         } catch (Exception e) {
         	e.printStackTrace();
-            return Response.status(UNAUTHORIZED).build();
+            return Response.status(500).build();
         }
     }
+    
+    /**
+     * Get current application properties which store in database.
+     * example url: daquery-ws/ws/properties
+     * @return 200
+     * @throws DaqueryException 
+     * @throws Exception
+     */
+    @GET
+    @Secured
+    @Path("/properties")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProperties() throws DaqueryException {
+    	try {   	
+    		
+    		/* App DB properties
+    		 * taskQueueMaxLength
+    		 * exportTaskQueueMaxLength
+    		 * deliverData
+    		 * threeDigitZip
+    		 * dateShift
+    		 * fileOutputDir
+    		 * localDeliveryDir
+    		 */
+            
+    		 // Get the HTTP Authorization header from the request
+    		logger.log(Level.INFO, "Get properties");
+            
+    		Map<String, String> properties = new HashMap<>();
+    		properties.put("taskQueueMaxLength", AppProperties.getDBProperty("taskQueueMaxLength"));
+    		properties.put("exportTaskQueueMaxLength", AppProperties.getDBProperty("exportTaskQueueMaxLength"));
+    		properties.put("deliverData", AppProperties.getDBProperty("deliverData"));
+    		properties.put("threeDigitZip", AppProperties.getDBProperty("threeDigitZip"));
+    		properties.put("dateShift", AppProperties.getDBProperty("dateShift"));
+    		properties.put("fileOutputDir", AppProperties.getDBProperty("fileOutputDir"));
+    		properties.put("localDeliveryDir", AppProperties.getDBProperty("localDeliveryDir"));
+            return ResponseHelper.getJsonResponseGen(200, properties);
+
+        } catch (Exception e) {
+        	String msg = e.getMessage();
+            return ResponseHelper.getErrorResponse(500, "An unexpected error occurred", msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name"), e);
+        }
+    }
+    
+    /**
+     * Get current application properties which store in database.
+     * example url: daquery-ws/ws/properties
+     * @return 200
+     * @throws Exception
+     */
+    @PUT
+    @Secured
+    @Path("/properties")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response udpateProperties(Map<?, ?> properties) {
+    	try {   	
+    		
+    		/* App DB properties
+    		 * taskQueueMaxLength
+    		 * exportTaskQueueMaxLength
+    		 * deliverData
+    		 * threeDigitZip
+    		 * dateShift
+    		 * fileOutputDir
+    		 * localDeliveryDir
+    		 */
+            
+    		 // Get the HTTP Authorization header from the request
+    		logger.log(Level.INFO, "Update properties");
+    		
+    		// Validate taskQueueMaxLength and exportTaskQueueMaxLength 
+    		if( (Integer) properties.get("taskQueueMaxLength") < 1)
+    			return ResponseHelper.getErrorResponse(500, "Task Queue Max Length must be greater than 1", "Task Queue Max Length must be greater than 1", null);
+            if( (Integer) properties.get("exportTaskQueueMaxLength") <1 )
+            	return ResponseHelper.getErrorResponse(500, "Export Task Queue Max Length must be greater than 1", "Export Task Queue Max Length must be greater than 1", null);
+            
+            // Validate fileOutputDir and localDeliveryDir
+            String fileOutputDir = (String) properties.get("fileOutputDir");
+            File f = new File(fileOutputDir);
+            if(f.exists()) {
+            	if(!f.canWrite()) {
+            		return ResponseHelper.getErrorResponse(500, "The file output directory is not writable.", "The file output directory is not writable.", null);
+            	}
+            } else {
+            	if(!f.mkdir()) {
+            		return ResponseHelper.getErrorResponse(500, "The file output directory is not able to create.", "The file output directory is not able to create.", null);
+            	}
+            }
+            
+            String localDeliveryDir = (String) properties.get("localDeliveryDir");
+            f = new File(localDeliveryDir);
+            if(f.exists()) {
+            	if(!f.canWrite()) {
+            		return ResponseHelper.getErrorResponse(500, "The local delivery directory is not writable.", "The local delivery directory is not writable.", null);
+            	}
+            } else {
+            	if(!f.mkdir()) {
+            		return ResponseHelper.getErrorResponse(500, "The local delivery directory is not able to create.", "The local delivery directory is not able to create.", null);
+            	}
+            }
+            	
+    		AppProperties.setDBProperty("taskQueueMaxLength", ((Integer) properties.get("taskQueueMaxLength")).toString());
+    		AppProperties.setDBProperty("exportTaskQueueMaxLength", ((Integer) properties.get("exportTaskQueueMaxLength")).toString());
+    		AppProperties.setDBProperty("deliverData", (String) properties.get("deliverData"));
+    		AppProperties.setDBProperty("threeDigitZip", (String) properties.get("threeDigitZip"));
+    		AppProperties.setDBProperty("dateShift", (String) properties.get("dateShift"));
+    		AppProperties.setDBProperty("fileOutputDir", (String) properties.get("fileOutputDir"));
+    		AppProperties.setDBProperty("localDeliveryDir", (String) properties.get("localDeliveryDir"));
+
+            return ResponseHelper.getJsonResponseGen(200, properties);
+
+        } catch (Exception e) {
+        	e.printStackTrace();
+            return ResponseHelper.getErrorResponse(500, "", "", e);
+        }
+    }
+    
     
     private Response handleAggregateRequestFromSite(UserInfo uInfo, DaqueryRequest request, String requesterId, Network net) throws Exception {
     	if(uInfo == null)
@@ -790,7 +915,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		DaqueryResponse rVal = null;
 		try
 		{
+			Site site = SiteDAO.getSiteByNameOrId(request.getRequesterSite().getName());
 			request.setId(null);
+			request.setRequesterSite(site);
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
 			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();

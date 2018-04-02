@@ -153,7 +153,7 @@ export class NewQueryComponent implements OnInit {
           requestSite: {
             siteId: site.siteId,
             name: site.name
-          },
+          }, 
           network: {
             networkId: this.inquiryForm.value.network || this.networks[0].networkId
           },
