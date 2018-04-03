@@ -30,7 +30,9 @@ node {
     }
     stage('Deploy web ui to Tomcat') {
          dir('ws') {
-            sh './clean.sh'
+            //don't run the clean.sh script.  Jenkins should manage this.
+            //running clean.sh might delete other items running in Jenkins
+            //sh './clean.sh'
             sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
             //delete the database at the filesystem level
             //delete the files within the database directory
