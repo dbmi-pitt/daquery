@@ -1,47 +1,37 @@
 package edu.pitt.dbmi.daqueryws.test.rest;
 
 import static io.restassured.RestAssured.given;
-
-import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
-import edu.pitt.dbmi.daqueryws.test.rest.DaqueryBaseTest;
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
-import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
-import edu.pitt.dbmi.daquery.common.domain.Role;
-import edu.pitt.dbmi.daquery.common.domain.UserStatus;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
-import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
-import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daquery.dao.RoleDAO;
-
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.google.gson.JsonObject;
-
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
+
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
+import edu.pitt.dbmi.daquery.common.domain.Role;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
+import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
+import io.restassured.response.Response;
 
 public class RoleRestTest extends DaqueryBaseTest {
 
@@ -70,28 +60,12 @@ public class RoleRestTest extends DaqueryBaseTest {
 	private static String nrUseremail = "norole" + roleTestEmailDomain;
 
     public static String databaseHomeDir = "/opt/apache-tomcat-6.0.53";
+    
 
     @BeforeClass
     public static void setupUsers() {
-    	//AppProperties.setDevHomeDir(DomainTestSuite.databaseHomeDir);
-    	System.out.println("In setupUsers...");
-    	String siteName = "dq-test-site";
-    	int port = 8008;
-    	String urlBase = "http://localhost";
-    	String localSiteURL = urlBase + ":" + port;
-    	String adminEmail = "dqadmin@pitt.edu";
-    	String adminPassword = "temppassword";
-    	String adminRealName = "Test User";
     	try {
-			/*assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), siteName, localSiteURL, adminEmail, adminPassword, adminRealName));
-			if(AppSetup.isErroredSetup())
-				throw new DaqueryException(AppSetup.getErrorMessage());
-			else if(!AppSetup.isValidSetup())
-				throw new DaqueryException("Invalid DB setup, but no error was reported.");
-			*/
 	        createAllUsers();
-	        //RestAssured.baseURI = urlBase;
-	        //RestAssured.port = port;
 	   	} catch (Exception e) {
 	    		System.out.println(e.getMessage());
 	        	//if there is a problem, let JUnit know
@@ -99,6 +73,10 @@ public class RoleRestTest extends DaqueryBaseTest {
 	    }
     }
     
+    /**
+     * Create a set of users for testing
+     * @throws Exception- throw an Exception for unhandled errors
+     */
     private static void createAllUsers() throws Exception {
     	createTestUser(adminUsername, adminUseremail, userpassword, "admin");
     	createTestUser(stewardUsername, stewardUseremail, userpassword, "steward");
@@ -108,10 +86,20 @@ public class RoleRestTest extends DaqueryBaseTest {
     	createTestUser(nrUsername, nrUseremail, userpassword, null);
     }
 
+    /**
+     * Create a single DaqueryUser object for use in testing scenarios.  The user will be optionally assigned a single role.
+     * success: create a new DaqueryUser with at most one role
+     * failure: return Assert.fail
+     * @param username- the DaqueryUser realName
+     * @param email- the DaqueryUser email
+     * @param password- the DaqueryUser password
+     * @param rolename- optional a String representing the name of the role to assign to the DaqueryUser
+     * @throws Exception- throw any unhandled exceptions
+     */
 	private static void createTestUser(String username, String email, String password, String rolename) throws Exception
 	{
 
-		performUserLogin(DomainTestSuite.adminEmail, DomainTestSuite.adminPassword);
+		login(DomainTestSuite.adminEmail, DomainTestSuite.adminPassword);
         //Map<String, String> user = new HashMap<>();
 		JsonObject user = new JsonObject();
         user.addProperty("email", email);
@@ -119,7 +107,7 @@ public class RoleRestTest extends DaqueryBaseTest {
         user.addProperty("realName", username);
         user.addProperty("utype", "FULL");
 
-		Client client = null;
+        Client client = null;
 		Entity<String> ent = Entity.entity(user.toString(), MediaType.APPLICATION_JSON);
 		
 		Builder respBuilder = null;
@@ -127,8 +115,8 @@ public class RoleRestTest extends DaqueryBaseTest {
 		String serviceName = "users";
 		try
 		{
-			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(RestAssured.baseURI, RestAssured.port));
-			newURL = RestAssured.baseURI + ":" + RestAssured.port;
+			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(defaultServerName, defaultPort));
+			newURL = "http://" + defaultServerName + ":" + defaultPort;
 			client = WSConnectionUtil.getRemoteClient(newURL);
 		} catch (Exception e) {
 			//any exception fails the test
@@ -136,126 +124,208 @@ public class RoleRestTest extends DaqueryBaseTest {
 		}
 		respBuilder = client.target(StringHelper.ensureTrailingSlashURL(newURL) + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON_TYPE);
 		
-		javax.ws.rs.core.Response resp  = respBuilder.post(ent);
+		javax.ws.rs.core.Response resp  = respBuilder.header("Authorization", "Bearer " + currentToken).post(ent);
 		
-		assertTrue("Error expected status of 201, got: " + resp.getStatus(), resp.getStatus() == 201);
+		assertTrue("Error expected status of 201, got: " 
+		    + resp.getStatus() + " Request details: " + respBuilder.toString() + " Reply details: " + resp.toString(), resp.getStatus() == 201);
 		System.out.println("Successfully created user account: " + email);
 
-/*
-		Client client = null;
-		Entity<String> ent = Entity.entity(email.toJson(), MediaType.APPLICATION_JSON);
+		Gson gson = new Gson();
+		DaqueryUser newUser = gson.fromJson(resp.readEntity(String.class), DaqueryUser.class);
+
+		user.addProperty("id", newUser.getId());
 		
-		Builder respBuilder = null;
-		String centServerURL = null;
+		if (rolename != null) {
+			List<Role> lstRoles = getAllRoles();
+			Role currRole = null;
+			for (Role r : lstRoles)
+			{
+				if (r.getName().equalsIgnoreCase(rolename)) {
+					currRole = r;
+					break;
+				}
+			}
+			JsonObject objRole = new JsonObject();
+			objRole.addProperty(currRole.getName(), new Boolean(true));
+
+			user.add("roles",objRole);
+
+			client = null;
+			System.out.println("JSON for new user account: " + user.toString());
+			ent = Entity.entity(user.toString(), MediaType.APPLICATION_JSON);
+			
+			respBuilder = null;
+			newURL = null;
+			serviceName = "users/update-role/" + newUser.getId();
+			try
+			{
+				assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(defaultServerName, defaultPort));
+				newURL = "http://" + defaultServerName + ":" + defaultPort;
+				client = WSConnectionUtil.getRemoteClient(newURL);
+				respBuilder = client.target(StringHelper.ensureTrailingSlashURL(newURL) + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON_TYPE);
+				
+				resp  = respBuilder.header("Authorization", "Bearer " + currentToken).put(ent);
+				
+				assertTrue("Error expected status of 200, got: " + resp.getStatus(), resp.getStatus() == 200);
+				System.out.println("Successfully added role: " + rolename + " to user account: " + email);
+			} catch (Exception e) {
+				//any exception fails the test
+				Assert.fail("Error attempting to connect to server: " + newURL + " Error: " + e.getMessage());
+			}
+		}
+	}
+	
+
+	/**
+	 * Perform a login using the username and password parameters.
+	 * @param username
+	 * @param password
+	 * @return- a String representing the JWT token on success
+	 * @throws Exception
+	 */
+	private static String login(String username, String password) throws Exception
+	{
+		Client client = null;
+		Response resp = null;
+		Map<String, String> args = new HashMap<String, String>();
+		args.put("email", username);
+		args.put("password", password);
+		String getURL = WSConnectionUtil.buildGetUrl("http://"+defaultServerName + ":" + defaultPort, "users/login", args);
 		try
 		{
-			centServerURL = AppProperties.getCentralServerURL();
-			URL url = new URL(centServerURL);
-			        RestAssured.basePath = basePath;
-        RestAssured.baseURI = baseHost;
- RestAssured.port
-			if(!checkConnection(url.getHost(), url.getPort()))
-					return(ResponseHelper.getErrorResponse(500, "Central server is not reachable at site " + centServerURL, "Cannot connect to " + url.getHost(), null));
-			
-			client = getRemoteClient(centServerURL);
+			URL url = new URL(getURL);
+			if(!WSConnectionUtil.checkConnection(url.getHost(), url.getPort()))
+			{
+				System.err.println("Server is not reachable for site localhost:8080.");
+				System.exit(1);
+			}
+
+			client = WSConnectionUtil.getRemoteClient(getURL);
 		}
 		catch(KeyManagementException kme)
 		{
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server at " + centServerURL, "An error happened while configuring the secure key management for the site POST connection.", kme));
+			System.err.println("Unable to contact remote site localhost:8080.  An error happened while configuring the secure key management for the site GET connection.");
+			System.exit(1);
 		}
 		catch(MalformedURLException mue)
 		{
-			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server, bad site address.  Site:" + centServerURL, "This was due to a malformed url: " + centServerURL, mue));
+			System.err.println("Unable to contact remote site, bad site address for site localhost:8080.  This was due to a malformed url: " + getURL);
 		}
+
 		
-		respBuilder = client.target(StringHelper.ensureTrailingSlash(centServerURL) + "daquery-central/" + serviceName).request(MediaType.APPLICATION_JSON_TYPE);
-		
-		Response resp  = respBuilder.post(ent);
-		
-		return(resp);
-*/
-		
-		/*
-        Response res = given().contentType("application/json")
-			//.body(user.toJson())
-        	.body(user.toString())
-			.headers("Authorization", "Bearer " + currentToken)
-			.headers("Accept-Encoding", "gzip, deflate")
-			.headers("Accept", "application/json, text/plain")
-			.log().all()
-			.when().post("users/tempcreate").then()
-			.log().all()
-			.statusCode(201)
-			.extract().response();
-		System.out.println("here is the request: " + res.prettyPrint());
-*/		
-/*        System.out.println("in checkLogin: " + currentToken);
-		DaqueryUser user = new DaqueryUser(true);
-		user.setEmail(email);
-		user.setRealName("Test User");
-		user.setStatusEnum(UserStatus.ACTIVE);
-		user.setUsername(username);
-		user.setPassword(password);
-		List<Role> roles = new ArrayList<Role>();
-		if (rolename != null) {
-			Role role1 = RoleDAO.queryRoleByName(rolename);
-			roles.add(role1);
-			user.setRoles(roles);
+
+		Builder builder = client.target(getURL)
+				.request(MediaType.APPLICATION_JSON); //.get();
+		javax.ws.rs.core.Response answer = builder.get();
+		if(answer.getStatus() != 200)
+		{
+			System.err.println("Could not authenticate. Status:" + answer.getStatus());
+			System.exit(1);
 		}
-		List<DaqueryUser> users = new ArrayList<DaqueryUser>();
-		users.add(user);
-		save(user);*/
-	}
+		String json = answer.readEntity(String.class);
+		JsonWebToken jwt = JSONHelper.gson.fromJson(json, JsonWebToken.class);
+		currentToken = jwt.getToken();
+		return(jwt.getToken());
+	}	
 	
-	private static void save(Object obj)
-	{
-		Session session = null;
-		Transaction t = null;
-		int exitCode = 0;
+
+	/**
+	 * Return a list of all the Roles currently recognized by the Daquery system.  
+	 * @return success: A list of all the Role objects found in Daquery
+	 *    error: Assert.fail
+	 * 
+	 */
+	public static List<Role> getAllRoles() {
+        Client client = null;
+		
+		Builder respBuilder = null;
+		String newURL = null;
+		String serviceName = "roleaccesstest/allroles";
 		try
 		{
-			session = HibernateConfiguration.openSession();
-			t = session.beginTransaction();
-			session.saveOrUpdate(obj);
-			t.commit();
+			login(DomainTestSuite.adminEmail, DomainTestSuite.adminPassword);
+			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(defaultServerName, defaultPort));
+			newURL = "http://" + defaultServerName + ":" + defaultPort;
+			client = WSConnectionUtil.getRemoteClient(newURL);
+		} catch (Exception e) {
+			//any exception fails the test
+			Assert.fail("Error attempting to connect to server: " + newURL + " Error: " + e.getMessage());
 		}
-		catch(Throwable tr)
-		{
-			if(t != null) t.rollback();
-			System.out.println(tr.getMessage());
-			tr.printStackTrace();
-		}
-		finally
-		{
-			if(session != null) session.close();
-		}
-	}
-
-	public static void performUserLogin(String userEmail, String password) {
-		System.out.println("in performUserLogin");
-		System.out.println("in performUserLogin: " + currentToken);
-        currentToken = given().pathParam("email", userEmail)
-               .pathParam("password", password)
-        .when().get("users/login?email={email}&password={password}")
-        .then().statusCode(200)
-        .extract().path("token");
-		System.out.println("in performUserLogin: " + currentToken);
+		respBuilder = client.target(StringHelper.ensureTrailingSlashURL(newURL) + "daquery/ws/" + serviceName).request(MediaType.APPLICATION_JSON_TYPE);
+		
+		javax.ws.rs.core.Response resp  = respBuilder.header("Authorization", "Bearer " + currentToken).get();
+		
+		String jsonData = resp.readEntity(String.class);
+		Gson gson = new Gson();
+		Role[] arrayRoles = gson.fromJson(jsonData, Role[].class);
+		List<Role> lstRoles = new ArrayList<Role>(Arrays.asList(arrayRoles));
+		return lstRoles;
+		
 	}
 
 	@Test
 	public void adminTest() {
- /*   	createTestUser(adminUsername, adminUseremail, userpassword, "admin");
-    	createTestUser(stewardUsername, stewardUseremail, userpassword, "steward");
-    	createTestUser(viewerUsername, viewerUseremail, userpassword, "viewer");
-    	createTestUser(aqUsername, aqUseremail, userpassword, "aggregate_querier");
-    	createTestUser(dqUsername, dqUseremail, userpassword, "data_querier");
-    	createTestUser(nrUsername, nrUseremail, userpassword, null);*/
-		System.out.println("in AdminTest");
-		performUserLogin(adminUseremail, userpassword);
+		try {
+			login(adminUseremail, userpassword);
+		} catch (Exception e) {
+			//any exception fails the test
+			Assert.fail("Error attempting to login into server using admin account: " + adminUseremail + " Error: " + e.getMessage());
+		}
 		given().with().contentType("application/json")
 		.headers("Authorization", "Bearer " + currentToken)
 		.when().get("roleaccesstest/admin").then().statusCode(200);
 	}
 
+	@Test
+	public void aggregateTest() {
+		try {
+			login(aqUseremail, userpassword);
+		} catch (Exception e) {
+			//any exception fails the test
+			Assert.fail("Error attempting to login into server using admin account: " + adminUseremail + " Error: " + e.getMessage());
+		}
+		given().with().contentType("application/json")
+		.headers("Authorization", "Bearer " + currentToken)
+		.when().get("roleaccesstest/aggregate").then().statusCode(200);
+	}
+
+	@Test
+	public void dataDownloadTest() {
+		try {
+			login(dqUseremail, userpassword);
+		} catch (Exception e) {
+			//any exception fails the test
+			Assert.fail("Error attempting to login into server using admin account: " + adminUseremail + " Error: " + e.getMessage());
+		}
+		given().with().contentType("application/json")
+		.headers("Authorization", "Bearer " + currentToken)
+		.when().get("roleaccesstest/datadownload").then().statusCode(200);
+	}
+
+	@Test
+	public void stewardTest() {
+		try {
+			login(stewardUseremail, userpassword);
+		} catch (Exception e) {
+			//any exception fails the test
+			Assert.fail("Error attempting to login into server using admin account: " + adminUseremail + " Error: " + e.getMessage());
+		}
+		given().with().contentType("application/json")
+		.headers("Authorization", "Bearer " + currentToken)
+		.when().get("roleaccesstest/steward").then().statusCode(200);
+	}
+
+	@Test
+	public void viewerTest() {
+		try {
+			login(viewerUseremail, userpassword);
+		} catch (Exception e) {
+			//any exception fails the test
+			Assert.fail("Error attempting to login into server using admin account: " + adminUseremail + " Error: " + e.getMessage());
+		}
+		given().with().contentType("application/json")
+		.headers("Authorization", "Bearer " + currentToken)
+		.when().get("roleaccesstest/viewer").then().statusCode(200);
+	}
 
 }
