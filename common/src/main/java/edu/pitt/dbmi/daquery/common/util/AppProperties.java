@@ -326,6 +326,15 @@ public class AppProperties
 			return(val);
 	}
 	
+	public static String getTrackingDir() throws DaqueryException
+	{
+		String val = getDBProperty("tracking.output.dir");
+		if(val == null)
+			return(StringHelper.ensureTrailingSlashFile(System.getProperty("java.io.tmpdir")) + "daquery_tracking_logs");
+		else
+			return(val);
+	}	
+	
 	public static String getLocalDeliveryDir() throws DaqueryException
 	{
 		String val = getDBProperty("local.delivery.dir");

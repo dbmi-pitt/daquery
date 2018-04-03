@@ -1,0 +1,9 @@
+alter table NETWORK add column MAX_DATE_SHIFT integer;
+alter table NETWORK add column MIN_DATE_SHIFT integer;
+alter table NETWORK add column SHIFT_DATES boolean;
+alter table NETWORK add column SERIALIZE_PATIENT_ID boolean;
+alter table NETWORK add column OBFUSCATE_AGGREGATE_RESULTS boolean;
+alter table NETWORK add column AGGREGATE_OBFUSCATE_TYPE varchar(20);
+alter table NETWORK add column AGGREGATE_OBFUSCATE_PERCENT float(23);
+alter table NETWORK add column AGGREGATE_OBFUSCATE_RANGE integer;
+alter table NETWORK add column AGGREGATE_OBFUSCATE_THRESHOLD integer;

@@ -3,6 +3,7 @@ package edu.pitt.dbmi.daquery.common.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -12,6 +13,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,6 +33,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
@@ -50,9 +53,9 @@ import edu.pitt.dbmi.daquery.download.properties.ValueCode;
 public class DataExporter {
 	
 	public static void main(String[] args) throws Throwable {
-        AppProperties.setDevHomeDir("C:\\Users\\del20");
+        AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
         Session s = HibernateConfiguration.openSession();
-        DaqueryRequest r = (DaqueryRequest) s.get(DaqueryRequest.class, Long.parseLong("2201"));
+        DaqueryRequest r = (DaqueryRequest) s.get(DaqueryRequest.class, new Long(1601l));
         DataModel dm = (DataModel) s.get(DataModel.class, Long.parseLong("1"));
         //DataExport de = new DataExport(dm.getDataExportConf());
         List<String> pList = new ArrayList<String>();
@@ -60,8 +63,11 @@ public class DataExporter {
         pList.add("PIT637837");
         pList.add("PIT982221");        
         DataExporter dataExporter = new DataExporter(r.getResponses().iterator().next(), dm.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
-        while(dataExporter.hasNextExport())
-        	dataExporter.exportNext();
+        FileWriter fw = new FileWriter("shirey-tracking.out", true);
+        dataExporter.dumpData(new File("."), r, 1, 1, 10, fw);
+        fw.close();
+        //while(dataExporter.hasNextExport())
+        //	dataExporter.exportNext();
 	}
 	
 	private static final int BASICINFO_COLUMN_COUNT = 9;
@@ -77,7 +83,7 @@ public class DataExporter {
 	String dataDir;
 	boolean deliverData;
 	List<String> idList;
-	private final int pientBlockSize = 500;
+	private final int patientBlockSize = 500;
 	boolean debugDataExport;
 	boolean threeDigitZip;
 	boolean dateShift;
@@ -86,7 +92,8 @@ public class DataExporter {
 	int nFiles;
 	int currentFile = 0;
 		
-	public DataExporter(DaqueryResponse daqueryResponse, DataExportConfig dataExportConfig, String dataDir, List<String> idList) throws DaqueryException {
+	public DataExporter(DaqueryResponse daqueryResponse, DataExportConfig dataExportConfig, String dataDir, List<String> idList) // throws DaqueryException
+	{
 		this.daqueryResponse = daqueryResponse;
 		this.daqueryRequest = daqueryResponse.getRequest();
 		this.dataExportConfig = dataExportConfig;
@@ -162,16 +169,49 @@ public class DataExporter {
 	//either remotely or locally 
 	public String exportNext() throws Throwable
 	{
+		FileWriter trackingFileWriter = null;
 		try
 		{
 			if(! hasNextExport()) return null;
 				currentFile++;
 	
+			String trackingFileDir = StringHelper.ensureTrailingSlashFile(AppProperties.getTrackingDir());
+			File trackingDir = new File(trackingFileDir);
+			if(! trackingDir.exists())
+			{
+				try{trackingDir.mkdirs();}
+				catch(Throwable ioe)
+				{
+					String msg = "Unable to create tracking file directory at " + trackingFileDir;
+					logger.log(Level.SEVERE, msg, ioe);
+					throw new DaqueryErrorException(msg, ioe);
+				}
+			}
+			if(! trackingDir.isDirectory())
+			{
+				String msg = "The configured directory for tracking files is not a directory. " + trackingFileDir;
+				logger.log(Level.SEVERE, msg);
+				throw new DaqueryErrorException(msg);
+			}
+			if(! trackingDir.canWrite())
+			{
+				String msg = "The configured tracking file directory is not writable.  " + trackingFileDir;
+				logger.log(Level.SEVERE, msg);
+				throw new DaqueryErrorException(msg);
+			}
+			String trackingFilePath = trackingFileDir + daqueryRequest.getFilePrefix() + "_" + currentFile + ".log";
+			trackingFileWriter = new FileWriter(trackingFilePath, true);
+			if(currentFile == 1)
+			{
+				trackingFileWriter.write("Export started: " + dateFormat.format(new Date()) + "\nl");
+				trackingFileWriter.write("exported patient id, db patient id, date shift\n");
+			}
 			File tmpDir = FileHelper.createTempDirectory();
-			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile);
+			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile, trackingFileWriter);
 	
 			//send the file to remote requester
 			String outputFilename = daqueryRequest.getFilePrefix() + "_" + currentFile + ".zip";
+			
 			String filename = null;
 			if(deliverData) {
 				filename = WSConnectionUtil.sendFileToSite(zipFile, outputFilename, daqueryRequest.getRequestSite(), daqueryResponse.getRequest().getRequestGroup());
@@ -189,9 +229,13 @@ public class DataExporter {
 			logger.log(Level.SEVERE, "Error occurs on data export", t);
 			throw t;
 		}
+		finally
+		{
+			if(trackingFileWriter != null) trackingFileWriter.close();
+		}
 	}
 	
-	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile) throws Throwable
+	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile, FileWriter trackingFile) throws Throwable
 	{
 		String filenamePrefix = daqueryRequest.getFilePrefix();
 		Hashtable<OutputFile, OutputStreamWriter> outputStreams = new Hashtable<>();
@@ -204,7 +248,7 @@ public class DataExporter {
 				outputStreams.put(outputfile, new OutputStreamWriter(ontologyOutputStream));
 				
 			}else{
-				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile);
+				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile, trackingFile);
 			}
 		}
 		
@@ -283,8 +327,8 @@ public class DataExporter {
 		
 		// send finish locally msg to requester site.
 	}
-
-	private void writeCustomCSVFile(OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile) throws Throwable {
+	
+	private void writeCustomCSVFile(OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile, FileWriter trackingFile) throws Throwable {
 		Connection conn = null;
 		Statement s = null;
 		ResultSet rs = null;
@@ -295,7 +339,7 @@ public class DataExporter {
 			buildCSVHeader(writer, outputFile.custom_column_set);
 			
 			ArrayList<String> patients = getPatientIDofCurrPage(currentFileNum, patientsPerFile); 
-			int patientsPerLoad = this.pientBlockSize;
+			int patientsPerLoad = this.patientBlockSize;
 //			if(outputFile.source.equals("patient_dimension")){
 //				patientsPerLoad = this.propFile.getPatientDimensionPatientBlockSize() == null ? this.patientDimensionPatientBlockSize : this.propFile.getPatientDimensionPatientBlockSize();
 //			} else if(outputFile.source.equals("visit_dimension")){
@@ -319,7 +363,7 @@ public class DataExporter {
 								+ " order by " + outputFile.idColumn;
 				rs = s.executeQuery(query);
 				
-				String[] outLine = new String[2 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
+				String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
 				Arrays.fill(outLine, "");
 				while (rs.next()) {
 					// create a new row
@@ -327,32 +371,39 @@ public class DataExporter {
 					Arrays.fill(outLine, "");
 					
 					String patientNum = rs.getString(1);
-					outLine[0] = patientNum.toString();
-					outLine[1] = csvSafeString(patientNum);
-					int outLineEnd = debugDataExport ? outLine.length - 3 : outLine.length - 1;
+					//outLine[0] = csvSafeString(patientNum);
+					if(daqueryRequest.getNetwork().getSerializePatientId())
+						outLine[0] = this.getSerializedId(patientNum);
+					else
+						outLine[0] = patientNum;
+					
+					if(trackingFile != null)
+						trackingFile.write(outLine[0] + "," + patientNum + "," + this.getShiftDays(patientNum) + "\n");
+					
+					int outLineEnd = debugDataExport ? outLine.length - 2 : outLine.length;
 					for(int j = 2; j <= outLineEnd; j++){
 						if(outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("zip"))
-							outLine[j] = threeDigitZip(rs.getString(j), threeDigitZip);
+							outLine[j-1] = threeDigitZip(rs.getString(j), threeDigitZip);
 						else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("birthday"))
-							outLine[j] = csvSafeString(handleBirthday(patientNum, rs.getDate(j)));
+							outLine[j-1] = csvSafeString(handleBirthday(patientNum, rs.getDate(j)));
 						else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("source")){
 							String SourceSystem = rs.getString(j);
-							outLine[j] = csvSafeString(SourceSystem);
+							outLine[j-1] = csvSafeString(SourceSystem);
 						}
 						else{
 							Object obj = rs.getObject(j);
 							if(obj instanceof Date)
-								outLine[j] = csvSafeString(dateShift(patientNum, (Date)obj));
+								outLine[j-1] = csvSafeString(dateShift(patientNum, (Date)obj));
 							else
-								outLine[j] = obj == null ? "" : csvSafeString(obj.toString());
+								outLine[j-1] = obj == null ? "" : csvSafeString(obj.toString());
 						}
 					}
 					
 					// For testing purpose
 					if (debugDataExport) {
-						outLine[outLine.length - 2] = outLine[0];
+						outLine[outLine.length - 2] = patientNum;
 						if (dateShift) {
-							outLine[outLine.length - 1] = Integer.toString(getShiftDays(outLine[0]));
+							outLine[outLine.length - 1] = Integer.toString(getShiftDays(patientNum));
 						} else {
 							outLine[outLine.length - 1] = "0";
 						}
@@ -361,7 +412,7 @@ public class DataExporter {
 					// write the previous entry to file
 					StringBuilder outLine_sb = new StringBuilder();
 					String delim = "";
-					for(int j = 1; j < outLine.length; j++){
+					for(int j = 0; j < outLine.length; j++){
 						outLine_sb.append(delim).append(outLine[j]);
 						delim = ",";
 					}
@@ -607,37 +658,40 @@ public class DataExporter {
 		return (dateShiftToString(getShiftDays(ptId), date));
 	}
 	
-	private String dateShiftToString(int daysToShift, Date date) throws DaqueryException {
+	private String dateShiftToString(int daysToShift, Date date) throws DaqueryException
+	{
 		if (date == null)
 			return ("");
-		Date dt = dateShift(daysToShift, date);
-		if (dt == null)
-			return ("");
-
-		return (dateFormat.format(dt));
+		if(AppProperties.getDateShift())
+		{
+			Date dt = dateShift(daysToShift, date);
+			if (dt == null)
+				return ("");
+			
+			return (dateFormat.format(dt));
+		}
+		else
+			return(dateFormat.format(date));
 	}
 	
 	private Hashtable<String, Integer> shiftDaysByPatientId = new Hashtable<String, Integer>();
-	private Random rand = new Random();
 	
 	private int getShiftDays(String patientId) throws DaqueryException {
 		if (!shiftDaysByPatientId.containsKey(patientId)) {
-			Integer shiftDays;
-			String scheme = AppProperties.getDBProperty("date.shift.scheme").trim().toUpperCase();
-			int maxDays = getMaxShiftDays();
-			shiftDays = new Integer(0);
-			while (shiftDays.intValue() == 0) // don't allow a shift of zero
+			Network net = daqueryRequest.getNetwork();
+			if(! net.getShiftDates())
 			{
-				int dayShift = rand.nextInt(maxDays);
-				if (scheme.equals("PAST"))
-					shiftDays = new Integer(dayShift * -1);
-				else if (scheme.equals("FUTURE"))
-					shiftDays = new Integer(dayShift);
-				else
-					// default to +-
-					shiftDays = new Integer(dayShift - (maxDays / 2));
+				shiftDaysByPatientId.put(patientId, new Integer(0));
 			}
-			shiftDaysByPatientId.put(patientId, shiftDays);
+			else
+			{
+				int shiftDays = 0;
+				while (shiftDays == 0) // don't allow a shift of zero
+				{
+					shiftDays = RngHelper.nextIntInRange(net.getMinDateShift(), net.getMaxDateShift()); 
+				}
+				shiftDaysByPatientId.put(patientId, new Integer(shiftDays));
+			}
 		}
 		return (shiftDaysByPatientId.get(patientId).intValue());
 	}
@@ -646,7 +700,7 @@ public class DataExporter {
 	
 	private int getMaxShiftDays() throws NumberFormatException, DaqueryException {
 		if (maxShiftDays == null)
-			maxShiftDays = new Integer(AppProperties.getDBProperty("date.shift.max.day"));
+			maxShiftDays = 300; //new Integer(AppProperties.getDBProperty("date.shift.max.day"));
 
 		return (maxShiftDays.intValue());
 
@@ -654,9 +708,9 @@ public class DataExporter {
 	
 	private int ptIdCounter = 1;
 	private int patientIdOffset;
-	private Hashtable<BigDecimal, Integer> serialIdByI2b2Id = new Hashtable<BigDecimal, Integer>();
+	private Hashtable<String, Integer> serialIdByI2b2Id = new Hashtable<String, Integer>();
 	
-	private String getSerializedId(BigDecimal patientId) {
+	private String getSerializedId(String patientId) {
 		if (!serialIdByI2b2Id.containsKey(patientId)) {
 			Integer newId = new Integer(ptIdCounter++);
 			serialIdByI2b2Id.put(patientId, this.patientIdOffset + newId);
