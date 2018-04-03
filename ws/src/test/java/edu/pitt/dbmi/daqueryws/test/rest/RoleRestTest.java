@@ -1,57 +1,37 @@
 package edu.pitt.dbmi.daqueryws.test.rest;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertTrue;
 
-import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
-import edu.pitt.dbmi.daqueryws.test.rest.DaqueryBaseTest;
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
-import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
-import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
-import edu.pitt.dbmi.daquery.common.domain.Role;
-import edu.pitt.dbmi.daquery.common.domain.UserStatus;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
-import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
-import edu.pitt.dbmi.daquery.common.util.JSONHelper;
-import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daquery.dao.RoleDAO;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.junit.AfterClass;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
-import static org.junit.Assert.assertTrue;
-
-import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
+import edu.pitt.dbmi.daquery.common.domain.Role;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
+import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
+import io.restassured.response.Response;
 
 public class RoleRestTest extends DaqueryBaseTest {
 
@@ -81,29 +61,11 @@ public class RoleRestTest extends DaqueryBaseTest {
 
     public static String databaseHomeDir = "/opt/apache-tomcat-6.0.53";
     
-    private static List<Role> lstRoles = new ArrayList<Role>();
 
     @BeforeClass
     public static void setupUsers() {
-    	//AppProperties.setDevHomeDir(DomainTestSuite.databaseHomeDir);
-    	System.out.println("In setupUsers...");
-    	String siteName = "dq-test-site";
-    	int port = 8008;
-    	String urlBase = "http://localhost";
-    	String localSiteURL = urlBase + ":" + port;
-    	String adminEmail = "dqadmin@pitt.edu";
-    	String adminPassword = "temppassword";
-    	String adminRealName = "Test User";
     	try {
-			/*assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), siteName, localSiteURL, adminEmail, adminPassword, adminRealName));
-			if(AppSetup.isErroredSetup())
-				throw new DaqueryException(AppSetup.getErrorMessage());
-			else if(!AppSetup.isValidSetup())
-				throw new DaqueryException("Invalid DB setup, but no error was reported.");
-			*/
 	        createAllUsers();
-	        //RestAssured.baseURI = urlBase;
-	        //RestAssured.port = port;
 	   	} catch (Exception e) {
 	    		System.out.println(e.getMessage());
 	        	//if there is a problem, let JUnit know
@@ -111,6 +73,10 @@ public class RoleRestTest extends DaqueryBaseTest {
 	    }
     }
     
+    /**
+     * Create a set of users for testing
+     * @throws Exception- throw an Exception for unhandled errors
+     */
     private static void createAllUsers() throws Exception {
     	createTestUser(adminUsername, adminUseremail, userpassword, "admin");
     	createTestUser(stewardUsername, stewardUseremail, userpassword, "steward");
@@ -120,6 +86,16 @@ public class RoleRestTest extends DaqueryBaseTest {
     	createTestUser(nrUsername, nrUseremail, userpassword, null);
     }
 
+    /**
+     * Create a single DaqueryUser object for use in testing scenarios.  The user will be optionally assigned a single role.
+     * success: create a new DaqueryUser with at most one role
+     * failure: return Assert.fail
+     * @param username- the DaqueryUser realName
+     * @param email- the DaqueryUser email
+     * @param password- the DaqueryUser password
+     * @param rolename- optional a String representing the name of the role to assign to the DaqueryUser
+     * @throws Exception- throw any unhandled exceptions
+     */
 	private static void createTestUser(String username, String email, String password, String rolename) throws Exception
 	{
 
@@ -132,7 +108,6 @@ public class RoleRestTest extends DaqueryBaseTest {
         user.addProperty("utype", "FULL");
 
         Client client = null;
-		System.out.println("JSON for new user account: " + user.toString());
 		Entity<String> ent = Entity.entity(user.toString(), MediaType.APPLICATION_JSON);
 		
 		Builder respBuilder = null;
@@ -201,6 +176,13 @@ public class RoleRestTest extends DaqueryBaseTest {
 	}
 	
 
+	/**
+	 * Perform a login using the username and password parameters.
+	 * @param username
+	 * @param password
+	 * @return- a String representing the JWT token on success
+	 * @throws Exception
+	 */
 	private static String login(String username, String password) throws Exception
 	{
 		Client client = null;
@@ -242,55 +224,28 @@ public class RoleRestTest extends DaqueryBaseTest {
 		}
 		String json = answer.readEntity(String.class);
 		JsonWebToken jwt = JSONHelper.gson.fromJson(json, JsonWebToken.class);
-		System.out.println("in login  Authenticated user: " + DomainTestSuite.adminEmail + " returned token: " + currentToken);
 		currentToken = jwt.getToken();
 		return(jwt.getToken());
 	}	
 	
 
+	/**
+	 * Return a list of all the Roles currently recognized by the Daquery system.  
+	 * @return success: A list of all the Role objects found in Daquery
+	 *    error: Assert.fail
+	 * 
+	 */
 	public static List<Role> getAllRoles() {
-		//TODO: FIX THIS- this is a hardcoded list right now.
-		
-		List<Role> lstRoles = new ArrayList<Role>();
-		Role r1 = new Role();
-		r1.setId(1);
-		r1.setName("admin");
-		lstRoles.add(r1);
-
-		Role r2 = new Role();
-		r2.setId(2);
-		r2.setName("steward");
-		lstRoles.add(r2);
-
-		Role r3 = new Role();
-		r3.setId(3);
-		r3.setName("viewer");
-		lstRoles.add(r3);
-
-		Role r4 = new Role();
-		r4.setId(4);
-		r4.setName("aggregate_querier");
-		lstRoles.add(r4);
-
-		Role r5 = new Role();
-		r5.setId(5);
-		r5.setName("data_querier");
-		lstRoles.add(r5);
-
-		return lstRoles;
-		/*
         Client client = null;
 		
 		Builder respBuilder = null;
 		String newURL = null;
 		String serviceName = "roleaccesstest/allroles";
-		String baseURI = "localhost";
-		int port = 8080;
 		try
 		{
 			login(DomainTestSuite.adminEmail, DomainTestSuite.adminPassword);
-			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(baseURI, port));
-			newURL = "http://" + baseURI + ":" + port;
+			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(defaultServerName, defaultPort));
+			newURL = "http://" + defaultServerName + ":" + defaultPort;
 			client = WSConnectionUtil.getRemoteClient(newURL);
 		} catch (Exception e) {
 			//any exception fails the test
@@ -301,14 +256,11 @@ public class RoleRestTest extends DaqueryBaseTest {
 		javax.ws.rs.core.Response resp  = respBuilder.header("Authorization", "Bearer " + currentToken).get();
 		
 		String jsonData = resp.readEntity(String.class);
-		System.out.println("Here are the roles: " + jsonData);
 		Gson gson = new Gson();
-		Type listType = new TypeToken<ArrayList<Role>>(){}.getType();
-		List<Role> lstRoles = gson.fromJson(jsonData, listType);
-		System.out.println("Here is the roles array: " + lstRoles.toString());
-
+		Role[] arrayRoles = gson.fromJson(jsonData, Role[].class);
+		List<Role> lstRoles = new ArrayList<Role>(Arrays.asList(arrayRoles));
 		return lstRoles;
-		*/
+		
 	}
 
 	@Test
