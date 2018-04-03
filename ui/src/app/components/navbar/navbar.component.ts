@@ -4,6 +4,8 @@ import { AuthenticationService } from '../../services/authentication.service';
 import { Notification } from '../../models/notification.model';
 import { AuthGuard } from '../../_guards/auth.guard';
 import { Observable } from 'rxjs/Rx';
+import { Location } from '@angular/common';
+import { RoleGuard } from '../../_guards/role.guard';
 
 
 @Component({
@@ -14,12 +16,21 @@ import { Observable } from 'rxjs/Rx';
 export class NavbarComponent implements OnInit {
 
   notifications: Notification[] = [];
+  showAppConfig = false;
   constructor(private authenticationService: AuthenticationService,
               private notificationService: NotificationService,
-              private authGuard: AuthGuard) { }
+              private authGuard: AuthGuard,
+              private roleGuard: RoleGuard) { }
 
   ngOnInit() {
+    if(this.canActive(["admin"])) {
+      this.showAppConfig = true;
+    }
     this.getNotifications();
+  }
+
+  canActive(allowedRoles: string[]): boolean {
+    return this.roleGuard.allowed(allowedRoles);
   }
 
   getNotifications(){

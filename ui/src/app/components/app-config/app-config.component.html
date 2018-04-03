@@ -1,0 +1,96 @@
+<section class="content-header">
+  <h1>App Configuration <small></small></h1>
+</section>
+<section class="content">
+  <div *ngIf="success" class="alert alert-success alert-dismissible">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <h4><i class="icon fa fa-check"></i> Succeeded!</h4>
+    App Configuration is updated!
+  </div>
+  <div class="row">
+    <div class="col-md-6 col-md-offset-3">
+      <form name="form" (ngSubmit)="updateConfig()" #f [formGroup]="appConfigForm" novalidate>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': taskQueueMaxLength.invalid && (taskQueueMaxLength.dirty || taskQueueMaxLength.touched), 'has-success': taskQueueMaxLength.valid && (taskQueueMaxLength.dirty || taskQueueMaxLength.touched) }">
+          <label>Task Queue Maximum Length</label>
+          <input type="number" min="1" max="100" class="form-control" formControlName="taskQueueMaxLength" name="taskQueueMaxLength" />
+          <p class="help-block">This is the maximum number of tasks, such as queries, that will concurrently run in the background.  If more than this number of tasks are queued they will be held until others finish.</p>
+          <div class="help-block" *ngIf="taskQueueMaxLength.hasError('required') && (taskQueueMaxLength.dirty || taskQueueMaxLength.touched)">Please enter task queue max length</div>
+          <div class="help-block" *ngIf="taskQueueMaxLength.hasError('min') && (taskQueueMaxLength.dirty || taskQueueMaxLength.touched)">Task queue max length must be >= 1</div>
+        </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': exportTaskQueueMaxLength.invalid && (exportTaskQueueMaxLength.dirty || exportTaskQueueMaxLength.touched), 'has-success': exportTaskQueueMaxLength.valid && (exportTaskQueueMaxLength.dirty || exportTaskQueueMaxLength.touched) }">
+          <label>Data Export Queue Maximum Length</label>
+          <input type="number" min="1" max="100" class="form-control" formControlName="exportTaskQueueMaxLength" name="exportTaskQueueMaxLength" />
+          <p class="help-block">This is the maximum number of data exports that will run at the same time.  If more than this number of exports is queued they will be held until others finish.</p>
+          <div class="help-block" *ngIf="exportTaskQueueMaxLength.hasError('required') && (exportTaskQueueMaxLength.dirty || exportTaskQueueMaxLength.touched)">Please enter valid export queue max length</div>
+          <div class="help-block" *ngIf="exportTaskQueueMaxLength.hasError('min') && (exportTaskQueueMaxLength.dirty || exportTaskQueueMaxLength.touched)">Export queue max length must be >= 1</div>
+        </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': deliverData.invalid && (deliverData.dirty || deliverData.touched), 'has-success': deliverData.valid && (deliverData.dirty || deliverData.touched) }">
+          <label>Deliver Exports To Remote Sites</label>
+          <div class="radio">
+            <label class="radio-inline">
+              <input type="radio" name="deliverData" id="deliverData1" value="true" checked="" formControlName="deliverData">
+              Yes
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="deliverData" id="deliverData2" value="false" checked="" formControlName="deliverData">
+              No
+            </label>
+          </div>
+          <p class="help-block">If set to yes, approved data requests will be delivered to the requesting site.  If set to no, approved data requests will be exported and stored locally in the directory specified by "Local Delivery Directory"</p>
+          <div class="help-block" *ngIf="(!deliverData.hasError('required') && deliverData.hasError('validateEqual')) && (deliverData.dirty || deliverData.touched)">Deliver data</div>
+        </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': threeDigitZip.invalid && (threeDigitZip.dirty || threeDigitZip.touched), 'has-success': threeDigitZip.valid && (threeDigitZip.dirty || threeDigitZip.touched) }">
+          <label>Truncate Zip Codes To Three Digits</label>
+          <div class="radio">
+            <label class="radio-inline">
+              <input type="radio" name="threeDigitZip" id="threeDigitZip1" value="true" checked="" formControlName="threeDigitZip">
+              Yes
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="threeDigitZip" id="threeDigitZip2" value="false" checked="" formControlName="threeDigitZip">
+              No
+            </label>
+          </div>
+          <p class="help-block">If set to yes exported zip codes will be truncated to include only the first three digits when exported.  If set to no, zip codes will be exported as stored in the data source.</p>
+          <div class="help-block" *ngIf="(!threeDigitZip.hasError('required') && threeDigitZip.hasError('validateEqual')) && (threeDigitZip.dirty || threeDigitZip.touched)">Three Digit Zip</div>
+        </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': dateShift.invalid && (dateShift.dirty || dateShift.touched), 'has-success': dateShift.valid && (dateShift.dirty || dateShift.touched) }">
+          <label>Shift Dates Per Case</label>
+          <div class="radio">
+            <label class="radio-inline">
+              <input type="radio" name="dateShift" id="dateShift1" value="true" checked="" formControlName="dateShift">
+              Yes
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="dateShift" id="dateShift2" value="false" checked="" formControlName="dateShift">
+              No
+            </label>
+          </div>
+          <p class="help-block">If set to yes all dates will be randomly shifted on a per case basis when exported (all dates for a given case will be shifted by the same amount).  If set to no dates will be exported as stored in the data source.</p>
+          <div class="help-block" *ngIf="(!dateShift.hasError('required') && dateShift.hasError('validateEqual')) && (dateShift.dirty || dateShift.touched)">Data Shift</div>
+        </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': fileOutputDir.invalid && (fileOutputDir.dirty || fileOutputDir.touched), 'has-success': fileOutputDir.valid && (fileOutputDir.dirty || fileOutputDir.touched) }">
+          <label>Export File Delivery Directory</label>
+          <input type="text" class="form-control" formControlName="fileOutputDir" name="fileOutputDir" />
+          <p class="help-block">The directory where exported files will be stored when delivered from a site that has approved an export.  This directory defaults to the system temp directory.</p>
+          <div class="help-block" *ngIf="(!fileOutputDir.hasError('required') && fileOutputDir.hasError('validateEqual')) && (fileOutputDir.dirty || fileOutputDir.touched)">File Output Directory</div>
+        </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': localDeliveryDir.invalid && (localDeliveryDir.dirty || localDeliveryDir.touched), 'has-success': localDeliveryDir.valid && (localDeliveryDir.dirty || localDeliveryDir.touched) }">
+          <label>Local Delivery Directory</label>
+          <input type="text" class="form-control" formControlName="localDeliveryDir" name="localDeliveryDir" />
+          <p class="help-block">The directory where exported files are stored when the "Deliver Exports To Remote Sites" is set to no.  This directory defaults to the system temp direcotry.</p>
+          <div class="help-block" *ngIf="(!localDeliveryDir.hasError('required') && localDeliveryDir.hasError('validateEqual')) && (localDeliveryDir.dirty || localDeliveryDir.touched)">Local Delivery Directory</div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            <button [disabled]="appConfigForm.invalid || loading" class="btn btn-primary btn-block btn-flat">
+              <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+              <span *ngIf="!loading">Update</span>
+            </button>
+          </div>
+        </div>
+        <div *ngIf="error" class="alert alert-danger">{{error}}</div>
+      </form>
+    </div>
+  </div>
+</section>

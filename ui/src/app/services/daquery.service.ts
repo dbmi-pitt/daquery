@@ -30,4 +30,19 @@ export class DaqueryService {
                     });
   }
 
+  getAppConfig() {
+    return this.http.get('/daquery/ws/properties')
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  updateAppConfig(properties: any) {
+    return this.http.put('/daquery/ws/properties', properties)
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
 }

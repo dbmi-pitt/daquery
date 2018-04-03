@@ -34,8 +34,8 @@ export class DataSourceComponent implements OnInit {
     this.activatedRoute.params.subscribe(async (params: Params) => {
       this.network_id = params['id'];
       this.getNetwork(this.network_id);
-      this.getDatamodel(this.network_id);
       this.createForm();
+      this.getDatamodel(this.network_id);
     });
   }
 
@@ -65,6 +65,10 @@ export class DataSourceComponent implements OnInit {
     this.networkService.getDatamodel(network_id)
                        .subscribe(datamodel => {
                           this.datamodel = datamodel;
+                          this.datasourceForm.get('connectionUrl').setValue(this.datamodel.dataSources[0].connectionUrl);
+                          this.datasourceForm.get('username').setValue(this.datamodel.dataSources[0].username);
+                          this.datasourceForm.get('password').setValue(this.datamodel.dataSources[0].password);
+                          this.datasourceForm.get('driver').setValue(this.datamodel.dataSources[0].driverClass);
                        });
   }
 
