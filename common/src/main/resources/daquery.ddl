@@ -1,11 +1,20 @@
-<!-- daquery.data.version=1.33 -->
+<!-- daquery.data.version=1.35 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    NETWORK_ID varchar(50),
    NAME varchar(100) NOT NULL,
-   DATA_MODEL_ID bigint
+   DATA_MODEL_ID bigint,
+   MAX_DATE_SHIFT integer,
+   MIN_DATE_SHIFT integer,
+   SHIFT_DATES boolean,
+   SERIALIZE_PATIENT_ID boolean,
+   OBFUSCATE_AGGREGATE_RESULTS boolean,
+   AGGREGATE_OBFUSCATE_TYPE varchar(20),
+   AGGREGATE_OBFUSCATE_PERCENT float(23),
+   AGGREGATE_OBFUSCATE_RANGE integer,
+   AGGREGATE_OBFUSCATE_THRESHOLD integer
 );
 
 CREATE TABLE DATA_MODEL

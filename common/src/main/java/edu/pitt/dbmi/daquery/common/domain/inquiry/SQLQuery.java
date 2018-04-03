@@ -15,6 +15,7 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
+import edu.pitt.dbmi.daquery.common.util.RngHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
 
@@ -87,7 +88,10 @@ public class SQLQuery extends Inquiry
 					}
 					//String sql = "select count(patid) from demographic;";
 					String sql = ((SQLQuery) response.getRequest().getInquiry()).getCode();
-					response.setValue(ds.executeAggregate(sql).toString());
+					Long val = ds.executeAggregate(sql);
+					String strVal = null;
+					if(val != null) strVal = RngHelper.obfuscateAggregateResult(val, response.getRequest().getNetwork()).toString();
+					response.setValue(strVal);
 					String aggregateValueSql = analyze.convertToValuesSql();
 					if(! StringHelper.isEmpty(aggregateValueSql))
 					{

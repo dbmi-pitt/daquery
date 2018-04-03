@@ -55,6 +55,43 @@ public class Network extends DaqueryObject implements Serializable {
 	private Set<Site> outgoingQuerySites;
 
 	@Expose
+	@Column(name="MAX_DATE_SHIFT")
+	private Integer maxDateShift;
+	
+	@Expose
+	@Column(name="MIN_DATE_SHIFT")
+	private Integer minDateShift;
+	
+	@Expose
+	@Column(name="SHIFT_DATES")
+	private Boolean shiftDates;
+	
+	@Expose
+	@Column(name="SERIALIZE_PATIENT_ID")
+	private Boolean serializePatientId;
+	
+	@Expose
+	@Column(name="OBFUSCATE_AGGREGATE_RESULTS")
+	private Boolean obfuscateAggregateResults;
+	
+	@Expose
+	@Column(name="AGGREGATE_OBFUSCATE_TYPE")
+	private String aggregateObfuscateType; //RANGE or PERCENTAGE are the allowed values
+	
+	@Expose
+	@Column(name="AGGREGATE_OBFUSCATE_PERCENT")
+	private Float aggregateObfuscatePercent;
+	
+	@Expose
+	@Column(name="AGGREGATE_OBFUSCATE_RANGE")
+	private Integer aggregateObfuscateRange;
+
+	@Expose
+	@Column(name="AGGREGATE_OBFUSCATE_THRESHOLD")
+	private Integer aggregateObfuscateThreshold;
+
+	
+	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "INCOMING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
 	private Set<Site> incomingQuerySites;
@@ -114,6 +151,32 @@ public class Network extends DaqueryObject implements Serializable {
 		incomingQuerySites = sites;
 	}
 	
+	public Integer getMaxDateShift(){if(maxDateShift == null) return(new Integer(0)); else return maxDateShift;}
+	public void setMaxDateShift(Integer val){maxDateShift = val;}
+	
+	public Integer getMinDateShift(){if(minDateShift == null) return(new Integer(-365)); else return minDateShift;}
+	public void setMinDateShift(Integer val){minDateShift = val;}
+	
+	public Boolean getShiftDates(){if(shiftDates == null) return(new Boolean(true)); else return shiftDates;}
+	public void setShiftDates(Boolean val){shiftDates = val;}
+	
+	public Boolean getSerializePatientId(){if(serializePatientId == null) return(new Boolean(true)); else return serializePatientId;}
+	public void setSerializePatientId(Boolean val){serializePatientId = val;}
+	
+	public Boolean getObfuscateAggregateResults(){if(obfuscateAggregateResults == null) return(new Boolean(true)); else return obfuscateAggregateResults;}
+	public void setObfuscateAggregateResults(Boolean val){obfuscateAggregateResults = val;}
+	
+	public String getAggregateObfuscateType(){if(aggregateObfuscateType == null) return("RANGE"); else return aggregateObfuscateType;}
+	public void setAggregateObfuscateType(String val){aggregateObfuscateType = val;}
+	
+	public Float getAggregtaeObfucatePercent(){if(aggregateObfuscatePercent == null) return(new Float(0.10f)); else return aggregateObfuscatePercent;}
+	public void setAggregtaeObfucatePercent(Float val){aggregateObfuscatePercent = val;}
+	
+	public Integer getAggregateObfuscateRange(){if(aggregateObfuscateRange == null) return(new Integer(10)); else return aggregateObfuscateRange;}
+	public void setAggregateObfuscateRange(Integer val){aggregateObfuscateRange = val;}
+	
+	public Integer getAggregateObfuscateThreshold(){if(aggregateObfuscateThreshold == null) return(new Integer(10)); else return aggregateObfuscateThreshold;}
+	public void setAggregateObfuscateThreshold(Integer val){aggregateObfuscateThreshold = val;}
 	//#TODO: add a method addIncomingSite(Site) 
 	
 	public DataModel getDataModel(){return(dataModel);}
