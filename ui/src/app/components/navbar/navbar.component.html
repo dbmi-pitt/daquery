@@ -48,6 +48,11 @@
                 <i class="fa fa-key text-yellow"></i> Change Password
               </a>
             </li>
+            <li *ngIf="showAppConfig">
+              <a [routerLink]="['/app-config']">
+                <i class="fa fa-cog text-blue"></i> App Configuration
+              </a>
+            </li>
           </ul>
         </li>
         <li>

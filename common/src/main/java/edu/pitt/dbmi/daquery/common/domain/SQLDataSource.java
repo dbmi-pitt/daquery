@@ -15,6 +15,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.google.gson.annotations.Expose;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
@@ -41,16 +42,19 @@ public class SQLDataSource extends DataSource
 		this.username = username;		
 	}
 
-	
+	@Expose
 	@Column(name = "CONNECTION_URL")
 	private String connectionUrl;
 	
+	@Expose
 	@Column(name = "USERNAME")
 	private String username;
 	
+	@Expose
 	@Column(name = "PWD")
 	private String password; 
 	
+	@Expose
 	@Column(name = "DRIVER_CLASS")
 	private String driverClass;
 	

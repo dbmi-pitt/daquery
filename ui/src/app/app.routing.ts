@@ -19,6 +19,7 @@ import { Error404Component } from "./components/error-404/error-404.component";
 import { Error401Component } from "./components/error-401/error-401.component";
 import { Error403Component } from "./components/error-403/error-403.component";
 import { ChangePasswordComponent } from "./components/change-password/change-password.component";
+import { AppConfigComponent } from "./components/app-config/app-config.component";
 import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
 import { EditUserComponent } from "./components/users/edit-user/edit-user.component";
@@ -39,6 +40,7 @@ const appRoutes:Routes = [
       { path: "sites/:id", component: SiteComponent, canActivate: [AuthGuard] },
       { path: "users", component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "change-password", component: ChangePasswordComponent, canActivate: [AuthGuard] },
+      { path: "app-config", component: AppConfigComponent, canActivate: [AuthGuard] },
       { path: "users/:id", component: EditUserComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin']} }
     ]
   },

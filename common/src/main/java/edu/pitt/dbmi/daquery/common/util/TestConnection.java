@@ -91,14 +91,14 @@ public class TestConnection
 //			System.err.println("Unable to connect to " + dbUrl);
 //			System.err.println("Username: " + username);
 //			t.printStackTrace(System.err);
-			logger.log(Level.WARNING, "Unable to connect to " + dbUrl, "Unable to connect to " + dbUrl + "\n" + "Username: " + username);
+			logger.log(Level.WARNING, "Unable to connect to URL " + dbUrl, "Unable to connect to URL " + dbUrl);
 			try{if(conn != null) conn.close();}
 			catch(Throwable tt){
 				//System.err.println("Error closing connection."); tt.printStackTrace(System.err);
-				logger.log(Level.WARNING, "Unable to connect to " + dbUrl + "\n" + "Username: " + username);
+				logger.log(Level.WARNING, "Unable to connect to URL " + dbUrl);
 			}
 			
-			return new DataBaseTestResult(false, "Database connection test fail", "Unable to connect to " + dbUrl + "\n" + "Username: " + username);
+			return new DataBaseTestResult(false, "Database connection test fail", "Unable to connect to URL " + dbUrl);
 		}
 		
 		//remove a trailing semi-colon from the query- jdbc doesn't like this..
@@ -125,7 +125,7 @@ public class TestConnection
 			return new DataBaseTestResult(false,  "Database connection test fail",  "Error while executing query " + testQuery);
 		}
 		
-		return new DataBaseTestResult(true,  "Database connection test success.",  "Success running query.");
+		return new DataBaseTestResult(true,  "Database connection test success",  "Success running query.");
 	}
 	
 	/**
