@@ -34,9 +34,12 @@ import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
+import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
+import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.dao.ResponseDAO;
@@ -343,6 +346,24 @@ public class RequestEndpoint extends AbstractEndpoint {
             ResponseDAO.denyDataRequest(request.getId());
             request = DaqueryRequestDAO.getRequestById(id);
             
+            EmailContents emailContents = new EmailContents();
+            emailContents.toAddresses.add(request.getRequester().getEmail());
+			emailContents.message += "Sorry, your request has been denied.";
+
+			try{EmailUtil.sendEmail(emailContents);}
+			catch(Throwable t)
+			{
+				if(t instanceof DaqueryErrorException)
+				{
+					DaqueryErrorException dee = (DaqueryErrorException) t;
+					if(dee.getErrorInfo() != null)
+					{
+						logger.log(Level.SEVERE, "\n\t" + dee.getErrorInfo().displayMessage + "\n\t" + dee.getErrorInfo().getLongMessage() + "\n\t" + dee.getErrorInfo().getStackTrace());
+					}
+				}
+				logger.log(Level.SEVERE, "Unable to send an email for request with id: " + request.getRequestId() + " because an error occurred.", t);
+			}
+			
             String jsonString = request.getResponses().iterator().next().toJson();
             return Response.ok(200).entity(jsonString).build();
     	} catch (HibernateException he) {
