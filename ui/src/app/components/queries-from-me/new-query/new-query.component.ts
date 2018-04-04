@@ -30,7 +30,7 @@ export class NewQueryComponent implements OnInit {
   error: any;
 
   @Output() requestSent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() requests: EventEmitter<any[]> = new EventEmitter<any[]>();;
+  @Output() requests: EventEmitter<any[]> = new EventEmitter<any[]>();
 
   constructor(private fb: FormBuilder,
               private networkService: NetworkService,

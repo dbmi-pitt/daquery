@@ -12,8 +12,8 @@ export class QueriesFromMeComponent implements OnInit {
   showNewQuery = false;
   editingInquiry: any;
 
-  @ViewChild(RequestsFromMeListComponent) private requestsFromMeList: RequestsFromMeListComponent;
-  @ViewChild(RecentQueryComponent) private recentQuery: RecentQueryComponent;
+  @ViewChild(RequestsFromMeListComponent) public requestsFromMeList: RequestsFromMeListComponent;
+  @ViewChild(RecentQueryComponent) public recentQuery: RecentQueryComponent;
 
   constructor(private daqueryService: DaqueryService) { }
 
