@@ -109,7 +109,21 @@ public class Network extends DaqueryObject implements Serializable {
 		this.networkId = uuid;
 	}
 
-	public long getId() {
+	private void setDefaults()
+	{
+		maxDateShift = 0;
+		minDateShift = -365;
+		shiftDates = true;
+		serializePatientId = true;
+		obfuscateAggregateResults = true;
+		aggregateObfuscateType = "RANGE"; //RANGE or PERCENTAGE are the allowed values
+		aggregateObfuscatePercent = 0.1f;
+		aggregateObfuscateRange = 10;
+		aggregateObfuscateThreshold = 10;		
+	}
+	
+	public long getId()
+	{
 		return id;
 	}
 
@@ -151,31 +165,31 @@ public class Network extends DaqueryObject implements Serializable {
 		incomingQuerySites = sites;
 	}
 	
-	public Integer getMaxDateShift(){if(maxDateShift == null) return(new Integer(0)); else return maxDateShift;}
+	public Integer getMaxDateShift(){return maxDateShift;}
 	public void setMaxDateShift(Integer val){maxDateShift = val;}
 	
-	public Integer getMinDateShift(){if(minDateShift == null) return(new Integer(-365)); else return minDateShift;}
+	public Integer getMinDateShift(){return minDateShift;}
 	public void setMinDateShift(Integer val){minDateShift = val;}
 	
-	public Boolean getShiftDates(){if(shiftDates == null) return(new Boolean(true)); else return shiftDates;}
+	public Boolean getShiftDates(){return shiftDates;}
 	public void setShiftDates(Boolean val){shiftDates = val;}
 	
-	public Boolean getSerializePatientId(){if(serializePatientId == null) return(new Boolean(true)); else return serializePatientId;}
+	public Boolean getSerializePatientId(){return serializePatientId;}
 	public void setSerializePatientId(Boolean val){serializePatientId = val;}
 	
-	public Boolean getObfuscateAggregateResults(){if(obfuscateAggregateResults == null) return(new Boolean(true)); else return obfuscateAggregateResults;}
+	public Boolean getObfuscateAggregateResults(){return obfuscateAggregateResults;}
 	public void setObfuscateAggregateResults(Boolean val){obfuscateAggregateResults = val;}
 	
-	public String getAggregateObfuscateType(){if(aggregateObfuscateType == null) return("RANGE"); else return aggregateObfuscateType;}
+	public String getAggregateObfuscateType(){return aggregateObfuscateType;}
 	public void setAggregateObfuscateType(String val){aggregateObfuscateType = val;}
 	
-	public Float getAggregtaeObfucatePercent(){if(aggregateObfuscatePercent == null) return(new Float(0.10f)); else return aggregateObfuscatePercent;}
+	public Float getAggregtaeObfucatePercent(){return aggregateObfuscatePercent;}
 	public void setAggregtaeObfucatePercent(Float val){aggregateObfuscatePercent = val;}
 	
-	public Integer getAggregateObfuscateRange(){if(aggregateObfuscateRange == null) return(new Integer(10)); else return aggregateObfuscateRange;}
+	public Integer getAggregateObfuscateRange(){return aggregateObfuscateRange;}
 	public void setAggregateObfuscateRange(Integer val){aggregateObfuscateRange = val;}
 	
-	public Integer getAggregateObfuscateThreshold(){if(aggregateObfuscateThreshold == null) return(new Integer(10)); else return aggregateObfuscateThreshold;}
+	public Integer getAggregateObfuscateThreshold(){return aggregateObfuscateThreshold;}
 	public void setAggregateObfuscateThreshold(Integer val){aggregateObfuscateThreshold = val;}
 	//#TODO: add a method addIncomingSite(Site) 
 	
