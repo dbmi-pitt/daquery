@@ -101,7 +101,8 @@ public class DataExporter {
 		this.deliverData = AppProperties.getDeliverData();
 		this.debugDataExport = AppProperties.getDebugDataExport();
 		this.threeDigitZip = AppProperties.getThreeDigitZip();
-		this.dateShift = AppProperties.getDateShift();
+		
+		this.dateShift = daqueryResponse.getRequest().getNetwork().getShiftDates();
 		this.idList = idList;
 		
 		casesPerFile = this.dataExportConfig.getCasesPerFile();
@@ -438,7 +439,8 @@ public class DataExporter {
 		Statement s = null;
 		ResultSet rs = null;
 		try {
-			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModel().getDataSource(SourceType.SQL);
+			Network net = daqueryRequest.getNetwork();
+			SQLDataSource ds = (SQLDataSource) net.getDataModel().getDataSource(SourceType.SQL);
 			conn = ds.getConnection();
 			String DatabaseName = conn.getMetaData().getDatabaseProductName();
 			
@@ -662,7 +664,7 @@ public class DataExporter {
 	{
 		if (date == null)
 			return ("");
-		if(AppProperties.getDateShift())
+		if(dateShift)
 		{
 			Date dt = dateShift(daysToShift, date);
 			if (dt == null)
