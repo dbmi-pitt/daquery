@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.central.util;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.*;
@@ -12,12 +13,13 @@ import edu.pitt.dbmi.daquery.common.util.EmailConfig;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 public class EmailHelper {
-	public void sendMail(String subject, String message, String toAddress) throws MessagingException, FileNotFoundException{
+	public void sendMail(String subject, String message, List<String> toAddresses, List<String> ccAddresses) throws MessagingException, FileNotFoundException{
 		
 		EmailConfig emailConf = DaqueryCentralPropertyFile.instance().getEmailConfiguration();
 		postMail(subject,  /*subject*/
 				 message, /*message*/
-				 toAddress, /* to: address */
+				 toAddresses, /* to: address */
+				 ccAddresses,
 				 emailConf.username,  /* smtp username */
 				 emailConf.password, /* smtp password */
 				 emailConf.fromAddress, /* from address */
@@ -27,7 +29,7 @@ public class EmailHelper {
 				 StringHelper.stringToBool(emailConf.useSSL)); /* use SSL */
 	}
 	
-	public void postMail(String subject, String message, String toAddress, String username, String password, String fromAddress, String smtpServer, String port, boolean useTLS, boolean useSSL) throws MessagingException {
+	public void postMail(String subject, String message, List<String> toAddresses, List<String> ccAddresses, String username, String password, String fromAddress, String smtpServer, String port, boolean useTLS, boolean useSSL) throws MessagingException {
       	
     	message =  message + "</body></html>";
     	
@@ -54,7 +56,13 @@ public class EmailHelper {
     	msg.setContent(message, "text/html");
     	msg.setSubject(subject);
     	msg.setFrom(new InternetAddress(fromAddress));
-    	msg.addRecipient(Message.RecipientType.TO, new InternetAddress(toAddress));
+    	for(String toAddress : toAddresses)
+    		msg.addRecipient(Message.RecipientType.TO, new InternetAddress(toAddress));
+    	if(ccAddresses != null)
+    	{
+	    	for(String ccAddress : ccAddresses)
+	    		msg.addRecipient(Message.RecipientType.CC, new InternetAddress(ccAddress));
+    	}
     	Transport.send(msg);
 	}
 

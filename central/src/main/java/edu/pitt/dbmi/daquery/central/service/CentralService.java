@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.central.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,12 +187,14 @@ public class CentralService{
 			Network net = NetworkDAO.getNetworkById(networkId);
 			// send email to toSite admin
 			if (DBHelper.createConnectionRequest(networkId, fromSiteId, toSiteId)) {
+				List<String> toAddresses = new ArrayList<String>();
+				toAddresses.add(site.getAdminEmail());
 				EmailHelper eh = new EmailHelper();
 				eh.sendMail("Daquery Connection Request", "Daquery site " + requestedToSite.getName() + 
 						  " is requesting to connect to your site, " + site.getName() + 
 						  ", to run queries on the network " + net.getName() +
 						  ".  Please log into your site, go to Network and choose Edit Sites under the network " +
-						  " to approve or deny the request.", site.getAdminEmail());
+						  " to approve or deny the request.", toAddresses, null);
 				
 				// esi.adminEmail);
 				// eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", "del20@pitt.edu");
@@ -224,7 +227,7 @@ public class CentralService{
 			
 		try
 		{
-			emailHelper.sendMail(message.subject, message.message, message.toAddresses.get(0));
+			emailHelper.sendMail(message.subject, message.message, message.toAddresses, message.ccAddresses);
 				
 			return ResponseHelper.getBasicResponse(200, "Message sent.");
 		}

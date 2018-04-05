@@ -10,6 +10,7 @@ public class EmailContents extends DaqueryObject
 	private static final long serialVersionUID = 98837383453453l;
 	
 	@Expose public List<String> toAddresses = new ArrayList<String>();
+	@Expose public List<String> ccAddresses = new ArrayList<String>();
 	@Expose public String subject;
 	@Expose public String message;
 	
