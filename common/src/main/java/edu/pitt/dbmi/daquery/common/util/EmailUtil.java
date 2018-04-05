@@ -12,9 +12,11 @@ public class EmailUtil
 	{
 		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
 		EmailContents ec = new EmailContents();
-		ec.subject = "tester";
+		ec.subject = "tester22";
 		ec.message = "hello<br //><br //>&nbsp;&nbsp;&nbsp;&nbsp;<b>hola</b> eh?";
 		ec.toAddresses.add("shirey@pitt.edu");
+		ec.toAddresses.add("schmoo@gmail.com");
+		ec.ccAddresses.add("bill.shirey@gmail.com");
 		sendEmail(ec);
 	}
 	
