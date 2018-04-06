@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:web="http://xmlns.jcp.org/xml/ns/javaee">
-  <display-name>Restful Web Application</display-name>
+  <display-name>daquery-ws</display-name>	  
   <servlet>
     <servlet-name>daquery-ws</servlet-name>
-    <servlet-class>
-                     org.glassfish.jersey.servlet.ServletContainer
-                </servlet-class>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
     <init-param>
       <param-name>javax.ws.rs.Application</param-name>
       <param-value>edu.pitt.dbmi.daquery.app.DaqueryApplication</param-value>
@@ -37,23 +35,5 @@
   <filter-mapping>
     <filter-name>URLFilter</filter-name>
     <url-pattern>/*</url-pattern>
-  </filter-mapping>
-  <display-name>daquery-ws</display-name>
-  <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
-    <welcome-file>index.htm</welcome-file>
-    <welcome-file>index.jsp</welcome-file>
-    <welcome-file>default.html</welcome-file>
-    <welcome-file>default.htm</welcome-file>
-    <welcome-file>default.jsp</welcome-file>
-  </welcome-file-list>
-  <servlet>
-    <description>JAX-RS Tools Generated - Do not modify</description>
-    <servlet-name>JAX-RS Servlet</servlet-name>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>JAX-RS Servlet</servlet-name>
-    <url-pattern>/jaxrs/*</url-pattern>
-  </servlet-mapping>
+  </filter-mapping>  
 </web-app>
