@@ -7,7 +7,7 @@ import edu.pitt.dbmi.daquery.rest.DaqueryEndpoint;
 import edu.pitt.dbmi.daquery.update.DBUpdater;
 import edu.pitt.dbmi.daquery.update.DBVersion;
 
-@DBVersion(version=1.35f)
+@DBVersion(version=1.36f)
 public class DBUpdate136 implements DBUpdater
 {
 	@Override
