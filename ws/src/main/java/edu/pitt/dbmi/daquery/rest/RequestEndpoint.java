@@ -344,7 +344,10 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             EmailContents emailContents = new EmailContents();
             emailContents.toAddresses.add(request.getRequester().getEmail());
-			emailContents.message += "Sorry, your request has been denied.";
+            emailContents.subject = "Daquery Data Request Denied";
+            emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Delivered From:</b>" + SiteDAO.getLocalSite() + "<br //>";
+			emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Requested Date:</b>" + request.getSentTimestamp() + "<br //>";
+			emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Query Name:</b>" + request.getInquiry().getInquiryName() + "<br //>";
 
 			try{EmailUtil.sendEmail(emailContents);}
 			catch(Throwable t)
