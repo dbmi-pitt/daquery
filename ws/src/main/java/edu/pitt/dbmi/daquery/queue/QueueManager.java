@@ -16,12 +16,12 @@ public class QueueManager
 
 		String key = keyValue(queueName);
 		if(!queues.containsKey(key))
-			queues.put(key, new TaskQueue());
+			queues.put(key, new TaskQueue(queueName));
 
 		return(queues.get(key));
 	}
 
-	public synchronized static TaskQueue addQueue(String queueName, int maxRunLength) throws DaqueryException
+/*	public synchronized static TaskQueue addQueue(String queueName, int maxRunLength) throws DaqueryException
 	{
 		if(StringHelper.isEmpty(queueName))
 			throw new DaqueryException("Queue name must not be blank.");
@@ -34,16 +34,17 @@ public class QueueManager
 		if(maxRunLength <= 0)
 			throw new DaqueryException("Task queue max run size must be greter than zero.");
 		
-		TaskQueue q = new TaskQueue(maxRunLength);
+		TaskQueue q = new TaskQueue(queueName, maxRunLength);
 		queues.put(key, q);
 		return(q);
-	}
+	} */
 
 	public synchronized static boolean containsQueue(String queueName)
 	{
 		if(StringHelper.isEmpty(queueName)) return(false);
 		return(queues.containsKey(keyValue(queueName)));
 	}
+
 	private static String keyValue(String val)
 	{
 		if(val == null) return(null);

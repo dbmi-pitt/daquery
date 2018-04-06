@@ -13,13 +13,18 @@ public class TaskQueue
 	private static Hashtable<String, Task> tasksById = new Hashtable<String, Task>();
 	private static LinkedList<Task> waitingQueue = new LinkedList<Task>();
 	private static List<TaskRunner> runningQueue = new ArrayList<TaskRunner>();
-	private int maxRunLength = AppProperties.getTaskQueueMaxLength();
+	private int maxRunLength;
+	private String queueName = null;
 	
-	public TaskQueue(){}
-	
-	public TaskQueue(int maxRunLength)
+	public TaskQueue(String queueName)
+	{
+		this.maxRunLength = AppProperties.getTaskQueueMaxLength(queueName);
+		this.queueName = queueName;
+	}
+	public TaskQueue(String queueName, int maxRunLength)
 	{
 		this.maxRunLength = maxRunLength;
+		this.queueName = queueName;
 	}
 	
 	public synchronized void addTask(Task task) throws DaqueryException
