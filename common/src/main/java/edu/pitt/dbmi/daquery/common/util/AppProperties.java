@@ -233,13 +233,13 @@ public class AppProperties
 	} */
 	
 	private static final int defaultTaskQueueMaxLength = 4;
-	private static final int defaultExportTaskQueueMaxLength = 1;
+	private static final String taskQueuePrefix = "task.queue.length.";
 	
-	public static int getTaskQueueMaxLength()
+	public static int getDefaultTaskQueueMaxLength()
 	{
 		try
 		{
-			String mLen = getDBProperty("task.queue.length");
+			String mLen = getDBProperty(taskQueuePrefix + "default");
 			if(StringHelper.isEmpty(mLen)) return(defaultTaskQueueMaxLength);
 			return(Integer.parseInt(mLen));
 		}
@@ -250,28 +250,37 @@ public class AppProperties
 		}
 		
 	}
-	public static void setTaskQueueMaxLenghtexit(int max) throws DaqueryException
+/*	public static void setTaskQueueMaxLenghtexit(int max) throws DaqueryException
 	{
 		if(max <= 0) throw new DaqueryException("The maximum task queue length must be greater than zero.");
 		String maxStr = Integer.toString(max);
 		setDBProperty("task.queue.length", maxStr);
-	}
+	} */
 	
-	public static int getExportTaskQueueMaxLength()
+	public static int getTaskQueueMaxLength(String queueName)
 	{
 		try
 		{
-			String mLen = getDBProperty("download.task.queue.length");
-			if(StringHelper.isEmpty(mLen)) return(defaultExportTaskQueueMaxLength);
+			String mLen = null;
+			mLen = getDBProperty(taskQueuePrefix + queueName.trim().toLowerCase());
+			if(StringHelper.isEmpty(mLen)) return(getDefaultTaskQueueMaxLength());
 			return(Integer.parseInt(mLen));
 		}
 		catch(Throwable t)
 		{
 			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the download task queue length from the application database.", t);
-			return(defaultExportTaskQueueMaxLength);			
+			return(getDefaultTaskQueueMaxLength());			
 		}		
 	}
 	
+	public static void setTaskQueueMaxLength(String queueName, int queueLength) throws DaqueryException
+	{
+		if(! StringHelper.isEmpty(queueName))
+		{
+			String key = taskQueuePrefix + queueName.trim().toLowerCase();
+			setDBProperty(key, (new Integer(queueLength)).toString());
+		}
+	}
 	private static final boolean defaultDeliverData = true; 
 	public static boolean getDeliverData() {
 		try {

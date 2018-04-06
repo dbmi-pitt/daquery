@@ -88,7 +88,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 {
 	private final static Logger logger = Logger.getLogger(DaqueryEndpoint.class.getName());
 
-	private final static String MAIN_QUEUE = "main";
+	public final static String MAIN_QUEUE = "main";
 	public final static String EXPORT_QUEUE = "export_queue";
 	
     @Context

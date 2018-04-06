@@ -48,11 +48,7 @@ public class TestDataExport
 			rqsts.add(req);
 			inq.setRequests(rqsts);
 			
-			TaskQueue queue = null;
-			if(!QueueManager.containsQueue(DaqueryEndpoint.EXPORT_QUEUE))
-				queue = QueueManager.addQueue(DaqueryEndpoint.EXPORT_QUEUE, 1);
-			else
-				queue = QueueManager.getNamedQueue(DaqueryEndpoint.EXPORT_QUEUE);
+			TaskQueue queue = QueueManager.getNamedQueue(DaqueryEndpoint.EXPORT_QUEUE);
 			ResponseTask task = new ResponseTask(req, DaqueryUserDAO.getSysUser(), req.getNetwork().getDataModel());
 			queue.addTask(task);
 		}
