@@ -183,8 +183,8 @@ public class Network extends DaqueryObject implements Serializable {
 	public String getAggregateObfuscateType(){return aggregateObfuscateType;}
 	public void setAggregateObfuscateType(String val){aggregateObfuscateType = val;}
 	
-	public Float getAggregtaeObfucatePercent(){return aggregateObfuscatePercent;}
-	public void setAggregtaeObfucatePercent(Float val){aggregateObfuscatePercent = val;}
+	public Float getAggregateObfuscatePercent(){return aggregateObfuscatePercent;}
+	public void setAggregateObfuscatePercent(Float val){aggregateObfuscatePercent = val;}
 	
 	public Integer getAggregateObfuscateRange(){return aggregateObfuscateRange;}
 	public void setAggregateObfuscateRange(Integer val){aggregateObfuscateRange = val;}
