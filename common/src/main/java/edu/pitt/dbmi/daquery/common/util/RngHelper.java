@@ -79,7 +79,7 @@ public class RngHelper
 			}
 			else
 			{
-				float maxPrct = net.getAggregtaeObfucatePercent();
+				float maxPrct = net.getAggregateObfuscatePercent();
 				float obfPrct = nextFloatInRange(maxPrct * -1f, maxPrct);
 				rval = val + (int) Math.round(val * obfPrct);
 			}
