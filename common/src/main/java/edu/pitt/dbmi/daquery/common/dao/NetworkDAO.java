@@ -299,5 +299,36 @@ public class NetworkDAO extends AbstractDAO {
     		if(s != null) s.close();
     	}
     }
+    
+    public static void updateDeIDProps(String networkId, Network n) throws Exception {
+    	if(networkId == null || n == null)
+    		return;
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+    		Transaction t = s.beginTransaction();
+    		
+    		Network network = NetworkDAO.queryNetwork(networkId);
+    		network.setObfuscateAggregateResults(n.getObfuscateAggregateResults());
+    		network.setAggregateObfuscateType(n.getAggregateObfuscateType());
+    		network.setAggregateObfuscateRange(n.getAggregateObfuscateRange());
+    		network.setAggregateObfuscatePercent(n.getAggregateObfuscatePercent());
+    		network.setAggregateObfuscateThreshold(n.getAggregateObfuscateThreshold());
+    		network.setShiftDates(n.getShiftDates());
+    		network.setMinDateShift(n.getMinDateShift());
+    		network.setMaxDateShift(n.getMaxDateShift());
+    		network.setSerializePatientId(n.getSerializePatientId());
+    		
+			s.saveOrUpdate(network);
+			t.commit();
+			return;
+    	} catch(HibernateException e) {
+    		logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
+        	logger.log(Level.SEVERE, e.getLocalizedMessage());
+            throw e;
+    	} finally {
+    		if(s != null) s.close();
+    	}
+    }
 }
 

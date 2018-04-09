@@ -71,6 +71,7 @@ import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
 import { MomentModule } from 'angular2-moment';
 import { EditUserComponent } from './components/users/edit-user/edit-user.component';
 import { AppConfigComponent } from './components/app-config/app-config.component';
+import { DeidPropsComponent } from './components/networks/network/deid-props/deid-props.component';
 
 
 @NgModule({
@@ -115,6 +116,7 @@ import { AppConfigComponent } from './components/app-config/app-config.component
     SavedQueriesComponent,
     EditUserComponent,
     AppConfigComponent,
+    DeidPropsComponent,
   ],
   imports: [
     BrowserModule,

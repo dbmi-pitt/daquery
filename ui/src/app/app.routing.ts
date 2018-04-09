@@ -13,6 +13,7 @@ import { Step3Component } from "./components/setup/step3/step3.component";
 import { NetworksComponent } from "./components/networks/networks.component";
 import { NetworkComponent } from "./components/networks/network/network.component";
 import { DataSourceComponent } from "./components/networks/network/data-source/data-source.component";
+import { DeidPropsComponent } from "./components/networks/network/deid-props/deid-props.component";
 import { SiteComponent } from "./components/sites/site/site.component";
 import { AddSiteComponent } from "./components/sites/add-site/add-site.component";
 import { Error404Component } from "./components/error-404/error-404.component";
@@ -36,6 +37,7 @@ const appRoutes:Routes = [
       { path: "networks", component: NetworksComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "networks/:id", component: NetworkComponent, canActivate: [AuthGuard] },
       { path: "networks/:id/data-source", component: DataSourceComponent, canActivate: [AuthGuard] },
+      { path: "networks/:id/deid-props", component: DeidPropsComponent, canActivate: [AuthGuard] },
       { path: "add-site", component: AddSiteComponent, canActivate: [AuthGuard] },
       { path: "sites/:id", component: SiteComponent, canActivate: [AuthGuard] },
       { path: "users", component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },

@@ -1,0 +1,92 @@
+<section class="content-header">
+  <h1><i class="fa fa-share-alt"></i> {{ network?.name }} <small>patient empowered research</small>
+  </h1>
+</section>
+<section class="content">
+  <div class="row">
+      <div class="col-md-8">
+        <div class="box box-primary">
+          <div class="box-header with-border">Data De-Identification Properties for ( {{network?.name}} )</div>
+          <div class="box-body">
+            <div *ngIf="success" class="alert alert-success alert-dismissible">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+              <h4><i class="icon fa fa-check"></i> Succeeded!</h4>
+              Data De-Identification Properties are updated!
+            </div>
+            <form #f [formGroup]="deidForm" (ngSubmit)="onSubmit()" novalidate>
+              <hr />
+              <h4>Aggregate Result Obfuscation</h4>
+              <div class="form-group has-feedback">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" formControlName="obfuscate" name="obfuscate">
+                    Obfuscate aggregate results
+                  </label>
+                </div>
+              </div>
+              <div *ngIf="obfuscate.value" style="margin-left: 10px">
+                <div class="form-group has-feedback" [ngClass]="{'has-error': obfuscateType.invalid && (submitted || obfuscateType.dirty || obfuscateType.touched), 'has-success': obfuscateType.valid && (submitted || obfuscateType.dirty || obfuscateType.touched) }">
+                  <label>Obfuscation Type</label>
+                  <select formControlName="obfuscateType" class="form-control" name="obfuscateType">
+                      <option value="range">Range</option>
+                      <option value="percentage">Percentage</option>
+                    </select>
+                  <div class="help-block" *ngIf="obfuscateType.invalid && (submitted || obfuscateType.dirty || obfuscateType.touched)">Please select a obfuscation type</div>
+                </div>
+                <div *ngIf="obfuscateType.value == 'range'" class="form-group has-feedback" [ngClass]="{'has-error': range.invalid && (submitted || range.dirty || range.touched), 'has-success': range.valid && (submitted || range.dirty || range.touched) }">
+                  <label>Range</label>
+                  <input type="text" formControlName="range" class="form-control" name="range" placeholder="Range">
+                  <div class="help-block" *ngIf="range.invalid && (submitted || range.dirty || range.touched)">Please enter the range</div>
+                </div>
+                <div *ngIf="obfuscateType.value == 'percentage'" class="form-group has-feedback" [ngClass]="{'has-error': percentage.invalid && (submitted || percentage.dirty || percentage.touched), 'has-success': percentage.valid && (submitted || percentage.dirty || percentage.touched) }">
+                  <label>Percentage</label>
+                  <input type="text" formControlName="percentage" class="form-control" name="percentage" placeholder="Percentage">
+                  <div class="help-block" *ngIf="percentage.invalid && (submitted || percentage.dirty || percentage.touched)">Please enter the percentage</div>
+                </div>
+                <div class="form-group has-feedback" [ngClass]="{'has-error': threshold.invalid && (submitted || threshold.dirty || threshold.touched), 'has-success': threshold.valid && (submitted || threshold.dirty || threshold.touched) }">
+                  <label>threshold</label>
+                  <input type="text" formControlName="threshold" class="form-control" name="threshold" placeholder="Obfuscation Threshold">
+                  <div class="help-block" *ngIf="threshold.invalid && (submitted || threshold.dirty || threshold.touched)">Please enter the obfuscation threshold</div>
+                </div>
+              </div>
+              <hr />
+              <h4>Date Shifting</h4>
+              <div class="form-group has-feedback">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" formControlName="dateShifting" name="dateShifting">
+                    Randomly shift dates per case in exports
+                  </label>
+                </div>
+              </div>
+              <div *ngIf="dateShifting.value" style="margin-left: 10px">
+                <div class="form-group has-feedback" [ngClass]="{'has-error': minDateShift.invalid && (submitted || minDateShift.dirty || minDateShift.touched), 'has-success': minDateShift.valid && (submitted || minDateShift.dirty || minDateShift.touched) }">
+                  <label>Minimum date shift</label>
+                  <input type="text" formControlName="minDateShift" class="form-control" name="minDateShift" placeholder="minDateShift">
+                  <div class="help-block" *ngIf="minDateShift.invalid && (submitted || minDateShift.dirty || minDateShift.touched)">Please enter the range</div>
+                </div>
+                <div class="form-group has-feedback" [ngClass]="{'has-error': maxDateShift.invalid && (submitted || maxDateShift.dirty || maxDateShift.touched), 'has-success': maxDateShift.valid && (submitted || maxDateShift.dirty || maxDateShift.touched) }">
+                  <label>Maximum date shift</label>
+                  <input type="text" formControlName="maxDateShift" class="form-control" name="maxDateShift" placeholder="maxDateShift">
+                  <div class="help-block" *ngIf="maxDateShift.invalid && (submitted || maxDateShift.dirty || maxDateShift.touched)">Please enter the percentage</div>
+                </div>
+              </div>
+              <hr />
+              <h4>Study IDs</h4>
+              <div class="form-group has-feedback">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" formControlName="serializeID" name="serializeID">
+                      Serialize patient study id in export
+                    </label>
+                  </div>
+                </div>
+              <button class="btn btn-danger">Change</button>
+              <a class="btn btn-link" [routerLink]="['../']">Cancel</a>
+            </form>
+            <div *ngIf="error" class="alert alert-danger">{{error}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
