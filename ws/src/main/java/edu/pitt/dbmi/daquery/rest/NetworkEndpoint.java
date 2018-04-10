@@ -346,7 +346,14 @@ public class NetworkEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateDeIDByNetworkId(@PathParam("id") String id, Network n) {
     	try {
-
+    		
+    		if(n.getMinDateShift() > n.getMaxDateShift()) {
+    			return Response.status(Response.Status.BAD_REQUEST)
+    						   .entity("Maximum date shift must be greater than Minimum date shift")
+    						   .build();
+    			//return ResponseHelper.getErrorResponse(400, "Maximum date shift must be greater than Minimum date shift", "Maximum date shift must be greater than Minimum date shift", null);
+    		}
+    		
             logger.info("#### returning network by uuid=" + id);
 
             Principal principal = securityContext.getUserPrincipal();

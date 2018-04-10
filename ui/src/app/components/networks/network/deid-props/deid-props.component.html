@@ -35,17 +35,17 @@
                 </div>
                 <div *ngIf="obfuscateType.value == 'range'" class="form-group has-feedback" [ngClass]="{'has-error': range.invalid && (submitted || range.dirty || range.touched), 'has-success': range.valid && (submitted || range.dirty || range.touched) }">
                   <label>Range</label>
-                  <input type="text" formControlName="range" class="form-control" name="range" placeholder="Range">
+                  <input type="number" formControlName="range" class="form-control" name="range" placeholder="Range">
                   <div class="help-block" *ngIf="range.invalid && (submitted || range.dirty || range.touched)">Please enter the range</div>
                 </div>
                 <div *ngIf="obfuscateType.value == 'percentage'" class="form-group has-feedback" [ngClass]="{'has-error': percentage.invalid && (submitted || percentage.dirty || percentage.touched), 'has-success': percentage.valid && (submitted || percentage.dirty || percentage.touched) }">
                   <label>Percentage</label>
-                  <input type="text" formControlName="percentage" class="form-control" name="percentage" placeholder="Percentage">
+                  <input type="number" formControlName="percentage" class="form-control" name="percentage" placeholder="Percentage">
                   <div class="help-block" *ngIf="percentage.invalid && (submitted || percentage.dirty || percentage.touched)">Please enter the percentage</div>
                 </div>
                 <div class="form-group has-feedback" [ngClass]="{'has-error': threshold.invalid && (submitted || threshold.dirty || threshold.touched), 'has-success': threshold.valid && (submitted || threshold.dirty || threshold.touched) }">
                   <label>threshold</label>
-                  <input type="text" formControlName="threshold" class="form-control" name="threshold" placeholder="Obfuscation Threshold">
+                  <input type="number" formControlName="threshold" class="form-control" name="threshold" placeholder="Obfuscation Threshold">
                   <div class="help-block" *ngIf="threshold.invalid && (submitted || threshold.dirty || threshold.touched)">Please enter the obfuscation threshold</div>
                 </div>
               </div>
@@ -62,12 +62,12 @@
               <div *ngIf="dateShifting.value" style="margin-left: 10px">
                 <div class="form-group has-feedback" [ngClass]="{'has-error': minDateShift.invalid && (submitted || minDateShift.dirty || minDateShift.touched), 'has-success': minDateShift.valid && (submitted || minDateShift.dirty || minDateShift.touched) }">
                   <label>Minimum date shift</label>
-                  <input type="text" formControlName="minDateShift" class="form-control" name="minDateShift" placeholder="minDateShift">
+                  <input type="number" formControlName="minDateShift" class="form-control" name="minDateShift" placeholder="minDateShift">
                   <div class="help-block" *ngIf="minDateShift.invalid && (submitted || minDateShift.dirty || minDateShift.touched)">Please enter the range</div>
                 </div>
                 <div class="form-group has-feedback" [ngClass]="{'has-error': maxDateShift.invalid && (submitted || maxDateShift.dirty || maxDateShift.touched), 'has-success': maxDateShift.valid && (submitted || maxDateShift.dirty || maxDateShift.touched) }">
                   <label>Maximum date shift</label>
-                  <input type="text" formControlName="maxDateShift" class="form-control" name="maxDateShift" placeholder="maxDateShift">
+                  <input type="number" formControlName="maxDateShift" class="form-control" name="maxDateShift" placeholder="maxDateShift">
                   <div class="help-block" *ngIf="maxDateShift.invalid && (submitted || maxDateShift.dirty || maxDateShift.touched)">Please enter the percentage</div>
                 </div>
               </div>
