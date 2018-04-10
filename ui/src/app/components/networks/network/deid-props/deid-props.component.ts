@@ -5,6 +5,7 @@ import { NetworkService } from '../../../../services/network.service';
 import { SiteService } from '../../../../services/site.service';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
+import { validateConfig } from '@angular/router/src/config';
 
 @Component({
   selector: 'app-deid-props',
@@ -40,26 +41,26 @@ export class DeidPropsComponent implements OnInit {
         if(val){
           this.deidForm.get('obfuscateType').setValidators([Validators.required]);
           this.deidForm.get('obfuscateType').updateValueAndValidity();
-          this.deidForm.get('threshold').setValidators([Validators.required]);
+          this.deidForm.get('threshold').setValidators([Validators.required, Validators.min(0)]);
           this.deidForm.get('threshold').updateValueAndValidity();
         }
       });
       const obfuscateTypeChange$ = this.deidForm.get('obfuscateType').valueChanges;
       obfuscateTypeChange$.subscribe(val => {
         if(val == 'range'){
-          this.deidForm.get('range').setValidators([Validators.required]);
+          this.deidForm.get('range').setValidators([Validators.required, Validators.min(0)]);
           this.deidForm.get('range').updateValueAndValidity();
         } else if (val == 'percentage'){
-          this.deidForm.get('percentage').setValidators([Validators.required]);
+          this.deidForm.get('percentage').setValidators([Validators.required, Validators.max(1), Validators.min(0)]);
           this.deidForm.get('percentage').updateValueAndValidity();
         }
       });
       const dateShiftingChange$ = this.deidForm.get('dateShifting').valueChanges;
       dateShiftingChange$.subscribe(val => {
         if(val){
-          this.deidForm.get('minDateShift').setValidators([Validators.required]);
+          this.deidForm.get('minDateShift').setValidators([Validators.required, Validators.min(0)]);
           this.deidForm.get('minDateShift').updateValueAndValidity();
-          this.deidForm.get('maxDateShift').setValidators([Validators.required]);
+          this.deidForm.get('maxDateShift').setValidators([Validators.required, Validators.min(0)]);
           this.deidForm.get('maxDateShift').updateValueAndValidity();
         }
       });
@@ -112,21 +113,26 @@ export class DeidPropsComponent implements OnInit {
   }
 
   onSubmit(){
-    let network = {
-      obfuscateAggregateResults: this.deidForm.get('obfuscate').value,
-      aggregateObfuscateType: this.deidForm.get('obfuscateType').value,
-      aggregateObfuscateRange: this.deidForm.get('range').value,
-      aggregateObfuscatePercent: this.deidForm.get('percentage').value,
-      aggregateObfuscateThreshold: this.deidForm.get('threshold').value,
-      shiftDates: this.deidForm.get('dateShifting').value,
-      minDateShift: this.deidForm.get('minDateShift').value,
-      maxDateShift: this.deidForm.get('maxDateShift').value,
-      serializePatientId: this.deidForm.get('serializeID').value
+    if(this.deidForm.valid){
+      let network = {
+        obfuscateAggregateResults: this.deidForm.get('obfuscate').value,
+        aggregateObfuscateType: this.deidForm.get('obfuscateType').value,
+        aggregateObfuscateRange: this.deidForm.get('range').value,
+        aggregateObfuscatePercent: this.deidForm.get('percentage').value,
+        aggregateObfuscateThreshold: this.deidForm.get('threshold').value,
+        shiftDates: this.deidForm.get('dateShifting').value,
+        minDateShift: this.deidForm.get('minDateShift').value,
+        maxDateShift: this.deidForm.get('maxDateShift').value,
+        serializePatientId: this.deidForm.get('serializeID').value
+      };
+      this.success = false;
+      this.error = null;
+      this.networkService.updateNetworkDeIDProps(this.network.networkId, network)
+                         .subscribe(res => {
+                           this.success = true;
+                         }, err => {
+                           this.error = err.error;
+                         });
     }
-    this.success = false;
-    this.networkService.updateNetworkDeIDProps(this.network.networkId, network)
-                       .subscribe(res => {
-                        this.success = true;
-                       });
   }
 }

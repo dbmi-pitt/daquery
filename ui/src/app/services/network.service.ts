@@ -80,7 +80,9 @@ export class NetworkService {
   updateNetworkDeIDProps(network_id: string, network: any): Observable<any>{
     return this.http.put(`/daquery/ws/networks/${network_id}/deid`, network)
                     .catch(error => {
-                      this.error.error = error;
+                      if(error.error.hasOwnProperty("displayMessage")){
+                        this.error.error = error;
+                      }
                       return Observable.throw(error || 'Server error');
                     })
   }
