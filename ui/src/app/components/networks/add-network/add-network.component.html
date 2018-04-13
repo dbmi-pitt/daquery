@@ -40,6 +40,7 @@
             <input type="password" formControlName="password" class="form-control" name="password" placeholder="Data source Password">
             <div class="help-block" *ngIf="password.invalid && (submitted || password.dirty || password.touched)">Please enter the datamodel password</div>
           </div>
+          <div *ngIf="testResult" [ngClass]="{'text-green': testResult.result, 'text-red': !testResult.result}">{{ testResult.errorMsg }}. {{ testResult.detailErrorMsg }}</div>
           <button class="btn btn-primary">Join</button>
           <button class="btn btn-info" (click)="testDataSource($event)">Test</button>
         </form>
