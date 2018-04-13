@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -218,7 +219,14 @@ public class DBHelper
 			for(String netId : netIds)
 			{
 				Network net = NetworkDAO.queryNetwork(netId);
-				if(net != null) networks.add(net);
+				//CDB remove the Data Sources from the Networks before passing them back to
+				//the sites.
+				if(net != null) {
+					if (net.getDataModel() != null) {
+						net.getDataModel().setDataSources(new HashSet<DataSource>());
+					}
+					networks.add(net);
+				}
 			}
 			
 			return(networks);
