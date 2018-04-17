@@ -133,6 +133,9 @@ public class NetworkDAO extends AbstractDAO {
     		network.setName(params.get("name"));
     		network.setNetworkId(params.get("network_id"));
     		network.setDataModel(dataModel);
+    		network.setObfuscateAggregateResults(false);
+    		network.setShiftDates(false);
+    		network.setSerializePatientId(false);
     		
     		s.persist(network);
     		s.getTransaction().commit();

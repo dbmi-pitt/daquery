@@ -43,6 +43,15 @@ export class DeidPropsComponent implements OnInit {
           this.deidForm.get('obfuscateType').updateValueAndValidity();
           this.deidForm.get('threshold').setValidators([Validators.required, Validators.min(0)]);
           this.deidForm.get('threshold').updateValueAndValidity();
+        } else {
+          this.deidForm.get('obfuscateType').clearValidators();
+          this.deidForm.get('obfuscateType').updateValueAndValidity();
+          this.deidForm.get('range').clearValidators();
+          this.deidForm.get('range').updateValueAndValidity();
+          this.deidForm.get('percentage').clearValidators();
+          this.deidForm.get('percentage').updateValueAndValidity();
+          this.deidForm.get('threshold').clearValidators();
+          this.deidForm.get('threshold').updateValueAndValidity();
         }
       });
       const obfuscateTypeChange$ = this.deidForm.get('obfuscateType').valueChanges;
@@ -61,6 +70,11 @@ export class DeidPropsComponent implements OnInit {
           this.deidForm.get('minDateShift').setValidators([Validators.required, Validators.min(0)]);
           this.deidForm.get('minDateShift').updateValueAndValidity();
           this.deidForm.get('maxDateShift').setValidators([Validators.required, Validators.min(0)]);
+          this.deidForm.get('maxDateShift').updateValueAndValidity();
+        } else {
+          this.deidForm.get('minDateShift').clearValidators();
+          this.deidForm.get('minDateShift').updateValueAndValidity();
+          this.deidForm.get('maxDateShift').clearValidators();
           this.deidForm.get('maxDateShift').updateValueAndValidity();
         }
       });
