@@ -375,6 +375,13 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	AppProperties.setDBProperty("central.site.key", key);
 			    	AppProperties.setDBProperty("site.id", siteId);
 			    	AppProperties.setDBProperty("site.name", siteName);
+			    	AppProperties.setDBProperty("taskQueueMaxLength", "10");
+			    	AppProperties.setDBProperty("exportTaskQueueMaxLength", "10");
+			    	AppProperties.setDBProperty("deliverData", "false");
+			    	AppProperties.setDBProperty("threeDigitZip", "false");
+			    	AppProperties.setDBProperty("dateShift", "false");
+			    	AppProperties.setDBProperty("fileOutputDir", "");
+			    	AppProperties.setDBProperty("localDeliveryDir", "");
 			    	
 			    	DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
