@@ -128,6 +128,7 @@ public class NetworkDAO extends AbstractDAO {
     		s = HibernateConfiguration.openSession();
     		s.getTransaction().begin();
     		
+    		s.save(dataModel);
     		
     		Network network = new Network();
     		network.setName(params.get("name"));

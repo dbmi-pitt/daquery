@@ -219,8 +219,10 @@ public class DBHelper
 			for(String netId : netIds)
 			{
 				Network net = NetworkDAO.queryNetwork(netId);
-				//CDB remove the Data Sources from the Networks before passing them back to
-				//the sites.
+				//CDB remove the Data Sources and Data Models from the Networks before passing them back to
+				//the sites.  I removed the Data Sources because it makes no sense for the Central Network to have
+				//a defined data source.  I removed the Data Model because I could not pass the Network back with 
+				//a defined Data Model XML.  It kept throwing errors.
 				if(net != null) {
 					if (net.getDataModel() != null) {
 						net.getDataModel().setDataSources(new HashSet<DataSource>());
