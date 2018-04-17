@@ -71,7 +71,7 @@ public class RngHelper
 		{
 			if(val.longValue() <= ((long) net.getAggregateObfuscateThreshold().intValue()))
 				return(new Long(0));
-			if(net.getAggregateObfuscateType().equals("RANGE"))
+			if(net.getAggregateObfuscateType().toUpperCase().equals("RANGE"))
 			{
 				int range = net.getAggregateObfuscateRange();
 				int obf = nextIntInRange(range * -1, range);

@@ -347,7 +347,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
     public Response updateDeIDByNetworkId(@PathParam("id") String id, Network n) {
     	try {
     		
-    		if(n.getMinDateShift() > n.getMaxDateShift()) {
+    		if(n.getMinDateShift() != null && n.getMaxDateShift() != null && n.getMinDateShift() > n.getMaxDateShift()) {
     			return Response.status(Response.Status.BAD_REQUEST)
     						   .entity("Maximum date shift must be greater than Minimum date shift")
     						   .build();
