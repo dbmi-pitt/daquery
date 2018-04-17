@@ -11,7 +11,7 @@
 	    <field name="Race" colName="RACE"/>
 	    <field name="Biobank Flag" colName="BIOBANK_FLAG"/>
 	    <field name="Raw Sex" colName="RAW_SEX"/>
-	    <field name="Raw Sexual Orientation" colName="RAW"/>
+	    <field name="Raw Sexual Orientation" colName="RAW_SEXUAL_ORIENTATION"/>
 	    <field name="Raw Gender Identity" colName="RAW_GENDER_IDENTITY"/>
 	    <field name="Raw Hispanic" colName="RAW_HISPANIC"/>
 	    <field name="Raw Race" colName="RAW_RACE"/>	    
