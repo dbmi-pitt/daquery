@@ -2,6 +2,10 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 import java.io.Serializable;
 import java.io.StringReader;
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,17 +23,27 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 @Entity
 @Table(name="DATA_MODEL")
 public class DataModel extends DaqueryObject implements Serializable
 {	
-    @Id
+
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
 	private long id;
@@ -115,4 +129,24 @@ public class DataModel extends DaqueryObject implements Serializable
 			throw new DaqueryException("Error data export configuration.  Possibly the XML is not formated correctly.", je);
 		}
 	}
+	
+	@Override
+	public String toJson() {
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        DataModel tempDM = new DataModel();
+        tempDM.setId(this.getId());
+        tempDM.setName(this.getName());
+        tempDM.setDescription(this.getDescription());
+        tempDM.setDataModelId(this.getDataModelId());
+        //CDB I had to remove this otherwise it throws a Stack Overflow
+        //The attributes contain an owner which is a DataModel.  This DataModel 
+        //generates attributes with another DataModel, etc.
+        Set<DataAttribute> tempAttr = this.getAttributes();
+        tempAttr.remove("owner");
+        tempDM.setAttributes(new HashSet<DataAttribute>());
+        tempDM.setDataExportConf(this.getDataExportConf());
+        return gson.toJson(tempDM);
+        
+	}
+
 }
