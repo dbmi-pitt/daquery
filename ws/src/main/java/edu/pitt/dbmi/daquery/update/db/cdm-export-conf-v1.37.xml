@@ -11,7 +11,7 @@
 	    <field name="Race" colName="RACE"/>
 	    <field name="Biobank Flag" colName="BIOBANK_FLAG"/>
 	    <field name="Raw Sex" colName="RAW_SEX"/>
-	    <field name="Raw Sexual Orientation" colName="RAW"/>
+	    <field name="Raw Sexual Orientation" colName="RAW_SEXUAL_ORIENTATION"/>
 	    <field name="Raw Gender Identity" colName="RAW_GENDER_IDENTITY"/>
 	    <field name="Raw Hispanic" colName="RAW_HISPANIC"/>
 	    <field name="Raw Race" colName="RAW_RACE"/>	    
@@ -43,7 +43,7 @@
 	    <field name="DRG" colName="DRG" />
 	    <field name="DRG Type" colName="DRG_TYPE" />
 	    <field name="Admitting Source" colName="ADMITTING_SOURCE" />
-	    <field name="Raw Site Id" colName="RAW_SITE_ID" />
+	    <field name="Raw Site Id" colName="RAW_SITEID" />
 	    <field name="Raw Enc Type" colName="RAW_ENC_TYPE" />
 	    <field name="Raw Discharge Disposition" colName="RAW_DISCHARGE_DISPOSITION" />
 	    <field name="Raw Discharge Status" colName="RAW_DISCHARGE_STATUS" />
@@ -103,6 +103,7 @@
 	    <field name="Smoking" colName="SMOKING" />
 	    <field name="Tobacco" colName="TOBACCO" />
 	    <field name="Tobacco Type" colName="TOBACCO_TYPE" />
+	    <field name="Raw Vital Source" colName="RAW_VITAL_SOURCE" />
 	    <field name="Raw Diastolic" colName="RAW_DIASTOLIC" />
 	    <field name="Raw Systolic" colName="RAW_SYSTOLIC" />
 	    <field name="Raw BP Position" colName="RAW_BP_POSITION" />
@@ -198,7 +199,7 @@
     <custom-column-set>
 	    <field name="Pat Id" colName="PATID" />
 	    <field name="Encounter Id" colName="ENCOUNTERID" />
-	    <field name="RX Provider Id" colName="RX_PROVIDER_ID" />
+	    <field name="RX Provider Id" colName="RX_PROVIDERID" />
 	    <field name="RX Order Date" colName="RX_ORDER_DATE" />
 	    <field name="RX Order Time" colName="RX_ORDER_TIME" />
 	    <field name="RX Start Date" colName="RX_START_DATE" />
@@ -221,7 +222,6 @@
 	<idColumn>TRIALID</idColumn>
     <custom-column-set>
 	    <field name="Pat Id" colName="PATID" />
-	    <field name="Encounter Id" colName="ENCOUNTERID" />
 	    <field name="Participant Id" colName="PARTICIPANTID" />
 	    <field name="Trial Site Id" colName="TRIAL_SITEID" />
 	    <field name="Trial Enroll Date" colName="TRIAL_ENROLL_DATE" />
@@ -243,6 +243,7 @@
 	<idColumn>PATID</idColumn>
     <custom-column-set>
 	    <field name="Death Cause" colName="DEATH_CAUSE" />
+	    <field name="Death Cause Code" colName="DEATH_CAUSE_CODE" />
 	    <field name="Death Cause Type" colName="DEATH_CAUSE_TYPE" />
 	    <field name="Death Cause Source" colName="DEATH_CAUSE_SOURCE" />
 	    <field name="Death Cause Confidence" colName="DEATH_CAUSE_CONFIDENCE" />
