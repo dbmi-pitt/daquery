@@ -28,7 +28,8 @@ export class AppConfigComponent implements OnInit {
       threeDigitZip: ['', [Validators.required]],
       dateShift: ['', [Validators.required]],
       fileOutputDir: ['', [Validators.required]],
-      localDeliveryDir: ['', [Validators.required]]
+      localDeliveryDir: ['', [Validators.required]],
+      trackingOutputDir: ['', [Validators.required]]
     })
   }
 
@@ -39,6 +40,7 @@ export class AppConfigComponent implements OnInit {
   get dateShift() { return this.appConfigForm.get('dateShift'); }
   get fileOutputDir() { return this.appConfigForm.get('fileOutputDir'); }
   get localDeliveryDir() { return this.appConfigForm.get('localDeliveryDir'); }
+  get trackingOutputDir() { return this.appConfigForm.get('trackingOutputDir'); }
 
   ngOnInit() {
   }
@@ -53,6 +55,7 @@ export class AppConfigComponent implements OnInit {
                         this.appConfigForm.get('dateShift').setValue(res.dateShift);
                         this.appConfigForm.get('fileOutputDir').setValue(res.fileOutputDir);
                         this.appConfigForm.get('localDeliveryDir').setValue(res.localDeliveryDir);
+                        this.appConfigForm.get('trackingOutputDir').setValue(res.localDeliveryDir);
                        })
   }
 

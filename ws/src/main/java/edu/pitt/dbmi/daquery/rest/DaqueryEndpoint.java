@@ -380,8 +380,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	AppProperties.setDBProperty("deliverData", "false");
 			    	AppProperties.setDBProperty("threeDigitZip", "false");
 			    	AppProperties.setDBProperty("dateShift", "false");
-			    	AppProperties.setDBProperty("fileOutputDir", "");
-			    	AppProperties.setDBProperty("localDeliveryDir", "");
+			    	AppProperties.setDBProperty("fileOutputDir", "/tmp/");
+			    	AppProperties.setDBProperty("localDeliveryDir", "/tmp/");
+			    	AppProperties.setDBProperty("trackingOutputDir", "/tmp/");
 			    	
 			    	DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
@@ -756,6 +757,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		 * dateShift
     		 * fileOutputDir
     		 * localDeliveryDir
+    		 * trackingOutputDir
     		 */
             
     		 // Get the HTTP Authorization header from the request
@@ -769,6 +771,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		properties.put("dateShift", AppProperties.getDBProperty("dateShift"));
     		properties.put("fileOutputDir", AppProperties.getDBProperty("fileOutputDir"));
     		properties.put("localDeliveryDir", AppProperties.getDBProperty("localDeliveryDir"));
+    		properties.put("trackingOutputDir", AppProperties.getDBProperty("trackingOutputDir"));
             return ResponseHelper.getJsonResponseGen(200, properties);
 
         } catch (Exception e) {
@@ -799,6 +802,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		 * dateShift
     		 * fileOutputDir
     		 * localDeliveryDir
+    		 * trackingOutputDir
     		 */
             
     		 // Get the HTTP Authorization header from the request
@@ -810,7 +814,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
             if( (Integer) properties.get("exportTaskQueueMaxLength") <1 )
             	return ResponseHelper.getErrorResponse(500, "Export Task Queue Max Length must be greater than 1", "Export Task Queue Max Length must be greater than 1", null);
             
-            // Validate fileOutputDir and localDeliveryDir
+            // Validate fileOutputDir, localDeliveryDir and trackingOutputDir
             String fileOutputDir = (String) properties.get("fileOutputDir");
             File f = new File(fileOutputDir);
             if(f.exists()) {
@@ -834,6 +838,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
             		return ResponseHelper.getErrorResponse(500, "The local delivery directory is not able to create.", "The local delivery directory is not able to create.", null);
             	}
             }
+            
+            String trackingOutputDir = (String) properties.get("trackingOutputDir");
+            f = new File(trackingOutputDir);
+            if(f.exists()) {
+            	if(!f.canWrite()) {
+            		return ResponseHelper.getErrorResponse(500, "The tracking output directory is not writable.", "The tracking output directory is not writable.", null);
+            	}
+            } else {
+            	if(!f.mkdir()) {
+            		return ResponseHelper.getErrorResponse(500, "The tracking output directory is not able to create.", "The tracking output directory is not able to create.", null);
+            	}
+            }
             	
     		AppProperties.setDBProperty("taskQueueMaxLength", ((Integer) properties.get("taskQueueMaxLength")).toString());
     		AppProperties.setDBProperty("exportTaskQueueMaxLength", ((Integer) properties.get("exportTaskQueueMaxLength")).toString());
@@ -842,6 +858,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		AppProperties.setDBProperty("dateShift", (String) properties.get("dateShift"));
     		AppProperties.setDBProperty("fileOutputDir", (String) properties.get("fileOutputDir"));
     		AppProperties.setDBProperty("localDeliveryDir", (String) properties.get("localDeliveryDir"));
+    		AppProperties.setDBProperty("trackingOutputDir", (String) properties.get("trackingOutputDir")); 
 
             return ResponseHelper.getJsonResponseGen(200, properties);
 

@@ -81,6 +81,12 @@
           <p class="help-block">The directory where exported files are stored when the "Deliver Exports To Remote Sites" is set to no.  This directory defaults to the system temp direcotry.</p>
           <div class="help-block" *ngIf="(!localDeliveryDir.hasError('required') && localDeliveryDir.hasError('validateEqual')) && (localDeliveryDir.dirty || localDeliveryDir.touched)">Local Delivery Directory</div>
         </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': trackingOutputDir.invalid && (trackingOutputDir.dirty || trackingOutputDir.touched), 'has-success': trackingOutputDir.valid && (trackingOutputDir.dirty || trackingOutputDir.touched) }">
+          <label>Export Mapping Directory</label>
+          <input type="text" class="form-control" formControlName="trackingOutputDir" name="trackingOutputDir" />
+          <p class="help-block">The directory where mapping files will be created for data exports. The mapping files include patient study id mappings and the date offset used for the patient.</p>
+          <div class="help-block" *ngIf="(!trackingOutputDir.hasError('required') && trackingOutputDir.hasError('validateEqual')) && (trackingOutputDir.dirty || trackingOutputDir.touched)">Local Delivery Directory</div>
+        </div>
         <div class="row">
           <div class="col-xs-4">
             <button [disabled]="appConfigForm.invalid || loading" class="btn btn-primary btn-block btn-flat">
