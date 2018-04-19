@@ -30,7 +30,7 @@ export class SetupComponent implements OnInit {
       adminemail_confirmation: ['', [Validators.required, Validators.email]],
       adminpwd: ['', [Validators.required, Validators.minLength(8)]],
       adminpwd_confirmation: ['', [Validators.required, Validators.minLength(8)]],
-      adminrealname: ''
+      adminrealname: ['', [Validators.required, Validators.maxLength(20)]]
     })
   }
 
@@ -43,25 +43,30 @@ export class SetupComponent implements OnInit {
   get adminrealname() { return this.setupForm.get('adminrealname'); }
   
   onSubmit() {
-    this.loading = true;
-    this.setupService.setupSite(this.setupForm.value)
-                     .subscribe(response => {
-                      localStorage.setItem('currentUser', JSON.stringify(response['user']));
-                      localStorage.setItem('jwt', JSON.stringify(response['token']));
-                      this.router.navigate(['/queries-from-me']);
-                     },
-                      error => {
-                        if(error.status === 401){
-                          this.loading = false;
-                          this.error = "Invalid Site-name and Site-key combination."
-                        } else if(error.status === 500){
-                          this.loading = false;
-                          this.error = "An unexpected error occurred.  Please contact the system admin."
-                        } else if(error.status === 404){
-                          this.loading = false;
-                          this.error = "Please double check you application.properties file to make sure central.server.url is set correctly."
-                        }
-                      });
+    if(this.setupForm.valid){
+      this.loading = true;
+      this.setupService.setupSite(this.setupForm.value)
+                      .subscribe(response => {
+                        localStorage.setItem('currentUser', JSON.stringify(response['user']));
+                        localStorage.setItem('jwt', JSON.stringify(response['token']));
+                        this.router.navigate(['/queries-from-me']);
+                      },
+                        error => {
+                          if(error.status === 401){
+                            this.loading = false;
+                            this.error = "Invalid Site-name and Site-key combination."
+                          } else if(error.status === 500){
+                            this.loading = false;
+                            this.error = "An unexpected error occurred.  Please contact the system admin."
+                          } else if(error.status === 404){
+                            this.loading = false;
+                            this.error = "Please double check you application.properties file to make sure central.server.url is set correctly."
+                          }
+                        });
+    } else {
+      Object.keys(this.setupForm.controls).forEach(k => {
+        this.setupForm.get(k).markAsTouched();
+      })
+    }
   }
-
 }

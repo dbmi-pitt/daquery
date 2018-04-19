@@ -41,7 +41,8 @@
       <div class="form-group has-feedback" [ngClass]="{'has-error': adminrealname.invalid && (adminrealname.dirty || adminrealname.touched), 'has-success': adminrealname.valid && (adminrealname.dirty || adminrealname.touched) }">
         <input type="text" formControlName="adminrealname" class="form-control" name="admin-real-name" placeholder="Admin Real Name" />
         <span class="fa fa-user-o form-control-feedback"></span>
-        <div class="help-block" *ngIf="adminrealname.invalid && (adminrealname.dirty || adminrealname.touched)">Please enter a real name</div>
+        <div class="help-block" *ngIf="adminrealname.hasError('required') && (adminrealname.dirty || adminrealname.touched)">Please enter a real name</div>
+        <div class="help-block" *ngIf="adminrealname.hasError('maxlength') && (adminrealname.dirty || adminrealname.touched)">Real name at most 20 characters</div>
       </div>
       <div class="row">
         <div class="col-xs-12">
