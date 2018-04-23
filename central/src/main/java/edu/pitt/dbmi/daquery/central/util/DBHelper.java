@@ -226,6 +226,7 @@ public class DBHelper
 				if(net != null) {
 					if (net.getDataModel() != null) {
 						net.getDataModel().setDataSources(new HashSet<DataSource>());
+						net.getDataModel().setDataExportConf("");
 					}
 					networks.add(net);
 				}
