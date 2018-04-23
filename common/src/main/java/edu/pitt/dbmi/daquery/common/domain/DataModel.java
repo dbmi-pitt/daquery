@@ -144,9 +144,16 @@ public class DataModel extends DaqueryObject implements Serializable
         Set<DataAttribute> tempAttr = this.getAttributes();
         tempAttr.remove("owner");
         tempDM.setAttributes(new HashSet<DataAttribute>());
-        tempDM.setDataExportConf(this.getDataExportConf());
+        //just in case there are some double quotes in the XML, replace them with single quotes
+        //otherwise the JSON thinks it is an unterminated string
+        tempDM.setDataExportConf(this.getDataExportConf().replace('"', '\''));
         return gson.toJson(tempDM);
         
+	}
+	
+	private String escapeQuotes(String inputStr) {
+		String retString = inputStr.replace('"', '\"');
+		return retString;
 	}
 
 }

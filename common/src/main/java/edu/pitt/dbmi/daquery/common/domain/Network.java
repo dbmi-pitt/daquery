@@ -3,8 +3,12 @@ package edu.pitt.dbmi.daquery.common.domain;
 import java.io.Serializable;
 import javax.persistence.*;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,10 +53,11 @@ public class Network extends DaqueryObject implements Serializable {
     @JoinColumn(name="DATA_MODEL_ID")
     private DataModel dataModel;
 	
+	//Initialize to an empty set to avoid NullpointerExceptions in other parts of code
 	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "OUTGOING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
-	private Set<Site> outgoingQuerySites;
+	private Set<Site> outgoingQuerySites = new HashSet<Site>();
 
 	@Expose
 	@Column(name="MAX_DATE_SHIFT")
@@ -91,10 +96,11 @@ public class Network extends DaqueryObject implements Serializable {
 	private Integer aggregateObfuscateThreshold;
 
 	
+	//Initialize to an empty set to avoid NullpointerExceptions in other parts of code
 	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "INCOMING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
-	private Set<Site> incomingQuerySites;
+	private Set<Site> incomingQuerySites = new HashSet<Site>();
 	
 	public Network(){}
 	
@@ -200,6 +206,30 @@ public class Network extends DaqueryObject implements Serializable {
 	public String toString() {
 		return "Network [id=" + id + ", network id=" + networkId + ", name=" + name  + "]";
 	}
-    
+/*    
+    @Override
+    public String toJson() {
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        Network tempNet = new Network();
+        tempNet.setId(this.getId());
+        tempNet.setNetworkId(this.getNetworkId());
+        tempNet.setName(this.getName());
+        tempNet.setMaxDateShift(this.getMaxDateShift());
+        tempNet.setMinDateShift(this.getMinDateShift());
+        tempNet.setShiftDates(this.getShiftDates());
+        tempNet.setSerializePatientId(this.getSerializePatientId());
+        tempNet.setObfuscateAggregateResults(this.getObfuscateAggregateResults());
+        tempNet.setAggregateObfuscateType(this.getAggregateObfuscateType());
+        tempNet.setShiftDates(this.getShiftDates());
+        tempNet.setAggregateObfuscatePercent(this.getAggregateObfuscatePercent());
+        tempNet.setAggregateObfuscateRange(this.getAggregateObfuscateRange());
+        tempNet.setAggregateObfuscateThreshold(this.getAggregateObfuscateThreshold());        
+        //tempNet.setDataModel(this.getDataModel());
+        String strJson = gson.toJson(tempNet);
+        return strJson;
+        //JsonObject jobj = gson.fromJson(strJson, Network.class);
+    	
+    }
+ */   
 
 }
