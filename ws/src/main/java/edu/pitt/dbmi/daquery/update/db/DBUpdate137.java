@@ -52,7 +52,7 @@ public class DBUpdate137 implements DBUpdater
 	
 	//added this to avoid delimiter errors in SQL insert statement
 	private String escapeSingleQuotes(String inputStr) {
-		String retString = inputStr.replace("'", "\'");
+		String retString = inputStr.replace("'", "''");
 		return retString;
 	}
 
