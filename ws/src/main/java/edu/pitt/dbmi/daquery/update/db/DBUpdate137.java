@@ -46,7 +46,14 @@ public class DBUpdate137 implements DBUpdater
 		
 		//for all data models add the export xml for CDM
 		Statement st = conn.createStatement();
-		st.executeUpdate("update DATA_MODEL set DATA_EXPORT_CONf = '" + exportXML + "'");
+		st.executeUpdate("update DATA_MODEL set DATA_EXPORT_CONF = '" + escapeSingleQuotes(exportXML) + "'");
 		conn.commit();
 	}
+	
+	//added this to avoid delimiter errors in SQL insert statement
+	private String escapeSingleQuotes(String inputStr) {
+		String retString = inputStr.replace("'", "\'");
+		return retString;
+	}
+
 }
