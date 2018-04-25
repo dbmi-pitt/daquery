@@ -1257,7 +1257,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	        	if(! outputDirectory.mkdirs())
 	        		return ResponseHelper.getErrorResponse(500, "Unable to create output directory.", "The directory " + outputDirectoryPath + " could not be created when sending file " + filename + ".", null);
 	        }
-	        File groupOutputDir = Paths.get(outputDirectoryPath, outputDirName).toFile();
+	        File groupOutputDir = Paths.get(outputDirectoryPath, outputDirName.replaceAll(":", "-")).toFile();
 	        if(! groupOutputDir.exists())
 	        {
 	        	if(! groupOutputDir.mkdirs())
