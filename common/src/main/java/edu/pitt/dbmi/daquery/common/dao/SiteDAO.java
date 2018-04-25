@@ -56,6 +56,13 @@ public class SiteDAO extends AbstractDAO {
         }
             
     }
+    
+    public static List<Site> querySitesByUUID(String uuid) throws Exception {
+    	List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    	ParameterItem piUUId = new ParameterItem("uuid", uuid);
+		pList.add(piUUId);
+		return executeQueryReturnList(Site.FIND_BY_UUID, pList, logger);
+    }
 
     public static Site querySiteByID(String id) throws Exception {
     	// auto generated ID
@@ -125,6 +132,16 @@ public class SiteDAO extends AbstractDAO {
 		catch(Throwable t)
 		{
 		    String msg = "Unexpected error while querying a site by name or id: [" + nameOrId + "].";
+		    logger.log(Level.SEVERE, msg, t);
+		    throw new DaqueryException(msg + "  Check server logs for more information.", t);
+		}
+    }
+    
+    public static List<Site> getSitesByUUID(String uuid) throws DaqueryException {
+    	try {
+    		return querySitesByUUID(uuid);
+    	} catch(Throwable t) {
+		    String msg = "Unexpected error while querying a site by UUID: [" + uuid + "].";
 		    logger.log(Level.SEVERE, msg, t);
 		    throw new DaqueryException(msg + "  Check server logs for more information.", t);
 		}

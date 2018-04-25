@@ -130,26 +130,26 @@ public class DataModel extends DaqueryObject implements Serializable
 		}
 	}
 	
-	@Override
-	public String toJson() {
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        DataModel tempDM = new DataModel();
-        tempDM.setId(this.getId());
-        tempDM.setName(this.getName());
-        tempDM.setDescription(this.getDescription());
-        tempDM.setDataModelId(this.getDataModelId());
-        //CDB I had to remove this otherwise it throws a Stack Overflow
-        //The attributes contain an owner which is a DataModel.  This DataModel 
-        //generates attributes with another DataModel, etc.
-        Set<DataAttribute> tempAttr = this.getAttributes();
-        tempAttr.remove("owner");
-        tempDM.setAttributes(new HashSet<DataAttribute>());
-        //just in case there are some double quotes in the XML, replace them with single quotes
-        //otherwise the JSON thinks it is an unterminated string
-        tempDM.setDataExportConf(this.getDataExportConf().replace('"', '\''));
-        return gson.toJson(tempDM);
-        
-	}
+//	@Override
+//	public String toJson() {
+//        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+//        DataModel tempDM = new DataModel();
+//        tempDM.setId(this.getId());
+//        tempDM.setName(this.getName());
+//        tempDM.setDescription(this.getDescription());
+//        tempDM.setDataModelId(this.getDataModelId());
+//        //CDB I had to remove this otherwise it throws a Stack Overflow
+//        //The attributes contain an owner which is a DataModel.  This DataModel 
+//        //generates attributes with another DataModel, etc.
+//        Set<DataAttribute> tempAttr = this.getAttributes();
+//        tempAttr.remove("owner");
+//        tempDM.setAttributes(new HashSet<DataAttribute>());
+//        //just in case there are some double quotes in the XML, replace them with single quotes
+//        //otherwise the JSON thinks it is an unterminated string
+//        tempDM.setDataExportConf(this.getDataExportConf().replace('"', '\''));
+//        return gson.toJson(tempDM);
+//        
+//	}
 	
 	private String escapeQuotes(String inputStr) {
 		String retString = inputStr.replace('"', '\"');
