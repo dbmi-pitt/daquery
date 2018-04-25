@@ -2,6 +2,7 @@ package edu.pitt.dbmi.daquery.central.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -31,6 +32,9 @@ import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
 import edu.pitt.dbmi.daquery.central.util.EmailHelper;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
@@ -401,7 +405,12 @@ public class CentralService{
 			if(net.getDataModel() == null)
 				return(ResponseHelper.getErrorResponse(404, "Data model not found.", "The network with id " + netId + " does not have a data model associated with it.", null));
 			
-			return(ResponseHelper.getJsonResponseGen(200, net.getDataModel()));			
+			//we need to remove the DataAttribute Set from the DataModel before we 
+			//return it as JSON.  We also need to remove the DataSource info
+			DataModel dmTemp = net.getDataModel();
+			dmTemp.setAttributes(new HashSet<DataAttribute>());
+			dmTemp.setDataSources(new HashSet<DataSource>());
+			return(ResponseHelper.getJsonResponseGen(200, dmTemp));			
 		}
 		catch(Throwable t)
 		{
