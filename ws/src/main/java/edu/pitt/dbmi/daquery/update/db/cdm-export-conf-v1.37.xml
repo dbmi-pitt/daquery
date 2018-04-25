@@ -27,9 +27,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='encounter.csv' source='encounter'>
-	<idColumn>ENCOUNTERID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Endcounter Id' colName='ENCOUNTERID' />
 	    <field name='Admit Date' colName='ADMIT_DATE' />
 	    <field name='Admit Time' colName='ADMIT_TIME' />
 	    <field name='Discharge Date' colName='DISCHARGE_DATE' />
@@ -52,9 +52,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='diagnosis.csv' source='diagnosis'>
-	<idColumn>DIAGNOSISID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Diagnosis Id' colName='DIAGNOSISID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Enc Type' colName='ENC_TYPE' />
 	    <field name='Admit Date' colName='ADMIT_DATE' />
@@ -71,9 +71,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='procedures.csv' source='procedures'>
-	<idColumn>PROCEDURESID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Procedures Id' colName='PROCEDURESID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Enc Type' colName='ENC_TYPE' />
 	    <field name='Admit Date' colName='ADMIT_DATE' />
@@ -87,9 +87,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='vital.csv' source='vital'>
-	<idColumn>VITALID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Vital Id' colName='VITALID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Measure Date' colName='MEASURE_DATE' />
 	    <field name='Measure Time' colName='MEASURE_TIME' />
@@ -113,9 +113,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='dispensing.csv' source='dispensing'>
-	<idColumn>DISPENSINGID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Dispensing Id' colName='DISPENSINGID' />
 	    <field name='Prescribing Id' colName='PRESCRIBINGID' />
 	    <field name='Dispense Date' colName='DISPENSE_DATE' />
 	    <field name='NDC' colName='NDC' />
@@ -125,9 +125,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='lab_result_cm.csv' source='lab_result_cm'>
-	<idColumn>LAB_RESULT_CM_ID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Lab Result CM Id' colName='LAB_RESULT_CM_ID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Lab Name' colName='LAB_NAME' />
 	    <field name='Specimen Source' colName='SPECIMEN_SOURCE' />
@@ -160,9 +160,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='condition.csv' source='condition'>
-	<idColumn>CONDITIONID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Condition Id' colName='CONDITIONID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Report Date' colName='REPORT_DATE' />
 	    <field name='Resolve Date' colName='RESOLVE_DATE' />
@@ -178,9 +178,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='pro_cm.csv' source='pro_cm'>
-	<idColumn>PRO_CM_ID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='PRO CM Id' colName='PRO_CM_ID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='PRO Item' colName='PRO_ITEM' />
 	    <field name='PRO LOINC' colName='PRO_LOINC' />
@@ -195,9 +195,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='prescribing.csv' source='prescribing'>
-	<idColumn>PRESCRIBINGID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Prescribing Id' colName='PRESCRIBINGID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='RX Provider Id' colName='RX_PROVIDERID' />
 	    <field name='RX Order Date' colName='RX_ORDER_DATE' />
@@ -219,9 +219,9 @@
 	</custom-column-set>
 </outputFile>
 <outputFile name='pcornet_trial.csv' source='pcornet_trial'>
-	<idColumn>TRIALID</idColumn>
+	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Pat Id' colName='PATID' />
+	    <field name='Trial Id' colName='TRIALID' />
 	    <field name='Participant Id' colName='PARTICIPANTID' />
 	    <field name='Trial Site Id' colName='TRIAL_SITEID' />
 	    <field name='Trial Enroll Date' colName='TRIAL_ENROLL_DATE' />
