@@ -308,7 +308,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            Site site = SiteDAO.querySiteByID(id);
+            Site site = SiteDAO.getSitesByUUID(id).get(0);
             
             if (site == null) {
                 return Response.status(NOT_FOUND).build();

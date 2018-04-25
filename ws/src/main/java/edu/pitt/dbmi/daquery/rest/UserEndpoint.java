@@ -183,7 +183,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	Site site = null;
 	    	if(hasSite)
 	    	{
-	    		site = SiteDAO.getSiteByNameOrId(siteId);
+	    		site = SiteDAO.getSitesByUUID(siteId).get(0);
 	    		if(site == null)
 	    			return(ResponseHelper.getErrorResponse(400, "Remote site not found", "A site was not found with id " + siteId + " while trying to find the users of this site.", null));
 	    	}
@@ -408,11 +408,11 @@ public class UserEndpoint extends AbstractEndpoint {
     		return(ResponseHelper.getErrorResponse(500, msg + " Check the server local and site server logs.", null, t));
     	}
     }
-    private Hashtable<String, UserInfo> allUsersForSite(String siteId, boolean forceLocal) throws Exception
+    private Hashtable<String, UserInfo> allUsersForSite(String uuid, boolean forceLocal) throws Exception
     {
     	Site mySite = SiteDAO.getLocalSite();
     	Hashtable<String, UserInfo> rVal = new Hashtable<String, UserInfo>();
-    	if(mySite.getSiteId().equals(siteId) || forceLocal)
+    	if(mySite.getSiteId().equals(uuid) || forceLocal)
     	{
     		List<DaqueryUser> users = DaqueryUserDAO.queryAllUsers();
     		for(DaqueryUser user : users)
@@ -420,7 +420,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     	else
     	{
-    		Site site = SiteDAO.getSiteByNameOrId(siteId);
+    		Site site = SiteDAO.getSitesByUUID(uuid).get(0);
     		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/user-info", null, null);
     		String json = resp.readEntity(String.class);
     		ObjectMapper mapper = new ObjectMapper();
