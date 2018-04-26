@@ -67,9 +67,9 @@ export class DeidPropsComponent implements OnInit {
       const dateShiftingChange$ = this.deidForm.get('dateShifting').valueChanges;
       dateShiftingChange$.subscribe(val => {
         if(val){
-          this.deidForm.get('minDateShift').setValidators([Validators.required, Validators.min(0)]);
+          this.deidForm.get('minDateShift').setValidators([Validators.required]);
           this.deidForm.get('minDateShift').updateValueAndValidity();
-          this.deidForm.get('maxDateShift').setValidators([Validators.required, Validators.min(0)]);
+          this.deidForm.get('maxDateShift').setValidators([Validators.required]);
           this.deidForm.get('maxDateShift').updateValueAndValidity();
         } else {
           this.deidForm.get('minDateShift').clearValidators();
