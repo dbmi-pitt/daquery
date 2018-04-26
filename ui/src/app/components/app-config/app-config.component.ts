@@ -25,8 +25,8 @@ export class AppConfigComponent implements OnInit {
       taskQueueMaxLength: ['', [Validators.required, Validators.min(1)]],
       exportTaskQueueMaxLength: ['', [Validators.required, Validators.min(1)]],
       deliverData:  ['', [Validators.required]],
-      threeDigitZip: ['', [Validators.required]],
-      dateShift: ['', [Validators.required]],
+      // threeDigitZip: ['', [Validators.required]],
+      // dateShift: ['', [Validators.required]],
       fileOutputDir: ['', [Validators.required]],
       localDeliveryDir: ['', [Validators.required]],
       trackingOutputDir: ['', [Validators.required]]
@@ -36,8 +36,8 @@ export class AppConfigComponent implements OnInit {
   get taskQueueMaxLength() { return this.appConfigForm.get('taskQueueMaxLength'); }
   get exportTaskQueueMaxLength() { return this.appConfigForm.get('exportTaskQueueMaxLength'); }
   get deliverData() { return this.appConfigForm.get('deliverData'); }
-  get threeDigitZip() { return this.appConfigForm.get('threeDigitZip'); }
-  get dateShift() { return this.appConfigForm.get('dateShift'); }
+  // get threeDigitZip() { return this.appConfigForm.get('threeDigitZip'); }
+  // get dateShift() { return this.appConfigForm.get('dateShift'); }
   get fileOutputDir() { return this.appConfigForm.get('fileOutputDir'); }
   get localDeliveryDir() { return this.appConfigForm.get('localDeliveryDir'); }
   get trackingOutputDir() { return this.appConfigForm.get('trackingOutputDir'); }
@@ -51,8 +51,8 @@ export class AppConfigComponent implements OnInit {
                         this.appConfigForm.get('taskQueueMaxLength').setValue(parseInt(res.taskQueueMaxLength));
                         this.appConfigForm.get('exportTaskQueueMaxLength').setValue(parseInt(res.exportTaskQueueMaxLength));
                         this.appConfigForm.get('deliverData').setValue(res.deliverData);
-                        this.appConfigForm.get('threeDigitZip').setValue(res.threeDigitZip);
-                        this.appConfigForm.get('dateShift').setValue(res.dateShift);
+                        // this.appConfigForm.get('threeDigitZip').setValue(res.threeDigitZip);
+                        // this.appConfigForm.get('dateShift').setValue(res.dateShift);
                         this.appConfigForm.get('fileOutputDir').setValue(res.fileOutputDir);
                         this.appConfigForm.get('localDeliveryDir').setValue(res.localDeliveryDir);
                         this.appConfigForm.get('trackingOutputDir').setValue(res.localDeliveryDir);

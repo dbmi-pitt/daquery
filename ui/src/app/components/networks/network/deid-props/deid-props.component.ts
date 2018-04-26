@@ -89,6 +89,7 @@ export class DeidPropsComponent implements OnInit {
   get dateShifting() { return this.deidForm.get('dateShifting'); }
   get minDateShift() { return this.deidForm.get('minDateShift'); }
   get maxDateShift() { return this.deidForm.get('maxDateShift'); }
+  get truncateZipCode() { return this.deidForm.get('truncateZipCode'); }
   get serializeID() { return this.deidForm.get('serializeID'); }
 
   createForm() {
@@ -101,6 +102,7 @@ export class DeidPropsComponent implements OnInit {
       dateShifting: [''],
       minDateShift: [''],
       maxDateShift: [''],
+      truncateZipCode: [''],
       serializeID: ['']
     })
   }
@@ -114,8 +116,8 @@ export class DeidPropsComponent implements OnInit {
     this.deidForm.get('dateShifting').setValue(network.shiftDates);
     this.deidForm.get('minDateShift').setValue(network.minDateShift);
     this.deidForm.get('maxDateShift').setValue(network.maxDateShift);
+    this.deidForm.get('truncateZipCode').setValue(network.truncateZipCode);
     this.deidForm.get('serializeID').setValue(network.serializePatientId);
-
   }
 
   getNetwork(id: number){
@@ -137,6 +139,7 @@ export class DeidPropsComponent implements OnInit {
         shiftDates: this.deidForm.get('dateShifting').value,
         minDateShift: this.deidForm.get('minDateShift').value,
         maxDateShift: this.deidForm.get('maxDateShift').value,
+        truncateZipCode: this.deidForm.get('truncateZipCode').value,
         serializePatientId: this.deidForm.get('serializeID').value
       };
       this.success = false;
