@@ -100,7 +100,7 @@ public class DataExporter {
 		this.dataDir = dataDir;
 		this.deliverData = AppProperties.getDeliverData();
 		this.debugDataExport = AppProperties.getDebugDataExport();
-		this.threeDigitZip = AppProperties.getThreeDigitZip();
+		this.threeDigitZip =  daqueryResponse.getRequest().getNetwork().getShiftDates();
 		
 		this.dateShift = daqueryResponse.getRequest().getNetwork().getShiftDates();
 		this.idList = idList;
@@ -767,7 +767,8 @@ public class DataExporter {
 		if (birthday == null) {
 			return "";
 		}
-		if (StringHelper.stringToBool(AppProperties.getDBProperty("date.shift"))) {
+		Network net = daqueryRequest.getNetwork();
+		if (net.getShiftDates()) {
 			bDay = dateShift(getShiftDays(ptId), birthday);
 			if (bDay == null) {
 				return "";
@@ -800,8 +801,8 @@ public class DataExporter {
 	private Date dateShift(int daysToShift, Date date) throws DaqueryException {
 		if (date == null)
 			return (null);
-
-		if (StringHelper.stringToBool(AppProperties.getDBProperty("date.shift"))) {
+		Network net = daqueryRequest.getNetwork();
+		if (net.getShiftDates()) {
 			Calendar dt = Calendar.getInstance();
 			dt.setTime(date);
 			dt.add(Calendar.DATE, daysToShift);
