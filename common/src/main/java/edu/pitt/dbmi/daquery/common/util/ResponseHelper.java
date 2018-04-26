@@ -229,7 +229,8 @@ public class ResponseHelper {
     		}	    	
     		else
     		{
-    			val = "[" + resp.getStatus() + "]" + resp.readEntity(String.class);
+    			//val = "ResponseStatus:" + resp.getStatus() + " " + resp.readEntity(String.class);
+    			val = resp.readEntity(String.class);
     		}
 	    	if(StringHelper.isEmpty(val)) return(null);
 			ObjectMapper mapper = new ObjectMapper();
