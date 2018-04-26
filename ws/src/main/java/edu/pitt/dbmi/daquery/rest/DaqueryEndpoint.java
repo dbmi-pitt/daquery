@@ -462,7 +462,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			String requestSiteId = request.getRequestSite().getSiteId();
 			Site mySite = SiteDAO.getLocalSite();
 			
-			Site requestSite = SiteDAO.getSiteByNameOrId(requestSiteId);
+			Site requestSite = SiteDAO.getSitesByUUID(requestSiteId).get(0);
 			if(requestSite == null)
 			{
 				String msg = "A request must have a valid inquiry attached with an associated data type ";
@@ -580,7 +580,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		String requestSiteId = rVal.getRequest().getRequestSite().getSiteId();
     		if( !mySite.getSiteId().equals(requestSiteId))
     		{	// remote response
-    			Site remoteSite = SiteDAO.querySiteByID(requestSiteId);
+    			Site remoteSite = SiteDAO.getSitesByUUID(requestSiteId).get(0);
     			httpResponse = WSConnectionUtil.getFromRemoteSite(remoteSite, "/response/" + id, null, null);
     			
     			if(httpResponse.getStatus() == 200)
@@ -767,8 +767,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		properties.put("taskQueueMaxLength", AppProperties.getDBProperty("taskQueueMaxLength"));
     		properties.put("exportTaskQueueMaxLength", AppProperties.getDBProperty("exportTaskQueueMaxLength"));
     		properties.put("deliverData", AppProperties.getDBProperty("deliverData"));
-    		properties.put("threeDigitZip", AppProperties.getDBProperty("threeDigitZip"));
-    		properties.put("dateShift", AppProperties.getDBProperty("dateShift"));
+//    		properties.put("threeDigitZip", AppProperties.getDBProperty("threeDigitZip"));
+//    		properties.put("dateShift", AppProperties.getDBProperty("dateShift"));
     		properties.put("fileOutputDir", AppProperties.getDBProperty("fileOutputDir"));
     		properties.put("localDeliveryDir", AppProperties.getDBProperty("localDeliveryDir"));
     		properties.put("trackingOutputDir", AppProperties.getDBProperty("trackingOutputDir"));
@@ -854,8 +854,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		AppProperties.setDBProperty("taskQueueMaxLength", ((Integer) properties.get("taskQueueMaxLength")).toString());
     		AppProperties.setDBProperty("exportTaskQueueMaxLength", ((Integer) properties.get("exportTaskQueueMaxLength")).toString());
     		AppProperties.setDBProperty("deliverData", (String) properties.get("deliverData"));
-    		AppProperties.setDBProperty("threeDigitZip", (String) properties.get("threeDigitZip"));
-    		AppProperties.setDBProperty("dateShift", (String) properties.get("dateShift"));
+//    		AppProperties.setDBProperty("threeDigitZip", (String) properties.get("threeDigitZip"));
+//    		AppProperties.setDBProperty("dateShift", (String) properties.get("dateShift"));
     		AppProperties.setDBProperty("fileOutputDir", (String) properties.get("fileOutputDir"));
     		AppProperties.setDBProperty("localDeliveryDir", (String) properties.get("localDeliveryDir"));
     		AppProperties.setDBProperty("trackingOutputDir", (String) properties.get("trackingOutputDir")); 
@@ -939,7 +939,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		DaqueryResponse rVal = null;
 		try
 		{
-			Site site = SiteDAO.getSiteByNameOrId(request.getRequesterSite().getName());
+			Site site = SiteDAO.getSitesByUUID(request.getRequesterSite().getSiteId()).get(0);
 			request.setId(null);
 			request.setRequesterSite(site);
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());

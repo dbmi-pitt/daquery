@@ -321,6 +321,7 @@ public class NetworkDAO extends AbstractDAO {
     		network.setShiftDates(n.getShiftDates());
     		network.setMinDateShift(n.getMinDateShift());
     		network.setMaxDateShift(n.getMaxDateShift());
+    		network.setTruncateZipCode(n.getTruncateZipCode());
     		network.setSerializePatientId(n.getSerializePatientId());
     		
 			s.saveOrUpdate(network);
