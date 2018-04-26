@@ -204,7 +204,7 @@ public class DataExporter {
 			trackingFileWriter = new FileWriter(trackingFilePath, true);
 			if(currentFile == 1)
 			{
-				trackingFileWriter.write("Export started: " + dateFormat.format(new Date()) + "\nl");
+				trackingFileWriter.write("Export started: " + dateFormat.format(new Date()) + "\n");
 				trackingFileWriter.write("exported patient id, db patient id, date shift\n");
 			}
 			File tmpDir = FileHelper.createTempDirectory();

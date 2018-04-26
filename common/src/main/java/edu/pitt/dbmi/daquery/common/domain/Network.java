@@ -1,16 +1,26 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
 import java.io.Serializable;
-import javax.persistence.*;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.Expose;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import com.google.gson.annotations.Expose;
 
 @NamedQueries({
     @NamedQuery(name = Network.FIND_ALL, query = "SELECT u FROM Network u ORDER BY u.name DESC"),
@@ -33,7 +43,17 @@ public class Network extends DaqueryObject implements Serializable {
     public static final String FIND_BY_UUID = "Network.findByUUID";
     public static final String FIND_BY_NAME = "Network.findByName";
 
-
+	private static final Integer MAXDATESHIFT_DEFAULT = 0;
+	private static final Integer MINDATESHIFT_DEFAULT = -365;
+	private static final Boolean SHIFTDATES_DEFAULT = true;
+	private static final Boolean SERIALIZEPATIENTID_DEFAULT = true;
+	private static final Boolean OBFUSCATEAGGREGATERESULTS_DEFAULT = true;
+	private static final String AGGREGATEOBFUSCATETYPE_DEFAULT = "RANGE"; //RANGE or PERCENTAGE are the allowed values
+	private static final Float AGGREGATEOBFUSCATEPERCENT_DEFAULT = 0.1f;
+	private static final Integer AGGREGATEOBFUSCATERANGE_DEFAULT = 10;
+	private static final Integer AGGREGATEOBFUSCATETHRESHOLD_DEFAULT = 10;
+	private static final Boolean TRUNCATEZIPCODE_DEFAULT = true;    
+	
     @Expose
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -108,7 +128,6 @@ public class Network extends DaqueryObject implements Serializable {
 	public Network(){}
 	
 	public Network(boolean generateUUID) {
-		setDefaults();
 		if (generateUUID) {
 			UUID newUUID = UUID.randomUUID();
 			this.setNetworkId(newUUID.toString());
@@ -116,21 +135,7 @@ public class Network extends DaqueryObject implements Serializable {
 	}
 	
 	public Network(String uuid) {
-		setDefaults();
 		this.networkId = uuid;
-	}
-
-	private void setDefaults()
-	{
-		maxDateShift = 0;
-		minDateShift = -365;
-		shiftDates = true;
-		serializePatientId = true;
-		obfuscateAggregateResults = true;
-		aggregateObfuscateType = "RANGE"; //RANGE or PERCENTAGE are the allowed values
-		aggregateObfuscatePercent = 0.1f;
-		aggregateObfuscateRange = 10;
-		aggregateObfuscateThreshold = 10;		
 	}
 	
 	public long getId()
@@ -176,69 +181,120 @@ public class Network extends DaqueryObject implements Serializable {
 		incomingQuerySites = sites;
 	}
 	
-	public Integer getMaxDateShift(){return maxDateShift;}
+	public Integer getMaxDateShift()
+	{
+		if(maxDateShift == null)
+			return MAXDATESHIFT_DEFAULT;
+		else
+			return maxDateShift;
+	}
 	public void setMaxDateShift(Integer val){maxDateShift = val;}
 	
-	public Integer getMinDateShift(){return minDateShift;}
+	public Integer getMinDateShift()
+	{
+		if(minDateShift == null)
+			return MINDATESHIFT_DEFAULT;
+		else
+			return minDateShift;
+	}
 	public void setMinDateShift(Integer val){minDateShift = val;}
 	
-	public Boolean getShiftDates(){return shiftDates;}
+	public Boolean getShiftDates()
+	{
+		if(shiftDates == null)
+			return SHIFTDATES_DEFAULT;
+		else
+			return shiftDates;
+	}
 	public void setShiftDates(Boolean val){shiftDates = val;}
 	
-	public Boolean getSerializePatientId(){return serializePatientId;}
+	public Boolean getSerializePatientId()
+	{
+		if(serializePatientId == null)
+			return SERIALIZEPATIENTID_DEFAULT;
+		else
+			return serializePatientId;
+	}
 	public void setSerializePatientId(Boolean val){serializePatientId = val;}
 	
-	public Boolean getObfuscateAggregateResults(){return obfuscateAggregateResults;}
+	public Boolean getObfuscateAggregateResults()
+	{
+		if(obfuscateAggregateResults == null)
+			return OBFUSCATEAGGREGATERESULTS_DEFAULT;
+		else
+			return obfuscateAggregateResults;
+	}
 	public void setObfuscateAggregateResults(Boolean val){obfuscateAggregateResults = val;}
 	
-	public String getAggregateObfuscateType(){return aggregateObfuscateType;}
+	public String getAggregateObfuscateType()
+	{
+		if(aggregateObfuscateType == null)
+			return AGGREGATEOBFUSCATETYPE_DEFAULT;
+		else
+			return aggregateObfuscateType;
+	}
 	public void setAggregateObfuscateType(String val){aggregateObfuscateType = val;}
 	
-	public Float getAggregateObfuscatePercent(){return aggregateObfuscatePercent;}
+	public Float getAggregateObfuscatePercent()
+	{
+		if(aggregateObfuscatePercent == null)
+			return AGGREGATEOBFUSCATEPERCENT_DEFAULT;
+		else
+			return aggregateObfuscatePercent;
+	}
 	public void setAggregateObfuscatePercent(Float val){aggregateObfuscatePercent = val;}
 	
-	public Integer getAggregateObfuscateRange(){return aggregateObfuscateRange;}
+	public Integer getAggregateObfuscateRange()
+	{
+		if(aggregateObfuscateRange == null)
+			return AGGREGATEOBFUSCATERANGE_DEFAULT;
+		else
+			return aggregateObfuscateRange;
+	}
 	public void setAggregateObfuscateRange(Integer val){aggregateObfuscateRange = val;}
 	
-	public Integer getAggregateObfuscateThreshold(){return aggregateObfuscateThreshold;}
+	public Integer getAggregateObfuscateThreshold()
+	{
+		if(aggregateObfuscateThreshold == null)
+				return AGGREGATEOBFUSCATETHRESHOLD_DEFAULT;
+		else
+			return aggregateObfuscateThreshold;
+	}
 	public void setAggregateObfuscateThreshold(Integer val){aggregateObfuscateThreshold = val;}
 
-	//#TODO: add a method addIncomingSite(Site) 
-	
-	public Boolean getTruncateZipCode(){return truncateZipCode;}
+	public Boolean getTruncateZipCode()
+	{
+		if(truncateZipCode == null)
+			return TRUNCATEZIPCODE_DEFAULT;
+		else
+			return truncateZipCode;
+	}
 	public void setTruncateZipCode(Boolean trun){truncateZipCode = trun;}
 	
-	public DataModel getDataModel(){return(dataModel);}
+	public DataModel getDataModel()
+	{
+		return(dataModel);
+	}
 	public void setDataModel(DataModel model){dataModel = model;}
     
     @Override
 	public String toString() {
 		return "Network [id=" + id + ", network id=" + networkId + ", name=" + name  + "]";
 	}
-/*    
+
     @Override
     public String toJson() {
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        Network tempNet = new Network();
-        tempNet.setId(this.getId());
-        tempNet.setNetworkId(this.getNetworkId());
-        tempNet.setName(this.getName());
-        tempNet.setMaxDateShift(this.getMaxDateShift());
-        tempNet.setMinDateShift(this.getMinDateShift());
-        tempNet.setShiftDates(this.getShiftDates());
-        tempNet.setSerializePatientId(this.getSerializePatientId());
-        tempNet.setObfuscateAggregateResults(this.getObfuscateAggregateResults());
-        tempNet.setAggregateObfuscateType(this.getAggregateObfuscateType());
-        tempNet.setShiftDates(this.getShiftDates());
-        tempNet.setAggregateObfuscatePercent(this.getAggregateObfuscatePercent());
-        tempNet.setAggregateObfuscateRange(this.getAggregateObfuscateRange());
-        tempNet.setAggregateObfuscateThreshold(this.getAggregateObfuscateThreshold());        
-        //tempNet.setDataModel(this.getDataModel());
-        String strJson = gson.toJson(tempNet);
-        return strJson;
-        //JsonObject jobj = gson.fromJson(strJson, Network.class);
-    	
+        setMaxDateShift(this.getMaxDateShift());
+        setMinDateShift(this.getMinDateShift());
+        setShiftDates(this.getShiftDates());
+        setSerializePatientId(this.getSerializePatientId());
+        setObfuscateAggregateResults(this.getObfuscateAggregateResults());
+        setAggregateObfuscateType(this.getAggregateObfuscateType());
+        setAggregateObfuscatePercent(this.getAggregateObfuscatePercent());
+        setAggregateObfuscateRange(this.getAggregateObfuscateRange());
+        setAggregateObfuscateThreshold(this.getAggregateObfuscateThreshold());
+        setTruncateZipCode(this.getTruncateZipCode());
+        return super.toJson();
     }
- */   
 
 }
