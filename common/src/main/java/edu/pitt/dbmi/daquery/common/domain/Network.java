@@ -95,6 +95,9 @@ public class Network extends DaqueryObject implements Serializable {
 	@Column(name="AGGREGATE_OBFUSCATE_THRESHOLD")
 	private Integer aggregateObfuscateThreshold;
 
+	@Expose
+	@Column(name="TRUNCATE_ZIP_CODE")
+	private Boolean truncateZipCode;
 	
 	//Initialize to an empty set to avoid NullpointerExceptions in other parts of code
 	@Expose
@@ -105,6 +108,7 @@ public class Network extends DaqueryObject implements Serializable {
 	public Network(){}
 	
 	public Network(boolean generateUUID) {
+		setDefaults();
 		if (generateUUID) {
 			UUID newUUID = UUID.randomUUID();
 			this.setNetworkId(newUUID.toString());
@@ -112,6 +116,7 @@ public class Network extends DaqueryObject implements Serializable {
 	}
 	
 	public Network(String uuid) {
+		setDefaults();
 		this.networkId = uuid;
 	}
 
@@ -197,7 +202,11 @@ public class Network extends DaqueryObject implements Serializable {
 	
 	public Integer getAggregateObfuscateThreshold(){return aggregateObfuscateThreshold;}
 	public void setAggregateObfuscateThreshold(Integer val){aggregateObfuscateThreshold = val;}
+
 	//#TODO: add a method addIncomingSite(Site) 
+	
+	public Boolean getTruncateZipCode(){return truncateZipCode;}
+	public void setTruncateZipCode(Boolean trun){truncateZipCode = trun;}
 	
 	public DataModel getDataModel(){return(dataModel);}
 	public void setDataModel(DataModel model){dataModel = model;}
