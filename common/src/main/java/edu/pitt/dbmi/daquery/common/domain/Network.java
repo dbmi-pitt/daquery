@@ -48,7 +48,7 @@ public class Network extends DaqueryObject implements Serializable {
 	private static final Boolean SHIFTDATES_DEFAULT = true;
 	private static final Boolean SERIALIZEPATIENTID_DEFAULT = true;
 	private static final Boolean OBFUSCATEAGGREGATERESULTS_DEFAULT = true;
-	private static final String AGGREGATEOBFUSCATETYPE_DEFAULT = "RANGE"; //RANGE or PERCENTAGE are the allowed values
+	private static final String AGGREGATEOBFUSCATETYPE_DEFAULT = "range"; //RANGE or PERCENTAGE are the allowed values
 	private static final Float AGGREGATEOBFUSCATEPERCENT_DEFAULT = 0.1f;
 	private static final Integer AGGREGATEOBFUSCATERANGE_DEFAULT = 10;
 	private static final Integer AGGREGATEOBFUSCATETHRESHOLD_DEFAULT = 10;

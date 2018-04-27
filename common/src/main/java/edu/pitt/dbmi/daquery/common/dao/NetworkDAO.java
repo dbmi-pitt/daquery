@@ -213,6 +213,41 @@ public class NetworkDAO extends AbstractDAO {
     	}
     }
     
+    /* get a network based on its database id (NETWORK.ID) */
+    public static Network getNetworkById(long networkId) throws DaqueryException
+    {
+    	Session s = null;
+    	try
+    	{
+    		s = HibernateConfiguration.openSession();
+    		String hql = "select n FROM Network n where n.id = " + networkId;
+    		Query q = s.createQuery(hql);
+    		List<Network> nets = q.list();
+    		if(nets.size() == 1)
+    			return(nets.get(0));
+    		else if(nets.size() == 0)
+    		{
+    			throw new DaqueryException("Network with id " + networkId + " is not found.");
+    		}
+    		else
+    		{
+    			throw new DaqueryException("Network with id " + networkId + " is found multiple times. (" + nets.size() + ")");
+    		}
+    	}
+    	catch(Throwable t)
+    	{
+    		String msg = "An unexpected error occured while trying to retrieve a network with id " + networkId;
+    		logger.log(Level.SEVERE, msg, t);
+    		throw new DaqueryException(msg + "  Check the local server logs for more information.", t);
+    	}
+    	finally
+    	{
+    		if(s != null) s.close();
+    	}
+    	
+    }
+    
+    /* get a network based on its uuid (NETWORK.NETWORK_ID */
     public static Network getNetworkById(String networkId) throws DaqueryException
     {
     	if(StringHelper.isBlank(networkId)) return(null);
@@ -227,11 +262,11 @@ public class NetworkDAO extends AbstractDAO {
     			return(nets.get(0));
     		else if(nets.size() == 0)
     		{
-    			throw new DaqueryException("Network with id " + networkId + " is not found.");
+    			throw new DaqueryException("Network with uuid " + networkId + " is not found.");
     		}
     		else
     		{
-    			throw new DaqueryException("Network with id " + networkId + " is found multiple times. (" + nets.size() + ")");
+    			throw new DaqueryException("Network with uuid " + networkId + " is found multiple times. (" + nets.size() + ")");
     		}
     	}
     	catch(Throwable t)
