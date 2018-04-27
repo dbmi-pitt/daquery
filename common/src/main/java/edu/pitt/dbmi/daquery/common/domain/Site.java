@@ -69,9 +69,9 @@ public class Site extends DaqueryObject implements Serializable {
 	@Column(name= "ADMIN_EMAIL", nullable=false, length=500)
 	private String adminEmail;
 	
-	@Expose
+/*	@Expose
 	@Column(name= "STATUS", nullable=false, length=500)
-	private String status;
+	private String status; */
 	
 	@Column(name="TEMPKEY")
 	private boolean tempKey;
@@ -133,7 +133,7 @@ public class Site extends DaqueryObject implements Serializable {
 			  EncryptionType commType,
 			  String name,
 			  String siteId,
-			  SiteStatus status,
+//			  SiteStatus status,
 			  String url)
 	{
 		this.setAccessKey(accessKey);
@@ -142,7 +142,7 @@ public class Site extends DaqueryObject implements Serializable {
 		this.setCommTypeValue(commType);
 		this.setName(name);
 		this.setSiteId(siteId);
-		this.setStatusValue(status);
+//		this.setStatusValue(status);
 		this.setUrl(url);
 	}	
 	
@@ -190,7 +190,7 @@ public class Site extends DaqueryObject implements Serializable {
 		this.adminEmail = email;
 	}
 
-	public String getStatus() {
+/*	public String getStatus() {
 		return status;
 	}
 
@@ -212,7 +212,7 @@ public class Site extends DaqueryObject implements Serializable {
 		} else {
 			status = statusValue.name();
 		}
-	}
+	}*/
 
 	/**
 	 * The access key used to make and receive calls to/from this site.

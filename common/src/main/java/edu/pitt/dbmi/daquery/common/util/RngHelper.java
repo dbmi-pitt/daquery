@@ -12,7 +12,7 @@ public class RngHelper
 	public static void main(String [] args)
 	{
 		Network net = new Network();
-		net.setAggregateObfuscateType("PERCENTAGE");
+		net.setAggregateObfuscateType("percentage");
 		System.out.println(obfuscateAggregateResult(100L, net));
 	}
 	
