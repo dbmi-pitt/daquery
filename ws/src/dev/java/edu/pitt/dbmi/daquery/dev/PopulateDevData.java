@@ -96,6 +96,14 @@ public class PopulateDevData
 		inq.setAggregate(true);
 		save(inq);
 		save(net);
+		
+		for(Site s : net.getOutgoingQuerySites())
+			SiteDAO.setOutgoingSiteStatus(s.getSiteId(), net.getNetworkId(), SiteStatus.CONNECTED);
+		
+		for(Site s : net.getIncomingQuerySites())
+			SiteDAO.setIncomingSiteStatus(s.getSiteId(), net.getNetworkId(), SiteStatus.CONNECTED);
+				
+		
 		DaqueryRequest req = createOutgoingRequest(inq, user, nas.localSite);
 		req.setNetwork(net);
 		save(req);
@@ -113,6 +121,12 @@ public class PopulateDevData
 		inq.setNetwork(net);
 		save(inq);
 		
+		for(Site s : net.getOutgoingQuerySites())
+			SiteDAO.setOutgoingSiteStatus(s.getSiteId(), net.getNetworkId(), SiteStatus.CONNECTED);
+		
+		for(Site s : net.getIncomingQuerySites())
+			SiteDAO.setIncomingSiteStatus(s.getSiteId(), net.getNetworkId(), SiteStatus.CONNECTED);
+		
 	}
 	
 	private static DaqueryRequest createOutgoingRequest(Inquiry inquiry, DaqueryUser requester, Site requestSite)
@@ -127,13 +141,6 @@ public class PopulateDevData
 		return(req);
 	}
 
-	public static DaqueryRequest createFullOutgoingRequest() throws Exception
-	{
-		DaqueryUser author = PopulateDevData.createTestUser();
-		Inquiry inquiry = PopulateDevData.createInquiryData(author);
-		Site requestSite = PopulateDevData.createNetAndSiteData().net.getOutgoingQuerySites().iterator().next();
-		return(PopulateDevData.createOutgoingRequest(inquiry, author, requestSite));
-	}
 	private static Inquiry createInquiryData(DaqueryUser author)
 	{
 		SQLQuery sqlQ = new SQLQuery(true);
@@ -206,9 +213,9 @@ public class PopulateDevData
 		net.setName("dbmi-dev");
 		net.setNetworkId("abcd-efgh-ijkm-nopq");
 
-		Site bsiteOut = new Site("jajasioujaiojaijf","shirey@pitt.edu","no key for now..",EncryptionType.NONE,"bill-dev","20b23b5c-61ad-44eb-8eef-886adcced18e",SiteStatus.CONNECTED,"http://localhost:8080/");	
-		Site dsiteOut = new Site("jaoijafojafasdf","del20@pitt.edu","no key for now..",EncryptionType.NONE,"desheng-dev","bcfdd450-3dd8-4ced-9599-c65de7c9f115",SiteStatus.CONNECTED,"http://del20-dt.univ.pitt.edu:8080/");		
-		Site csiteOut = new Site("wueroiqwerwer","chb69@pitt.edu","no key for now..",EncryptionType.NONE,"chuck-dev","0f2378ec-d9ce-489a-b338-c8f82e567f40",SiteStatus.CONNECTED,"http://borromeo-lp.dbmi.pitt.edu:8080/");
+		Site bsiteOut = new Site("jajasioujaiojaijf","shirey@pitt.edu","no key for now..",EncryptionType.NONE,"bill-dev","20b23b5c-61ad-44eb-8eef-886adcced18e","http://localhost:8080/");	
+		Site dsiteOut = new Site("jaoijafojafasdf","del20@pitt.edu","no key for now..",EncryptionType.NONE,"desheng-dev","bcfdd450-3dd8-4ced-9599-c65de7c9f115","http://del20-dt.univ.pitt.edu:8080/");		
+		Site csiteOut = new Site("wueroiqwerwer","chb69@pitt.edu","no key for now..",EncryptionType.NONE,"chuck-dev","0f2378ec-d9ce-489a-b338-c8f82e567f40","http://borromeo-lp.dbmi.pitt.edu:8080/");
 		Set<Site> sitesOut = new HashSet<Site>();
 		sitesOut.add(bsiteOut);
 		sitesOut.add(dsiteOut);

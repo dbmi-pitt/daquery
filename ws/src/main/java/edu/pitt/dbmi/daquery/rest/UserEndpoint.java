@@ -183,7 +183,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	Site site = null;
 	    	if(hasSite)
 	    	{
-	    		site = SiteDAO.getSitesByUUID(siteId).get(0);
+	    		site = SiteDAO.getSiteByUUID(siteId);
 	    		if(site == null)
 	    			return(ResponseHelper.getErrorResponse(400, "Remote site not found", "A site was not found with id " + siteId + " while trying to find the users of this site.", null));
 	    	}
@@ -420,7 +420,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     	else
     	{
-    		Site site = SiteDAO.getSitesByUUID(uuid).get(0);
+    		Site site = SiteDAO.getSiteByUUID(uuid);
     		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/user-info", null, null);
     		String json = resp.readEntity(String.class);
     		ObjectMapper mapper = new ObjectMapper();
