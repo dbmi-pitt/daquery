@@ -308,7 +308,7 @@ public class SiteEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            Site site = SiteDAO.getSitesByUUID(id).get(0);
+            Site site = SiteDAO.getSiteByUUID(id);
             
             if (site == null) {
                 return Response.status(NOT_FOUND).build();
@@ -353,11 +353,19 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	// respond to UI
 	        	String networkId = (String) newSite.get("network_id");	
 		        Network network = NetworkDAO.queryNetwork(networkId);
-	        	Site site_out = new Site((String)newSite.get("site"),
+		        
+		        //TODO: Does the site parameter hold the uuid??
+		        //      Does this site exist in SITE already?
+		        //      Does an entry exist in outgoing_query_sites already?
+		        
+		        
+		        String siteUUID = (String) newSite.get("site");
+	        	Site site_out = new Site(siteUUID,
 	        							 (String)newSite.get("name"),
 						 				 (String)newSite.get("url"),
 						 				 (String)newSite.get("admin_email"));
-	        	site_out.setStatus(SiteStatus.PENDING.toString());
+	        	
+	        	//site_out.setStatus(SiteStatus.PENDING.toString());
 	        	site_out.setKeystoreAlias((String)newSite.get("alias"));
 	        	String keystorepath = WSConnectionUtil.getKeystorePath();
 	        	site_out.setKeystorePath(keystorepath);
@@ -369,11 +377,13 @@ public class SiteEndpoint extends AbstractEndpoint {
  				Response resp = WSConnectionUtil.centralServerGet("request-connection",  idParam);
  				
  				if(resp.getStatus() == 200 || resp.getStatus() == 201) {
+ 					//add to network, then set status in OUTGOING_QUERY_SITES
 		        	network.getOutgoingQuerySites().add(site_out);
 		        	
 		        	s.getTransaction().begin();
 	 		        s.update(network);       
 	 		        s.getTransaction().commit();
+	 		        SiteDAO.setOutgoingSiteStatus(siteUUID, networkId, SiteStatus.PENDING);
 	 		        
  					return Response.ok(201).build();
  				}
@@ -497,18 +507,19 @@ public class SiteEndpoint extends AbstractEndpoint {
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
     			
     			    			
-	        	Site site_in = new Site((String)map.get("siteId"),
+    			String siteUUID = (String) map.get("siteId");
+	        	Site site_in = new Site(siteUUID,
 	        							(String)map.get("name"),
 						 				(String)map.get("url"),
 						 				(String)map.get("adminEmail"));
-	        	site_in.setStatus(SiteStatus.CONNECTED.toString());
+	        	//site_in.setStatus(SiteStatus.CONNECTED.toString());
 //	        	Set<Site> ss = new HashSet<Site>();
 //	        	ss.add(site_in);
 	        	network.getIncomingQuerySites().add(site_in);
 	        	s.getTransaction().begin();
 		        s.merge(network);
 		        s.getTransaction().commit();
-	        	
+	        	SiteDAO.setIncomingSiteStatus(siteUUID, networkId, SiteStatus.CONNECTED);
 		        return Response.ok(201).build();
 			} else {
 				Response rVal = ResponseHelper.wrapServerResponse(acResp, "Central Server");
@@ -581,19 +592,19 @@ public class SiteEndpoint extends AbstractEndpoint {
     			Map<String, Object> map= new LinkedHashMap<>();
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
     			
-    			    			
-	        	Site site_in = new Site((String)map.get("id"),
+    			String siteUUID = (String) map.get("id");	
+	        	Site site_in = new Site(siteUUID,
 	        							(String)map.get("siteName"),
 						 				(String)map.get("siteURL"),
 						 				(String)map.get("adminEmail"));
-	        	site_in.setStatus(SiteStatus.DENIED.toString());
+	        	//site_in.setStatus(SiteStatus.DENIED.toString());
 	        	Set<Site> ss = new HashSet<Site>();
 	        	ss.add(site_in);
 	        	network.setIncomingQuerySites(ss);
 	        	s.getTransaction().begin();
 		        s.update(network);
 		        s.getTransaction().commit();
-	        	
+	        	SiteDAO.setIncomingSiteStatus(siteUUID, networkId, SiteStatus.DENIED);
 		       return Response.ok(201).build();
 			} else {
 				Response rVal = ResponseHelper.wrapServerResponse(denyResp, "Central Server");

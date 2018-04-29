@@ -22,6 +22,7 @@ import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -57,11 +58,17 @@ public class SiteDAO extends AbstractDAO {
             
     }
     
-    public static List<Site> querySitesByUUID(String uuid) throws Exception {
+    public static Site querySiteByUUID(String uuid) throws Exception {
     	List<ParameterItem> pList = new ArrayList<ParameterItem>();
     	ParameterItem piUUId = new ParameterItem("uuid", uuid);
 		pList.add(piUUId);
-		return executeQueryReturnList(Site.FIND_BY_UUID, pList, logger);
+		List<Site> sites = executeQueryReturnList(Site.FIND_BY_UUID, pList, logger);
+		if(sites == null || sites.size() == 0)
+			return(null);
+		else if(sites.size() > 1)
+			throw new DaqueryException("Multiple entries exist for site with id " + uuid);
+		else
+			return(sites.get(0));
     }
 
     public static Site querySiteByID(String id) throws Exception {
@@ -137,9 +144,9 @@ public class SiteDAO extends AbstractDAO {
 		}
     }
     
-    public static List<Site> getSitesByUUID(String uuid) throws DaqueryException {
+    public static Site getSiteByUUID(String uuid) throws DaqueryException {
     	try {
-    		return querySitesByUUID(uuid);
+    		return querySiteByUUID(uuid);
     	} catch(Throwable t) {
 		    String msg = "Unexpected error while querying a site by UUID: [" + uuid + "].";
 		    logger.log(Level.SEVERE, msg, t);
@@ -161,7 +168,7 @@ public class SiteDAO extends AbstractDAO {
     		
     		updatePendingSitesByNetwork(netId, s);
     		
-    		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='CONNECTED' and n.id = :network_id";
+    		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.status='CONNECTED' and n.id = :network_id";
 			Query query = s.createSQLQuery(sql)
 						   .addEntity(Site.class)
 						   .setParameter("network_id", netId);
@@ -209,9 +216,9 @@ public class SiteDAO extends AbstractDAO {
 					if(!status.equals("PENDING"))
 					{
 						if(status.equals("APPROVED"))
-							updateOutgoingSiteStatus(siteUUID, netId, "CONNECTED");
+							updateOutgoingSiteStatus(siteUUID, netId, SiteStatus.CONNECTED);
 						else
-							updateOutgoingSiteStatus(siteUUID, netId, status);
+							updateOutgoingSiteStatus(siteUUID, netId, SiteStatus.valueOf(status));
 					}
 				}
 			}
@@ -239,27 +246,25 @@ public class SiteDAO extends AbstractDAO {
     	}
     }
     
-    public static void setOutgoingSiteStatus(String siteUUID, String networkUUID, String status) throws DaqueryException
+    public static void setOutgoingSiteStatus(String siteUUID, String networkUUID, SiteStatus status) throws DaqueryException
     {
     	Session s = null;
     	try
     	{
+    		String strStatus = status.toString();
     		s = HibernateConfiguration.openSession();
-    	
-			String sql = "SELECT count(*) FROM OUTGOING_QUERY_SITES WHERE site_id = " + siteUUID;
+    		String sql = "select count(*) from outgoing_query_sites oqs, site s, network n where s.site_id = '"+ siteUUID + "' and n.network_id = '" + networkUUID + "' and n.id = oqs.network_id and s.id = oqs.site_id";    	
 			Transaction t = s.beginTransaction();
-			Query query = s.createSQLQuery(sql)
-						   .addEntity(Site.class)
-						   .setParameter("network_id", networkId)
-						   .setParameter("siteID", siteUUID);
+			Query query = s.createSQLQuery(sql);
+			dd
 			List<Site> vals = query.list();
 			if(vals.size() <= 0)
 			{
-				throw new DaqueryException("The status for site with id " + siteUUID + " cannot be updated because it does not exist as an outgoing site on network with id " + networkId);
+				throw new DaqueryException("The status for site with id " + siteUUID + " cannot be updated because it does not exist as an outgoing site on network with id " + networkUUID);
 			}
 			else if(vals.size() > 1)
 			{
-				throw new DaqueryException("The status for sit id " + siteUUID + " was not updated because the site exists multiple times as an outgoing site on network with id " + networkId);
+				throw new DaqueryException("The status for sit id " + siteUUID + " was not updated because the site exists multiple times as an outgoing site on network with id " + networkUUID);
 			}
 			for(Site site : vals)
 			{
@@ -271,6 +276,11 @@ public class SiteDAO extends AbstractDAO {
     	{
     		if(s != null) s.close();
     	}
+    }
+    
+    public static void setIncomingSiteStatus(String siteUUID, String networkUUID, SiteStatus status) throws DaqueryException
+    {
+    	
     }
     
     private static String checkSiteStatusAtCentral(String fromSiteId, String toSiteId, String networkId, Session s) throws DaqueryErrorException, DaqueryException
@@ -297,7 +307,7 @@ public class SiteDAO extends AbstractDAO {
     	}
     }
     
-    private static void updateOutgoingSiteStatus(String siteUUID, long networkId, String status) throws DaqueryException
+    private static void updateOutgoingSiteStatus(String siteUUID, long networkId, SiteStatus status) throws DaqueryException
     {
     	Network net = NetworkDAO.getNetworkById(networkId);
     	if(net == null)
@@ -316,7 +326,7 @@ public class SiteDAO extends AbstractDAO {
     	try {
     		s = HibernateConfiguration.openSession();
 			
-			String sql = "SELECT s.* FROM SITE as s JOIN INCOMING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='CONNECTED' and n.id = :network_id";
+			String sql = "SELECT s.* FROM SITE as s JOIN INCOMING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.status='CONNECTED' and n.id = :network_id";
 			Query query = s.createSQLQuery(sql)
 						   .addEntity(Site.class)
 						   .setParameter("network_id", network_id);

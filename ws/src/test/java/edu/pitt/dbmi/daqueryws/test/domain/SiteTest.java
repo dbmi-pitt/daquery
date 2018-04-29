@@ -63,7 +63,6 @@ public class SiteTest {
 			s1.setName(sitename);
 			s1.setUrl(siteurl);
 			s1.setAdminEmail(adminemail);
-			s1.setStatusValue(SiteStatus.PENDING);
 			s1.setAccessKey(accesskey);
 			s1.setComEncKey(commenckey);
 			s1.setCommTypeValue(EncryptionType.NONE);
@@ -72,7 +71,6 @@ public class SiteTest {
 			s2.setName(sitenameWithSpaces);
 			s2.setUrl(siteurl);
 			s2.setAdminEmail(adminemail);
-			s2.setStatusValue(SiteStatus.PENDING);
 			s2.setAccessKey(accesskey);
 			s2.setComEncKey(commenckey);
 			s2.setCommTypeValue(EncryptionType.NONE);
@@ -81,7 +79,6 @@ public class SiteTest {
 			s3.setName(sitenameWithNumbers);
 			s3.setUrl(siteurl);
 			s3.setAdminEmail(adminemail);
-			s3.setStatusValue(SiteStatus.PENDING);
 			s3.setAccessKey(accesskey);
 			s3.setComEncKey(commenckey);
 			s3.setCommTypeValue(EncryptionType.NONE);
@@ -90,7 +87,6 @@ public class SiteTest {
 			s4.setName(sitenameLettersOnly);
 			s4.setUrl(siteurl);
 			s4.setAdminEmail(adminemail);
-			s4.setStatusValue(SiteStatus.PENDING);
 			s4.setAccessKey(accesskey);
 			s4.setComEncKey(commenckey);
 			s4.setCommTypeValue(EncryptionType.NONE);
@@ -246,12 +242,10 @@ public class SiteTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 	    	Site s = SiteDAO.querySiteByID(site1UUID);
-	    	s.setStatusValue(SiteStatus.CONNECTED);
 			session.getTransaction().begin();
 			session.update(s);
 			session.getTransaction().commit();
 	    	Site s1 = SiteDAO.querySiteByID(site1UUID);
-			assertTrue(s1.getStatusValue() == SiteStatus.CONNECTED);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
@@ -266,12 +260,10 @@ public class SiteTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 	    	Site s = SiteDAO.querySiteByID(site1UUID);
-	    	s.setStatusValue(SiteStatus.PENDING);
 			session.getTransaction().begin();
 			session.update(s);
 			session.getTransaction().commit();
 	    	Site s1 = SiteDAO.querySiteByID(site1UUID);
-			assertTrue(s1.getStatusValue() == SiteStatus.PENDING);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
@@ -287,12 +279,10 @@ public class SiteTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 	    	Site s = SiteDAO.querySiteByID(site1UUID);
-	    	s.setStatusValue(SiteStatus.DENIED);
 			session.getTransaction().begin();
 			session.update(s);
 			session.getTransaction().commit();
 	    	Site s1 = SiteDAO.querySiteByID(site1UUID);
-			assertTrue(s1.getStatusValue() == SiteStatus.DENIED);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
@@ -307,12 +297,10 @@ public class SiteTest {
 		try {
 	    	session = HibernateConfiguration.openSession();
 	    	Site s = SiteDAO.querySiteByID(site1UUID);
-	    	s.setStatusValue(SiteStatus.NOT_CONNECTED);
 			session.getTransaction().begin();
 			session.update(s);
 			session.getTransaction().commit();
 	    	Site s1 = SiteDAO.querySiteByID(site1UUID);
-			assertTrue(s1.getStatusValue() == SiteStatus.NOT_CONNECTED);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		} finally {
