@@ -432,7 +432,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             	String msg = "Unable to connect to url " + databaseInfo.get("url");
             	logger.log(Level.WARNING, msg);
             	
-            	return Response.ok(200).entity("{\"result\": true, \"errorMsg\": \"" + msg + "\", \"detailErrorMsg\": \"\"}").build();
+            	return Response.ok(200).entity("{\"result\": false, \"errorMsg\": \"" + msg + "\", \"detailErrorMsg\": \"\"}").build();
             }
             
             String q = ((String)databaseInfo.get("driver")).contains("oracle") ? "select * from dual" : "select 'sql'";
