@@ -116,7 +116,7 @@ public class CentralService{
 			
 			//TODO: check the sender ip/site name as an extra verification step
 			if(! DBHelper.authenticateSite(siteNameOrKey, key))
-				return(ResponseHelper.getErrorResponse(401, siteNameOrKey + " is not authorized to use this server.  Possibly a bad key or site name was provided.", null, null));
+				return(ResponseHelper.getErrorResponse(401, siteNameOrKey + " is not authorized to use this Daquery Central server.  Possibly a bad key or site name was provided.", null, null));
 	
 			Map<String, Object> additionalVals = null;
 

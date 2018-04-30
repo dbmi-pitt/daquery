@@ -250,6 +250,10 @@ public class AppProperties
 		}
 		
 	}
+	private static String taskDBPropName(String queueName)
+	{
+		return(taskQueuePrefix + queueName.trim().toLowerCase());
+	}
 /*	public static void setTaskQueueMaxLenghtexit(int max) throws DaqueryException
 	{
 		if(max <= 0) throw new DaqueryException("The maximum task queue length must be greater than zero.");
@@ -262,7 +266,7 @@ public class AppProperties
 		try
 		{
 			String mLen = null;
-			mLen = getDBProperty(taskQueuePrefix + queueName.trim().toLowerCase());
+			mLen = getDBProperty(taskDBPropName(queueName));
 			if(StringHelper.isEmpty(mLen)) return(getDefaultTaskQueueMaxLength());
 			return(Integer.parseInt(mLen));
 		}
@@ -277,8 +281,7 @@ public class AppProperties
 	{
 		if(! StringHelper.isEmpty(queueName))
 		{
-			String key = taskQueuePrefix + queueName.trim().toLowerCase();
-			setDBProperty(key, (new Integer(queueLength)).toString());
+			setDBProperty(taskDBPropName(queueName), (new Integer(queueLength)).toString());			
 		}
 	}
 	private static final boolean defaultDeliverData = true; 
@@ -334,6 +337,10 @@ public class AppProperties
 		else
 			return(val);
 	}
+	public static void setFileOutputDir(String dir) throws DaqueryException
+	{
+		setDBProperty("file.output.dir", dir);
+	}
 	
 	public static String getTrackingDir() throws DaqueryException
 	{
@@ -343,6 +350,10 @@ public class AppProperties
 		else
 			return(val);
 	}	
+	public static void setTrackingDir(String dir) throws DaqueryException
+	{
+		setDBProperty("tracking.output.dir", dir);
+	}
 	
 	public static String getLocalDeliveryDir() throws DaqueryException
 	{
@@ -351,6 +362,10 @@ public class AppProperties
 			return(System.getProperty("java.io.tmpdir"));
 		else
 			return(val);
+	}
+	public static void setLocalDeliveryDir(String dir) throws DaqueryException
+	{
+		setDBProperty("local.delivery.dir", dir);
 	}
 	
 	/**
