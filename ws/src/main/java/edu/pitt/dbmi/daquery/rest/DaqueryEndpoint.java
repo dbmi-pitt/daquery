@@ -1,7 +1,5 @@
 package edu.pitt.dbmi.daquery.rest;
 
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,10 +9,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,23 +43,18 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
-import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
-import edu.pitt.dbmi.daquery.common.dao.PropertyDAO;
 import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
-import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
-import edu.pitt.dbmi.daquery.common.domain.Property;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
@@ -81,6 +72,7 @@ import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
+import edu.pitt.dbmi.daquery.queue.TaskQueue;
 import io.jsonwebtoken.ExpiredJwtException;
 
 @Path("/")
@@ -88,9 +80,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 {
 	private final static Logger logger = Logger.getLogger(DaqueryEndpoint.class.getName());
 
-	public final static String MAIN_QUEUE = "main";
-	public final static String EXPORT_QUEUE = "export_queue";
-	
     @Context
     private UriInfo uriInfo;
     
@@ -619,7 +608,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     				}
     			}
     		}
-    		ResponseTask rTask = (ResponseTask) QueueManager.getNamedQueue(MAIN_QUEUE).getTask(rVal.getResponseId());
+    		ResponseTask rTask = (ResponseTask) QueueManager.getNamedQueue(TaskQueue.MAIN_QUEUE).getTask(rVal.getResponseId());
     		if(rVal.getStatusEnum().isQueuedOrRunning() && rTask == null)
     		{
     			rVal.setStatusEnum(ResponseStatus.STALLED);
@@ -943,7 +932,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setId(null);
 			request.setRequesterSite(site);
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
-			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
+			QueueManager.getNamedQueue(TaskQueue.MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();
 			rVal.setRequest(request);
 			ResponseDAO.saveOrUpdate(rVal);
@@ -1006,7 +995,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
-			QueueManager.getNamedQueue(MAIN_QUEUE).addTask(task);
+			QueueManager.getNamedQueue(TaskQueue.MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();
 			rVal.setRequest(request);
 			ResponseDAO.saveOrUpdate(rVal);

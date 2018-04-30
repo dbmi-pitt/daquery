@@ -8,14 +8,11 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.InquiryType;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDownload;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 import edu.pitt.dbmi.daquery.queue.TaskQueue;
-import edu.pitt.dbmi.daquery.rest.DaqueryEndpoint;
 
 public class TestDataExport
 {
@@ -48,7 +45,7 @@ public class TestDataExport
 			rqsts.add(req);
 			inq.setRequests(rqsts);
 			
-			TaskQueue queue = QueueManager.getNamedQueue(DaqueryEndpoint.EXPORT_QUEUE);
+			TaskQueue queue = QueueManager.getNamedQueue(TaskQueue.EXPORT_QUEUE);
 			ResponseTask task = new ResponseTask(req, DaqueryUserDAO.getSysUser(), req.getNetwork().getDataModel());
 			queue.addTask(task);
 		}
