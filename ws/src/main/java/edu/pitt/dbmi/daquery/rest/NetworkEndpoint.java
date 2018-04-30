@@ -39,6 +39,7 @@ import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -229,6 +230,9 @@ public class NetworkEndpoint extends AbstractEndpoint {
             sitedao.createOutogingSites(network.getId(), site.getId());
             sitedao.createIncomingSites(network.getId(), site.getId());
             sitedao.closeCurrentSessionwithTransaction();
+            
+            SiteDAO.setIncomingSiteStatus(site.getSiteId(), network.getNetworkId(), SiteStatus.CONNECTED);
+            SiteDAO.setOutgoingSiteStatus(site.getSiteId(), network.getNetworkId(), SiteStatus.CONNECTED);
             
             String json = network.toJson();
 
