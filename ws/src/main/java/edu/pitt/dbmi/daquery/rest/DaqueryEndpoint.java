@@ -364,14 +364,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	AppProperties.setDBProperty("central.site.key", key);
 			    	AppProperties.setDBProperty("site.id", siteId);
 			    	AppProperties.setDBProperty("site.name", siteName);
-			    	AppProperties.setDBProperty("taskQueueMaxLength", "10");
-			    	AppProperties.setDBProperty("exportTaskQueueMaxLength", "10");
-			    	AppProperties.setDBProperty("deliverData", "false");
-			    	AppProperties.setDBProperty("threeDigitZip", "false");
-			    	AppProperties.setDBProperty("dateShift", "false");
-			    	AppProperties.setDBProperty("fileOutputDir", "/tmp/");
-			    	AppProperties.setDBProperty("localDeliveryDir", "/tmp/");
-			    	AppProperties.setDBProperty("trackingOutputDir", "/tmp/");
+			    	AppProperties.setTaskQueueMaxLength(TaskQueue.MAIN_QUEUE,4);
+			    	AppProperties.setTaskQueueMaxLength(TaskQueue.EXPORT_QUEUE, 1);
+			    	AppProperties.setDeliverData(false);
+			    	AppProperties.setThreeDigitZip(true);
+			    	AppProperties.setDateShift(true);
+			    	AppProperties.setFileOutputDir(System.getProperty("java.io.tmpdir"));
+			    	AppProperties.setLocalDeliveryDir(System.getProperty("java.io.tmpdir"));
+			    	AppProperties.setTrackingDir(System.getProperty("java.io.tmpdir"));
 			    	
 			    	DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
@@ -753,14 +753,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		logger.log(Level.INFO, "Get properties");
             
     		Map<String, String> properties = new HashMap<>();
-    		properties.put("taskQueueMaxLength", AppProperties.getDBProperty("taskQueueMaxLength"));
-    		properties.put("exportTaskQueueMaxLength", AppProperties.getDBProperty("exportTaskQueueMaxLength"));
-    		properties.put("deliverData", AppProperties.getDBProperty("deliverData"));
-//    		properties.put("threeDigitZip", AppProperties.getDBProperty("threeDigitZip"));
-//    		properties.put("dateShift", AppProperties.getDBProperty("dateShift"));
-    		properties.put("fileOutputDir", AppProperties.getDBProperty("fileOutputDir"));
-    		properties.put("localDeliveryDir", AppProperties.getDBProperty("localDeliveryDir"));
-    		properties.put("trackingOutputDir", AppProperties.getDBProperty("trackingOutputDir"));
+    		properties.put("taskQueueMaxLength", (new Integer(AppProperties.getTaskQueueMaxLength(TaskQueue.MAIN_QUEUE))).toString());
+    		properties.put("exportTaskQueueMaxLength", (new Integer(AppProperties.getTaskQueueMaxLength(TaskQueue.EXPORT_QUEUE))).toString());
+    		properties.put("deliverData", (new Boolean(AppProperties.getDeliverData())).toString());
+//    		properties.put("threeDigitZip", (new Boolean(AppProperties.getThreeDigitZip())).toString());
+//    		properties.put("dateShift", (new Boolean(AppProperties.getDateShift())).toString());
+    		properties.put("fileOutputDir", AppProperties.getFileOutputDir());
+    		properties.put("localDeliveryDir", AppProperties.getLocalDeliveryDir());
+    		properties.put("trackingOutputDir", AppProperties.getTrackingDir());
             return ResponseHelper.getJsonResponseGen(200, properties);
 
         } catch (Exception e) {
@@ -828,7 +828,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
             	}
             }
             
-            String trackingOutputDir = (String) properties.get("trackingOutputDir");
+            String trackingOutputDir = AppProperties.getTrackingDir();
             f = new File(trackingOutputDir);
             if(f.exists()) {
             	if(!f.canWrite()) {
@@ -840,14 +840,12 @@ public class DaqueryEndpoint extends AbstractEndpoint
             	}
             }
             	
-    		AppProperties.setDBProperty("taskQueueMaxLength", ((Integer) properties.get("taskQueueMaxLength")).toString());
-    		AppProperties.setDBProperty("exportTaskQueueMaxLength", ((Integer) properties.get("exportTaskQueueMaxLength")).toString());
-    		AppProperties.setDBProperty("deliverData", (String) properties.get("deliverData"));
-//    		AppProperties.setDBProperty("threeDigitZip", (String) properties.get("threeDigitZip"));
-//    		AppProperties.setDBProperty("dateShift", (String) properties.get("dateShift"));
-    		AppProperties.setDBProperty("fileOutputDir", (String) properties.get("fileOutputDir"));
-    		AppProperties.setDBProperty("localDeliveryDir", (String) properties.get("localDeliveryDir"));
-    		AppProperties.setDBProperty("trackingOutputDir", (String) properties.get("trackingOutputDir")); 
+    		AppProperties.setTaskQueueMaxLength(TaskQueue.MAIN_QUEUE, ((Integer) properties.get("taskQueueMaxLength")).intValue());
+    		AppProperties.setTaskQueueMaxLength(TaskQueue.EXPORT_QUEUE, ((Integer) properties.get("exportTaskQueueMaxLength")).intValue());
+    		AppProperties.setDeliverData( Boolean.parseBoolean((String) properties.get("deliverData")));
+    		AppProperties.setFileOutputDir((String) properties.get("fileOutputDir"));
+    		AppProperties.setLocalDeliveryDir((String) properties.get("localDeliveryDir"));
+    		AppProperties.setTrackingDir((String) properties.get("trackingOutputDir")); 
 
             return ResponseHelper.getJsonResponseGen(200, properties);
 
