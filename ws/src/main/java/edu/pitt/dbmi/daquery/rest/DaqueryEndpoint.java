@@ -590,7 +590,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     			else
     			{
     				DecodedErrorInfo decodedInfo = ResponseHelper.decodeErrorResponse(httpResponse);
-    				if(decodedInfo != null && decodedInfo.getErrorInfo() != null)
+    				if(decodedInfo != null && decodedInfo.getErrorInfo() != null && decodedInfo.getErrorInfo().getResponse() != null)
     				{
 						DaqueryResponse resp = decodedInfo.getErrorInfo().getResponse();
 						rVal.setStatus(resp.getStatus());
