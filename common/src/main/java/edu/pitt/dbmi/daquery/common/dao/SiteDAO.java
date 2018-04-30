@@ -167,7 +167,7 @@ public class SiteDAO extends AbstractDAO {
     		
     		updatePendingSitesByNetwork(netId, s);
     		
-    		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.status='CONNECTED' and n.id = :network_id";
+    		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.site_status='CONNECTED' and n.id = :network_id";
 			Query query = s.createSQLQuery(sql)
 						   .addEntity(Site.class)
 						   .setParameter("network_id", netId);
@@ -198,7 +198,7 @@ public class SiteDAO extends AbstractDAO {
     public static void updatePendingSitesByNetwork(long netId, Session s) throws DaqueryException, DaqueryErrorException
     {
 		//before getting connected sites see if there are any pending sites that have been approved or disapproved
-		String sql = "SELECT s.site_id, n.network_id FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE s.status='PENDING' and n.id = " + netId;    		
+		String sql = "SELECT s.site_id, n.network_id FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.site_status='PENDING' and n.id = " + netId;    		
 		
 		Query q1 = s.createSQLQuery(sql);
 		List<Object[]> idList = q1.list();
@@ -353,7 +353,7 @@ public class SiteDAO extends AbstractDAO {
     	try {
     		s = HibernateConfiguration.openSession();
 			
-			String sql = "SELECT s.* FROM SITE as s JOIN INCOMING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.status='CONNECTED' and n.id = :network_id";
+			String sql = "SELECT s.* FROM SITE as s JOIN INCOMING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.site_status='CONNECTED' and n.id = :network_id";
 			Query query = s.createSQLQuery(sql)
 						   .addEntity(Site.class)
 						   .setParameter("network_id", network_id);
