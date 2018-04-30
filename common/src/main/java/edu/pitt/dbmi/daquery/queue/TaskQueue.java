@@ -10,6 +10,10 @@ import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 
 public class TaskQueue
 {
+	public final static String MAIN_QUEUE = "main";
+	public final static String EXPORT_QUEUE = "export_queue";
+		
+	
 	private static Hashtable<String, Task> tasksById = new Hashtable<String, Task>();
 	private static LinkedList<Task> waitingQueue = new LinkedList<Task>();
 	private static List<TaskRunner> runningQueue = new ArrayList<TaskRunner>();

@@ -297,7 +297,7 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             DaqueryRequest request = DaqueryRequestDAO.getRequestById(id);
             
-            TaskQueue queue = QueueManager.getNamedQueue(DaqueryEndpoint.EXPORT_QUEUE);
+            TaskQueue queue = QueueManager.getNamedQueue(TaskQueue.EXPORT_QUEUE);
             ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), request.getNetwork().getDataModel());
             queue.addTask(task);
 
