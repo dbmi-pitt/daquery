@@ -123,6 +123,10 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 		if(isRejected()) return(null);
 		if(StringHelper.isEmpty(aggregateColumnName)) return(null);
 		
+		//HACK- for now, hard code PATID- this needs to be tied to the current DataModel
+		//only allow queries that are aggregating over patients to be converted to download
+		if(! (aggregateColumnName.trim().toUpperCase().equals("PATID"))) return(null);
+		
 		String rSQL = baseSQL.trim();
 		rSQL = rSQL.replaceFirst("(?i)select\\s+count\\(.*\\)", "");
 		String selectClause = "select ";
