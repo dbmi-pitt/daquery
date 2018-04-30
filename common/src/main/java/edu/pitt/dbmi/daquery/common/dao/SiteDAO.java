@@ -19,7 +19,6 @@ import org.hibernate.Transaction;
 import org.hibernate.internal.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
-import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
@@ -36,18 +35,18 @@ public class SiteDAO extends AbstractDAO {
 	
     public static final String LOCAL_SITE_ID_PROP_NAME = "site.id";
     
-    public static void main(String [] args)
+    public static void main(String [] args) throws Exception
     {
     	//AppProperties.setDevHomeDir("/home/devuser/dq-data");
     	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-    	getLocalSite();
+    	//setOutgoingSiteStatus("20b23b5c-61ad-44eb-8eef-886adcced18e", "ab3e4325-dbc5-4501-9fb9-4bc3dbc0a821", SiteStatus.CONNECTED);
+    	setIncomingSiteStatus("sitetestid", "nettestid", SiteStatus.CONNECTED);
     }
     
     public static List<Site> queryAllSites() throws Exception {
-    	try { 		
+    	try {
     	    List<Site> site_list = executeQueryReturnList(Site.FIND_ALL, null, logger);
 	        return site_list;
-	    
         } catch (HibernateException e) {
         	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings." ,e);
             throw e;
@@ -248,39 +247,67 @@ public class SiteDAO extends AbstractDAO {
     
     public static void setOutgoingSiteStatus(String siteUUID, String networkUUID, SiteStatus status) throws DaqueryException
     {
+    	setSiteStatus(siteUUID, networkUUID, status, "outgoing");
+    }
+    public static void setIncomingSiteStatus(String siteUUID, String networkUUID, SiteStatus status) throws DaqueryException
+    {
+    	setSiteStatus(siteUUID, networkUUID, status, "incoming");
+    }    
+    private static void setSiteStatus(String siteUUID, String networkUUID, SiteStatus status, String type) throws DaqueryException
+    {
     	Session s = null;
     	try
     	{
-    		String strStatus = status.toString();
+    		String tableName = "";
+    		if(type == null)
+    		{
+    			throw new DaqueryException("Unable to set a site status because the type (in/out) was not specified.");
+    		}
+    		else if(type.equals("outgoing"))
+    		{
+    			tableName = "outgoing_query_sites";
+    		}
+    		else if(type.equals("incoming"))
+    		{
+    			tableName = "incoming_query_sites";
+    		}
+    		Site site = SiteDAO.querySiteByID(siteUUID);
+    		if(site == null)
+    			throw new DaqueryException("Site does not exist with id " + siteUUID);
+    		Network net = NetworkDAO.queryNetwork(networkUUID);
+    		if(net == null)
+    			throw new DaqueryException("Network does not exist with id " + networkUUID);
+
     		s = HibernateConfiguration.openSession();
-    		String sql = "select count(*) from outgoing_query_sites oqs, site s, network n where s.site_id = '"+ siteUUID + "' and n.network_id = '" + networkUUID + "' and n.id = oqs.network_id and s.id = oqs.site_id";    	
+    		String sql = "select count(*) from " + tableName + " oqs, site s, network n where s.site_id = '"+ siteUUID.trim() + "' and n.network_id = '" + networkUUID.trim() + "' and n.id = oqs.network_id and s.id = oqs.site_id";    	
 			Transaction t = s.beginTransaction();
 			Query query = s.createSQLQuery(sql);
-			dd
-			List<Site> vals = query.list();
-			if(vals.size() <= 0)
+			Integer val = (Integer) query.uniqueResult();
+			String strStatus = status.toString();
+			if(val == null || val.intValue() == 0)
 			{
-				throw new DaqueryException("The status for site with id " + siteUUID + " cannot be updated because it does not exist as an outgoing site on network with id " + networkUUID);
+				sql = "insert into " + tableName + " (site_id, network_id, site_status) values ("+ site.getId() +", "+ net.getId() +", '"+ strStatus +"')";
 			}
-			else if(vals.size() > 1)
+			else if(val.intValue() == 1)
 			{
-				throw new DaqueryException("The status for sit id " + siteUUID + " was not updated because the site exists multiple times as an outgoing site on network with id " + networkUUID);
+				sql = "update " + tableName + " set site_status = '"+ strStatus +"' where site_id = "+ site.getId() +" and network_id = "+ net.getId();
 			}
-			for(Site site : vals)
+			else
 			{
-				
+				throw new DaqueryException("The " + type + " status for site id " + siteUUID + " was not updated because the site exists multiple times as an outgoing site on network with id " + networkUUID);
 			}
+			Query q2 = s.createSQLQuery(sql);
+			q2.executeUpdate();
 			t.commit();
+    	}
+    	catch(Exception ex)
+    	{
+    		throw new DaqueryException("Unhandled error while setting " + type + " status of site.  siteId:" + siteUUID + " networkId:" + networkUUID, ex);
     	}
     	finally
     	{
     		if(s != null) s.close();
     	}
-    }
-    
-    public static void setIncomingSiteStatus(String siteUUID, String networkUUID, SiteStatus status) throws DaqueryException
-    {
-    	
     }
     
     private static String checkSiteStatusAtCentral(String fromSiteId, String toSiteId, String networkId, Session s) throws DaqueryErrorException, DaqueryException
