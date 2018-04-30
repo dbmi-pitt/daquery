@@ -92,14 +92,18 @@ public class SQLQuery extends Inquiry
 					String strVal = null;
 					if(val != null) strVal = RngHelper.obfuscateAggregateResult(val, response.getRequest().getNetwork()).toString();
 					response.setValue(strVal);
+					
 					String aggregateValueSql = analyze.convertToValuesSql();
-					if(! StringHelper.isEmpty(aggregateValueSql))
+					if(val != null && val.longValue() >0 && ! StringHelper.isEmpty(aggregateValueSql))
 					{
 						response.setDownloadAvailable(true);
 						SQLDownload dLoad = new SQLDownload(true);
 						dLoad.setCode(aggregateValueSql);
 						response.setDownloadDirective(dLoad);
 					}
+					else
+						response.setDownloadAvailable(false);
+					
 					response.setStatusEnum(ResponseStatus.COMPLETED);
 				}
 			}
