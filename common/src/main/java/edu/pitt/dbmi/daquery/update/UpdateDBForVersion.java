@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.update;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
@@ -25,6 +26,7 @@ import edu.pitt.dbmi.daquery.common.util.ApplicationPropertiesFile;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.FileHelper;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.common.util.ReflectionHelper;
 
 public class UpdateDBForVersion
 {
@@ -37,7 +39,9 @@ public class UpdateDBForVersion
 		  ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		  URL url = loader.getResource(folder);
 		  String path = url.getPath();
-		  return new File(path).listFiles();
+		  File f = new File(path);
+		  File [] fs = f.listFiles();
+		  return fs;
 	  }
 
 	public static void main (String[] args)
@@ -138,31 +142,22 @@ public class UpdateDBForVersion
 		updater.updateData(conn);
 	}
 	
-	private static List<UpdateInfo> getDBUpdateClasses()
+	private static List<UpdateInfo> getDBUpdateClasses() throws IOException
 	{
 		List<UpdateInfo> rVal = new ArrayList<UpdateInfo>();
-		for (File f : getResourceFolderFiles("edu/pitt/dbmi/daquery/update/db"))
+		for(Class<?> cls : ReflectionHelper.classesInPackage("edu.pitt.dbmi.daquery.update.db"))
 		{
-			String clsStr = classNameFromPath(f.toString());
-			if(clsStr != null)
+			if(DBUpdater.class.isAssignableFrom(cls))
 			{
-				try
+				DBVersion vsn = cls.getAnnotation(DBVersion.class);
+				if(vsn != null)
 				{
-					Class<?> tstCls = Class.forName(clsStr);
-					if(DBUpdater.class.isAssignableFrom(tstCls))
-					{
-						DBVersion vsn = tstCls.getAnnotation(DBVersion.class);
-						if(vsn != null)
-						{
-							UpdateInfo uInfo = new UpdateInfo();
-							uInfo.cls = tstCls;
-							uInfo.version = vsn.version();
-							uInfo.ddlFile = vsn.ddlFile();
-							rVal.add(uInfo);
-						}
-					}
+					UpdateInfo uInfo = new UpdateInfo();
+					uInfo.cls = cls;
+					uInfo.version = vsn.version();
+					uInfo.ddlFile = vsn.ddlFile();
+					rVal.add(uInfo);
 				}
-				catch(ClassNotFoundException e){e.printStackTrace();}
 			}
 		}
 		return(rVal);
