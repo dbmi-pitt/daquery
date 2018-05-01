@@ -52,7 +52,15 @@ public class StringHelper
 		String rVal = val.replace("\\\"", "\"");
 		return(rVal);
 	}
-	
+
+	public static String escapeBackslashes(String val)
+	{
+		if(val == null)
+			return(null);
+		String rVal = val.replace("\\", "\\\\");
+		return(rVal);
+	}
+
 	public static String ensureTrailingSlashURL(String path)
 	{
 		if(path == null) return(null);
