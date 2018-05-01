@@ -173,7 +173,8 @@ public class JSONHelper
 		}
 		else
 		{
-			return("\"" + obj.toString() + "\"");
+			String ret = "\"" + obj.toString() + "\"";
+			return ret.replace("\\", "\\\\");
 		}
 	}
 	
