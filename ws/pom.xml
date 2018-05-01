@@ -424,7 +424,7 @@
          					<executable>cmd</executable>
          					<arguments>
          						<argument>/C</argument>
-         						<argument>del /F /Q "${project.basedir}\src\main\webapp\*"</argument>
+         						<argument>del /F /Q "${project.basedir}\src\main\webapp\*.*"</argument>
          					</arguments>
          				</configuration>
          				<goals>
