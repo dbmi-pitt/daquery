@@ -1,0 +1,5 @@
+CREATE TABLE SITE_CONNECTION
+(
+	SITE_ID bigint,
+	STATUS varchar(20)
+);
