@@ -23,6 +23,5 @@ public class DBUpdate139 implements DBUpdater
 		{
 			if(s != null) s.close();
 		}
-		//nothing to do for this update
 	}
 }
