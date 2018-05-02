@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.39 -->
+<!-- daquery.data.version=1.4 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -220,3 +220,9 @@ CREATE TABLE SQL_DOWNLOAD
    INQ_ID bigint NOT NULL
 );
 
+CREATE TABLE SITE_CONNECTION
+(
+	ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+	SITE_ID bigint,
+	STATUS varchar(20)
+);
