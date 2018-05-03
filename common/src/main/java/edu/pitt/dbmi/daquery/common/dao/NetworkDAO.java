@@ -152,9 +152,16 @@ public class NetworkDAO extends AbstractDAO {
 //    		network.setTruncateZipCode(false);
 //    		network.setSerializePatientId(false);
 //    		
-/*    		network.setObfuscateAggregateResults(Network.OBFUSCATEAGGREGATERESULTS_DEFAULT);
+    		network.setObfuscateAggregateResults(Network.OBFUSCATEAGGREGATERESULTS_DEFAULT);
+    		network.setAggregateObfuscateType(network.AGGREGATEOBFUSCATETYPE_DEFAULT);
+    		network.setAggregateObfuscateRange(network.AGGREGATEOBFUSCATERANGE_DEFAULT);
+    		network.setAggregateObfuscatePercent(network.AGGREGATEOBFUSCATEPERCENT_DEFAULT);
+    		network.setAggregateObfuscateThreshold(network.AGGREGATEOBFUSCATETHRESHOLD_DEFAULT);
     		network.setShiftDates(Network.SHIFTDATES_DEFAULT);
-    		network.setAggregateObfuscateType(Network.AGGREGATEOBFUSCATETYPE_DEFAULT); */
+    		network.setMinDateShift(network.MINDATESHIFT_DEFAULT);
+    		network.setMaxDateShift(network.MAXDATESHIFT_DEFAULT);
+    		network.setTruncateZipCode(network.TRUNCATEZIPCODE_DEFAULT);
+    		network.setAggregateObfuscateType(Network.AGGREGATEOBFUSCATETYPE_DEFAULT);
     		
     		SiteConnection outCon = new SiteConnection(localSite, network, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING); 
     		SiteConnection inCon = new SiteConnection(localSite, network, SiteStatus.CONNECTED, ConnectionDirection.INCOMING); 
