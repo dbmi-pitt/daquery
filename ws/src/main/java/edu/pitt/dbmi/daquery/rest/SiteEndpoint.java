@@ -377,7 +377,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 						 				 (String)newSite.get("url"),
 						 				 (String)newSite.get("admin_email"));
 	        	
-	        	site.setKeystoreAlias((String)newSite.get("alias"));
+	        	//site.setKeystoreAlias((String)newSite.get("alias"));
 	        	String keystorepath = WSConnectionUtil.getKeystorePath();
 	        	site.setKeystorePath(keystorepath);
 		        
