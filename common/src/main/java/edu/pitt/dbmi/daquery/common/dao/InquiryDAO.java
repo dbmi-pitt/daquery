@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.daquery.dao;
+package edu.pitt.dbmi.daquery.common.dao;
 
 import java.util.ArrayList;
 //works for Java 1.8
@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import org.hibernate.criterion.Restrictions;
 
-import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;

@@ -1,11 +1,13 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,7 +44,7 @@ import edu.pitt.dbmi.daquery.update.db.DBUpdate137;
 public class DataModel extends DaqueryObject implements Serializable
 {	
 
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+	private static final long serialVersionUID = 29292842342523123l;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -124,7 +126,12 @@ public class DataModel extends DaqueryObject implements Serializable
 			//TODO: Hack for now.  If export config is empty read it from our file
 			if(StringHelper.isBlank(dataExportConf))
 			{
-				dataExportConf = DBUpdate137.readExportConf();
+				InputStream is = DataModel.class.getResourceAsStream("/data-export-config-cdm-v3.1.xml");
+				Scanner inputScanner = new Scanner(is);
+				dataExportConf = "";
+				while(inputScanner.hasNextLine())
+					dataExportConf = dataExportConf + inputScanner.nextLine() + "\n";
+				inputScanner.close();
 			}
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();

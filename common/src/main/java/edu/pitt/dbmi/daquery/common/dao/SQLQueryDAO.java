@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.daquery.dao;
+package edu.pitt.dbmi.daquery.common.dao;
 
 //works for Java 1.8
 //import java.time.LocalDateTime;
@@ -6,7 +6,6 @@ package edu.pitt.dbmi.daquery.dao;
 import java.util.List;
 import java.util.logging.Logger;
 
-import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
