@@ -543,7 +543,6 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	s.saveOrUpdate(sConn);
 	        	s.saveOrUpdate(network);
 		        s.getTransaction().commit();
-	        	SiteDAO.setIncomingSiteStatus(siteUUID, networkId, SiteStatus.CONNECTED);
 		        return Response.ok(201).build();
 			} else {
 				Response rVal = ResponseHelper.wrapServerResponse(acResp, "Central Server");
@@ -636,7 +635,6 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	s.saveOrUpdate(sConn);
 		        s.saveOrUpdate(network);
 		        s.getTransaction().commit();
-	        	SiteDAO.setIncomingSiteStatus(siteUUID, networkId, SiteStatus.DENIED);
 		       return Response.ok(201).build();
 			} else {
 				Response rVal = ResponseHelper.wrapServerResponse(denyResp, "Central Server");

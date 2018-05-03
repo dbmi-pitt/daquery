@@ -1,7 +1,6 @@
 package edu.pitt.dbmi.daquery.central.dev;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -16,21 +15,12 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public class CreateTestNetworks
-{
-	public static void main(String [] args) throws DaqueryException
-	{
-		//AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
-		//createTestNetworks();
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53/");
-		createShrineTestNetworks();
-	}
-	
-	public static List<Network> createTestNetworks() throws DaqueryException
+{	
+	public static List<Network> createLocalDevTestNetwork() throws DaqueryException
 	{
 		Properties props = PrivateProps.getProps();
 		
@@ -77,7 +67,7 @@ public class CreateTestNetworks
 		allNet.getSiteConnections().add(oConnD);
 		allNet.getSiteConnections().add(oConnC);		
 		allNet.setDataModel(modelA);
-		allNet.setName("All-Net");
+		allNet.setName("Local-All-Net");
 		
 		Network dcNet = new Network("1169eae7-79ed-41e6-bb62-c86167aef92f");
 		SiteConnection o2ConnD = new SiteConnection(dSite, dcNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
@@ -117,7 +107,7 @@ public class CreateTestNetworks
 	}
 	
 	//create a set of Shrine SSL connections
-	public static List<Network> createShrineTestNetworks() throws DaqueryException
+	public static List<Network> createSSLTestNetwork() throws DaqueryException
 	{
 		Properties props = PrivateProps.getProps();
 		                       
@@ -125,21 +115,21 @@ public class CreateTestNetworks
 		bSite.setName("dev02");
 		bSite.setAccessKey("abc123");
 		bSite.setTempKey(true);
-		bSite.setUrl("http://130.49.213.163:6443/");
+		bSite.setUrl("https://130.49.213.163:6443/");
 		bSite.setAdminEmail("shirey@pitt.edu");
 		
 		Site cSite = new Site("74059b65-056d-43a8-a705-b606c452ff71");
 		cSite.setName("dev03");
-		cSite.setAccessKey("123abc");
+		cSite.setAccessKey("abc123");
 		cSite.setTempKey(true);
-		cSite.setUrl("http://130.49.213.164:6443/");
+		cSite.setUrl("https://130.49.213.164:6443/");
 		cSite.setAdminEmail("chuck.borromeo@pitt.edu");		
 		
 		Site dSite = new Site("05b6db4d-a543-4ff6-8b9c-664b6153a104");
 		dSite.setName("shrine-dev01");
-		dSite.setAccessKey("xyz789");
+		dSite.setAccessKey("abc123");
 		dSite.setTempKey(true);
-		dSite.setUrl("http://130.49.213.165:6443/");
+		dSite.setUrl("https://130.49.213.165:6443/");
 		dSite.setAdminEmail("del20@pitt.edu");
 
 		DataModel modelA = CreateCDMModelInfo.makeModel(props.getProperty("cdm.url"),
@@ -155,7 +145,7 @@ public class CreateTestNetworks
 		allNet.getSiteConnections().add(o5ConnD);
 		allNet.getSiteConnections().add(o5ConnC);
 		allNet.setDataModel(modelA);
-		allNet.setName("SHRINE-SSL");
+		allNet.setName("DEV-ALL-SSL");
 		
 		save(allNet);
 		
@@ -164,6 +154,56 @@ public class CreateTestNetworks
 		return(nets);
 	}
 
+	//create a set of Shrine non-encrypted connections
+	//careful- the site UUIDs/names are the same as createSSLTestNetwork
+	public static List<Network> createTestNetwork() throws DaqueryException
+	{
+		Properties props = PrivateProps.getProps();
+                     
+		Site bSite = new Site("81590cc9-9bcd-470e-bc10-065080996842");
+		bSite.setName("dev02");
+		bSite.setAccessKey("abc123");
+		bSite.setTempKey(true);
+		bSite.setUrl("http://130.49.213.163:6060/");
+		bSite.setAdminEmail("shirey@pitt.edu");
+
+		Site cSite = new Site("74059b65-056d-43a8-a705-b606c452ff71");
+		cSite.setName("dev03");
+		cSite.setAccessKey("abc123");
+		cSite.setTempKey(true);
+		cSite.setUrl("http://130.49.213.164:6060/");
+		cSite.setAdminEmail("shirey@pitt.edu");		
+
+		Site dSite = new Site("05b6db4d-a543-4ff6-8b9c-664b6153a104");
+		dSite.setName("dev01");
+		dSite.setAccessKey("abc123");
+		dSite.setTempKey(true);
+		dSite.setUrl("http://130.49.213.165:6060/");
+		dSite.setAdminEmail("shirey@pitt.edu");
+
+		DataModel modelA = CreateCDMModelInfo.makeModel(props.getProperty("cdm.url"),
+													   props.getProperty("cdm.username"),
+													   props.getProperty("cdm.password"), "CDM-SHRINE");
+		
+
+		Network allNet = new Network("69fb4043-4de4-4763-b205-80e99c564730");
+		SiteConnection o5ConnB = new SiteConnection(bSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection o5ConnD = new SiteConnection(dSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection o5ConnC = new SiteConnection(cSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		allNet.getSiteConnections().add(o5ConnB);
+		allNet.getSiteConnections().add(o5ConnD);
+		allNet.getSiteConnections().add(o5ConnC);
+		allNet.setDataModel(modelA);
+		allNet.setName("DEV-ALL");
+		
+		save(allNet);
+		
+		List<Network> nets = new ArrayList<Network>();
+		nets.add(allNet);
+		return(nets);
+	}
+	
+	
 	private static void save(Object obj)
 	{
 		Session session = null;

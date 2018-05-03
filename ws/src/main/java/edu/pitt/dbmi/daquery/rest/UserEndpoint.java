@@ -207,8 +207,10 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	
 	    	//get a list of networks that the specified site is connected to
 	    	List<String> netIds = new ArrayList<String>();
-	    	String sql = "select distinct network.network_id from site, incoming_query_sites, network " +
-	    	             " where site.id = incoming_query_sites.site_id and network.id = incoming_query_sites.network_id  and upper(trim(site.site_id)) = '" + siteId.trim().toUpperCase() + "'";
+	    	String sql = "select distinct network.network_id from site, site_connection, network " +
+	    	             " where site.id = site_connection.site_id and network.id = site_connection.network_id  and upper(trim(site.site_id)) = '" + siteId.trim().toUpperCase() + "'" +
+	    	             	" and upper(trim(site_connection.status)) = 'CONNECTED'";
+
 	    	SQLQuery netQ = sess.createSQLQuery(sql);
 	    	List<Object> nIds = netQ.list();
 	    	for(Object nid : nIds)

@@ -7,14 +7,16 @@ public class RunAppSetup
 {
 	public static void main(String [] args) throws Exception
 	{
-		//AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53/");
+		AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
+		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53/");
 		AppSetup.initialSetup("123456789", "central-test", "", "path@pitt.edu", "temptest", "Test User");
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
 		else if(AppSetup.isValidSetup())
 		{
-			CreateTestNetworks.createTestNetworks();
+			//CreateTestNetworks.createLocalDevTestNetwork();
+			//CreateTestNetworks.createSSLTestNetwork();
+			CreateTestNetworks.createTestNetwork();
 			System.out.println("All Good");
 		}
 		else
