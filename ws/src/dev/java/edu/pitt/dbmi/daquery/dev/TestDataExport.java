@@ -3,13 +3,13 @@ package edu.pitt.dbmi.daquery.dev;
 import java.util.Date;
 import java.util.HashSet;
 
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 import edu.pitt.dbmi.daquery.queue.TaskQueue;

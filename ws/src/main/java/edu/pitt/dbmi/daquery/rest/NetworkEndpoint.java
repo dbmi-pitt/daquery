@@ -1,7 +1,6 @@
 package edu.pitt.dbmi.daquery.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.security.Principal;
@@ -14,7 +13,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -34,13 +32,12 @@ import org.hibernate.HibernateException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataBaseTestResult;
@@ -48,8 +45,6 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.TestConnection;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daquery.dao.SQLDataSourceDAO;
-import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 
 
 
