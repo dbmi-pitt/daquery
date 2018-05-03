@@ -1,11 +1,14 @@
-package edu.pitt.dbmi.daquery.dao;
+package edu.pitt.dbmi.daquery.common.dao;
 
 import java.util.ArrayList;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.persistence.PersistenceException;
 
 import org.hibernate.HibernateException;
 import org.hibernate.NonUniqueResultException;
@@ -13,8 +16,6 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.internal.util.StringHelper;
 
-import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
-import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
@@ -22,9 +23,6 @@ import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
-import edu.pitt.dbmi.daquery.rest.UserEndpoint;
-
-import java.util.logging.Level;
 
 
 

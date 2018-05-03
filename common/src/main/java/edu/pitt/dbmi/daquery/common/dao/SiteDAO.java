@@ -13,9 +13,7 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.hibernate.internal.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
@@ -40,8 +38,7 @@ public class SiteDAO extends AbstractDAO {
     {
     	//AppProperties.setDevHomeDir("/home/devuser/dq-data");
     	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-    	//setOutgoingSiteStatus("20b23b5c-61ad-44eb-8eef-886adcced18e", "ab3e4325-dbc5-4501-9fb9-4bc3dbc0a821", SiteStatus.CONNECTED);
-    	setIncomingSiteStatus("sitetestid", "nettestid", SiteStatus.CONNECTED);
+    	//.....
     }
     
     public static List<Site> queryAllSites() throws Exception {
@@ -244,7 +241,7 @@ public class SiteDAO extends AbstractDAO {
     	}
     }
     
-    public static void setOutgoingSiteStatus(String siteUUID, String networkUUID, SiteStatus status) throws DaqueryException
+/*  public static void setOutgoingSiteStatus(String siteUUID, String networkUUID, SiteStatus status) throws DaqueryException
     {
     	setSiteStatus(siteUUID, networkUUID, status, "outgoing");
     }
@@ -307,7 +304,7 @@ public class SiteDAO extends AbstractDAO {
     	{
     		if(s != null) s.close();
     	}
-    }
+    } */
     
     private static String checkSiteStatusAtCentral(String fromSiteId, String toSiteId, String networkId, Session s) throws DaqueryErrorException, DaqueryException
     {
@@ -339,12 +336,12 @@ public class SiteDAO extends AbstractDAO {
     	if(net == null)
     		throw new DaqueryException("A network with database id " + networkId + " was not found.");
 
-    	SiteConnection sc = net.findIncomingSite(siteUUID);
+    	SiteConnection sc = net.findOutgoingSite(siteUUID);
     	if(sc == null)
     		throw new DaqueryException("A site with siteUUID " + siteUUID + " was not found connected to network with database id " + networkId);
     	
     	sc.setStatusValue(status);
-    	SiteDAO.save(sc);
+    	SiteDAO.updateOrSave(sc);
     }
 
     /** Get sites by network_id

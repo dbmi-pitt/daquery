@@ -43,11 +43,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
+import edu.pitt.dbmi.daquery.common.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
-import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
@@ -71,8 +72,6 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 import edu.pitt.dbmi.daquery.queue.TaskQueue;
@@ -1028,7 +1027,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     private Response handleRemoteAggregateRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
     	request.setDirection("OUT");
     	request.setSentTimestamp(new Date());
-		AbstractDAO.save(request);
+		AbstractDAO.updateOrSave(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if(response.getStatus() == 200)
 		{
@@ -1077,6 +1076,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     private Response handleDataRequestFromSite(UserInfo uInfo, DaqueryRequest request, String requesterId, Network net) throws Exception {
     	if(uInfo == null)
 		{
+    		
 			if(request.getRequester() == null || StringHelper.isEmpty(request.getRequester().getId()) || StringHelper.isEmpty(request.getRequester().getEmail()) || StringHelper.isEmpty(request.getRequester().getRealName()))
 			{
 				String msg = "Requester user information is required.";
@@ -1151,6 +1151,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			rVal.setStatusEnum(ResponseStatus.PENDING);
 			rVal.setDownloadAvailable(false);
 			rVal.setRequest(request);
+			SiteDAO.updateOrSave(request.getRequesterSite());
+			SiteDAO.updateOrSave(request.getRequestSite());
 			ResponseDAO.saveOrUpdate(rVal);
 			return ResponseHelper.getJsonResponseGen(201, rVal);
 		}
@@ -1291,7 +1293,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
     	request.setDirection("OUT");
     	request.setSentTimestamp(new Date());
-		AbstractDAO.save(request);
+		AbstractDAO.updateOrSave(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if(response.getStatus() == 201)
 		{
