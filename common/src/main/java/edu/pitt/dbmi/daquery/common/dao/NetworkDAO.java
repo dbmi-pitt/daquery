@@ -141,7 +141,14 @@ public class NetworkDAO extends AbstractDAO {
     		network.setNetworkId(params.get("network_id"));
     		network.setDataModel(dataModel);
     		network.setObfuscateAggregateResults(false);
+    		network.setAggregateObfuscateType("");
+    		network.setAggregateObfuscateRange(0);
+    		network.setAggregateObfuscatePercent((float) 0);
+    		network.setAggregateObfuscateThreshold(0);
     		network.setShiftDates(false);
+    		network.setMinDateShift(0);
+    		network.setMaxDateShift(0);
+    		network.setTruncateZipCode(false);
     		network.setSerializePatientId(false);
     		
     		SiteConnection outCon = new SiteConnection(localSite, network, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING); 
