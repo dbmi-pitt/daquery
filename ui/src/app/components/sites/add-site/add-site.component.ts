@@ -32,7 +32,7 @@ export class AddSiteComponent implements OnInit {
     this.connectSiteForm = this.fb.group({
       network_id: network_id,
       site: ['', Validators.required],
-      alias: ['', Validators.required],
+      // alias: ['', Validators.required],
       name: ['', Validators.required],
       url: ['', Validators.required],
       admin_email: ['', Validators.required]
@@ -40,7 +40,7 @@ export class AddSiteComponent implements OnInit {
   }
 
   get site() { return this.connectSiteForm.get('site')};
-  get alias() { return this.connectSiteForm.get('alias')};
+  // get alias() { return this.connectSiteForm.get('alias')};
   get name() { return this.connectSiteForm.get('name')};
   get url() { return this.connectSiteForm.get('url')};
   get admin_email() { return this.connectSiteForm.get('admin_email')};
