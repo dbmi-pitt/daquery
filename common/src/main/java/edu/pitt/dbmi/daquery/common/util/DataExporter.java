@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
@@ -61,9 +62,8 @@ public class DataExporter {
         pList.add("PIT637837");
         pList.add("PIT982221");        
         DataExporter dataExporter = new DataExporter(r.getResponses().iterator().next(), dm.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
-        FileWriter fw = new FileWriter("shirey-tracking.out", true);
-        dataExporter.dumpData(new File("."), r, 1, 1, 10, fw);
-        fw.close();
+        dataExporter.dumpData(new File("."), r, 1, 1, 10);
+        dataExporter.close();
         //while(dataExporter.hasNextExport())
         //	dataExporter.exportNext();
 	}
@@ -164,16 +164,11 @@ public class DataExporter {
 			return(false);
 	}
 	
-	//returns the file and path where the exported file is stored
-	//either remotely or locally 
-	public String exportNext() throws Throwable
+	private FileWriter trackFileWriter = null;
+	private FileWriter getTrackingFileWriter() throws DaqueryException, IOException, DaqueryErrorException
 	{
-		FileWriter trackingFileWriter = null;
-		try
+		if(trackFileWriter == null)
 		{
-			if(! hasNextExport()) return null;
-				currentFile++;
-	
 			String trackingFileDir = StringHelper.ensureTrailingSlashFile(AppProperties.getTrackingDir());
 			File trackingDir = new File(trackingFileDir);
 			if(! trackingDir.exists())
@@ -197,16 +192,30 @@ public class DataExporter {
 				String msg = "The configured tracking file directory is not writable.  " + trackingFileDir;
 				logger.log(Level.SEVERE, msg);
 				throw new DaqueryErrorException(msg);
-			}
+			}			
+			
 			String trackingFilePath = trackingFileDir + daqueryRequest.getFilePrefix() + "_" + currentFile + ".log";
-			trackingFileWriter = new FileWriter(trackingFilePath, true);
-			if(currentFile == 1)
-			{
-				trackingFileWriter.write("Export started: " + dateFormat.format(new Date()) + "\n");
-				trackingFileWriter.write("exported patient id, db patient id, date shift\n");
-			}
+			trackFileWriter = new FileWriter(trackingFilePath, true);
+			trackFileWriter.write("Export started: " + dateFormat.format(new Date()) + "\n");
+			trackFileWriter.write("exported patient id, db patient id, date shift\n");
+		}
+		return(trackFileWriter);
+	}
+	
+	//returns the file and path where the exported file is stored
+	//either remotely or locally 
+	public String exportNext() throws Throwable
+	{
+		try
+		{
+			//just make sure all is okay with the tracking file writer before doing any export- several errors could get thrown from this call
+			getTrackingFileWriter();
+			
+			if(! hasNextExport()) return null;
+				currentFile++;
+
 			File tmpDir = FileHelper.createTempDirectory();
-			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile, trackingFileWriter);
+			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile);
 	
 			//send the file to remote requester
 			String outputFilename = daqueryRequest.getFilePrefix() + "_" + currentFile + ".zip";
@@ -217,6 +226,8 @@ public class DataExporter {
 			}
 			else
 			{
+				File downDir = new File(AppProperties.getLocalDeliveryDir());
+				FileHelper.checkAndCreateDir(downDir);
 				Path p = Paths.get(AppProperties.getLocalDeliveryDir(), outputFilename);
 				Files.copy(zipFile.toPath(), p, StandardCopyOption.REPLACE_EXISTING );
 				filename = p.toString();
@@ -228,13 +239,46 @@ public class DataExporter {
 			logger.log(Level.SEVERE, "Error occurs on data export", t);
 			throw t;
 		}
-		finally
-		{
-			if(trackingFileWriter != null) trackingFileWriter.close();
-		}
+	}
+
+	
+	public void close() throws IOException
+	{
+		if(trackFileWriter != null) trackFileWriter.close();
+		trackFileWriter = null;
 	}
 	
-	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile, FileWriter trackingFile) throws Throwable
+	public void writeTrackingFile() throws IOException, DaqueryErrorException, DaqueryException
+	{
+		//make a list of all patients 
+		HashSet<String> patientIds = new HashSet<String>();
+		for(String id : serialIdByI2b2Id.keySet())
+		{
+			if(!patientIds.contains(id))
+				patientIds.add(id);
+		}
+		for(String id : shiftDaysByPatientId.keySet())
+		{
+			if(!patientIds.contains(id))
+				patientIds.add(id);
+		}
+		
+		FileWriter trckFile = getTrackingFileWriter();
+		for(String id : patientIds)
+		{
+			Integer shiftDays = null;
+			Integer patNum = null;
+			
+			if(shiftDaysByPatientId.containsKey(id))
+				shiftDays = shiftDaysByPatientId.get(id);
+			if(serialIdByI2b2Id.containsKey(id))
+				patNum = serialIdByI2b2Id.get(id);
+			
+			trckFile.write(id + "," + ((patNum == null)?"":patNum.toString()) + "," + ((shiftDays == null)?"":shiftDays.toString()) + "\n");
+		}		
+	}
+	
+	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile) throws Throwable
 	{
 		String filenamePrefix = daqueryRequest.getFilePrefix();
 		Hashtable<OutputFile, OutputStreamWriter> outputStreams = new Hashtable<>();
@@ -247,7 +291,7 @@ public class DataExporter {
 				outputStreams.put(outputfile, new OutputStreamWriter(ontologyOutputStream));
 				
 			}else{
-				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile, trackingFile);
+				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile);
 			}
 		}
 		
@@ -327,7 +371,7 @@ public class DataExporter {
 		// send finish locally msg to requester site.
 	}
 	
-	private void writeCustomCSVFile(OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile, FileWriter trackingFile) throws Throwable {
+	private void writeCustomCSVFile(OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile) throws Throwable {
 		Connection conn = null;
 		Statement s = null;
 		ResultSet rs = null;
@@ -375,9 +419,6 @@ public class DataExporter {
 						outLine[0] = this.getSerializedId(patientNum);
 					else
 						outLine[0] = patientNum;
-					
-					if(trackingFile != null)
-						trackingFile.write(outLine[0] + "," + patientNum + "," + this.getShiftDays(patientNum) + "\n");
 					
 					int outLineEnd = debugDataExport ? outLine.length - 2 : outLine.length;
 					for(int j = 2; j <= outLineEnd; j++){
@@ -677,11 +718,12 @@ public class DataExporter {
 	private Hashtable<String, Integer> shiftDaysByPatientId = new Hashtable<String, Integer>();
 	
 	private int getShiftDays(String patientId) throws DaqueryException {
-		if (!shiftDaysByPatientId.containsKey(patientId)) {
+		String idKey = getIdKey(patientId);
+		if (!shiftDaysByPatientId.containsKey(idKey)) {
 			Network net = daqueryRequest.getNetwork();
 			if(! net.getShiftDates())
 			{
-				shiftDaysByPatientId.put(patientId, new Integer(0));
+				shiftDaysByPatientId.put(idKey, new Integer(0));
 			}
 			else
 			{
@@ -690,10 +732,10 @@ public class DataExporter {
 				{
 					shiftDays = RngHelper.nextIntInRange(net.getMinDateShift(), net.getMaxDateShift()); 
 				}
-				shiftDaysByPatientId.put(patientId, new Integer(shiftDays));
+				shiftDaysByPatientId.put(idKey, new Integer(shiftDays));
 			}
 		}
-		return (shiftDaysByPatientId.get(patientId).intValue());
+		return (shiftDaysByPatientId.get(idKey).intValue());
 	}
 	
 	private Integer maxShiftDays = null;
@@ -710,12 +752,19 @@ public class DataExporter {
 	private int patientIdOffset;
 	private Hashtable<String, Integer> serialIdByI2b2Id = new Hashtable<String, Integer>();
 	
+	private String getIdKey(String val)
+	{
+		if(val == null) return(null);
+		return(val.trim().toUpperCase());
+	}
+	
 	private String getSerializedId(String patientId) {
-		if (!serialIdByI2b2Id.containsKey(patientId)) {
+		String idKey = getIdKey(patientId);
+		if (!serialIdByI2b2Id.containsKey(idKey)) {
 			Integer newId = new Integer(ptIdCounter++);
-			serialIdByI2b2Id.put(patientId, this.patientIdOffset + newId);
+			serialIdByI2b2Id.put(idKey, this.patientIdOffset + newId);
 		}
-		String rVal = Integer.toString(serialIdByI2b2Id.get(patientId));
+		String rVal = Integer.toString(serialIdByI2b2Id.get(idKey));
 		return (rVal);
 	}
 	

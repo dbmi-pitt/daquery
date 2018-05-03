@@ -46,16 +46,16 @@ public class Network extends DaqueryObject implements Serializable {
     public static final String FIND_BY_UUID = "Network.findByUUID";
     public static final String FIND_BY_NAME = "Network.findByName";
 
-	private static final Integer MAXDATESHIFT_DEFAULT = 0;
-	private static final Integer MINDATESHIFT_DEFAULT = -365;
-	private static final Boolean SHIFTDATES_DEFAULT = true;
-	private static final Boolean SERIALIZEPATIENTID_DEFAULT = true;
-	private static final Boolean OBFUSCATEAGGREGATERESULTS_DEFAULT = true;
-	private static final String AGGREGATEOBFUSCATETYPE_DEFAULT = "range"; //RANGE or PERCENTAGE are the allowed values
-	private static final Float AGGREGATEOBFUSCATEPERCENT_DEFAULT = 0.1f;
-	private static final Integer AGGREGATEOBFUSCATERANGE_DEFAULT = 10;
-	private static final Integer AGGREGATEOBFUSCATETHRESHOLD_DEFAULT = 10;
-	private static final Boolean TRUNCATEZIPCODE_DEFAULT = true;    
+	public static final Integer MAXDATESHIFT_DEFAULT = 0;
+	public static final Integer MINDATESHIFT_DEFAULT = -365;
+	public static final Boolean SHIFTDATES_DEFAULT = true;
+	public static final Boolean SERIALIZEPATIENTID_DEFAULT = true;
+	public static final Boolean OBFUSCATEAGGREGATERESULTS_DEFAULT = true;
+	public static final String AGGREGATEOBFUSCATETYPE_DEFAULT = "range"; //RANGE or PERCENTAGE are the allowed values
+	public static final Float AGGREGATEOBFUSCATEPERCENT_DEFAULT = 0.1f;
+	public static final Integer AGGREGATEOBFUSCATERANGE_DEFAULT = 10;
+	public static final Integer AGGREGATEOBFUSCATETHRESHOLD_DEFAULT = 10;
+	public static final Boolean TRUNCATEZIPCODE_DEFAULT = true;    
 	
     @Expose
     @Id
