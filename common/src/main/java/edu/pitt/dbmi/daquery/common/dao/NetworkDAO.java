@@ -170,7 +170,7 @@ public class NetworkDAO extends AbstractDAO {
         }
     }
     
-    public static Network getNetworkForIncomingSite(Site site)
+/*    public static Network getNetworkForIncomingSite(Site site)
     {
     	if(site == null || site.getSiteId() == null)
     		return(null);
@@ -178,7 +178,7 @@ public class NetworkDAO extends AbstractDAO {
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
-    		String sql = "select n.network_id from incoming_query_sites iqs, site s, network n where s.site_id = '" + site.getSiteId() + "' and s.id = iqs.site_id and iqs.network_id = n.id";
+    		String sql = "select network_id from site_connection where s.site_id = '" + site.getSiteId() + "' and s.id = iqs.site_id and iqs.network_id = n.id";
     		SQLQuery q = s.createSQLQuery(sql);
     		String netId = (String) q.uniqueResult();
     		Network net = queryNetwork(netId);
@@ -193,7 +193,7 @@ public class NetworkDAO extends AbstractDAO {
 	    		s.close();
 	    	}
         }    	
-    }
+    } */
     
     public static DataModel getDatamodelbyNetworkId(Network network) throws DaqueryException {
     	if (network == null) {

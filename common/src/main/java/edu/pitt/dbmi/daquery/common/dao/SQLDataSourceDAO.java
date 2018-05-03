@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.daquery.dao;
+package edu.pitt.dbmi.daquery.common.dao;
 
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
-import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 

@@ -31,7 +31,9 @@ import javax.ws.rs.core.UriInfo;
 import org.hibernate.HibernateException;
 
 import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.EmailContents;
@@ -41,8 +43,6 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 import edu.pitt.dbmi.daquery.queue.TaskQueue;

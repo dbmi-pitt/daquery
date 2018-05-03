@@ -1,19 +1,13 @@
 package edu.pitt.dbmi.daquery.common.dao;
 
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
@@ -31,7 +25,7 @@ public class DaqueryRequestDAO extends AbstractDAO {
 	
 	public static void saveOrUpdate(DaqueryRequest request) throws DaqueryException
 	{
-		AbstractDAO.save(request);
+		AbstractDAO.updateOrSave(request);
 	}
 	
 	public static DaqueryRequest getRequestById(String requestId) throws DaqueryException
