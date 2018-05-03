@@ -222,18 +222,9 @@ public class NetworkEndpoint extends AbstractEndpoint {
             if(dModel != null)
 	            dModel.setDataSources(dsset);
 	        sqlDataSource.setDataModel(dModel);
-	        Network network = NetworkDAO.createNetwork(network_params, dModel);
-            
-            Site site = SiteDAO.getLocalSite();
-            
-            sitedao.openCurrentSessionwithTransaction();
-            sitedao.createOutogingSites(network.getId(), site.getId());
-            sitedao.createIncomingSites(network.getId(), site.getId());
-            sitedao.closeCurrentSessionwithTransaction();
-            
-            SiteDAO.setIncomingSiteStatus(site.getSiteId(), network.getNetworkId(), SiteStatus.CONNECTED);
-            SiteDAO.setOutgoingSiteStatus(site.getSiteId(), network.getNetworkId(), SiteStatus.CONNECTED);
-            
+	        Site localSite = SiteDAO.getLocalSite();
+	        Network network = NetworkDAO.createNetwork(network_params, dModel, localSite);
+
             String json = network.toJson();
 
             return Response.ok(200).entity(json).build();

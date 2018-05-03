@@ -18,6 +18,7 @@ import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.SASDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
@@ -81,6 +82,7 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(DataModel.class);
     	hibernateConf.addAnnotatedClass(DataAttribute.class);
     	hibernateConf.addAnnotatedClass(RemoteRole.class);
+    	hibernateConf.addAnnotatedClass(SiteConnection.class);
     	
     	
         	

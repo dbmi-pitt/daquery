@@ -15,6 +15,8 @@ import com.google.gson.annotations.Expose;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.RngHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
@@ -115,9 +117,21 @@ public class SQLQuery extends Inquiry
 				
 			return(response);
 		}
+		catch(DaqueryException de)
+		{
+			log.log(Level.SEVERE, "Application error while executing an aggregate query.", de);
+			Throwable t = ResponseHelper.getRootCause(de);
+			String causeMsg = "";
+			if(! t.equals(de))
+				causeMsg = t.getMessage() + " ";
+			response.setStatusEnum(ResponseStatus.ERROR);
+			response.setErrorMessage(causeMsg + de.getMessage() + " Check the site logs for more information.");
+			response.setStackTrace(StringHelper.stackToString(t));		
+			return(response);
+		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "Unexpected error while executing query: " + code, t);
+			log.log(Level.SEVERE, "Unexpected error while executing an aggregate query: " + code, t);
 			response.setStatusEnum(ResponseStatus.ERROR);
 			response.setErrorMessage("An unexpected error occured. Check the site logs for more information." + t.getMessage());
 			response.setStackTrace(StringHelper.stackToString(t));

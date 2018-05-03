@@ -45,13 +45,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
+import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
+import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
@@ -68,7 +72,6 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
@@ -100,18 +103,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		System.out.println(json); */
 	}
 		
-	private static boolean containsSiteWhoIQuery(List<Network> networks, String siteId)
+	private static boolean containsSiteWhoIQuery(String networkId, String siteId) throws DaqueryException
 	{
-		for(Network net : networks)
-		{
-			for(Site site : net.getOutgoingQuerySites())
-			{
-				if(siteId.equals(site.getId()))
-				{
-					return(true);
-				}
-			}
-		}
+		Network net = NetworkDAO.getNetworkById(networkId);
+		if(net == null) return(false);
+		SiteConnection conn = net.findOutgoingSite(siteId);
+		if(conn != null && conn.getStatusValue() != null && conn.getStatusValue().equals(SiteStatus.CONNECTED))
+			return(true);
+		
 		return(false);
 	}
 	
@@ -120,8 +119,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @Produces(MediaType.TEXT_PLAIN)
 	public Response helloWorld()
 	{
-		//that's a little dark, mate.-- it's actually a flipped reference to a Pink Floyd song
-		return(ResponseHelper.getBasicResponse(200, "Hello Cruel World"));
+		return(ResponseHelper.getBasicResponse(200, "Hello World"));
 	}
     
 	
@@ -240,27 +238,30 @@ public class DaqueryEndpoint extends AbstractEndpoint
 						connectedNetworkIds.add(net.getNetworkId());
 				}
 				String json = resp.readEntity(String.class);
-				Network[] ninfo = JSONHelper.gson.fromJson(json, Network[].class);
-				List<Network> nets = NetworkDAO.queryAllNetworks();
+				Network[] netsFromCentral = JSONHelper.gson.fromJson(json, Network[].class);
+				//List<Network> nets = NetworkDAO.queryAllNetworks();
 				List<Site> sitesToRemove = new ArrayList<Site>();
-				for(Network nin : ninfo)
+				for(Network nFromCentral : netsFromCentral)
 				{
-					if(! connectedNetworkIds.contains(nin.getNetworkId()))
+					if(! connectedNetworkIds.contains(nFromCentral.getNetworkId()))
 					{
-						for(Site si : nin.getOutgoingQuerySites())
+						for(SiteConnection sc : nFromCentral.getSiteConnections())
 						{
-							if(containsSiteWhoIQuery(nets, si.getSiteId()))
-								sitesToRemove.add(si);
+							if(SiteConnection.isOutgoing(sc) && sc.getSite() != null)
+							{
+								if(containsSiteWhoIQuery(nFromCentral.getNetworkId(), sc.getSite().getSiteId()))
+									sitesToRemove.add(sc.getSite());
+							}
 						}
 						for(Site sr : sitesToRemove)
 						{
-							nin.getOutgoingQuerySites().remove(sr);
+							nFromCentral.removeOutgoingConnection(sr);
 						}
 						sitesToRemove.clear();
 					}
 				}
 				List<Network> rlist = new ArrayList<Network>();
-				for(Network n : ninfo)
+				for(Network n : netsFromCentral)
 				{
 					if(! connectedNetworkIds.contains(n.getNetworkId()))
 						rlist.add(n);

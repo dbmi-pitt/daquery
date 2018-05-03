@@ -22,21 +22,11 @@ import edu.pitt.dbmi.daquery.common.domain.*;
 
 public class DBHelper
 {
-	public static void main(String [] args) throws Exception
-	{
-		//for testing set the location of the application database
-		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
-		List<Network> nets = getAllowedNetworks("20b23b5c-61ad-44eb-8eef-886adcced18e");
-		for(Network net : nets)
-		{
-			System.out.println(net.getName() + ":" + net.getNetworkId());
-			for(Site site : net.getOutgoingQuerySites())
-			{
-				System.out.println("\t" + site.getName() + ":" + site.getUrl() + ":" + site.getSiteId());
-			}
-		}
-		
-	}
+    public static void main(String [] args) throws Exception
+    {
+    	AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+    	NetworkDAO.getAllNetworks();
+    }
 	
 	private static Logger log = Logger.getLogger(DBHelper.class.getName());
 	
@@ -193,57 +183,28 @@ public class DBHelper
 	 * @return a list of networks with associated sites.
 	 * @throws DaqueryCentralException
 	 */
-	public static List<Network> getAllowedNetworks(String siteId) throws DaqueryCentralException
+	public static List<Network> getAllowedNetworks(String siteId) throws DaqueryCentralException, DaqueryException
 	{
-		
-		String sql = "select distinct net.network_id from outgoing_query_sites oqs, site, network net  where oqs.site_id = site.id and oqs.network_id = net.id and site.site_id = '" + siteId +"'";
-/*		String sql = "select site_id, network_name, data_model, network_membership.network_id, site.name as site_name, site_url, admin_email " +
-		                                  "from network_membership, " +
-                                                "(select id as network_id, name as network_name, data_model from network " +
-                                                          "where id in " + 
-                                                                 "(select network_id from network_membership " +
-                                                                                "where site_id = '" + siteId +"')) as inn, " +
-                                                 "site " +
-                                           "where network_membership.network_id = inn.network_id and " +
-                                                 "site.id = network_membership.site_id " +
-                                           "order by network_membership.network_id"; */
-		List<Network> networks = new ArrayList<Network>();
-
-		Session sess = null;
-		Statement stat = null;
-		try
+		List<Network> nets = NetworkDAO.getAllNetworks();
+		List<Network> returnNets = new ArrayList<Network>();
+		for(Network net : nets)
 		{
-			sess = HibernateConfiguration.openSession();
-			SQLQuery q = sess.createSQLQuery(sql);
-			List<String> netIds = q.list();
-			for(String netId : netIds)
+			//CDB remove the Data Sources and Data Models from the Networks before passing them back to
+			//the sites.  I removed the Data Sources because it makes no sense for the Central Network to have
+			//a defined data source.  I removed the Data Model because I could not pass the Network back with 
+			//a defined Data Model XML.  It kept throwing errors.
+			if(net != null && net.findOutgoingSite(siteId) != null)
 			{
-				Network net = NetworkDAO.queryNetwork(netId);
-				//CDB remove the Data Sources and Data Models from the Networks before passing them back to
-				//the sites.  I removed the Data Sources because it makes no sense for the Central Network to have
-				//a defined data source.  I removed the Data Model because I could not pass the Network back with 
-				//a defined Data Model XML.  It kept throwing errors.
-				if(net != null) {
-					if (net.getDataModel() != null) {
-						net.getDataModel().setDataSources(new HashSet<DataSource>());
-						//net.getDataModel().setDataExportConf("");
-					}
-					networks.add(net);
+				if (net.getDataModel() != null)
+				{
+					net.getDataModel().setDataSources(new HashSet<DataSource>());
+					//net.getDataModel().setDataExportConf("");
 				}
+				returnNets.add(net);
 			}
+		}
 			
-			return(networks);
-		}
-		catch(Throwable t)
-		{
-			String msg = "An unexpected error occurred while looking up the available networks/sites for site with id: " + siteId;
-			log.log(Level.SEVERE, msg, t);
-			throw new DaqueryCentralException(msg, t);
-		}
-		finally
-		{
-			if(sess != null) sess.close();
-		}
+		return(returnNets);
 		
 	}
 

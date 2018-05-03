@@ -51,7 +51,7 @@ public class AppProperties
 	{	if ( getHomeDirectory() == null )
 			return null;
 		else
-			return(getHomeDirectory() + File.separator + confDir + File.separator);
+			return(StringHelper.ensureTrailingSlashFile(getHomeDirectory()) + confDir + File.separator);
 	}
 	
 	public static String getDBDir() throws Exception

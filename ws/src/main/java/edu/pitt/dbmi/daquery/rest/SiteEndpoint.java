@@ -41,8 +41,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
@@ -166,6 +168,7 @@ public class SiteEndpoint extends AbstractEndpoint {
      * returns a 404 error if no queries are found,
      *   a 500 error on failure
      */
+    //all sites that aren't already connected?
 	@GET
     @Path("/available")
     @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
@@ -185,35 +188,45 @@ public class SiteEndpoint extends AbstractEndpoint {
             Map<String, String> idParam = new HashMap<String, String>();
 			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
 			netResp = WSConnectionUtil.centralServerGet("availableNetworks",  idParam);
-			Network network = NetworkDAO.queryNetwork(String.valueOf(networkId));
+			
 			
 			if(netResp.getStatus() == 200)
 			{
+				Network network = NetworkDAO.queryNetwork(String.valueOf(networkId));
+				if(network == null)
+				{
+					return ResponseHelper.getErrorResponse(400, "Network not found.", "Network with id " + networkId + " was not found.", null);
+				}
+
 				String json = netResp.readEntity(String.class);
-				Network[] ninfo = JSONHelper.gson.fromJson(json, Network[].class);
-				Network network_info = null;
-				for(Network nin : ninfo) {
-					if(nin.getNetworkId().equals(network.getNetworkId()))
-						network_info = nin;
+				Network[] networksFromCentral = JSONHelper.gson.fromJson(json, Network[].class);
+				Network netFromCent = null;
+				for(Network testNet : networksFromCentral) {
+					if(testNet.getNetworkId().equals(network.getNetworkId()))
+						netFromCent = testNet;
 				}
-				
-				Site si = null;
-				for(Site sin : network_info.getOutgoingQuerySites()) {
-					if(sin.getSiteId().equals(AppProperties.getDBProperty("site.id")))
-						si = sin;
-				}
-				
-				network_info.getOutgoingQuerySites().remove(si);
+
+				//remove local site?
+				SiteConnection lclSiteConn = netFromCent.findOutgoingSite(AppProperties.getDBProperty("site.id"));
+				if(lclSiteConn != null)
+					netFromCent.removeOutgoingConnection(lclSiteConn.getSite());
 				
 				List<Site> rlist = new ArrayList<>();
-				for(Site s : network_info.getOutgoingQuerySites())
-					rlist.add(s);
+				for(SiteConnection sConn : netFromCent.getSiteConnections())
+				{
+					if(SiteConnection.isOutgoing(sConn) && sConn.getSite() != null)
+						rlist.add(sConn.getSite());
+				}
+				
 				Map<String, List> rmap = new HashMap<>();
 				rmap.put("full", rlist);
 				List<Site> outgoings = new ArrayList<>();
-				for(Site s : network.getOutgoingQuerySites()) {
-					outgoings.add(s);
+				for(SiteConnection sc : network.getSiteConnections())
+				{
+					if(SiteConnection.isOutgoing(sc) && sc.getSite() != null)
+						outgoings.add(sc.getSite());
 				}
+
 				rmap.put("outgoing", outgoings);
 				return(ResponseHelper.getJsonResponseGen(200, rmap));
 			} else {
@@ -353,42 +366,44 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	// respond to UI
 	        	String networkId = (String) newSite.get("network_id");	
 		        Network network = NetworkDAO.queryNetwork(networkId);
-		        
-		        //TODO: Does the site parameter hold the uuid??
-		        //      Does this site exist in SITE already?
-		        //      Does an entry exist in outgoing_query_sites already?
-		        
+
 		        
 		        String siteUUID = (String) newSite.get("site");
-	        	Site site_out = new Site(siteUUID,
+		        
+		        Site site = SiteDAO.getSiteByUUID(siteUUID);
+		        if(site == null)
+		        	site = new Site(siteUUID,
 	        							 (String)newSite.get("name"),
 						 				 (String)newSite.get("url"),
 						 				 (String)newSite.get("admin_email"));
 	        	
-	        	//site_out.setStatus(SiteStatus.PENDING.toString());
-	        	site_out.setKeystoreAlias((String)newSite.get("alias"));
+	        	site.setKeystoreAlias((String)newSite.get("alias"));
 	        	String keystorepath = WSConnectionUtil.getKeystorePath();
-	        	site_out.setKeystorePath(keystorepath);
+	        	site.setKeystorePath(keystorepath);
 		        
 	        	Map<String, String> idParam = new HashMap<String, String>();
                 idParam.put("network-id", network.getNetworkId());
                 idParam.put("from-site-id", AppProperties.getDBProperty("site.id"));
-                idParam.put("to-site-id", site_out.getSiteId());
+                idParam.put("to-site-id", site.getSiteId());
  				Response resp = WSConnectionUtil.centralServerGet("request-connection",  idParam);
  				
  				if(resp.getStatus() == 200 || resp.getStatus() == 201) {
- 					//add to network, then set status in OUTGOING_QUERY_SITES
-		        	network.getOutgoingQuerySites().add(site_out);
+ 					SiteConnection sConn = network.findOutgoingSite(site.getSiteId());
+ 					if(sConn == null)
+ 						sConn = new SiteConnection(site, network, SiteStatus.PENDING, ConnectionDirection.OUTGOING);
+ 					else
+ 						sConn.setStatusValue(SiteStatus.PENDING);
+ 					
 		        	
 		        	s.getTransaction().begin();
-	 		        s.update(network);       
+		        	s.saveOrUpdate(sConn);
+	 		        s.saveOrUpdate(network);    
 	 		        s.getTransaction().commit();
-	 		        SiteDAO.setOutgoingSiteStatus(siteUUID, networkId, SiteStatus.PENDING);
 	 		        
  					return Response.ok(201).build();
  				}
  				else
- 					return ResponseHelper.wrapServerResponse(resp, site_out.getName());
+ 					return ResponseHelper.wrapServerResponse(resp, site.getName());
 	        } else {	        	
 	        	return ResponseHelper.getErrorResponse(BAD_REQUEST.getStatusCode(), "Can only request connections with outgoing sites.", "Invalid type parameter [" + type + "] found in URL" , null);
 	        }
@@ -508,16 +523,25 @@ public class SiteEndpoint extends AbstractEndpoint {
     			
     			    			
     			String siteUUID = (String) map.get("siteId");
-	        	Site site_in = new Site(siteUUID,
+    			Site site_in = SiteDAO.getSiteByUUID(siteUUID);
+    			if(site_in == null)
+    			{
+    				site_in = new Site(siteUUID,
 	        							(String)map.get("name"),
 						 				(String)map.get("url"),
 						 				(String)map.get("adminEmail"));
-	        	//site_in.setStatus(SiteStatus.CONNECTED.toString());
-//	        	Set<Site> ss = new HashSet<Site>();
-//	        	ss.add(site_in);
-	        	network.getIncomingQuerySites().add(site_in);
+    			}
+	        	
+	        	SiteConnection sConn = network.findIncomingSite(site_in.getSiteId());
+	        	if(sConn == null)
+	        		sConn = new SiteConnection(site_in, network, SiteStatus.CONNECTED, ConnectionDirection.INCOMING);
+	        	else
+	        		sConn.setStatusValue(SiteStatus.CONNECTED);
+	        	
 	        	s.getTransaction().begin();
-		        s.merge(network);
+		        //s.merge(network);
+	        	s.saveOrUpdate(sConn);
+	        	s.saveOrUpdate(network);
 		        s.getTransaction().commit();
 	        	SiteDAO.setIncomingSiteStatus(siteUUID, networkId, SiteStatus.CONNECTED);
 		        return Response.ok(201).build();
@@ -593,16 +617,24 @@ public class SiteEndpoint extends AbstractEndpoint {
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
     			
     			String siteUUID = (String) map.get("id");	
-	        	Site site_in = new Site(siteUUID,
-	        							(String)map.get("siteName"),
-						 				(String)map.get("siteURL"),
-						 				(String)map.get("adminEmail"));
-	        	//site_in.setStatus(SiteStatus.DENIED.toString());
-	        	Set<Site> ss = new HashSet<Site>();
-	        	ss.add(site_in);
-	        	network.setIncomingQuerySites(ss);
+	        	Site site_in = SiteDAO.getSiteByUUID(siteUUID); 
+	        	if(site_in == null)
+	        	{
+		        	site_in = new Site(siteUUID,
+		        							(String)map.get("siteName"),
+							 				(String)map.get("siteURL"),
+							 				(String)map.get("adminEmail"));
+	        	}
+	        	
+	        	SiteConnection sConn = network.findIncomingSite(siteUUID);
+	        	if(sConn == null)
+	        		sConn = new SiteConnection(site_in, network, SiteStatus.DENIED, ConnectionDirection.INCOMING);
+	        	else
+	        		sConn.setStatusValue(SiteStatus.DENIED);
+	        	
 	        	s.getTransaction().begin();
-		        s.update(network);
+	        	s.saveOrUpdate(sConn);
+		        s.saveOrUpdate(network);
 		        s.getTransaction().commit();
 	        	SiteDAO.setIncomingSiteStatus(siteUUID, networkId, SiteStatus.DENIED);
 		       return Response.ok(201).build();

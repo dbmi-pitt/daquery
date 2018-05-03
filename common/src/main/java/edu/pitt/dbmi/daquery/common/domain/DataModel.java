@@ -35,6 +35,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.update.db.DBUpdate137;
 
 @Entity
 @Table(name="DATA_MODEL")
@@ -120,6 +121,11 @@ public class DataModel extends DaqueryObject implements Serializable
 	public DataExportConfig getExportConfig() throws DaqueryException
 	{
 		try {
+			//TODO: Hack for now.  If export config is empty read it from our file
+			if(StringHelper.isBlank(dataExportConf))
+			{
+				dataExportConf = DBUpdate137.readExportConf();
+			}
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			StringReader reader = new StringReader(dataExportConf);

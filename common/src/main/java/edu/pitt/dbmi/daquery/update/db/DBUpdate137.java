@@ -36,18 +36,22 @@ public class DBUpdate137 implements DBUpdater
 	}
 	@Override
 	public void updateData(Connection conn) throws Exception {
-		
+				
+		//for all data models add the export xml for CDM
+		Statement st = conn.createStatement();
+		st.executeUpdate("update DATA_MODEL set DATA_EXPORT_CONF = '" + escapeSingleQuotes(readExportConf()) + "'");
+		conn.commit();
+	}
+	
+	public static String readExportConf()
+	{
 		InputStream is = ApplicationPropertiesFile.class.getResourceAsStream("/edu/pitt/dbmi/daquery/update/db/cdm-export-conf-v1.37.xml");
 		Scanner inputScanner = new Scanner(is);
 		String exportXML = "";
 		while(inputScanner.hasNextLine())
 			exportXML = exportXML + inputScanner.nextLine() + "\n";
 		inputScanner.close();
-		
-		//for all data models add the export xml for CDM
-		Statement st = conn.createStatement();
-		st.executeUpdate("update DATA_MODEL set DATA_EXPORT_CONF = '" + escapeSingleQuotes(exportXML) + "'");
-		conn.commit();
+		return(exportXML);
 	}
 	
 	//added this to avoid delimiter errors in SQL insert statement

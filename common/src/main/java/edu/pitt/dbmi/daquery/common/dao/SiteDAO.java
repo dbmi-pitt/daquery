@@ -21,6 +21,7 @@ import org.hibernate.internal.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
@@ -160,32 +161,19 @@ public class SiteDAO extends AbstractDAO {
      * @throws DaqueryException 
      * @throws Exception 
      */
-    public static List<Site> queryConnectedOutgoingSitesByNetworkId(long netId) throws DaqueryException, DaqueryErrorException {
-    	Session s = null;
-    	try {
-    		s = HibernateConfiguration.openSession();
-    		
-    		updatePendingSitesByNetwork(netId, s);
-    		
-    		String sql = "SELECT s.* FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.site_status='CONNECTED' and n.id = :network_id";
-			Query query = s.createSQLQuery(sql)
-						   .addEntity(Site.class)
-						   .setParameter("network_id", netId);
-			
-			List result = query.list();
-    		
-	        return result;
-        } catch (HibernateException e) {
-        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
-            throw e;
-        } catch (Throwable t) {
-        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve outgoing sites site by network id [" + netId + "]", t);
-            throw t;        	
-        }
-    	finally
-    	{
-    		if(s != null) s.close();
-    	}
+    public static List<Site> queryConnectedOutgoingSitesByNetworkId(long netId) throws DaqueryException, DaqueryErrorException
+    {
+    		Network net = NetworkDAO.getNetworkById(netId);
+    		List<Site> rVals = new ArrayList<Site>();
+    		if(net != null && net.getSiteConnections() != null)
+    		{
+    			for(SiteConnection sc : net.getSiteConnections())
+    			{
+    				if(SiteConnection.isOutgoing(sc) && SiteConnection.isConnected(sc) && sc.getSite() != null)
+    					rVals.add(sc.getSite());
+    			}
+    		}
+    		return(rVals);
     }
     
     /**
@@ -197,18 +185,28 @@ public class SiteDAO extends AbstractDAO {
      */
     public static void updatePendingSitesByNetwork(long netId, Session s) throws DaqueryException, DaqueryErrorException
     {
+    	Network net = NetworkDAO.getNetworkById(netId);
+    	if(net == null) return;
+    	
 		//before getting connected sites see if there are any pending sites that have been approved or disapproved
-		String sql = "SELECT s.site_id, n.network_id FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.site_status='PENDING' and n.id = " + netId;    		
+//		String sql = "SELECT s.site_id, n.network_id FROM SITE as s JOIN OUTGOING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.site_status='PENDING' and n.id = " + netId;    		
 		
-		Query q1 = s.createSQLQuery(sql);
-		List<Object[]> idList = q1.list();
-		if(idList.size() > 0)
-		{
-			Site mySite = SiteDAO.getLocalSite();
-			for(Object [] ids : idList)
-			{
-				String siteUUID = (String) ids[0];
-				String netUUID = (String) ids[1];
+//		Query q1 = s.createSQLQuery(sql);
+//		List<Object[]> idList = q1.list();
+//		if(idList.size() > 0)
+//		{
+		Site mySite = SiteDAO.getLocalSite();
+		String netUUID = net.getNetworkId();
+    	for(SiteConnection sc : net.getSiteConnections())
+    	{
+
+			
+//			for(Object [] ids : idList)
+//			{
+    		
+    		if(SiteConnection.isOutgoing(sc) && SiteConnection.isPending(sc))
+    		{
+    			String siteUUID = sc.getSite().getSiteId();
 				String status = checkSiteStatusAtCentral(mySite.getSiteId(), siteUUID, netUUID, s);
 				if(! StringHelper.isEmpty(status))
 				{
@@ -220,7 +218,8 @@ public class SiteDAO extends AbstractDAO {
 							updateOutgoingSiteStatus(siteUUID, netId, SiteStatus.valueOf(status));
 					}
 				}
-			}
+    		}
+//			}
 		}    	
     }
     
@@ -339,8 +338,13 @@ public class SiteDAO extends AbstractDAO {
     	Network net = NetworkDAO.getNetworkById(networkId);
     	if(net == null)
     		throw new DaqueryException("A network with database id " + networkId + " was not found.");
+
+    	SiteConnection sc = net.findIncomingSite(siteUUID);
+    	if(sc == null)
+    		throw new DaqueryException("A site with siteUUID " + siteUUID + " was not found connected to network with database id " + networkId);
     	
-    	SiteDAO.setOutgoingSiteStatus(siteUUID, net.getNetworkId(), status);
+    	sc.setStatusValue(status);
+    	SiteDAO.save(sc);
     }
 
     /** Get sites by network_id
@@ -348,34 +352,26 @@ public class SiteDAO extends AbstractDAO {
      *  @return List<Site>
      * @throws Exception 
      */
-    public static List<Site> queryConnectedIncomingSitesByNetworkId(long network_id) throws Exception{
-    	Session s = null;
-    	try {
-    		s = HibernateConfiguration.openSession();
-			
-			String sql = "SELECT s.* FROM SITE as s JOIN INCOMING_QUERY_SITES as oqs ON s.id = oqs.site_id JOIN NETWORK as n ON n.id = oqs.network_id WHERE oqs.site_status='CONNECTED' and n.id = :network_id";
-			Query query = s.createSQLQuery(sql)
-						   .addEntity(Site.class)
-						   .setParameter("network_id", network_id);
-			
-			List result = query.list();
-    		
-	        return result;
-	    
-        } catch (HibernateException e) {
-        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
-            throw e;
-    	} catch (Throwable t) {
-    		logger.log(Level.SEVERE, "Unexpected error encountered trying to query incoming sites site by networkid [" + network_id + "]", t);
-    		throw t;        	
-    	}
+    public static List<Site> queryConnectedIncomingSitesByNetworkId(long network_id) throws Exception
+    {
+    		Network net = NetworkDAO.getNetworkById(network_id);
+    		List<Site> rVals = new ArrayList<Site>();
+    		if(net != null && net.getSiteConnections() != null)
+    		{
+    			for(SiteConnection sc : net.getSiteConnections())
+    			{
+    				if(SiteConnection.isIncoming(sc) && SiteConnection.isConnected(sc) && sc.getSite() != null)
+    					rVals.add(sc.getSite());
+    			}
+    		}
+    		return(rVals);
     }
     
     public long createSite(Site site) throws Exception {
     	return (Long) getCurrentSession().save(site);
     }
     
-    public void createOutogingSites(long network_id, long site_id) throws Exception {
+/*    public void createOutogingSites(long network_id, long site_id) throws Exception {
     	Session s = null;
     	try {			
 			String sql = "INSERT INTO OUTGOING_QUERY_SITES (site_id, network_id) VALUES (:site_id, :network_id)";
@@ -417,7 +413,7 @@ public class SiteDAO extends AbstractDAO {
     			s.close();
     		}
     	}
-    }
+    } */
 
     private static Site mySite = null;
     

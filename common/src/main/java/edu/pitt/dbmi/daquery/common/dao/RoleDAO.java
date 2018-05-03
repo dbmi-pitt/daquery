@@ -1,4 +1,4 @@
-package edu.pitt.dbmi.daquery.dao;
+package edu.pitt.dbmi.daquery.common.dao;
 
 import java.util.ArrayList;
 //works for Java 1.8
@@ -11,8 +11,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.internal.util.StringHelper;
 
-import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
-import edu.pitt.dbmi.daquery.common.dao.ParameterItem;
 import edu.pitt.dbmi.daquery.common.domain.RemoteRole;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
