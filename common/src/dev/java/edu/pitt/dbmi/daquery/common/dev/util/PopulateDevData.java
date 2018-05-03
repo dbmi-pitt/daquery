@@ -1,6 +1,5 @@
-package edu.pitt.dbmi.daquery.dev;
+package edu.pitt.dbmi.daquery.common.dev.util;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -11,7 +10,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
-import edu.pitt.dbmi.daquery.common.dev.util.PrivateProps;
+import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
@@ -20,6 +19,7 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
@@ -31,8 +31,7 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daquery.dao.RoleDAO;
+import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 
 /**
  * Populate the database with some dev data in a Hibernatey kind of way..
@@ -95,14 +94,7 @@ public class PopulateDevData
 		inq.setNetwork(net);
 		inq.setAggregate(true);
 		save(inq);
-		save(net);
-		
-		for(Site s : net.getOutgoingQuerySites())
-			SiteDAO.setOutgoingSiteStatus(s.getSiteId(), net.getNetworkId(), SiteStatus.CONNECTED);
-		
-		for(Site s : net.getIncomingQuerySites())
-			SiteDAO.setIncomingSiteStatus(s.getSiteId(), net.getNetworkId(), SiteStatus.CONNECTED);
-				
+		save(net);				
 		
 		DaqueryRequest req = createOutgoingRequest(inq, user, nas.localSite);
 		req.setNetwork(net);
@@ -121,11 +113,6 @@ public class PopulateDevData
 		inq.setNetwork(net);
 		save(inq);
 		
-		for(Site s : net.getOutgoingQuerySites())
-			SiteDAO.setOutgoingSiteStatus(s.getSiteId(), net.getNetworkId(), SiteStatus.CONNECTED);
-		
-		for(Site s : net.getIncomingQuerySites())
-			SiteDAO.setIncomingSiteStatus(s.getSiteId(), net.getNetworkId(), SiteStatus.CONNECTED);
 		
 	}
 	
@@ -216,18 +203,25 @@ public class PopulateDevData
 		Site bsiteOut = new Site("jajasioujaiojaijf","shirey@pitt.edu","no key for now..",EncryptionType.NONE,"bill-dev","20b23b5c-61ad-44eb-8eef-886adcced18e","http://localhost:8080/");	
 		Site dsiteOut = new Site("jaoijafojafasdf","del20@pitt.edu","no key for now..",EncryptionType.NONE,"desheng-dev","bcfdd450-3dd8-4ced-9599-c65de7c9f115","http://del20-dt.univ.pitt.edu:8080/");		
 		Site csiteOut = new Site("wueroiqwerwer","chb69@pitt.edu","no key for now..",EncryptionType.NONE,"chuck-dev","0f2378ec-d9ce-489a-b338-c8f82e567f40","http://borromeo-lp.dbmi.pitt.edu:8080/");
-		Set<Site> sitesOut = new HashSet<Site>();
+		SiteConnection bConn = new SiteConnection(bsiteOut, net, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection dConn = new SiteConnection(dsiteOut, net, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection cConn = new SiteConnection(csiteOut, net, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		net.getSiteConnections().add(bConn);
+		net.getSiteConnections().add(dConn);
+		net.getSiteConnections().add(cConn);
+/*		Set<Site> sitesOut = new HashSet<Site>();
 		sitesOut.add(bsiteOut);
 		sitesOut.add(dsiteOut);
 		sitesOut.add(csiteOut);
-		net.setOutgoingQuerySites(sitesOut);
+		net.setOutgoingQuerySites(sitesOut); */
 		
 //		Site bsiteIn = new Site("jajasioujaiojaijf","shirey@pitt.edu","no key for now..",EncryptionType.NONE,"bill-dev","20b23b5c-61ad-44eb-8eef-886adcced18e",SiteStatus.CONNECTED,"http://localhost:8080/");	
-//		Site dsiteIn = new Site("wuiowujwoiuwrwer","del20@pitt.edu","no key for now..",EncryptionType.NONE,"desheng-dev","bcfdd450-3dd8-4ced-9599-c65de7c9f115",SiteStatus.CONNECTED,"http://del20-dt.univ.pitt.edu:8080/");				
-		Set<Site> sitesIn = new HashSet<Site>();
-		sitesIn.add(bsiteOut);
-		sitesIn.add(dsiteOut);
-		net.setIncomingQuerySites(sitesIn);
+//		Site dsiteIn = new Site("wuiowujwoiuwrwer","del20@pitt.edu","no key for now..",EncryptionType.NONE,"desheng-dev","bcfdd450-3dd8-4ced-9599-c65de7c9f115",SiteStatus.CONNECTED,"http://del20-dt.univ.pitt.edu:8080/");
+		
+		SiteConnection bConnI = new SiteConnection(bsiteOut, net, SiteStatus.CONNECTED, ConnectionDirection.INCOMING);		
+		SiteConnection dConnI = new SiteConnection(dsiteOut, net, SiteStatus.CONNECTED, ConnectionDirection.INCOMING);
+		net.getSiteConnections().add(bConnI);
+		net.getSiteConnections().add(dConnI);
 		
 		DataModel dm = new DataModel(true);
 		dm.setName("CDM");
@@ -246,7 +240,6 @@ public class PopulateDevData
 		ns.localSite = bsiteOut;
 		
 		return(ns);
-		
 	}
 	
 	private static class NetAndSite

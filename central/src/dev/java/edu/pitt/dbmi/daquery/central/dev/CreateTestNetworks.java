@@ -10,9 +10,12 @@ import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.dev.util.CreateCDMModelInfo;
 import edu.pitt.dbmi.daquery.common.dev.util.PrivateProps;
+import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
+import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
@@ -67,28 +70,36 @@ public class CreateTestNetworks
 		
 		
 		Network allNet = new Network("fb3e4325-dbc5-4501-9fb9-4bd8dbc0a823");
-		allNet.setOutgoingQuerySites(new HashSet<Site>());
-		allNet.getOutgoingQuerySites().add(bSite);
-		allNet.getOutgoingQuerySites().add(dSite);
-		allNet.getOutgoingQuerySites().add(cSite);
+		SiteConnection oConnB = new SiteConnection(bSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection oConnD = new SiteConnection(dSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection oConnC = new SiteConnection(cSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		allNet.getSiteConnections().add(oConnB);
+		allNet.getSiteConnections().add(oConnD);
+		allNet.getSiteConnections().add(oConnC);		
 		allNet.setDataModel(modelA);
 		allNet.setName("All-Net");
+		
 		Network dcNet = new Network("1169eae7-79ed-41e6-bb62-c86167aef92f");
-		dcNet.setOutgoingQuerySites(new HashSet<Site>());
-		dcNet.getOutgoingQuerySites().add(dSite);
-		dcNet.getOutgoingQuerySites().add(cSite);
+		SiteConnection o2ConnD = new SiteConnection(dSite, dcNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection o2ConnC = new SiteConnection(cSite, dcNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		dcNet.getSiteConnections().add(o2ConnD);
+		dcNet.getSiteConnections().add(o2ConnC);
 		dcNet.setDataModel(modelDC);
 		dcNet.setName("D-C Net");
+		
 		Network cbNet = new Network("9dc38074-a153-4183-a36f-2b64cf75c13c");
-		cbNet.setOutgoingQuerySites(new HashSet<Site>());
-		cbNet.getOutgoingQuerySites().add(cSite);
-		cbNet.getOutgoingQuerySites().add(bSite);
+		SiteConnection o3ConnC = new SiteConnection(cSite, cbNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection o3ConnB = new SiteConnection(bSite, cbNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		cbNet.getSiteConnections().add(o3ConnC);
+		cbNet.getSiteConnections().add(o3ConnB);
 		cbNet.setDataModel(modelCB);
 		cbNet.setName("C-B Net");
+		
 		Network dbNet = new Network("afff8323-176c-4cb0-9d2c-cccc03fff101");
-		dbNet.setOutgoingQuerySites(new HashSet<Site>());
-		dbNet.getOutgoingQuerySites().add(dSite);
-		dbNet.getOutgoingQuerySites().add(bSite);
+		SiteConnection o4ConnD = new SiteConnection(dSite, dbNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection o4ConnB = new SiteConnection(bSite, dbNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		dbNet.getSiteConnections().add(o4ConnD);
+		dbNet.getSiteConnections().add(o4ConnB);
 		dbNet.setDataModel(modelDB);
 		dbNet.setName("D-B Net");
 		
@@ -137,10 +148,12 @@ public class CreateTestNetworks
 		
 		
 		Network allNet = new Network("69fb4043-4de4-4763-b205-80e99c564730");
-		allNet.setOutgoingQuerySites(new HashSet<Site>());
-		allNet.getOutgoingQuerySites().add(bSite);
-		allNet.getOutgoingQuerySites().add(dSite);
-		allNet.getOutgoingQuerySites().add(cSite);
+		SiteConnection o5ConnB = new SiteConnection(bSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection o5ConnD = new SiteConnection(dSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection o5ConnC = new SiteConnection(cSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		allNet.getSiteConnections().add(o5ConnB);
+		allNet.getSiteConnections().add(o5ConnD);
+		allNet.getSiteConnections().add(o5ConnC);
 		allNet.setDataModel(modelA);
 		allNet.setName("SHRINE-SSL");
 		

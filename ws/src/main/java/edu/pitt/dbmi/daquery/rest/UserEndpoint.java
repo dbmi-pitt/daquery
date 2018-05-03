@@ -52,6 +52,7 @@ import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.auth.TokenInvalidException;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
+import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
@@ -69,7 +70,6 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
-import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import io.jsonwebtoken.ExpiredJwtException;
 
 

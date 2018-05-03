@@ -376,4 +376,15 @@ public class ResponseHelper {
     {
     	return(Response.status(responseCode).type(MediaType.TEXT_PLAIN).entity(message).build());
     }
+    
+    /**
+     * Get the last "caused by exception" in an exception
+     */
+    public static Throwable getRootCause(Throwable t)
+    {
+    	Throwable cause = t;
+    	while(cause.getCause() != null)
+    		cause = cause.getCause();
+    	return(cause);
+    }
 }

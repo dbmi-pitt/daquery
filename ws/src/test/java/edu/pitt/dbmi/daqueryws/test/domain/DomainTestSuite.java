@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
@@ -25,7 +26,6 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
-import edu.pitt.dbmi.daquery.dao.RoleDAO;
 
 
 @RunWith(Suite.class)

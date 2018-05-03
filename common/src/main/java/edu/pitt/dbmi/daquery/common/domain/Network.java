@@ -19,8 +19,11 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
+
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 @NamedQueries({
     @NamedQuery(name = Network.FIND_ALL, query = "SELECT u FROM Network u ORDER BY u.name DESC"),
@@ -73,12 +76,6 @@ public class Network extends DaqueryObject implements Serializable {
     @JoinColumn(name="DATA_MODEL_ID")
     private DataModel dataModel;
 	
-	//Initialize to an empty set to avoid NullpointerExceptions in other parts of code
-	@Expose
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable(name = "OUTGOING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
-	private Set<Site> outgoingQuerySites = new HashSet<Site>();
-
 	@Expose
 	@Column(name="MAX_DATE_SHIFT")
 	private Integer maxDateShift;
@@ -119,11 +116,9 @@ public class Network extends DaqueryObject implements Serializable {
 	@Column(name="TRUNCATE_ZIP_CODE")
 	private Boolean truncateZipCode;
 	
-	//Initialize to an empty set to avoid NullpointerExceptions in other parts of code
 	@Expose
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable(name = "INCOMING_QUERY_SITES", joinColumns = @JoinColumn(name="NETWORK_ID"), inverseJoinColumns = @JoinColumn(name = "SITE_ID"))
-	private Set<Site> incomingQuerySites = new HashSet<Site>();
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="network")
+	private Set<SiteConnection> siteConnections = new HashSet<SiteConnection>();	
 	
 	public Network(){}
 	
@@ -162,24 +157,9 @@ public class Network extends DaqueryObject implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public Set<Site> getOutgoingQuerySites()
-	{
-		return(outgoingQuerySites);
-	}
-	public void setOutgoingQuerySites(Set<Site> sites)
-	{
-		outgoingQuerySites = sites;
-	}
-	
-	public Set<Site> getIncomingQuerySites()
-	{
-		return(incomingQuerySites);
-	}
-	public void setIncomingQuerySites(Set<Site> sites)
-	{
-		incomingQuerySites = sites;
-	}
+
+	public Set<SiteConnection> getSiteConnections(){return(siteConnections);}
+	public void setSiteConnections(Set<SiteConnection> conns){siteConnections = conns;}
 	
 	public Integer getMaxDateShift()
 	{
@@ -277,6 +257,42 @@ public class Network extends DaqueryObject implements Serializable {
 	}
 	public void setDataModel(DataModel model){dataModel = model;}
     
+	public SiteConnection findIncomingSite(String siteUUID)
+	{
+		return(findSiteConnection(siteUUID, ConnectionDirection.INCOMING));
+	}
+	
+	public SiteConnection findOutgoingSite(String siteUUID)
+	{
+		return(findSiteConnection(siteUUID, ConnectionDirection.OUTGOING));
+	}
+	
+	private SiteConnection findSiteConnection(String siteUUID, ConnectionDirection direction)
+	{
+		if(StringHelper.isEmpty(siteUUID) || direction == null || siteConnections == null)
+			return(null);
+		
+		for(SiteConnection conn : getSiteConnections())
+		{
+			if(conn.getSite() != null &&
+			     conn.getSite().getSiteId() != null &&
+			     conn.getDirectionValue() != null &&
+			     conn.getDirectionValue().equals(direction) &&
+			     StringHelper.equalIgnoreCase(conn.getSite().getSiteId(), siteUUID)
+			   )
+				return(conn);
+		}
+		return(null);
+	}
+	
+	public void removeOutgoingConnection(Site site)
+	{
+		SiteConnection sc = findOutgoingSite(site.getSiteId());
+		if(sc != null)
+		{
+			siteConnections.remove(sc);
+		}
+	}
     @Override
 	public String toString() {
 		return "Network [id=" + id + ", network id=" + networkId + ", name=" + name  + "]";

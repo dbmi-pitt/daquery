@@ -17,10 +17,12 @@ import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.dev.util.CreateCDMModelInfo;
 import edu.pitt.dbmi.daquery.common.dev.util.PrivateProps;
+import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.EncryptionType;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -91,13 +93,16 @@ public class SiteTest {
 			s4.setComEncKey(commenckey);
 			s4.setCommTypeValue(EncryptionType.NONE);
 			
-			Set<Site> newSites = new HashSet<Site>();
-			newSites.add(s1);
-			newSites.add(s2);
-			newSites.add(s3);
-			newSites.add(s4);
-			n.setIncomingQuerySites(newSites);
+			SiteConnection c1 = new SiteConnection(s1, n, SiteStatus.CONNECTED, ConnectionDirection.INCOMING);
+			SiteConnection c2 = new SiteConnection(s2, n, SiteStatus.CONNECTED, ConnectionDirection.INCOMING);
+			SiteConnection c3 = new SiteConnection(s3, n, SiteStatus.CONNECTED, ConnectionDirection.INCOMING);
+			SiteConnection c4 = new SiteConnection(s4, n, SiteStatus.CONNECTED, ConnectionDirection.INCOMING);
 			
+			n.getSiteConnections().add(c1);
+			n.getSiteConnections().add(c2);
+			n.getSiteConnections().add(c3);
+			n.getSiteConnections().add(c4);
+						
 			session.getTransaction().begin();
 			session.persist(s1);
 			session.persist(s2);

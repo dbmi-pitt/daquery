@@ -6,6 +6,7 @@ import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
 import edu.pitt.dbmi.daqueryws.test.rest.DaqueryBaseTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Role;
@@ -18,7 +19,6 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daquery.dao.RoleDAO;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;

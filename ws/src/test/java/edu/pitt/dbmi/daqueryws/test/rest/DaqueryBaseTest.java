@@ -2,12 +2,12 @@ package edu.pitt.dbmi.daqueryws.test.rest;
 
 import org.junit.Test;
 
+import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
-import edu.pitt.dbmi.daquery.dao.RoleDAO;
 import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
 
 import org.hibernate.Session;

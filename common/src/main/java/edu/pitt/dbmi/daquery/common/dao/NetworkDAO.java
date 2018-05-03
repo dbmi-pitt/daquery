@@ -16,11 +16,15 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
+import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
@@ -32,14 +36,16 @@ import oracle.net.aso.n;
 public class NetworkDAO extends AbstractDAO {
 
     private final static Logger logger = Logger.getLogger(NetworkDAO.class.getName());
-
-    public static List<Network> getAllNetworks()
+    
+    public static List<Network> getAllNetworks() throws DaqueryException
     {
     	Session sess = null;
     	try
     	{
-    		Criteria c = sess.createCriteria(Network.class);
-    		return c.list();
+    		sess = HibernateConfiguration.openSession();
+    		Query q = sess.createQuery("from Network");
+    		List<Network> nets = q.list();
+    		return(nets);
     	}
     	finally
     	{
@@ -122,7 +128,7 @@ public class NetworkDAO extends AbstractDAO {
     }
     
 	
-    public static Network createNetwork(HashMap<String, String> params, DataModel dataModel) throws Exception {
+    public static Network createNetwork(HashMap<String, String> params, DataModel dataModel, Site localSite) throws Exception {
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
@@ -138,7 +144,12 @@ public class NetworkDAO extends AbstractDAO {
     		network.setShiftDates(false);
     		network.setSerializePatientId(false);
     		
-    		s.persist(network);
+    		SiteConnection outCon = new SiteConnection(localSite, network, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING); 
+    		SiteConnection inCon = new SiteConnection(localSite, network, SiteStatus.CONNECTED, ConnectionDirection.INCOMING); 
+    		network.getSiteConnections().add(outCon);
+    		network.getSiteConnections().add(inCon);
+    		
+    		s.save(network);
     		s.getTransaction().commit();
     		
 	        return network;
@@ -262,7 +273,7 @@ public class NetworkDAO extends AbstractDAO {
     			return(nets.get(0));
     		else if(nets.size() == 0)
     		{
-    			throw new DaqueryException("Network with uuid " + networkId + " is not found.");
+    			return(null);
     		}
     		else
     		{
