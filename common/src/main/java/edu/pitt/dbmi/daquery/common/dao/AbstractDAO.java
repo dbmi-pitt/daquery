@@ -66,7 +66,7 @@ public abstract class AbstractDAO {
 	currentTransaction = t;
     }
 
-	public static void save(DaqueryObject obj) throws DaqueryException
+	public static void updateOrSave(DaqueryObject obj) throws DaqueryException
 	{
 		Session session = null;
 		Transaction t = null;
@@ -90,7 +90,7 @@ public abstract class AbstractDAO {
 			if(session != null) session.close();
 		}
 	}    
-    
+	
 	/**
 	 * Very generic query method that returns a List of objects from the database.
 	 * @param namedQuery- the namedQuery to be executed
