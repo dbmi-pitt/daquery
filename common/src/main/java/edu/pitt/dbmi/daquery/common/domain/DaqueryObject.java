@@ -46,6 +46,7 @@ public abstract class DaqueryObject implements Serializable{
                         //return new JsonPrimitive(ISODateTimeFormat.dateTime().print(src));
                     }
                 }).create();
-		return StringHelper.unEscapeQuotes(gson.toJson(this));
+		//return StringHelper.unEscapeQuotes(gson.toJson(this));
+        return gson.toJson(this);
 	}
 }
