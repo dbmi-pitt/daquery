@@ -92,7 +92,7 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   requestData(request: any) {
-    if(confirm("Are you sure you want to request this data?")){
+    if(confirm("Do you want to request this data?")){
       let dataRequest = {
         requestSite: {
           siteId: request.requestSite.siteId,
