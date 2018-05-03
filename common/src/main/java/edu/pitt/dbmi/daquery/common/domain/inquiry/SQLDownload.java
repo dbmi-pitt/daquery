@@ -19,12 +19,9 @@ import javax.persistence.Table;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
-import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.EmailContents;
-import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
@@ -35,7 +32,6 @@ import edu.pitt.dbmi.daquery.common.util.DataExporter;
 import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 @Entity
 @Table(name = "SQL_DOWNLOAD")
@@ -64,6 +60,7 @@ public class SQLDownload extends SQLQuery implements Download
 		Statement st = null;
 		ResultSet rs = null;
 		Session sess = null;
+		DataExporter dataExporter = null;
 		try
 		{
 			sess = HibernateConfiguration.openSession();
@@ -110,8 +107,7 @@ public class SQLDownload extends SQLQuery implements Download
 				return(response);
 			}
 
-			Network net = response.getRequest().getNetwork();
-			DataExporter dataExporter = new DataExporter(response, model.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
+			dataExporter = new DataExporter(response, model.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
 			int totalFiles = dataExporter.getNumFiles();
 			int fileCount = 1;
 			List<String> filenames = new ArrayList<String>();
@@ -126,12 +122,13 @@ public class SQLDownload extends SQLQuery implements Download
 					filenames.add(fn);
 				fileCount++;
 			}
+			dataExporter.writeTrackingFile();
+			dataExporter.close();
 			
 			boolean deliverData = AppProperties.getDeliverData();
 			
 			EmailContents emailContents = new EmailContents();
 			DaqueryRequest req = response.getRequest();
-//			DaqueryRequest req = DaqueryRequestDAO.getRequestById(dqResp.getRequest().getRequestId());
 			String inqName = "";
 			String dt = "";
 			String siteName = "";
@@ -238,6 +235,7 @@ public class SQLDownload extends SQLQuery implements Download
 			try{if(rs != null) rs.close();}catch(SQLException ioe){}
 			try{if(st != null) st.close();}catch(SQLException ioe){}
 			try{if(conn != null) conn.close();}catch(SQLException ioe){}
+			try{if(dataExporter != null) dataExporter.close();}catch(IOException ioe){}
 		}
 	}
 }
