@@ -13,9 +13,7 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.hibernate.internal.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
@@ -343,7 +341,7 @@ public class SiteDAO extends AbstractDAO {
     		throw new DaqueryException("A site with siteUUID " + siteUUID + " was not found connected to network with database id " + networkId);
     	
     	sc.setStatusValue(status);
-    	SiteDAO.save(sc);
+    	SiteDAO.updateOrSave(sc);
     }
 
     /** Get sites by network_id

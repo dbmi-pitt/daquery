@@ -2,7 +2,6 @@ package edu.pitt.dbmi.daquery.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
@@ -51,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.auth.TokenInvalidException;
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
@@ -69,7 +69,6 @@ import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import io.jsonwebtoken.ExpiredJwtException;
 
 

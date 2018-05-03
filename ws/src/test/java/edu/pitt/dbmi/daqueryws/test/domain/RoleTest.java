@@ -4,6 +4,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.Network;
@@ -11,7 +12,6 @@ import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
-import edu.pitt.dbmi.daquery.dao.DaqueryUserDAO;
 import io.restassured.RestAssured;
 
 import static org.junit.Assert.*;

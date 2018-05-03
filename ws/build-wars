@@ -1,7 +1,2 @@
-cd ../common/
-mvn clean install
-cd ../central/
-mvn clean install
-cd ../ws/
-./build-no-test.sh
-
+cd build-util
+./build-wars
