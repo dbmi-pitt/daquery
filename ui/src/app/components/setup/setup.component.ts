@@ -60,7 +60,7 @@ export class SetupComponent implements OnInit {
                             this.error = "An unexpected error occurred.  Please contact the system admin."
                           } else if(error.status === 404){
                             this.loading = false;
-                            this.error = "Please double check you application.properties file to make sure central.server.url is set correctly."
+                            this.error = "Please ask the Daquery developers to check your application.properties file to make sure the central.server.url is set correctly."
                           }
                         });
     } else {
