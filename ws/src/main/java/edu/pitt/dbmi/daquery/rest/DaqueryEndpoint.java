@@ -1126,9 +1126,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		
 		if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "DATA_QUERIER"))
 		{
-			String msg = "Requester does not have data query role.";
+			String msg = "Requester does not have data download role.";
 			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
-			return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
+			return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to request date from site: " + AppProperties.getDBProperty("site.name"), null, eResp));
 		}
 		
 		if(DaqueryUserDAO.isLocalUserId(requesterId))
@@ -1173,9 +1173,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		
 		if(! DaqueryUserDAO.hasRole(requesterId, net.getNetworkId(), "DATA_QUERIER"))
 		{
-			String msg = "Requester does not have aggregate query role.";
+			String msg = "Requester does not have data download role.";
 			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
-			return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to run aggregate queries against site: " + AppProperties.getDBProperty("site.name"), null, eResp));
+			return(ResponseHelper.getErrorResponse(403, msg, "User " + uInfo.getEmail() + " is not allowed to request data from site: " + AppProperties.getDBProperty("site.name"), null, eResp));
 		}
 		
 		if(DaqueryUserDAO.isLocalUserId(requesterId))

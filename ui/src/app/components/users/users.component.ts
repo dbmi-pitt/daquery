@@ -32,7 +32,7 @@ export class UsersComponent implements OnInit {
 
   addNewUser(user: any) {
     this.showAddUser = false;
-    this.users.push(user);
+    this.users.unshift(user);
     this.localUserComponent.getLocalRoles();
   }
 }

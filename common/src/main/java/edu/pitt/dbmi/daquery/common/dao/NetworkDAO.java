@@ -140,9 +140,28 @@ public class NetworkDAO extends AbstractDAO {
     		network.setName(params.get("name"));
     		network.setNetworkId(params.get("network_id"));
     		network.setDataModel(dataModel);
-    		network.setObfuscateAggregateResults(false);
-    		network.setShiftDates(false);
-    		network.setSerializePatientId(false);
+//<<<<<<< HEAD
+//    		network.setObfuscateAggregateResults(false);
+//    		network.setAggregateObfuscateType("");
+//    		network.setAggregateObfuscateRange(0);
+//    		network.setAggregateObfuscatePercent((float) 0);
+//    		network.setAggregateObfuscateThreshold(0);
+//    		network.setShiftDates(false);
+//    		network.setMinDateShift(0);
+//    		network.setMaxDateShift(0);
+//    		network.setTruncateZipCode(false);
+//    		network.setSerializePatientId(false);
+//    		
+    		network.setObfuscateAggregateResults(Network.OBFUSCATEAGGREGATERESULTS_DEFAULT);
+    		network.setAggregateObfuscateType(network.AGGREGATEOBFUSCATETYPE_DEFAULT);
+    		network.setAggregateObfuscateRange(network.AGGREGATEOBFUSCATERANGE_DEFAULT);
+    		network.setAggregateObfuscatePercent(network.AGGREGATEOBFUSCATEPERCENT_DEFAULT);
+    		network.setAggregateObfuscateThreshold(network.AGGREGATEOBFUSCATETHRESHOLD_DEFAULT);
+    		network.setShiftDates(Network.SHIFTDATES_DEFAULT);
+    		network.setMinDateShift(network.MINDATESHIFT_DEFAULT);
+    		network.setMaxDateShift(network.MAXDATESHIFT_DEFAULT);
+    		network.setTruncateZipCode(network.TRUNCATEZIPCODE_DEFAULT);
+    		network.setAggregateObfuscateType(Network.AGGREGATEOBFUSCATETYPE_DEFAULT);
     		
     		SiteConnection outCon = new SiteConnection(localSite, network, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING); 
     		SiteConnection inCon = new SiteConnection(localSite, network, SiteStatus.CONNECTED, ConnectionDirection.INCOMING); 

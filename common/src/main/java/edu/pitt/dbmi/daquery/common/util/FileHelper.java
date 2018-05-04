@@ -160,6 +160,29 @@ public class FileHelper
     		return(f);
     }
 
+    
+    public static void checkAndCreateDir(File f) throws DaqueryException
+    {
+		if(! f.exists())
+		{
+			try{f.mkdirs();}
+			catch(Throwable ioe)
+			{
+				String msg = "Unable to create directory at " + f.getAbsolutePath();
+				throw new DaqueryException(msg, ioe);
+			}
+		}
+		if(! f.isDirectory())
+		{
+			String msg = f.getAbsolutePath() + " is not a valid directory.";
+			throw new DaqueryException(msg);
+		}
+		if(! f.canWrite())
+		{
+			String msg = f.getAbsolutePath() + " is not writable";
+			throw new DaqueryException(msg);
+		}	
+    }
     private static class ExtendedFile
     {
     	public File dir = null;
