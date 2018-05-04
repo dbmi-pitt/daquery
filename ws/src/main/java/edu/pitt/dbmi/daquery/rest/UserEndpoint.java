@@ -639,6 +639,7 @@ public class UserEndpoint extends AbstractEndpoint {
     			new_user.setStatusEnum(UserStatus.ACTIVE);
     		}
     		new_user.setRoles(new ArrayList<Role>());
+    		new_user.getRoles().add(RoleDAO.queryRoleByName("viewer"));
     		
     		s = HibernateConfiguration.openSession();
 	
