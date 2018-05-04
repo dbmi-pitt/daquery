@@ -451,7 +451,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			String requestSiteId = request.getRequestSite().getSiteId();
 			Site mySite = SiteDAO.getLocalSite();
 			
-			Site requestSite = SiteDAO.getSiteByUUID(requestSiteId);
+			Site requestSite = SiteDAO.getSiteByNameOrId(requestSiteId);
 			if(requestSite == null)
 			{
 				String msg = "A request must have a valid inquiry attached with an associated data type ";
@@ -569,7 +569,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		String requestSiteId = rVal.getRequest().getRequestSite().getSiteId();
     		if( !mySite.getSiteId().equals(requestSiteId))
     		{	// remote response
-    			Site remoteSite = SiteDAO.getSiteByUUID(requestSiteId);
+    			Site remoteSite = SiteDAO.getSiteByNameOrId(requestSiteId);
     			httpResponse = WSConnectionUtil.getFromRemoteSite(remoteSite, "/response/" + id, null, null);
     			
     			if(httpResponse.getStatus() == 200)
@@ -926,7 +926,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		DaqueryResponse rVal = null;
 		try
 		{
-			Site site = SiteDAO.getSiteByUUID(request.getRequesterSite().getSiteId());
+			Site site = SiteDAO.getSiteByNameOrId(request.getRequesterSite().getSiteId());
 			request.setId(null);
 			request.setRequesterSite(site);
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
