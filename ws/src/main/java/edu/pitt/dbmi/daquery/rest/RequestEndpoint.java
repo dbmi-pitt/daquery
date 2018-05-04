@@ -290,12 +290,16 @@ public class RequestEndpoint extends AbstractEndpoint {
             logger.info("#### updating a request");
 
             Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            String userUUID = principal.getName();
+            logger.info("Responding to request from: " + userUUID);
             
-            DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
+            DaqueryUser currentUser = DaqueryUserDAO.getUserByNameOrId(userUUID);
             
             DaqueryRequest request = DaqueryRequestDAO.getRequestById(id);
+            
+            if(!DaqueryUserDAO.hasRole(currentUser.getId(), request.getNetwork().getNetworkId(), "STEWARD")) {
+            	return ResponseHelper.getErrorResponse(400, "You are not steward of this network", "The current user is not a steward of the current working network.", null);
+            }
             
             TaskQueue queue = QueueManager.getNamedQueue(TaskQueue.EXPORT_QUEUE);
             ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), request.getNetwork().getDataModel());
@@ -333,12 +337,17 @@ public class RequestEndpoint extends AbstractEndpoint {
             logger.info("#### updating a request");
 
             Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
-            logger.info("Responding to request from: " + username);
+            String userUUID = principal.getName();
+            logger.info("Responding to request from: " + userUUID);
             
-            DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
+            DaqueryUser currentUser = DaqueryUserDAO.getUserByNameOrId(userUUID);
             
             DaqueryRequest request = DaqueryRequestDAO.getRequestById(id);
+            
+            if(!DaqueryUserDAO.hasRole(currentUser.getId(), request.getNetwork().getNetworkId(), "STEWARD")) {
+            	return ResponseHelper.getErrorResponse(400, "You are not steward of this network", "The current user is not a steward of the current working network.", null);
+            }
+            
             ResponseDAO.denyDataRequest(request.getId());
             request = DaqueryRequestDAO.getRequestById(id);
             

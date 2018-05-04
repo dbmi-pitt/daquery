@@ -51,8 +51,8 @@
                 </div>
               </div>
               <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
-                <button class="btn btn-success" (click)="approveRequest()">Approve</button>
-                <button class="btn btn-danger" (click)="denyRequest()">Deny</button>
+                <button *ngIf="showApproveDenyBtn" class="btn btn-success" (click)="approveRequest()">Approve</button>
+                <button *ngIf="showApproveDenyBtn" class="btn btn-danger" (click)="denyRequest()">Deny</button>
               </div>
             </div>
             <hr />
