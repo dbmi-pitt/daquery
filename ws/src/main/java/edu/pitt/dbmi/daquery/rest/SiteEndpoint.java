@@ -538,7 +538,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	s.getTransaction().begin();
 		        //s.merge(network);
 	        	s.saveOrUpdate(sConn);
-	        	s.saveOrUpdate(network);
+	        	//s.saveOrUpdate(network);
 		        s.getTransaction().commit();
 		        return Response.ok(201).build();
 			} else {
@@ -630,7 +630,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 	        	s.getTransaction().begin();
 	        	s.saveOrUpdate(sConn);
-		        s.saveOrUpdate(network);
+		        //s.saveOrUpdate(network);
 		        s.getTransaction().commit();
 		       return Response.ok(201).build();
 			} else {

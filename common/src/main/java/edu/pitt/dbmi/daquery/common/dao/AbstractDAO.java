@@ -64,8 +64,8 @@ public abstract class AbstractDAO {
 
     public void setCurrentTransaction(Transaction t) {
 	currentTransaction = t;
-    }
-
+    }    
+    
 	public static void updateOrSave(DaqueryObject obj) throws DaqueryException
 	{
 		Session session = null;
@@ -148,11 +148,22 @@ public abstract class AbstractDAO {
 	 * null if no data is returned.
 	 * @throws Exception
 	 */
-    public static <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+        public static <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger) throws Exception {
+        	return(executeQueryReturnSingle(namedQuery, params, logger, null));
+        }
+        
+    public static <T> T executeQueryReturnSingle(String namedQuery, List<ParameterItem> params, Logger logger, Session session) throws Exception {
     	logger.info("executing query: " + namedQuery);
     	Session s = null;
+    	boolean sessionProvided = false;
     	try {
-    		s = HibernateConfiguration.openSession();
+    		if(session != null)
+    		{
+    			sessionProvided = true;
+    			s = session;
+    		}
+    		else
+    			s = HibernateConfiguration.openSession();
 	        Query query = s.getNamedQuery(namedQuery);
 	        if (params != null && !params.isEmpty()) {
 	        	for (ParameterItem param : params) {
@@ -181,7 +192,7 @@ public abstract class AbstractDAO {
         	throw e;
         }
     	finally {
-    		if (s != null) {
+    		if (s != null && ! sessionProvided) {
     			s.close();
     		}
     	}
