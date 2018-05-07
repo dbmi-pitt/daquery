@@ -54,6 +54,9 @@ public class NetworkDAO extends AbstractDAO {
     }
     
     public static Network queryNetwork(String id) throws Exception {
+    	return(queryNetwork(id, null));
+    }
+    public static Network queryNetwork(String id, Session sess) throws Exception {
     	// auto generated ID
         if(id.matches("^\\d+$"))
         	logger.info("searching for #### single Network id= " + id);
@@ -65,12 +68,12 @@ public class NetworkDAO extends AbstractDAO {
     		if(id.matches("^\\d+$")) {
     			ParameterItem piId = new ParameterItem("id", Long.parseLong(id));
     			pList.add(piId);
-    			network = executeQueryReturnSingle(Network.FIND_BY_ID, pList, logger);
+    			network = executeQueryReturnSingle(Network.FIND_BY_ID, pList, logger, sess);
     		}
     		else {
     			ParameterItem piUUId = new ParameterItem("uuid", id);
     			pList.add(piUUId);
-    			network = executeQueryReturnSingle(Network.FIND_BY_UUID, pList, logger);
+    			network = executeQueryReturnSingle(Network.FIND_BY_UUID, pList, logger, sess);
     		}
     		
 	        return network;
