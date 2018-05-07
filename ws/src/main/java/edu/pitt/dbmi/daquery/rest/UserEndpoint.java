@@ -820,7 +820,7 @@ public class UserEndpoint extends AbstractEndpoint {
 		    		return Response.status(UNAUTHORIZED).build();	        		
 	        	}
 	        //step 5: check if this is an admin initiated password change	        
-	        } else if (hasAdminRole && updatedUser.getNewPassword() != null) {
+	        } else if (hasAdminRole && updatedUser.getNewPassword() != null && !updatedUser.getNewPassword().equals("")) {
         		user.setPassword(updatedUser.getNewPassword());
 	        }
 	        
