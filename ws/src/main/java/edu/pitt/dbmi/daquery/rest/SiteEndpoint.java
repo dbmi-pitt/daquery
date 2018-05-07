@@ -2,18 +2,15 @@ package edu.pitt.dbmi.daquery.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -397,7 +394,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 		        	
 		        	s.getTransaction().begin();
 		        	s.saveOrUpdate(sConn);
-	 		        s.saveOrUpdate(network);    
+	 		        //s.saveOrUpdate(network);    
 	 		        s.getTransaction().commit();
 	 		        
  					return Response.ok(201).build();
@@ -541,7 +538,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	s.getTransaction().begin();
 		        //s.merge(network);
 	        	s.saveOrUpdate(sConn);
-	        	s.saveOrUpdate(network);
+	        	//s.saveOrUpdate(network);
 		        s.getTransaction().commit();
 		        return Response.ok(201).build();
 			} else {
@@ -633,7 +630,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	
 	        	s.getTransaction().begin();
 	        	s.saveOrUpdate(sConn);
-		        s.saveOrUpdate(network);
+		        //s.saveOrUpdate(network);
 		        s.getTransaction().commit();
 		       return Response.ok(201).build();
 			} else {

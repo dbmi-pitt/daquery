@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RequestService } from '../../../services/request.service';
 import { QueryToMe } from '../../../models/query-to-me.model';
+import { RoleGuard } from '../../../_guards/role.guard';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -15,12 +16,18 @@ export class QueriesToMeListComponent implements OnInit {
 
   requests: any[];
   selectedRequest: any;
-  constructor(private requestService: RequestService) {
+
+  showApproveDenyBtn = false;
+  constructor(private requestService: RequestService,
+              private roleGuard: RoleGuard) {
 
   }
 
   ngOnInit() {
     this.getRequestsToMe();
+    if(this.canActive(["steward"])) {
+      this.showApproveDenyBtn = true;
+    }
   }
 
   getRequestsToMe() {
@@ -66,5 +73,9 @@ export class QueriesToMeListComponent implements OnInit {
                           this.selectedRequest.responses[0] = res;
                         });
     }
+  }
+
+  canActive(allowedRoles: string[]): boolean {
+    return this.roleGuard.allowed(allowedRoles);
   }
 }

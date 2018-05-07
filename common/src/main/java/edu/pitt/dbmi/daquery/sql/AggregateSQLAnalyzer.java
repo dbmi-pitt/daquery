@@ -130,7 +130,9 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 		String rSQL = baseSQL.trim();
 		rSQL = rSQL.replaceFirst("(?i)select\\s+count\\(.*\\)", "");
 		String selectClause = "select ";
-		if(aggregateDistinct) selectClause = selectClause + "distinct ";
+		//if(aggregateDistinct) selectClause = selectClause + "distinct ";
+		//always use a distinct query so patients aren't duplicated
+		selectClause = selectClause + "distinct ";
 		if(!StringHelper.isEmpty(aggregateTableName)) selectClause = selectClause + aggregateTableName + ".";
 		selectClause = selectClause + aggregateColumnName;
 		rSQL = selectClause + " " + rSQL.trim();
