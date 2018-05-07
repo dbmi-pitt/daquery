@@ -117,4 +117,11 @@ public class StringHelper
 		return(val1.toUpperCase().trim().equals(val2.toUpperCase().trim()));
 		
 	}
+	
+	public static String capitalize(String val)
+	{
+		if(isBlank(val)) return(val);
+		String toVal = val.trim();
+		return toVal.substring(0,1).toUpperCase() + toVal.substring(1).toLowerCase();
+	}
 }
