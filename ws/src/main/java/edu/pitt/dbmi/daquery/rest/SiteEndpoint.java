@@ -612,7 +612,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     			Map<String, Object> map= new LinkedHashMap<>();
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
     			
-    			String siteUUID = (String) map.get("id");	
+    			String siteUUID = (String) map.get("siteId");	
 	        	Site site_in = SiteDAO.getSiteByUUID(siteUUID); 
 	        	if(site_in == null)
 	        	{
