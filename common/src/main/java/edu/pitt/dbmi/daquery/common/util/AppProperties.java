@@ -286,14 +286,16 @@ public class AppProperties
 	}
 	private static final boolean defaultDeliverData = true; 
 	public static boolean getDeliverData() {
-		try {
+		//hard code to true for now
+		return defaultDeliverData;
+/*		try {
 			String val = getDBProperty("deliver.data");
 			if(StringHelper.isEmpty(val)) return(defaultDeliverData);
 			return Boolean.parseBoolean(val);
 		} catch (Throwable t) {
 			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the deliver data from the application database.", t);
 			return(defaultDeliverData);	
-		}
+		} */
 	}
 	public static void setDeliverData(boolean val) throws DaqueryException {
 		setDBProperty("deliver.data", Boolean.toString(val));
