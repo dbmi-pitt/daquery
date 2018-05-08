@@ -36,15 +36,20 @@ import org.hibernate.Session;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
+import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.KeystoreAlias;
@@ -355,6 +360,18 @@ public class SiteEndpoint extends AbstractEndpoint {
 
     	Session s = null;
     	try {
+    		
+    		Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+	        DaqueryUser requester = DaqueryUserDAO.queryUserByID(username);
+	        if(requester == null)
+	        	return(ResponseHelper.getErrorResponse(401, "User " + requester.getUsername() + " is not authorized to make remote site connection requests.", null, null));
+	        if(! requester.getRoles().contains(Role.ADMIN))
+	        	return(ResponseHelper.getErrorResponse(401, "Must have admin rights to request a site connection.", null, null));
+	        if(StringHelper.isEmpty(requester.getEmail()))	        	
+	        	return(ResponseHelper.getErrorResponse(400, "User " + requester.getUsername() + " must have a registered email address to request a remote site connection.", null, null));
+
+	        
     		s = HibernateConfiguration.openSession();
 	        if(type.equals("outgoing")) {
 	        	// create site entity
@@ -382,6 +399,7 @@ public class SiteEndpoint extends AbstractEndpoint {
                 idParam.put("network-id", network.getNetworkId());
                 idParam.put("from-site-id", AppProperties.getDBProperty("site.id"));
                 idParam.put("to-site-id", site.getSiteId());
+                idParam.put("requester-email", requester.getEmail());
  				Response resp = WSConnectionUtil.centralServerGet("request-connection",  idParam);
  				
  				if(resp.getStatus() == 200 || resp.getStatus() == 201) {
@@ -395,8 +413,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 		        	s.getTransaction().begin();
 		        	s.saveOrUpdate(sConn);
 	 		        //s.saveOrUpdate(network);    
-	 		        s.getTransaction().commit();
-	 		        
+	 		        s.getTransaction().commit();       
  					return Response.ok(201).build();
  				}
  				else
@@ -612,7 +629,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     			Map<String, Object> map= new LinkedHashMap<>();
     			map = mapper.readValue(json, new TypeReference<Map<String, String>>(){});
     			
-    			String siteUUID = (String) map.get("id");	
+    			String siteUUID = (String) map.get("siteId");	
 	        	Site site_in = SiteDAO.getSiteByUUID(siteUUID); 
 	        	if(site_in == null)
 	        	{

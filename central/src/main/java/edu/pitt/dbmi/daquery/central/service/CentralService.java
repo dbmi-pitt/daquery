@@ -179,7 +179,9 @@ public class CentralService{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response requestConnection(@QueryParam("network-id") String networkId,
-			@QueryParam("from-site-id") String fromSiteId, @QueryParam("to-site-id") String toSiteId) {
+			@QueryParam("from-site-id") String fromSiteId,
+			@QueryParam("to-site-id") String toSiteId,
+			@QueryParam("requester-email") String requesterEmail) {
 		try {
 			// create connection request
 			ConnectionRequest cr = DBHelper.getConnectionRequest(networkId, fromSiteId, toSiteId);
@@ -190,7 +192,7 @@ public class CentralService{
 			Site requestedToSite = DBHelper.getSite(fromSiteId);
 			Network net = NetworkDAO.getNetworkById(networkId);
 			// send email to toSite admin
-			if (DBHelper.createConnectionRequest(networkId, fromSiteId, toSiteId)) {
+			if (DBHelper.createConnectionRequest(networkId, fromSiteId, toSiteId, requesterEmail)) {
 				List<String> toAddresses = new ArrayList<String>();
 				toAddresses.add(site.getAdminEmail());
 				EmailHelper eh = new EmailHelper();
