@@ -61,6 +61,7 @@ import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
@@ -501,10 +502,21 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			} else {
 				// Data Request
 				Response rVal = null;
-				if(!isLocalRequester) {
+				if(!isLocalRequester)
+				{
 					// Local Request (From Site)
 					rVal = handleDataRequestFromSite(uInfo, request, requesterId, net);
-				} else {
+					if(rVal != null)
+					{
+						EmailContents email = new EmailContents();
+						email.subject = "Data Request Submitted";
+						email.message = "A data request in network " + request.getNetwork().getName() +" from " + request.getRequesterSite().getName() + " was submitted to your site: " + request.getRequestSite().getName() + ".<br /><br /> Please log into Daquery and go to Incoming Requests to review the request.";
+						email.toAddresses.add(request.getRequestSite().getAdminEmail());
+						request.getRequesterSite();
+						EmailUtil.sendEmail(email);
+					}											
+				}
+				else {
 					request.setRequester(uInfo);
 					if(mySite.getSiteId().equals(requestSiteId)) {	
 						// Local Request (From UI)
@@ -513,15 +525,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 						// Remote Request (From UI)
 						rVal = handleRemoteDataRequestFromUI(request, response, requestSite, securityToken);
 					}
-				}
-				if(rVal != null)
-				{
-					EmailContents email = new EmailContents();
-					email.subject = "Data Request Submitted";
-					email.message = "Your data request in network " + request.getNetwork().getName() +" to " + request.getRequestSite().getName() + " was submitted.";
-					email.toAddresses.add(uInfo.getEmail());
-					request.getRequesterSite();
-					EmailUtil.sendEmail(email);
 				}
 				return(rVal);
 			}
@@ -596,7 +599,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					rVal.setDownloadAvailable(resp.isDownloadAvailable());
 					rVal.setDownloadDirective(resp.getDownloadDirective());
 					rVal.setStatusMessage(resp.getStatusMessage());
-					rVal.setFiles(resp.getFiles());
+					Fileset files = resp.getFiles();
+					if(files != null)
+						files.setId(null);
+					rVal.setFiles(files);
 					ResponseDAO.saveOrUpdate(rVal);
 					return ResponseHelper.getJsonResponseGen(200, json);	
 				}
