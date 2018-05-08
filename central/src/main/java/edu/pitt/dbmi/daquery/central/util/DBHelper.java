@@ -327,7 +327,7 @@ public class DBHelper
 			Network net = NetworkDAO.getNetworkById(networkId);
 			
 			Statement stat = conn.createStatement();
-			ResultSet rs = stat.executeQuery("select requester_email from connection request where network_id = '" + networkId + "' and from_site_id = '" + fromSiteId + "' and to_site_id = '" + toSiteId + "'");
+			ResultSet rs = stat.executeQuery("select requester_email from connection_request where network_id = '" + networkId + "' and from_site_id = '" + fromSiteId + "' and to_site_id = '" + toSiteId + "'");
 			String requesterEmail = null;
 			if(rs.next())
 				requesterEmail = rs.getString(1);

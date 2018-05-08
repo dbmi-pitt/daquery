@@ -51,6 +51,7 @@ import edu.pitt.dbmi.daquery.common.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
+import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
@@ -66,6 +67,7 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.FileHelper;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
@@ -498,19 +500,30 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		
 			} else {
 				// Data Request
+				Response rVal = null;
 				if(!isLocalRequester) {
 					// Local Request (From Site)
-					return handleDataRequestFromSite(uInfo, request, requesterId, net);
+					rVal = handleDataRequestFromSite(uInfo, request, requesterId, net);
 				} else {
 					request.setRequester(uInfo);
 					if(mySite.getSiteId().equals(requestSiteId)) {	
 						// Local Request (From UI)
-						return handleLocalDataRequestFromUI(request, requesterId, net, uInfo);
+						rVal = handleLocalDataRequestFromUI(request, requesterId, net, uInfo);
 					} else {
 						// Remote Request (From UI)
-						return handleRemoteDataRequestFromUI(request, response, requestSite, securityToken);
+						rVal = handleRemoteDataRequestFromUI(request, response, requestSite, securityToken);
 					}
 				}
+				if(rVal != null)
+				{
+					EmailContents email = new EmailContents();
+					email.subject = "Data Request Submitted";
+					email.message = "Your data request in network " + request.getNetwork().getName() +" to " + request.getRequestSite().getName() + " was submitted.";
+					email.toAddresses.add(uInfo.getEmail());
+					request.getRequesterSite();
+					EmailUtil.sendEmail(email);
+				}
+				return(rVal);
 			}
 		}
 		catch(Throwable t)

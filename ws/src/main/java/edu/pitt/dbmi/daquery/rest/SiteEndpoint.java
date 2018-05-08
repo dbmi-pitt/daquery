@@ -366,7 +366,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        DaqueryUser requester = DaqueryUserDAO.queryUserByID(username);
 	        if(requester == null)
 	        	return(ResponseHelper.getErrorResponse(401, "User " + requester.getUsername() + " is not authorized to make remote site connection requests.", null, null));
-	        if(! requester.getRoles().contains(Role.ADMIN))
+	        if(! requester.hasRole(Role.ADMIN))
 	        	return(ResponseHelper.getErrorResponse(401, "Must have admin rights to request a site connection.", null, null));
 	        if(StringHelper.isEmpty(requester.getEmail()))	        	
 	        	return(ResponseHelper.getErrorResponse(400, "User " + requester.getUsername() + " must have a registered email address to request a remote site connection.", null, null));
