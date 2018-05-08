@@ -6,6 +6,7 @@ import { SiteService } from '../../../../services/site.service';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { validateConfig } from '@angular/router/src/config';
+import { DiffValidator } from '../../../../validators/diff-validator.directive';
 
 @Component({
   selector: 'app-deid-props',
@@ -104,7 +105,7 @@ export class DeidPropsComponent implements OnInit {
       maxDateShift: [''],
       truncateZipCode: [''],
       serializeID: ['']
-    })
+    },{validator: maxGreaterThanMin('minDateShift', 'maxDateShift')})
   }
 
   loadForm(network: any) {
@@ -150,6 +151,20 @@ export class DeidPropsComponent implements OnInit {
                          }, err => {
                            this.error = err.error;
                          });
+    }
+  }
+}
+
+function maxGreaterThanMin(minDateShift: string, maxDateShift: string){
+  return (group: FormGroup): {[key: string]: any} => {
+    let min = group.controls[minDateShift];
+    let max = group.controls[maxDateShift];
+
+    if(min.value > max.value){
+      max.markAsDirty();
+      return {
+        minGreaterThanMax: true
+      }
     }
   }
 }
