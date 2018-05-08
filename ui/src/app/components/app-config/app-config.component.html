@@ -24,7 +24,9 @@
           <div class="help-block" *ngIf="exportTaskQueueMaxLength.hasError('required') && (exportTaskQueueMaxLength.dirty || exportTaskQueueMaxLength.touched)">Please enter valid export queue max length</div>
           <div class="help-block" *ngIf="exportTaskQueueMaxLength.hasError('min') && (exportTaskQueueMaxLength.dirty || exportTaskQueueMaxLength.touched)">Export queue max length must be >= 1</div>
         </div>
-        <div class="form-group has-feedback" [ngClass]="{'has-error': deliverData.invalid && (deliverData.dirty || deliverData.touched), 'has-success': deliverData.valid && (deliverData.dirty || deliverData.touched) }">
+        
+        <!-- remove local delivery option for now -->
+        <div style="display: none;" class="form-group has-feedback" [ngClass]="{'has-error': deliverData.invalid && (deliverData.dirty || deliverData.touched), 'has-success': deliverData.valid && (deliverData.dirty || deliverData.touched) }">
           <label>Deliver Exports To Remote Sites</label>
           <div class="radio">
             <label class="radio-inline">
@@ -75,7 +77,9 @@
           <p class="help-block">The directory where exported files will be stored when delivered from a site that has approved an export.  This directory defaults to the system temp directory.</p>
           <div class="help-block" *ngIf="(!fileOutputDir.hasError('required') && fileOutputDir.hasError('validateEqual')) && (fileOutputDir.dirty || fileOutputDir.touched)">File Output Directory</div>
         </div>
-        <div class="form-group has-feedback" [ngClass]="{'has-error': localDeliveryDir.invalid && (localDeliveryDir.dirty || localDeliveryDir.touched), 'has-success': localDeliveryDir.valid && (localDeliveryDir.dirty || localDeliveryDir.touched) }">
+        
+        <!-- remove local delivery for now -->
+        <div style="display: none;" class="form-group has-feedback" [ngClass]="{'has-error': localDeliveryDir.invalid && (localDeliveryDir.dirty || localDeliveryDir.touched), 'has-success': localDeliveryDir.valid && (localDeliveryDir.dirty || localDeliveryDir.touched) }">
           <label>Local Delivery Directory</label>
           <input type="text" class="form-control" formControlName="localDeliveryDir" name="localDeliveryDir" />
           <p class="help-block">The directory where exported files are stored when the "Deliver Exports To Remote Sites" is set to no.  This directory defaults to the system temp direcotry.</p>
