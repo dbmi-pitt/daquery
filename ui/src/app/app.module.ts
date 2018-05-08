@@ -27,6 +27,7 @@ import { MapValuesPipe } from './pipes/iteratable.pipe';
 
 // custom validator
 import { EqualValidator } from './validators/equal-validator.directive';
+import { DiffValidator } from './validators/diff-validator.directive';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
@@ -77,6 +78,7 @@ import { DeidPropsComponent } from './components/networks/network/deid-props/dei
 @NgModule({
   declarations: [
     EqualValidator,
+    DiffValidator,
     AppComponent,
     NavbarComponent,
     SidebarComponent,
