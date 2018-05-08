@@ -69,7 +69,7 @@ export class NetworkComponent implements OnInit {
   denyConnect(pendingSite: any){
     const connectRequest = {
       network_id: this.network.networkId,
-      from_site_id: pendingSite.id
+      from_site_id: pendingSite.siteId
     };
     this.siteService.denyConnect(connectRequest)
                     .subscribe(data => {

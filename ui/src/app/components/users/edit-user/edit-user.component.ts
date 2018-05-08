@@ -39,7 +39,7 @@ export class EditUserComponent implements OnInit {
       realName: [this.user.realName, Validators.required],
       roles: this.fb.array([]),
       email: [this.user.email, [Validators.required, Validators.email]],
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      newPassword: ['', [Validators.minLength(8)]],
     })
   }
 

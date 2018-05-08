@@ -247,8 +247,8 @@ public class DBHelper
 	 * @param ConnectionRequest cr
 	 * @throws DaqueryCentralException
 	 */
-	public static boolean createConnectionRequest(String networkId, String fromSiteId, String toSiteId) throws DaqueryCentralException {
-		String sql = "insert into connection_request (network_id, from_site_id, to_site_id, status) values (?, ?, ?, ?)";
+	public static boolean createConnectionRequest(String networkId, String fromSiteId, String toSiteId, String requesterEmail) throws DaqueryCentralException {
+		String sql = "insert into connection_request (network_id, from_site_id, to_site_id, status, requester_email) values (?, ?, ?, ?, ?)";
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
@@ -259,6 +259,7 @@ public class DBHelper
 			ps.setString(2, fromSiteId);
 			ps.setString(3, toSiteId);
 			ps.setString(4, "PENDING");
+			ps.setString(5, requesterEmail);
 			ps.execute();
 			
 			return true;
@@ -311,12 +312,37 @@ public class DBHelper
 	 * @throws DaqueryCentralException
 	 */
 	public static boolean updateConnectionRequest(String networkId, String fromSiteId, String toSiteId, String status) throws DaqueryCentralException{
+		
+		
+		
 		String sql = "update connection_request set status = ? where network_id = ? and from_site_id = ? and to_site_id = ?";
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
 		try {
 			conn = ApplicationDBHelper.getConnection();
+			
+			Site toSite = SiteDAO.getSiteByUUID(toSiteId);
+			Site fromSite = SiteDAO.getSiteByNameOrId(fromSiteId);
+			Network net = NetworkDAO.getNetworkById(networkId);
+			
+			Statement stat = conn.createStatement();
+			ResultSet rs = stat.executeQuery("select requester_email from connection request where network_id = '" + networkId + "' and from_site_id = '" + fromSiteId + "' and to_site_id = '" + toSiteId + "'");
+			String requesterEmail = null;
+			if(rs.next())
+				requesterEmail = rs.getString(1);
+			if(requesterEmail != null)
+			{
+				List<String> toAddresses = new ArrayList<String>();
+				toAddresses.add(requesterEmail);
+				EmailHelper eh = new EmailHelper();
+				eh.sendMail("Daquery Connection Request " + StringHelper.capitalize(status), "Daquery site " + toSite.getName() + 
+						  " on network " + net.getName() + 
+						  " has " + status.toLowerCase() + " your request to connect from your site " + fromSite.getName(), toAddresses, null);
+			}
+			else
+				log.log(Level.WARNING, "Unable to email a site on a " + status.toLowerCase() + " connection request because a requester email was not found.  toSiteId:" + toSiteId + " fromSiteId:" + fromSiteId + " networkId:" + networkId);
+			
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, status);
 			ps.setString(2, networkId);
