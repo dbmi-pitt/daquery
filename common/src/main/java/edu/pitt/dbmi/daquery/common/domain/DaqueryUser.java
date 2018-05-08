@@ -18,6 +18,7 @@ import javax.persistence.Transient;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 @NamedQueries({
         @NamedQuery(name = DaqueryUser.FIND_ALL, query = "SELECT u FROM DaqueryUser u ORDER BY u.realName DESC"),
@@ -104,6 +105,23 @@ public class DaqueryUser extends UserInfo {
         this.setPassword(password);
     }
 
+    public boolean hasRole(String role)
+    {
+    	if(roles == null) return(false);
+    	if(StringHelper.isBlank(role)) return(false);
+    	String roleComp = role.trim().toUpperCase();
+    	boolean rVal = false;
+    	for(Role r : roles)
+    	{
+    		if((! StringHelper.isEmpty(r.getName())) && r.getName().trim().toUpperCase().equals(roleComp))
+    		{
+    			rVal = true;
+    			break;
+    		}
+    	}
+    	return(rVal);
+    }
+    
     public String getUsername() {
         return this.username;
     }
