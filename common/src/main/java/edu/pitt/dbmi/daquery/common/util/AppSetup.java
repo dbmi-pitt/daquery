@@ -171,9 +171,9 @@ public class AppSetup
 			
 			rs.close();
 			rs = stat.executeQuery("select id from role where lower(name) = 'admin'");
-			Integer roleId = null;
+			Integer adminRoleId = null;
 			if(rs.next())
-				roleId = rs.getInt(1);
+				adminRoleId = rs.getInt(1);
 			else
 			{
 				String msg = "Role ADMIN not found in application database. Unable to add initial admin user.";
@@ -181,6 +181,19 @@ public class AppSetup
 				setErroredSetup(msg);
 				return(false);
 			}
+			rs.close();
+			rs = stat.executeQuery("select id from role where lower(name) = 'steward'");
+			Integer stewardRoleId = null;
+			if(rs.next())
+				stewardRoleId = rs.getInt(1);
+			else
+			{
+				String msg = "Role STEWARD not found in application database. Unable to add initial admin user.";
+				log.log(Level.SEVERE, msg);
+				setErroredSetup(msg);
+				return(false);
+			}
+			
 			
 			UUID uuid = UUID.randomUUID();
 		    String uuidStr = uuid.toString();
@@ -189,7 +202,9 @@ public class AppSetup
 			String insertSQL = "insert into dq_user (id, username, password, status, email, real_name, utype) values ('"  + uuidStr.trim() + "', 'admin', '" + hashedPwd + "', '" + UserStatus.ACTIVE.toString() + "', '" + adminEmail.trim() + "', '" + adminRealName + "', 'FULL')";
 			log.info("User inserted with: " + insertSQL);
 			stat.executeUpdate(insertSQL);
-			insertSQL = "insert into user_role (role_id, user_id) values (" + roleId + ", '" + uuidStr.trim() + "')";
+			insertSQL = "insert into user_role (role_id, user_id) values (" + adminRoleId + ", '" + uuidStr.trim() + "')";
+			stat.executeUpdate(insertSQL);
+			insertSQL = "insert into user_role (role_id, user_id) values (" + stewardRoleId + ", '" + uuidStr.trim() + "')";
 			stat.executeUpdate(insertSQL);
 			firstUserCreated = true;
 			String sysUUID = 	UUID.randomUUID().toString().trim();

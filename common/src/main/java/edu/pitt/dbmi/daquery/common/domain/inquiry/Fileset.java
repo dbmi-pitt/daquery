@@ -31,7 +31,7 @@ public class Fileset extends DaqueryObject
     @Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
-	private long id;
+	private Long id;
     
     @Expose
 	@ElementCollection(fetch = FetchType.EAGER)
@@ -40,11 +40,11 @@ public class Fileset extends DaqueryObject
 	@OrderColumn
 	private Set<String> filepaths;
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
