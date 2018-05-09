@@ -222,7 +222,7 @@ public class DataExporter {
 			
 			String filename = null;
 			if(deliverData) {
-				filename = WSConnectionUtil.sendFileToSite(zipFile, outputFilename, daqueryRequest.getRequestSite(), daqueryResponse.getRequest().getRequestGroup());
+				filename = WSConnectionUtil.sendFileToSite(zipFile, outputFilename, daqueryRequest.getRequesterSite(), daqueryResponse.getRequest().getRequestGroup());
 			}
 			else
 			{
@@ -727,6 +727,10 @@ public class DataExporter {
 			}
 			else
 			{
+				if(net.getMinDateShift() == net.getMaxDateShift())
+				{
+					throw new DaqueryException("Warning: dates cannot be shifted because the min and max date shift are equal.");
+				}
 				int shiftDays = 0;
 				while (shiftDays == 0) // don't allow a shift of zero
 				{

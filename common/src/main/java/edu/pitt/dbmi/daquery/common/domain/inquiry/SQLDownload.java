@@ -154,7 +154,7 @@ public class SQLDownload extends SQLQuery implements Download
 				emailContents.subject = "Data Request Delivered";
 				emailContents.message = "The data that you requested has been uploaded to your Daquery server.<br \\><br \\>";
 				response.setStatusEnum(ResponseStatus.COMPLETED);
-				emailEnd = "<br \\>The following file(s) were delivered to your Daquery server " + req.getRequestSite().getName() + " " + req.getRequestSite().getUrl() + ":<br \\>";
+				emailEnd = "<br \\>The following file(s) were delivered to your Daquery server " + req.getRequesterSite().getName() + " " + req.getRequestSite().getUrl() + ":<br \\>";
 				response.setStatusMessage( (new Integer(totalFiles)).toString() + ft + " delivered");
 			}
 			else
