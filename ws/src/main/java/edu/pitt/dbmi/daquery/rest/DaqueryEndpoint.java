@@ -95,14 +95,17 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	
 	public static void main (String [] args) throws Exception
 	{
-		Client client = ClientBuilder.newClient();
+/*		Client client = ClientBuilder.newClient();
 		
 		Response rVal = client.target("http://localhost:8080/daquery-central/availableNetworks?site-id=20b23b5c-61ad-44eb-8eef-886adcced18e").request(MediaType.APPLICATION_JSON).get();
-		System.out.println(rVal);
+		System.out.println(rVal); */
 		//System.out.println(callCentralServerAuth("bill-dev", "abc123"));
 /*		InquiryRequest iq = PopulateDevData.createFullOutgoingRequest();
 		String json = iq.toJson();
 		System.out.println(json); */
+		
+		AppProperties.setDevHomeDir("/home/devuser/dq-data");
+		
 	}
 		
 	private static boolean containsSiteWhoIQuery(String networkId, String siteId) throws DaqueryException
@@ -674,6 +677,37 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	return Response.ok(201).entity(query.toJson()).build();   
     }
     
+    @GET
+    @Path("/count-sites")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response countSites()
+    {
+    	String rVal = "";
+		Session s = null;
+		try
+		{
+			s = HibernateConfiguration.openSession();
+			org.hibernate.SQLQuery q = s.createSQLQuery("select name, count(id) from site group by name order by name");
+			List vals = q.list();
+			for(Object o : vals)
+			{
+				Object [] a = (Object []) o;
+				rVal = rVal + a[0] + " " + a[1] + "\n";
+			}
+
+		}
+		catch(Throwable t)
+		{
+			return(ResponseHelper.getErrorResponse(500, "Error while counting sites.", null, t));
+		}
+		finally
+		{
+			if(s != null) s.close();
+		}    	
+    	return(ResponseHelper.getBasicResponse(200, rVal));    	
+    }
+
+    
     /**
      * Get local roles
      * @return the list of roles except admin
@@ -1170,8 +1204,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			rVal.setStatusEnum(ResponseStatus.PENDING);
 			rVal.setDownloadAvailable(false);
 			rVal.setRequest(request);
-			SiteDAO.updateOrSave(request.getRequesterSite());
-			SiteDAO.updateOrSave(request.getRequestSite());
+			Site requesterSite = SiteDAO.saveOrUpdate(request.getRequesterSite());
+			Site requestSite = SiteDAO.saveOrUpdate(request.getRequestSite());
+			request.setRequesterSite(requesterSite);
+			request.setRequestSite(requestSite);
 			ResponseDAO.saveOrUpdate(rVal);
 			return ResponseHelper.getJsonResponseGen(201, rVal);
 		}

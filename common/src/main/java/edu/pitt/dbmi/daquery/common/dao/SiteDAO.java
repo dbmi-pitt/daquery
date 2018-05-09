@@ -344,6 +344,23 @@ public class SiteDAO extends AbstractDAO {
     	SiteDAO.updateOrSave(sc);
     }
 
+    public static Site saveOrUpdate(Site site) throws DaqueryException
+    {
+    	if(site == null) return null;
+    	Site tSite = null;
+    	if(! StringHelper.isEmpty(site.getSiteId()) && site.getId() == 0)
+    	{
+    		tSite = SiteDAO.getSiteByUUID(site.getSiteId());
+    		if(tSite != null)
+    		{
+    			tSite.setAdminEmail(site.getAdminEmail());
+    		}
+    	}
+    	if(tSite == null) tSite = site;
+    	AbstractDAO.updateOrSave(tSite);
+    	return(tSite);
+    }
+    
     /** Get sites by network_id
      *  @param network_id
      *  @return List<Site>

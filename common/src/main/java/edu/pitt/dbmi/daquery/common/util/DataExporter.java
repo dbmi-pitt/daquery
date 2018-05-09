@@ -222,7 +222,7 @@ public class DataExporter {
 			
 			String filename = null;
 			if(deliverData) {
-				filename = WSConnectionUtil.sendFileToSite(zipFile, outputFilename, daqueryRequest.getRequestSite(), daqueryResponse.getRequest().getRequestGroup());
+				filename = WSConnectionUtil.sendFileToSite(zipFile, outputFilename, daqueryRequest.getRequesterSite(), daqueryResponse.getRequest().getRequestGroup());
 			}
 			else
 			{
