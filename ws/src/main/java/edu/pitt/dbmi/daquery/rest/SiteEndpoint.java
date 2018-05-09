@@ -634,8 +634,8 @@ public class SiteEndpoint extends AbstractEndpoint {
 	        	if(site_in == null)
 	        	{
 		        	site_in = new Site(siteUUID,
-		        							(String)map.get("siteName"),
-							 				(String)map.get("siteURL"),
+		        							(String)map.get("name"),
+							 				(String)map.get("url"),
 							 				(String)map.get("adminEmail"));
 	        	}
 	        	
