@@ -225,7 +225,7 @@ public class SQLDownload extends SQLQuery implements Download
 		{
 			log.log(Level.SEVERE, "Unhandled error while exporting", e);
 			response.setStatusEnum(ResponseStatus.ERROR);
-			response.setErrorMessage("An unhandled error occured during file export.");
+			response.setErrorMessage("An unhandled error occured during file export.  Check the server log files.");
 			response.setStackTrace(StringHelper.stackToString(e));
 			return(response);			
 		}
