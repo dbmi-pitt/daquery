@@ -418,8 +418,8 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            if(!TestConnection.checkConnection((String)databaseInfo.get("url"))) {
-            	String msg = "Unable to connect to url " + databaseInfo.get("url");
+            if(!TestConnection.checkConnection((String)databaseInfo.get("url"), (String) databaseInfo.get("driver"))) {
+            	String msg = "Database is unreachable. Check that the server and port are specified correctly.  Or check firewall settings.";
             	logger.log(Level.WARNING, msg);
             	
             	return Response.ok(200).entity("{\"result\": false, \"errorMsg\": \"" + msg + "\", \"detailErrorMsg\": \"\"}").build();
@@ -429,7 +429,12 @@ public class NetworkEndpoint extends AbstractEndpoint {
             DataBaseTestResult result = TestConnection.runQuery((String) databaseInfo.get("url"), (String) databaseInfo.get("username"), (String) databaseInfo.get("password"), (String) databaseInfo.get("driver"), q);
             
             return Response.ok(200).entity(result.toJson()).build();
-        } catch (Exception e) {
+    	}
+    	catch(DaqueryException e)
+    	{
+    		return Response.ok(200).entity("{\"result\": false, \"errorMsg\": \"" + e.getMessage() + "\", \"detailErrorMsg\": \"\"}").build();    		
+        }
+    	catch (Exception e) {
     		String msg = "An unexpected error was encountered testing datasource connection";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
