@@ -33,4 +33,8 @@ export class SavedQueriesComponent implements OnInit {
   onEditClick(inquiry: any){
     this.editInquiry.emit(inquiry);
   }
+
+  notifyMe() {
+    this.getSavedInquiries();
+  }
 }
