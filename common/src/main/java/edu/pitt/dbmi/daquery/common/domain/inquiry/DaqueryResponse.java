@@ -165,7 +165,7 @@ public class DaqueryResponse extends DaqueryObject
     public Inquiry getDownloadDirective(){return(downloadDirective);}
     public void setDownloadDirective(Inquiry directive){downloadDirective = directive;}
     
-    public boolean isDownloadAvailable(){return(downloadAvailable);}
-    public void setDownloadAvailable(boolean available){downloadAvailable = available;}
+    public Boolean isDownloadAvailable(){return(downloadAvailable);}
+    public void setDownloadAvailable(Boolean available){downloadAvailable = available;}
     
 }
