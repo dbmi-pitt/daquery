@@ -27,6 +27,7 @@ import com.google.gson.annotations.Expose;
 	@NamedQuery(name=Site.FIND_BY_ID, query="SELECT s FROM Site s WHERE s.id = :id"),
 	@NamedQuery(name=Site.FIND_BY_UUID, query="SELECT s FROM Site s WHERE s.siteId = :uuid"),
 	@NamedQuery(name=Site.FIND_BY_NAME, query="SELECT s FROM Site s WHERE s.name = :name"),
+	@NamedQuery(name=Site.FIND_BY_NAME_NC, query="SELECT s FROM Site s WHERE upper(s.name) = :name"),
 	@NamedQuery(name=Site.COUNT_ALL, query="SELECT count(s) FROM Site s")
 })
 
@@ -43,6 +44,7 @@ public class Site extends DaqueryObject implements Serializable {
     public static final String FIND_BY_UUID = "Site.findUUId";
     public static final String COUNT_ALL = "Site.countAll";
     public static final String FIND_BY_NAME = "Site.findByName";
+    public static final String FIND_BY_NAME_NC = "Site.findByNameNc";
 
 	private static final long serialVersionUID = 1L;
 
