@@ -42,7 +42,7 @@ public class DBHelper
 		try
 		{
 			Site site = SiteDAO.querySiteByID(siteNameOrId);
-			if(site == null) site = SiteDAO.querySiteByName(siteNameOrId);
+			if(site == null) site = SiteDAO.querySiteByNameCaseInsensitive(siteNameOrId);
 			if(site == null || StringHelper.isEmpty(site.getAccessKey())) return(false);
 			return(sitekey.equals(site.getAccessKey()));
 		}
@@ -144,13 +144,13 @@ public class DBHelper
 	 * @return The newly generated key.
 	 * @throws DaqueryCentralException
 	 */
-	public static String getNewSiteKey(String siteNameOrId) throws DaqueryCentralException
+	public static String getNewSiteKey(String siteName) throws DaqueryCentralException
 	{
 		Connection conn = null;
 		Statement stat = null;
 		try
 		{
-			Site site = SiteDAO.getSiteByNameOrId(siteNameOrId);
+			Site site = SiteDAO.getSiteByNameOrIdCaseInsensitive(siteName);
 			String newKey = PasswordUtils.randomPassword(24);
 			if(site != null)
 			{
@@ -162,11 +162,11 @@ public class DBHelper
 				return(newKey);
 			}
 			else
-				throw new DaqueryCentralException("Site with name or id: " + siteNameOrId + " not found while trying to generate and store a new site key");
+				throw new DaqueryCentralException("Site with name or id: " + siteName + " not found while trying to generate and store a new site key");
 		}
 		catch(Throwable t)
 		{
-			String msg = "An error occured while generating and setting a site access key.  Site name or id was " + siteNameOrId;
+			String msg = "An error occured while generating and setting a site access key.  Site name or id was " + siteName;
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryCentralException(msg, t);
 
