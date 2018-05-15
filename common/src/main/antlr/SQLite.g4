@@ -632,10 +632,14 @@ name
  : any_name
  ;
 
-count_function
- : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' )? ')'
- ;
+//count_function
+// : K_COUNT '(' ( distinct_keyword?  ( ( database_name '.' )? table_name '.' )? column_name | '*' )? ')' ( K_AS? column_alias )?
+// ;
 
+count_function
+ : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' )?  ')' (K_AS? column_alias)?
+ ;
+ 
 and_keyword
  : K_AND
  ;
