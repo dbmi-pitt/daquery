@@ -442,7 +442,9 @@ public class WSConnectionUtil {
 			args.put("output-dir", (StringHelper.isEmpty(outputDirName)?"default-output":outputDirName));
 			args.put("from-site-id", mySite.getSiteId());
 			
-			Client client = ClientBuilder.newBuilder().build();
+			Client client = WSConnectionUtil.getRemoteClient(toSite.getUrl());
+			
+			//Client client = ClientBuilder.newBuilder().build();
 			WebTarget target = client.target(buildGetUrl(toSite.getUrl(), "data-file", args));
 			target.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
 			target.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024);
