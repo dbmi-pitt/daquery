@@ -125,6 +125,25 @@ public class SiteDAO extends AbstractDAO {
         }
     }
 
+    public static Site querySiteByNameCaseInsensitive(String name) throws Exception {
+    	try {
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+    		Site site = null;
+    		ParameterItem piName = new ParameterItem("name", name.toUpperCase());
+			pList.add(piName);
+			site = executeQueryReturnSingle(Site.FIND_BY_NAME_NC, pList, logger);
+    		
+	        return site;
+	    
+        } catch (HibernateException e) {
+        	logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.", e);
+            throw e;
+        } catch (Throwable t) {
+        	logger.log(Level.SEVERE, "Unexpected error encountered trying to retrieve site by name [" + name + "]", t);
+            throw t;        	
+        }
+    }
+    
     public static Site getSiteByNameOrId(String nameOrId) throws DaqueryException
     {
 		try
@@ -140,6 +159,22 @@ public class SiteDAO extends AbstractDAO {
 		    throw new DaqueryException(msg + "  Check server logs for more information.", t);
 		}
     }
+    
+    public static Site getSiteByNameOrIdCaseInsensitive(String nameOrId) throws DaqueryException
+    {
+		try
+		{
+		    Site site = querySiteByID(nameOrId);
+		    if(site == null) site = querySiteByNameCaseInsensitive(nameOrId);
+		    return(site);
+		}
+		catch(Throwable t)
+		{
+		    String msg = "Unexpected error while querying a site by name or id: [" + nameOrId + "].";
+		    logger.log(Level.SEVERE, msg, t);
+		    throw new DaqueryException(msg + "  Check server logs for more information.", t);
+		}
+    }    
     
     public static Site getSiteByUUID(String uuid) throws DaqueryException {
     	try {

@@ -1,0 +1,5 @@
+ssh root@pathi2b2-test.dbmi.pitt.edu "rm -f /opt/shrine/tomcat/daq-build/*.war"
+scp /home/devuser/projects/daquery/ws/target/daquery.war  root@pathi2b2-test.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
+scp /home/devuser/projects/daquery/central/target/daquery-central.war  root@pathi2b2-test.dbmi.pitt.edu:/opt/shrine/tomcat/daq-build/
+ssh root@pathi2b2-test.dbmi.pitt.edu "/opt/shrine/tomcat/daq-build/daquery-clean-deploy"
+
