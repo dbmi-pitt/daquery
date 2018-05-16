@@ -14,7 +14,11 @@
   <div class="col-md-9">
       <div *ngIf="selectedRequest" class="box box-default color-palette-box">
           <div class="box-header with-border">
-            <h3 class="box-title"> {{ selectedRequest.inquiry.inquiryName }} </h3> <small class="label pull-right" [ngClass]="getRequestStatusLabelClass(selectedRequest)">{{ selectedRequest.responses[0].status }}</small>
+            <h3 class="box-title"> {{ selectedRequest.inquiry.inquiryName }} </h3>
+            <span class="pull-right-container">
+              <small class="pull-right">{{ selectedRequest.responses[0].statusMessage }}</small>
+              <small class="label pull-right" style="margin-right: 5px" [ngClass]="getRequestStatusLabelClass(selectedRequest)">{{ selectedRequest.responses[0].status }}</small>
+            </span>
           </div>
           <div class="box-body">
             <div *ngIf="selectedRequest.responses[0].status === 'ERROR'" class="callout callout-danger">
