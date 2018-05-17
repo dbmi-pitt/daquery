@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_aliasContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_nameContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Count_functionContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.DbColumnExprContext;
@@ -24,8 +25,10 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	
 	public static void main(String [] args)
 	{
-		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("sElEct coUNt( distinct blech.patid) from demographic;");
+		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(distinct patid) from demographic;");
 		System.out.println(a.isRejected());
+		if(a.isRejected())
+			System.out.println("\t" + a.getRejectionMessage());
 		System.out.println(a.convertToValuesSql());
 	}
 	
@@ -63,16 +66,37 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 				countFound = true;
 				if(firstCtxNode.children.size() == 0)
 					setRejection("Aggregate select count function contains no arguments or contains a star.  Only a single column name is supported.");
-				else if(firstCtxNode.children.size() > 2)
+				else if(firstCtxNode.children.size() > 3)
 					setRejection("Aggregate select count functions can only count a single field.");
+				else if(firstCtxNode.children.size() == 3)
+				{
+					if(! ((firstCtxNode.children.get(0).self instanceof Distinct_keywordContext) &&
+						  (firstCtxNode.children.get(1).self instanceof DbColumnExprContext) &&
+						  (firstCtxNode.children.get(2).self instanceof Column_aliasContext)
+					  ))
+						setRejection("Invalid aggregte count function modifier.");
+					else
+					{
+						aggregateDistinct = true;
+						columnExpr = firstCtxNode.children.get(1).self;
+					}
+				}
 				else if(firstCtxNode.children.size() == 2)
 				{
-					if(! (firstCtxNode.children.get(0).self instanceof Distinct_keywordContext))
-						setRejection("Aggregte count function modifiers can only be of type \"distinct\"");
-					else
+					if((firstCtxNode.children.get(0).self instanceof Distinct_keywordContext))
+					{
 						aggregateDistinct = true;
+						columnExpr = firstCtxNode.children.get(1).self;
+					}
+					else if((firstCtxNode.children.get(0).self instanceof DbColumnExprContext) && (firstCtxNode.children.get(1).self instanceof Column_aliasContext))
+					{ 
+					    columnExpr = firstCtxNode.children.get(0).self;	  
+					}
+					else
+						setRejection("Invalid aggregte count function modifier.");
+
 					
-					columnExpr = firstCtxNode.children.get(1).self;
+					
 				}
 				else //only one argument in count function
 					columnExpr  = firstCtxNode.children.get(0).self;
