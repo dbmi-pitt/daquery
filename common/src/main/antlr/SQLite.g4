@@ -330,7 +330,7 @@ expr
  | expr ( comparison_operator ) expr
  | expr and_or expr
  | count_function
- | function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
+ | any_function
  | '(' expr ')'
  | K_CAST '(' expr K_AS type_name ')'
  | expr K_COLLATE collation_name
@@ -415,6 +415,7 @@ result_column
  | table_name '.' '*'
  | dbColumnExpr
  | count_function
+ | any_function
  ;
 
 table_or_subquery
@@ -632,12 +633,12 @@ name
  : any_name
  ;
 
-//count_function
-// : K_COUNT '(' ( distinct_keyword?  ( ( database_name '.' )? table_name '.' )? column_name | '*' )? ')' ( K_AS? column_alias )?
-// ;
-
 count_function
- : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' )?  ')' (K_AS? column_alias)?
+ : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' | K_DISTINCT? any_function )?  ')' (K_AS? column_alias)?
+ ;
+ 
+any_function
+ : function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
  ;
  
 and_keyword

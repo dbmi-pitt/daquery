@@ -437,6 +437,12 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCount_function(SQLiteParser.Count_functionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#any_function}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAny_function(SQLiteParser.Any_functionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#and_keyword}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

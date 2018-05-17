@@ -718,6 +718,16 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitCount_function(SQLiteParser.Count_functionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#any_function}.
+	 * @param ctx the parse tree
+	 */
+	void enterAny_function(SQLiteParser.Any_functionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#any_function}.
+	 * @param ctx the parse tree
+	 */
+	void exitAny_function(SQLiteParser.Any_functionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#and_keyword}.
 	 * @param ctx the parse tree
 	 */

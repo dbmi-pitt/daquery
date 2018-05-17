@@ -109,6 +109,17 @@ public class SQLPrintLListener extends AbstractSQLListener
 	{
 		addChunk("Function_name:" + ctx.getText());		
 	}
+	
+	@Override public void enterAny_function(SQLiteParser.Any_functionContext ctx)
+	{
+		addChunk("Function_name:" + ctx.getText());		
+	}
+	
+	@Override public void exitAny_function(SQLiteParser.Any_functionContext ctx)
+	{
+		addChunk("EXIT Function_name:" + ctx.getText());		
+	}
+	
 	@Override public void enterCount_function(SQLiteParser.Count_functionContext ctx)
 	{
 		addChunk("Count_function:" + ctx.getText());

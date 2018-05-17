@@ -25,7 +25,7 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	
 	public static void main(String [] args)
 	{
-		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(distinct patid) from demographic;");
+		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(distinct patid) as adsd from VITAL where patid like 'PIT100_' or patid like 'PIT101_';");
 		System.out.println(a.isRejected());
 		if(a.isRejected())
 			System.out.println("\t" + a.getRejectionMessage());
@@ -48,7 +48,6 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	
 	private void analyzeNode(TreeNode node, int level)
 	{
-
 		if(node.self instanceof Result_columnContext && !firstResultFound )
 		{
 			firstResultFound = true;

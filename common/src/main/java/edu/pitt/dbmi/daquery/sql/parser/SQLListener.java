@@ -81,6 +81,12 @@ public class SQLListener extends AbstractSQLListener
 	{
 	
 	}
+	
+	@Override public void enterAny_function(SQLiteParser.Any_functionContext ctx)
+	{
+	
+	}	
+	
 	@Override public void enterCount_function(SQLiteParser.Count_functionContext ctx)
 	{
 	

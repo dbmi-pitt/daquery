@@ -52,7 +52,6 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 	
 	private void analyzeNode(TreeNode node, int level)
 	{
-		
 		if(debug)
 		{
 			if(node == null || node.self == null)
