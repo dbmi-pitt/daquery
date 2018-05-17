@@ -126,7 +126,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	{
 		return(ResponseHelper.getBasicResponse(200, "Hello World"));
 	}
-    
 	
 	/**
 	 * Send and error message for testing purposes.
@@ -178,6 +177,15 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return Response.ok(200).entity(data.toJson()).build();
 	}
     
+	@GET
+	@Path("/display-version")
+    @Produces(MediaType.TEXT_PLAIN)
+	public Response version()
+	{
+		return(ResponseHelper.getBasicResponse(200, AppProperties.getDisplayVersion()));
+	}
+	
+	
 	/**
 	 * Check if the site database is set up or not.
 	 * 
