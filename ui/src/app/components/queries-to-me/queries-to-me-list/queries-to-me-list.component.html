@@ -1,12 +1,12 @@
 <div class="row">
-  <div class="col-md-3" style="overflow-y: auto; max-height: 800px">
+  <div class="col-md-3" style="overflow-y: auto; max-height: 90vh">
     <div *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'info-box bg-aqua-active' : 'info-box'"  (click)="onRequestSelect(request)">
       <span class="info-box-icon bg-aqua"><i class="fa fa-caret-right"></i></span>
 
       <div class="info-box-content">
         <span class="info-box-text">{{request.inquiry.inquiryName}} <small class="label pull-right" [ngClass]="getRequestStatusLabelClass(request)">{{ request.responses[0].status }}</small></span> 
         <span class="info-box-number">{{request.requester?.realName}}</span>
-        <span class="info-box-number">{{request.responses[0]?.value }}</span>
+        <span class="info-box-text">{{request.sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</span>
       </div>
       <!-- /.info-box-content -->
     </div>
@@ -40,7 +40,8 @@
             </div>
             <hr />
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-12" style="overflow-y: auto; max-height: 65vh">
+                <label>SQL Code</label>
                 <pre>
                   <code>
                     {{ selectedRequest.inquiry.code }}
