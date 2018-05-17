@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationStart } from '@angular/router';
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 import { Keepalive } from '@ng-idle/keepalive';
 import { AuthenticationService } from '../../services/authentication.service';
@@ -67,6 +67,13 @@ export class DashboardComponent implements OnInit {
     // });
 
     this.reset();   
+
+    router.events.subscribe((event) => {
+      // see also 
+      if(event instanceof NavigationStart){
+        this.error.error = null;
+      }
+  });
   }
 
   ngOnInit() {
@@ -85,7 +92,7 @@ export class DashboardComponent implements OnInit {
 
   onAlertDismiss(){
     this.error.error = null;
-    console.log("alert dismiss");
+    //console.log("alert dismiss");
   }
 
   showErrorInfo(){
