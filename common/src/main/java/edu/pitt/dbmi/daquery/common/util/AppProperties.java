@@ -23,7 +23,7 @@ public class AppProperties
 	
 	public static void main(String [] args)
 	{
-		
+		System.out.println(getDisplayVersion());
 	}
 	
 	public static void setDevHomeDir(String val)
@@ -71,7 +71,20 @@ public class AppProperties
 	
 	public static String getCurrentVersion()
 	{
-		return(ApplicationPropertiesFile.getPropertiesFromFile().getProperty("current.version"));
+		String major = getMajorVersion();
+		String minor = getMinorVersion();
+		
+		String mm;
+		
+		if(StringHelper.isEmpty(major))
+			mm = ""; 
+		else
+		{
+			if(! StringHelper.isEmpty(minor)) mm = " " + major.trim() + "." + minor.trim();
+			else mm = " " + major.trim();
+		}
+
+		return(mm);
 	}
 	public static String getDBName() throws Exception
 	{
@@ -368,6 +381,64 @@ public class AppProperties
 	public static void setLocalDeliveryDir(String dir) throws DaqueryException
 	{
 		setDBProperty("local.delivery.dir", dir);
+	}
+	
+	public static String getBuildNo()
+	{
+		String bn = VersionPropertiesFile.getPropertiesFromFile().getProperty("build.no", "");
+		if(StringHelper.isEmpty(bn)) return(null);
+		return(bn);
+	}
+
+	public static String getBuildBranch()
+	{
+		String bn = VersionPropertiesFile.getPropertiesFromFile().getProperty("branch", "");
+		if(StringHelper.isEmpty(bn)) return(null);
+		return(bn);
+	}
+
+	public static String getMajorVersion()
+	{
+		String bn = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("major.version", "");
+		if(StringHelper.isEmpty(bn)) return(null);
+		return(bn);
+	}
+
+	public static String getMinorVersion()
+	{
+		String bn = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("minor.version", "");
+		if(StringHelper.isEmpty(bn)) return(null);
+		return(bn);
+	}
+	
+	public static String getBuildType()
+	{
+		String bn = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("build.type", "");
+		if(StringHelper.isEmpty(bn)) return(null);
+		return(bn);
+	}
+		
+	public static String getDisplayVersion()
+	{
+		String buildN = getBuildNo();
+		String branch = getBuildBranch();
+		String type = getBuildType();
+		
+		
+		if(!StringHelper.isEmpty(type)) type = " " + type.trim();
+		else type = "";
+		
+		if(!StringHelper.isBlank(buildN)) buildN = " build " + buildN.trim();
+		else buildN = "";
+		
+		if(!StringHelper.isBlank(branch) && ! branch.trim().toLowerCase().equals("master")) branch = " <font color=\"red\"><em>BRANCH</em>" + branch.trim() + "</font>";
+		else branch = "";
+		
+		String vsn = getCurrentVersion() + type + buildN + branch;
+		if(! StringHelper.isEmpty(vsn)) vsn = "<b>Version</b>" + vsn;
+		
+		return(vsn);
+		
 	}
 	
 	/**
