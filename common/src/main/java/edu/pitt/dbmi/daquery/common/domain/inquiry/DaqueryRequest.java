@@ -159,7 +159,7 @@ public class DaqueryRequest extends DaqueryObject
 		if(getRequester() != null && !StringHelper.isEmpty(getRequester().getEmail()))
 			username = StringHelper.usernameFromEmail(getRequester().getEmail()) + "-";
 		if(getInquiry() != null && ! StringHelper.isEmpty(getInquiry().getInquiryName()))
-			inqName = getInquiry().getInquiryName().replaceAll(" ", "_") + "-";
+			inqName = StringHelper.replaceInFilename(getInquiry().getInquiryName()) + "-";
 		if(this.getSentTimestamp() != null)
 			dtTime = StringHelper.formatDate(getSentTimestamp());
 		return username + inqName + dtTime;

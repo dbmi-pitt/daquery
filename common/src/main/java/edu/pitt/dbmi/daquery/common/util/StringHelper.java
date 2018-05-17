@@ -20,9 +20,7 @@ public class StringHelper
 	
 	public static void main(String [] args)
 	{
-		String val = "\\\"here\\\"";
-		System.out.println(val);
-		System.out.println(unEscapeQuotes(val));
+		System.out.println(replaceInFilename("A?A%A\\A/A(A)A;A&A'A.A:A|A\"A"));
 	}
 	public static boolean isEmpty(String val)
 	{
@@ -116,6 +114,15 @@ public class StringHelper
 		
 		return(val1.toUpperCase().trim().equals(val2.toUpperCase().trim()));
 		
+	}
+	
+	/**
+	 * Replace invalid (or not suggested) filename characters with an underscore
+	 */
+	public static String replaceInFilename(String val)
+	{
+		if(StringHelper.isEmpty(val)) return(val);
+		return(val.replaceAll("[/ \\\\?%*:|\"<>.'&();]", "_"));		
 	}
 	
 	public static String capitalize(String val)
