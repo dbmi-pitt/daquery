@@ -1,5 +1,4 @@
 package edu.pitt.dbmi.daquery.sql.parser;
-import java.text.ParseException;
 import java.util.Hashtable;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -416,6 +415,11 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		return visitChildren(ctx);
 	}
 	@Override public Object visitFunction_name(SQLiteParser.Function_nameContext ctx)
+	{
+		addToTree(ctx);
+		return visitChildren(ctx);
+	}
+	@Override public Object visitAny_function(SQLiteParser.Any_functionContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
