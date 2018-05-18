@@ -1,2 +1,2 @@
-git.info.bat
+call git.info.bat
 mvn clean install -DskipTests=true
