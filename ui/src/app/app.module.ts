@@ -24,6 +24,7 @@ import { DaqueryService } from './services/daquery.service';
 
 // custom pipe
 import { MapValuesPipe } from './pipes/iteratable.pipe';
+import { Direction } from './pipes/direction.pipe';
 
 // custom validator
 import { EqualValidator } from './validators/equal-validator.directive';
@@ -73,6 +74,7 @@ import { MomentModule } from 'angular2-moment';
 import { EditUserComponent } from './components/users/edit-user/edit-user.component';
 import { AppConfigComponent } from './components/app-config/app-config.component';
 import { DeidPropsComponent } from './components/networks/network/deid-props/deid-props.component';
+import { RemoteUsersComponent } from './components/remote-users/remote-users.component';
 
 
 @NgModule({
@@ -114,11 +116,13 @@ import { DeidPropsComponent } from './components/networks/network/deid-props/dei
     ChangePasswordComponent,
     DataSourceComponent,
     MapValuesPipe,
+    Direction,
     RecentQueryComponent,
     SavedQueriesComponent,
     EditUserComponent,
     AppConfigComponent,
     DeidPropsComponent,
+    RemoteUsersComponent,
   ],
   imports: [
     BrowserModule,
@@ -152,7 +156,8 @@ import { DeidPropsComponent } from './components/networks/network/deid-props/dei
                 provide: HTTP_INTERCEPTORS,
                 useClass: ResInterceptor,
                 multi: true,
-              }
+              },
+              Direction
   ],
   bootstrap: [AppComponent]
 })

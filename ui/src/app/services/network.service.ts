@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from 'rxjs/Observable';
-import { Network } from '../models/network.model';
 import { AuthenticationService } from './authentication.service';
 import { Error } from '../_globals/error';
 
@@ -13,7 +12,7 @@ export class NetworkService {
               private error: Error) { }
 
   networks = [];
-  getNetworks(): Observable<Network[]> {
+  getNetworks(): Observable<any[]> {
     return this.http.get('/daquery/ws/networks')
                     .catch(error => {
                       this.error.error = error;
@@ -21,7 +20,7 @@ export class NetworkService {
                     });
   }
 
-  getNetwork(id: number): Observable<Network> {
+  getNetwork(id: number): Observable<any> {
     return this.http.get(`/daquery/ws/networks/${id}`)
                     .catch(error => {
                       this.error.error = error;
@@ -45,7 +44,7 @@ export class NetworkService {
                     });
   }
   
-  createNetwork(networkForm: any): Observable<Network> {
+  createNetwork(networkForm: any): Observable<any> {
     return this.http.post('/daquery/ws/networks', networkForm)
                     .catch(error => {
                       this.error.error = error;
