@@ -3,6 +3,7 @@ import { Router, NavigationStart } from '@angular/router';
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 import { Keepalive } from '@ng-idle/keepalive';
 import { AuthenticationService } from '../../services/authentication.service';
+import { DaqueryService } from '../../services/daquery.service';
 import { Error } from '../../_globals/error';
 import { Session } from '../../_globals/session';
 
@@ -19,11 +20,13 @@ export class DashboardComponent implements OnInit {
   lastPing?: Date = null;
   
   showStackTrace = false;
+  version: String;
 
   constructor(private router: Router,
               private idle: Idle, 
               private keepalive: Keepalive,
               private authenticationService: AuthenticationService,
+              private daqueryService: DaqueryService,
               public error: Error,
               public session: Session) { 
     // sets an idle timeout of 5 minutes(300 seconds)
@@ -81,6 +84,7 @@ export class DashboardComponent implements OnInit {
     // if(true){
     //   this.router.navigate(['/change-password']);
     // }
+    this.getVersion();
   }
 
   reset() {
@@ -97,5 +101,12 @@ export class DashboardComponent implements OnInit {
 
   showErrorInfo(){
     $('#myErrorModal').modal('show');
+  }
+
+  getVersion(){
+    this.daqueryService.getVersion()
+                       .subscribe(ver => {
+                         this.version = ver;
+                       })
   }
 }
