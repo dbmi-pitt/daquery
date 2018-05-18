@@ -9,6 +9,7 @@ import { LocalUserComponent } from 'app/components/users/local-user/local-user.c
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
+  remote = false;
   showAddUser = false;
   users: User[];
   @ViewChild(LocalUserComponent)  private localUserComponent: LocalUserComponent;

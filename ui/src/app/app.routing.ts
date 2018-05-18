@@ -4,6 +4,7 @@ import { QueriesToMeComponent } from "./components/queries-to-me/queries-to-me.c
 import { QueriesFromMeComponent } from "./components/queries-from-me/queries-from-me.component";
 import { SitesComponent } from "./components/sites/sites.component";
 import { UsersComponent } from "./components/users/users.component";
+import { RemoteUsersComponent } from "./components/remote-users/remote-users.component";
 import { ReviewQueryComponent } from "./components/queries-to-me/review-query/review-query.component";
 import { LoginComponent } from "./components/login/login.component";
 import { SetupComponent } from "./components/setup/setup.component";
@@ -41,6 +42,7 @@ const appRoutes:Routes = [
       { path: "add-site", component: AddSiteComponent, canActivate: [AuthGuard] },
       { path: "sites/:id", component: SiteComponent, canActivate: [AuthGuard] },
       { path: "users", component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
+      { path: "remote-users", component: RemoteUsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "change-password", component: ChangePasswordComponent, canActivate: [AuthGuard] },
       { path: "app-config", component: AppConfigComponent, canActivate: [AuthGuard] },
       { path: "users/:id", component: EditUserComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin']} }
