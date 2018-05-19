@@ -6,7 +6,7 @@ layout: page
 ---
 
 
-This is page TWO
+# Installation instructions go here.
 
 ![Test Image](images/test.png)
 Format: ![Alternate Text](aurl)
