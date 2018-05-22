@@ -20,7 +20,7 @@ export class NetworkService {
                     });
   }
 
-  getNetwork(id: number): Observable<any> {
+  getNetwork(id: string | number): Observable<any> {
     return this.http.get(`/daquery/ws/networks/${id}`)
                     .catch(error => {
                       this.error.error = error;

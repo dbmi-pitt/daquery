@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { RoleGuard } from '../../_guards/role.guard';
+import { NetworkService } from '../../services/network.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -14,8 +15,10 @@ export class SidebarComponent implements OnInit {
   showNetworkConfiguration = false;
   showUserManagement = false;
 
+  networks: any[];
   constructor(location: Location,
-              private roleGuard: RoleGuard) {
+              private roleGuard: RoleGuard,
+              private networkService: NetworkService) {
     this.location = location;
   }
 
@@ -24,6 +27,7 @@ export class SidebarComponent implements OnInit {
       this.showUserManagement = true;
       this.showNetworkConfiguration = true;
     }
+    this.getNetworks();
   }
 
   isActive(path){
@@ -34,4 +38,17 @@ export class SidebarComponent implements OnInit {
     return this.roleGuard.allowed(allowedRoles);
   }
   
+  getNetworks() {
+    this.networkService.getNetworks()
+                       .subscribe(networks => {
+                          this.networks = networks;
+                          // networks.forEach(n => {
+                          //   n.siteConnections.forEach(sc => {
+                          //     if(sc.direction.toUpperCase() === 'INCOMING' && sc.status.toUpperCase() === 'CONNECTED'){
+                          //       this.getRemoteUser(sc);
+                          //     }
+                          //   })
+                          // })
+                        });
+  }
 }
