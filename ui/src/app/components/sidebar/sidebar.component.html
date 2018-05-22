@@ -26,7 +26,7 @@
         <a [routerLink]="['/networks']"><i class="fa fa-share-alt"></i><span>Networks</span></a>
       </li>
       <li class="treeview" *ngIf="showUserManagement" [class.active]="isActive('/users')">
-        <a [routerLink]="['/users']">
+        <a style="cursor: pointer">
           <i class="fa fa-users"></i>
           <span>Users</span>
           <span class="pull-right-container">
@@ -35,7 +35,7 @@
         </a>
         <ul class="treeview-menu">
           <li class="active"><a [routerLink]="['/users']"><i class="fa fa-circle-o"></i> Local User</a></li>
-          <li class="active"><a [routerLink]="['/remote-users']"><i class="fa fa-circle-o"></i> Remote User</a></li>
+          <li *ngFor="let network of networks" class="active"><a [routerLink]="['/remote-users']" [queryParams]="{ network: network.networkId }"><i class="fa fa-circle-o"></i> {{network.name}} User</a></li>
         </ul>
       </li>
     </ul>
