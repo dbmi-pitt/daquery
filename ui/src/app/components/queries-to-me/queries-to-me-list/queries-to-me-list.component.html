@@ -1,14 +1,15 @@
 <div class="row">
-  <div class="col-md-3" style="overflow-y: auto; max-height: 90vh">
-    <div *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'info-box bg-aqua-active' : 'info-box'"  (click)="onRequestSelect(request)">
-      <span class="info-box-icon bg-aqua"><i class="fa fa-caret-right"></i></span>
-
-      <div class="info-box-content">
-        <span class="info-box-text">{{request.inquiry.inquiryName}} <small class="label pull-right" [ngClass]="getRequestStatusLabelClass(request)">{{ request.responses[0].status }}</small></span> 
-        <span class="info-box-number">{{request.requester?.realName}}</span>
-        <span class="info-box-text">{{request.sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</span>
+  <div class="col-md-3" style="overflow-y: auto; max-height: 82vh">
+    <div class="box box-solid">
+      <div class="box-body no-padding">
+        <ul class="nav nav-pills nav-stacked">
+          <li *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'active' : ''">
+            <a style="cursor: pointer" (click)="onRequestSelect(request)"> {{request.inquiry.inquiryName}} <br />
+            <span>@{{ request.sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</span>  
+            <span class="label pull-right" [ngClass]="getRequestStatusLabelClass(request)">{{ request.responses[0].status }}</span></a>
+          </li>
+        </ul>
       </div>
-      <!-- /.info-box-content -->
     </div>
   </div>
   <div class="col-md-9">
@@ -40,7 +41,7 @@
             </div>
             <hr />
             <div class="row">
-              <div class="col-md-12" style="overflow-y: auto; max-height: 65vh">
+              <div class="col-md-12" style="overflow-y: auto; max-height: 57vh">
                 <label>SQL Code</label>
                 <pre>
                   <code>
