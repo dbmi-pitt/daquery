@@ -3,6 +3,7 @@ import { NetworkService } from '../../services/network.service';
 import { UserService } from '../../services/user.service';
 import { Direction } from '../../pipes/direction.pipe';
 import { forEach } from '@angular/router/src/utils/collection';
+import { Router, ActivatedRoute, Params } from '@angular/router';
 
 @Component({
   selector: 'app-remote-users',
@@ -10,27 +11,30 @@ import { forEach } from '@angular/router/src/utils/collection';
   styleUrls: ['./remote-users.component.css']
 })
 export class RemoteUsersComponent implements OnInit {
-  networks: any[];
+  network: any;
   constructor(private networkService: NetworkService,
               private direction: Direction,
-              private userService: UserService,) { }
+              private userService: UserService,
+              private activatedRoute: ActivatedRoute,
+            ) { }
 
   ngOnInit() {
-    this.getNetworks();
+    this.activatedRoute.params.subscribe((params: Params) => {
+      let networkId = this.activatedRoute.snapshot.queryParams["network"];
+      this.getNetwork(networkId);
+    });
   }
 
-  getNetworks() {
-    this.networkService.getNetworks()
-                       .subscribe(networks => {
-                          this.networks = networks;
-                          networks.forEach(n => {
-                            n.siteConnections.forEach(sc => {
-                              if(sc.direction.toUpperCase() === 'INCOMING' && sc.status.toUpperCase() === 'CONNECTED'){
-                                this.getRemoteUser(sc);
-                              }
-                            })
-                          })
-                        });
+  getNetwork(networkId: string){
+    this.networkService.getNetwork(networkId)
+                       .subscribe(n => {
+                         this.network = n;
+                         this.network.siteConnections.forEach(sc => {
+                           if(sc.direction.toUpperCase() === 'INCOMING' && sc.status.toUpperCase() === 'CONNECTED') {
+                             this.getRemoteUser(sc);
+                           }
+                         })
+                       });
   }
 
   getRemoteUser(sc: any){
