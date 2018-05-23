@@ -298,7 +298,7 @@ public class RequestEndpoint extends AbstractEndpoint {
             DaqueryRequest request = DaqueryRequestDAO.getRequestById(id);
             
             if(!DaqueryUserDAO.hasRole(currentUser.getId(), request.getNetwork().getNetworkId(), "STEWARD")) {
-            	return ResponseHelper.getErrorResponse(400, "You are not steward of this network", "The current user is not a steward of the current working network.", null);
+            	return ResponseHelper.getErrorResponse(400, "You are not a data export steward for this network.", "The current user is not a steward of the current working network.  Steward rights are required.", null);
             }
             
             TaskQueue queue = QueueManager.getNamedQueue(TaskQueue.EXPORT_QUEUE);
