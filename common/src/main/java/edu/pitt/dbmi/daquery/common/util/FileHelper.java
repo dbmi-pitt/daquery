@@ -55,11 +55,12 @@ public class FileHelper
 			
 	}
 	
-	public static File createTempDirectory() throws IOException
+	public static File createExportTempDirectory() throws IOException, DaqueryException
 	{
 	    File temp = null;
-
-	    Path p = Files.createTempDirectory("dqexport");
+	    String baseDirStr = AppProperties.getTempFileExportDir();
+	    Path baseDir = Paths.get(baseDirStr);
+	    Path p = Files.createTempDirectory(baseDir, "dqexport");
 	    temp = p.toFile();
 	    return(temp);
 	}

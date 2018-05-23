@@ -214,7 +214,7 @@ public class DataExporter {
 			if(! hasNextExport()) return null;
 				currentFile++;
 
-			File tmpDir = FileHelper.createTempDirectory();
+			File tmpDir = FileHelper.createExportTempDirectory();
 			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile);
 	
 			//send the file to remote requester
