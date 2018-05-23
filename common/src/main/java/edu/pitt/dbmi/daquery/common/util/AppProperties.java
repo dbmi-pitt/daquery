@@ -357,6 +357,19 @@ public class AppProperties
 		setDBProperty("file.output.dir", dir);
 	}
 	
+	public static String getTempFileExportDir() throws DaqueryException
+	{
+		String val = getDBProperty("temp.export.dir");
+		if(val == null)
+			return(System.getProperty("java.io.tmpdir"));
+		else
+			return(val);
+	}
+	public static void setTempFileExportDir(String dir) throws DaqueryException
+	{
+		setDBProperty("temp.export.dir", dir);
+	}
+	
 	public static String getTrackingDir() throws DaqueryException
 	{
 		String val = getDBProperty("tracking.output.dir");
