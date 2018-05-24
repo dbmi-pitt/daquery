@@ -21,6 +21,7 @@ import { NetworkService } from './services/network.service';
 import { NotificationService } from './services/notification.service';
 import { SetupService } from './services/setup.service';
 import { DaqueryService } from './services/daquery.service';
+import { EventBrokerService } from './services/eventbroker.service';
 
 // custom pipe
 import { MapValuesPipe } from './pipes/iteratable.pipe';
@@ -147,6 +148,7 @@ import { RemoteUsersComponent } from './components/remote-users/remote-users.com
               NotificationService,
               SetupService,
               DaqueryService,
+              EventBrokerService,
               {
                 provide: HTTP_INTERCEPTORS,
                 useClass: JWTInterceptor,

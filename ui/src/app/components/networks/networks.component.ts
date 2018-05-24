@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { NetworkService } from '../../services/network.service';
 import { MapValuesPipe } from '../../pipes/iteratable.pipe';
-
+import { EventBrokerService } from '../../services/eventbroker.service';
 
 @Component({
   selector: 'app-networks',
@@ -13,7 +13,8 @@ export class NetworksComponent implements OnInit {
   showCreateNetwork = false;
 
   networks: any[];
-  constructor(private networkService: NetworkService) {
+  constructor(private networkService: NetworkService,
+              private eventBroker: EventBrokerService) {
   }
 
   ngOnInit() {
@@ -65,6 +66,7 @@ export class NetworksComponent implements OnInit {
     this.showCreateNetwork = false;
     this.showJoinNetwork = false;
     this.networks.push(network);
+    this.eventBroker.emit<boolean>("add-network", true);
   }
 
 }
