@@ -1,7 +1,7 @@
 <div class="wrapper">
   <app-navbar></app-navbar>
   <app-sidebar></app-sidebar>
-  <div class="content-wrapper" style="min-height: 946px;">
+  <div class="content-wrapper" style="min-height: 900px;">
     <div *ngIf="error.error" class="alert alert-danger alert-dismissible">
       <button type="button" class="close" data-dismiss="alert" aria-hidden="true" (click)="onAlertDismiss()">×</button>
       {{ error.error.error.displayMessage }}

@@ -56,7 +56,19 @@
           </ul>
         </li>
         <li>
-          <a href="#" (click)="logout()">Logout</a>
+          <a style="cursor: pointer" class="dropdown-toggle" data-toggle="dropdown">{{ user.realName }}</a>
+          <ul class="dropdown-menu">
+            <li>
+              <a [routerLink]="['/users', user.id] ">
+                <i class="fa fa-pencil-square-o text-green"></i>Profile
+              </a>
+            </li>
+            <li>
+              <a style="cursor: pointer" (click)="logout()">
+                <i class="fa fa-sign-out text-red"></i>Logout
+              </a>
+            </li>
+          </ul>
         </li>
       </ul>
     </div>

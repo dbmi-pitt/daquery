@@ -33,9 +33,13 @@
             <i class="fa fa-angle-left pull-right"></i>
           </span>
         </a>
-        <ul class="treeview-menu">
-          <li class="active"><a [routerLink]="['/users']"><i class="fa fa-circle-o"></i> Local User</a></li>
-          <li *ngFor="let network of networks" class="active"><a [routerLink]="['/remote-users']" [queryParams]="{ network: network.networkId }"><i class="fa fa-circle-o"></i> {{network.name}} User</a></li>
+        <ul class="treeview-menu" style="display: block">
+          <li>
+            <a [routerLink]="['/users']"><i class="fa fa-circle-o"></i> Local User</a>
+          </li>
+          <li *ngFor="let network of networks">
+            <a [routerLink]="['/remote-users']" [queryParams]="{ network: network.networkId }"><i class="fa fa-circle-o"></i> {{network.name}} User</a>
+          </li>
         </ul>
       </li>
     </ul>

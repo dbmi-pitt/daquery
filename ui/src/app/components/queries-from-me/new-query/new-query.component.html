@@ -25,9 +25,10 @@
                   <label for="name">Study Name</label>
                   <input type="text" class="form-control" id="study-name" formControlName="studyName">
                 </div> -->
-                <div class="form-group">
+                <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryDescription.invalid && (inquiryDescription.dirty || inquiryDescription.touched), 'has-success': inquiryDescription.valid && (inquiryDescription.dirty || inquiryDescription.touched) }">
                   <label for="name">Inquiry Description</label>
                   <input type="text" class="form-control" id="inquiry-description" formControlName="inquiryDescription">
+                  <div class="help-block" *ngIf="inquiryDescription.hasError('maxlength') && (inquiryDescription.dirty || inquiryDescription.touched)">Please enter no more than 500 characters</div>
                 </div>
                 <div class="form-group">
                   <label for="query">SQL</label>

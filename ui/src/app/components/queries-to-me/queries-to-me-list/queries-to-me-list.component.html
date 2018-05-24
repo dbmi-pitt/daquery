@@ -41,8 +41,15 @@
             </div>
             <hr />
             <div class="row">
+              <div class="col-md-12">
+                  <label>Request description:</label>
+                  <p>{{ selectedRequest.inquiry.inquiryDescription }}</p>
+              </div>
+            </div>
+            <hr />
+            <div class="row">
               <div class="col-md-12" style="overflow-y: auto; max-height: 57vh">
-                <label>SQL Code</label>
+                <label>Patient set constructed from:</label>
                 <pre>
                   <code>
                     {{ selectedRequest.inquiry.code }}
