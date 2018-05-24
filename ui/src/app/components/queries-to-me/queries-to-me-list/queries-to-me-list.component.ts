@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RequestService } from '../../../services/request.service';
+import { UserService } from '../../../services/user.service';
 import { QueryToMe } from '../../../models/query-to-me.model';
 import { RoleGuard } from '../../../_guards/role.guard';
 
@@ -19,12 +20,14 @@ export class QueriesToMeListComponent implements OnInit {
 
   showApproveDenyBtn = false;
   constructor(private requestService: RequestService,
+              private userService: UserService,
               private roleGuard: RoleGuard) {
 
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.getRequestsToMe();
+    await this.updateCurrentUser();
     if(this.canActive(["steward"])) {
       this.showApproveDenyBtn = true;
     }
@@ -39,7 +42,6 @@ export class QueriesToMeListComponent implements OnInit {
 
   onRequestSelect(request: any){
     this.selectedRequest = request;
-    $('#tb').DataTable();
   }
 
   getRequestStatusLabelClass(request: any){
@@ -77,5 +79,15 @@ export class QueriesToMeListComponent implements OnInit {
 
   canActive(allowedRoles: string[]): boolean {
     return this.roleGuard.allowed(allowedRoles);
+  }
+
+  updateCurrentUser(){
+    return new Promise((resolve, reject) => {
+      this.userService.getUser(this.userService.getCurrentUser().id)
+                      .subscribe(res => {
+                        this.userService.setCurrentUser(res);
+                        resolve();
+                      })
+    });
   }
 }

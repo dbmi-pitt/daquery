@@ -809,6 +809,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		 * fileOutputDir
     		 * localDeliveryDir
     		 * trackingOutputDir
+    		 * tempFileExportDir
     		 */
             
     		 // Get the HTTP Authorization header from the request
@@ -823,6 +824,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		properties.put("fileOutputDir", AppProperties.getFileOutputDir());
     		properties.put("localDeliveryDir", AppProperties.getLocalDeliveryDir());
     		properties.put("trackingOutputDir", AppProperties.getTrackingDir());
+    		properties.put("tempFileExportDir", AppProperties.getTempFileExportDir());
             return ResponseHelper.getJsonResponseGen(200, properties);
 
         } catch (Exception e) {
@@ -854,6 +856,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		 * fileOutputDir
     		 * localDeliveryDir
     		 * trackingOutputDir
+    		 * tempFileExportDir
     		 */
             
     		 // Get the HTTP Authorization header from the request
@@ -901,13 +904,26 @@ public class DaqueryEndpoint extends AbstractEndpoint
             		return ResponseHelper.getErrorResponse(500, "The tracking output directory is not able to create.", "The tracking output directory is not able to create.", null);
             	}
             }
+            
+            String tempFileExportDir = AppProperties.getTempFileExportDir();
+            f = new File(tempFileExportDir);
+            if(f.exists()) {
+            	if(!f.canWrite()) {
+            		return ResponseHelper.getErrorResponse(500, "The temp file export directory is not writable.", "The temp file export directory is not writable.", null);
+            	}
+            } else {
+            	if(!f.mkdir()) {
+            		return ResponseHelper.getErrorResponse(500, "The temp file export directory is not able to create.", "The temp file export directory is not able to create.", null);
+            	}
+            }
             	
     		AppProperties.setTaskQueueMaxLength(TaskQueue.MAIN_QUEUE, ((Integer) properties.get("taskQueueMaxLength")).intValue());
     		AppProperties.setTaskQueueMaxLength(TaskQueue.EXPORT_QUEUE, ((Integer) properties.get("exportTaskQueueMaxLength")).intValue());
     		AppProperties.setDeliverData( Boolean.parseBoolean((String) properties.get("deliverData")));
     		AppProperties.setFileOutputDir((String) properties.get("fileOutputDir"));
     		AppProperties.setLocalDeliveryDir((String) properties.get("localDeliveryDir"));
-    		AppProperties.setTrackingDir((String) properties.get("trackingOutputDir")); 
+    		AppProperties.setTrackingDir((String) properties.get("trackingOutputDir"));
+    		AppProperties.setTempFileExportDir((String) properties.get("tempFileExportDir"));
 
             return ResponseHelper.getJsonResponseGen(200, properties);
 

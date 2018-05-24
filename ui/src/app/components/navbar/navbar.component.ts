@@ -17,6 +17,7 @@ export class NavbarComponent implements OnInit {
 
   notifications: Notification[] = [];
   showAppConfig = false;
+  user: any;
   constructor(private authenticationService: AuthenticationService,
               private notificationService: NotificationService,
               private authGuard: AuthGuard,
@@ -26,6 +27,7 @@ export class NavbarComponent implements OnInit {
     if(this.canActive(["admin"])) {
       this.showAppConfig = true;
     }
+    this.user = JSON.parse(localStorage.getItem('currentUser'));
     this.getNotifications();
   }
 

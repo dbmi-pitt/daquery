@@ -89,7 +89,13 @@
           <label>Export Mapping Directory</label>
           <input type="text" class="form-control" formControlName="trackingOutputDir" name="trackingOutputDir" />
           <p class="help-block">The directory where mapping files will be created for data exports. The mapping files include patient study id mappings and the date offset used for the patient.</p>
-          <div class="help-block" *ngIf="(!trackingOutputDir.hasError('required') && trackingOutputDir.hasError('validateEqual')) && (trackingOutputDir.dirty || trackingOutputDir.touched)">Local Delivery Directory</div>
+          <div class="help-block" *ngIf="(!trackingOutputDir.hasError('required') && trackingOutputDir.hasError('validateEqual')) && (trackingOutputDir.dirty || trackingOutputDir.touched)">Export Mapping Directory</div>
+        </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': tempFileExportDir.invalid && (tempFileExportDir.dirty || tempFileExportDir.touched), 'has-success': tempFileExportDir.valid && (tempFileExportDir.dirty || tempFileExportDir.touched) }">
+          <label>Temporary Export Storage</label>
+          <input type="text" class="form-control" formControlName="tempFileExportDir" name="tempFileExportDir" />
+          <p class="help-block">The directory where temporary files are stored during a data export.</p>
+          <div class="help-block" *ngIf="(!tempFileExportDir.hasError('required') && tempFileExportDir.hasError('validateEqual')) && (tempFileExportDir.dirty || tempFileExportDir.touched)">Temporary Export Storage</div>
         </div>
         <div class="row">
           <div class="col-xs-4">

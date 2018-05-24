@@ -48,7 +48,7 @@ export class NewQueryComponent implements OnInit {
         dataType:['aggregate'],
         inquiryName: [inquiry.inquiryName, Validators.required],
         studyName: '',
-        inquiryDescription: inquiry.inquiryDescription,
+        inquiryDescription: [inquiry.inquiryDescription, Validators.maxLength(500)],
         oracleQuery: '',
         sqlQuery: [inquiry.code, Validators.required]
       });
@@ -59,7 +59,7 @@ export class NewQueryComponent implements OnInit {
         dataType: ['aggregate'],
         inquiryName: ['', Validators.required],
         studyName: '',
-        inquiryDescription: '',
+        inquiryDescription: ['', Validators.maxLength(500)],
         oracleQuery: '',
         sqlQuery: ['', Validators.required]
       });

@@ -132,4 +132,8 @@ export class UserService {
   getCurrentUser() {
     return JSON.parse(localStorage.getItem('currentUser'));
   }
+
+  setCurrentUser(user: any) {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  }
 }
