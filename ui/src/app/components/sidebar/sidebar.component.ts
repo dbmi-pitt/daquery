@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { RoleGuard } from '../../_guards/role.guard';
 import { NetworkService } from '../../services/network.service';
+import { EventBrokerService } from '../../services/eventbroker.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -18,8 +19,14 @@ export class SidebarComponent implements OnInit {
   networks: any[];
   constructor(location: Location,
               private roleGuard: RoleGuard,
-              private networkService: NetworkService) {
+              private networkService: NetworkService,
+              private eventBrokerService: EventBrokerService) {
     this.location = location;
+    eventBrokerService.listen<boolean>("add-network", (value: boolean) => {
+      if(value) {
+        this.getNetworks();
+      }
+    })
   }
 
   ngOnInit() {
