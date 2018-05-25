@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
@@ -354,6 +355,16 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	    	}
 	    	String confDir = AppProperties.getConfDirectory();
 	    	File confDirF = new File(confDir);
+	    	if(! confDirF.exists())
+	    	{
+				java.nio.file.Path p = Paths.get(confDir);
+				try{Files.createDirectories(p);}
+				catch(Throwable t)
+				{
+					logger.log(Level.SEVERE, "Unable to create database directory: " + confDir, t);
+					return(ResponseHelper.getErrorResponse(500, "Unable to create database directory.", "Ask your systems admin to check the log files.", t));
+				}
+	    	}
 	    	if(! confDirF.exists() || ! confDirF.canWrite())
 	    	{
 	    		logger.log(Level.SEVERE, "The database directory, " + confDir + "does not exist or is not writable.");
