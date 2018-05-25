@@ -159,7 +159,7 @@ public class DaqueryUserDAO extends AbstractDAO {
      * NoResultException if no user is found
      */
     public static DaqueryUser authenticate(String email, String password) throws SecurityException, HibernateException, Exception {
-    	logger.info("searching for #### email/password : " + email + "/" + password);
+    	logger.info("searching for #### email/password : " + email + "/***********");
     	try {
     		List<ParameterItem> pList = new ArrayList<ParameterItem>();
 			ParameterItem piEmail = new ParameterItem("email", email);

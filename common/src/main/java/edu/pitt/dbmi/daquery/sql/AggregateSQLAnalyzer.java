@@ -128,7 +128,7 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 		if(! (aggregateColumnName.trim().toUpperCase().equals("PATID"))) return(null);
 		
 		String rSQL = baseSQL.trim();
-		rSQL = rSQL.replaceFirst("(?i)select\\s+count\\(.*\\)", "");
+		rSQL = rSQL.replaceFirst("(?i)select\\s+count\\(.*?\\)", "");
 		String selectClause = "select ";
 		//if(aggregateDistinct) selectClause = selectClause + "distinct ";
 		//always use a distinct query so patients aren't duplicated

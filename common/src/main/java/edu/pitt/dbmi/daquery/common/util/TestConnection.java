@@ -132,13 +132,59 @@ public class TestConnection
 	 * Check a TCP connection.  Try to connect to a port,
 	 * if it times out after two seconds fail
 	 */
-	public static boolean checkConnection(String url)
+	public static boolean checkConnection(String url, String driverName) throws DaqueryException
 	{
 		try{
-			Socket s = new Socket();
+			if(StringHelper.isEmpty(driverName))
+			{
+				throw new DaqueryException("A driver name was not recieved.");
+			}
+			boolean isSQLServer = false;
+			boolean isOracle = false;
+			int port = -1;
+			String compDriver = driverName.trim().toUpperCase();
+			if(compDriver.contains(("SQLSERVER")))
+			{
+				isSQLServer = true;
+				port = 1433; //default sql server port
+			}
+			else if(compDriver.contains(("ORACLE")))
+			{
+				isOracle = true;
+				port = 1521; //default oracle port
+			}
 			String[] info = url.split(":");
-			String serverName = info[3].substring(1);
-			int port = Integer.parseInt(info[4]);
+			String portString = null;
+			String serverName = null;
+			if(isOracle)
+			{
+				serverName = info[3].substring(1);
+				portString = info[4];
+			}
+			else if(isSQLServer)
+			{
+				if(info[2].startsWith("//"))
+					info[2] = info[2].substring(2);
+				if(info[2].indexOf(";") > 0)
+					info[2] = info[2].substring(0, info[2].indexOf(";"));
+				if(info.length >= 4)
+				{
+					if(info[3].indexOf('\\') > 0)
+						info[3] = info[3].substring(0, info[3].indexOf("\\"));
+					if(info[3].indexOf(';') > 0)
+						info[3] = info[3].substring(0, info[3].indexOf(";"));
+					portString = info[3];
+				}
+				serverName = info[2];
+			}
+			else
+			{
+				throw new DaqueryException("Database type could not be discovered from the JDBC driver name.");
+			}
+			if(portString != null)
+				try{port = Integer.parseInt(portString);}catch(NumberFormatException nfe){}
+			
+			Socket s = new Socket();			
 			s.connect(new InetSocketAddress(serverName, port), 2000);
 			try{s.close();}catch(Throwable t){}
 			return true;

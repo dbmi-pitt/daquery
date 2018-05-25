@@ -602,6 +602,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					rVal.setDownloadAvailable(resp.isDownloadAvailable());
 					rVal.setDownloadDirective(resp.getDownloadDirective());
 					rVal.setStatusMessage(resp.getStatusMessage());
+					rVal.setErrorMessage(resp.getErrorMessage());
 					Fileset files = resp.getFiles();
 					if(files != null)
 						files.setId(null);

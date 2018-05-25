@@ -120,7 +120,7 @@ public class CentralService{
 	
 			Map<String, Object> additionalVals = null;
 
-			Site site = SiteDAO.getSiteByNameOrId(siteNameOrKey);
+			Site site = SiteDAO.getSiteByNameOrIdCaseInsensitive(siteNameOrKey);
 			if(site.isTempKey())
 			{
 				String newKey = DBHelper.getNewSiteKey(siteNameOrKey);

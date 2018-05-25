@@ -125,7 +125,7 @@ public class SQLQuery extends Inquiry
 			if(! t.equals(de))
 				causeMsg = t.getMessage() + " ";
 			response.setStatusEnum(ResponseStatus.ERROR);
-			response.setErrorMessage(causeMsg + de.getMessage() + " Check the site logs for more information.");
+			response.setErrorMessage(removeErrorPrefix(causeMsg) + removeErrorPrefix(de.getMessage()) + " Check the site logs for more information.");
 			response.setStackTrace(StringHelper.stackToString(t));		
 			return(response);
 		}
@@ -137,5 +137,14 @@ public class SQLQuery extends Inquiry
 			response.setStackTrace(StringHelper.stackToString(t));
 			return(response);
 		}
-	}	
+	}
+	private String removeErrorPrefix(String err)
+	{
+		if(StringHelper.isEmpty(err)) return(err);
+		String errComp = err.trim().toUpperCase();
+		if(errComp.startsWith("ORA-") && errComp.indexOf(":") > 0)
+			return(err.trim().substring(errComp.indexOf(":") + 1).trim());
+		else
+			return(err);
+	}
 }
