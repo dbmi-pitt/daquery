@@ -38,6 +38,11 @@ public class AppProperties
 		{
 			rVal = devHomeDir;
 		}
+		else if (! StringHelper.isBlank(System.getenv("DAQUERY_HOME")))
+		{
+			devHomeDir = System.getenv("DAQUERY_HOME");
+			rVal = devHomeDir;
+		}
 		else if (System.getProperty("catalina.home") == null)
 		{
 			rVal = System.getenv("CATALINA_HOME");
@@ -148,6 +153,10 @@ public class AppProperties
 	
 	public static String getCentralServerURL()
 	{
+		if(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL")))
+		{
+			return(System.getenv("DAQUERY_CENT_URL"));
+		}
 		String propertyName = ".central.server.url";
 		if(isDebugMode())
 			propertyName = "dev" + propertyName;
