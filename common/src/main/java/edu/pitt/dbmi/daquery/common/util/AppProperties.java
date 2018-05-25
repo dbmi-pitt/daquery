@@ -453,7 +453,7 @@ public class AppProperties
 		if(!StringHelper.isBlank(buildN)) buildN = " build " + buildN.trim();
 		else buildN = "";
 		
-		if(!StringHelper.isBlank(branch) && ! branch.trim().toLowerCase().equals("master")) branch = " <font color=\"red\"><em>BRANCH</em>" + branch.trim() + "</font>";
+		if(!StringHelper.isBlank(branch) && ! branch.trim().toLowerCase().equals("master")) branch = " <font color=\"red\"><em>BRANCH</em> " + branch.trim() + "</font>";
 		else branch = "";
 		
 		String vsn = getCurrentVersion() + type + buildN + branch;
