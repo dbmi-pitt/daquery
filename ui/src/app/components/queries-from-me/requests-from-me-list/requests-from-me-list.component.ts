@@ -47,7 +47,7 @@ export class RequestsFromMeListComponent implements OnInit {
 
                          this.requests.forEach((request) => {
                           let response = request.responses[0];
-                          if(response && !['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
+                          if(response && !['ERROR', 'COMPLETED', 'STALLED', 'DENIED'].includes(response.status)){
                              let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
                                this.responseService.getResponse(response.responseId)
                                                    .subscribe(res => {
@@ -56,7 +56,7 @@ export class RequestsFromMeListComponent implements OnInit {
                                                      response.value = res.value;
                                                      response.statusMessage = res.statusMessage;
                                                      response.files = res.files;
-                                                     if(['ERROR', 'COMPLETED', 'STALLED'].includes(response.status)){
+                                                     if(['ERROR', 'COMPLETED', 'STALLED', 'DENIED'].includes(response.status)){
                                                        subscription.unsubscribe();
                                                      }
                                                    },

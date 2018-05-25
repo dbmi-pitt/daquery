@@ -1,6 +1,6 @@
 <div class="row">
-  <div class="col-md-3">
-    <div *ngFor="let request of requests" class="info-box" (click)="onRequestSelect(request)">
+  <div class="col-md-3" style="overflow-y: auto; max-height: 800px">
+    <div *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'info-box bg-aqua-active' : 'info-box'"  (click)="onRequestSelect(request)">
       <span class="info-box-icon bg-aqua"><i class="fa fa-caret-right"></i></span>
 
       <div class="info-box-content">
@@ -10,28 +10,6 @@
       </div>
       <!-- /.info-box-content -->
     </div>
-      <!-- <div class="table-responsive">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Query Name</th>
-              <th>Type</th>
-              <th>From</th>
-              <th>Status</th>
-              <th>Result</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let request of requests">
-              <td>{{request.inquiry.inquiryName}}</td>
-              <td>{{request.inquiry.aggregate ? "AGGREGATE" : "DATA"}}</td>
-              <td>{{request.requester?.realName}}</td>
-              <td>{{request.responses[0]?.status}}</td>
-              <td>{{request.responses[0]?.status === 'ERROR' ? request.responses[0]?.errorMessage : request.responses[0]?.value }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div> -->
   </div>
   <div class="col-md-9">
       <div *ngIf="selectedRequest" class="box box-default color-palette-box">
@@ -53,6 +31,7 @@
               <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
                 <button *ngIf="showApproveDenyBtn" class="btn btn-success" (click)="approveRequest()">Approve</button>
                 <button *ngIf="showApproveDenyBtn" class="btn btn-danger" (click)="denyRequest()">Deny</button>
+                <button *ngIf="!showApproveDenyBtn" class="btn btn-block btn-default disabled">To respond to this request the STEWARD role is required</button>
               </div>
             </div>
             <hr />
