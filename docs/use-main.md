@@ -8,3 +8,5 @@ layout: page
 
 # User documentation goes here
 
+![Test Image](images/test.png)
+Format: ![Alternate Text](aurl)
