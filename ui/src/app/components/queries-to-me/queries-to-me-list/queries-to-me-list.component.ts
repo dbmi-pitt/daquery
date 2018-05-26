@@ -58,7 +58,7 @@ export class QueriesToMeListComponent implements OnInit {
   }
 
   approveRequest(){
-    if(confirm("Are you sure you want to approve this request?")){
+    if(confirm("Do you want to approve this request?")){
     this.requestService.approveDataRequest(this.selectedRequest.requestId)
                        .subscribe(res => {
                           this.selectedRequest.responses[0] = res;
@@ -67,7 +67,7 @@ export class QueriesToMeListComponent implements OnInit {
   }
 
   denyRequest(){
-    if(confirm("Are you sure you want to deny this request?")){
+    if(confirm("Do you want to deny this request?")){
       this.requestService.denyDataRequest(this.selectedRequest.requestId)
                         .subscribe(res => {
                           this.selectedRequest.responses[0] = res;
