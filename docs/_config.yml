@@ -2,7 +2,7 @@
 theme: jekyll-theme-slate
 
 title: Daquery
-tagline: Pronounced da-kə-rē
+tagline: Pronounced&#58; /da-kə-rē/
 description: A distributed query tool
 longdescription: Daquery is a distributed query and data export tool used in the PCRF PaTH network.
 
