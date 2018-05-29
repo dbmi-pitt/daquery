@@ -3,7 +3,7 @@ layout: page
 ---
 ## Daquery Data Tool Installation Guide
 
-<p style="font-size: 14pt;">Daquery is a distributed query tool specifically designed for use on the PCRF PaTH network.  The tool was designed to run in the Tomcat application server that is currently being used to host SHRINE as part of the PaTH SHRINE+ network.</p>
+<p style="font-size: 14pt;">Daquery is a distributed query tool specifically designed for use by the PCRF PaTH network.  The tool was designed to run in the Tomcat application server that is currently being used to host SHRINE as part of the PaTH SHRINE+ network.</p>
 
 <p style="background-color: yellow; color: black;">NOTE: These installation instructions assume an installation on Linux. File and directory paths shown are typical only and are based on the statndard PaTH i2b2/PaTH virtual machine setup. The paths may need to be changed to work on your particular setup. Only Linux commands are shown below assume you are logged in as the root user.</p>
 
