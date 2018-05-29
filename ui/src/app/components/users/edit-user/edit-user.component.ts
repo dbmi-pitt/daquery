@@ -59,7 +59,9 @@ export class EditUserComponent implements OnInit {
                       for(let role of res){
                         let check = this.user.roles.find(x => x['name'] == role['name']) ? true : false;
                         this.local_roles.push([role['name'], check]);
-                        (<FormArray>this.profileForm.get('roles')).push(this.fb.group({ "name": role['name'], "check": check }));
+                        if(!['AGGREGATE_QUERIER', 'DATA_QUERIER'].includes(role['name'].toUpperCase())){
+                          (<FormArray>this.profileForm.get('roles')).push(this.fb.group({ "name": role['name'], "check": check }));
+                        }
                       }
                     });
   }
