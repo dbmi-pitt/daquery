@@ -5,7 +5,7 @@ layout: page
 
 <p style="font-size: 14pt;">Daquery is a distributed query tool specifically designed for use by the PCRF PaTH network.  The tool was designed to run in the Tomcat application server that is currently being used to host SHRINE as part of the PaTH SHRINE+ network.</p>
 
-<p style="background-color: yellow; color: black;">NOTE: These installation instructions assume an installation on Linux. File and directory paths shown are typical only and are based on the statndard PaTH i2b2/PaTH virtual machine setup. The paths may need to be changed to work on your particular setup. Only Linux commands are shown below assume you are logged in as the root user.</p>
+<p style="background-color: yellow; color: black;">NOTE: These installation instructions assume an installation on Linux. File and directory paths shown are typical only and are based on the standard PaTH i2b2/PaTH virtual machine setup. The paths may need to be changed to work on your particular setup. Only Linux commands are shown below assume you are logged in as the root user.</p>
 
 
 #### Minimum Requirements
@@ -35,7 +35,7 @@ tomcat   23312     1  0 Apr13 ?       00:46:14 /usr/java/jdk1.7.0_06/bin/java -D
 
 The base Tomcat directory shown above in red will be refered to as _TOMCAT-DIR_.
 
-The original PaTH Tomcat setup doesn't allow for enough memory to run SHRINE/i2b2 and Daquery at the same time.  To increase the memory allocation edit (or add if it doesn't exit) the file _TOMCAT-DIR_/bin/**setenv.sh** to include the following line (make sure you get the whole line, scroll to the right):
+The original PaTH Tomcat setup doesn't allow for enough memory to run SHRINE/i2b2 and Daquery at the same time.  To increase the memory allocation edit (or add if it doesn't exist) the file _TOMCAT-DIR_/bin/**setenv.sh** to include the following line (make sure you get the whole line, scroll to the right):
 ```
 CATALINA_OPTS="$CATALINA_OPTS -server -Xms256m -Xmx1500m -XX:MaxPermSize=256M XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled"
 ```
