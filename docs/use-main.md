@@ -5,8 +5,7 @@
 layout: page
 ---
 
+# Daquery User Guide
 
-# User documentation goes here
+### This manual is under development.  Please check back soon.
 
-![Test Image](images/test.png)
-Format: ![Alternate Text](aurl)
