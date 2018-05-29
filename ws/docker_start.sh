@@ -32,9 +32,12 @@ TOMCAT_HOME="/usr/local/tomcat"
 # DAQUERY_CENT_URL is the IP address (or hostname) of the Daquery Central server you want the site
 # to use
 DAQUERY_CENT_URL="10.0.2.15"
-# DAQUERY_HOME is the file path for the Daquery container's Derby database on the host
+# DAQUERY_HOME is the file path for the Daquery container's Derby database on the host.
+# This parameter allows the Daquery docker site to maintain a state between runs 
 DAQUERY_HOME="/home/devuser/daquery_data"
 # CONTAINER_DAQUERY_HOME is the file path for the Daquery container's Derby database on the container
+# This file will create a new directory called $CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT
+# to ensure the creation of a unique Derby database.  
 CONTAINER_DAQUERY_HOME="/localdata/daquery_data"
 docker run --name $CONTAINER_NAME -dt -v $OJDBC_DIR:$CONTAINER_OJDBC_DIR -v $DAQUERY_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DAQUERY_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e OJDBC_DIR=$OJDBC_DIR -e DAQUERY_WAR_DIR=$DAQUERY_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_OJDBC_DIR=$CONTAINER_OJDBC_DIR -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-baseline:latest
 
