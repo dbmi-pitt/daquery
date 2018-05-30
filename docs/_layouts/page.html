@@ -15,13 +15,13 @@
 
     <!-- HEADER -->
     <div id="header_wrap" class="outer" style="height: 80px;">
-        <header class="inner" style="max-width: 1000px; padding-top: 7px;">
-          <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
+        <header class="inner" style="max-width: 1000px; padding-top: 7px;"> 
+          <h1 id="project_title">{{ site.title }}&nbsp;&nbsp;&nbsp;<font size="5">{{ site.tagline }}</font></h1>
         </header>
     </div>
 
     <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
+    <div id="main_content_wrap" class="outer" style="min-height: 400px; font-size: 12pt;">
       <section id="main_content" class="inner" style="max-width: 1000px; padding-top: 10px">
         {{ content }}
       </section>
