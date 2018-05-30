@@ -10,13 +10,15 @@ import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup, FormControl, Va
   styleUrls: ['./edit-user.component.css']
 })
 export class EditUserComponent implements OnInit {
-
   user_id: string;
   user: any;
   editMode = false
   profileForm: FormGroup
   submitting = false
   local_roles: any[];
+
+  currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  currentUserRoles: string[] = this.currentUser.roles.map(r => r.name.toLowerCase());
 
   constructor(private userService: UserService,
               private activatedRoute: ActivatedRoute,

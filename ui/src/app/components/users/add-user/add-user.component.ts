@@ -1,6 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, FormGroup, Validators } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
+import { noWhitespaceValidator } from '../../../validators/nowhitespace.directive';
 
 @Component({
   selector: 'app-add-user',
@@ -25,7 +26,7 @@ export class AddUserComponent implements OnInit {
       email: [null, [Validators.required, Validators.email]],
       password: [null, [Validators.required, Validators.minLength(8)]],
       password_confirmation: [null, [Validators.required, Validators.minLength(8)]],
-      realname: [null, Validators.required]
+      realname: [null, [Validators.required, noWhitespaceValidator()]]
     });
 
     this.userForm.valueChanges.subscribe(data => this.onValueChange(data));
