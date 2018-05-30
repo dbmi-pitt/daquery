@@ -28,7 +28,7 @@
             <input type="text" class="form-control" id="realname" placeholder="Real Name" formControlName="realname">
             <div class="help-block" *ngIf="realname.invalid && (realname.dirty || realname.touched)">Please enter a real name</div>
           </div>
-          <button type="submit" class="btn btn-primary" [disabled]="!userForm.valid">
+          <button type="submit" class="btn btn-primary" [disabled]="!userForm.valid || submitting">
             <i *ngIf="submitting" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
             <span *ngIf="!submitting">Submit</span>
           </button>

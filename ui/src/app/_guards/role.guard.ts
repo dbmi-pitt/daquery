@@ -4,16 +4,18 @@ import { UserService } from '../services/user.service';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  currentUserRoles: string[] = JSON.parse(localStorage.getItem('currentUser')).roles.map(r => r.name.toLowerCase());
+  currentUser =  JSON.parse(localStorage.getItem('currentUser'));
+  currentUserRoles: string[] = this.currentUser.roles.map(r => r.name.toLowerCase());
   constructor(private router: Router,
               private userService: UserService) {
     this.getCurrentUserRoles();
   }
 
-  async canActivate(route: ActivatedRouteSnapshot,
+  canActivate(route: ActivatedRouteSnapshot,
               state: RouterStateSnapshot) {
     let allowedRoles = route.data["roles"] as Array<string>;
-    if(this.userRolePermitted(allowedRoles, this.currentUserRoles)){
+    if(this.userRolePermitted(allowedRoles, this.currentUserRoles) || 
+        (allowedRoles.includes('self') && route.params["id"] === this.currentUser.id)){
       return true;
     } else {
       this.router.navigate(['/403']);
