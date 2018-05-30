@@ -1,3 +1,4 @@
+#!/bin/bash
 # docker_start.sh
 # This file launches a working Daquery site.  You can use this site for testing.
 # To run this file: edit the parameters below as necessary.  Note: if you want to
@@ -11,17 +12,58 @@ CONTAINER_NAME="daquery-testsite"
 docker stop $CONTAINER_NAME
 docker pull cborromeo/daquery-baseline
 docker rm $CONTAINER_NAME
-# TOMCAT_REDIRECT_PORT is the port used to access the Daquery website
-# from the host system (ex: http://localhost:4000)
-TOMCAT_REDIRECT_PORT="4000"
-# TOMCAT_DEBUG_PORT is the port used to debug the Daquery website from the host system
-TOMCAT_DEBUG_PORT="7272"
+
 # OJDBC_DIR is the directory on the host machine containing the Oracle JDBC driver
 # this file must be named ojdbc6-11.1.0.7.0.jar
 OJDBC_DIR="/home/devuser"
+
+if [ ! -f $OJDBC_DIR/ojdbc6-11.1.0.7.0.jar ]; then
+    echo +-+-+-+-+- File ojdbc6-11.1.0.7.0.jar does not exist in $OJDBC_DIR.  Exiting. +-+-+-+-+-
+    exit 1
+fi
+
 # DAQUERY_WAR_DIR is the directory on the host machine containing the Daquery war file
 # this file must be named daquery.war
 DAQUERY_WAR_DIR="/home/devuser/projects/daquery/ws/target"
+
+if [ ! -f $DAQUERY_WAR_DIR/daquery.war ]; then
+    echo +-+-+-+-+- File daquery.war does not exist in $DAQUERY_WAR_DIR.  Exiting. +-+-+-+-+-
+    exit 1
+fi
+
+# TOMCAT_REDIRECT_PORT is the port used to access the Daquery website
+# from the host system (ex: http://localhost:4001)
+# This is the default, which can be overridden by passing a port number in 
+# on the command line as a single argument to this script.
+TOMCAT_REDIRECT_PORT="4001"
+
+# Check to see if a port number was passed in, if not use the default port
+if [ -z "$1" ]; then
+ echo using default port
+else
+ TOMCAT_REDIRECT_PORT=$1
+fi
+
+# Check to see if something is already running on the port that we want to use
+if nc -z localhost $TOMCAT_REDIRECT_PORT; then
+    echo +-+-+-+-+- Port $TOMCAT_REDIRECT_PORT is in use, cannot start Daquery.  Exiting. +-+-+-+-+-
+    exit 1
+else
+    echo starting Daquery on port $TOMCAT_REDIRECT_PORT
+fi
+
+# Calculate the debug port by adding 1000 to the configured Daquery port
+# TOMCAT_DEBUG_PORT is the port used to debug the Daquery website from the host system
+TOMCAT_DEBUG_PORT=$(($TOMCAT_REDIRECT_PORT + 1000))
+
+# Check to see if something is already running on the debug port that we want to use
+if nc -z localhost $TOMCAT_DEBUG_PORT; then
+    echo +-+-+-+-+- Port $TOMCAT_DEBUG_PORT is in use, cannot use it as a debug port.  Exiting. +-+-+-+-+-
+    exit 1
+else
+    echo debugging on port $TOMCAT_DEBUG_PORT
+fi
+
 # The file $OJDBC_DIR/ojdbc6-11.1.0.7.0.jar gets copied to CONTAINER_OJDBC_DIR
 CONTAINER_OJDBC_DIR="/localdata/jdbc_driver"
 # The file $DAQUERY_WAR_DIR/daquery.war gets copied to CONTAINER_DAQUERY_WAR_DIR
