@@ -2,19 +2,20 @@
 # docker_start.sh
 # This file launches a working Daquery site.  You can use this site for testing.
 # To run this file: edit the parameters below as necessary.  Note: if you want to
-# run multiple instances of a Daquery site, 1) you need to make a copy of the docker_start.sh file
-# to run another instance and 2) you need to make sure the CONTAINER_NAME, 
-# TOMCAT_REDIRECT_PORT, and TOMCAT_DEBUG_PORT are unique between the two instances.
-
-# CONTAINER_NAME is the docker name for this Daquery container.  This name must
-# be unique if running multiple Daquery sites (ex: daquery-testsite1, daquery-testsite2)
-CONTAINER_NAME="daquery-testsite"
-docker stop $CONTAINER_NAME
-docker pull cborromeo/daquery-baseline
-docker rm $CONTAINER_NAME
+# run multiple instances of a Daquery site you need to run them on different ports.
+# The default port is set to 4001, but can be changed by providing a port on the 
+# command line as the first (only) argument- ex: ./docker_start.sh 4040 will run
+# Daquery on port 4040
+#
+# Additionaly, the OJDBC_DIR and DAQUERY_WAR_DIR variables may need to be updated depending
+# on the locations of ojdbc6-11.1.0.7.0.jar and daquery.war on your system.  These
+# only need to be changed once to match your system, different versions are not
+# required when running multiple instances of Daquery on the same system.
 
 # OJDBC_DIR is the directory on the host machine containing the Oracle JDBC driver
 # this file must be named ojdbc6-11.1.0.7.0.jar
+
+
 OJDBC_DIR="/home/devuser"
 
 if [ ! -f $OJDBC_DIR/ojdbc6-11.1.0.7.0.jar ]; then
@@ -81,5 +82,14 @@ DAQUERY_HOME="/home/devuser/daquery_data"
 # This file will create a new directory called $CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT
 # to ensure the creation of a unique Derby database.  
 CONTAINER_DAQUERY_HOME="/localdata/daquery_data"
+
+# CONTAINER_NAME is the docker name for this Daquery container.  This name must
+# be unique if running multiple Daquery sites (ex: daquery-testsite1, daquery-testsite2)
+CONTAINER_NAME="daquery-testsite-$TOMCAT_REDIRECT_PORT"
+docker stop $CONTAINER_NAME
+docker pull cborromeo/daquery-baseline
+docker rm $CONTAINER_NAME
+
+
 docker run --name $CONTAINER_NAME -dt -v $OJDBC_DIR:$CONTAINER_OJDBC_DIR -v $DAQUERY_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DAQUERY_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e OJDBC_DIR=$OJDBC_DIR -e DAQUERY_WAR_DIR=$DAQUERY_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_OJDBC_DIR=$CONTAINER_OJDBC_DIR -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-baseline:latest
 
