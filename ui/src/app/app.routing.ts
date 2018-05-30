@@ -45,7 +45,7 @@ const appRoutes:Routes = [
       { path: "remote-users", component: RemoteUsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "change-password", component: ChangePasswordComponent, canActivate: [AuthGuard] },
       { path: "app-config", component: AppConfigComponent, canActivate: [AuthGuard] },
-      { path: "users/:id", component: EditUserComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin']} }
+      { path: "users/:id", component: EditUserComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin', 'self'] } }
     ]
   },
   { path: "404", component: Error404Component },
