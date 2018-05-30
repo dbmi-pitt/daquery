@@ -306,7 +306,7 @@ public class AppSetup
 				String currentDateTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
 				conn = ApplicationDBHelper.getConnection();
 				st = conn.createStatement();
-				AppProperties.setDBProperty("current.version", AppProperties.getCurrentVersion());
+				//AppProperties.setDBProperty("current.version", AppProperties.getCurrentVersion());
 				AppProperties.setDBProperty("initial.setup", currentDateTime);
 				conn.commit();
 				return(true);
