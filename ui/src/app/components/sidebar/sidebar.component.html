@@ -35,10 +35,10 @@
         </a>
         <ul class="treeview-menu" style="display: block">
           <li>
-            <a [routerLink]="['/users']"><i class="fa fa-circle-o"></i> Local User</a>
+            <a [routerLink]="['/users']"><i class="fa fa-circle-o"></i> Local Users</a>
           </li>
           <li *ngFor="let network of networks">
-            <a [routerLink]="['/remote-users']" [queryParams]="{ network: network.networkId }"><i class="fa fa-circle-o"></i> {{network.name}} User</a>
+            <a [routerLink]="['/remote-users']" [queryParams]="{ network: network.networkId }"><i class="fa fa-circle-o"></i> {{network.name}} Users</a>
           </li>
         </ul>
       </li>
