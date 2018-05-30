@@ -16,7 +16,8 @@ public class RunAppSetup
 		{
 			//CreateTestNetworks.createLocalDevTestNetwork();
 			//CreateTestNetworks.createSSLTestNetwork();
-			CreateTestNetworks.createTestNetwork();
+			//CreateTestNetworks.createTestNetwork();
+			CreateTestNetworks.createLocalVMTestNetwork();
 			System.out.println("All Good");
 		}
 		else

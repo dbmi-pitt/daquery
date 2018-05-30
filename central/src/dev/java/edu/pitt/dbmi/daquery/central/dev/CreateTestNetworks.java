@@ -20,6 +20,55 @@ import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public class CreateTestNetworks
 {	
+	
+	public static List<Network> createLocalVMTestNetwork() throws DaqueryException
+	{
+		Properties props = PrivateProps.getProps();
+		
+		Site bSite = new Site("20b23b5c-61ad-44eb-8eef-886adcced29f");
+		bSite.setName("dev-8080");
+		bSite.setAccessKey("abc123");
+		bSite.setTempKey(true);
+		bSite.setUrl("http://10.0.2.15:8080/");
+		bSite.setAdminEmail("shirey@pitt.edu");
+		
+		Site cSite = new Site("0f2378ec-d9ce-489a-b338-c8f82e56739f");
+		cSite.setName("dev-4001");
+		cSite.setAccessKey("abc123");
+		cSite.setTempKey(true);
+		cSite.setUrl("http://10.0.2.15:4001/");
+		cSite.setAdminEmail("shirey@pitt.edu");		
+		
+		Site dSite = new Site("bcfdd450-3dd8-4ced-9599-c65de7c9f49f");
+		dSite.setName("dev-4002");
+		dSite.setAccessKey("abc123");
+		dSite.setTempKey(true);
+		dSite.setUrl("http://10.0.2.15:4002/");
+		dSite.setAdminEmail("shirey@pitt.edu");
+
+		DataModel modelA = CreateCDMModelInfo.makeModel(props.getProperty("cdm.url"),
+													   props.getProperty("cdm.username"),
+													   props.getProperty("cdm.password"), "LOCAL-CDM-ALL");
+		
+		
+		Network allNet = new Network("fb3e4325-dbc5-4501-9fb9-4bd8dbc0a199");
+		SiteConnection oConnB = new SiteConnection(bSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection oConnD = new SiteConnection(dSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		SiteConnection oConnC = new SiteConnection(cSite, allNet, SiteStatus.CONNECTED, ConnectionDirection.OUTGOING);
+		allNet.getSiteConnections().add(oConnB);
+		allNet.getSiteConnections().add(oConnD);
+		allNet.getSiteConnections().add(oConnC);		
+		allNet.setDataModel(modelA);
+		allNet.setName("Local-VM-All-Net");
+		
+		
+		save(allNet);
+		
+		List<Network> nets = new ArrayList<Network>();
+		nets.add(allNet);
+		return(nets);
+	}
+	
 	public static List<Network> createLocalDevTestNetwork() throws DaqueryException
 	{
 		Properties props = PrivateProps.getProps();
