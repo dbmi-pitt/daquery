@@ -200,7 +200,7 @@ public class CentralService{
 						  " is requesting to connect to your site, " + site.getName() + 
 						  ", to run queries on the network " + net.getName() +
 						  ".  Please log into your site, go to Network and choose Edit Sites under the network " +
-						  " to approve or deny the request.", toAddresses, null);
+						  " to approve or deny the request.  See https://dbmi-pitt.github.io/daquery/approve-site-connection.html for more information.", toAddresses, null);
 				
 				// esi.adminEmail);
 				// eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", "del20@pitt.edu");
