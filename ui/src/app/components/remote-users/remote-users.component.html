@@ -24,13 +24,13 @@
                   <div class="checkbox">
                     <label>
                       <input *ngIf="!showSpin" id="{{user.id+'_Aggregate'}}" type="checkbox" [checked]="user.roles.includes('aggregate_querier')" attr.data-userid="{{user.id}}" attr.data-siteid="{{conn.site.siteId}}" attr.data-networkid="{{network.networkId}}" (change)="onAggregateToggle($event, 'aggregate_querier')">
-                      <i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i> aggregate_querier
+                      <i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i> Run Aggregate Queries
                     </label>
                   </div>
                   <div class="checkbox">
                     <label>
                       <input *ngIf="!showSpin" id="{{user.id+'_Data'}}" type="checkbox" [checked]="user.roles.includes('data_querier')" attr.data-userid="{{user.id}}" attr.data-siteid="{{conn.site.siteId}}" attr.data-networkid="{{network.networkId}}" (change)="onDataToggle($event, 'data_querier')">
-                      <i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i> data_querier
+                      <i *ngIf="showSpin" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i> Export Data
                     </label>
                   </div>
                 </div>
