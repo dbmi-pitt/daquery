@@ -37,7 +37,7 @@ The base Tomcat directory shown above in red will be refered to as _TOMCAT-DIR_.
 
 The original PaTH Tomcat setup doesn't allow for enough memory to run SHRINE/i2b2 and Daquery at the same time.  To increase the memory allocation edit (or add if it doesn't exist) the file _TOMCAT-DIR_/bin/**setenv.sh** to include the following line (make sure you get the whole line, scroll to the right):
 ```
-CATALINA_OPTS="$CATALINA_OPTS -server -Xms256m -Xmx1500m -XX:MaxPermSize=256M XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled"
+CATALINA_OPTS="$CATALINA_OPTS -server -Xms256m -Xmx1500m -XX:MaxPermSize=256M -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled"
 ```
 
 Stop Tomcat
