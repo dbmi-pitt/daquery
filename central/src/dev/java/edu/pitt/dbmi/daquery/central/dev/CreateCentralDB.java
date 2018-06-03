@@ -1,23 +1,24 @@
 package edu.pitt.dbmi.daquery.central.dev;
 
-import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import java.util.UUID;
 
-public class RunAppSetup
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.AppSetup;
+
+public class CreateCentralDB
 {
-	public static void main(String [] args) throws Exception
+	public static void main(String [] args) throws Throwable
 	{
 		AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
-		AppSetup.initialSetup("123456789", "central-test", "", "path@pitt.edu", "temptest", "Test User");
+		AppSetup.initialSetup(UUID.randomUUID().toString(), "PaTH-Central", "", "shirey@pitt.edu", UUID.randomUUID().toString(), "Central User");
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
 		else if(AppSetup.isValidSetup())
 		{
-			CreateTestNetworks.createLocalVMTestNetwork();
+			CreateProdNetwork.createPathtNetwork();
 			System.out.println("All Good");
 		}
 		else
 			System.out.println("Invalid setup, but no error reported");
 	}
-	
 }
