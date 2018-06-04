@@ -39,7 +39,12 @@ The original PaTH Tomcat setup doesn't allow for enough memory to run SHRINE/i2b
 ```
 CATALINA_OPTS="$CATALINA_OPTS -server -Xms256m -Xmx1500m -XX:MaxPermSize=256M -XX:+CMSClassUnloadingEnabled -XX:+CMSPermGenSweepingEnabled"
 ```
-
+After creating/editing setenv.sh ensure that it is readable by Tomcat:
+```
+[root@pathid2b2 ~] cd /opt/shrine/tomcat/bin
+[root@pathid2b2 ~] chown tomcat:tomcat setenv.sh
+[root@pathid2b2 ~] chmod 644 setenv.sh
+```
 Stop Tomcat
 ```
 [root@pathid2b2 ~] service tomcat stop
@@ -68,8 +73,9 @@ tomcat   13693     1  0 May25 ?        00:03:21 /usr/java/jdk1.7.0_06/bin/java -
 base=/opt/shrine/tomcat -Dcatalina.home=/opt/shrine/tomcat -Djava.io.tmpdir=/opt/shrine/tomcat/temp org.apache
 .catalina.startup.Bootstrap start
 root     18198 17944  0 16:22 pts/0    00:00:00 grep catalina</code></pre></div>
-
-**[optional]**Proxy through Apache HTTP service
+<br /><br />
+#### [optional step] Create a proxy
+____________________________________________________________________
 To make it easier for users to find the application you can create a proxy route to the application through the standard http and https ports (80/443).  
 
 Edit the Apache HTTP configuration, usually located at: /etd/httpd/conf/**httpd.conf**.  Add the lines shown in <font style="color: red;">red</font> below to httpd.conf.  If your Tomcat server isn't using the default SHRINE Tomcat port of 6060, replace the 6060 in the configuration proxy settings with the port that Tomcat is responding to on your system.
@@ -95,11 +101,13 @@ Then restart Apache HTTPD with:
 ____________________________________________________________________
 After starting Tomcat with the Daquery war in place browse to the newly launched site in a web browser.  
 For the PaTH network this will usually be one of the following URLs:
-- http://server.name:6443/daquery
-- https://server.name:6060/daquery
+- https://server.name:6443/daquery
+- http://server.name:6060/daquery
 
 The port number (6060 or 6443) can vary depending on your Tomcat installation.  
 The default for PaTH is 6060 for HTTP and 6443 for HTTPS.
+
+**SECURITY NOTE:** If possible always access the application via HTTPS (6443 in the above example).  If you access the site via a non-encrypted link initial login passwords will be sent over the network in plain text.
 
 When navigating to the site for the first time you should see an initial setup screen with the fields described in the table below. Fill the fields with the required information.  You will recieve an email with your site name and key.
 
@@ -111,7 +119,11 @@ When navigating to the site for the first time you should see an initial setup s
 | Admin Password      | A password that you will use when logging into the site.                                                                       |
 | Real Name           | Your name.                                                                                                                     |
 
-After filling all of the fields click the "Initialize Daquery" button at the bottom of the page.
+After filling all of the fields click the "Initialize Daquery" button at the bottom of the page.  At this point the application will create an embedded store for application data storage (located at *TOMCAT-DIR*/conf/daquery-db/) and create the first, admin user.
+
+#### Post initialization steps
+____________________________________________________________________
+The inital setup set a few storage settings to a system temporary directory.  You should review these settings to make sure they will work with your specific server setup.  See the help page for [Application Settings](app-settings.html) for more information.
 
 The application will set up at this point creating a local database for application storage.  After the initial setup is complete navigate to the "Network" section and join the PaTH network.
 Additional instructions on joining a network are available [here](join-network.html).
