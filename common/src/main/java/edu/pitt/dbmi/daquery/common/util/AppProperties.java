@@ -78,6 +78,7 @@ public class AppProperties
 	{
 		String major = getMajorVersion();
 		String minor = getMinorVersion();
+		String subMinor = getSubMinorVersion();
 		
 		String mm;
 		
@@ -85,7 +86,12 @@ public class AppProperties
 			mm = ""; 
 		else
 		{
-			if(! StringHelper.isEmpty(minor)) mm = " " + major.trim() + "." + minor.trim();
+			if(! StringHelper.isEmpty(minor))
+			{
+				mm = " " + major.trim() + "." + minor.trim();
+				if(! StringHelper.isEmpty(subMinor))
+					mm = mm + "." + subMinor;
+			}
 			else mm = " " + major.trim();
 		}
 
@@ -432,6 +438,14 @@ public class AppProperties
 		if(StringHelper.isEmpty(bn)) return(null);
 		return(bn);
 	}
+
+	public static String getSubMinorVersion()
+	{
+		String bn = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("sub.minor.version", "");
+		if(StringHelper.isEmpty(bn)) return(null);
+		return(bn);
+	}
+	
 	
 	public static String getBuildType()
 	{
