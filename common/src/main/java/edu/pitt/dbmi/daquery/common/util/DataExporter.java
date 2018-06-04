@@ -236,7 +236,16 @@ public class DataExporter {
 			return(filename);
 
 		} catch (Throwable t) {
-			logger.log(Level.SEVERE, "Error occurs on data export", t);
+			logger.log(Level.SEVERE, "An error occured during the ", t);
+			if(t instanceof DaqueryErrorException)
+			{
+				DaqueryErrorException dee = (DaqueryErrorException) t;
+				logger.log(Level.SEVERE, "Error Message: " + dee.getMessage());
+				if(dee.getCause() != null)
+					logger.log(Level.SEVERE, "Detailed Error Message: " + dee.getErrorInfo(), dee.getCause());
+				else
+					logger.log(Level.SEVERE, "Detailed Error Message: " + dee.getErrorInfo());
+			}
 			throw t;
 		}
 	}
