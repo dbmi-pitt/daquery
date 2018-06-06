@@ -18,6 +18,7 @@ export class NavbarComponent implements OnInit {
   notifications: Notification[] = [];
   showAppConfig = false;
   user: any;
+
   constructor(private authenticationService: AuthenticationService,
               private notificationService: NotificationService,
               private authGuard: AuthGuard,

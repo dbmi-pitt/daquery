@@ -14,6 +14,7 @@ export class AddNetworkComponent implements OnInit {
   submitted = false;
   joinNetworkForm: FormGroup;
   testResult: any;
+  testing: boolean;
 
   urlexample: String = "";
   @Output()
@@ -56,11 +57,18 @@ export class AddNetworkComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     if(this.joinNetworkForm.valid){
-      const selectedNetwork = this.availableNetworks.find(e => e.networkId === this.joinNetworkForm.value.network);
-      this.networkService.joinNetwork({"form": this.joinNetworkForm.value, "network": selectedNetwork})
-                        .subscribe(data => {
-                          this.newNetwork.emit(data);
-                        });
+      this.networkService.testDataSource(this.joinNetworkForm.value)
+                         .subscribe( res => {
+                            if(res.result){
+                              const selectedNetwork = this.availableNetworks.find(e => e.networkId === this.joinNetworkForm.value.network);
+                              this.networkService.joinNetwork({"form": this.joinNetworkForm.value, "network": selectedNetwork})
+                                                .subscribe(data => {
+                                                  this.newNetwork.emit(data);
+                                                });
+                            } else {
+                              this.testResult = res;
+                            }
+                          });
     }
   }
 
@@ -69,10 +77,12 @@ export class AddNetworkComponent implements OnInit {
   }
 
   testDataSource(e) {
+    this.testing = true;
     e.preventDefault();
     this.networkService.testDataSource(this.joinNetworkForm.value)
                        .subscribe( res => {
                           this.testResult = res;
+                          this.testing = false;
                        });
   }
 

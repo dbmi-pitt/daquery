@@ -25,6 +25,7 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
         @NamedQuery(name = DaqueryUser.FIND_BY_LOGIN_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.username = :login AND u.password = :password"),
         @NamedQuery(name = DaqueryUser.FIND_BY_ID_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.id = :id AND u.password = :password"),
         @NamedQuery(name = DaqueryUser.FIND_BY_EMAIL_PASSWORD, query = "SELECT u FROM DaqueryUser u WHERE u.email = :email AND u.password = :password"),
+        @NamedQuery(name = DaqueryUser.FIND_BY_EMAIL, query = "SELECT u FROM DaqueryUser u WHERE u.email = :email"),
         @NamedQuery(name = DaqueryUser.FIND_BY_ID, query = "SELECT u FROM DaqueryUser u WHERE u.id = :id"),
         @NamedQuery(name = DaqueryUser.FIND_BY_USERNAME, query = "SELECT u FROM DaqueryUser u WHERE u.username = :username"),
         @NamedQuery(name = DaqueryUser.FIND_ADMIN, query = "SELECT u FROM DaqueryUser u WHERE lower(trim(u.username)) = 'admin' and upper(trim(u.utype)) = '" + UserInfo.FULL_USER + "'"),
@@ -47,6 +48,7 @@ public class DaqueryUser extends UserInfo {
     public static final String FIND_BY_LOGIN_PASSWORD = "DaqueryUser.findByLoginAndPassword";
     public static final String FIND_BY_ID_PASSWORD = "DaqueryUser.findByIDAndPassword";
     public static final String FIND_BY_EMAIL_PASSWORD = "DaqueryUser.findByEmailAndPassword";
+    public static final String FIND_BY_EMAIL = "DaqueryUser.findByEmail";
     public static final String FIND_BY_ID = "DaqueryUser.findByID";
     public static final String FIND_BY_USERNAME = "DaqueryUser.findByUsername";
     public static final String FIND_ADMIN = "DaqueryUser.findAdmin";
