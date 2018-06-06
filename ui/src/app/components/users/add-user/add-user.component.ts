@@ -60,6 +60,9 @@ export class AddUserComponent implements OnInit {
                     .subscribe(res => {
                       //location.reload();
                       this.newUser.emit(res);
+                    },
+                    error => {
+                      this.submitting = false;
                     });
     //this.showAddUser.emit(false);
   }
