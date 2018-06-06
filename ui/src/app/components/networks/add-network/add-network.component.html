@@ -41,8 +41,11 @@
             <div class="help-block" *ngIf="password.invalid && (submitted || password.dirty || password.touched)">Please enter the datamodel password</div>
           </div>
           <div *ngIf="testResult" [ngClass]="{'text-green': testResult.result, 'text-red': !testResult.result}">{{ testResult.errorMsg }}. {{ testResult.detailErrorMsg }}</div>
-          <button class="btn btn-primary">Join</button>
-          <button class="btn btn-info" (click)="testDataSource($event)">Test</button>
+          <button class="btn btn-primary btn-flat">Join</button>
+          <button [disabled]="testing" class="btn btn-info btn-flat" (click)="testDataSource($event)">
+              <i *ngIf="testing" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+              <span *ngIf="!testing">Test</span>
+            </button>
         </form>
       </div>
     </div>

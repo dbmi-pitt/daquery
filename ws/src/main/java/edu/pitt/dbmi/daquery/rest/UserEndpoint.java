@@ -634,6 +634,11 @@ public class UserEndpoint extends AbstractEndpoint {
         
     	Session s = null;
     	try {
+    		new_user.setEmail(new_user.getEmail().toLowerCase());
+    		DaqueryUser user = DaqueryUserDAO.queryUserByEmail(new_user.getEmail().toLowerCase());
+    		
+    		if(user != null) { return ResponseHelper.getErrorResponse(400, "Email address exist.", null, null, null); }
+    		
     		new_user.assignUUID();
     		if (new_user.getStatusEnum() == null) {
     			new_user.setStatusEnum(UserStatus.ACTIVE);

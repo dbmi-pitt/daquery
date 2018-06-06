@@ -19,6 +19,12 @@ export class SetupComponent implements OnInit {
               private setupService: SetupService) { }
 
   ngOnInit() {
+    this.setupService.getSetup()
+                     .subscribe(isSetup => {
+                        if(isSetup === 'Y'){
+                          this.router.navigate(['/login']);
+                        }
+                      });
     this.createForm();
   }
 

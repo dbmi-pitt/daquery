@@ -79,6 +79,31 @@ public class DaqueryUserDAO extends AbstractDAO {
     	}
     	
     }
+    
+    /**
+     * Return an object representing the user matching the given email
+     * @param email- the email of the user to find 
+     * @return- a DaqueryUser object
+     * @throws HibernateException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static DaqueryUser queryUserByEmail(String email) throws Exception {
+    	try {
+			List<ParameterItem> pList = new ArrayList<ParameterItem>();
+			ParameterItem piUser = new ParameterItem("email", email);
+			pList.add(piUser);
+	        DaqueryUser user = executeQueryReturnSingle(DaqueryUser.FIND_BY_EMAIL, pList, logger);	
+	        return user;
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+    	} catch (Exception e) {
+	        throw e;    		
+    	}
+    	
+    }
+    
 
     /**
      * Get UserInfo information for a given user's UUID.  Returns the UserInfo directly
