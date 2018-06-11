@@ -83,7 +83,6 @@ public class DaqueryUser extends UserInfo {
 	           inverseJoinColumns={@JoinColumn(name="ROLE_ID", nullable=false)}
 		      )
 	private List<Role> roles;
-
     
     // ======================================
     // =            Constructors            =

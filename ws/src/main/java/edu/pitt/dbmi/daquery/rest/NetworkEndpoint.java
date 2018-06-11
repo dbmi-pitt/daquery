@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
@@ -436,6 +438,68 @@ public class NetworkEndpoint extends AbstractEndpoint {
         }
     	catch (Exception e) {
     		String msg = "An unexpected error was encountered testing datasource connection";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        }
+    }
+    
+    @POST
+    @Secured
+    @Path("/{id}/add-contact")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addContact(@PathParam("id") int id, DaqueryUser user) {
+    	try {
+
+            logger.info("#### adding network contact");
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            Network network = NetworkDAO.getNetworkById(id);
+            
+            NetworkDAO.addContactToNetwork(network, user);
+            
+            return Response.ok(201).entity("{}").build();
+    	}
+    	catch(DaqueryException e)
+    	{
+    		return Response.ok(200).entity("{\"result\": false, \"errorMsg\": \"" + e.getMessage() + "\", \"detailErrorMsg\": \"\"}").build();    		
+        }
+    	catch (Exception e) {
+    		String msg = "An unexpected error was encountered adding network contact";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        }
+    }
+    
+    @DELETE
+    @Secured
+    @Path("/{id}/remove-contact/{userid}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response removeContact(@PathParam("id") int id, @PathParam("userid") String userId) {
+    	try {
+
+            logger.info("#### adding network contact");
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            Network network = NetworkDAO.getNetworkById(id);
+            
+            NetworkDAO.removeContactToNetwork(network, userId);
+            
+            return Response.ok(200).entity("{}").build();
+    	}
+    	catch(DaqueryException e)
+    	{
+    		return Response.ok(200).entity("{\"result\": false, \"errorMsg\": \"" + e.getMessage() + "\", \"detailErrorMsg\": \"\"}").build();    		
+        }
+    	catch (Exception e) {
+    		String msg = "An unexpected error was encountered adding network contact";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         }
