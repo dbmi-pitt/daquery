@@ -14,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -118,8 +119,16 @@ public class Network extends DaqueryObject implements Serializable {
 	
 	@Expose
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="network")
-	private Set<SiteConnection> siteConnections = new HashSet<SiteConnection>();	
+	private Set<SiteConnection> siteConnections = new HashSet<SiteConnection>();
 	
+	@Expose
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinTable(name="NETWORK_CONTACT",
+	           joinColumns={@JoinColumn(name="NETWORK_ID", nullable=false)},
+	           inverseJoinColumns={@JoinColumn(name="USER_ID", nullable=false)}
+		      )
+	private Set<DaqueryUser> contacts = new HashSet<DaqueryUser>();
+	 
 	public Network(){}
 	
 	public Network(boolean generateUUID) {
@@ -293,6 +302,9 @@ public class Network extends DaqueryObject implements Serializable {
 			siteConnections.remove(sc);
 		}
 	}
+	
+	public Set<DaqueryUser> getContacts() { return contacts;}
+	
     @Override
 	public String toString() {
 		return "Network [id=" + id + ", network id=" + networkId + ", name=" + name  + "]";

@@ -27,7 +27,6 @@ export class NetworkContactsComponent implements OnInit {
   ngOnInit() {
     this.activatedRoute.params.subscribe(async (params: Params) => {
       this.network_id = params['id'];
-      this.getNetwork(this.network_id);
       this.getUsers();
     });
   }
@@ -36,14 +35,33 @@ export class NetworkContactsComponent implements OnInit {
     this.networkService.getNetwork(id)
                        .subscribe(network => {
                           this.network = network;
+                          for(let contact of this.network.contacts){
+                            this.users.find(u => u.id === contact.id)['checked'] = true;
+                          }
                         });
   }
 
   getUsers() {
     this.userService.getUsers()
                     .subscribe(users => {
-                      this.users = users
+                      this.users = users;
+                      this.getNetwork(this.network_id);
                     });
+  }
+
+  onChange(e){
+    let user_id = e.target.getAttribute('data-userid');
+    if(e.target.checked){
+      this.networkService.addContact(this.network.id, this.users.find(u => u.id === user_id))
+                         .subscribe(res => {
+                            console.log(res);
+                         });
+    } else {
+      this.networkService.removeContact(this.network.id, this.users.find(u => u.id === user_id))
+                         .subscribe(res => {
+                            console.log(res);
+                         });
+    }
   }
 
 }

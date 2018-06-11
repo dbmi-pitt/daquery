@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.4 -->
+<!-- daquery.data.version=1.41 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -213,4 +213,11 @@ CREATE TABLE SITE_CONNECTION
 	STATUS varchar(20),
 	NETWORK_ID bigint,
 	DIRECTION varchar(20)
+);
+
+CREATE TABLE NETWORK_CONTACT
+(
+	ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+	NETWORK_ID bigint,
+	USER_ID varchar(50)
 );

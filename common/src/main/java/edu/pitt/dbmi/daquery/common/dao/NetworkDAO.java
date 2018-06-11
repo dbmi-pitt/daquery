@@ -17,6 +17,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
@@ -399,6 +400,56 @@ public class NetworkDAO extends AbstractDAO {
     		logger.log(Level.SEVERE, "Error unable to connect to database.  Please check database settings.");
         	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
+    	} finally {
+    		if(s != null) s.close();
+    	}
+    }
+    
+    public static void addContactToNetwork(Network network, DaqueryUser user) throws Exception {
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+    		Transaction t = s.beginTransaction();
+    		
+    		network.getContacts().add(user);
+    		
+    		s.saveOrUpdate(network);
+			t.commit();
+			return;
+    	} catch (Throwable t){
+    		String msg = "Unexpected error when adding contact to network, user id : " + user.getId();
+        	logger.log(Level.SEVERE, msg);
+        	logger.log(Level.SEVERE, msg, t);
+            throw t; 
+    	} finally {
+    		if(s != null) s.close();
+    	}
+    	
+    }
+    
+    public static void removeContactToNetwork(Network network, String userId) throws Exception {
+    	Session s = null;
+    	try {
+    		s = HibernateConfiguration.openSession();
+    		Transaction t = s.beginTransaction();
+    		
+    		DaqueryUser contact = null;
+    		for(DaqueryUser du : network.getContacts()) {
+    			if(du.getId().equals(userId)) {
+    				contact = du;
+    			}
+    		}
+    		
+    		network.getContacts().remove(contact);
+    		
+    		s.saveOrUpdate(network);
+			t.commit();
+			return;
+    	} catch (Throwable t){
+    		String msg = "Unexpected error when removing contact to network, user id : " + userId;
+        	logger.log(Level.SEVERE, msg);
+        	logger.log(Level.SEVERE, msg, t);
+            throw t; 
     	} finally {
     		if(s != null) s.close();
     	}
