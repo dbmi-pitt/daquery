@@ -42,7 +42,8 @@ CREATE TABLE "APP"."DQ_USER"
    PASSWORD varchar(100),
    REAL_NAME varchar(100),
    STATUS varchar(50),
-   UTYPE varchar(4)
+   UTYPE varchar(4),
+   CONTACT boolean
 );
 
 CREATE TABLE "APP"."ROLE"
