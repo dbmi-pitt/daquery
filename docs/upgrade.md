@@ -3,7 +3,7 @@ layout: page
 ---
 ## Daquery Data Tool: Upgrading
 
-To upgrade Daquery it is usually a simple manner of redeploying the Daquery war file.  If other steps are needed for a particular build those steps will be listed on the release page for that build. Before proceeding check the [release](https://github.com/dbmi-pitt/daquery/releases) for any additional instructions.
+To upgrade Daquery it is usually a simple manner of redeploying the Daquery war file.  If other steps are needed for a particular build those steps will be listed on the release page for that build. Before proceeding check the [release](https://github.com/dbmi-pitt/daquery/releases/latest) for any additional instructions.
 
 * Login to your Daquery server as root or a user who has root privileges.
 
