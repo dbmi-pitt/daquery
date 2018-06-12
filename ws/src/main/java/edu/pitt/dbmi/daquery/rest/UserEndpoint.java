@@ -637,7 +637,7 @@ public class UserEndpoint extends AbstractEndpoint {
     		new_user.setEmail(new_user.getEmail().toLowerCase());
     		DaqueryUser user = DaqueryUserDAO.queryUserByEmail(new_user.getEmail().toLowerCase());
     		
-    		if(user != null) { return ResponseHelper.getErrorResponse(400, "Email address exist.", null, null, null); }
+    		if(user != null) { return ResponseHelper.getErrorResponse(400, "A user with the same email address already exists.", null, null, null); }
     		
     		new_user.assignUUID();
     		if (new_user.getStatusEnum() == null) {
