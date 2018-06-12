@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.42 -->
+<!-- daquery.data.version=1.43 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -108,7 +108,7 @@ CREATE TABLE DATA_ATTRIBUTE
 CREATE TABLE SQL_DATA_SOURCE
 (
    DS_ID bigint NOT NULL,
-   CONNECTION_URL varchar(250),
+   CONNECTION_URL varchar(500),
    USERNAME varchar(50),
    PWD varchar(50),
    DRIVER_CLASS varchar(255)
