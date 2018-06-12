@@ -1,0 +1,1 @@
+alter table DQ_USER add column contact boolean;
