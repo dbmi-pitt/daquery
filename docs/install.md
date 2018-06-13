@@ -27,13 +27,13 @@ This output should contain the Tomcat directory.&nbsp;&nbsp;&nbsp;Like:
 
 <div class="highlight"><pre class="highlight"><code>[root@pathi2b2 ~]# ps -ef | grep catalina
 root     18235 16023  0 14:38 pts/1   00:00:00 grep catalina
-tomcat   23312     1  0 Apr13 ?       00:46:14 /usr/java/jdk1.7.0_06/bin/java -Djava.util.logging.config.file
+<font style="color: blue;">tomcat</font>   23312     1  0 Apr13 ?       00:46:14 /usr/java/jdk1.7.0_06/bin/java -Djava.util.logging.config.file
 =<font style="color: red;">/opt/shrine/tomcat/</font>conf/logging.properties -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager 
 -Djava.endorsed.dirs=<font style="color: red;">/opt/shrine/tomcat/</font>endorsed -classpath <font style="color: red;">/opt/shrine/tomcat/</font>bin/bootstrap.jar -Dcatalina.base
 =<font style="color: red;">/opt/shrine/tomcat</font> -Dcatalina.home=<font style="color: red;">/opt/shrine/tomcat</font> -Djava.io.tmpdir=<font style="color: red;">/opt/shrine/tomcat/</font>temp org.apache
 .catalina.startup.Bootstrap start</code></pre></div>
 
-The base Tomcat directory shown above in red will be refered to as _TOMCAT-DIR_.
+The base Tomcat directory shown above in <font style="color: red;">red</font> will be refered to as _TOMCAT-DIR_.  Also, you'll need to know the user that Tomcat is running as, this is shown in <font style="color: blue;">blue</font> in the above process list.
 
 The original PaTH Tomcat setup doesn't allow for enough memory to run SHRINE/i2b2 and Daquery at the same time.  To increase the memory allocation edit (or add if it doesn't exist) the file _TOMCAT-DIR_/bin/**setenv.sh** to include the following line (make sure you get the whole line, scroll to the right):
 ```
@@ -45,6 +45,15 @@ After creating/editing setenv.sh ensure that it is readable by Tomcat:
 [root@pathid2b2 ~] chown tomcat:tomcat setenv.sh
 [root@pathid2b2 ~] chmod 644 setenv.sh
 ```
+Ensure that your Tomcat configuration directory is writeable.  Daquery stores local data in the _TOMCAT-DIR_/conf directory, so this directory needs to be writable by the owner of the Tomcat process (shown in blue in the above process list).  Check the writability of the directory like this:
+```
+[root@pathid2b2 ~] su - tomcat
+[tomcat@pathid2b2 ~] cd /opt/shrine/tomcat/conf
+[tomcat@pathid2b2 ~] touch testfile
+[tomcat@pathid2b2 ~] exit
+```
+If the "touch" command is successful, then the directory is writable.  If not, you'll need to use a combination of chown and/or chmod commands in the conf directory and directories above it to make it writable.
+
 Stop Tomcat
 ```
 [root@pathid2b2 ~] service tomcat stop
@@ -78,7 +87,7 @@ root     18198 17944  0 16:22 pts/0    00:00:00 grep catalina</code></pre></div>
 ____________________________________________________________________
 To make it easier for users to find the application you can create a proxy route to the application through the standard http and https ports (80/443).  
 
-Edit the Apache HTTP configuration, usually located at: /etd/httpd/conf/**httpd.conf**.  Add the lines shown in <font style="color: red;">red</font> below to httpd.conf.  If your Tomcat server isn't using the default SHRINE Tomcat port of 6060, replace the 6060 in the configuration proxy settings with the port that Tomcat is responding to on your system.
+Edit the Apache HTTP configuration, usually located at: /etc/httpd/conf/**httpd.conf**.  Add the lines shown in <font style="color: red;">red</font> below to httpd.conf.  If your Tomcat server isn't using the default SHRINE Tomcat port of 6060, replace the 6060 in the configuration proxy settings with the port that Tomcat is responding to on your system.
 
 <div class="highlight"><pre class="highlight"><code>. . .
 
@@ -128,3 +137,4 @@ The inital setup set a few storage settings to a system temporary directory.  Yo
 The application will set up at this point creating a local database for application storage.  After the initial setup is complete navigate to the "Network" section and join the PaTH network.
 Additional instructions on joining a network are available [here](join-network.html).
 
+Once you are a member or the Daquery PaTH network, notify the Pitt admin and you'll recieve a request to connect sites with Pitt.  More information on accepting site a connection request is [here](approve-site-connection.html).  After connected to a site you'll need to grant permission to the remote connected site's uses to query and export data.  More information on that can be found [here](remote-user-roles.html).

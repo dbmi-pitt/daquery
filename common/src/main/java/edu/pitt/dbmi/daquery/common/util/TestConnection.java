@@ -46,8 +46,9 @@ public class TestConnection
 	
 	private final static Logger logger = Logger.getLogger(TestConnection.class.getName());
 	
-	public static void main(String [] args)
+	public static void main(String [] args) throws Exception
 	{
+		System.out.println(checkConnection("jdbc:oracle:thin:@(DESCRIPTION=(LOAD_BALANCE=yes)(ADDRESS=(PROTOCOL=TCP)(HOST=i2b2p-scan.med.utah.edu)(PORT=1521))(CONNECT_DATA=(FAILOVER_MODE=(TYPE=select)(METHOD=basic)(RETRIES=180)(DELAY=5))(SERVER=dedicated)(SERVICE_NAME=i2b2_dwteam.med.utah.edu)))", "oracle"));
 		//load and check the required properties from the file jdbctest.props
 //		loadProperties();
 //		System.out.println("Properties file " + PROP_FILE_NAME + " successfully loaded");
@@ -159,7 +160,21 @@ public class TestConnection
 			if(isOracle)
 			{
 				serverName = info[3].substring(1);
-				portString = info[4];
+				String tLine = serverName.replaceAll("\\s", "");
+				//see if there is a host directive;
+				if(tLine.matches("(?i).*?\\(HOST=.+\\).*"))
+				{
+					String sLine = tLine.replaceFirst("(?i).*?\\(HOST=", "");
+					int lParen = sLine.indexOf(")");
+					serverName = sLine.substring(0, lParen);
+					if(tLine.matches("(?i).*?\\(PORT=.+\\).*"))
+					{
+						String pLine = tLine.replaceFirst("(?i).*?\\(PORT=", "");
+						portString = pLine.substring(0, pLine.indexOf(")"));
+					}
+				}
+				else
+					portString = info[4];
 			}
 			else if(isSQLServer)
 			{
