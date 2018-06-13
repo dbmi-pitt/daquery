@@ -10,6 +10,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 //works for Java 1.8
 //import java.time.LocalDateTime;
@@ -123,7 +124,7 @@ public class UserEndpoint extends AbstractEndpoint {
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findAllUsers() {
+    public Response findAllUsers(@QueryParam("type") String type) {
     	try {
 
             logger.info("#### returning all users");
@@ -133,6 +134,20 @@ public class UserEndpoint extends AbstractEndpoint {
             logger.info("Responding to request from: " + username);
                         
             List<DaqueryUser> user_list = DaqueryUserDAO.queryAllUsers();
+            
+            if(type != null && type.equals("admin")) {
+//            	for(DaqueryUser user : user_list) {
+//            		if(user.hasRole("admin")) {
+//            			user_list.remove(user);
+//            		}
+//            	}
+            	for(Iterator<DaqueryUser> it = user_list.iterator(); it.hasNext();) {
+            		DaqueryUser user = it.next();
+            		if(!user.hasRole("admin")) {
+            			it.remove();
+            		}
+            	}
+            }
             
             if (user_list == null) {
                 return Response.status(NOT_FOUND).build();
@@ -851,7 +866,8 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	user.setStatus(updatedUser.getStatus());
 	        if(updatedUser.getEmail() != null)
 	        	user.setEmail(updatedUser.getEmail());
-	     
+	        
+	        user.setContact(updatedUser.getContact());
 	        
 	        //persist changes
 	        s.getTransaction().begin();

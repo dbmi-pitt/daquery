@@ -386,5 +386,41 @@ public class DaqueryUserDAO extends AbstractDAO {
     	}
     	return(sysUser);
     }
+    
+    public static void addContact(String id) throws Exception {
+    	logger.info("add user to contact: " + id + " is valid");
+    	try {
+
+    		DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+    		user.setContact(true);
+	    
+        } catch (HibernateException pe) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(pe.getLocalizedMessage());
+            throw pe;
+        } catch (Exception e) {
+    		logger.info(e.getLocalizedMessage());
+        	throw e;
+        }
+            
+    }
+    
+    public static void removeContact(String id) throws Exception {
+    	logger.info("remove user to contact: " + id + " is valid");
+    	try {
+
+    		DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+    		user.setContact(false);
+	    
+        } catch (HibernateException pe) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(pe.getLocalizedMessage());
+            throw pe;
+        } catch (Exception e) {
+    		logger.info(e.getLocalizedMessage());
+        	throw e;
+        }
+            
+    }
 }
 

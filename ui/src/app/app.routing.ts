@@ -23,6 +23,7 @@ import { Error401Component } from "./components/error-401/error-401.component";
 import { Error403Component } from "./components/error-403/error-403.component";
 import { ChangePasswordComponent } from "./components/change-password/change-password.component";
 import { AppConfigComponent } from "./components/app-config/app-config.component";
+import { SiteContactsComponent } from "./components/site-contacts/site-contacts.component";
 import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
 import { EditUserComponent } from "./components/users/edit-user/edit-user.component";
@@ -46,7 +47,8 @@ const appRoutes:Routes = [
       { path: "users", component: UsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "remote-users", component: RemoteUsersComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "change-password", component: ChangePasswordComponent, canActivate: [AuthGuard] },
-      { path: "app-config", component: AppConfigComponent, canActivate: [AuthGuard] },
+      { path: "app-config", component: AppConfigComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
+      { path: "site-contacts", component: SiteContactsComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
       { path: "users/:id", component: EditUserComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin', 'self'] } }
     ]
   },
