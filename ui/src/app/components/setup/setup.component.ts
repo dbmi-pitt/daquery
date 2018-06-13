@@ -3,6 +3,8 @@ import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup, FormControl, Va
 import { SetupService } from '../../services/setup.service';
 import { Router } from '@angular/router';
 
+declare var $:any;
+
 @Component({
   selector: 'app-setup',
   templateUrl: './setup.component.html',
@@ -60,13 +62,13 @@ export class SetupComponent implements OnInit {
                         error => {
                           if(error.status === 401){
                             this.loading = false;
-                            this.error = "Invalid Site-name and Site-key combination."
+                            this.error['displayMessage'] = "Invalid Site-name and Site-key combination."
                           } else if(error.status === 500){
                             this.loading = false;
-                            this.error = "An unexpected error occurred.  Please contact the system admin."
+                            this.error = error.error;
                           } else if(error.status === 404){
                             this.loading = false;
-                            this.error = "Please ask the Daquery developers to check your application.properties file to make sure the central.server.url is set correctly."
+                            this.error['displayMessage'] = "Please ask the Daquery developers to check your application.properties file to make sure the central.server.url is set correctly."
                           }
                         });
     } else {
@@ -74,5 +76,9 @@ export class SetupComponent implements OnInit {
         this.setupForm.get(k).markAsTouched();
       })
     }
+  }
+
+  showErrorInfo(){
+    $('#myErrorModal').modal('show');
   }
 }
