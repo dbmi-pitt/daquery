@@ -18,3 +18,4 @@ On the next screen provide the database connection information to connect to you
 
 <img src="images/join-net.png" alt="Join Network" style="width: 400px;"/>
 
+Once you are a member or the Daquery PaTH network, notify the Pitt admin and you'll recieve a request to connect sites with Pitt.  More information on accepting site a connection request is [here](approve-site-connection.html).  After connected to a site you'll need to grant permission to the remote connected site's uses to query and export data.  More information on that can be found [here](remote-user-roles.html).
