@@ -25,6 +25,14 @@ export class UserService {
                     });
   }
 
+  getAdminUsers(): Observable<User[]> {
+    return this.http.get('/daquery/ws/users?type=admin')
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
+
   getUser(user_id: string): Observable<any> {
     return this.http.get(`/daquery/ws/users/${user_id}`)
                     .catch(error => {
@@ -135,5 +143,25 @@ export class UserService {
 
   setCurrentUser(user: any) {
     localStorage.setItem('currentUser', JSON.stringify(user));
+  }
+
+  addContact(user: any) {
+    return this.http.put(`/daquery/ws/users/${user.id}`, user)
+                    .catch(error => {
+                      if(error.status != 401){
+                        this.error.error = error;
+                      }
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  removeContact(user: any) {
+    return this.http.put(`/daquery/ws/users/${user.id}`, user)
+                    .catch(error => {
+                      if(error.status != 401){
+                        this.error.error = error;
+                      }
+                      return Observable.throw(error || 'Server error');
+                    })
   }
 }

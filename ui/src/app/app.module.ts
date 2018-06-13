@@ -77,6 +77,7 @@ import { AppConfigComponent } from './components/app-config/app-config.component
 import { DeidPropsComponent } from './components/networks/network/deid-props/deid-props.component';
 import { RemoteUsersComponent } from './components/remote-users/remote-users.component';
 import { NetworkContactsComponent } from './components/networks/network/network-contacts/network-contacts.component';
+import { SiteContactsComponent } from './components/site-contacts/site-contacts.component';
 
 
 @NgModule({
@@ -126,6 +127,7 @@ import { NetworkContactsComponent } from './components/networks/network/network-
     DeidPropsComponent,
     RemoteUsersComponent,
     NetworkContactsComponent,
+    SiteContactsComponent,
   ],
   imports: [
     BrowserModule,

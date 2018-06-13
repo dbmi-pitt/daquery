@@ -84,6 +84,10 @@ public class DaqueryUser extends UserInfo {
 		      )
 	private List<Role> roles;
     
+    @Expose
+    @Column(name="CONTACT")
+    private Boolean contact;
+    
     // ======================================
     // =            Constructors            =
     // ======================================
@@ -214,6 +218,15 @@ public class DaqueryUser extends UserInfo {
 	public void assignUUID() {
 		UUID newUUID = UUID.randomUUID();
 		super.setId(newUUID.toString());
+	}
+	
+	public boolean getContact() {
+		if(this.contact == null) return false;
+		return this.contact;
+	}
+	
+	public void setContact(boolean value) {
+		this.contact = value;
 	}
 	
     //TODO: Add loop to print out the roles, queries, etc.
