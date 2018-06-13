@@ -41,9 +41,12 @@
             </div>
             <hr />
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-10">
                   <label>Request description:</label>
                   <p>{{ selectedRequest.inquiry.inquiryDescription }}</p>
+              </div>
+              <div class="col-md-2">
+                <label *ngIf="selectedRequest.responses[0].value" >Result: {{ selectedRequest.responses[0].value }} </label>
               </div>
             </div>
             <hr />
@@ -57,12 +60,6 @@
                 </pre>
               </div>
             </div>
-            <hr />
-            <div class="row">
-              <div class="col-md-12">
-                <label>Result: {{ selectedRequest.responses[0].value }} </label>
-              </div>
-            </div>  
           </div>
           <!-- /.box-body -->
         </div>
