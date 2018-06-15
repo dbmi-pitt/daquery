@@ -660,6 +660,7 @@ public class UserEndpoint extends AbstractEndpoint {
     		}
     		new_user.setRoles(new ArrayList<Role>());
     		new_user.getRoles().add(RoleDAO.queryRoleByName("viewer"));
+    		new_user.setStatus(UserStatus.PWD_EXPIRED.toString());
     		
     		s = HibernateConfiguration.openSession();
 	
@@ -889,9 +890,68 @@ public class UserEndpoint extends AbstractEndpoint {
     		}
     		
     	}
-    	
     }
+    
+    /**
+     * This method will allow the user to be updated.
+     * @param updatedUser- a JSON object representing the updated user
+     * example url: daquery-ws/ws/users
+     * @return 200 OK
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized
+     * @throws 404 Not found	
+     */
+    @PUT
+    @Secured
+    @Path("/{id}/force-change-password")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response forceChangePassword(@PathParam("id") String id, DaqueryUser updatedUser) {
+    	Session s = null;
+    	
+    	try {
+    		s = HibernateConfiguration.openSession();
 
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+
+	        DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+	        
+	        if(user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getNewPassword()))){
+	        	return ResponseHelper.getErrorResponse(400, "New password cannot be the same as old password.", "", null);
+	        }
+	        
+	        user.setPassword(updatedUser.getNewPassword());
+	        user.setStatus(UserStatus.ACTIVE.toString());
+	        
+	        Site mySite = SiteDAO.getLocalSite();
+            
+            Map<String, Object> extraObjs = new HashMap<String, Object>();
+            extraObjs.put("user", user);
+            
+	        //persist changes
+	        s.getTransaction().begin();
+	
+	        s.merge(user);
+	        
+	        s.getTransaction().commit();
+
+	        Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), mySite.getSiteId(), null, extraObjs);
+
+            return rVal;
+	        
+	    } catch (Exception e) {
+			String msg = "An unexpected error occured while force changing password for user [" + id + "].";
+			logger.log(Level.SEVERE, msg, e);
+			return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
+		} finally {
+			if (s != null) {
+				s.close();
+			}
+		
+		}
+    }
+    
     @GET
     @Path("/validateToken")
     @Produces(MediaType.APPLICATION_JSON)

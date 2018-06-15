@@ -78,6 +78,7 @@ import { DeidPropsComponent } from './components/networks/network/deid-props/dei
 import { RemoteUsersComponent } from './components/remote-users/remote-users.component';
 import { NetworkContactsComponent } from './components/networks/network/network-contacts/network-contacts.component';
 import { SiteContactsComponent } from './components/site-contacts/site-contacts.component';
+import { ForceChangePasswordComponent } from './components/force-change-password/force-change-password.component';
 
 
 @NgModule({
@@ -128,6 +129,7 @@ import { SiteContactsComponent } from './components/site-contacts/site-contacts.
     RemoteUsersComponent,
     NetworkContactsComponent,
     SiteContactsComponent,
+    ForceChangePasswordComponent,
   ],
   imports: [
     BrowserModule,

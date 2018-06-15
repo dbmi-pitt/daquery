@@ -105,22 +105,22 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         	if(StringHelper.equalIgnoreCase(mySite.getSiteId(), jwt.getSiteId()))
         	{
         		//validate a local user
-	            if (!DaqueryUserDAO.isUserValid(jwt.getUserId())) {
+	            if (!DaqueryUserDAO.isUserValid(jwt.getUserId()) && !DaqueryUserDAO.isUserPwdExpired(jwt.getUserId())) {
 	        		String msg = "User account [" + jwt.getUserId() +"] is not valid.";
 	        		logger.log(Level.SEVERE, msg);
 	                throw new Exception(msg);
 	            }
 	            
-	            if (DaqueryUserDAO.expiredPassword(jwt.getUserId())) {
-	            	try {
-	            		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(jwt.getUserId(), jwt.getSiteId(), jwt.getNetworkId()));
-	            	} catch (Exception e) {
-	            		String msg = "An unexpected error occured while responding to an expired authorization token for user [" +jwt.getUserId() + "]";
-	            		logger.log(Level.SEVERE, msg, e);	            		
-	            		requestContext.abortWith(ResponseHelper.getErrorResponse(500, msg, "Your user token was expired.  Please login again to get a new token.", e));
-	            		Response.status(Response.Status.UNAUTHORIZED).build();
-	            	}
-	            }
+//	            if (DaqueryUserDAO.expiredPassword(jwt.getUserId())) {
+//	            	try {
+//	            		requestContext.abortWith(ResponseHelper.expiredPasswordResponse(jwt.getUserId(), jwt.getSiteId(), jwt.getNetworkId()));
+//	            	} catch (Exception e) {
+//	            		String msg = "An unexpected error occured while responding to an expired authorization token for user [" +jwt.getUserId() + "]";
+//	            		logger.log(Level.SEVERE, msg, e);	            		
+//	            		requestContext.abortWith(ResponseHelper.getErrorResponse(500, msg, "Your user token was expired.  Please login again to get a new token.", e));
+//	            		Response.status(Response.Status.UNAUTHORIZED).build();
+//	            	}
+//	            }
 	            
 	            //an exception will be thrown if the token isn't valid
 	            jwt.validate();

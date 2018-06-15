@@ -39,8 +39,19 @@ export class AuthenticationService {
                         return 'fail';
                       }
                     }).catch(error => {
-                      if(error.status === 401)
+                      if(error.status === 401){
+                        if(error.error.subcode === "401.2"){
+                          localStorage.setItem('currentUserId', error.error.UserId);
+                          let token = error.error['token'];
+                          if (token) {
+                            // set token property
+                            this.token = token;
+                            localStorage.setItem('jwt', JSON.stringify(token));
+                          }
+                          return Observable.of('password_expired');
+                        }
                         return Observable.of('fail');
+                      }
                       else
                         return Observable.of('error');
                     });
