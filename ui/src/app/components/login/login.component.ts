@@ -39,6 +39,8 @@ export class LoginComponent implements OnInit {
                                 } else if (result === 'fail'){
                                   this.error = 'Email or password is incorrect';
                                   this.loading = false;
+                                } else if (result === 'password_expired'){
+                                  this.router.navigate(['/force-change-password']);
                                 } else if (result === 'error'){
                                   this.error = 'Daquery Server is down.';
                                   this.loading = false;

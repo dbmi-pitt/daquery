@@ -371,7 +371,33 @@ public class DaqueryUserDAO extends AbstractDAO {
         }
             
     }
+    
+    /**
+     * Query the database to find the current user (represented by UUID).
+     * Determine: a) if the user has a valid account and b) if the user's status is pwdExpired
+     * @param uuid- The user's UUID
+     * @return- True is the UUID represents a valid AND active account,
+     * return False otherwise
+     * @throws HibernateException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static boolean isUserPwdExpired(String id) throws Exception {
+    	logger.info("checking if user: " + id + " is password expired");
+    	try {
 
+    		DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+    		return UserStatus.PWD_EXPIRED == UserStatus.valueOf(user.getStatus());
+	    
+        } catch (HibernateException pe) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(pe.getLocalizedMessage());
+            throw pe;
+        } catch (Exception e) {
+    		logger.info(e.getLocalizedMessage());
+        	throw e;
+        }
+    }
+ 
 	
     public static UserInfo getSysUser()
     {

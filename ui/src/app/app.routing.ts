@@ -27,11 +27,13 @@ import { SiteContactsComponent } from "./components/site-contacts/site-contacts.
 import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
 import { EditUserComponent } from "./components/users/edit-user/edit-user.component";
+import { ForceChangePasswordComponent } from "./components/force-change-password/force-change-password.component";
 
 const appRoutes:Routes = [
   { path: 'setup', component: SetupComponent },
   { path: "", component: LoginComponent },
   { path: "login", component: LoginComponent },
+  { path: "force-change-password", component: ForceChangePasswordComponent },
   { path: '', component: DashboardComponent,
     children: [
       { path: "queries-to-me", component: QueriesToMeComponent, canActivate: [AuthGuard] },
