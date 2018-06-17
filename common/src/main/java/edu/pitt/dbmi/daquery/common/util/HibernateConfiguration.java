@@ -91,14 +91,31 @@ public class HibernateConfiguration {
         .setProperty("hibernate.connection.username", "")
     	.setProperty("hibernate.connection.password", "")
     	.setProperty("hibernate.show_sql", "false")
-        
+        .setProperty("hibernate.connection.release_mode", "after_statement") 
         .setProperty("hibernate.c3p0.acquire_increment", "1")
         .setProperty("hibernate.c3p0.idle_test_period","240")
         .setProperty("hibernate.c3p0.timeout","600")	            
         .setProperty("hibernate.c3p0.max_size","100")
         .setProperty("hibernate.c3p0.min_size","3")
         .setProperty("hibernate.c3p0.validate", "false")
-        .setProperty("hibernate.c3p0.max_statements", "500");
+        .setProperty("hibernate.c3p0.max_statements", "500")
+        .setProperty("c3p0.preferredTestQuery", "SELECT 1 FROM DUAL")
+        .setProperty("c3p0.testConnectionOnCheckout", "true") 
+        .setProperty("c3p0.testConnectionOnCheckin", "true")
+        .setProperty("hibernate.c3p0.acquire_increment", "1")
+        .setProperty("hibernate.c3p0.timeout","600")	            
+        .setProperty("hibernate.c3p0.max_size","100")
+        .setProperty("hibernate.c3p0.min_size","3")
+        .setProperty("hibernate.c3p0.validate", "false")  //this is an expensive property to turn on...        
+    	.setProperty("hibernate.cache.use_second_level_cache","false")
+        .setProperty("hibernate.jdbc.batch.size","20")
+        .setProperty("hibernate.search.default.directory_provider", "org.hibernate.search.store.FSDirectoryProvider")
+        .setProperty("hibernate.search.worker.batch.max_merge_docs", "1000")	            
+        .setProperty("hibernate.search.worker.batch.merge_factor", "100")	            	            
+        .setProperty("hibernate.search.worker.batch.max_buffered_docs", "100")
+        .setProperty("hibernate.search.worker.thread_pool.size", "20")
+        .setProperty("hibernate.search.default.exclusive_index_use", "true")
+        .setProperty("hibernate.search.indexing_strategy", "manual");
         
         try {
         	hibernateConf.setProperty("hibernate.connection.url", ApplicationDBHelper.getDBURL());
@@ -109,7 +126,7 @@ public class HibernateConfiguration {
         }
 
 /*      .setProperty("hibernate.dialect", props.getProperty("hibernate.dialect", "org.hibernate.dialect.Oracle9Dialect")) */         
-/*	    .setProperty("hibernate.connection.release_mode", "after_statement") */
+
 /*    	.setProperty("hibernate.show_sql", props.getProperty("hibernate.show_sql", "false")) */
 /*	    .setProperty("hibernate.cache.provider_class","net.sf.ehcache.hibernate.EhCacheProvider") */
 /*    	.setProperty("hibernate.current_session_context_class", "thread")
