@@ -14,5 +14,8 @@ public class TestC3POProps
 		List<String> names = C3P0Properties.getPropertyNames();
 		for(String name : names)
 			System.out.println(name);
+		
+		String v = C3P0Properties.getProperty("c3p0.preferredTestQuery");
+		System.out.println(v);
 	}
 }
