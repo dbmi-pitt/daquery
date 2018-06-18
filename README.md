@@ -7,3 +7,7 @@ This is the main repository for the Daquery application. It contains the followi
  * common/ - common components used by both the main ws and the central web service
 
 See additional README files in each component directory for more information about the component and build information.
+
+Installation instructions can be found [here](https://dbmi-pitt.github.io/daquery/install.html).
+
+Upgrade instructions can be found [here](https://dbmi-pitt.github.io/daquery/upgrade.html).
