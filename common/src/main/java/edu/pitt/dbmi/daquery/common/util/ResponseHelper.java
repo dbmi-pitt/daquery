@@ -63,7 +63,9 @@ public class ResponseHelper {
      */
     public static Response expiredPasswordResponse(String name, String siteUUID, String networkUUID) throws DaqueryException
     {
-    	return(getTokenResponse(401, 2, name, siteUUID, networkUUID, null));
+    	Map<String, Object> map = new HashMap<>();
+    	map.put("UserId", name);
+    	return(getTokenResponse(401, 2, name, siteUUID, networkUUID, map));
     }
 
     /**

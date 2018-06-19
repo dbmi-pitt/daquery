@@ -888,7 +888,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
             	}
             } else {
             	if(!f.mkdir()) {
-            		return ResponseHelper.getErrorResponse(500, "The file output directory is not able to create.", "The file output directory is not able to create.", null);
+            		return ResponseHelper.getErrorResponse(500, "Unable to create the file output directory at " + fileOutputDir, null, null);
             	}
             }
             

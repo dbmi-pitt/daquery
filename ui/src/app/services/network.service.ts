@@ -93,4 +93,20 @@ export class NetworkService {
                       return Observable.throw(error || 'Server error');
                     })
   }
+
+  addContact(network_id: string, user: any): Observable<any> {
+    return this.http.post(`/daquery/ws/networks/${network_id}/add-contact`, user)
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  removeContact(network_id: string, user: any): Observable<any> {
+    return this.http.delete(`/daquery/ws/networks/${network_id}/remove-contact/${user.id}`)
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
 }
