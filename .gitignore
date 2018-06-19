@@ -49,4 +49,5 @@ build.version
 /ui/.DS_Store
 /ui/Thumbs.db
 
-jdbc.connection.properties
+daquery.c3p0.properties
+
