@@ -56,7 +56,8 @@ export class NewQueryComponent implements OnInit {
       this.inquiryForm = this.fb.group({
         network: '',
         sitesToQuery: this.fb.array([]),
-        dataType: ['aggregate'],
+        queryType: ['aggregate'],
+        dataType: ['SQL_QUERY'],
         inquiryName: ['', Validators.required],
         studyName: '',
         inquiryDescription: ['', Validators.maxLength(500)],
@@ -71,6 +72,7 @@ export class NewQueryComponent implements OnInit {
   get sqlQuery() { return this.inquiryForm.get('sqlQuery'); }
   get network() { return this.inquiryForm.get('network'); }
   get sitesToQuery() { return this.inquiryForm.get('sitesToQuery'); }
+  get queryType() { return this.inquiryForm.get('queryType'); }
   get dataType() { return this.inquiryForm.get('dataType'); }
 
   ngOnInit() {
@@ -161,7 +163,7 @@ export class NewQueryComponent implements OnInit {
           inquiry: {
             version: 1,
             dataType: 'SQL_QUERY',
-            aggregate: true,
+            queryType: this.inquiryForm.value.queryType,
             code: this.inquiryForm.value.sqlQuery,
             inquiryName: this.inquiryForm.value.inquiryName,
             inquiryDescription: this.inquiryForm.value.inquiryDescription
