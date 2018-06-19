@@ -39,6 +39,7 @@ export class EditUserComponent implements OnInit {
   createForm() {
     this.profileForm = this.fb.group({
       realName: [this.user.realName, Validators.required],
+      expired: [this.user.status === 'PWD_EXPIRED'],
       roles: this.fb.array([]),
       email: [this.user.email, [Validators.required, Validators.email]],
       newPassword: ['', [Validators.minLength(8)]],
@@ -46,6 +47,7 @@ export class EditUserComponent implements OnInit {
   }
 
   get realName() { return this.profileForm.get('realName'); }
+  get expired() { return this.profileForm.get('expired'); }
   get roles() { return this.profileForm.get('roles'); }
   get email() { return this.profileForm.get('email'); }
   get newPassword() { return this.profileForm.get('newPassword'); }
@@ -73,8 +75,10 @@ export class EditUserComponent implements OnInit {
     if(this.profileForm.valid){
       const user = Object.assign({
         id: this.user_id,
-        utype: 'FULL'
+        utype: 'FULL',
+        status: this.profileForm.controls['expired'].value ? 'PWD_EXPIRED' : 'ACTIVE'
       }, this.profileForm.value);
+      delete user['expired'];
       user.roles = user.roles.filter(r => r.check === true).map(r => {
         delete r['check'];
         return r;
