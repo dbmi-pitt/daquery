@@ -38,19 +38,19 @@
             <!-- <li class="footer"><a href="#">View all</a></li> >
           </ul>
         </li> -->
-        <li>
+        <li *ngIf="showAppConfig">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-sliders"></i>
           </a>
           <ul class="dropdown-menu">
             <li>
-              <a [routerLink]="['/change-password']">
-                <i class="fa fa-key text-yellow"></i> Change Password
-              </a>
-            </li>
-            <li *ngIf="showAppConfig">
               <a [routerLink]="['/app-config']">
                 <i class="fa fa-cog text-blue"></i> App Configuration
+              </a>
+            </li>
+            <li>
+              <a [routerLink]="['/site-contacts']">
+                <i class="fa fa-address-card-o text-green"></i> App Contact
               </a>
             </li>
           </ul>
@@ -59,10 +59,15 @@
           <a style="cursor: pointer" class="dropdown-toggle" data-toggle="dropdown">{{ user.realName }}</a>
           <ul class="dropdown-menu">
             <li>
+              <a [routerLink]="['/change-password']">
+                <i class="fa fa-key text-yellow"></i> Change Password
+              </a>
+            </li>
+            <!-- <li>
               <a [routerLink]="['/users', user.id] ">
                 <i class="fa fa-pencil-square-o text-green"></i>Profile
               </a>
-            </li>
+            </li> -->
             <li>
               <a style="cursor: pointer" (click)="logout()">
                 <i class="fa fa-sign-out text-red"></i>Logout

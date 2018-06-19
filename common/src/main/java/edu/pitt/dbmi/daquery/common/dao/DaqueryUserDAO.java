@@ -79,6 +79,31 @@ public class DaqueryUserDAO extends AbstractDAO {
     	}
     	
     }
+    
+    /**
+     * Return an object representing the user matching the given email
+     * @param email- the email of the user to find 
+     * @return- a DaqueryUser object
+     * @throws HibernateException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static DaqueryUser queryUserByEmail(String email) throws Exception {
+    	try {
+			List<ParameterItem> pList = new ArrayList<ParameterItem>();
+			ParameterItem piUser = new ParameterItem("email", email);
+			pList.add(piUser);
+	        DaqueryUser user = executeQueryReturnSingle(DaqueryUser.FIND_BY_EMAIL, pList, logger);	
+	        return user;
+        } catch (HibernateException e) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(e.getLocalizedMessage());
+            throw e;
+    	} catch (Exception e) {
+	        throw e;    		
+    	}
+    	
+    }
+    
 
     /**
      * Get UserInfo information for a given user's UUID.  Returns the UserInfo directly
@@ -346,7 +371,33 @@ public class DaqueryUserDAO extends AbstractDAO {
         }
             
     }
+    
+    /**
+     * Query the database to find the current user (represented by UUID).
+     * Determine: a) if the user has a valid account and b) if the user's status is pwdExpired
+     * @param uuid- The user's UUID
+     * @return- True is the UUID represents a valid AND active account,
+     * return False otherwise
+     * @throws HibernateException if the database is incorrectly configured
+     * Exception for any other issue
+     */
+    public static boolean isUserPwdExpired(String id) throws Exception {
+    	logger.info("checking if user: " + id + " is password expired");
+    	try {
 
+    		DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+    		return UserStatus.PWD_EXPIRED == UserStatus.valueOf(user.getStatus());
+	    
+        } catch (HibernateException pe) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(pe.getLocalizedMessage());
+            throw pe;
+        } catch (Exception e) {
+    		logger.info(e.getLocalizedMessage());
+        	throw e;
+        }
+    }
+ 
 	
     public static UserInfo getSysUser()
     {
@@ -360,6 +411,42 @@ public class DaqueryUserDAO extends AbstractDAO {
     		logger.log(Level.SEVERE, "An unexpected exception occured while retrieving the SYSTEM user", t);
     	}
     	return(sysUser);
+    }
+    
+    public static void addContact(String id) throws Exception {
+    	logger.info("add user to contact: " + id + " is valid");
+    	try {
+
+    		DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+    		user.setContact(true);
+	    
+        } catch (HibernateException pe) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(pe.getLocalizedMessage());
+            throw pe;
+        } catch (Exception e) {
+    		logger.info(e.getLocalizedMessage());
+        	throw e;
+        }
+            
+    }
+    
+    public static void removeContact(String id) throws Exception {
+    	logger.info("remove user to contact: " + id + " is valid");
+    	try {
+
+    		DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+    		user.setContact(false);
+	    
+        } catch (HibernateException pe) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(pe.getLocalizedMessage());
+            throw pe;
+        } catch (Exception e) {
+    		logger.info(e.getLocalizedMessage());
+        	throw e;
+        }
+            
     }
 }
 

@@ -10,6 +10,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 //works for Java 1.8
 //import java.time.LocalDateTime;
@@ -123,7 +124,7 @@ public class UserEndpoint extends AbstractEndpoint {
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findAllUsers() {
+    public Response findAllUsers(@QueryParam("type") String type) {
     	try {
 
             logger.info("#### returning all users");
@@ -133,6 +134,20 @@ public class UserEndpoint extends AbstractEndpoint {
             logger.info("Responding to request from: " + username);
                         
             List<DaqueryUser> user_list = DaqueryUserDAO.queryAllUsers();
+            
+            if(type != null && type.equals("admin")) {
+//            	for(DaqueryUser user : user_list) {
+//            		if(user.hasRole("admin")) {
+//            			user_list.remove(user);
+//            		}
+//            	}
+            	for(Iterator<DaqueryUser> it = user_list.iterator(); it.hasNext();) {
+            		DaqueryUser user = it.next();
+            		if(!user.hasRole("admin")) {
+            			it.remove();
+            		}
+            	}
+            }
             
             if (user_list == null) {
                 return Response.status(NOT_FOUND).build();
@@ -634,12 +649,18 @@ public class UserEndpoint extends AbstractEndpoint {
         
     	Session s = null;
     	try {
+    		new_user.setEmail(new_user.getEmail().toLowerCase());
+    		DaqueryUser user = DaqueryUserDAO.queryUserByEmail(new_user.getEmail().toLowerCase());
+    		
+    		if(user != null) { return ResponseHelper.getErrorResponse(400, "A user with the same email address already exists.", null, null, null); }
+    		
     		new_user.assignUUID();
     		if (new_user.getStatusEnum() == null) {
     			new_user.setStatusEnum(UserStatus.ACTIVE);
     		}
     		new_user.setRoles(new ArrayList<Role>());
     		new_user.getRoles().add(RoleDAO.queryRoleByName("viewer"));
+    		new_user.setStatus(UserStatus.PWD_EXPIRED.toString());
     		
     		s = HibernateConfiguration.openSession();
 	
@@ -846,7 +867,8 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	user.setStatus(updatedUser.getStatus());
 	        if(updatedUser.getEmail() != null)
 	        	user.setEmail(updatedUser.getEmail());
-	     
+	        
+	        user.setContact(updatedUser.getContact());
 	        
 	        //persist changes
 	        s.getTransaction().begin();
@@ -868,9 +890,68 @@ public class UserEndpoint extends AbstractEndpoint {
     		}
     		
     	}
-    	
     }
+    
+    /**
+     * This method will allow the user to be updated.
+     * @param updatedUser- a JSON object representing the updated user
+     * example url: daquery-ws/ws/users
+     * @return 200 OK
+     * @throws 400 Bad Request	error message
+     * @throws 401 Unauthorized
+     * @throws 404 Not found	
+     */
+    @PUT
+    @Secured
+    @Path("/{id}/force-change-password")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response forceChangePassword(@PathParam("id") String id, DaqueryUser updatedUser) {
+    	Session s = null;
+    	
+    	try {
+    		s = HibernateConfiguration.openSession();
 
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+
+	        DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+	        
+	        if(user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getNewPassword()))){
+	        	return ResponseHelper.getErrorResponse(400, "New password cannot be the same as old password.", "", null);
+	        }
+	        
+	        user.setPassword(updatedUser.getNewPassword());
+	        user.setStatus(UserStatus.ACTIVE.toString());
+	        
+	        Site mySite = SiteDAO.getLocalSite();
+            
+            Map<String, Object> extraObjs = new HashMap<String, Object>();
+            extraObjs.put("user", user);
+            
+	        //persist changes
+	        s.getTransaction().begin();
+	
+	        s.merge(user);
+	        
+	        s.getTransaction().commit();
+
+	        Response rVal = ResponseHelper.getTokenResponse(200, null, user.getId(), mySite.getSiteId(), null, extraObjs);
+
+            return rVal;
+	        
+	    } catch (Exception e) {
+			String msg = "An unexpected error occured while force changing password for user [" + id + "].";
+			logger.log(Level.SEVERE, msg, e);
+			return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
+		} finally {
+			if (s != null) {
+				s.close();
+			}
+		
+		}
+    }
+    
     @GET
     @Path("/validateToken")
     @Produces(MediaType.APPLICATION_JSON)

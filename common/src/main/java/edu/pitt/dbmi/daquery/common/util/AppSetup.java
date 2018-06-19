@@ -410,7 +410,7 @@ public class AppSetup
 			conn = ApplicationDBHelper.getConnection();
 			state = conn.createStatement();
 			
-			rs = state.executeQuery("select value from property where name = 'current.version'");
+/*			rs = state.executeQuery("select value from property where name = 'current.version'");
 			String version = null;
 			if(rs.next())
 				version = rs.getString(1);
@@ -424,7 +424,7 @@ public class AppSetup
 				log.log(Level.SEVERE, "The applicationcurrent version does not match the configured version.");
 				return(DBSTATUS_INDETERMINATE);
 			}
-			rs.close();
+			rs.close(); */
 			rs = state.executeQuery("select value from property where name = 'initial.setup'");
 			if(!rs.next())
 			{

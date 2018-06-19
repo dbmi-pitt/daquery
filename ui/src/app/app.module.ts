@@ -76,6 +76,9 @@ import { EditUserComponent } from './components/users/edit-user/edit-user.compon
 import { AppConfigComponent } from './components/app-config/app-config.component';
 import { DeidPropsComponent } from './components/networks/network/deid-props/deid-props.component';
 import { RemoteUsersComponent } from './components/remote-users/remote-users.component';
+import { NetworkContactsComponent } from './components/networks/network/network-contacts/network-contacts.component';
+import { SiteContactsComponent } from './components/site-contacts/site-contacts.component';
+import { ForceChangePasswordComponent } from './components/force-change-password/force-change-password.component';
 
 
 @NgModule({
@@ -124,6 +127,9 @@ import { RemoteUsersComponent } from './components/remote-users/remote-users.com
     AppConfigComponent,
     DeidPropsComponent,
     RemoteUsersComponent,
+    NetworkContactsComponent,
+    SiteContactsComponent,
+    ForceChangePasswordComponent,
   ],
   imports: [
     BrowserModule,
