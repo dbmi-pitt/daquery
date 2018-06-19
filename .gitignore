@@ -48,3 +48,5 @@ build.version
 # System Files
 /ui/.DS_Store
 /ui/Thumbs.db
+common/src/dev/java/edu/pitt/dbmi/daquery/common/dev/util/private-data.props
+common/src/dev/java/edu/pitt/dbmi/daquery/common/dev/util/private-data.props

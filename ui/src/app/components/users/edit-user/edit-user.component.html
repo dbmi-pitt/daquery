@@ -38,7 +38,12 @@
               <span class="fa fa-user-o form-control-feedback"></span>
               <div class="help-block" *ngIf="realName.invalid && (realName.dirty || realName.touched)">Please enter a real name</div>
             </div>
-            <p class="text-muted text-center">{{ listRoles(user.roles) | uppercase }}</p>
+            <div class="checkbox">
+              <label class="checkbox-inline">
+                <input type="checkbox" formControlName="expired" checked="user.status === 'PWD_EXPIRED'">Account Expired
+              </label>
+              </div>
+            <p class="text-muted"><b>ROLES:</b> {{ listRoles(user.roles) | uppercase }}</p>
             <ul *ngIf="currentUserRoles.includes('admin')" class="list-unstyled" formArrayName="roles">
               <li *ngFor="let role of profileForm.controls.roles.controls; let i=index" [formGroupName]="i">
                 <div class="checkbox">
@@ -58,7 +63,7 @@
                 </div>
               </li>
               <li *ngIf="currentUserRoles.includes('admin')" class="list-group-item">
-                <b>Password</b> <a class="pull-right">********</a>
+                <b>Password</b>
                 <div class="form-group has-feedback" [ngClass]="{'has-error': newPassword.invalid && (newPassword.dirty || newPassword.touched), 'has-success': newPassword.valid && (newPassword.dirty || newPassword.touched) }">
                   <input type="password" formControlName="newPassword" class="form-control" name="newPassword" placeholder="Password" />
                   <span class="fa fa-lock form-control-feedback"></span>
