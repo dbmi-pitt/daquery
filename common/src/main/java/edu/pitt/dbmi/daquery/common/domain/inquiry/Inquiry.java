@@ -74,7 +74,7 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	protected DaqueryUser author;
 
 	@Expose
-	protected boolean aggregate;
+	protected QueryType queryType;
 	
 	public Inquiry() {
 		
@@ -137,8 +137,11 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	public Network getNetwork(){return(network);}
 	public void setNetwork(Network net){network = net;}
 		
-	public boolean isAggregate(){return(aggregate);}
-	public void setAggregate(boolean aggregate){this.aggregate = aggregate;}
+	public boolean isAggregate(){return( this.queryType == QueryType.AGGREGATE_QUERY);}
+	public void setAggregate(boolean aggregate){this.queryType = QueryType.AGGREGATE_QUERY;}
+	
+	public boolean isTable(){return( this.queryType == QueryType.TABLE_QUERY);}
+	public void setTable(boolean aggregate){this.queryType = QueryType.TABLE_QUERY;}
 	
 	@Transient
 	public abstract DaqueryResponse run(DaqueryResponse response, DataModel model);
