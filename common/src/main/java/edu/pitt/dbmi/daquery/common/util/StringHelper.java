@@ -8,6 +8,14 @@ import java.util.Date;
 
 public class StringHelper
 {
+	public static boolean startsWithIgnoreCase(String val, String match)
+	{
+		if(StringHelper.isEmpty(val) || StringHelper.isEmpty(match))
+			return(false);
+		else
+			return(val.toUpperCase().startsWith(match.toUpperCase()));
+	}
+	
 	public static String stackToString(Throwable t)
 	{
 		StringWriter sWriter = new StringWriter();
@@ -33,6 +41,47 @@ public class StringHelper
 		return(isEmpty(val));
 	}
 	
+	/** find the matching type of the string
+	 * Looks for boolean, int, String - in that order,
+	 * returns null if the type can't be determined
+	 * @param val
+	 * @return
+	 */
+	private static String [] booleanVals = {"yes", "no", "true", "false"};
+	public static Class<?> myType(String val)
+	{
+		if(isEmpty(val)) return(null);
+		String chkVal = val.trim();
+		if(isBoolean(chkVal))
+			return(Boolean.class);
+		else if(isInt(val))
+			return(Integer.class);
+		else
+			return(String.class);
+	}
+	
+	public static Boolean toBool(String val)
+	{
+		if(! isBoolean(val)) return(null);
+		String chkVal = val.trim().toLowerCase();
+		if(chkVal.equals("yes") || chkVal.equals("true")) return(true);
+		return(false);
+	}
+	
+	public static boolean isBoolean(String val)
+	{
+		if(isEmpty(val)) return(false);
+		String chkVal = val.trim();
+		return(equalIgnoreCase(chkVal, booleanVals));
+	}
+	public static boolean isInt(String val)
+	{
+		if(isEmpty(val)) return(false);
+		try{Integer.parseInt(val);}
+		catch(NumberFormatException nfe){return(false);}
+		return(true);
+		
+	}
 	public static boolean anyAreEmpty(String [] vals)
 	{
 		if(vals == null) return(true);
@@ -114,6 +163,19 @@ public class StringHelper
 		
 		return(val1.toUpperCase().trim().equals(val2.toUpperCase().trim()));
 		
+	}
+	
+	/**
+	 * Compare against a list of values, if any value in the list matches
+	 * return true
+	 */
+	public static boolean equalIgnoreCase(String val, String [] compares)
+	{
+		for(String comp : compares)
+		{
+			if(equalIgnoreCase(val, comp)) return(true);
+		}
+		return(false);
 	}
 	
 	/**
