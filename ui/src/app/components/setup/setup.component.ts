@@ -13,7 +13,7 @@ declare var $:any;
 export class SetupComponent implements OnInit {
   setupForm: FormGroup;
   loading = false;
-  error = '';
+  error: any;
 
   constructor(
               private router: Router,
