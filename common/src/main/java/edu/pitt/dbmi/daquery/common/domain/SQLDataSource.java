@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
@@ -20,6 +22,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
+import edu.pitt.dbmi.daquery.common.util.C3P0Properties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 
 @Entity
@@ -29,6 +32,8 @@ import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 public class SQLDataSource extends DataSource
 {
 	private static final long serialVersionUID = 29408234823894234l;
+	
+	private static Logger log = Logger.getLogger(SQLDataSource.class.getName());
 	
 	private static Hashtable<Long, ComboPooledDataSource> datasources = new Hashtable<Long, ComboPooledDataSource>();
 	
@@ -113,7 +118,7 @@ public class SQLDataSource extends DataSource
 		return(sourceKey);
 	}
 	
-	private ComboPooledDataSource getDataSource() throws PropertyVetoException
+	private ComboPooledDataSource getDataSource() throws PropertyVetoException, DaqueryException
 	{
 		Long key = getSourceKey();
 		if(! datasources.containsKey(getSourceKey()))
@@ -123,11 +128,21 @@ public class SQLDataSource extends DataSource
 			ds.setJdbcUrl(connectionUrl);
 			ds.setPassword(password);
 			ds.setUser(username);
+			
+			if(C3P0Properties.fileExists())
+				C3P0Properties.setProperties(ds);
+			else
+				log.log(Level.INFO, "No c3p0 properties file found.  No additional parameters set.");
+			
+/*			log.log(Level.INFO, "----------------------------------------------------- PREFERRED TEST QUERY" + ds.getPreferredTestQuery());
+			log.log(Level.INFO, "----------------------------------------------------- IDLE CONNECTION TEST PERIOD" + ds.getIdleConnectionTestPeriod());
+			log.log(Level.INFO, "----------------------------------------------------- TEST CONNECTION ON CHECKOUT" + ds.isTestConnectionOnCheckout()); */
+			
 			datasources.put(key,ds);
 		}
 		return(datasources.get(key));
 	}
-	public Connection getConnection() throws SQLException, PropertyVetoException
+	public Connection getConnection() throws SQLException, PropertyVetoException, DaqueryException
 	{
 		ComboPooledDataSource dataSource = getDataSource();
 		return(dataSource.getConnection());

@@ -78,9 +78,8 @@ public class TestConnection
 		try{Class.forName(driverClass);}
 		catch(Throwable t)
 		{
-			logger.log(Level.WARNING, "Unable to load driver class " + driverClass);
-			logger.log(Level.WARNING, "Check to make sure the correct driver is specifed in the -cp argument in run.sh");
-			return new DataBaseTestResult(false, "Unable to load driver class " + driverClass, "Check to make sure the correct driver is specifed in the -cp argument in run.sh");
+			logger.log(Level.SEVERE, "Unable to load driver class " + driverClass + ". Check to make sure the correct jdbc drivers are installed.");
+			return new DataBaseTestResult(false, "Unable to load driver class " + driverClass, "Check to make sure the proper jdbc driver jar file is in place in the java path (possibly in tomcat/lib)");
 		}
 //		System.out.println("Driver " + driverClass + " Successfully loaded.");
 //		System.out.println("Using the following url to connect to the database: " + dbUrl);
@@ -199,12 +198,16 @@ public class TestConnection
 			if(portString != null)
 				try{port = Integer.parseInt(portString);}catch(NumberFormatException nfe){}
 			
-			Socket s = new Socket();			
+			Socket s = new Socket();
+			logger.log(Level.INFO, "Testing connection to " + serverName + " on port " + portString + "/" + port);
 			s.connect(new InetSocketAddress(serverName, port), 2000);
-			try{s.close();}catch(Throwable t){}
+			try{s.close();}catch(Throwable t)
+			{
+				logger.log(Level.SEVERE, "Error while testing db connection. server: " + serverName + " port: " + portString + "/" + port + " Driver:" + driverName + "\nURL:" + url, t);
+			}
 			return true;
 	    } catch (Exception ex) {
-	        ex.printStackTrace(System.err);
+	        logger.log(Level.SEVERE, "Error encountered while testing a connection. Driver:" + driverName + "\nURL:" + url, ex);
 	    }
 	    return false;
 	}	
