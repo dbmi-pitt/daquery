@@ -422,7 +422,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             
             if(!TestConnection.checkConnection((String)databaseInfo.get("url"), (String) databaseInfo.get("driver"))) {
             	String msg = "Database is unreachable. Check that the server and port are specified correctly.  Or check firewall settings.";
-            	logger.log(Level.WARNING, msg);
+            	logger.log(Level.SEVERE, msg);
             	
             	return Response.ok(200).entity("{\"result\": false, \"errorMsg\": \"" + msg + "\", \"detailErrorMsg\": \"\"}").build();
             }

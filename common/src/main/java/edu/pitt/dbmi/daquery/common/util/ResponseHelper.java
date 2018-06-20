@@ -314,10 +314,33 @@ public class ResponseHelper {
     {
     	String msg = null;
     	ErrorInfo eInfo = null;
+
+		if(! StringHelper.isEmpty(message))
+			msg = message;
+		else
+			msg = "";    	
+
+		if(cause != null && cause instanceof DaqueryErrorException)
+    	{
+    		DaqueryErrorException ex = (DaqueryErrorException) cause;
+   			eInfo = ex.getErrorInfo();
+   			if(eInfo != null)
+   			{
+   				if(! StringHelper.isEmpty(eInfo.getDisplayMessage()))
+   					msg = eInfo.getDisplayMessage() + " : " + msg;
+   				else if(! StringHelper.isEmpty(eInfo.getLongMessage()))
+   					msg = msg + " : " + eInfo.getLongMessage();
+   			}
+   			
+    	}
+    	else if(cause != null && StringHelper.isEmpty(message))
+    	{
+    		msg = cause.getMessage();
+    	}
+		
     	try
     	{
-    		msg = message;
-	    	if(msg == null)
+	    	if(StringHelper.isEmpty(msg) && eInfo == null)
 	    	{
 	    		msg = "Unexplained error recieved.";
 	    		DaqueryException ex;
