@@ -336,7 +336,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			)
 	{
 		try
-		{
+		{	
 	    	if (! AppProperties.isDebugMode() && uriInfo.getRequestUri().getScheme() != "https") {
 	            return(ResponseHelper.getErrorResponse(500, "This service must be accessed via https only.", "A call to " + uriInfo.getRequestUri().toString() + " was made.  This needs to be done via https.", null));    		
 	    	}

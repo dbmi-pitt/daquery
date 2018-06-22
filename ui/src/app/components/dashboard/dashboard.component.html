@@ -5,7 +5,7 @@
     <div *ngIf="error.error" class="alert alert-danger alert-dismissible">
       <button type="button" class="close" data-dismiss="alert" aria-hidden="true" (click)="onAlertDismiss()">×</button>
       {{ error.error.error.displayMessage }}
-      <button class="btn-link" style="color: #fff" (click)="showErrorInfo()">More info</button>
+      <button class="btn-link" style="color: #fff; text-decoration: underline" (click)="showErrorInfo()">More info</button>
     </div>
     <router-outlet></router-outlet>
   </div>
@@ -46,7 +46,7 @@
       <div class="modal-body">
         <h4>{{ error?.error?.message }}</h4>
         {{ error?.error?.error?.longMessage }}
-        <div class="row">
+        <div *ngIf="error?.error?.error?.stackTrace" class="row">
           <div class="col-md-4 col-md-offset-4">
             <button (click)="showStackTrace = !showStackTrace" class="btn btn-link">{{ showStackTrace ? "Hide Stack Trace" : "Show Stack Trace" }}</button>
           </div>

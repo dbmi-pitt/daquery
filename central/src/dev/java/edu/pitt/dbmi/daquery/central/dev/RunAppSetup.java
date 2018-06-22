@@ -7,7 +7,7 @@ public class RunAppSetup
 {
 	public static void main(String [] args) throws Exception
 	{
-		AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
+		AppProperties.setDevHomeDir("C:\\Users\\del20");
 		AppSetup.initialSetup("123456789", "central-test", "", "path@pitt.edu", "temptest", "Test User");
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());

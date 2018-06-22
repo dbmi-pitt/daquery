@@ -16,6 +16,7 @@ import org.hibernate.Session;
 import edu.pitt.dbmi.daquery.common.util.*;
 import edu.pitt.dbmi.daquery.central.ConnectionRequest;
 import edu.pitt.dbmi.daquery.central.ConnectionRequestStatus;
+import edu.pitt.dbmi.daquery.central.SiteContact;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.*;
@@ -243,6 +244,70 @@ public class DBHelper
 	}
 	
 	/**
+	 * Get the site contact by site_id, user_id
+	 * @param siteId
+	 * @param userId
+	 * @throws DaqueryCentralException
+	 */
+	public static SiteContact getSiteContact(String siteId, String userId) throws DaqueryCentralException {
+		String sql = "select id, site_id, user_id, email, real_name from site_contact where site_id=? and user_id=?";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, siteId);
+			ps.setString(2, userId);
+			rs = ps.executeQuery();
+			if(rs.next()) {
+				return new SiteContact(rs);
+			} else {
+				return null;
+			}
+		} catch (Throwable t) {
+			String msg = "An unexpected error occurred while looking up the site contact with site_id: " + siteId + " user_id: " + userId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, rs);
+		}
+	}
+	
+	/**
+	 * Get the site contacts by site_id
+	 * @param siteId
+	 * @param userId
+	 * @throws DaqueryCentralException
+	 */
+	public static List<String> getSiteContactsEmail(String siteId) throws DaqueryCentralException {
+		String sql = "select email from site_contact where site_id=?";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, siteId);
+			rs = ps.executeQuery();
+			List<String> contacts = new ArrayList<>();
+			while(rs.next()) {
+				contacts.add(rs.getString(0));
+			}
+			
+			return contacts;
+		} catch (Throwable t) {
+			String msg = "An unexpected error occurred while looking up the site contact with site_id: " + siteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, rs);
+		}
+	}
+	
+	/**
 	 * Create the connection request with network_id, from_site_id, to_site_id
 	 * @param ConnectionRequest cr
 	 * @throws DaqueryCentralException
@@ -272,6 +337,65 @@ public class DBHelper
 		}
 	}
 	
+	/**
+	 * Create the site contact with site_id, user_id, email, real_name
+	 * @param String siteId
+	 * @param String userId
+	 * @param String email
+	 * @param String realName
+	 * @throws DaqueryCentralException
+	 */
+	public static boolean createSiteContact(String siteId, String userId, String email, String realName) throws DaqueryCentralException {
+		String sql = "insert into site_contact (site_id, user_id, email, real_name) values (?, ?, ?, ?)";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, siteId);
+			ps.setString(2, userId);
+			ps.setString(3, email);
+			ps.setString(4, realName);
+			ps.execute();
+			
+			return true;
+		} catch(Throwable t) {
+			String msg = "An unexpected error occurred while creating the site contact with site_id: " + siteId + " user_id: " + userId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, null);
+		}
+	}
+	
+	/**
+	 * Delete the site contact with site_id, user_id
+	 * @param String siteId
+	 * @param String userId
+	 * @throws DaqueryCentralException
+	 */
+	public static boolean deleteSiteContact(String siteId, String userId) throws DaqueryCentralException {
+		String sql = "delete from site_contact where site_id=? and user_id=?";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, siteId);
+			ps.setString(2, userId);
+			ps.execute();
+			
+			return true;
+		} catch(Throwable t) {
+			String msg = "An unexpected error occurred while deleteing the site contact with site_id: " + siteId + " user_id: " + userId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, null);
+		}
+	}
 	
 	/**
 	 * Get sites waiting for response
