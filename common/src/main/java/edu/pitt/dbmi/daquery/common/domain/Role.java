@@ -15,6 +15,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
 
 
@@ -52,6 +53,7 @@ public class Role extends DaqueryObject implements Serializable {
 	@Column(nullable=false, length=50)
 	private String name;
 
+	@JsonIgnore
 	//bi-directional many-to-many association to User
 	@ManyToMany(mappedBy="roles", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private List<DaqueryUser> users;

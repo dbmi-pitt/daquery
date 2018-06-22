@@ -27,11 +27,14 @@ import com.google.gson.GsonBuilder;
 
 import edu.pitt.dbmi.daquery.central.ConnectionRequest;
 import edu.pitt.dbmi.daquery.central.ConnectionRequestStatus;
+import edu.pitt.dbmi.daquery.central.SiteContact;
 import edu.pitt.dbmi.daquery.central.util.DBHelper;
 import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
 import edu.pitt.dbmi.daquery.central.util.EmailHelper;
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
@@ -194,7 +197,7 @@ public class CentralService{
 			// send email to toSite admin
 			if (DBHelper.createConnectionRequest(networkId, fromSiteId, toSiteId, requesterEmail)) {
 				List<String> toAddresses = new ArrayList<String>();
-				toAddresses.add(site.getAdminEmail());
+				toAddresses.addAll(DBHelper.getSiteContactsEmail(site.getSiteId()));
 				EmailHelper eh = new EmailHelper();
 				eh.sendMail("Daquery Connection Request", "Daquery site " + requestedToSite.getName() + 
 						  " is requesting to connect to your site, " + site.getName() + 
@@ -213,6 +216,84 @@ public class CentralService{
 					+ " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
 			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to create a connection request.", msg + " Check the central server logs for more information.", t));
+		}
+	}
+	
+	/**
+	 * Create a new site contact
+	 * 
+	 * @param siteId
+	 * @param userId
+	 * @param email
+	 * @param realName
+	 * @return 200 with info specified above, 401 if authentication fails or 400/500
+	 *         on error.
+	 */
+	@GET
+	@Path("add-site-contact")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response addSiteContact(@QueryParam("site-id") String siteId,
+			@QueryParam("user-id") String userId,
+			@QueryParam("email") String email,
+			@QueryParam("real-name") String realName) {
+		try {
+			// create SiteContact
+			SiteContact sc = DBHelper.getSiteContact(siteId, userId);
+			if (sc != null)
+				return (ResponseHelper.getBasicResponse(400, "This site contact is already exist."));
+
+			// send email to toSite admin
+			if (DBHelper.createSiteContact(siteId, userId, email, realName)) {
+				
+				return ResponseHelper.getJsonResponseGen(200, "{}");
+			} else {
+				return ResponseHelper.getErrorResponse(500, "Error while saving a site contact",  "An unexpected error occured while authenticating a site.  Check the central server logs for more information.", null);
+			}
+		} catch (Throwable t) {
+			String msg = "An error occurred while creating a site contact with site_id:" + siteId
+					+ " user_id:" + userId + " email:" + email + " real_name:" + realName;
+			log.log(Level.SEVERE, msg, t);
+			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to create a site contact.", msg + " Check the central server logs for more information.", t));
+		}
+	}
+	
+	/**
+	 * Delete a site contact
+	 * 
+	 * @param siteId
+	 * @param userId
+	 * @param email
+	 * @param realName
+	 * @return 200 with info specified above, 401 if authentication fails or 400/500
+	 *         on error.
+	 */
+	@GET
+	@Path("delete-site-contact")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteSiteContact(@QueryParam("site-id") String siteId,
+			@QueryParam("user-id") String userId,
+			@QueryParam("email") String email,
+			@QueryParam("real-name") String realName) {
+		try {
+			// create SiteContact
+			SiteContact sc = DBHelper.getSiteContact(siteId, userId);
+			if (sc == null)
+				return ResponseHelper.getJsonResponseGen(200, "{}");
+
+			// send email to toSite admin
+			if (DBHelper.deleteSiteContact(siteId, userId)) {
+				
+				return ResponseHelper.getJsonResponseGen(200, "{}");
+			} else {
+				return ResponseHelper.getErrorResponse(500, "Error while deleting a site contact",  "An unexpected error occured while authenticating a site.  Check the central server logs for more information.", null);
+			}
+		} catch (Throwable t) {
+			String msg = "An error occurred while deleting a site contact with site_id:" + siteId
+					+ " user_id:" + userId + " email:" + email + " real_name:" + realName;
+			log.log(Level.SEVERE, msg, t);
+			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to delete a site contact.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 
@@ -240,6 +321,32 @@ public class CentralService{
 		catch(Throwable t)
 		{
 			return ResponseHelper.getErrorResponse(500, "Unable to send email message.", null, t);
+		}
+	}
+	
+	@GET
+	@Path("site-contact")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response addUser(DaqueryUser user)
+	{
+		
+		Session sess = null;
+		try
+		{
+			sess = HibernateConfiguration.openSession();
+			
+			sess.saveOrUpdate(user);
+			
+				
+			return ResponseHelper.getBasicResponse(201, "User created.");
+		}
+		catch(Throwable t)
+		{
+			return ResponseHelper.getErrorResponse(500, "Unable to send email message.", null, t);
+		}
+		finally
+		{
+			if(sess != null) sess.close();
 		}
 	}	
 	

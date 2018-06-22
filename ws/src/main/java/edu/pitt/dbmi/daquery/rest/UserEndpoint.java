@@ -873,6 +873,23 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        user.setContact(updatedUser.getContact());
 	        
+	        Map<String, String> params = new HashMap<>();
+        	params.put("site-id", SiteDAO.getLocalSite().getSiteId());
+        	params.put("user-id", user.getId());
+        	params.put("email", user.getEmail());
+        	params.put("real-name", user.getRealName());
+        	Response resp = null;
+	        if(user.getContact()) {
+	        	resp = WSConnectionUtil.centralServerGet("add-site-contact", params);
+	        } else {
+	        	resp = WSConnectionUtil.centralServerGet("delete-site-contact", params);
+	        }
+	        
+	        if(resp.getStatus() != 200) {
+	        	String msg = "There is problem on daquery central on adding or deleting a site contact.";
+	        	throw new Exception();
+	        }
+	        
 	        //persist changes
 	        s.getTransaction().begin();
 	
