@@ -434,8 +434,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while setting up the site.", "More information may be available in the application logs.", t));
 		}
 	}
-	
-	
+		
 	@POST
 	@Path("request")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -533,7 +532,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 						EmailContents email = new EmailContents();
 						email.subject = "Data Request Submitted";
 						email.message = "A data request in network " + request.getNetwork().getName() +" from " + request.getRequesterSite().getName() + " was submitted to your site: " + request.getRequestSite().getName() + ".<br /><br /> Please log into Daquery and go to Incoming Requests to review the request.";
-						email.toAddresses.add(request.getRequestSite().getAdminEmail());
+						for(DaqueryUser u : request.getNetwork().getContacts()) {
+							email.toAddresses.add(u.getEmail());
+						}
 						request.getRequesterSite();
 						EmailUtil.sendEmail(email);
 					}											

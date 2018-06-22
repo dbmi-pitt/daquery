@@ -32,6 +32,7 @@ import org.hibernate.HibernateException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
@@ -459,7 +460,9 @@ public class NetworkEndpoint extends AbstractEndpoint {
             
             Network network = NetworkDAO.getNetworkById(id);
             
-            NetworkDAO.addContactToNetwork(network, user);
+            DaqueryUser u = DaqueryUserDAO.getUserByNameOrId(user.getId());
+            
+            NetworkDAO.addContactToNetwork(network, u);
             
             return Response.ok(201).entity("{}").build();
     	}
