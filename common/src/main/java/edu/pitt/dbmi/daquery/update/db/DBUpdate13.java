@@ -49,4 +49,9 @@ public class DBUpdate13 implements DBUpdater
 		st.executeUpdate("update DATA_MODEL set DATA_EXPORT_CONf = '" + exportXML + "'");
 		conn.commit();
 	}
+	
+	@Override
+	public void updateCentralData(Connection conn) throws Exception {
+		//nothing to do on central for this update
+	}	
 }

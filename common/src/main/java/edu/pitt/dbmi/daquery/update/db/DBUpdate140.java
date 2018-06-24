@@ -14,4 +14,9 @@ public class DBUpdate140 implements DBUpdater
 	public void updateData(Connection conn) throws Exception {
 		//nothing to do for this update
 	}
+	
+	@Override
+	public void updateCentralData(Connection conn) throws Exception {
+		//nothing to do on central for this update
+	}
 }

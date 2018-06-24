@@ -157,6 +157,12 @@ public class AppProperties
 		
 	}
 	
+	public static boolean isCentral()
+	{
+		String isCent = ApplicationPropertiesFile.getPropertiesFromFile().getProperty("is.central", "");
+		return(StringHelper.equalIgnoreCase(isCent, "true") || StringHelper.equalIgnoreCase(isCent, "yes"));
+	}
+	
 	public static String getCentralServerURL()
 	{
 		if(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL")))

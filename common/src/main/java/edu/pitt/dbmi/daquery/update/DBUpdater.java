@@ -5,4 +5,6 @@ import java.sql.Connection;
 public interface DBUpdater
 {
 	public void updateData(Connection conn) throws Exception;
+	
+	public void updateCentralData(Connection conn) throws Exception;
 }
