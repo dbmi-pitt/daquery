@@ -3,6 +3,8 @@ package edu.pitt.dbmi.daquery.common.util;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,8 +18,76 @@ public class ReflectionHelper
 {
 	private static Logger log = Logger.getLogger(ReflectionHelper.class.getName());
 	
-	public static List<Class<?>> classesInPackage(String pkg) throws IOException
+	/**
+	 * Find all setter methods that match a given parameter name
+	 * Criteria is, match parameter name, single argument and returns void  
+	 */
+	public static List<Method> findMatchingSetters(Class<?> cls, String parameterName)
 	{
+		List<Method> returnMethods = new ArrayList<Method>();
+		if(!StringHelper.isEmpty(parameterName) && ! (cls == null))
+		{
+			String pNameTrimmed = parameterName.trim();
+			String setterName = "set" + pNameTrimmed.substring(0, 1).toUpperCase() + pNameTrimmed.substring(1);
+			Method [] allMethods = cls.getMethods();
+			for(Method m : allMethods)
+			{
+				if(m.getName().equals(setterName) &&
+					m.getReturnType().equals(Void.TYPE) &&
+					m.getParameterTypes().length == 1)
+				{
+					returnMethods.add(m);
+				}
+			}
+		}
+		return(returnMethods);
+	}
+	
+	public static void setValue(Object obj, Class<?> cls, String parameterName, String value) throws InvocationTargetException, IllegalAccessException, IllegalArgumentException, DaqueryException
+	{
+		List<Method> setters = findMatchingSetters(cls, parameterName);
+		Class<?> valType = StringHelper.myType(value);
+		if(valType == null) throw new DaqueryException("The type for " + value + " while setting " + parameterName + " could not be determined.  Only int, boolean or String are supported.");
+		boolean invoked = false;
+		for(Method m : setters)
+		{ 
+			Class<?> type = m.getParameterTypes()[0];
+			if(type.equals(int.class) && valType.equals(Integer.class))
+			{
+				m.invoke(obj, Integer.parseInt(value));
+				invoked = true;
+			}
+			else if(type.equals(Integer.class) && valType.equals(Integer.class))
+			{
+				m.invoke(obj, new Integer(Integer.parseInt(value)));
+				invoked = true;
+			}
+			else if(type.equals(boolean.class) && valType.equals(Boolean.class))
+			{
+				m.invoke(obj, StringHelper.toBool(value));
+				invoked = true;
+			}
+			else if(type.equals(Boolean.class) && valType.equals(Boolean.class))
+			{
+				m.invoke(obj, new Boolean(StringHelper.toBool(value)));
+				invoked = true;
+			}
+			else if(type.equals(String.class) && valType.equals(String.class))
+			{
+				m.invoke(obj, value);
+				invoked = true;
+			}
+		}
+		if(! invoked)
+		{
+			throw new DaqueryException("The available setter argument types for " + parameterName + " did not match the supplied value type of " + valType.getSimpleName());
+		}
+	}
+	
+	
+	
+	public static List<Class<?>> classesInPackage(String pkg) throws IOException
+	{	
 		List<Class<?>> rVal = new ArrayList<Class<?>>();
 		String pkgAsFilePath = pkg.replace('.', '/');
 		for (File f : getResourceFolderFiles(pkgAsFilePath))

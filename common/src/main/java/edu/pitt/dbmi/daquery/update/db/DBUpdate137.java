@@ -59,5 +59,9 @@ public class DBUpdate137 implements DBUpdater
 		String retString = inputStr.replace("'", "''");
 		return retString;
 	}
-
+	
+	@Override
+	public void updateCentralData(Connection conn) throws Exception {
+		//nothing to do on central for this update
+	}
 }

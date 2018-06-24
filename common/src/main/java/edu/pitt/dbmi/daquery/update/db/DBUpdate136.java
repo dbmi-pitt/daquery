@@ -16,4 +16,9 @@ public class DBUpdate136 implements DBUpdater
 		AppProperties.setTaskQueueMaxLength(TaskQueue.EXPORT_QUEUE, 1);
 		AppProperties.setTaskQueueMaxLength(TaskQueue.MAIN_QUEUE, 4);
 	}
+	
+	@Override
+	public void updateCentralData(Connection conn) throws Exception {
+		//nothing to do on central for this update
+	}	
 }

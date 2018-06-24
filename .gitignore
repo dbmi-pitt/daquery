@@ -48,3 +48,6 @@ build.version
 # System Files
 /ui/.DS_Store
 /ui/Thumbs.db
+
+daquery.c3p0.properties
+
