@@ -140,6 +140,8 @@ public class UpdateDBForVersion
 		Object obj = ui.cls.newInstance();
 		DBUpdater updater = (DBUpdater) obj;
 		updater.updateData(conn);
+		if(AppProperties.isCentral())
+			updater.updateCentralData(conn);
 	}
 	
 	private static List<UpdateInfo> getDBUpdateClasses() throws IOException
@@ -156,6 +158,7 @@ public class UpdateDBForVersion
 					uInfo.cls = cls;
 					uInfo.version = vsn.version();
 					uInfo.ddlFile = vsn.ddlFile();
+					uInfo.centralDDLFile = vsn.centralDDLFile();
 					rVal.add(uInfo);
 				}
 			}
@@ -168,6 +171,7 @@ public class UpdateDBForVersion
 		Class<?> cls;
 		float version;
 		String ddlFile;
+		String centralDDLFile;
 		
 		@Override
 		public int compareTo(UpdateInfo val)
@@ -193,15 +197,22 @@ public class UpdateDBForVersion
 
 	private static void updateDDL(UpdateInfo info, Connection conn) throws DaqueryException, SQLException
 	{
-		if(StringHelper.isEmpty(info.ddlFile))
-			return;
-		log.log(Level.INFO, "Updating database with " + "/edu/pitt/dbmi/daquery/update/db/" + info.ddlFile);
-		InputStream is = ApplicationPropertiesFile.class.getResourceAsStream("/edu/pitt/dbmi/daquery/update/db/" + info.ddlFile);
+		if(! StringHelper.isEmpty(info.ddlFile))
+			updateDDL(info.ddlFile, conn);
+		if( (! StringHelper.isEmpty(info.centralDDLFile)) && AppProperties.isCentral())
+			updateDDL(info.centralDDLFile, conn);
+	}
+	
+	private static void updateDDL(String ddlFileName, Connection conn) throws DaqueryException, SQLException
+	{
+		log.log(Level.INFO, "Updating database with " + "/edu/pitt/dbmi/daquery/update/db/" + ddlFileName);
+		InputStream is = ApplicationPropertiesFile.class.getResourceAsStream("/edu/pitt/dbmi/daquery/update/db/" + ddlFileName);
 	    Scanner inputScanner = new Scanner(is);
 	    inputScanner.useDelimiter(ApplicationDBHelper.DDL_SCANNER_PATTERN);
 	    Statement dbStatement = null;
 	    dbStatement = conn.createStatement();
 	    ApplicationDBHelper.executeDDL(dbStatement, inputScanner);
+		
 	}
 	
 	/*	public static boolean updateDB()
