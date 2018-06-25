@@ -130,7 +130,7 @@ export class UserService {
   forceChangePassword(user: any): Observable<boolean> {
     return this.http.put(`/daquery/ws/users/${user.id}/force-change-password`, user)
                     .catch(error => {
-                      if(error.status != 401)
+                      if(error.status != 400)
                         this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     })

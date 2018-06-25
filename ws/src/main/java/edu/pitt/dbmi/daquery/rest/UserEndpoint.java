@@ -6,6 +6,7 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -510,6 +511,7 @@ public class UserEndpoint extends AbstractEndpoint {
      * @param password- the password for the account.  This value must not be empty.
      * @return javax.ws.rs.core.Response containing a status of OK plus the JWT for a valid login/password combination
      * otherwise, return a BAD REQUEST if login and/or password is empty.  Return an UNAUTHORIZED for any other failure.
+     * @throws UnsupportedEncodingException 
      */
     @GET
     @Path("/login")
@@ -517,9 +519,10 @@ public class UserEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response authenticateUser(@QueryParam("email") String email,
                                      @QueryParam("password") String password,
-                                     @DefaultValue("") String networkId) {
+                                     @DefaultValue("") String networkId) throws UnsupportedEncodingException {
 
-    	
+    	email = java.net.URLDecoder.decode(email, "UTF-8");
+    	password = java.net.URLDecoder.decode(password, "UTF-8");
     	String netId = (StringHelper.isEmpty(networkId))?null:networkId;
     	
     	if (email.isEmpty() || password.isEmpty()) 
@@ -847,7 +850,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        Site mySite = SiteDAO.getLocalSite();
 	        //step 6: is the user's password expired?
-	        if (DaqueryUserDAO.expiredPassword(user.getId())) {
+	        if (DaqueryUserDAO.expiredPassword(loggedInUser.getId())) {
 	            return(ResponseHelper.expiredPasswordResponse(user.getId(), mySite.getSiteId(), null));	        		        	
 	        }
 	        
@@ -869,6 +872,23 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	user.setEmail(updatedUser.getEmail());
 	        
 	        user.setContact(updatedUser.getContact());
+	        
+	        Map<String, String> params = new HashMap<>();
+        	params.put("site-id", SiteDAO.getLocalSite().getSiteId());
+        	params.put("user-id", user.getId());
+        	params.put("email", user.getEmail());
+        	params.put("real-name", user.getRealName());
+        	Response resp = null;
+	        if(user.getContact()) {
+	        	resp = WSConnectionUtil.centralServerGet("add-site-contact", params);
+	        } else {
+	        	resp = WSConnectionUtil.centralServerGet("delete-site-contact", params);
+	        }
+	        
+	        if(resp.getStatus() != 200) {
+	        	String msg = "There is problem on daquery central on adding or deleting a site contact.";
+	        	throw new Exception();
+	        }
 	        
 	        //persist changes
 	        s.getTransaction().begin();
