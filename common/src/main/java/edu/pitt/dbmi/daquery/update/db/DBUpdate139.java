@@ -12,4 +12,9 @@ public class DBUpdate139 implements DBUpdater
 	public void updateData(Connection conn) throws Exception {
 		//nothing to do here
 	}
+	
+	@Override
+	public void updateCentralData(Connection conn) throws Exception {
+		//nothing to do on central for this update
+	}
 }
