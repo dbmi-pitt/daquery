@@ -9,13 +9,13 @@ public class CreateCentralDB
 {
 	public static void main(String [] args) throws Throwable
 	{
-		AppProperties.setDevHomeDir("/home/devuser/daquery-data/");
+		AppProperties.setDevHomeDir("C:\\Users\\del20");
 		AppSetup.initialSetup(UUID.randomUUID().toString(), "PaTH-Central", "", "shirey@pitt.edu", UUID.randomUUID().toString(), "Central User");
 		if(AppSetup.isErroredSetup())
 			System.err.println(AppSetup.getErrorMessage());
 		else if(AppSetup.isValidSetup())
 		{
-			CreateProdNetwork.createPathtNetwork();
+			CreateTestNetworks.createLocalDevTestNetwork();
 			System.out.println("All Good");
 		}
 		else
