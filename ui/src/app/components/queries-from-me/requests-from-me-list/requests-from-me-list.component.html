@@ -10,7 +10,7 @@
     <tbody *ngFor="let requestGroup of (requestGroups | mapValues)">
       <tr>
         <td (click)="requestGroup.active = !requestGroup.active"><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}"></i> {{ requestGroup.val[0].inquiry.inquiryName }}</td>
-        <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</td>
+        <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
         <td></td>
       </tr>
       <tr *ngIf="requestGroup.active">
@@ -57,7 +57,7 @@
               <tr *ngFor="let request of requestGroup.val">
                 <td>{{ request.requestSite.name }}</td>
                 <td>{{ request.responses[0]?.status }}</td>
-                <td>{{ request.responses[0]?.replyTimestamp | date:'yyyy-MM-dd HH:mm a' }}</td>
+                <td>{{ request.responses[0]?.replyTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
                 <td>{{ getRequestResult(request.responses[0]) }}
                     <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED', 'PENDING', 'DENIED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
                     <span *ngIf="request.responses[0]?.hasError" class="pull-right-container">
