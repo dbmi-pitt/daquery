@@ -5,7 +5,7 @@
         <ul class="nav nav-pills nav-stacked">
           <li *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'active' : ''">
             <a style="cursor: pointer" (click)="onRequestSelect(request)"> {{request.inquiry.inquiryName}} <br />
-            <span>@{{ request.sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</span>  
+            <span>@{{ request.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</span>  
             <span class="label pull-right" [ngClass]="getRequestStatusLabelClass(request)">{{ request.responses[0].status }}</span></a>
           </li>
         </ul>
@@ -30,7 +30,7 @@
                 <div class="user-block">
                   <i class="fa fa-user-circle-o fa-3x" style="float: left" aria-hidden="true"></i>
                   <span class="username">{{selectedRequest.requester?.realName}}</span>
-                  <span class="description">{{ selectedRequest.requesterSite.name }} | {{ selectedRequest.requester.email }} | {{ selectedRequest.sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</span>
+                  <span class="description">{{ selectedRequest.requesterSite.name }} | {{ selectedRequest.requester.email }} | {{ selectedRequest.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</span>
                 </div>
               </div>
               <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
