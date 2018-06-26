@@ -198,6 +198,9 @@ public class CentralService{
 			if (DBHelper.createConnectionRequest(networkId, fromSiteId, toSiteId, requesterEmail)) {
 				List<String> toAddresses = new ArrayList<String>();
 				toAddresses.addAll(DBHelper.getSiteContactsEmail(site.getSiteId()));
+				if(toAddresses.size() == 0) {
+					toAddresses.add(site.getAdminEmail());
+				}
 				EmailHelper eh = new EmailHelper();
 				eh.sendMail("Daquery Connection Request", "Daquery site " + requestedToSite.getName() + 
 						  " is requesting to connect to your site, " + site.getName() + 
