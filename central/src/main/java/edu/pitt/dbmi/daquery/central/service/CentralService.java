@@ -241,7 +241,7 @@ public class CentralService{
 			// create SiteContact
 			SiteContact sc = DBHelper.getSiteContact(siteId, userId);
 			if (sc != null)
-				return (ResponseHelper.getBasicResponse(400, "This site contact is already exist."));
+				return (ResponseHelper.getBasicResponse(200, "This site contact is already exist."));
 
 			// send email to toSite admin
 			if (DBHelper.createSiteContact(siteId, userId, email, realName)) {

@@ -220,12 +220,11 @@ public class DaqueryUser extends UserInfo {
 		super.setId(newUUID.toString());
 	}
 	
-	public boolean getContact() {
-		if(this.contact == null) return false;
+	public Boolean getContact() {
 		return this.contact;
 	}
 	
-	public void setContact(boolean value) {
+	public void setContact(Boolean value) {
 		this.contact = value;
 	}
 	
