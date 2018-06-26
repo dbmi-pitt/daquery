@@ -140,8 +140,9 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	public boolean isAggregate(){return( this.queryType == QueryType.AGGREGATE_QUERY);}
 	public void setAggregate(boolean aggregate){this.queryType = QueryType.AGGREGATE_QUERY;}
 	
-	public boolean isTable(){return( this.queryType == QueryType.TABLE_QUERY);}
-	public void setTable(boolean aggregate){this.queryType = QueryType.TABLE_QUERY;}
+	@Column(name="QUERY_TYPE")
+	public QueryType getQueryType() { return this.queryType; }
+	public void setQueryType(QueryType queryType) { this.queryType = queryType; }
 	
 	@Transient
 	public abstract DaqueryResponse run(DaqueryResponse response, DataModel model);
