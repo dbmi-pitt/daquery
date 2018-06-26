@@ -1,0 +1,1 @@
+create table site_contact (id int NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY, site_id varchar(256), user_id varchar(256), email varchar(256), real_name varchar(256));

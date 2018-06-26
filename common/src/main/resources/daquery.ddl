@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.43 -->
+<!-- daquery.data.version=1.44 -->
 
 CREATE TABLE "APP"."NETWORK"
 (

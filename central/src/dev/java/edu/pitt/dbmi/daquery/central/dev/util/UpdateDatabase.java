@@ -9,7 +9,7 @@ public class UpdateDatabase
 {
 	public static void main(String [] args)
 	{
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		AppProperties.setDevHomeDir("C:\\Users\\del20");
 		UpdateDBForVersion.updateDB();
 	}
 }

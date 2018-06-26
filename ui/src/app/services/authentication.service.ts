@@ -18,7 +18,7 @@ export class AuthenticationService {
   }
 
   login(email: string, password: string): Observable<string> {
-    const params = new HttpParams().set('email', email).set('password', password);
+    const params = new HttpParams().set('email', encodeURIComponent(email)).set('password', encodeURIComponent(password));
     
     return this.http.get('/daquery/ws/users/login', {params: params})
                     .map(response => {

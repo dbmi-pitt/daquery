@@ -87,7 +87,7 @@ public class DaqueryUser extends UserInfo {
     @Expose
     @Column(name="CONTACT")
     private Boolean contact;
-        
+    
     // ======================================
     // =            Constructors            =
     // ======================================

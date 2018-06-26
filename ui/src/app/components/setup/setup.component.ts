@@ -14,6 +14,8 @@ export class SetupComponent implements OnInit {
   setupForm: FormGroup;
   loading = false;
   error: any;
+  
+  showStackTrace = false;
 
   constructor(
               private router: Router,

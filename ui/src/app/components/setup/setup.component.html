@@ -128,7 +128,7 @@
       </div>
       <br />
       <div *ngIf="error" class="alert alert-danger">{{error.displayMessage}}
-        <button class="btn-link" style="color: #fff" (click)="showErrorInfo()">More info</button>
+        <button class="btn-link" style="color: #fff; text-decoration: underline" (click)="showErrorInfo()">More info</button>
       </div>
     </form>
   </div>
@@ -145,6 +145,14 @@
         <div class="modal-body">
           <h4>{{ error?.message }}</h4>
           <h4>{{ error?.longMessage }}</h4>
+          <div *ngIf="error?.stackTrace" class="row">
+            <div class="col-md-4 col-md-offset-4">
+              <button (click)="showStackTrace = !showStackTrace" class="btn btn-link">{{ showStackTrace ? "Hide Stack Trace" : "Show Stack Trace" }}</button>
+            </div>
+          </div>
+          <div *ngIf="showStackTrace" style="overflow: auto;">
+            {{ error?.stackTrace }}
+          </div>
         </div>
         <div class="modal-footer">
           
