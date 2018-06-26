@@ -882,7 +882,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        	Response resp = null;
 		        if(user.getContact()) {
 		        	resp = WSConnectionUtil.centralServerGet("add-site-contact", params);
-		        } else if (user.getContact()){
+		        } else {
 		        	resp = WSConnectionUtil.centralServerGet("delete-site-contact", params);
 		        }
 		        
