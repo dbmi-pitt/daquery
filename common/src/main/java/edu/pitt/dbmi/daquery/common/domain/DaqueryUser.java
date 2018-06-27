@@ -29,7 +29,8 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
         @NamedQuery(name = DaqueryUser.FIND_BY_ID, query = "SELECT u FROM DaqueryUser u WHERE u.id = :id"),
         @NamedQuery(name = DaqueryUser.FIND_BY_USERNAME, query = "SELECT u FROM DaqueryUser u WHERE u.username = :username"),
         @NamedQuery(name = DaqueryUser.FIND_ADMIN, query = "SELECT u FROM DaqueryUser u WHERE lower(trim(u.username)) = 'admin' and upper(trim(u.utype)) = '" + UserInfo.FULL_USER + "'"),
-        @NamedQuery(name = DaqueryUser.COUNT_ALL, query = "SELECT COUNT(u) FROM DaqueryUser u")
+        @NamedQuery(name = DaqueryUser.COUNT_ALL, query = "SELECT COUNT(u) FROM DaqueryUser u"),
+        @NamedQuery(name = DaqueryUser.FIND_CONTACT, query = "SELECt u FROM DaqueryUser u WHERE contact = true")
 })
 
 
@@ -52,6 +53,7 @@ public class DaqueryUser extends UserInfo {
     public static final String FIND_BY_ID = "DaqueryUser.findByID";
     public static final String FIND_BY_USERNAME = "DaqueryUser.findByUsername";
     public static final String FIND_ADMIN = "DaqueryUser.findAdmin";
+    public static final String FIND_CONTACT = "DaqueryUser.findContact";
 
     
     // ======================================
