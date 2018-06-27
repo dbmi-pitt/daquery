@@ -536,6 +536,11 @@ public class DaqueryEndpoint extends AbstractEndpoint
 							email.toAddresses.add(u.getEmail());
 						}
 						if(email.toAddresses.size() == 0) {
+							for(DaqueryUser u : DaqueryUserDAO.getSiteContacts()) {
+								email.toAddresses.add(u.getEmail());
+							}
+						}
+						if(email.toAddresses.size() == 0) {
 							email.toAddresses.add(mySite.getAdminEmail());
 						}
 						request.getRequesterSite();
