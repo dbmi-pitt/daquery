@@ -294,7 +294,7 @@ public class DBHelper
 			rs = ps.executeQuery();
 			List<String> contacts = new ArrayList<>();
 			while(rs.next()) {
-				contacts.add(rs.getString(0));
+				contacts.add(rs.getString("email"));
 			}
 			
 			return contacts;
