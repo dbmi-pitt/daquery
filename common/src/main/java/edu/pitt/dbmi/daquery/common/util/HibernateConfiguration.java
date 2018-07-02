@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
+import edu.pitt.dbmi.daquery.common.domain.ChangePasswordAttempt;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
@@ -83,6 +84,7 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(DataAttribute.class);
     	hibernateConf.addAnnotatedClass(RemoteRole.class);
     	hibernateConf.addAnnotatedClass(SiteConnection.class);
+    	hibernateConf.addAnnotatedClass(ChangePasswordAttempt.class);
     	
     	
         	

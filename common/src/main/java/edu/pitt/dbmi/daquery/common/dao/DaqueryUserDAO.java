@@ -1,6 +1,8 @@
 package edu.pitt.dbmi.daquery.common.dao;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
@@ -12,15 +14,20 @@ import javax.persistence.PersistenceException;
 
 import org.hibernate.HibernateException;
 import org.hibernate.NonUniqueResultException;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.internal.util.StringHelper;
 
+import edu.pitt.dbmi.daquery.common.domain.ChangePasswordAttempt;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.PasswordUtils;
 
@@ -253,7 +260,6 @@ public class DaqueryUserDAO extends AbstractDAO {
 	        throw e;    		
     	}
     }
-
     
     /**
      * Return a boolean indicating if the user's account has been set to one of the
@@ -465,6 +471,50 @@ public class DaqueryUserDAO extends AbstractDAO {
     		logger.info(e.getLocalizedMessage());
         	throw e;
         }
+    }
+    
+    public static List<ChangePasswordAttempt> getUserChangePasswordAttempt(String userId) throws Exception {
+    	logger.info("get change password attemp");
+    	try {
+
+    		List<ParameterItem> pList = new ArrayList<ParameterItem>();
+			ParameterItem piUserId = new ParameterItem("user_id", userId);
+			pList.add(piUserId);
+			Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.HOUR_OF_DAY, -24);
+			Date ago_24 = calendar.getTime();
+    		ParameterItem piAgo24 = new ParameterItem("ago_24", ago_24);
+    		pList.add(piAgo24);
+    		
+    		List<ChangePasswordAttempt> attemp_list = executeQueryReturnList(ChangePasswordAttempt.FIND_LAST_24_HOUR_BY_ID, pList, logger);
+    		
+    		return attemp_list;
+	    
+        } catch (HibernateException pe) {
+    		logger.info("Error unable to connect to database.  Please check database settings.");
+    		logger.info(pe.getLocalizedMessage());
+            throw pe;
+        } catch (Exception e) {
+    		logger.info(e.getLocalizedMessage());
+        	throw e;
+        }
+    }
+    
+    public static void addChangePasswordAttempt(String userId, String ipAddress) {
+    	Session sess = null;
+    	try {
+    		sess = HibernateConfiguration.openSession();
+    		Transaction t = sess.beginTransaction();
+    		ChangePasswordAttempt cpa = new ChangePasswordAttempt(userId, new Date(), ipAddress);
+    		
+    		sess.saveOrUpdate(cpa);
+    		t.commit();
+    		
+    	} catch(Throwable t) {
+    		logger.log(Level.SEVERE, "Unexpected error while tring to add change password attempt for userId: " + userId + ", ipAddress: " + ipAddress);
+    	} finally {
+    		if(sess != null) sess.close();
+    	}
     }
 }
 
