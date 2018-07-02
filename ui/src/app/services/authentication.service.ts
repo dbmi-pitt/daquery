@@ -49,6 +49,8 @@ export class AuthenticationService {
                             localStorage.setItem('jwt', JSON.stringify(token));
                           }
                           return Observable.of('password_expired');
+                        } else if(error.error.subcode === "401.3"){
+                          return Observable.of('account_disabled');
                         }
                         return Observable.of('fail');
                       }

@@ -110,7 +110,8 @@ export class NewQueryComponent implements OnInit {
                             this.authenticationService.renewjwt(network.networkId);
                             this.siteService.getSites(network)
                                             .subscribe(sites => {
-                                              const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
+                                              const siteFGs = sites.sort(function(a,b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); })
+                                                                   .map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
                                               const siteFormArray = this.fb.array(siteFGs);
                                               this.inquiryForm.setControl('sitesToQuery', siteFormArray);
                                             }, error => {

@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -548,7 +549,7 @@ public class UserEndpoint extends AbstractEndpoint {
             
             // Authenticate the user using the credentials provided
             user = DaqueryUserDAO.authenticate(email, password);
-
+            	
             if(DaqueryUserDAO.expiredPassword(user.getId()))
                 return(ResponseHelper.expiredPasswordResponse(user.getId(), mySite.getSiteId(), null));
             
@@ -924,20 +925,37 @@ public class UserEndpoint extends AbstractEndpoint {
      * @throws 404 Not found	
      */
     @PUT
-    @Secured
+    //@Secured
     @Path("/{id}/force-change-password")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response forceChangePassword(@PathParam("id") String id, DaqueryUser updatedUser) {
+    public Response forceChangePassword(@Context HttpServletRequest requestContext, @PathParam("id") String id, DaqueryUser updatedUser) {
     	Session s = null;
     	
     	try {
     		s = HibernateConfiguration.openSession();
 
-            Principal principal = securityContext.getUserPrincipal();
-            String username = principal.getName();
+//            Principal principal = securityContext.getUserPrincipal();
+//            String username = principal.getName();
 
 	        DaqueryUser user = DaqueryUserDAO.queryUserByID(id);
+	        if(user.getStatus().equals(UserStatus.DISABLED.toString())) {
+	        	return ResponseHelper.getErrorResponse(400, "Your account has been locked.", "", null); 
+	        }
+	        
+	        if(!user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getOldPassword()))) {
+	        	int attemps_count = DaqueryUserDAO.getUserChangePasswordAttempt(user.getId()).size();
+	        	if(attemps_count >= 4) { // lock account
+	        		user.setStatus(UserStatus.DISABLED.toString());
+	        		//persist changes
+	    	        s.getTransaction().begin();
+	    	        s.merge(user);
+	    	        s.getTransaction().commit();
+	        	} else {
+	        		DaqueryUserDAO.addChangePasswordAttempt(user.getId(), requestContext.getRemoteAddr());
+	        	}
+	        	return ResponseHelper.getErrorResponse(400, "Old password is not correct.", "", null); 
+	        }
 	        
 	        if(user.getPassword().equals(PasswordUtils.digestPassword(updatedUser.getNewPassword()))){
 	        	return ResponseHelper.getErrorResponse(400, "New password cannot be the same as old password.", "", null);
