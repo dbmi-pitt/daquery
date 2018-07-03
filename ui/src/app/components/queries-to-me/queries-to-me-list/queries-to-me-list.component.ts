@@ -17,8 +17,8 @@ export class QueriesToMeListComponent implements OnInit {
 
   requests: any[];
   selectedRequest: any;
-
   showApproveDenyBtn = false;
+  showStackTrace = false;
   constructor(private requestService: RequestService,
               private userService: UserService,
               private roleGuard: RoleGuard) {
@@ -89,5 +89,9 @@ export class QueriesToMeListComponent implements OnInit {
                         resolve();
                       })
     });
+  }
+
+  showErrorInfo(){
+    $('#myErrorModal').modal('show');
   }
 }
