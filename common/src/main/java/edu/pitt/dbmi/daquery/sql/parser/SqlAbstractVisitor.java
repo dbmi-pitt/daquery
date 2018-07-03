@@ -2,9 +2,9 @@ package edu.pitt.dbmi.daquery.sql.parser;
 import java.util.Hashtable;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.RuleNode;
 
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteBaseVisitor;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser;
 
 public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 {
@@ -13,8 +13,10 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 
 	protected abstract void handleNode(TreeNode node);
 	
-	protected void addToTree(ParserRuleContext ctx)
+	protected void addToTree(RuleNode node)
 	{
+		if(! (node instanceof ParserRuleContext)) return;
+		ParserRuleContext ctx = (ParserRuleContext) node;
 		ParserRuleContext parentCTX = ctx.getParent();
 		String cName = ctx.getClass().getSimpleName();
 		if(parentCTX == null && topNode != null)
@@ -36,7 +38,13 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		handleNode(myNode);
 	}
 	
-	@Override public Object visitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx)
+	@Override public Object visitChildren(RuleNode node)
+	{
+		addToTree(node);
+		return(super.visitChildren(node));
+	}
+	
+/*	@Override public Object visitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
@@ -158,11 +166,7 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
-/*	@Override public Object visitFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx)
-	{
-		addToTree(ctx);
-		return visitChildren(ctx);
-	} */
+
 	@Override public Object visitInsert_stmt(SQLiteParser.Insert_stmtContext ctx)
 	{
 		addToTree(ctx);
@@ -193,21 +197,12 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
-/*	@Override public Object visitSimple_select_stmt(SQLiteParser.Simple_select_stmtContext ctx)
-	{
-		addToTree(ctx);
-		return visitChildren(ctx);
-	} */
 	@Override public Object visitSelect_stmt(SQLiteParser.Select_stmtContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
-/*	@Override public Object visitSelect_or_values(SQLiteParser.Select_or_valuesContext ctx)
-	{
-		addToTree(ctx);
-		return visitChildren(ctx);
-	} */
+
 	@Override public Object visitUpdate_stmt(SQLiteParser.Update_stmtContext ctx)
 	{
 		addToTree(ctx);
@@ -552,6 +547,6 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
-	}	
+	} */
 }
 

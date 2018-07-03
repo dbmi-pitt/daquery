@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.hibernate.annotations.common.util.StringHelper;
 
-import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
+import edu.pitt.dbmi.daquery.sql.domain.Column;
+import edu.pitt.dbmi.daquery.sql.domain.DeIdTag;
 import edu.pitt.dbmi.daquery.sql.domain.Function;
 import edu.pitt.dbmi.daquery.sql.domain.SQLElement;
 import edu.pitt.dbmi.daquery.sql.domain.SelectStatement;
 import edu.pitt.dbmi.daquery.sql.domain.Table;
+import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Alter_table_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Analyze_stmtContext;
@@ -27,6 +29,8 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_trigger_st
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_view_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_virtual_table_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Database_nameContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Date_shift_field_propContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Deid_tagContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Delete_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Delete_stmt_limitedContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Detach_stmtContext;
@@ -36,7 +40,9 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Drop_trigger_stmt
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Drop_view_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.From_table_specContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Function_nameContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Id_field_propContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Insert_stmtContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Obfuscate_field_propContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Pragma_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Reindex_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Release_stmtContext;
@@ -46,7 +52,6 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Rollback_stmtCont
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Savepoint_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_coreContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_setContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Table_nameContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Update_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Update_stmt_limitedContext;
@@ -65,9 +70,9 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD, (select nyj from ieu);");
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD;");
-		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select vital.patid adsd, selst.somefield, myfunc(lmno.abc, pq.def) as mfun from VITAL, (select somefield, otherfield from adfa) selst where patid like 'PIT100_' or patid like 'PIT101_';");
+		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select vital.patid<IDENTIFIABLE isId=true dateshift on tbl.dsfield obfuscate=true> adsd, selst.somefield, myfunc(lmno.abc, pq.def)<IDENTIFIABLE isId=true dateshift on tb22.dsfield222 obfuscate=true>  as mfun from VITAL, (select somefield, otherfield from adfa) selst where patid like 'PIT100_' or patid like 'PIT101_';");
 		System.out.println(a.topElement);
-
+//<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
 		
 		if(a.hasWarnings())
 		{
@@ -139,8 +144,11 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		if(node.self instanceof Result_column_exprContext)
 		{
 			System.out.println(node.self.getText());
-			TableColumn col = new TableColumn();
-			parentElement = setParentChild(parentElement, col);			
+			if(! (parentElement instanceof DeIdTag))
+			{
+				TableColumn col = new TableColumn();
+				parentElement = setParentChild(parentElement, col);
+			}
 		}
 		if(node.self instanceof Count_functionContext || node.self instanceof Any_functionContext)
 		{
@@ -156,15 +164,19 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		{
 			if(isColumn(parentElement)) ((TableColumn) parentElement).setDBName(node.self.getText());
 			if(parentElement instanceof Table) ((Table) parentElement).setDBName(node.self.getText());
+			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftDBName(node.self.getText());
 		}
 		if(node.self instanceof Table_nameContext)
 		{
 			if(isColumn(parentElement)) ((TableColumn) parentElement).setTableName(node.self.getText());
 			if(parentElement instanceof Table) ((Table) parentElement).setName(node.self.getText());
+			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftTableName(node.self.getText());
 		}
 		if(node.self instanceof Column_nameContext)
 		{
-			if(isColumn(parentElement)) ((TableColumn) parentElement).setName(node.self.getText()); 
+			System.out.println(parentElement.getClass().getSimpleName() + ":" + node.self.getText());
+			if(isColumn(parentElement)) ((TableColumn) parentElement).setName(node.self.getText());
+			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftFieldName(node.self.getText());
 		}
 		if(node.self instanceof Column_aliasContext)
 		{
@@ -177,8 +189,67 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			if(parentElement instanceof Function) ((Function) parentElement).setName(node.self.getText());
 		}
 		
+		//deid tags must be returned from top level (most outer) select database columns or functions
+		if(node.self instanceof Deid_tagContext)
+		{
+			if(parentElement == null || ! (parentElement instanceof Column))
+			{
+				this.addWarning("Deidentification tags not associated with returned values are ignored.");
+			}
+			else if(parentElement.getParent() == null || 
+					! (parentElement.getParent() instanceof SelectStatement) ||
+					  parentElement.getParent().getParent() != null
+					)
+			{
+				this.addWarning("Deidentification tags not associated with returned values will be ignored.");
+			}
+			else
+			{
+				DeIdTag tag = new DeIdTag();
+				parentElement = setParentChild(parentElement, tag);
+			}
+		}
+		
+		if(node.self instanceof Id_field_propContext)
+		{
+			if(parentElement instanceof DeIdTag)
+			{
+				Boolean isId = parseTrueFalseProp(node.self.getText());
+				if(isId == null)
+				{
+					addWarning("DEID Tag is not parsable: " + node.self.getText());
+				}
+				else
+					((DeIdTag) parentElement).setId(isId);
+			}
+		}
+		
+		if(node.self instanceof Date_shift_field_propContext)
+		{
+			if(parentElement instanceof DeIdTag)
+			{
+				((DeIdTag) parentElement).setFoundDateShift(true);
+			}
+		}
+		
+		if(node.self instanceof Obfuscate_field_propContext)
+		{
+			if(parentElement instanceof DeIdTag)
+			{
+				Boolean obf = parseTrueFalseProp(node.self.getText());
+				if(obf == null)
+				{
+					addWarning("DEID Tag obfuscate property is not parsable: " + node.self.getText());
+				}
+				else
+					((DeIdTag) parentElement).setObfuscate(obf);
+			}			
+		}
+		
 		if(! isRejected())
 		{
+			if(parentElement instanceof DeIdTag)
+				System.out.println("here");
 			int nextLevel = level + 1;
 			for(TreeNode n : node.children)
 			{
@@ -187,6 +258,17 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		}		
 
 	}
+	
+		private static Boolean parseTrueFalseProp(String prop)
+		{
+			if(StringHelper.isEmpty(prop)) return(null);
+			int eqLoc = prop.indexOf('=');
+			if(eqLoc <=0 || eqLoc >= prop.length()) return(null);
+			String tf = prop.substring(eqLoc + 1).trim().toUpperCase();
+			if(tf.equals("FALSE")) return(new Boolean(false));
+			if(tf.endsWith("TRUE")) return(new Boolean(true));
+			return(null);
+		}	
 	
 	private boolean isColumn(SQLElement element)
 	{
