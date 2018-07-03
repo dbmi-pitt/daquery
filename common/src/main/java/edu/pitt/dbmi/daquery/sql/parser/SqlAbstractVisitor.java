@@ -36,12 +36,24 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		handleNode(myNode);
 	}
 	
+	@Override public Object visitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx)
+	{
+		addToTree(ctx);
+		return visitChildren(ctx);
+	}
+	
 	@Override public Object visitParse(SQLiteParser.ParseContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
 	@Override public Object visitError(SQLiteParser.ErrorContext ctx)
+	{
+		addToTree(ctx);
+		return visitChildren(ctx);
+	}
+	
+	@Override public Object visitFrom_table_spec(SQLiteParser.From_table_specContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
@@ -81,7 +93,7 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
-	@Override public Object visitCompound_select_stmt(SQLiteParser.Compound_select_stmtContext ctx)
+	@Override public Object visitSelect_set(SQLiteParser.Select_setContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
@@ -146,11 +158,11 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
-	@Override public Object visitFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx)
+/*	@Override public Object visitFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
-	}
+	} */
 	@Override public Object visitInsert_stmt(SQLiteParser.Insert_stmtContext ctx)
 	{
 		addToTree(ctx);
@@ -181,21 +193,21 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
-	@Override public Object visitSimple_select_stmt(SQLiteParser.Simple_select_stmtContext ctx)
+/*	@Override public Object visitSimple_select_stmt(SQLiteParser.Simple_select_stmtContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
-	}
+	} */
 	@Override public Object visitSelect_stmt(SQLiteParser.Select_stmtContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
-	@Override public Object visitSelect_or_values(SQLiteParser.Select_or_valuesContext ctx)
+/*	@Override public Object visitSelect_or_values(SQLiteParser.Select_or_valuesContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
-	}
+	} */
 	@Override public Object visitUpdate_stmt(SQLiteParser.Update_stmtContext ctx)
 	{
 		addToTree(ctx);
@@ -318,7 +330,13 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		addToTree(ctx);
 		return visitChildren(ctx);
 	}
-	@Override public Object visitCompound_operator(SQLiteParser.Compound_operatorContext ctx)
+	@Override public Object visitAnything_at_all(SQLiteParser.Anything_at_allContext ctx)
+	{
+		addToTree(ctx);
+		return visitChildren(ctx);		
+	}
+	
+	@Override public Object visitSet_operator(SQLiteParser.Set_operatorContext ctx)
 	{
 		addToTree(ctx);
 		return visitChildren(ctx);
@@ -512,6 +530,12 @@ public abstract class SqlAbstractVisitor extends SQLiteBaseVisitor<Object>
 		return visitChildren(ctx);
 	}
 	
+	@Override public Object visitResult_column_expr(SQLiteParser.Result_column_exprContext ctx)
+	{
+		addToTree(ctx);
+		return visitChildren(ctx);
+	}
+
 	@Override public Object visitSingle_from_clause(SQLiteParser.Single_from_clauseContext ctx)
 	{
 		addToTree(ctx);

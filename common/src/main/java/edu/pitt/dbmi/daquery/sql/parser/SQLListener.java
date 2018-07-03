@@ -1,16 +1,9 @@
 package edu.pitt.dbmi.daquery.sql.parser;
 
-import java.util.List;
-
-import edu.pitt.dbmi.daquery.sql.domain.SQLFragment;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser;
 
 public class SQLListener extends AbstractSQLListener
 {
-	public List<SQLFragment> children()
-	{
-		return null;
-	}
 	
 	@Override
 	public void enterSql_stmt_list(SQLiteParser.Sql_stmt_listContext ctx)
@@ -34,11 +27,11 @@ public class SQLListener extends AbstractSQLListener
 	
 	}
 
-	@Override
+/*	@Override
 	public void enterSimple_select_stmt(SQLiteParser.Simple_select_stmtContext ctx)
 	{
 	
-	}
+	} */
 	
 	@Override public void enterCommon_table_expression(SQLiteParser.Common_table_expressionContext ctx)
 	{
@@ -60,11 +53,16 @@ public class SQLListener extends AbstractSQLListener
 	
 	}
 	
-	@Override public void exitCompound_select_stmt(SQLiteParser.Compound_select_stmtContext ctx)
+	@Override public void exitSelect_set(SQLiteParser.Select_setContext ctx)
 	{
 	
-	}	
-	@Override public void enterFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx)
+	}
+	
+	@Override public void exitAnything_at_all(SQLiteParser.Anything_at_allContext ctx)
+	{
+		
+	}
+/*	@Override public void enterFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx)
 	{
 	
 	}
@@ -75,7 +73,7 @@ public class SQLListener extends AbstractSQLListener
 	@Override public void enterSelect_core(SQLiteParser.Select_coreContext ctx)
 	{
 	
-	}
+	} */
 	
 	@Override public void enterFunction_name(SQLiteParser.Function_nameContext ctx)
 	{
