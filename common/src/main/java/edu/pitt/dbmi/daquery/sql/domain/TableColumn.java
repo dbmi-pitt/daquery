@@ -2,13 +2,13 @@ package edu.pitt.dbmi.daquery.sql.domain;
 
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
-public class TableColumn extends AbstractElement implements SQLElement, Column
+public class TableColumn extends AbstractColumn implements SQLElement, Column
 {
 	private String name;
 	private String dbName;
 	private String tableName;
 	private String alias;
-
+	
 	public String getName(){return name;}
 	public void setName(String name){this.name = name;}
 	

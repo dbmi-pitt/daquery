@@ -340,7 +340,7 @@ dbColumnExpr
  
 result_column_expr
  :
- | dbColumnExpr
+| ( ( database_name '.' )? table_name '.' )? column_name deid_tag? ( K_AS? column_alias )?
  ;
  
 comparison_operator
@@ -409,6 +409,26 @@ result_column
  | any_function
  ;
 
+deid_tag
+ : '<' K_IDENTIFIABLE ident_prop?  '>'
+ ;
+ 
+ ident_prop
+  : id_field_prop? date_shift_field_prop? obfuscate_field_prop?
+  ;
+ 
+ id_field_prop
+  : K_ISID '=' ( K_TRUE | K_FALSE )
+  ;
+ 
+  date_shift_field_prop
+  : K_DATESHIFT K_ON result_column_expr
+  ;
+ 
+  obfuscate_field_prop
+  : K_OBFUSCATE '=' ( K_TRUE | K_FALSE )
+  ;
+ 
 from_table_spec
  : ( database_name '.' )? table_name ( K_AS? table_alias )?
    ( K_INDEXED K_BY index_name
@@ -528,6 +548,7 @@ keyword
  | K_CURRENT_TIME
  | K_CURRENT_TIMESTAMP
  | K_DATABASE
+ | K_DATESHIFT
  | K_DEFAULT
  | K_DEFERRABLE
  | K_DEFERRED
@@ -545,6 +566,7 @@ keyword
  | K_EXISTS
  | K_EXPLAIN
  | K_FAIL
+ | K_FALSE
  | K_FOR
  | K_FOREIGN
  | K_FROM
@@ -552,6 +574,7 @@ keyword
  | K_GLOB
  | K_GROUP
  | K_HAVING
+ | K_IDENTIFIABLE
  | K_IF
  | K_IGNORE
  | K_IMMEDIATE
@@ -565,6 +588,7 @@ keyword
  | K_INTERSECT
  | K_INTO
  | K_IS
+ | K_ISID
  | K_ISNULL
  | K_JOIN
  | K_KEY
@@ -580,6 +604,7 @@ keyword
  | K_NULL
  | K_OF
  | K_OFFSET
+ | K_OFFUSCATE
  | K_ON
  | K_OR
  | K_ORDER
@@ -610,6 +635,7 @@ keyword
  | K_TO
  | K_TRANSACTION
  | K_TRIGGER
+ | K_TRUE
  | K_UNION
  | K_UNIQUE
  | K_UPDATE
@@ -631,11 +657,11 @@ name
  ;
 
 count_function
- : K_COUNT '(' ( distinct_keyword? result_column_expr | '*' | K_DISTINCT? any_function )?  ')' (K_AS? column_alias)?
+ : K_COUNT '(' ( distinct_keyword? result_column_expr | '*' | K_DISTINCT? any_function )?  ')' deid_tag? (K_AS? column_alias)?
  ;
  
 any_function
- : function_name '(' ( K_DISTINCT? result_column_expr ( ',' result_column_expr )* | '*' )? ')' (K_AS? column_alias)?
+ : function_name '(' ( K_DISTINCT? result_column_expr ( ',' result_column_expr )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
  ;
  
 and_keyword
@@ -799,6 +825,7 @@ K_CURRENT_DATE : C U R R E N T '_' D A T E;
 K_CURRENT_TIME : C U R R E N T '_' T I M E;
 K_CURRENT_TIMESTAMP : C U R R E N T '_' T I M E S T A M P;
 K_DATABASE : D A T A B A S E;
+K_DATESHIFT : D A T E S H I F T;
 K_DEFAULT : D E F A U L T;
 K_DEFERRABLE : D E F E R R A B L E;
 K_DEFERRED : D E F E R R E D;
@@ -815,6 +842,7 @@ K_EXCEPT : E X C E P T;
 K_EXCLUSIVE : E X C L U S I V E;
 K_EXISTS : E X I S T S;
 K_EXPLAIN : E X P L A I N;
+K_FALSE : F A L S E;
 K_FAIL : F A I L;
 K_FOR : F O R;
 K_FOREIGN : F O R E I G N;
@@ -824,6 +852,7 @@ K_GLOB : G L O B;
 K_GROUP : G R O U P;
 K_HAVING : H A V I N G;
 K_IF : I F;
+K_IDENTIFIABLE : I D E N T I F I A B L E;
 K_IGNORE : I G N O R E;
 K_IMMEDIATE : I M M E D I A T E;
 K_IN : I N;
@@ -836,6 +865,7 @@ K_INSTEAD : I N S T E A D;
 K_INTERSECT : I N T E R S E C T;
 K_INTO : I N T O;
 K_IS : I S;
+K_ISID : I S I D;
 K_ISNULL : I S N U L L;
 K_JOIN : J O I N;
 K_KEY : K E Y;
@@ -851,6 +881,7 @@ K_NOTNULL : N O T N U L L;
 K_NULL : N U L L;
 K_OF : O F;
 K_OFFSET : O F F S E T;
+K_OBFUSCATE : O B F U S C A T E;
 K_ON : O N;
 K_OR : O R;
 K_ORDER : O R D E R;
@@ -881,6 +912,7 @@ K_THEN : T H E N;
 K_TO : T O;
 K_TRANSACTION : T R A N S A C T I O N;
 K_TRIGGER : T R I G G E R;
+K_TRUE : T R U E;
 K_UNION : U N I O N;
 K_UNIQUE : U N I Q U E;
 K_UPDATE : U P D A T E;

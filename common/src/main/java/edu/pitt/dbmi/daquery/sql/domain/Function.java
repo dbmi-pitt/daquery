@@ -3,7 +3,7 @@ package edu.pitt.dbmi.daquery.sql.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Function extends AbstractElement implements SQLElement, Column
+public class Function extends AbstractColumn implements SQLElement, Column
 {
 	private String name;
 	private List<TableColumn> arguments = new ArrayList<TableColumn>();
@@ -17,10 +17,10 @@ public class Function extends AbstractElement implements SQLElement, Column
 	
 	public String getAlias(){return(alias);}
 	public void setAlias(String name){alias = name;}
-	
+		
 	@Override public void addChild(SQLElement element)
 	{
-		children.add(element);
+		super.addChild(element);
 		if(element instanceof TableColumn) addArgument((TableColumn) element);
 	}
 }

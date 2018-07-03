@@ -538,6 +538,56 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitResult_column(SQLiteParser.Result_columnContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#deid_tag}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeid_tag(SQLiteParser.Deid_tagContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#deid_tag}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeid_tag(SQLiteParser.Deid_tagContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#ident_prop}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdent_prop(SQLiteParser.Ident_propContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#ident_prop}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdent_prop(SQLiteParser.Ident_propContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#id_field_prop}.
+	 * @param ctx the parse tree
+	 */
+	void enterId_field_prop(SQLiteParser.Id_field_propContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#id_field_prop}.
+	 * @param ctx the parse tree
+	 */
+	void exitId_field_prop(SQLiteParser.Id_field_propContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#date_shift_field_prop}.
+	 * @param ctx the parse tree
+	 */
+	void enterDate_shift_field_prop(SQLiteParser.Date_shift_field_propContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#date_shift_field_prop}.
+	 * @param ctx the parse tree
+	 */
+	void exitDate_shift_field_prop(SQLiteParser.Date_shift_field_propContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#obfuscate_field_prop}.
+	 * @param ctx the parse tree
+	 */
+	void enterObfuscate_field_prop(SQLiteParser.Obfuscate_field_propContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#obfuscate_field_prop}.
+	 * @param ctx the parse tree
+	 */
+	void exitObfuscate_field_prop(SQLiteParser.Obfuscate_field_propContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#from_table_spec}.
 	 * @param ctx the parse tree
 	 */

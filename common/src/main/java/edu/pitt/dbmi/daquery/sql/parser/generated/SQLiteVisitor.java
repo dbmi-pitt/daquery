@@ -329,6 +329,36 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitResult_column(SQLiteParser.Result_columnContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#deid_tag}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeid_tag(SQLiteParser.Deid_tagContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#ident_prop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdent_prop(SQLiteParser.Ident_propContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#id_field_prop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitId_field_prop(SQLiteParser.Id_field_propContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#date_shift_field_prop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDate_shift_field_prop(SQLiteParser.Date_shift_field_propContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#obfuscate_field_prop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitObfuscate_field_prop(SQLiteParser.Obfuscate_field_propContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#from_table_spec}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

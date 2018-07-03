@@ -17,7 +17,6 @@ import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteLexer;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Anything_at_allContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_setContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Sql_stmtContext;
 
 public class SQLAnalyzer extends SqlAbstractVisitor
