@@ -42,7 +42,7 @@ error
  ;
 
 sql_stmt_list
- : sql_stmt ( sql_stmt )*
+ : sql_stmt ( sql_stmt )* ( anything_at_all )*
  ;
 
 sql_stmt
@@ -51,7 +51,6 @@ sql_stmt
                                       | attach_stmt
                                       | begin_stmt
                                       | commit_stmt
-                                      | compound_select_stmt
                                       | create_index_stmt
                                       | create_table_stmt
                                       | create_trigger_stmt
@@ -64,18 +63,18 @@ sql_stmt
                                       | drop_table_stmt
                                       | drop_trigger_stmt
                                       | drop_view_stmt
-                                      | factored_select_stmt
                                       | insert_stmt
                                       | pragma_stmt
                                       | reindex_stmt
                                       | release_stmt
                                       | rollback_stmt
                                       | savepoint_stmt
-                                      | simple_select_stmt
+                                      | select_set                                      
                                       | select_stmt
                                       | update_stmt
                                       | update_stmt_limited
-                                      | vacuum_stmt ) end_of_select
+                                      | vacuum_stmt
+                                      | with_select_stmt ) end_of_select
  ;
 
 end_of_select
@@ -105,13 +104,13 @@ commit_stmt
  : ( K_COMMIT | K_END ) ( K_TRANSACTION transaction_name? )?
  ;
 
-compound_select_stmt
+select_set
  : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( ( K_UNION K_ALL? | K_INTERSECT | K_EXCEPT ) select_core )+
+   select_core ( set_operator select_core )+
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
-
+ 
 create_index_stmt
  : K_CREATE K_UNIQUE? K_INDEX ( K_IF K_NOT K_EXISTS )?
    ( database_name '.' )? index_name K_ON table_name '(' indexed_column ( ',' indexed_column )* ')'
@@ -182,13 +181,6 @@ drop_view_stmt
  : K_DROP K_VIEW ( K_IF K_EXISTS )? ( database_name '.' )? view_name
  ;
 
-factored_select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( compound_operator select_core )*
-   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
- ;
-
 insert_stmt
  : with_clause? ( K_INSERT 
                 | K_REPLACE
@@ -227,25 +219,17 @@ savepoint_stmt
  : K_SAVEPOINT savepoint_name
  ;
 
-simple_select_stmt
+with_select_stmt
  : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
- ;
-
-select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_or_values ( compound_operator select_or_values )*
+   select_core 
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
-
-select_or_values
- : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
-   ( multi_from_clause )?
-   ( K_WHERE expr )?
-   ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
- | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
+ 
+select_stmt
+ : select_core 
+   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
 
 update_stmt
@@ -317,6 +301,7 @@ conflict_clause
     AND
     OR
 */
+
 expr
  : literal_value
  | BIND_PARAMETER
@@ -352,6 +337,12 @@ dbColumnExpr
  :
  | ( ( database_name '.' )? table_name '.' )? column_name ( K_AS? column_alias )?
  ;
+ 
+result_column_expr
+ :
+ | dbColumnExpr
+ ;
+ 
 comparison_operator
  : '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | in_keyword | like_keyword | K_GLOB | K_MATCH | K_REGEXP
  ;
@@ -413,15 +404,19 @@ common_table_expression
 result_column
  : '*'
  | table_name '.' '*'
- | dbColumnExpr
+ | result_column_expr
  | count_function
  | any_function
  ;
 
-table_or_subquery
+from_table_spec
  : ( database_name '.' )? table_name ( K_AS? table_alias )?
    ( K_INDEXED K_BY index_name
    | K_NOT K_INDEXED )?
+ ;
+ 
+table_or_subquery
+ : from_table_spec
  | '(' ( table_or_subquery ( ',' table_or_subquery )*
        | join_clause )
    ')' ( K_AS? table_alias )?
@@ -454,11 +449,12 @@ multi_from_clause
  : K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause )
  ;
 
-compound_operator
+set_operator
  : K_UNION
  | K_UNION K_ALL
  | K_INTERSECT
  | K_EXCEPT
+ | K_MINUS
  ;
 
 cte_table_name
@@ -576,6 +572,7 @@ keyword
  | K_LIKE
  | K_LIMIT
  | K_MATCH
+ | K_MINUS
  | K_NATURAL
  | K_NO
  | K_NOT
@@ -634,11 +631,11 @@ name
  ;
 
 count_function
- : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' | K_DISTINCT? any_function )?  ')' (K_AS? column_alias)?
+ : K_COUNT '(' ( distinct_keyword? result_column_expr | '*' | K_DISTINCT? any_function )?  ')' (K_AS? column_alias)?
  ;
  
 any_function
- : function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
+ : function_name '(' ( K_DISTINCT? result_column_expr ( ',' result_column_expr )* | '*' )? ')' (K_AS? column_alias)?
  ;
  
 and_keyword
@@ -738,6 +735,10 @@ any_name
  | keyword
  | STRING_LITERAL
  | '(' any_name ')'
+ ;
+
+anything_at_all
+ : (.)+
  ;
 
 SCOL : ';';
@@ -842,6 +843,7 @@ K_LEFT : L E F T;
 K_LIKE : L I K E;
 K_LIMIT : L I M I T;
 K_MATCH : M A T C H;
+K_MINUS : M I N U S;
 K_NATURAL : N A T U R A L;
 K_NO : N O;
 K_NOT : N O T;
