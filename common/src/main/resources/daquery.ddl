@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.44 -->
+<!-- daquery.data.version=1.47 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -179,6 +179,7 @@ CREATE TABLE DAQUERY_RESPONSE
    SITE_ID bigint,
    FILESET_ID bigint,
    ERROR_MESSAGE varchar(1024),
+   STACKTRACE varchar(32000),
    RESPONSE_ID varchar(50),
    USER_ID varchar(50),
    DOWNLOAD_INQUIRY_ID bigint,
@@ -221,4 +222,12 @@ CREATE TABLE NETWORK_CONTACT
 	ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
 	NETWORK_ID bigint,
 	USER_ID varchar(50)
+);
+
+CREATE TABLE CHANGE_PASSWORD_ATTEMPT
+(
+	ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+	USER_ID varchar(50),
+	ATTEMPT_AT timestamp,
+	IP_ADDRESS varchar(50)
 );
