@@ -57,18 +57,18 @@ export class SetupComponent implements OnInit {
       this.loading = true;
       this.setupService.setupSite(this.setupForm.value)
                       .subscribe(response => {
-                        localStorage.setItem('currentUser', JSON.stringify(response['user']));
-                        localStorage.setItem('jwt', JSON.stringify(response['token']));
-                        this.router.navigate(['/queries-from-me']);
-                      },
-                        error => {
-                          if(error.status === 401){
+                          localStorage.setItem('currentUser', JSON.stringify(response['user']));
+                          localStorage.setItem('jwt', JSON.stringify(response['token']));
+                          this.router.navigate(['/queries-from-me']);
+                        }, err => {
+                          this.error = {};
+                          if(err.status === 401){
                             this.loading = false;
                             this.error['displayMessage'] = "Invalid Site-name and Site-key combination."
-                          } else if(error.status === 500){
+                          } else if(err.status === 500){
                             this.loading = false;
-                            this.error = error.error;
-                          } else if(error.status === 404){
+                            this.error = err.error;
+                          } else if(err.status === 404){
                             this.loading = false;
                             this.error['displayMessage'] = "Please ask the Daquery developers to check your application.properties file to make sure the central.server.url is set correctly."
                           }

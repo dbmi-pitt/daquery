@@ -128,7 +128,7 @@
       </div>
       <br />
       <div *ngIf="error" class="alert alert-danger">{{error.displayMessage}}
-        <button class="btn-link" style="color: #fff; text-decoration: underline" (click)="showErrorInfo()">More info</button>
+        <button *ngIf="error?.stackTrace" class="btn-link" style="color: #fff; text-decoration: underline" (click)="showErrorInfo()">More info</button>
       </div>
     </form>
   </div>

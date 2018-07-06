@@ -1,18 +1,18 @@
 <div class="row">
-  <div class="col-md-3" style="overflow-y: auto; max-height: 82vh">
+  <div class="col-lg-4 col-md-6" style="overflow-y: auto; max-height: 82vh">
     <div class="box box-solid">
       <div class="box-body no-padding">
         <ul class="nav nav-pills nav-stacked">
           <li *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'active' : ''">
             <a style="cursor: pointer" (click)="onRequestSelect(request)"> {{request.inquiry.inquiryName}} <br />
-            <span>@{{ request.sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</span>  
+            <span>@{{ request.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</span>  
             <span class="label pull-right" [ngClass]="getRequestStatusLabelClass(request)">{{ request.responses[0].status }}</span></a>
           </li>
         </ul>
       </div>
     </div>
   </div>
-  <div class="col-md-9">
+  <div class="col-lg-8 col-md-6">
       <div *ngIf="selectedRequest" class="box box-default color-palette-box">
           <div class="box-header with-border">
             <h3 class="box-title"> {{ selectedRequest.inquiry.inquiryName }} </h3>
@@ -23,14 +23,14 @@
           </div>
           <div class="box-body">
             <div *ngIf="selectedRequest.responses[0].status === 'ERROR'" class="callout callout-danger">
-              <p>{{ selectedRequest.responses[0]?.errorMessage }}</p>
+              <p>{{ selectedRequest.responses[0]?.errorMessage }} <button *ngIf="selectedRequest.responses[0]?.stackTrace" class="btn-link" style="color: #fff; text-decoration: underline" (click)="showErrorInfo()">More info</button></p>
             </div>
             <div class="row">
               <div class="col-md-6">
                 <div class="user-block">
                   <i class="fa fa-user-circle-o fa-3x" style="float: left" aria-hidden="true"></i>
                   <span class="username">{{selectedRequest.requester?.realName}}</span>
-                  <span class="description">{{ selectedRequest.requesterSite.name }} | {{ selectedRequest.requester.email }} | {{ selectedRequest.sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</span>
+                  <span class="description">{{ selectedRequest.requesterSite.name }} | {{ selectedRequest.requester.email }} | {{ selectedRequest.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</span>
                 </div>
               </div>
               <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
@@ -63,5 +63,31 @@
           </div>
           <!-- /.box-body -->
         </div>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="myErrorModal" tabindex="-1" role="dialog" aria-labelledby="myErrorModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myErrorModalLabel">Error Message</h4>
+      </div>
+      <div class="modal-body">
+        <h4>{{ selectedRequest?.responses[0]?.errorMessage }}</h4>
+        <div *ngIf="selectedRequest?.responses[0]?.stackTrace" class="row">
+          <div class="col-md-4 col-md-offset-4">
+            <button (click)="showStackTrace = !showStackTrace" class="btn btn-link">{{ showStackTrace ? "Hide Stack Trace" : "Show Stack Trace" }}</button>
+          </div>
+        </div>
+        <div *ngIf="showStackTrace" style="overflow: auto;">
+          {{ selectedRequest?.responses[0]?.stackTrace }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        
+      </div>
+    </div>
   </div>
 </div>
