@@ -38,11 +38,11 @@
               <span class="fa fa-user-o form-control-feedback"></span>
               <div class="help-block" *ngIf="realName.invalid && (realName.dirty || realName.touched)">Please enter a real name</div>
             </div>
-            <div class="checkbox">
-              <label class="checkbox-inline">
-                <input type="checkbox" formControlName="expired" checked="user.status === 'PWD_EXPIRED'">Account Expired
-              </label>
-              </div>
+            <div class="radio">
+              <label class="radio-inline"><input type="radio" name="status" formControlName="status" value="PWD_EXPIRED">Expired</label>
+              <label class="radio-inline"><input type="radio" name="status" formControlName="status" value="DISABLED">Disabled</label>
+              <label class="radio-inline"><input type="radio" name="status" formControlName="status" value="ACTIVE">Active</label>
+            </div>
             <p class="text-muted"><b>ROLES:</b> {{ listRoles(user.roles) | uppercase }}</p>
             <ul *ngIf="currentUserRoles.includes('admin')" class="list-unstyled" formArrayName="roles">
               <li *ngFor="let role of profileForm.controls.roles.controls; let i=index" [formGroupName]="i">

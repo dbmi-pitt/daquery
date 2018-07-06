@@ -41,6 +41,9 @@ export class LoginComponent implements OnInit {
                                   this.loading = false;
                                 } else if (result === 'password_expired'){
                                   this.router.navigate(['/force-change-password']);
+                                } else if (result === 'account_disabled'){
+                                  this.error = 'Your account has been locked.';
+                                  this.loading = false;
                                 } else if (result === 'error'){
                                   this.error = 'Daquery Server is down.';
                                   this.loading = false;

@@ -198,6 +198,9 @@ public class CentralService{
 			if (DBHelper.createConnectionRequest(networkId, fromSiteId, toSiteId, requesterEmail)) {
 				List<String> toAddresses = new ArrayList<String>();
 				toAddresses.addAll(DBHelper.getSiteContactsEmail(site.getSiteId()));
+				if(toAddresses.size() == 0) {
+					toAddresses.add(site.getAdminEmail());
+				}
 				EmailHelper eh = new EmailHelper();
 				eh.sendMail("Daquery Connection Request", "Daquery site " + requestedToSite.getName() + 
 						  " is requesting to connect to your site, " + site.getName() + 
@@ -241,7 +244,7 @@ public class CentralService{
 			// create SiteContact
 			SiteContact sc = DBHelper.getSiteContact(siteId, userId);
 			if (sc != null)
-				return (ResponseHelper.getBasicResponse(400, "This site contact is already exist."));
+				return (ResponseHelper.getBasicResponse(200, "This site contact is already exist."));
 
 			// send email to toSite admin
 			if (DBHelper.createSiteContact(siteId, userId, email, realName)) {

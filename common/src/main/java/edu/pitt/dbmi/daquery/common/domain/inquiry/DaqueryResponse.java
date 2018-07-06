@@ -91,9 +91,8 @@ public class DaqueryResponse extends DaqueryObject
     @JoinColumn(name = "DOWNLOAD_INQUIRY_ID")
     private Inquiry downloadDirective;
 
-    
     @Expose
-    @Transient
+    @Column(name="STACKTRACE")
     private String stackTrace;
     
     public DaqueryResponse(){}
