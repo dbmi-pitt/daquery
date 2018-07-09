@@ -12,9 +12,8 @@
                 <div class="form-group">
                   <label for="dataType">Data Type</label>
                   <div class="radio">
-                    <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="aggregate">Aggregate</label>
-                    <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="tabel">Table</label>
-                    <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="data" disabled>Data</label>
+                    <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="1">Aggregate</label>
+                    <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="3">Table</label>
                   </div>
                 </div>
                 <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">
