@@ -29,6 +29,7 @@ import edu.pitt.dbmi.daquery.common.dao.InquiryDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 
@@ -170,6 +171,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             // only create SQLQuery for now
             Inquiry inquiry = new SQLQuery(true);
             inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+            inquiry.setQueryType(QueryType.valueOf(form.get("queryType").toString().toUpperCase()));
             inquiry.setAuthor(currentUser);
             inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network").toString()));
             inquiry.setVersion(1);
