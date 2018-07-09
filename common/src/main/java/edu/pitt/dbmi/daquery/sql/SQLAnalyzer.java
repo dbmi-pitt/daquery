@@ -28,7 +28,7 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 	private boolean rejected = false;
 	private int statementCount = 0;
 	
-	private boolean debug = false;
+	private boolean debug = true;
 	
 	protected String baseSQL = null;
 	
