@@ -15,7 +15,13 @@ public class StringHelper
 		else
 			return(val.toUpperCase().startsWith(match.toUpperCase()));
 	}
-	
+	public static boolean containsIgnoreCase(String val, String match)
+	{
+		if(StringHelper.isEmpty(val) || StringHelper.isEmpty(match))
+			return(false);
+		else
+			return(val.toUpperCase().contains(match.toUpperCase()));
+	}
 	public static String stackToString(Throwable t)
 	{
 		StringWriter sWriter = new StringWriter();

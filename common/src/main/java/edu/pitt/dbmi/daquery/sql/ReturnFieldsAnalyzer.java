@@ -70,7 +70,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD, (select nyj from ieu);");
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD;");
-		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select vital.patid<IDENTIFIABLE isId=true dateshift on tbl.dsfield obfuscate=true> adsd, selst.somefield, myfunc(lmno.abc, pq.def)<IDENTIFIABLE isId=true dateshift on tb22.dsfield222 obfuscate=true>  as mfun from VITAL, (select somefield, otherfield from adfa) selst where patid like 'PIT100_' or patid like 'PIT101_';");
+		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select vital.patid<IDENTIFIABLE isId=true dateshift on tbl.dsfield obfuscate=true> adsd, selst.somefield, myfunc(lmno.abc, pq.def)<IDENTIFIABLE isId=true dateshift on tb22.dsfield222 obfuscate=true>  as mfun from VITAL, (select somefield, otherfield from adfa) selst where patid like 'PIT100_' or patid like 'PIT101_';");
+		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("insert into asdfa (abc, def, ghi) values ('ab', 'cd', 'ef');");
 		System.out.println(a.topElement);
 //<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
 		
@@ -106,6 +107,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		}
 		return(warns);
 	}
+	public List<String> getWarningList(){return(warnings);}
 	public ReturnFieldsAnalyzer(String sql)
 	{
 		super(sql);
@@ -174,7 +176,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		}
 		if(node.self instanceof Column_nameContext)
 		{
-			System.out.println(parentElement.getClass().getSimpleName() + ":" + node.self.getText());
+			if(parentElement != null)
+				System.out.println(parentElement.getClass().getSimpleName() + ":" + node.self.getText());
 			if(isColumn(parentElement)) ((TableColumn) parentElement).setName(node.self.getText());
 			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftFieldName(node.self.getText());
 		}
