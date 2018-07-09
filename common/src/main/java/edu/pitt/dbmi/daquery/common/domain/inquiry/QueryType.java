@@ -5,15 +5,14 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.InquiryType.TYPES;
 
 public enum QueryType {	
-	AGGREGATE_QUERY(1),
-	DATA_QUERY(2),
-	TABLE_QUERY(3);
+	AGGREGATE_QUERY("AGGREGATE"),
+	DATA_QUERY("DATA"),
+	TABLE_QUERY("TABLE");
 	
-	int val;
-	private String jsonValue;
+	String value = null;
 	
-	QueryType(int val){
-		this.val = val;
+	QueryType(String val){
+		this.value = val;
 	}
 	
 	@Override
