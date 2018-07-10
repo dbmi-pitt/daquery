@@ -171,7 +171,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             // only create SQLQuery for now
             Inquiry inquiry = new SQLQuery(true);
             inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
-            inquiry.setQueryType(QueryType.valueOf(form.get("queryType").toString().toUpperCase()));
+            inquiry.setQueryType(form.get("queryType").toString().toUpperCase());
             inquiry.setAuthor(currentUser);
             inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network").toString()));
             inquiry.setVersion(1);

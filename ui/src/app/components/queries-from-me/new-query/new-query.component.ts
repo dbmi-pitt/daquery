@@ -45,7 +45,7 @@ export class NewQueryComponent implements OnInit {
       this.inquiryForm = this.fb.group({
         network: '',
         sitesToQuery: this.fb.array([]),
-        queryType: [inquiry.queryType.toLowerCase()],
+        queryType: [inquiry.queryType.toUpperCase()],
         dataType:['SQL_QUERY'],
         inquiryName: [inquiry.inquiryName, Validators.required],
         studyName: '',
@@ -57,7 +57,7 @@ export class NewQueryComponent implements OnInit {
       this.inquiryForm = this.fb.group({
         network: '',
         sitesToQuery: this.fb.array([]),
-        queryType: ['aggregate_query'],
+        queryType: ['AGGREGATE_QUERY'],
         dataType: ['SQL_QUERY'],
         inquiryName: ['', Validators.required],
         studyName: '',
