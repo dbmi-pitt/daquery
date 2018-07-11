@@ -111,6 +111,10 @@ public class DataExporter {
 	{
 		return(nFiles);
 	}
+	
+	public int getCasesPerFile() {
+		return this.casesPerFile;
+	}
 
 	private void buildConceptCDsMap(DaqueryRequest daqueryRequest) throws Throwable {
 		conceptCDs = new Hashtable<>();
