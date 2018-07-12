@@ -126,7 +126,7 @@ public class SQLQuery extends Inquiry
 			if(! t.equals(de))
 				causeMsg = t.getMessage() + " ";
 			response.setStatusEnum(ResponseStatus.ERROR);
-			response.setErrorMessage(removeErrorPrefix(causeMsg) + removeErrorPrefix(de.getMessage()) + " Check the site logs for more information.");
+			response.setErrorMessage(removeErrorPrefix(causeMsg) + " " + removeErrorPrefix(de.getMessage()) + " Check the site logs for more information.");
 			response.setStackTrace(StringHelper.stackToString(t));		
 			return(response);
 		}
