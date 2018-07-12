@@ -48,7 +48,7 @@
                 </span>
             </td>
             <td>
-              <button *ngIf="request.inquiry.aggregate" [disabled]="!request.response || !request.response.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
+              <button *ngIf="request.inquiry.queryType === 'AGGREGATE'" [disabled]="!request.response || !request.response.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
             </td>
           </tr>
         </tbody>

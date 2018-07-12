@@ -210,9 +210,9 @@ public class ApplicationDBHelper
             if (line.trim().length() > 0)
             {
             	String l2 = line.trim();
-            	if(version == null && l2.matches("(?i)<!--\\s*daquery.data.version\\s*=\\s*.*"))
+            	if(version == null && l2.matches(DDLReader.DDL_VERSION_MATCH))
             	{
-            		String v = l2.replaceFirst("(?i)<!--\\s*daquery.data.version\\s*=\\s*", "");
+            		String v = l2.replaceFirst(DDLReader.DDL_VERSION_REPLACE, "");
             		try{version = Float.parseFloat(v.trim());}
             		catch(Throwable t)
             		{

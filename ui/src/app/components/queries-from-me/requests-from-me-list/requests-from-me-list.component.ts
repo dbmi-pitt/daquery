@@ -106,7 +106,7 @@ export class RequestsFromMeListComponent implements OnInit {
           version: 1,
           dataType: 'SQL_DOWNLOAD',
           inquiryId: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.inquiryId : '',
-          aggregate: false,
+          queryType: 'DATA',
           inquiryName: request.inquiry.inquiryName + "(Data)",
           inquiryDescription: request.inquiry.inquiryDescription,
           code: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.code : ''

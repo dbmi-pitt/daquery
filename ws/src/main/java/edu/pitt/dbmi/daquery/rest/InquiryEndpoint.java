@@ -170,7 +170,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             dao.openCurrentSessionwithTransaction();
             // only create SQLQuery for now
             Inquiry inquiry = new SQLQuery(true);
-            inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+            //inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
             inquiry.setQueryType(form.get("queryType").toString().toUpperCase());
             inquiry.setAuthor(currentUser);
             inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network").toString()));
@@ -225,7 +225,8 @@ public class InquiryEndpoint extends AbstractEndpoint {
             
             dao.openCurrentSessionwithTransaction();
             Inquiry inquiry = dao.getByUUID(id);
-            inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+            //inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+            inquiry.setQueryType(form.get("queryType").toString().toUpperCase());
             inquiry.setAuthor(currentUser);
             inquiry.setVersion(inquiry.getVersion() + 1);
             inquiry.setInquiryName(form.get("inquiryName").toString());

@@ -1,9 +1,9 @@
 package edu.pitt.dbmi.daquery.common.domain.inquiry;
 
 public enum QueryType {	
-	AGGREGATE_QUERY("AGGREGATE"),
-	DATA_QUERY("DATA"),
-	TABLE_QUERY("TABLE");
+	AGGREGATE("AGGREGATE"),
+	DATA("DATA"),
+	TABLE("TABLE");
 	
 	String value = null;
 	

@@ -6,6 +6,7 @@ package edu.pitt.dbmi.daquery.common.dao;
 import java.util.List;
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -21,7 +22,8 @@ private final static Logger logger = Logger.getLogger(SQLQueryDAO.class.getName(
 		SQLQuery q = new SQLQuery(true);
 		
 		try {
-			q.setAggregate(true);
+			//q.setAggregate(true);
+			q.setQueryType(QueryType.AGGREGATE.name());
 			q.setDataType("ABC");
 			q.setVersion(1);
 			q.setCode("SELECT * FROM TABLE");

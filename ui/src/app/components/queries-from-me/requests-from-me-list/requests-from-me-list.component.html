@@ -66,7 +66,7 @@
                     <a title="{{ getFilePaths(request.responses[0]) }}" data-toggle="tooltip" data-placement="top"><i *ngIf="request.responses[0]?.files" class="fa fa-question-circle"></i></a>
                 </td>
                 <td>
-                  <button *ngIf="request.inquiry.aggregate" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
+                  <button *ngIf="request.inquiry.queryType === 'AGGREGATE'" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
                 </td>
               </tr>
             </tbody>

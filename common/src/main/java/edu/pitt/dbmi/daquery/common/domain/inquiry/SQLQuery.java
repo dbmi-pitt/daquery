@@ -73,6 +73,7 @@ public class SQLQuery extends Inquiry
 		try
 		{	
 			if(isAggregate())
+			//if(getQueryType().equals(QueryType.AGGREGATE.value))
 			{
 				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(code);
 				if(analyze.isRejected())

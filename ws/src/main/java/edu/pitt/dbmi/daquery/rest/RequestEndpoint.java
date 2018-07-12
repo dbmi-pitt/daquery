@@ -196,7 +196,8 @@ public class RequestEndpoint extends AbstractEndpoint {
 		            request.setSentTimestamp(new Date());
 		            request.setRequestGroup(requestGroupUUID.toString());
 		            Inquiry inquiry = new SQLQuery(true);
-		            inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+		            //inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+		            inquiry.setQueryType(form.get("dataType").toString().toUpperCase());
 		            inquiry.setAuthor(currentUser);
 		            inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network").toString()));
 		            inquiry.setVersion(1);
