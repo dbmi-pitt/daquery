@@ -74,6 +74,7 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	protected DaqueryUser author;
 
 	@Expose
+	@Column(name="QUERY_TYPE")
 	protected String queryType;
 	
 	public Inquiry() {
@@ -136,9 +137,33 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@JoinColumn(name="NETWORK_ID")
 	public Network getNetwork(){return(network);}
 	public void setNetwork(Network net){network = net;}
-		
-	public boolean isAggregate(){return this.queryType.equals(QueryType.AGGREGATE_QUERY.value);}
-	public void setAggregate(boolean aggregate){this.queryType = QueryType.AGGREGATE_QUERY.value;}
+	
+	@Transient
+	public boolean isAggregate(){
+		return this.getQueryType().equals(QueryType.AGGREGATE.value);
+	}
+	@Transient
+	public void setAggregate(boolean aggregate) {
+		this.setQueryType(QueryType.AGGREGATE.value);
+	}
+	
+	@Transient
+	public boolean isData(){
+		return this.getQueryType().equals(QueryType.DATA.value);
+	}
+	@Transient
+	public void setData(boolean data) {
+		this.setQueryType(QueryType.DATA.value);
+	}
+	
+	@Transient
+	public boolean isTable(){
+		return this.getQueryType().equals(QueryType.TABLE.value);
+	}
+	@Transient
+	public void setTable(boolean table) {
+		this.setQueryType(QueryType.TABLE.value);
+	}
 	
 	@Column(name="QUERY_TYPE")
 	public String getQueryType() { return this.queryType; }

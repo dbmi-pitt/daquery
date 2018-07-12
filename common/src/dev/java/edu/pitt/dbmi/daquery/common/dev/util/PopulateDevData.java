@@ -24,6 +24,7 @@ import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.RequestDirection;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
@@ -92,7 +93,8 @@ public class PopulateDevData
 		save(user);
 		Inquiry inq = createInquiryData(user);
 		inq.setNetwork(net);
-		inq.setAggregate(true);
+		//inq.setAggregate(true);
+		inq.setQueryType(QueryType.AGGREGATE.name());
 		save(inq);
 		save(net);				
 		
