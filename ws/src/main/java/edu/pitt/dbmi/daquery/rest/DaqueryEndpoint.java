@@ -531,7 +531,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					{
 						EmailContents email = new EmailContents();
 						email.subject = "Data Request Submitted";
-						email.message = "A data request in network " + request.getNetwork().getName() +" from " + request.getRequesterSite().getName() + " was submitted to your site: " + request.getRequestSite().getName() + ".<br /><br /> Please log into Daquery and go to Incoming Requests to review the request.";
+						String emailHeader = EmailUtil.generateEmailHeader(net.getName(), request.getRequesterSite().getName(), request.getInquiry().getInquiryName()); 
+						email.message = emailHeader;
+						email.message += "A data request in network " + request.getNetwork().getName() +" from " + request.getRequesterSite().getName() + " was submitted to your site: " + request.getRequestSite().getName() + ".<br /><br /> Please log into Daquery and go to Incoming Requests to review the request.";
 						for(DaqueryUser u : request.getNetwork().getContacts()) {
 							email.toAddresses.add(u.getEmail());
 						}

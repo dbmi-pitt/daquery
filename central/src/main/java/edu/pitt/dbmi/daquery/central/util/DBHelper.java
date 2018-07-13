@@ -17,6 +17,7 @@ import edu.pitt.dbmi.daquery.common.util.*;
 import edu.pitt.dbmi.daquery.central.ConnectionRequest;
 import edu.pitt.dbmi.daquery.central.ConnectionRequestStatus;
 import edu.pitt.dbmi.daquery.central.SiteContact;
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.*;
@@ -457,12 +458,16 @@ public class DBHelper
 				requesterEmail = rs.getString(1);
 			if(requesterEmail != null)
 			{
+				DaqueryUser user = DaqueryUserDAO.queryUserByEmail(requesterEmail);
 				List<String> toAddresses = new ArrayList<String>();
 				toAddresses.add(requesterEmail);
 				EmailHelper eh = new EmailHelper();
-				eh.sendMail("Daquery Connection Request " + StringHelper.capitalize(status), "Daquery site " + toSite.getName() + 
+	            String emailMessage = EmailUtil.generateEmailHeader(net.getName(), toSite.getName(), null); 
+
+	            emailMessage += "Daquery site " + toSite.getName() + 
 						  " on network " + net.getName() + 
-						  " has " + status.toLowerCase() + " your request to connect from your site " + fromSite.getName(), toAddresses, null);
+						  " has " + status.toLowerCase() + " your request to connect from your site " + fromSite.getName();
+				eh.sendMail("Daquery Connection Request " + StringHelper.capitalize(status), emailMessage, toAddresses, null);
 			}
 			else
 				log.log(Level.WARNING, "Unable to email a site on a " + status.toLowerCase() + " connection request because a requester email was not found.  toSiteId:" + toSiteId + " fromSiteId:" + fromSiteId + " networkId:" + networkId);
