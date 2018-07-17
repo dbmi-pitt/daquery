@@ -1315,4 +1315,10 @@ public class CaseExporter implements DataExporter {
 		
 		return sb.toString();
 	}
+
+	@Override
+	public int getCasesPerFile() {
+		// TODO Auto-generated method stub
+		return this.casesPerFile;
+	}
 }
