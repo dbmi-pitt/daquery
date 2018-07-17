@@ -160,6 +160,16 @@ public class StringHelper
 		if(dte == null) return(null);
 		return dateTimeFormat.format(dte);
 	}
+
+	
+	public static SimpleDateFormat dateTimeDisplayFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
+	public static String displayDateFormat(Date dte)
+	{
+		if(dte == null) return(null);
+		return dateTimeDisplayFormat.format(dte);
+	}
+	
+	
 	public static boolean equalIgnoreCase(String val1, String val2)
 	{
 		if(val1 == null && val2 == null) return(true);

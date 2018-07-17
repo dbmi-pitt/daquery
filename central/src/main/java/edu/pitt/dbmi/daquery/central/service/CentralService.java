@@ -42,6 +42,7 @@ import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
@@ -202,11 +203,14 @@ public class CentralService{
 					toAddresses.add(site.getAdminEmail());
 				}
 				EmailHelper eh = new EmailHelper();
-				eh.sendMail("Daquery Connection Request", "Daquery site " + requestedToSite.getName() + 
+	            String emailMessage = EmailUtil.generateEmailHeader(net.getName(), site.getName(), null);
+	            emailMessage += "Daquery site " + requestedToSite.getName() + 
 						  " is requesting to connect to your site, " + site.getName() + 
 						  ", to run queries on the network " + net.getName() +
 						  ".  Please log into your site, go to Network and choose Edit Sites under the network " +
-						  " to approve or deny the request.  See https://dbmi-pitt.github.io/daquery/approve-site-connection.html for more information.", toAddresses, null);
+						  " to approve or deny the request.  See https://dbmi-pitt.github.io/daquery/approve-site-connection.html for more information.";
+
+				eh.sendMail("Daquery Connection Request", emailMessage, toAddresses, null);
 				
 				// esi.adminEmail);
 				// eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", "del20@pitt.edu");

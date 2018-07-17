@@ -19,7 +19,9 @@ import javax.persistence.Table;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
+import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
@@ -28,6 +30,7 @@ import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.DataExporter;
 import edu.pitt.dbmi.daquery.common.util.CaseExporter;
 import edu.pitt.dbmi.daquery.common.util.EmailUtil;
@@ -107,14 +110,17 @@ public class SQLDownload extends SQLQuery implements Download
 			String dt = "";
 			String siteName = "";
 			String requesterEmail = null;
+			DaqueryUser requester = null;
 			if(req != null)
 			{
-				if(req.getRequester() != null && !StringHelper.isEmpty(req.getRequester().getEmail()))
+				if(req.getRequester() != null && !StringHelper.isEmpty(req.getRequester().getEmail())) {
 					requesterEmail = req.getRequester().getEmail();
+					requester = DaqueryUserDAO.queryUserByEmail(requesterEmail);
+				}
 				if(req.getInquiry() != null && ! StringHelper.isEmpty(req.getInquiry().getInquiryName()))
 					inqName = req.getInquiry().getInquiryName();
 				if(req.getSentTimestamp() != null)
-					dt = StringHelper.formatDate(req.getSentTimestamp());
+					dt = StringHelper.displayDateFormat(req.getSentTimestamp());
 				if(req.getRequestSite() != null && ! StringHelper.isEmpty(req.getRequestSite().getName()))
 					siteName = req.getRequestSite().getName();
 			}
@@ -122,12 +128,32 @@ public class SQLDownload extends SQLQuery implements Download
 			String filePrefix = "";
 			String emailEnd = "";
 			String ft = " file";
-			if(totalFiles > 1) ft += "s";			
+			if(totalFiles > 1) ft += "s";
+			int casesPerFile = dataExporter.getCasesPerFile();
+			
+			String networkName = "";
+			String queryName = "";
+			String requesterName = "";
+			if (req.getNetwork() != null)
+				networkName = req.getNetwork().getName();
+			if (req.getInquiry() != null)
+				queryName = req.getInquiry().getInquiryName();
+			if (requester != null)
+				requesterName = requester.getRealName();
+			String emailHeader = EmailUtil.generateEmailHeader(networkName, siteName, queryName); 
+
+
 			if(deliverData)
 			{
 				emailContents.subject = "Data Request Delivered";
-				emailContents.message = "The data that you requested has been uploaded to your Daquery server.<br \\><br \\>";
+				emailContents.message = emailHeader;
+				emailContents.message += "The data that you requested has been uploaded to your Daquery server.<br \\><br \\>";
 				response.setStatusEnum(ResponseStatus.COMPLETED);
+				if (totalFiles > 1) {
+					emailContents.message += "You requested data for more than " + casesPerFile + " cases.<br \\>" 
+							+ "Therefore, your data request is split across " + totalFiles + ft + ".<br \\>"
+							+ "Each file contains up to " + casesPerFile + " cases.<br \\>";
+				}
 				emailEnd = "<br \\>The following file(s) were delivered to your Daquery server " + req.getRequesterSite().getName() + " " + req.getRequestSite().getUrl() + ":<br \\>";
 				response.setStatusMessage( (new Integer(totalFiles)).toString() + ft + " delivered");
 			}
@@ -135,8 +161,14 @@ public class SQLDownload extends SQLQuery implements Download
 			{
 				Site mySite = SiteDAO.getLocalSite();
 				emailContents.subject = "Data Request Delivered Locally";
-				emailContents.message = "The data that you requested has not been sent to your server.  It has been uploaded locally to the responding site's server.<br \\><br \\>";				
+				emailContents.message = emailHeader;
+				emailContents.message += "The data that you requested has not been sent to your server.  It has been uploaded locally to the responding site's server.<br \\><br \\>";				
 				response.setStatusEnum(ResponseStatus.COMPLETED);
+				if (totalFiles > 1) {
+					emailContents.message += "You requested data for more than " + casesPerFile + " cases.<br \\>" 
+							+ "Therefore, your data request is split across " + totalFiles + ft + ".<br \\>"
+							+ "Each file contains up to " + casesPerFile + " cases.<br \\>";
+				}
 				response.setStatusMessage( (new Integer(totalFiles)).toString() + ft + " delivered locally to " + mySite.getName());
 				filePrefix = "locally@" + mySite.getName() + "://";
 				emailEnd = "<br \\>The following file(s) were delivered <b>LOCALLY</b> to the responding site at " + mySite.getName() + ":<br \\>";
@@ -152,9 +184,6 @@ public class SQLDownload extends SQLQuery implements Download
 			if(requesterEmail != null)
 			{
 				emailContents.toAddresses.add(requesterEmail);
-				emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Delivered From:</b>" + siteName + "<br //>";
-				emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Requested Date:</b>" + dt + "<br //>";
-				emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Query Name:</b>" + inqName + "<br //>";
 				emailContents.message += emailEnd;
 				for(String fName : filenames)
 					emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;" + filePrefix + fName + "<br //>";
