@@ -37,7 +37,7 @@ public class TableExporter implements DataExporter {
 	boolean threeDigitZip;
 	boolean dateShift;
 	Hashtable<String, OutputFile> conceptCDs = null;
-	int casesPerFile;
+	int rowsPerFile;
 	int nFiles;
 	int currentFile = 0;
 	
@@ -52,7 +52,7 @@ public class TableExporter implements DataExporter {
 		this.debugDataExport = AppProperties.getDebugDataExport();
 		
 		this.dateShift = daqueryResponse.getRequest().getNetwork().getShiftDates();
-		casesPerFile = 1000;
+		rowsPerFile = 1000;
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class TableExporter implements DataExporter {
 			currentFile++;
 
 			File tmpDir = FileHelper.createExportTempDirectory();
-			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile);
+			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, rowsPerFile);
 	
 			//send the file to remote requester
 			String outputFilename = daqueryRequest.getFilePrefix() + "_" + currentFile + ".zip";
@@ -130,7 +130,7 @@ public class TableExporter implements DataExporter {
 		
 	}
 	
-	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile) throws Throwable
+	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int rowPerFile) throws Throwable
 	{
 		String filenamePrefix = daqueryRequest.getFilePrefix();
 //		Hashtable<OutputFile, OutputStreamWriter> outputStreams = new Hashtable<>();
@@ -188,6 +188,12 @@ public class TableExporter implements DataExporter {
 		FileHelper.zipDirectory(tmpDir, zipFile, false);
 		
 		return zipFile;
+	}
+
+	@Override
+	public int getCasesPerFile() {
+		// TODO Auto-generated method stub
+		return this.rowsPerFile;
 	}
 
 }

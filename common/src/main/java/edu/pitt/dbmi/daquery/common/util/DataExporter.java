@@ -18,4 +18,6 @@ public interface DataExporter {
 	public void writeTrackingFile() throws IOException, DaqueryErrorException, DaqueryException;
 	
 	public void close() throws IOException;
+
+	public int getCasesPerFile();
 }
