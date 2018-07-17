@@ -43,6 +43,7 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 import edu.pitt.dbmi.daquery.queue.TaskQueue;
@@ -352,12 +353,15 @@ public class RequestEndpoint extends AbstractEndpoint {
             ResponseDAO.denyDataRequest(request.getId());
             request = DaqueryRequestDAO.getRequestById(id);
             
+			String dt = "";
+			dt = StringHelper.displayDateFormat(request.getSentTimestamp());
+            
             EmailContents emailContents = new EmailContents();
             emailContents.toAddresses.add(request.getRequester().getEmail());
             emailContents.subject = "Daquery Data Request Denied";
-            emailContents.message = "&nbsp;&nbsp;&nbsp;&nbsp;<b>Delivered From:</b>" + SiteDAO.getLocalSite().getName() + "<br //>";
-			emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Requested Date:</b>" + request.getSentTimestamp() + "<br //>";
-			emailContents.message += "&nbsp;&nbsp;&nbsp;&nbsp;<b>Query Name:</b>" + request.getInquiry().getInquiryName() + "<br //>";
+            emailContents.message = EmailUtil.generateEmailHeader(request.getNetwork().getName(), SiteDAO.getLocalSite().getName(), request.getInquiry().getInquiryName()); 
+			emailContents.message += "<br //><br //>Your data request was denied by the site: " + SiteDAO.getLocalSite().getName() + "<br //>"; 
+			emailContents.message += "The site administrator " + currentUser.getRealName() + " (" + currentUser.getEmail() +") denied your request.  Please contact this site administrator for more details regarding this request denial.<br //>";
 
 			try{EmailUtil.sendEmail(emailContents);}
 			catch(Throwable t)
