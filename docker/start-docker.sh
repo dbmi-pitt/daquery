@@ -16,7 +16,16 @@
 # this file must be named ojdbc6-11.1.0.7.0.jar
 
 
-OJDBC_DIR="/home/devuser"
+OJDBC_DIR="/home/devuser/projects/daquery/ws/lib"
+
+
+#which version of nc do we have?
+#if file `which nc` | grep -qe 'link.*ncat'; then
+#  NC_CMD=
+#else
+#  NC_CMD="nc -z"
+#fi
+
 
 if [ ! -f $OJDBC_DIR/ojdbc6-11.1.0.7.0.jar ]; then
     echo +-+-+-+-+- File ojdbc6-11.1.0.7.0.jar does not exist in $OJDBC_DIR.  Exiting. +-+-+-+-+-
@@ -46,24 +55,24 @@ else
 fi
 
 # Check to see if something is already running on the port that we want to use
-if nc -z localhost $TOMCAT_REDIRECT_PORT; then
-    echo +-+-+-+-+- Port $TOMCAT_REDIRECT_PORT is in use, cannot start Daquery.  Exiting. +-+-+-+-+-
-    exit 1
-else
-    echo starting Daquery on port $TOMCAT_REDIRECT_PORT
-fi
+#if nc -z localhost $TOMCAT_REDIRECT_PORT; then
+#    echo +-+-+-+-+- Port $TOMCAT_REDIRECT_PORT is in use, cannot start Daquery.  Exiting. +-+-+-+-+-
+#    exit 1
+#else
+#    echo starting Daquery on port $TOMCAT_REDIRECT_PORT
+#fi
 
 # Calculate the debug port by adding 1000 to the configured Daquery port
 # TOMCAT_DEBUG_PORT is the port used to debug the Daquery website from the host system
 TOMCAT_DEBUG_PORT=$(($TOMCAT_REDIRECT_PORT + 1000))
 
 # Check to see if something is already running on the debug port that we want to use
-if nc -z localhost $TOMCAT_DEBUG_PORT; then
-    echo +-+-+-+-+- Port $TOMCAT_DEBUG_PORT is in use, cannot use it as a debug port.  Exiting. +-+-+-+-+-
-    exit 1
-else
-    echo debugging on port $TOMCAT_DEBUG_PORT
-fi
+#if nc -z localhost $TOMCAT_DEBUG_PORT; then
+#    echo +-+-+-+-+- Port $TOMCAT_DEBUG_PORT is in use, cannot use it as a debug port.  Exiting. +-+-+-+-+-
+#    exit 1
+#else
+#    echo debugging on port $TOMCAT_DEBUG_PORT
+#fi
 
 # The file $OJDBC_DIR/ojdbc6-11.1.0.7.0.jar gets copied to CONTAINER_OJDBC_DIR
 CONTAINER_OJDBC_DIR="/localdata/jdbc_driver"
