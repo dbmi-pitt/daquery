@@ -29,9 +29,11 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExporter;
+import edu.pitt.dbmi.daquery.common.util.CaseExporter;
 import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.common.util.TableExporter;
 
 @Entity
 @Table(name = "SQL_DOWNLOAD")
@@ -73,41 +75,13 @@ public class SQLDownload extends SQLQuery implements Download
 				response.setErrorMessage("No query provided to gather case identifiers for download.");
 				return(response);
 			}
+			
+			if(this.isData())
+				dataExporter = new CaseExporter(response, model.getExportConfig(), AppProperties.getDBProperty("output.path"));
+			else
+				dataExporter = new TableExporter(response, model.getExportConfig(), AppProperties.getDBProperty("output.path"));
+			dataExporter.init(conn, st, rs, sql);
 
-			//get the list of identifiers			
-			List<String> pList = new ArrayList<String>();			
-			try
-			{
-				sql = sql.trim();
-				if(sql.endsWith(";"))
-					sql = sql.substring(0, sql.length() - 1);
-				st = conn.createStatement();
-				rs = st.executeQuery(sql);
-				while(rs.next())
-				{
-					String val = rs.getString(1);
-					if(val == null)
-						continue;
-
-					if(val instanceof String)
-						pList.add((String) val);
-					else
-					{
-						response.setStatusEnum(ResponseStatus.ERROR);
-						response.setErrorMessage("An invalid case identifier " + val.toString() + " of type " + val.getClass().getName() + " was found.");
-						return(response);
-					}
-				}
-			}
-			catch(Throwable t)
-			{
-				response.setStatusEnum(ResponseStatus.ERROR);
-				response.setErrorMessage("Unexpected error while gathering case ids.");
-				response.setStackTrace(StringHelper.stackToString(t));
-				return(response);
-			}
-
-			dataExporter = new DataExporter(response, model.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
 			int totalFiles = dataExporter.getNumFiles();
 			int fileCount = 1;
 			List<String> filenames = new ArrayList<String>();
@@ -219,6 +193,12 @@ public class SQLDownload extends SQLQuery implements Download
 			response.setStatusEnum(ResponseStatus.ERROR);
 			response.setErrorMessage("A network or disk access error occured during file export.");
 			response.setStackTrace(StringHelper.stackToString(ioe));
+			return(response);
+		}
+		catch (Exception e) 
+		{
+			response.setStatusEnum(ResponseStatus.ERROR);
+			response.setErrorMessage(e.getMessage());
 			return(response);
 		}
 		catch (Throwable e)

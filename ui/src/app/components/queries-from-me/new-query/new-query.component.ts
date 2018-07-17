@@ -153,6 +153,10 @@ export class NewQueryComponent implements OnInit {
       
     let requests = this.inquiryForm.value.sitesToQuery.map((site) => {      
       if(site.check){
+        let inqName = this.inquiryForm.value.inquiryName;
+        if(this.inquiryForm.value.queryType === 'TABLE') inqName += "(Table)";
+        let dType = this.inquiryForm.value.queryType === 'AGGREGATE' ? 'SQL_QUERY' : 'SQL_DOWNLOAD';
+
         return {
           requestSite: {
             siteId: site.siteId,
@@ -164,10 +168,10 @@ export class NewQueryComponent implements OnInit {
           requestGroup: requestGroupUUID,
           inquiry: {
             version: 1,
-            dataType: 'SQL_QUERY',
+            dataType: dType,
             queryType: this.inquiryForm.value.queryType,
             code: this.inquiryForm.value.sqlQuery,
-            inquiryName: this.inquiryForm.value.inquiryName,
+            inquiryName: inqName,
             inquiryDescription: this.inquiryForm.value.inquiryDescription
           }
         };

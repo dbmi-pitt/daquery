@@ -37,6 +37,7 @@ import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.download.properties.Concept;
 import edu.pitt.dbmi.daquery.download.properties.ConceptColumn;
 import edu.pitt.dbmi.daquery.download.properties.CustomColumnSet;
@@ -49,7 +50,7 @@ import edu.pitt.dbmi.daquery.download.properties.OutputFile;
 import edu.pitt.dbmi.daquery.download.properties.ValueCode;
 
 
-public class DataExporter {
+public class CaseExporter implements DataExporter {
 	
 	public static void main(String[] args) throws Throwable {
         AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
@@ -57,11 +58,15 @@ public class DataExporter {
         DaqueryRequest r = (DaqueryRequest) s.get(DaqueryRequest.class, new Long(1601l));
         DataModel dm = (DataModel) s.get(DataModel.class, Long.parseLong("1"));
         //DataExport de = new DataExport(dm.getDataExportConf());
-        List<String> pList = new ArrayList<String>();
-        pList.add("PIT686766");
-        pList.add("PIT637837");
-        pList.add("PIT982221");        
-        DataExporter dataExporter = new DataExporter(r.getResponses().iterator().next(), dm.getExportConfig(), AppProperties.getDBProperty("output.path"), pList);
+//        List<String> pList = new ArrayList<String>();
+//        pList.add("PIT686766");
+//        pList.add("PIT637837");
+//        pList.add("PIT982221");
+        Connection conn = null;
+		Statement st = null;
+		ResultSet rs = null;
+        CaseExporter dataExporter = new CaseExporter(r.getResponses().iterator().next(), dm.getExportConfig(), AppProperties.getDBProperty("output.path"));
+        dataExporter.init(conn, st, rs, "select PATID from demographic where PATID='PIT686766' OR PATID='PIT637837' OR PATID='PIT982221'");
         dataExporter.dumpData(new File("."), r, 1, 1, 10);
         dataExporter.close();
         //while(dataExporter.hasNextExport())
@@ -73,7 +78,7 @@ public class DataExporter {
 	private static final int UNIT_INDEX = VALUE_INDEX + 1;
 	private static final int COREINFO_COLUMN_COUNT = BASICINFO_COLUMN_COUNT - 2;
 	
-	private final static Logger logger = Logger.getLogger(DataExporter.class.getName());
+	private final static Logger logger = Logger.getLogger(CaseExporter.class.getName());
 	
 	DaqueryResponse daqueryResponse;
 	DaqueryRequest daqueryRequest;
@@ -89,8 +94,49 @@ public class DataExporter {
 	int casesPerFile;
 	int nFiles;
 	int currentFile = 0;
+	
+	@Override
+	public void init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
+		//get the list of identifiers			
+		List<String> pList = new ArrayList<String>();			
+		try
+		{
+			sql = sql.trim();
+			if(sql.endsWith(";"))
+				sql = sql.substring(0, sql.length() - 1);
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+			while(rs.next())
+			{
+				String val = rs.getString(1);
+				if(val == null)
+					continue;
+
+				if(val instanceof String)
+					pList.add((String) val);
+				else
+				{
+					throw new Exception("Invalid case identifier: \"An invalid case identifier \" + val.toString() + \" of type \" + val.getClass().getName() + \" was found.\"");
+//					response.setStatusEnum(ResponseStatus.ERROR);
+//					response.setErrorMessage("An invalid case identifier " + val.toString() + " of type " + val.getClass().getName() + " was found.");
+//					return(response);
+				}
+			}
+			
+			this.idList = pList;
+			nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
+		}
+		catch(Throwable t)
+		{
+			throw t;
+//			response.setStatusEnum(ResponseStatus.ERROR);
+//			response.setErrorMessage("Unexpected error while gathering case ids.");
+//			response.setStackTrace(StringHelper.stackToString(t));
+//			return(response);
+		}
+	}
 		
-	public DataExporter(DaqueryResponse daqueryResponse, DataExportConfig dataExportConfig, String dataDir, List<String> idList) // throws DaqueryException
+	public CaseExporter(DaqueryResponse daqueryResponse, DataExportConfig dataExportConfig, String dataDir) // throws DaqueryException
 	{
 		this.daqueryResponse = daqueryResponse;
 		this.daqueryRequest = daqueryResponse.getRequest();
@@ -101,10 +147,10 @@ public class DataExporter {
 		this.threeDigitZip =  daqueryResponse.getRequest().getNetwork().getShiftDates();
 		
 		this.dateShift = daqueryResponse.getRequest().getNetwork().getShiftDates();
-		this.idList = idList;
+		//this.idList = idList;
 		
 		casesPerFile = this.dataExportConfig.getCasesPerFile();
-		nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
+		//nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
 	}
 
 	public int getNumFiles()
