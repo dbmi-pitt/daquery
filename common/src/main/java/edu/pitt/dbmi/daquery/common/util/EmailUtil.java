@@ -46,9 +46,9 @@ public class EmailUtil
 			retString += "&nbsp;&nbsp;&nbsp;&nbsp;<b>User Name:</b>&nbsp;" + userName;
 			//add the user's email in parentheses if set
 			if (userEmail != null && !userEmail.isEmpty())
-				retString += "(" + userEmail + ")";
-			retString += "<br //>";
-		}*/
+				retString += "(" + userEmail + ")"; }*/
+		retString += "<br //>";
+		
 		return retString;
 		
 	}
