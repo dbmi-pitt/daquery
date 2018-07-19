@@ -78,8 +78,8 @@ public class TestConnection
 		try{Class.forName(driverClass);}
 		catch(Throwable t)
 		{
-			logger.log(Level.SEVERE, "Unable to load driver class " + driverClass + ". Check to make sure the correct jdbc drivers are installed.");
-			return new DataBaseTestResult(false, "Unable to load driver class " + driverClass, "Check to make sure the proper jdbc driver jar file is in place in the java path (possibly in tomcat/lib)");
+			logger.log(Level.SEVERE, "Unable to load driver class " + driverClass, t);
+			return new DataBaseTestResult(false, "Unable to load driver class " + driverClass, t.getMessage());
 		}
 //		System.out.println("Driver " + driverClass + " Successfully loaded.");
 //		System.out.println("Using the following url to connect to the database: " + dbUrl);
@@ -91,14 +91,14 @@ public class TestConnection
 //			System.err.println("Unable to connect to " + dbUrl);
 //			System.err.println("Username: " + username);
 //			t.printStackTrace(System.err);
-			logger.log(Level.WARNING, "Unable to connect to URL " + dbUrl, "Unable to connect to URL " + dbUrl);
+		    logger.log(Level.SEVERE, "Unable to connect to URL " + dbUrl + " Unable to connect to URL " + dbUrl, t);
 			try{if(conn != null) conn.close();}
 			catch(Throwable tt){
 				//System.err.println("Error closing connection."); tt.printStackTrace(System.err);
-				logger.log(Level.WARNING, "Unable to connect to URL " + dbUrl);
+			    logger.log(Level.SEVERE, "Unable to close test connection fromn URL " + dbUrl, tt);
 			}
 			
-			return new DataBaseTestResult(false, "Database connection test fail", "Unable to connect to URL " + dbUrl);
+			return new DataBaseTestResult(false, "Unable to close test connection. ", t.getMessage() );
 		}
 		
 		//remove a trailing semi-colon from the query- jdbc doesn't like this..
@@ -120,9 +120,9 @@ public class TestConnection
 		}
 		catch(Throwable t)
 		{
-			logger.log(Level.WARNING, "Error while executing query " + testQuery);
+		    logger.log(Level.SEVERE, "Error while executing query " + testQuery, t);
 			//t.printStackTrace(System.err);
-			return new DataBaseTestResult(false,  "Database connection test fail",  "Error while executing query " + testQuery);
+		    return new DataBaseTestResult(false,  "Database connection test failed",  t.getMessage());
 		}
 		
 		return new DataBaseTestResult(true,  "Database connection test success",  "Success running query.");
