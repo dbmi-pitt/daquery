@@ -38,7 +38,7 @@ public class TableExporter implements DataExporter {
 	boolean dateShift;
 	Hashtable<String, OutputFile> conceptCDs = null;
 	int rowsPerFile;
-	int nFiles;
+	int nFiles = 1;
 	int currentFile = 0;
 	
 	private final static Logger logger = Logger.getLogger(TableExporter.class.getName());
