@@ -43,7 +43,7 @@ public class TableExporter implements DataExporter {
 	
 	private final static Logger logger = Logger.getLogger(TableExporter.class.getName());
 	
-	public TableExporter(DaqueryResponse response, DataExportConfig exportConfig, String dataDir) {
+	public TableExporter(DaqueryResponse response, String dataDir) {
 		this.daqueryResponse = response;
 		this.daqueryRequest = response.getRequest();
 
