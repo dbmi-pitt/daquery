@@ -40,6 +40,7 @@ public class TableExporter implements DataExporter {
 	int rowsPerFile;
 	int nFiles = 1;
 	int currentFile = 0;
+	private String sqlCode;
 	
 	private final static Logger logger = Logger.getLogger(TableExporter.class.getName());
 	
@@ -57,7 +58,7 @@ public class TableExporter implements DataExporter {
 
 	@Override
 	public void init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
-		// TODO Auto-generated method stub
+		this.sqlCode = sql;
 		
 	}
 	
@@ -157,8 +158,8 @@ public class TableExporter implements DataExporter {
 		conn = ds.getConnection();
 		Statement s = null;
 		ResultSet rs = null;
-		String sql = ((SQLQuery) daqueryRequest.getInquiry()).getCode();
-		String runSQL = sql.trim();
+		
+		String runSQL = sqlCode.trim();
 		if(runSQL.endsWith(";"))
 			runSQL = runSQL.substring(0, runSQL.length() - 1);
 		s = conn.createStatement();

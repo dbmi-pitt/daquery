@@ -61,6 +61,21 @@ public class SQLDownload extends SQLQuery implements Download
 	@Override
 	public DaqueryResponse run(DaqueryResponse response, DataModel model)
 	{
+		SQLDataSource ds = null;
+		String errorMessage = null;
+		if(model == null) errorMessage = "No data model found.";
+		else if((ds = (SQLDataSource) model.getDataSource(SourceType.SQL)) == null) errorMessage = "No SQL data source found attached to model " + model.getName();
+		
+		if(errorMessage != null)
+		{
+			response.setStatusEnum(ResponseStatus.ERROR);
+			response.setErrorMessage(errorMessage);
+			return(response);			
+		}
+		
+		SQLDialect dialect = model.getDataSource(SourceType.SQL).getDialectEnum();
+		String lclCode = getCode(dialect);
+		
 		Connection conn = null;
 		Statement st = null;
 		ResultSet rs = null;
@@ -69,10 +84,8 @@ public class SQLDownload extends SQLQuery implements Download
 		try
 		{
 			sess = HibernateConfiguration.openSession();
-			SQLDataSource ds = (SQLDataSource) model.getDataSource(SourceType.SQL);
 			conn = ds.getConnection();
-			String sql = this.getCode();
-			if(StringHelper.isEmpty(sql))
+			if(StringHelper.isEmpty(lclCode))
 			{
 				response.setStatusEnum(ResponseStatus.ERROR);
 				response.setErrorMessage("No query provided to gather case identifiers for download.");
@@ -83,7 +96,8 @@ public class SQLDownload extends SQLQuery implements Download
 				dataExporter = new CaseExporter(response, model.getExportConfig(), AppProperties.getDBProperty("output.path"));
 			else
 				dataExporter = new TableExporter(response, AppProperties.getDBProperty("output.path"));
-			dataExporter.init(conn, st, rs, sql);
+			
+			dataExporter.init(conn, st, rs, lclCode);
 
 			int totalFiles = dataExporter.getNumFiles();
 			int fileCount = 1;

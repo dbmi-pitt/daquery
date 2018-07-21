@@ -1,11 +1,16 @@
 package edu.pitt.dbmi.daquery.common.domain.inquiry;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -13,6 +18,7 @@ import javax.persistence.Transient;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -30,13 +36,20 @@ public class SQLQuery extends Inquiry
 	private static final long serialVersionUID = 2928392034234l;
 	private final static Logger log = Logger.getLogger(SQLQuery.class.getName());
 		
-	@Expose
+/*	@Expose
 	@Column(name = "CODE")
-	private String code;
+	private String code; */
 	
-	@Expose
+	
+	
+/*	@Expose
 	@Column(name = "SQL_DIALECT")
-	private String sqldialect;
+	private String sqldialect; */
+	
+    @Expose
+	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="query")
+	private Set<SQLCode> code;
+
 	
 	public SQLQuery()
 	{
@@ -47,7 +60,7 @@ public class SQLQuery extends Inquiry
 		super(generateUUID);
 	}
 	
-	@Transient
+/*	@Transient
 	public SQLDialect getSqlDialectEnum()
 	{
 		if (sqldialect == null) {
@@ -62,20 +75,56 @@ public class SQLQuery extends Inquiry
 		} else {
 			sqldialect = dialect.toString();			
 		}
-	}
+	} 
 	
 	public String getCode(){return(code);}
-	public void setCode(String code){this.code = code;}
+	public void setCode(String code){this.code = code;} */
 
+	public Set<SQLCode> getCode(){return(code);}
+	public void setCode(Set<SQLCode> code){this.code = code;}
+	
+	@Transient
+	public String getCode(SQLDialect dialect)
+	{
+		if(code == null) return(null);
+		SQLDialect searchDialect;
+		if(dialect == null) searchDialect = SQLDialect.ANSI;
+		else searchDialect = dialect;
+			
+		for(SQLCode c : code)
+		{
+			if(c != null && c.getDialectEnum() != null)
+			{
+				if(c.getDialectEnum().equals(searchDialect))
+					return(c.getCode());
+			}
+		}
+		return(null);
+	}
+	
 	@Override
 	public DaqueryResponse run(DaqueryResponse response, DataModel model)
 	{
 		try
-		{	
+		{
+			SQLDataSource ds = null;
+			String errorMessage = null;
+			if(model == null) errorMessage = "No data model found.";
+			else if((ds = (SQLDataSource) model.getDataSource(SourceType.SQL)) == null) errorMessage = "No SQL data source found attached to model " + model.getName();
+			
+			if(errorMessage != null)
+			{
+				response.setStatusEnum(ResponseStatus.ERROR);
+				response.setErrorMessage(errorMessage);
+				return(response);			
+			}
+			
+			SQLDialect dialect = model.getDataSource(SourceType.SQL).getDialectEnum();
+			String lclCode = getCode(dialect);
 			if(isAggregate())
 			//if(getQueryType().equals(QueryType.AGGREGATE.value))
 			{
-				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(code);
+				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(lclCode);
 				if(analyze.isRejected())
 				{
 					response.setStatusEnum(ResponseStatus.ERROR);
@@ -83,15 +132,9 @@ public class SQLQuery extends Inquiry
 				}
 				else
 				{
-					SQLDataSource ds = (SQLDataSource) model.getDataSource(SourceType.SQL);
-					if(ds == null)
-					{
-						response.setStatusEnum(ResponseStatus.ERROR);
-						response.setErrorMessage("A SQL data source attached to data model " + getNetwork().getDataModel().getName() + " was not found.");
-					}
+
 					//String sql = "select count(patid) from demographic;";
-					String sql = ((SQLQuery) response.getRequest().getInquiry()).getCode();
-					Long val = ds.executeAggregate(sql);
+					Long val = ds.executeAggregate(lclCode);
 					String strVal = null;
 					if(val != null) strVal = RngHelper.obfuscateAggregateResult(val, response.getRequest().getNetwork()).toString();
 					response.setValue(strVal);
@@ -101,7 +144,12 @@ public class SQLQuery extends Inquiry
 					{
 						response.setDownloadAvailable(true);
 						SQLDownload dLoad = new SQLDownload(true);
-						dLoad.setCode(aggregateValueSql);
+						SQLCode code = new SQLCode();
+						code.setCode(aggregateValueSql);
+						code.setDialectEnum(dialect);
+						Set<SQLCode> codes = new HashSet<SQLCode>();
+						codes.add(code);
+						dLoad.setCode(codes);
 						response.setDownloadDirective(dLoad);
 					}
 					else
