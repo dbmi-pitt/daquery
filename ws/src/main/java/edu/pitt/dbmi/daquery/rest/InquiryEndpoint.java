@@ -30,8 +30,11 @@ import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 
 @Path("/inquiries")
@@ -52,6 +55,15 @@ public class InquiryEndpoint extends AbstractEndpoint {
 
 	
     private final static Logger logger = Logger.getLogger(InquiryEndpoint.class.getName());
+    
+    public static void main(String [] args)
+    {
+    	SQLDialect d = SQLDialect.fromString("ORACLE");
+    	if(d != null)
+    		System.out.println(d);
+    	else
+    		System.out.println("NULL");
+    }
     
     /**
      * Get all inquiries
@@ -167,6 +179,15 @@ public class InquiryEndpoint extends AbstractEndpoint {
             
             DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
             
+            Object dobj = form.get("dialect");
+            if(dobj == null)
+            	return(ResponseHelper.getErrorResponse(400, "Dialect parameter required.", null, null));
+            
+            String dialectStr = dobj.toString();
+            SQLDialect dialect = SQLDialect.fromString(dialectStr);
+            if(dialect == null)
+            	return(ResponseHelper.getErrorResponse(400, "Invalid dialect value: " + dialectStr, null, null));
+            
             dao.openCurrentSessionwithTransaction();
             // only create SQLQuery for now
             Inquiry inquiry = new SQLQuery(true);
@@ -177,7 +198,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             inquiry.setVersion(1);
             inquiry.setInquiryName(form.get("inquiryName").toString());
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
-            ((SQLQuery) inquiry).setCode(form.get("sqlQuery").toString());
+            ((SQLQuery) inquiry).addCode(new SQLCode(form.get("sqlQuery").toString(), dialect));
             dao.save(inquiry);
             dao.closeCurrentSessionwithTransaction();
             
@@ -223,6 +244,15 @@ public class InquiryEndpoint extends AbstractEndpoint {
             
             DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
             
+            Object dobj = form.get("dialect");
+            if(dobj == null)
+            	return(ResponseHelper.getErrorResponse(400, "Dialect parameter required.", null, null));
+            
+            String dialectStr = dobj.toString();
+            SQLDialect dialect = SQLDialect.valueOf(dialectStr);
+            if(dialect == null)
+            	return(ResponseHelper.getErrorResponse(400, "Invalid dialect value: " + dialectStr, null, null));
+
             dao.openCurrentSessionwithTransaction();
             Inquiry inquiry = dao.getByUUID(id);
             //inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
@@ -231,7 +261,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             inquiry.setVersion(inquiry.getVersion() + 1);
             inquiry.setInquiryName(form.get("inquiryName").toString());
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
-            ((SQLQuery)inquiry).setCode(form.get("sqlQuery").toString());
+            ((SQLQuery)inquiry).addCode(new SQLCode(form.get("sqlQuery").toString(), dialect));
             dao.update(inquiry.getId(), inquiry);
             dao.closeCurrentSessionwithTransaction();
             
