@@ -21,6 +21,7 @@ import com.google.gson.annotations.Expose;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 import edu.pitt.dbmi.daquery.common.util.C3P0Properties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -63,6 +64,9 @@ public class SQLDataSource extends DataSource
 	@Column(name = "DRIVER_CLASS")
 	private String driverClass;
 	
+    @Expose
+    protected String dialect;
+	
 	public String getConnectionUrl(){return(connectionUrl);}
 	public void setConnectionUrl(String url){connectionUrl = url;}
 
@@ -74,6 +78,16 @@ public class SQLDataSource extends DataSource
 	
 	public String getDriverClass(){return(driverClass);}
 	public void setDriverClass(String cls){driverClass = cls;}
+	
+	public String getDialect(){return(dialect);}
+	public void setDialect(String dial){dialect = dial;}
+	
+	public SQLDialect getDialectEnum()
+	{
+			if(dialect == null){return(null);}
+			return(SQLDialect.fromString(dialect));
+	}
+	
 	
 	@Transient
 	public Long executeAggregate(String sql) throws DaqueryException

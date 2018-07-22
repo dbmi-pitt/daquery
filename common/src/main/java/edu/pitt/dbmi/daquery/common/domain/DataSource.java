@@ -1,8 +1,6 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
 import java.io.Serializable;
-import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -16,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -25,9 +22,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.gson.annotations.Expose;
-
-import edu.pitt.dbmi.daquery.common.domain.inquiry.InquiryType;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 
 /**
  * The persistent class for the ROLES database table.
@@ -62,9 +56,6 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
     @JoinColumn(name="MODEL_ID")
     DataModel dataModel;
 	
-    @Expose
-    protected String dialect;
-	
 	public DataSource() {
 		
 	}
@@ -87,15 +78,6 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 
 	public DataModel getDataModel(){return(dataModel);}
 	public void setDataModel(DataModel model){dataModel = model;}
-
-	public String getDialect(){return(dialect);}
-	public void setDialect(String dial){dialect = dial;}
-	
-	public SQLDialect getDialectEnum()
-	{
-			if(dialect == null){return(null);}
-			return(SQLDialect.valueOf(dialect));
-	}
 	
 	@Transient
 	public SourceType getSourceTypeEnum()

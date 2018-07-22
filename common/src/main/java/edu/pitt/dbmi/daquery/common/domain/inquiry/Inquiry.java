@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.common.domain.inquiry;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -76,7 +78,7 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Expose
 	@Column(name="QUERY_TYPE")
 	protected String queryType;
-	
+		
 	public Inquiry() {
 		
 	}
@@ -127,7 +129,7 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@OneToMany(fetch = FetchType.EAGER,cascade=CascadeType.ALL, mappedBy="inquiry")
 	public Set<DaqueryRequest> getRequests(){return(requests);}
 	public void setRequests(Set<DaqueryRequest> reqs){requests = reqs;}
-
+	
 	@ManyToOne
 	@JoinColumn(name="AUTHOR_ID")
 	public DaqueryUser getAuthor(){return(author);}

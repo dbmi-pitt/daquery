@@ -209,4 +209,29 @@ public class StringHelper
 		String toVal = val.trim();
 		return toVal.substring(0,1).toUpperCase() + toVal.substring(1).toLowerCase();
 	}
+	
+    public static <T extends Enum<T>> T valueOf(Class<T> enumType, String name)
+    {
+    	  try
+    	  {
+    		  
+    		  T rVal = ((Enum) enumType.newInstance()).valueOf(enumType, name);
+    		  return(rVal);
+    	  }
+    	  catch(IllegalAccessException e)
+    	  {
+    		  System.out.println("illegal accsss");
+    		  return null;
+    	  }
+    	  catch(IllegalArgumentException e)
+    	  {
+    		  System.out.println("illegal argument");
+    		  return null;
+    	  }
+    	  catch (InstantiationException e)
+    	  {
+    		  System.out.println("Instantiation Exception");
+    		  return null;
+    	  }
+	}
 }

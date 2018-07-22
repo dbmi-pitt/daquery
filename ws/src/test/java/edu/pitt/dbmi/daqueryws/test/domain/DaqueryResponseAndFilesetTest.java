@@ -1,7 +1,6 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,9 +21,9 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.RequestDirection;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 
@@ -141,10 +140,9 @@ public class DaqueryResponseAndFilesetTest {
 			
 			SQLQuery q = new SQLQuery(true);
 			q.setAuthor(u);
-			q.setCode(inquirySQLcode);
+			q.addCode(new SQLCode(inquirySQLcode, SQLDialect.ANSI));
 			q.setDataType("B positive");
 			q.setNetwork(n);
-			q.setSqlDialectEnum(SQLDialect.ANSI);
 			Set<DaqueryRequest> drset = new HashSet<DaqueryRequest>();
 			drset.add(dr);
 			q.setRequests(drset);

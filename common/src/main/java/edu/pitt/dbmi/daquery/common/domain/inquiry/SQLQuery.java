@@ -47,8 +47,8 @@ public class SQLQuery extends Inquiry
 	private String sqldialect; */
 	
     @Expose
-	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="query")
-	private Set<SQLCode> code;
+	protected Set<SQLCode> code = new HashSet<SQLCode>();
+
 
 	
 	public SQLQuery()
@@ -66,7 +66,7 @@ public class SQLQuery extends Inquiry
 		if (sqldialect == null) {
 			return null;
 		}
-		return(SQLDialect.valueOf(sqldialect));
+		return(SQLDialect.fromString(sqldialect));
 	}
 	public void setSqlDialectEnum(SQLDialect dialect)
 	{
@@ -80,8 +80,14 @@ public class SQLQuery extends Inquiry
 	public String getCode(){return(code);}
 	public void setCode(String code){this.code = code;} */
 
+	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="query")
 	public Set<SQLCode> getCode(){return(code);}
 	public void setCode(Set<SQLCode> code){this.code = code;}
+	public void addCode(SQLCode code)
+	{
+		this.code.add(code);
+		code.setQuery(this);
+	}
 	
 	@Transient
 	public String getCode(SQLDialect dialect)
@@ -118,8 +124,8 @@ public class SQLQuery extends Inquiry
 				response.setErrorMessage(errorMessage);
 				return(response);			
 			}
-			
-			SQLDialect dialect = model.getDataSource(SourceType.SQL).getDialectEnum();
+
+			SQLDialect dialect = ((SQLDataSource) model.getDataSource(SourceType.SQL)).getDialectEnum();
 			String lclCode = getCode(dialect);
 			if(isAggregate())
 			//if(getQueryType().equals(QueryType.AGGREGATE.value))
@@ -144,12 +150,7 @@ public class SQLQuery extends Inquiry
 					{
 						response.setDownloadAvailable(true);
 						SQLDownload dLoad = new SQLDownload(true);
-						SQLCode code = new SQLCode();
-						code.setCode(aggregateValueSql);
-						code.setDialectEnum(dialect);
-						Set<SQLCode> codes = new HashSet<SQLCode>();
-						codes.add(code);
-						dLoad.setCode(codes);
+						dLoad.addCode(new SQLCode(aggregateValueSql, dialect));
 						response.setDownloadDirective(dLoad);
 					}
 					else
