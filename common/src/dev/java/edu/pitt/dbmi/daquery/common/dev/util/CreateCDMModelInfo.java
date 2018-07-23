@@ -1,12 +1,16 @@
 package edu.pitt.dbmi.daquery.common.dev.util;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -16,18 +20,46 @@ import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public class CreateCDMModelInfo
 {
-	private static final String CDM_CONN_URL = "jdbc:oracle:thin:@dbmi-db-dev-01.dbmi.pitt.edu:1521:dbmi02";
+	private static final String CDM_CONN_URL = "jdbc:oracle:thin:@dbmi-db-dev-02.dbmi.pitt.edu:1521:dbmi09";
 	private static final String CDM_SCHEMA_NAME = "pcori_etl_31";
 	private static final String CDM_PASSWORD = "password";
 	
 	public static void main(String [] args) throws DaqueryException
 	{
-		AppProperties.setDevHomeDir("/Users/bill/dq-data");
-		makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
+		AppProperties.setDevHomeDir("/home/devuser/make-model");
+		//makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
+		dumpModelToJSON();
+	}
+
+	public static void dumpModelToJSON() throws DaqueryException
+	{
+		Session sess = null;
+		try
+		{
+			sess = HibernateConfiguration.openSession();
+			Query q = sess.createQuery("select m from DataModel m");
+			List<DataModel> models = q.list();
+			for(DataModel dm : models)
+			{
+				FileWriter fw = new FileWriter(new File("/home/devuser/data-model" + dm.getName() + ".json"));
+				fw.write(dm.toJson());
+				fw.close();
+			}
+
+		}
+		catch(Throwable tr)
+		{
+			throw new DaqueryException("Error while saving model.", tr);
+		}
+		finally
+		{
+			if(sess != null) sess.close();
+		}		
 	}
 	
 	public static DataModel makeModel(String cdmConnUrl, String cdmSchemaName, String cdmPassword, String modelName) throws DaqueryException
@@ -62,8 +94,10 @@ public class CreateCDMModelInfo
 			conn = DriverManager.getConnection(cdmConnUrl, cdmSchemaName, cdmPassword);
 			
 			DataModel dm = new DataModel(true);
-			dm.setName("CDM");
-			dm.setDescription("PCORI Common Data Model");
+			dm.setName("CDM-3.1");
+			dm.setDescription("PCORI Common Data Model Version 3.1");
+			DataExportConfig dec = dm.getExportConfig();
+			System.out.println(dec.getCasesPerFile());
 			SQLDataSource ds = new SQLDataSource();
 			ds.setName(modelName);
 			ds.setDataModel(dm);
@@ -85,8 +119,16 @@ public class CreateCDMModelInfo
 					da.setPhi(true);
 				else
 					da.setPhi(false);
-				if(da.getFieldName().toUpperCase().equals("PATID") && da.getEntityName().toUpperCase().equals("DEMOGRAPHIC"))
+				
+				if(da.getFieldName().toUpperCase().equals("PATID") || 
+						da.getFieldName().toUpperCase().equals("ENCOUNTERID") ||
+						da.getFieldName().toUpperCase().equals("PROVIDERID") ||
+						da.getFieldName().toUpperCase().equals("PRESCRIBINGID"))
+				{
 					da.setAggregatable(true);
+					da.setIdentifier(true);
+					da.setIdentiferName(da.getFieldName().toUpperCase());
+				}
 				else
 					da.setAggregatable(false);				
 				attribs.add(da);
