@@ -54,7 +54,6 @@
 <outputFile name='diagnosis.csv' source='diagnosis'>
 	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Diagnosis Id' colName='DIAGNOSISID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Enc Type' colName='ENC_TYPE' />
 	    <field name='Admit Date' colName='ADMIT_DATE' />
@@ -89,7 +88,6 @@
 <outputFile name='vital.csv' source='vital'>
 	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Vital Id' colName='VITALID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Measure Date' colName='MEASURE_DATE' />
 	    <field name='Measure Time' colName='MEASURE_TIME' />
@@ -115,7 +113,6 @@
 <outputFile name='dispensing.csv' source='dispensing'>
 	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Dispensing Id' colName='DISPENSINGID' />
 	    <field name='Prescribing Id' colName='PRESCRIBINGID' />
 	    <field name='Dispense Date' colName='DISPENSE_DATE' />
 	    <field name='NDC' colName='NDC' />
@@ -127,7 +124,6 @@
 <outputFile name='lab_result_cm.csv' source='lab_result_cm'>
 	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Lab Result CM Id' colName='LAB_RESULT_CM_ID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Lab Name' colName='LAB_NAME' />
 	    <field name='Specimen Source' colName='SPECIMEN_SOURCE' />
@@ -162,7 +158,6 @@
 <outputFile name='condition.csv' source='condition'>
 	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='Condition Id' colName='CONDITIONID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='Report Date' colName='REPORT_DATE' />
 	    <field name='Resolve Date' colName='RESOLVE_DATE' />
@@ -180,7 +175,6 @@
 <outputFile name='pro_cm.csv' source='pro_cm'>
 	<idColumn>PATID</idColumn>
     <custom-column-set>
-	    <field name='PRO CM Id' colName='PRO_CM_ID' />
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='PRO Item' colName='PRO_ITEM' />
 	    <field name='PRO LOINC' colName='PRO_LOINC' />
@@ -216,18 +210,6 @@
 	    <field name='Raw RXNORM CUI' colName='RAW_RXNORM_CUI' />
 	    <field name='Raw RX Quantity' colName='RAW_RX_QUANTITY' />
 	    <field name='Raw RX NDC' colName='RAW_RX_NDC' />
-	</custom-column-set>
-</outputFile>
-<outputFile name='pcornet_trial.csv' source='pcornet_trial'>
-	<idColumn>PATID</idColumn>
-    <custom-column-set>
-	    <field name='Trial Id' colName='TRIALID' />
-	    <field name='Participant Id' colName='PARTICIPANTID' />
-	    <field name='Trial Site Id' colName='TRIAL_SITEID' />
-	    <field name='Trial Enroll Date' colName='TRIAL_ENROLL_DATE' />
-	    <field name='Trial End Date' colName='TRIAL_END_DATE' />
-	    <field name='Trial Withdraw Date' colName='TRIAL_WITHDRAW_DATE' />
-	    <field name='Trial Invite Code' colName='TRIAL_INVITE_CODE' />
 	</custom-column-set>
 </outputFile>
 <outputFile name='death.csv' source='death'>
