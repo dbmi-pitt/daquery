@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.common.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,12 +9,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -30,8 +31,6 @@ import com.google.gson.reflect.TypeToken;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
-import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
-import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 
 public class JSONHelper
 {
@@ -52,6 +51,9 @@ public class JSONHelper
 		Object v = decodeResponse(ResponseHelper.getJsonResponseGen(200, dm), new TypeReference<DataModel>(){});
 		System.out.println(v);
 	}
+	
+	private final static Logger logger = Logger.getLogger(JSONHelper.class.getName());
+	
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"); 
     public static Gson gson = new GsonBuilder()
     		.excludeFieldsWithoutExposeAnnotation()
@@ -198,4 +200,28 @@ public class JSONHelper
 		return(rVal);
     }
 	
+    public static <T> T fromJson(InputStream jsonIS, Class<T> targetClass)
+    {
+    	ObjectMapper mapper = new ObjectMapper();
+    	T obj = null;
+		try{obj = mapper.readValue(jsonIS, targetClass);}
+		catch(Throwable t)
+		{
+			logger.log(Level.SEVERE, "Error while converting json to object.", t);
+		}
+		return(obj);
+    }    
+    
+    public static <T> T fromJson(String json, Class<T> targetClass)
+    {
+    	if(StringHelper.isEmpty(json)) return(null);
+    	ObjectMapper mapper = new ObjectMapper();
+    	T obj = null;
+		try{obj = mapper.readValue(json, targetClass);}
+		catch(Throwable t)
+		{
+			logger.log(Level.SEVERE, "Error while converting json to object.", t);
+		}
+		return(obj);
+    }
 }

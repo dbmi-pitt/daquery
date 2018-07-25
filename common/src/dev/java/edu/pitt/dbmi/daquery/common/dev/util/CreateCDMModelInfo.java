@@ -2,6 +2,9 @@ package edu.pitt.dbmi.daquery.common.dev.util;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -14,6 +17,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.google.gson.Gson;
+
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
@@ -22,6 +27,8 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 public class CreateCDMModelInfo
 {
@@ -29,13 +36,39 @@ public class CreateCDMModelInfo
 	private static final String CDM_SCHEMA_NAME = "pcori_etl_31";
 	private static final String CDM_PASSWORD = "password";
 	
-	public static void main(String [] args) throws DaqueryException
+	public static void main(String [] args) throws Exception
 	{
-		AppProperties.setDevHomeDir("/home/devuser/make-model");
+		//AppProperties.setDevHomeDir("/home/devuser/daquery-data");
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		//makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
-		dumpModelToJSON();
+		//dumpModelToJSON();
+		System.out.println(importModel());
 	}
 
+	private static Long importModel() throws IOException, DaqueryException
+	{
+		InputStream is = CreateCDMModelInfo.class.getResourceAsStream("/data-modelCDM-3.1.json");
+		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
+		//dm.setId(null);
+		Session sess = null;
+		try
+		{
+			sess = HibernateConfiguration.openSession();
+			Transaction t = sess.beginTransaction();
+			sess.save(dm);
+			t.commit();
+			return(dm.getId());
+		}
+		catch(Throwable tr)
+		{
+			throw new DaqueryException("Error while saving data model.", tr);
+		}
+		finally
+		{
+			if(sess != null) sess.close();
+		}		
+		
+	}	
 	public static void dumpModelToJSON() throws DaqueryException
 	{
 		Session sess = null;
