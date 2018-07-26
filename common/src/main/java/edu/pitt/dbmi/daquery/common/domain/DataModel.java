@@ -115,7 +115,7 @@ public class DataModel extends DaqueryObject implements Serializable
 	{
 		for(DataSource ds: dataSources)
 		{
-			if(ds.getSourceTypeEnum() == type)
+			if(ds.getSourceTypeEnum().equals(type))
 			{
 				return(ds);
 			}

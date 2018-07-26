@@ -41,6 +41,7 @@ import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataBaseTestResult;
@@ -208,6 +209,15 @@ public class NetworkEndpoint extends AbstractEndpoint {
             sqlDataSource.setUsername(sqldatasource_params.get("username"));
             sqlDataSource.setPassword(sqldatasource_params.get("password"));
             sqlDataSource.setDriverClass(sqldatasource_params.get("driver"));
+            String dialect = "";
+            if(sqldatasource_params.get("driver").contains("oracle")) {
+            	dialect = SQLDialect.ORACLE.toString();
+            } else if (sqldatasource_params.get("driver").contains("sqlserver")) {
+            	dialect = SQLDialect.SQLDialect.toString();
+            } else {
+            	dialect = SQLDialect.ANSI.toString();
+            }
+            sqlDataSource.setDialect(dialect);
             
             Set<DataSource> dsset = new HashSet<DataSource>();
             
@@ -310,6 +320,15 @@ public class NetworkEndpoint extends AbstractEndpoint {
             logger.info("Responding to request from: " + username);
             
             Network network = NetworkDAO.queryNetwork(id);
+            String dialect = "";
+            if(ds.getDriverClass().contains("oracle")) {
+            	dialect = SQLDialect.ORACLE.toString();
+            } else if(ds.getDriverClass().contains("sqlserver")) {
+            	dialect = SQLDialect.SQLDialect.toString();
+            } else {
+            	dialect = SQLDialect.ANSI.toString();
+            }
+            ds.setDialect(dialect);
             NetworkDAO.updateSQLDataSource(network, ds);
 
             return Response.ok(200).entity("{}").build();
