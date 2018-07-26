@@ -1,14 +1,10 @@
 import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { NewQuery } from '../../../models/new-query.model';
 import { NetworkService } from '../../../services/network.service';
 import { SiteService } from '../../../services/site.service';
 import { AuthenticationService } from '../../../services/authentication.service';
 import { RequestService } from '../../../services/request.service';
 import { Router } from '@angular/router';
-import { BoundCallbackObservable } from 'rxjs/observable/BoundCallbackObservable';
-import { sendRequest } from 'selenium-webdriver/http';
-import { Observable } from 'rxjs/Observable';
 import { UserService } from 'app/services/user.service';
 
 declare var $:any;
@@ -29,6 +25,13 @@ export class NewQueryComponent implements OnInit {
   editing: boolean = false;
   error: any;
 
+  sqlDialect = {
+    ansi: true,
+    oracle: false,
+    sqlServer: false
+  }
+  lastAddedTab = "ansi";
+
   @Output() requestSent: EventEmitter<any> = new EventEmitter<any>();
   @Output() requests: EventEmitter<any[]> = new EventEmitter<any[]>();
 
@@ -42,6 +45,18 @@ export class NewQueryComponent implements OnInit {
 
   createForm(inquiry) {
     if(inquiry){
+      let ansi_code = inquiry.code.find(x => x.dialect === 'ANSI').code;
+      let oracle_code = inquiry.code.find(x => x.dialect === 'ORACLE').code;
+      let sql_server_code = inquiry.code.find(x => x.dialect === 'SQL_SERVER').code;
+      this.sqlDialect = {
+        ansi: !(ansi_code === ""),
+        oracle: !(oracle_code === ""),
+        sqlServer: !(sql_server_code === "")
+      };
+      if(this.sqlDialect.ansi) this.lastAddedTab = "ansi";
+      if(this.sqlDialect.oracle) this.lastAddedTab = "oracle";
+      if(this.sqlDialect.sqlServer) this.lastAddedTab = "sql_server";
+
       this.inquiryForm = this.fb.group({
         network: '',
         sitesToQuery: this.fb.array([]),
@@ -50,8 +65,11 @@ export class NewQueryComponent implements OnInit {
         inquiryName: [inquiry.inquiryName, Validators.required],
         studyName: '',
         inquiryDescription: [inquiry.inquiryDescription, Validators.maxLength(500)],
-        oracleQuery: '',
-        sqlQuery: [inquiry.code, Validators.required]
+        query: this.fb.group({
+          ansi: [ansi_code, ansi_code === "" ? null : Validators.required],
+          oracle: [oracle_code, oracle_code === "" ? null : Validators.required],
+          sqlServer: [sql_server_code, sql_server_code === "" ? null : Validators.required]
+        })
       });
     } else {
       this.inquiryForm = this.fb.group({
@@ -62,8 +80,11 @@ export class NewQueryComponent implements OnInit {
         inquiryName: ['', Validators.required],
         studyName: '',
         inquiryDescription: ['', Validators.maxLength(500)],
-        oracleQuery: '',
-        sqlQuery: ['', Validators.required]
+        query: this.fb.group({
+          ansi: ['', Validators.required],
+          oracle: [''],
+          sqlServer: ['']
+        })
       });
     }
   }
@@ -75,6 +96,10 @@ export class NewQueryComponent implements OnInit {
   get sitesToQuery() { return this.inquiryForm.get('sitesToQuery'); }
   get queryType() { return this.inquiryForm.get('queryType'); }
   get dataType() { return this.inquiryForm.get('dataType'); }
+  get query() { return this.inquiryForm.get('query'); }
+  get ansi() { return this.inquiryForm.get('query').get('ansi'); }
+  get oracle() { return this.inquiryForm.get('query').get('oracle'); }
+  get sqlServer() { return this.inquiryForm.get('query').get('sqlServer'); }
 
   ngOnInit() {
     this.createForm(this.editingInquiry);
@@ -95,12 +120,14 @@ export class NewQueryComponent implements OnInit {
   }
 
   onRequest() {
-    if(this.editingInquiry) {
-      this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
-                         .subscribe();
-    } else {
-      this.requestService.saveInquires(this.inquiryForm.value)
-                        .subscribe();
+    if(this.inquiryForm.valid){
+      if(this.editingInquiry) {
+        this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
+                          .subscribe();
+      } else {
+        this.requestService.saveInquires(this.inquiryForm.value)
+                          .subscribe();
+      }
     }
     //this.showNetworkSitePanel = !this.showNetworkSitePanel;
     if(this.inquiryForm.valid){
@@ -123,14 +150,12 @@ export class NewQueryComponent implements OnInit {
                                             });
                           } else {
                             this.inquiryForm.get('inquiryName').markAsTouched();
-                            this.inquiryForm.get('sqlQuery').markAsTouched();
                           }
                         }, error => {
                           this.error = error;
                         });
     } else {
       this.inquiryForm.get('inquiryName').markAsTouched();
-      this.inquiryForm.get('sqlQuery').markAsTouched();
     }
   }
 
@@ -228,5 +253,62 @@ export class NewQueryComponent implements OnInit {
         d = Math.floor(d / 16);
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
+  }
+
+  plusANSIClick(){
+    this.sqlDialect.ansi = true;
+    this.inquiryForm.get('query').get('ansi').setValidators([Validators.required]);
+    this.inquiryForm.get('query').get('ansi').updateValueAndValidity();
+    this.lastAddedTab = "ansi";
+  }
+
+  plusORACLEClick(){
+    this.sqlDialect.oracle = true;
+    this.inquiryForm.get('query').get('oracle').setValidators([Validators.required]);
+    this.inquiryForm.get('query').get('oracle').updateValueAndValidity();
+    this.lastAddedTab = "oracle";
+  }
+
+  plusSQLSERVERClick(){
+    this.sqlDialect.sqlServer = true;
+    this.inquiryForm.get('query').get('sqlServer').setValidators([Validators.required]);
+    this.inquiryForm.get('query').get('sqlServer').updateValueAndValidity();
+    this.lastAddedTab = "sql_server";
+  }
+
+  onANSITabClose(){
+    this.sqlDialect.ansi = false;
+    this.inquiryForm.get('query').get('ansi').setValue("");
+    this.inquiryForm.get('query').get('ansi').clearValidators();
+    this.inquiryForm.get('query').get('ansi').updateValueAndValidity();
+    if(this.sqlDialect.oracle){
+      this.lastAddedTab = "oracle";
+    } else if(this.sqlDialect.sqlServer){
+      this.lastAddedTab = "sql_server";
+    }
+  }
+
+  onORACLETabClose(){
+    this.sqlDialect.oracle = false;
+    this.inquiryForm.get('query').get('oracle').setValue("");
+    this.inquiryForm.get('query').get('oracle').clearValidators();
+    this.inquiryForm.get('query').get('oracle').updateValueAndValidity();
+    if(this.sqlDialect.oracle){
+      this.lastAddedTab = "oracle";
+    } else if(this.sqlDialect.ansi){
+      this.lastAddedTab = "ansi";
+    }
+  }
+
+  onSQLSERVERTabClose(){
+    this.sqlDialect.sqlServer = false;
+    this.inquiryForm.get('query').get('sqlServer').setValue("");
+    this.inquiryForm.get('query').get('sqlServer').clearValidators();
+    this.inquiryForm.get('query').get('sqlServer').updateValueAndValidity();
+    if(this.sqlDialect.oracle){
+      this.lastAddedTab = "oracle";
+    } else if(this.sqlDialect.ansi){
+      this.lastAddedTab = "ansi";
+    }
   }
 }

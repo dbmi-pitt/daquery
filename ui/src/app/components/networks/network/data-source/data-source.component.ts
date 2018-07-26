@@ -41,18 +41,18 @@ export class DataSourceComponent implements OnInit {
 
   createForm() {
     this.datasourceForm = this.fb.group({
-      url: ['', Validators.required],
+      connectionUrl: ['', Validators.required],
       username: ['', Validators.required],
       password: ['', Validators.required],
-      driver: ['', Validators.required],
+      driverClass: ['', Validators.required],
       dtype: ['SQL']
     })
   }
 
-  get url() { return this.datasourceForm.get('url'); }
+  get connectionUrl() { return this.datasourceForm.get('connectionUrl'); }
   get username() { return this.datasourceForm.get('username'); }
   get password() { return this.datasourceForm.get('password'); }
-  get driver() { return this.datasourceForm.get('driver'); }
+  get driverClass() { return this.datasourceForm.get('driverClass'); }
 
   getNetwork(id: number){
       this.networkService.getNetwork(id)
@@ -65,10 +65,10 @@ export class DataSourceComponent implements OnInit {
     this.networkService.getDatamodel(network_id)
                        .subscribe(datamodel => {
                           this.datamodel = datamodel;
-                          this.datasourceForm.get('url').setValue(this.datamodel.dataSources[0].connectionUrl);
+                          this.datasourceForm.get('connectionUrl').setValue(this.datamodel.dataSources[0].connectionUrl);
                           this.datasourceForm.get('username').setValue(this.datamodel.dataSources[0].username);
                           this.datasourceForm.get('password').setValue(this.datamodel.dataSources[0].password);
-                          this.datasourceForm.get('driver').setValue(this.datamodel.dataSources[0].driverClass);
+                          this.datasourceForm.get('driverClass').setValue(this.datamodel.dataSources[0].driverClass);
                        });
   }
 
