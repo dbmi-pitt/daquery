@@ -34,23 +34,62 @@
                   <label for="query">SQL</label>
                   <div class="nav-tabs-custom">
                     <ul class="nav nav-tabs">
-                      <li class="active">
-                        <a href="#tab_1" data-toggle="tab" aria-expanded="true">SQL Query</a>
+                      <li [ngClass]="{'active': lastAddedTab === 'ansi'}" *ngIf="sqlDialect.ansi">
+                        <div>
+                          <a href="#tab_ansi" data-toggle="tab" aria-expanded="true">ANSI Query</a> 
+                          <button type="button" class="close" aria-label="Close" (click)="onANSITabClose()">
+                              <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
                       </li>
-                      <!-- <li>
-                        <a href="#tab_2" data-toggle="tab" aria-expanded="true">SQL Server Query</a>
-                      </li> -->
+                      <li [ngClass]="{'active': lastAddedTab === 'oracle'}" *ngIf="sqlDialect.oracle">
+                        <div>
+                          <a href="#tab_oracle" data-toggle="tab" aria-expanded="true">Oracle Query</a>
+                          <button type="button" class="close" aria-label="Close" (click)="onORACLETabClose()">
+                            <span aria-hidden="true">×</span>
+                          </button>
+                        </div>
+                      </li>
+                      <li [ngClass]="{'active': lastAddedTab === 'sql_server'}" *ngIf="sqlDialect.sqlServer">
+                        <div>
+                          <a href="#tab_sqlServer" data-toggle="tab" aria-expanded="true">Sql Server Query</a>
+                          <button type="button" class="close" aria-label="Close" (click)="onSQLSERVERTabClose()">
+                            <span aria-hidden="true">×</span>
+                          </button>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-plus"></i>
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a [ngClass]="{'greyout': sqlDialect.ansi}" (click)="plusANSIClick()">ANSI Query</a></li>
+                            <li><a [ngClass]="{'greyout': sqlDialect.oracle}" (click)="plusORACLEClick()">Oracle Query</a></li>
+                            <li><a [ngClass]="{'greyout': sqlDialect.sqlServer}" (click)="plusSQLSERVERClick()">SQL Server Query</a></li>
+                          </ul>
+                        </div>
+                      </li>
                     </ul>
-                    <div class="tab-content">
-                      <div class="tab-pane active" id="tab_1">
-                        <div class="form-group has-feedback" [ngClass]="{'has-error': sqlQuery.invalid && (sqlQuery.dirty || sqlQuery.touched), 'has-success': sqlQuery.valid && (sqlQuery.dirty || sqlQuery.touched) }">
-                          <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery" placeholder="enter ANSI SQL query"></textarea>
-                          <div class="help-block" *ngIf="sqlQuery.invalid && (sqlQuery.dirty || sqlQuery.touched)">Please enter a sql query</div>
+                    <div class="tab-content" formGroupName="query">
+                      <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'ansi'}" id="tab_ansi" *ngIf="sqlDialect.ansi">
+                        <div class="form-group has-feedback" [ngClass]="{'has-error': ansi.invalid && (ansi.dirty || ansi.touched), 'has-success': ansi.valid && (ansi.dirty || ansi.touched) }">
+                          <textarea class="form-control" rows="5" id="sql_query" formControlName="ansi" placeholder="enter ANSI SQL query"></textarea>
+                          <div class="help-block" *ngIf="ansi.invalid && (ansi.dirty || ansi.touched)">Please enter a ansi sql query</div>
                         </div>
                       </div>
-                      <!-- <div class="tab-pane" id="tab_2">
-                        <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlQuery" placeholder="enter your SQL Server T/SQL query"></textarea>
-                      </div> -->
+                      <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'oracle'}" id="tab_oracle" *ngIf="sqlDialect.oracle">
+                        <div class="form-group has-feedback" [ngClass]="{'has-error': oracle.invalid && (oracle.dirty || oracle.touched), 'has-success': oracle.valid && (oracle.dirty || oracle.touched) }">
+                          <textarea class="form-control" rows="5" id="sql_query" formControlName="oracle" placeholder="enter Oracle SQL query"></textarea>
+                          <div class="help-block" *ngIf="oracle.invalid && (oracle.dirty || oracle.touched)">Please enter a oracle sql query</div>
+                        </div>
+                      </div>
+                      <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'sql_server'}" id="tab_sqlServer" *ngIf="sqlDialect.sqlServer">
+                        <div class="form-group has-feedback" [ngClass]="{'has-error': sqlServer.invalid && (sqlServer.dirty || sqlServer.touched), 'has-success': sqlServer.valid && (sqlServer.dirty || sqlServer.touched) }">
+                          <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlServer" placeholder="enter Sql Server SQL"></textarea>
+                          <div class="help-block" *ngIf="sqlServer.invalid && (sqlServer.dirty || sqlServer.touched)">Please enter a sql server sql query</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
