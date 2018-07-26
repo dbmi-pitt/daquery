@@ -96,16 +96,29 @@ public class SQLQuery extends Inquiry
 		SQLDialect searchDialect;
 		if(dialect == null) searchDialect = SQLDialect.ANSI;
 		else searchDialect = dialect;
-			
+		
+		String rVal = null;
+		String ansiCode = null;
 		for(SQLCode c : code)
 		{
 			if(c != null && c.getDialectEnum() != null)
 			{
-				if(c.getDialectEnum().equals(searchDialect) || dialect.equals(SQLDialect.ANSI))
-					return(c.getCode());
+				if(rVal == null && c.getDialectEnum().equals(searchDialect))
+				{
+					rVal = c.getCode();
+				}
+				//store ansi code if we find it
+				if(c.getDialectEnum().equals(SQLDialect.ANSI))
+				{
+					ansiCode = c.getCode();
+				}		
 			}
 		}
-		return(null);
+		
+		//if a matching dialect isn't found use the ANSI code
+		if(rVal == null) rVal = ansiCode;
+		
+		return(rVal);
 	}
 	
 	@Override
