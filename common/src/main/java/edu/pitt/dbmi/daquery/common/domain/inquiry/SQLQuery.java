@@ -101,7 +101,7 @@ public class SQLQuery extends Inquiry
 		{
 			if(c != null && c.getDialectEnum() != null)
 			{
-				if(c.getDialectEnum().equals(searchDialect))
+				if(c.getDialectEnum().equals(searchDialect) || dialect.equals(SQLDialect.ANSI))
 					return(c.getCode());
 			}
 		}
