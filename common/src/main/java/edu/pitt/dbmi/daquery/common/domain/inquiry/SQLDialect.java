@@ -4,7 +4,7 @@ import org.hibernate.internal.util.StringHelper;
 
 public enum SQLDialect
 {
-	SQLDialect(TYPES.SQL_SERVER), ORACLE(TYPES.ORACLE), ANSI(TYPES.ANSI);
+	SQL_SERVER(TYPES.SQL_SERVER), ORACLE(TYPES.ORACLE), ANSI(TYPES.ANSI);
 	
 	String val;
 	SQLDialect(String v)
@@ -16,7 +16,7 @@ public enum SQLDialect
 	{
 		if(StringHelper.isEmpty(val)) return null;
 		String valChk = val.toUpperCase().trim();
-		for(SQLDialect s : SQLDialect.getDeclaringClass().getEnumConstants())
+		for(SQLDialect s : SQL_SERVER.getDeclaringClass().getEnumConstants())
 		{
 			if(s.val.equals(valChk))
 				return(s);

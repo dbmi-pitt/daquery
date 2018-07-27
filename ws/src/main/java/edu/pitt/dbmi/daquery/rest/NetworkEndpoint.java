@@ -213,7 +213,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             if(sqldatasource_params.get("driver").contains("oracle")) {
             	dialect = SQLDialect.ORACLE.toString();
             } else if (sqldatasource_params.get("driver").contains("sqlserver")) {
-            	dialect = SQLDialect.SQLDialect.toString();
+            	dialect = SQLDialect.SQL_SERVER.toString();
             } else {
             	dialect = SQLDialect.ANSI.toString();
             }
@@ -324,7 +324,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             if(ds.getDriverClass().contains("oracle")) {
             	dialect = SQLDialect.ORACLE.toString();
             } else if(ds.getDriverClass().contains("sqlserver")) {
-            	dialect = SQLDialect.SQLDialect.toString();
+            	dialect = SQLDialect.SQL_SERVER.toString();
             } else {
             	dialect = SQLDialect.ANSI.toString();
             }
