@@ -127,9 +127,11 @@ public class DataModel extends DaqueryObject implements Serializable
 	public DataExportConfig getExportConfig() throws DaqueryException
 	{
 		try {
-			//TODO: Hack for now.  If export config is empty read it from our file
-			if(StringHelper.isBlank(dataExportConf))
-			{
+
+			if(StringHelper.isBlank(dataExportConf)) return null;
+			
+			//Hack for now.  If export config is empty read it from our file
+/*			{
 				InputStream is = DataModel.class.getResourceAsStream("/data-export-config-cdm-v3.1.xml");
 				if(is == null)
 				{
@@ -140,7 +142,8 @@ public class DataModel extends DaqueryObject implements Serializable
 				while(inputScanner.hasNextLine())
 					dataExportConf = dataExportConf + inputScanner.nextLine() + "\n";
 				inputScanner.close();
-			}
+			} */
+			
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			StringReader reader = new StringReader(dataExportConf);
@@ -149,10 +152,10 @@ public class DataModel extends DaqueryObject implements Serializable
 		} catch(JAXBException je) {
 			throw new DaqueryException("Error data export configuration.  Possibly the XML is not formated correctly.", je);
 		}
-		catch(FileNotFoundException fnfe)
+/*		catch(FileNotFoundException fnfe)
 		{
 			throw new DaqueryException("File not found!!!!");
-		}
+		} */
 	}
 	
 //	@Override

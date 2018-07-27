@@ -94,9 +94,10 @@ public class CaseExporter implements DataExporter {
 	int casesPerFile;
 	int nFiles;
 	int currentFile = 0;
+	private String failureMessage;
 	
 	@Override
-	public void init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
+	public boolean init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
 		//get the list of identifiers			
 		List<String> pList = new ArrayList<String>();			
 		try
@@ -125,6 +126,7 @@ public class CaseExporter implements DataExporter {
 			
 			this.idList = pList;
 			nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
+			return(true);
 		}
 		catch(Throwable t)
 		{
@@ -153,6 +155,11 @@ public class CaseExporter implements DataExporter {
 		//nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
 	}
 
+	@Override
+	public String getFailureMessage()
+	{
+		return(failureMessage);
+	}
 	public int getNumFiles()
 	{
 		return(nFiles);
