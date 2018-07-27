@@ -103,12 +103,12 @@ public class SQLQuery extends Inquiry
 		{
 			if(c != null && c.getDialectEnum() != null)
 			{
-				if(rVal == null && c.getDialectEnum().equals(searchDialect))
+				if(rVal == null && c.getDialectEnum().equals(searchDialect) && (! StringHelper.isEmpty(c.getCode())))
 				{
 					rVal = c.getCode();
 				}
 				//store ansi code if we find it
-				if(c.getDialectEnum().equals(SQLDialect.ANSI))
+				if(c.getDialectEnum().equals(SQLDialect.ANSI) && (! StringHelper.isEmpty(c.getCode())))
 				{
 					ansiCode = c.getCode();
 				}		
@@ -126,10 +126,18 @@ public class SQLQuery extends Inquiry
 	{
 		try
 		{
+			SQLDialect dialect = null;
+			String lclCode = null;
 			SQLDataSource ds = null;
 			String errorMessage = null;
 			if(model == null) errorMessage = "No data model found.";
 			else if((ds = (SQLDataSource) model.getDataSource(SourceType.SQL)) == null) errorMessage = "No SQL data source found attached to model " + model.getName();
+			else
+			{
+				dialect = ((SQLDataSource) model.getDataSource(SourceType.SQL)).getDialectEnum();
+				lclCode = getCode(dialect);
+				if(StringHelper.isEmpty(lclCode)) errorMessage = "No SQL code found to execute on db type: " + dialect;
+			}
 			
 			if(errorMessage != null)
 			{
@@ -138,8 +146,7 @@ public class SQLQuery extends Inquiry
 				return(response);			
 			}
 
-			SQLDialect dialect = ((SQLDataSource) model.getDataSource(SourceType.SQL)).getDialectEnum();
-			String lclCode = getCode(dialect);
+			
 			if(isAggregate())
 			//if(getQueryType().equals(QueryType.AGGREGATE.value))
 			{

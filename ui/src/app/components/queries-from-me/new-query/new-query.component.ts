@@ -195,7 +195,20 @@ export class NewQueryComponent implements OnInit {
             version: 1,
             dataType: dType,
             queryType: this.inquiryForm.value.queryType,
-            code: this.inquiryForm.value.sqlQuery,
+            code: [
+                {
+                  code: this.inquiryForm.get('query').get('ansi').value,
+                  dialect: 'ANSI'
+                },
+                {
+                  code: this.inquiryForm.get('query').get('oracle').value,
+                  dialect: 'ORACLE'
+                },
+                {
+                  code: this.inquiryForm.get('query').get('sqlServer').value,
+                  dialect: 'SQL_SERVER'
+                }
+              ],
             inquiryName: inqName,
             inquiryDescription: this.inquiryForm.value.inquiryDescription
           }

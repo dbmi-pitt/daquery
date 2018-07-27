@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.NoViableAltException;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.hibernate.internal.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.sql.parser.SqlAbstractVisitor;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
@@ -76,6 +77,12 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 	}
 	public SQLAnalyzer(String sql)
 	{
+		if(StringHelper.isEmpty(sql))
+		{
+			rejectMessage = "No SQL code provided.";
+			logger.log(Level.SEVERE, "No SQL code provided to parser.");
+			return;
+		}
 		try
 		{
 			
