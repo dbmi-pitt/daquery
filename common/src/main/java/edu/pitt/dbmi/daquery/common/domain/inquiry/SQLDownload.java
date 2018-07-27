@@ -95,28 +95,30 @@ public class SQLDownload extends SQLQuery implements Download
 			if(this.isData())
 				dataExporter = new CaseExporter(response, model.getExportConfig(), AppProperties.getDBProperty("output.path"));
 			else
-				dataExporter = new TableExporter(response, AppProperties.getDBProperty("output.path"));
+				dataExporter = new TableExporter(response, model, AppProperties.getDBProperty("output.path"));
 			
-			dataExporter.init(conn, st, rs, lclCode);
-
-			int totalFiles = dataExporter.getNumFiles();
-			int fileCount = 1;
-			List<String> filenames = new ArrayList<String>();
-			while(dataExporter.hasNextExport())
+			Integer totalFiles = null;
+			List<String> filenames = null;
+			boolean initSuccess;
+			if(initSuccess = dataExporter.init(conn, st, rs, lclCode))
 			{
-				response.setStatusMessage("Exporting file " + fileCount + " of " + totalFiles + ".");
-				Transaction t2 = sess.beginTransaction();
-				sess.saveOrUpdate(response);
-				t2.commit();
-				String fn = dataExporter.exportNext();
-				if(fn != null)
-					filenames.add(fn);
-				fileCount++;
+				totalFiles = dataExporter.getNumFiles();
+				int fileCount = 1;
+				filenames = new ArrayList<String>();
+				while(dataExporter.hasNextExport())
+				{
+					response.setStatusMessage("Exporting file " + fileCount + " of " + totalFiles + ".");
+					Transaction t2 = sess.beginTransaction();
+					sess.saveOrUpdate(response);
+					t2.commit();
+					String fn = dataExporter.exportNext();
+					if(fn != null)
+						filenames.add(fn);
+					fileCount++;
+				}
+				dataExporter.writeTrackingFile();
+				dataExporter.close();
 			}
-			dataExporter.writeTrackingFile();
-			dataExporter.close();
-			
-			boolean deliverData = AppProperties.getDeliverData();
 			
 			EmailContents emailContents = new EmailContents();
 			DaqueryRequest req = response.getRequest();
@@ -156,8 +158,15 @@ public class SQLDownload extends SQLQuery implements Download
 				requesterName = requester.getRealName();
 			String emailHeader = EmailUtil.generateEmailHeader(networkName, siteName, queryName); 
 
-
-			if(deliverData)
+			boolean deliverData = AppProperties.getDeliverData();
+			if(!initSuccess)
+			{
+				emailContents.subject = "Data Request Delivery Failure";
+				emailContents.message = emailHeader;
+				emailContents.message += "The data export process for the above reveferenced request failed with the following error message:<br \\><br \\>";
+				emailContents.message += dataExporter.getFailureMessage();
+			}
+			else if(deliverData)
 			{
 				emailContents.subject = "Data Request Delivered";
 				emailContents.message = emailHeader;

@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 public interface DataExporter {
 	
-	public void init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable;
+	public boolean init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable;
 	
 	public int getNumFiles();
 	
@@ -20,4 +20,6 @@ public interface DataExporter {
 	public void close() throws IOException;
 
 	public int getCasesPerFile();
+	
+	public String getFailureMessage();
 }

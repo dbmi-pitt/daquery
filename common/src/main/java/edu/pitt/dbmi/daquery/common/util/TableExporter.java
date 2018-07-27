@@ -17,22 +17,22 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.download.properties.OutputFile;
 
 public class TableExporter implements DataExporter {
 	
 	DaqueryResponse daqueryResponse;
 	DaqueryRequest daqueryRequest;
-	DataExportConfig dataExportConfig;
+	DataModel model;
+	
 	String dataDir;
 	boolean deliverData;
 	List<String> idList;
-	private final int patientBlockSize = 500;
 	boolean debugDataExport;
 	boolean threeDigitZip;
 	boolean dateShift;
@@ -41,13 +41,15 @@ public class TableExporter implements DataExporter {
 	int nFiles = 1;
 	int currentFile = 0;
 	private String sqlCode;
+	private String failureMessage;
 	
 	private final static Logger logger = Logger.getLogger(TableExporter.class.getName());
 	
-	public TableExporter(DaqueryResponse response, String dataDir) {
+	public TableExporter(DaqueryResponse response, DataModel model, String dataDir) {
+		
 		this.daqueryResponse = response;
 		this.daqueryRequest = response.getRequest();
-
+		this.model = model;
 		this.dataDir = dataDir;
 		this.deliverData = AppProperties.getDeliverData();
 		this.debugDataExport = AppProperties.getDebugDataExport();
@@ -57,10 +59,13 @@ public class TableExporter implements DataExporter {
 	}
 
 	@Override
-	public void init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
+	public boolean init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
 		this.sqlCode = sql;
-		
+		return(true);
 	}
+	
+	@Override
+	public String getFailureMessage(){return(failureMessage);}
 	
 	@Override
 	public int getNumFiles() {
