@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.sql.ReturnColumn;
 
 public class SelectStatement extends AbstractElement implements ColumnProvider, SQLElement
 {
@@ -14,6 +15,11 @@ public class SelectStatement extends AbstractElement implements ColumnProvider, 
 	public String getAlias(){return alias;}
 	public void setAlias(String alias){this.alias = alias;}
 
+	public ReturnColumn resolveColumn(Column col)
+	{
+		
+	}
+	
 	@Override public void addChild(SQLElement child)
 	{
 		children.add(child);

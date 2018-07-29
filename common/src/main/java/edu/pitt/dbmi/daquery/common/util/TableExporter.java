@@ -23,6 +23,7 @@ import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.download.properties.OutputFile;
+import edu.pitt.dbmi.daquery.sql.ReturnFieldsAnalyzer;
 
 public class TableExporter implements DataExporter {
 	
@@ -42,6 +43,7 @@ public class TableExporter implements DataExporter {
 	int currentFile = 0;
 	private String sqlCode;
 	private String failureMessage;
+	private ReturnFieldsAnalyzer sqlAnalyzer;
 	
 	private final static Logger logger = Logger.getLogger(TableExporter.class.getName());
 	
@@ -61,6 +63,12 @@ public class TableExporter implements DataExporter {
 	@Override
 	public boolean init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
 		this.sqlCode = sql;
+		sqlAnalyzer = new ReturnFieldsAnalyzer(sql, model);
+		if(sqlAnalyzer.isRejected())
+		{
+			failureMessage = sqlAnalyzer.getRejectionMessage();
+			return(false);
+		}
 		return(true);
 	}
 	
