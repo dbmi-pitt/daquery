@@ -30,7 +30,7 @@ public class SQLAnalyzerTest
 	public void checkReturn(ReturnTest test)
 	{
 		System.out.println("Checking: " + test.sql);
-		ReturnFieldsAnalyzer analyze = new ReturnFieldsAnalyzer(test.sql);
+		ReturnFieldsAnalyzer analyze = new ReturnFieldsAnalyzer(test.sql, null);
 		Assert.assertEquals(analyze.isRejected(), test.rejected);
 		Assert.assertEquals(analyze.getWarningList().size(), test.nWarnings);
 		for(String warn : test.warningMatches)

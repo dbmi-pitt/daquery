@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.common.util.StringHelper;
 
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.sql.domain.Column;
 import edu.pitt.dbmi.daquery.sql.domain.DeIdTag;
 import edu.pitt.dbmi.daquery.sql.domain.Function;
@@ -61,6 +63,10 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.With_select_stmtC
 public class ReturnFieldsAnalyzer extends SQLAnalyzer
 {
 
+	private List<String> warnings = new ArrayList<String>();
+	private DataModel model = null;
+	private SQLElement topElement = null;
+	
 	public static void main(String [] args)
 	{
 		//simple
@@ -71,7 +77,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD, (select nyj from ieu);");
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD;");
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select vital.patid<IDENTIFIABLE isId=true dateshift on tbl.dsfield obfuscate=true> adsd, selst.somefield, myfunc(lmno.abc, pq.def)<IDENTIFIABLE isId=true dateshift on tb22.dsfield222 obfuscate=true>  as mfun from VITAL, (select somefield, otherfield from adfa) selst where patid like 'PIT100_' or patid like 'PIT101_';");
-		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("insert into asdfa (abc, def, ghi) values ('ab', 'cd', 'ef');");
+		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("insert into asdfa (abc, def, ghi) values ('ab', 'cd', 'ef');", null);
 		System.out.println(a.topElement);
 //<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
 		
@@ -87,7 +93,22 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		}
 	}
 	
-	private List<String> warnings = new ArrayList<String>();
+	
+	
+	public SelectStatement getTopSelect(){return((SelectStatement) topElement);}
+	public List<ReturnColumn> getReturnColumns()
+	{
+		SelectStatement select = getTopSelect();
+		List<Column> columns = select.getColumns();
+		List<ReturnColumn> rCols = new ArrayList<ReturnColumn>();
+		for(Column col : columns)
+		{
+			ReturnColumn rCol = select.resolveColumn(col);
+			rCols.add(rCol);
+		}
+		return(rCols);
+	}
+	
 	
 	public boolean hasWarnings(){return(warnings.size() > 0);}
 	private void addWarning(String warning){warnings.add(warning);}
@@ -108,9 +129,10 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		return(warns);
 	}
 	public List<String> getWarningList(){return(warnings);}
-	public ReturnFieldsAnalyzer(String sql)
+	public ReturnFieldsAnalyzer(String sql, DataModel model)
 	{
 		super(sql);
+		this.model = model;
 		if(!this.isRejected())
 			analyzeAggregateTree();
 	}
@@ -119,7 +141,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	{
 		analyzeNode(topNode, 1, null);
 	}	
-	private SQLElement topElement = null;
+	
 	private void analyzeNode(TreeNode node, int level, SQLElement parentElement)
 	{
 		if(censoredStatements.containsKey(node.self.getClass()))
@@ -262,16 +284,16 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 
 	}
 	
-		private static Boolean parseTrueFalseProp(String prop)
-		{
-			if(StringHelper.isEmpty(prop)) return(null);
-			int eqLoc = prop.indexOf('=');
-			if(eqLoc <=0 || eqLoc >= prop.length()) return(null);
-			String tf = prop.substring(eqLoc + 1).trim().toUpperCase();
-			if(tf.equals("FALSE")) return(new Boolean(false));
-			if(tf.endsWith("TRUE")) return(new Boolean(true));
-			return(null);
-		}	
+	private static Boolean parseTrueFalseProp(String prop)
+	{
+		if(StringHelper.isEmpty(prop)) return(null);
+		int eqLoc = prop.indexOf('=');
+		if(eqLoc <=0 || eqLoc >= prop.length()) return(null);
+		String tf = prop.substring(eqLoc + 1).trim().toUpperCase();
+		if(tf.equals("FALSE")) return(new Boolean(false));
+		if(tf.endsWith("TRUE")) return(new Boolean(true));
+		return(null);
+	}
 	
 	private boolean isColumn(SQLElement element)
 	{
