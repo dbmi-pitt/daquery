@@ -342,6 +342,11 @@ result_column_expr
  :
 | ( ( database_name '.' )? table_name '.' )? column_name deid_tag? ( K_AS? column_alias )?
  ;
+
+tracking_column_expr
+ :
+| ( ( database_name '.' )? table_name '.' )? column_name 
+ ;
  
 comparison_operator
  : '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | in_keyword | like_keyword | K_GLOB | K_MATCH | K_REGEXP
@@ -422,7 +427,7 @@ deid_tag
   ;
  
   date_shift_field_prop
-  : K_DATESHIFT K_ON result_column_expr
+  : K_DATESHIFT K_TRACKED K_BY tracking_column_expr
   ;
  
   obfuscate_field_prop
@@ -633,6 +638,7 @@ keyword
  | K_TEMPORARY
  | K_THEN
  | K_TO
+ | K_TRACKED
  | K_TRANSACTION
  | K_TRIGGER
  | K_TRUE
@@ -910,6 +916,7 @@ K_TEMP : T E M P;
 K_TEMPORARY : T E M P O R A R Y;
 K_THEN : T H E N;
 K_TO : T O;
+K_TRACKED : T R A C K E D;
 K_TRANSACTION : T R A N S A C T I O N;
 K_TRIGGER : T R I G G E R;
 K_TRUE : T R U E;

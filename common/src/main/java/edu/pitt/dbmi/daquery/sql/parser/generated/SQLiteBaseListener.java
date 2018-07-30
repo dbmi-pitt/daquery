@@ -520,6 +520,18 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterComparison_operator(SQLiteParser.Comparison_operatorContext ctx) { }
 	/**
 	 * {@inheritDoc}
