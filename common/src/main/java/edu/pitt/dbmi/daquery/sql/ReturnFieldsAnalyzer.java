@@ -55,6 +55,7 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Savepoint_stmtCon
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_coreContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_setContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Table_nameContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Tracking_column_exprContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Update_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Update_stmt_limitedContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Vacuum_stmtContext;
@@ -103,7 +104,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		List<ReturnColumn> rCols = new ArrayList<ReturnColumn>();
 		for(Column col : columns)
 		{
-			ReturnColumn rCol = select.resolveColumn(col);
+			ReturnColumn rCol = new ReturnColumn();
+			rCol.deidTag = select.resolveColumnPhiInfo(col, model);
 			rCols.add(rCol);
 		}
 		return(rCols);
@@ -135,6 +137,14 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		this.model = model;
 		if(!this.isRejected())
 			analyzeAggregateTree();
+		
+		for(ReturnColumn rc : getReturnColumns())
+		{
+			if(rc.deidTag == null)
+			{
+				this.addWarning("PHI information about returne column " + rc.column.getName() + " cannot be resolved.");
+			}
+		}
 	}
 	
 	private void analyzeAggregateTree()
@@ -174,6 +184,10 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 				parentElement = setParentChild(parentElement, col);
 			}
 		}
+		if(node.self instanceof Tracking_column_exprContext)
+		{
+			
+		}
 		if(node.self instanceof Count_functionContext || node.self instanceof Any_functionContext)
 		{
 			Function func = new Function();
@@ -188,20 +202,20 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		{
 			if(isColumn(parentElement)) ((TableColumn) parentElement).setDBName(node.self.getText());
 			if(parentElement instanceof Table) ((Table) parentElement).setDBName(node.self.getText());
-			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftDBName(node.self.getText());
+			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftTrackByDBName(node.self.getText());
 		}
 		if(node.self instanceof Table_nameContext)
 		{
 			if(isColumn(parentElement)) ((TableColumn) parentElement).setTableName(node.self.getText());
 			if(parentElement instanceof Table) ((Table) parentElement).setName(node.self.getText());
-			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftTableName(node.self.getText());
+			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftTrackByTableName(node.self.getText());
 		}
 		if(node.self instanceof Column_nameContext)
 		{
 			if(parentElement != null)
 				System.out.println(parentElement.getClass().getSimpleName() + ":" + node.self.getText());
 			if(isColumn(parentElement)) ((TableColumn) parentElement).setName(node.self.getText());
-			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftFieldName(node.self.getText());
+			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftTrackByName(node.self.getText());
 		}
 		if(node.self instanceof Column_aliasContext)
 		{

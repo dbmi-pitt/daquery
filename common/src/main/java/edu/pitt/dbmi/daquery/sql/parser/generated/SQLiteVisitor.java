@@ -263,6 +263,12 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitResult_column_expr(SQLiteParser.Result_column_exprContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#tracking_column_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#comparison_operator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

@@ -428,6 +428,16 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitResult_column_expr(SQLiteParser.Result_column_exprContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#tracking_column_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#tracking_column_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#comparison_operator}.
 	 * @param ctx the parse tree
 	 */

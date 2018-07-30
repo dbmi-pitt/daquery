@@ -1,16 +1,8 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.Hashtable;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,19 +20,12 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
 
-import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.update.db.DBUpdate137;
+import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
 
 @Entity
 @Table(name="DATA_MODEL")
@@ -49,6 +34,12 @@ public class DataModel extends DaqueryObject implements Serializable
 
 	private static final long serialVersionUID = 29292842342523123l;
 
+	private static final DataAttribute emptyAttribute = new DataAttribute();
+	
+	private static Hashtable<String, Hashtable<String, DataAttribute>> attributeInfoByModelId = new Hashtable<String, Hashtable<String, DataAttribute>>();
+	
+	private Hashtable<String, DataAttribute> attributeTable = null;
+	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
@@ -87,6 +78,68 @@ public class DataModel extends DaqueryObject implements Serializable
 	public DataModel(String uuid)
 	{
 		setDataModelId(uuid);
+	}
+	
+	public boolean contains(TableColumn col)
+	{
+		if(StringHelper.isBlank(col.getName()) || StringHelper.isBlank(col.getTableName())) return(false);
+		String key = getAttribKey(col.getName(), col.getTableName());
+		Hashtable<String, DataAttribute> attribs = getAttributeTable();
+		return(attribs.containsKey(key));
+	}
+	
+	public DataAttribute getAttribute(TableColumn col)
+	{
+		if(col == null) return null;
+		return(getAttribute(col.getName(), col.getTableName()));
+	}
+	
+	private DataAttribute getAttribute(String attribName, String tableName)
+	{
+		if(StringHelper.isEmpty(attribName) || StringHelper.isEmpty(tableName))
+			return(null);
+		String key = getAttribKey(attribName, tableName);
+		Hashtable<String, DataAttribute> attribs = getAttributeTable();
+		DataAttribute rVal = null;
+		if(attribs.containsKey(key))
+		{
+			DataAttribute da = attribs.get(key);
+			if(! da.equals(emptyAttribute)) rVal = da;
+		}
+		return(rVal);
+	}
+	private String getAttribKey(String attribName, String tableName)
+	{
+		return(attribName.trim().toUpperCase() + ":" + tableName.trim().toUpperCase());
+	}
+	
+	private Hashtable<String, DataAttribute> getAttributeTable()
+	{
+		if(attributeTable == null)
+		{
+			if(attributeInfoByModelId.containsKey(dataModelId))
+				attributeTable = attributeInfoByModelId.get(dataModelId);
+			else
+			{
+				attributeTable = buildAttributeTable();
+				attributeInfoByModelId.put(dataModelId, attributeTable);
+			}
+		}
+		return(attributeTable);
+	}
+	
+	private Hashtable<String, DataAttribute> buildAttributeTable()
+	{
+		Hashtable<String, DataAttribute> tbl = new Hashtable<String, DataAttribute>();
+		for(DataAttribute da : this.attributes)
+		{
+			if((! StringHelper.isEmpty(da.getEntityName())) && (! StringHelper.isEmpty(da.getFieldName())))
+			{
+				String key = getAttribKey(da.getFieldName(), da.getEntityName());
+				tbl.put(key, da);
+			}
+		}
+		return(tbl);
 	}
 	
 	public long getId(){return(id);}
