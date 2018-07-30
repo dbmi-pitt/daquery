@@ -391,6 +391,22 @@ public class AppProperties
 		setDBProperty("temp.export.dir", dir);
 	}
 	
+	private static final String defaultCasePerFile = "1000";
+	public static String getCasePerFile() throws DaqueryException
+	{
+		String val = getDBProperty("case.per.file");
+		if(val == null)
+			return defaultCasePerFile;
+		else
+			return val;
+	}
+	
+	public static void setCasePerFile(String val) throws DaqueryException
+	{
+		setDBProperty("case.per.file", val);
+	}
+	
+	
 	public static String getTrackingDir() throws DaqueryException
 	{
 		String val = getDBProperty("tracking.output.dir");
