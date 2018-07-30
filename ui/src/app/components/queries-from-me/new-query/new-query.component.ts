@@ -123,8 +123,8 @@ export class NewQueryComponent implements OnInit {
   }
 
   onRequest() {
-    if(this.inquiryForm.get('query').get('ansi').value === "" ||
-        this.inquiryForm.get('query').get('oracle').value === "" || 
+    if(this.inquiryForm.get('query').get('ansi').value === "" &&
+        this.inquiryForm.get('query').get('oracle').value === "" && 
         this.inquiryForm.get('query').get('sqlServer').value === ""){
       this.inquiryForm.get('query').setErrors({atLeastOne: true});
     }

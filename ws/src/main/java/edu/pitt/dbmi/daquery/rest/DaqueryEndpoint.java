@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
+import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
@@ -893,6 +894,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		properties.put("localDeliveryDir", AppProperties.getLocalDeliveryDir());
     		properties.put("trackingOutputDir", AppProperties.getTrackingDir());
     		properties.put("tempFileExportDir", AppProperties.getTempFileExportDir());
+    		properties.put("casePerFile", AppProperties.getCasePerFile());
             return ResponseHelper.getJsonResponseGen(200, properties);
 
         } catch (Exception e) {
@@ -992,6 +994,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		AppProperties.setLocalDeliveryDir((String) properties.get("localDeliveryDir"));
     		AppProperties.setTrackingDir((String) properties.get("trackingOutputDir"));
     		AppProperties.setTempFileExportDir((String) properties.get("tempFileExportDir"));
+    		AppProperties.setCasePerFile((String) properties.get("casePerFile"));
 
             return ResponseHelper.getJsonResponseGen(200, properties);
 
@@ -1075,6 +1078,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			Site site = SiteDAO.getSiteByNameOrId(request.getRequesterSite().getSiteId());
 			request.setId(null);
 			request.setRequesterSite(site);
+			DaqueryRequestDAO.saveOrUpdate(request);
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
 			QueueManager.getNamedQueue(TaskQueue.MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();
@@ -1138,6 +1142,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setId(null);
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
+			DaqueryRequestDAO.saveOrUpdate(request);
 			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
 			QueueManager.getNamedQueue(TaskQueue.MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();
@@ -1173,7 +1178,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     private Response handleRemoteAggregateRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
     	request.setDirection("OUT");
     	request.setSentTimestamp(new Date());
-		AbstractDAO.updateOrSave(request);
+    	DaqueryRequestDAO.updateOrSave(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if(response.getStatus() == 200)
 		{
@@ -1293,6 +1298,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setId(null);
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
+			DaqueryRequestDAO.saveOrUpdate(request);
 			rVal = new DaqueryResponse(true);
 			rVal.setStatusEnum(ResponseStatus.PENDING);
 			rVal.setDownloadAvailable(false);
@@ -1340,6 +1346,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		{
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
+			DaqueryRequestDAO.saveOrUpdate(request);
 			DaqueryResponse dr = new DaqueryResponse(true);
 			dr.setStatusEnum(ResponseStatus.PENDING);
 			dr.setRequest(request);
@@ -1356,7 +1363,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
     	request.setDirection("OUT");
     	request.setSentTimestamp(new Date());
-		AbstractDAO.updateOrSave(request);
+		DaqueryRequestDAO.updateOrSave(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if(response.getStatus() == 201)
 		{
@@ -1475,6 +1482,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setId(null);
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
+			DaqueryRequestDAO.saveOrUpdate(request);
 			rVal = new DaqueryResponse(true);
 			rVal.setStatusEnum(ResponseStatus.PENDING);
 			rVal.setDownloadAvailable(false);
@@ -1541,6 +1549,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setId(null);
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
+			DaqueryRequestDAO.saveOrUpdate(request);
 			rVal = new DaqueryResponse(true);
 			rVal.setResponder(uInfo);
 			rVal.setStatusEnum(ResponseStatus.PENDING);
@@ -1576,7 +1585,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     private Response handleRemoteTableRequestFromUI(DaqueryRequest request, Response response, Site requestSite, String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
     	request.setDirection("OUT");
     	request.setSentTimestamp(new Date());
-		AbstractDAO.updateOrSave(request);
+		DaqueryRequestDAO.updateOrSave(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if(response.getStatus() == 201)
 		{
