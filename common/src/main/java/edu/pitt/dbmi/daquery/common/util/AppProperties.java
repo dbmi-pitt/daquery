@@ -391,7 +391,7 @@ public class AppProperties
 		setDBProperty("temp.export.dir", dir);
 	}
 	
-	private static final String defaultCasePerFile = "1000";
+	private static final String defaultCasePerFile = "70000";
 	public static String getCasePerFile() throws DaqueryException
 	{
 		String val = getDBProperty("case.per.file");
