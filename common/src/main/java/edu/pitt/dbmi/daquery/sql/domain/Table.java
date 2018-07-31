@@ -28,6 +28,7 @@ public class Table extends AbstractElement implements ColumnProvider, SQLElement
 	}
 	
 	//resolves to deid info given that col is a TableColumn AND both table name and field name are provided
+	//called externally
 	public DeIdTag resolveColumnPhiInfo(Column col, DataModel dm)
 	{
 		return(getDeidInfo(col, dm));
