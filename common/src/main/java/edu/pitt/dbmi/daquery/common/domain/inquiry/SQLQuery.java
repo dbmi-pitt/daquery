@@ -102,12 +102,12 @@ public class SQLQuery extends Inquiry
 		{
 			if(c != null && c.getDialectEnum() != null)
 			{
-				if(rVal == null && c.getDialectEnum().equals(searchDialect))
+				if(rVal == null && c.getDialectEnum().equals(searchDialect) && (! StringHelper.isEmpty(c.getCode())))
 				{
 					rVal = c.getCode();
 				}
 				//store ansi code if we find it
-				if(c.getDialectEnum().equals(SQLDialect.ANSI))
+				if(c.getDialectEnum().equals(SQLDialect.ANSI) && (! StringHelper.isEmpty(c.getCode())))
 				{
 					ansiCode = c.getCode();
 				}		
