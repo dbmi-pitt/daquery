@@ -1,7 +1,5 @@
 package edu.pitt.dbmi.daquery.sql.domain;
 
-import edu.pitt.dbmi.daquery.common.util.StringHelper;
-
 public abstract class AbstractColumn extends AbstractElement implements SQLElement, Column
 {
 	private DeIdTag deIdTag;
@@ -21,13 +19,5 @@ public abstract class AbstractColumn extends AbstractElement implements SQLEleme
 	{
 		children.add(child);
 		if(child instanceof DeIdTag) setDeIdTag((DeIdTag) child);
-	}
-	
-	public String getDisplayName()
-	{
-		if(StringHelper.isEmpty(alias)) return(name);
-		else return(alias);
-	}
-	
-	
+	}	
 }

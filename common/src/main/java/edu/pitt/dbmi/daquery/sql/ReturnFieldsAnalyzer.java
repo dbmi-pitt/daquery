@@ -100,15 +100,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	public List<ReturnColumn> getReturnColumns()
 	{
 		SelectStatement select = getTopSelect();
-		List<Column> columns = select.getColumns();
-		List<ReturnColumn> rCols = new ArrayList<ReturnColumn>();
-		for(Column col : columns)
-		{
-			ReturnColumn rCol = new ReturnColumn();
-			rCol.deidTag = select.resolveColumnPhiInfo(col, model);
-			rCols.add(rCol);
-		}
-		return(rCols);
+		return(select.getReturnColumns(model));
 	}
 	
 	
@@ -140,10 +132,11 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		
 		for(ReturnColumn rc : getReturnColumns())
 		{
-			if(rc.deidTag == null)
-			{
-				this.addWarning("PHI information about returne column " + rc.column.getName() + " cannot be resolved.");
-			}
+			if(rc.multipleMatchingReferences)
+				this.addWarning("Unable to resolve PHI information for " + rc.column.getName() + " because it is ambiguously defined.");
+			else if(rc.deidTag == null)
+				this.addWarning("PHI information about returned column " + rc.column.getName() + " cannot be resolved.");
+			
 		}
 	}
 	
