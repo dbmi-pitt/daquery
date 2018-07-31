@@ -2,7 +2,9 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 import java.io.Serializable;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,10 +37,15 @@ public class DataModel extends DaqueryObject implements Serializable
 	private static final long serialVersionUID = 29292842342523123l;
 
 	private static final DataAttribute emptyAttribute = new DataAttribute();
+	private static final List<DataAttribute> emptyAttributeList = new ArrayList<DataAttribute>();
 	
 	private static Hashtable<String, Hashtable<String, DataAttribute>> attributeInfoByModelId = new Hashtable<String, Hashtable<String, DataAttribute>>();
+	private static Hashtable<String, Hashtable<String, List<DataAttribute>>> attributeByTableByModelId = new Hashtable<String, Hashtable<String, List<DataAttribute>>>();
 	
-	private Hashtable<String, DataAttribute> attributeTable = null;
+	@Transient
+	private Hashtable<String, DataAttribute> attributesByAttributeName = null;
+	@Transient
+	private Hashtable<String, List<DataAttribute>> attributesByTableName = null;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -80,6 +87,54 @@ public class DataModel extends DaqueryObject implements Serializable
 		setDataModelId(uuid);
 	}
 	
+	public boolean contains(edu.pitt.dbmi.daquery.sql.domain.Table table)
+	{
+		if(table == null || StringHelper.isEmpty(table.getName())) return(false);
+		String key = getTableKey(table.getName());
+		return(getAttributesByTable().containsKey(key));
+	}
+	public List<DataAttribute> getAttributesForTable(edu.pitt.dbmi.daquery.sql.domain.Table table)
+	{
+		String key = getTableKey(table.getName());
+		if(! getAttributesByTable().containsKey(key)) return emptyAttributeList;
+		return(getAttributesByTable().get(key));
+	}
+	public String getTableKey(String name)
+	{
+		return(name.trim().toUpperCase());
+	}
+	public Hashtable<String, List<DataAttribute>> getAttributesByTable()
+	{
+		if(attributesByTableName == null)
+		{
+			if(attributeByTableByModelId.containsKey(dataModelId))
+				attributesByTableName = attributeByTableByModelId.get(dataModelId);
+			else
+			{
+				attributesByTableName = buildAttributesByTable();
+				attributeByTableByModelId.put(dataModelId, attributesByTableName);
+			}
+		}
+		return(attributesByTableName);
+	}
+	
+	Hashtable<String, List<DataAttribute>> buildAttributesByTable()
+	{
+		Hashtable<String, List<DataAttribute>> tbl = new Hashtable<String, List<DataAttribute>>();
+		for(DataAttribute da : this.attributes)
+		{
+			if((! StringHelper.isEmpty(da.getEntityName())) && (! StringHelper.isEmpty(da.getFieldName())))
+			{
+				
+				String key = getTableKey(da.getEntityName());
+				if(! tbl.containsKey(key))
+					tbl.put(key, new ArrayList<DataAttribute>());
+				tbl.get(key).add(da);
+			}
+		}
+		return(tbl);		
+	}
+	
 	public boolean contains(TableColumn col)
 	{
 		if(StringHelper.isBlank(col.getName()) || StringHelper.isBlank(col.getTableName())) return(false);
@@ -115,17 +170,17 @@ public class DataModel extends DaqueryObject implements Serializable
 	
 	private Hashtable<String, DataAttribute> getAttributeTable()
 	{
-		if(attributeTable == null)
+		if(attributesByAttributeName == null)
 		{
 			if(attributeInfoByModelId.containsKey(dataModelId))
-				attributeTable = attributeInfoByModelId.get(dataModelId);
+				attributesByAttributeName = attributeInfoByModelId.get(dataModelId);
 			else
 			{
-				attributeTable = buildAttributeTable();
-				attributeInfoByModelId.put(dataModelId, attributeTable);
+				attributesByAttributeName = buildAttributeTable();
+				attributeInfoByModelId.put(dataModelId, attributesByAttributeName);
 			}
 		}
-		return(attributeTable);
+		return(attributesByAttributeName);
 	}
 	
 	private Hashtable<String, DataAttribute> buildAttributeTable()

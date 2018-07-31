@@ -17,6 +17,9 @@ public class TableColumn extends AbstractColumn implements SQLElement, Column
 	{
 		if(StringHelper.isEmpty(name)) return(false);
 		if(StringHelper.isEmpty(this.name) && StringHelper.isEmpty(alias)) return(false);
-		return(StringHelper.equalIgnoreCase(this.name, name) || StringHelper.equalIgnoreCase(name, alias));
+		if(StringHelper.isEmpty(alias))
+			return(StringHelper.equalIgnoreCase(this.name, name));
+		else
+			return(StringHelper.equalIgnoreCase(name, alias));
 	}
 }

@@ -7,4 +7,5 @@ public class ReturnColumn
 {
 	public Column column;
 	public DeIdTag deidTag;
+	public boolean multipleMatchingReferences = false;
 }

@@ -1,8 +1,12 @@
 package edu.pitt.dbmi.daquery.sql.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daquery.sql.ReturnColumn;
 
 public class Table extends AbstractElement implements ColumnProvider, SQLElement
 {
@@ -20,39 +24,44 @@ public class Table extends AbstractElement implements ColumnProvider, SQLElement
 	public void setDBName(String name){dbName = name;}
 	
 	@Override
-	public boolean matchesName(String name)
+	public boolean matchesName(String val)
 	{
-		if(StringHelper.isEmpty(name)) return(false);
+		if(StringHelper.isEmpty(val)) return(false);
 		if(StringHelper.isEmpty(this.name) && StringHelper.isEmpty(alias)) return(false);
-		return(StringHelper.equalIgnoreCase(this.name, name) || StringHelper.equalIgnoreCase(name, alias));
+		if(StringHelper.isBlank(alias))
+			return(StringHelper.equalIgnoreCase(val, this.name));
+		else
+			return(StringHelper.equalIgnoreCase(val, alias));
 	}
 	
-	//resolves to deid info given that col is a TableColumn AND both table name and field name are provided
-	//called externally
-	public DeIdTag resolveColumnPhiInfo(Column col, DataModel dm)
+	@Override
+	public List<ReturnColumn> getReturnColumns(DataModel dm)
 	{
-		return(getDeidInfo(col, dm));
-	}
-	
-	public DeIdTag getDeidInfo(Column col, DataModel dm)
-	{
-		if(col instanceof TableColumn && dm.contains((TableColumn)col))
+		List<ReturnColumn> rCols = new ArrayList<ReturnColumn>();
+		List<DataAttribute> fields = dm.getAttributesForTable(this);
+		for(DataAttribute attrib : fields)
 		{
-			DataAttribute attrib = dm.getAttribute((TableColumn) col);
+			ReturnColumn rCol = new ReturnColumn();
+			Column col = new TableColumn();
+			col.setName(attrib.getFieldName());
+			rCol.column = col;
+
 			DeIdTag tag = new DeIdTag();
 			boolean phi = attrib.isPhi();
-
 			if(attrib.isAggregatable()){tag.setObfuscate(true); phi = true;}
 			if(attrib.getFieldType().equals("DATE"))
 			{
 				phi = true;
 				tag.setDateShiftTrackByTableName(attrib.getEntityName());
-				tag.setDateShiftTrackByName(attrib.getFieldName());
+				tag.setDateShiftTrackByName("PATID");
 			}
 			if(attrib.isIdentifier()){tag.setId(true); phi = true;}
-			tag.setPhi(phi);
-			return(tag);
+			tag.setPhi(phi);			
+			rCol.deidTag = tag;
+			rCols.add(rCol);
 		}
-		else return(null);
-	}	
+		return(rCols);
+	}
+	
+
 }

@@ -8,5 +8,5 @@ public interface Column
 	public void setAlias(String alias);
 	public String getName();
 	public void setName(String name);
-	public String getDisplayName();
+	public boolean matchesName(String name);
 }
