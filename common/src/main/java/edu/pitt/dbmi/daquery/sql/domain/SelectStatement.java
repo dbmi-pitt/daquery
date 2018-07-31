@@ -3,7 +3,6 @@ package edu.pitt.dbmi.daquery.sql.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.ReturnColumn;
@@ -17,35 +16,54 @@ public class SelectStatement extends AbstractElement implements ColumnProvider, 
 	public String getAlias(){return alias;}
 	public void setAlias(String alias){this.alias = alias;}
 
-	public ReturnColumn resolveColumn(Column col, DataModel dm)
+	@Override
+	public List<ReturnColumn> getReturnColumns(DataModel dm)
+	{
+		List<ReturnColumn> rCols = new ArrayList<ReturnColumn>();
+		for(Column col : columns)
+		{
+			ReturnColumn rc = resolveColumn(col, dm);
+			rCols.add(rc);
+		}
+		return(rCols);
+	}
+	
+	private ReturnColumn resolveColumn(Column col, DataModel dm)
 	{
 		ReturnColumn rc = new ReturnColumn();
-		
-		
-		if(col instanceof TableColumn)
+		rc.column = col;
+
+		if(col.getDeIdTag() != null && isValidDeidTag(col.getDeIdTag()))
 		{
-			//first check to see if the table name resolves to an alias 
+			rc.deidTag = col.getDeIdTag();	
+		}
+		else if(col instanceof TableColumn)
+		{
+			List<DeIdTag> tags = new ArrayList<DeIdTag>();
+			//first check to see if the table name resolves an include table or aliased sub-select 
 			if(! StringHelper.isBlank(((TableColumn) col).getTableName()))
 			{
-				String testAlias = ((TableColumn) col).getTableName().trim().toUpperCase();
+				String testName = ((TableColumn) col).getTableName().trim().toUpperCase();
 				for(ColumnProvider cp : columnProviders)
 				{
-					if(! StringHelper.isEmpty(cp.getAlias()))
+					//does it match an aliased include (table or sub-select)
+					if((! StringHelper.isEmpty(cp.getAlias())) && cp.getAlias().trim().toUpperCase().equals(testName))
 					{
-						if(cp.getAlias().trim().toUpperCase().equals(testAlias))
-						{
-							TableColumn tCol = new TableColumn();
-							tCol.setName(col.getName());
-							rc = cp.resolveColumn(tCol, dm);
-						}
+						TableColumn tCol = new TableColumn();
+						tCol.setName(col.getName());
+						DeIdTag tag = cp.resolveColumnPhiInfo(tCol, dm);
+						if(tag != null) tags.add(tag);
 					}
-				}
+					//does it match an included table
+					else if(cp instanceof Table && ((Table)cp).getName().trim().toUpperCase().equals(testName))
+					{
+						
+					}
 			}
 			//otherwise if a table name isn't specified, look to see if there is
 			//a single match for the field name in an included table or sub-queries' included table 
 			else
 			{
-				List<DeIdTag> tags = new ArrayList<DeIdTag>();
 				for(ColumnProvider cp : columnProviders)
 				{
 					if(cp instanceof Table)
@@ -64,11 +82,15 @@ public class SelectStatement extends AbstractElement implements ColumnProvider, 
 				}
 			}
 		}
+		else if(col instanceof Function)
+		{
+			
+		}
 		return(rc);
 	}
 	
 	//resolves to deid info given that col is a TableColumn AND both table name and field name are provided
-	public DeIdTag resolveColumnPhiInfo(Column col, DataModel dm)
+	private DeIdTag resolveColumnPhiInfo(Column col, DataModel dm)
 	{
 		DeIdTag tag = null;
 		int idx = 0;
