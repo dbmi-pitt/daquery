@@ -49,8 +49,6 @@ public class SQLQuery extends Inquiry
     @Expose
 	protected Set<SQLCode> code = new HashSet<SQLCode>();
 
-
-	
 	public SQLQuery()
 	{
 		dataType = InquiryType.TYPES.SQL_VAL;
@@ -117,7 +115,8 @@ public class SQLQuery extends Inquiry
 		
 		//if a matching dialect isn't found use the ANSI code
 		if(rVal == null) rVal = ansiCode;
-		
+		//remove any deid tags from the SQL
+		if(! StringHelper.isEmpty(rVal)) rVal = rVal.replaceAll("(?i)<\\s*identifiable.*?>", "");
 		return(rVal);
 	}
 	
