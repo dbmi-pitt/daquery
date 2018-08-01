@@ -10,6 +10,8 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	private String dateShiftTrackByName = null;  //this could be a field name or alias
 	private String dateShiftTrackByTableName = null;
 	private String dateShiftTrackByDBName = null;
+	private boolean dateField = false;
+	private boolean birthDate = false;
 	
 	//used only by parser to keep track of a tag that contains a date shift property
 	private boolean foundDateShift = false;
@@ -36,4 +38,10 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	
 	public boolean foundDateShift(){return(foundDateShift);}
 	public void setFoundDateShift(boolean shift){foundDateShift = shift;}
+	
+	public boolean isDateField(){return(dateField);}
+	public void setDateField(boolean dteField){dateField = dteField;}
+	
+	public boolean isBirthdate(){return(birthDate);}
+	public void setBirthdate(boolean isBdate){birthDate = isBdate;}
 }

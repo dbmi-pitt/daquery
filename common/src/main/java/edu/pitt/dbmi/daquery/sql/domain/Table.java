@@ -49,13 +49,15 @@ public class Table extends AbstractElement implements ColumnProvider, SQLElement
 			DeIdTag tag = new DeIdTag();
 			boolean phi = attrib.isPhi();
 			if(attrib.isAggregatable()){tag.setObfuscate(true); phi = true;}
-			if(attrib.getFieldType().equals("DATE"))
+			if(attrib.getFieldType().equals("DATE") || attrib.isDateField())
 			{
 				phi = true;
 				tag.setDateShiftTrackByTableName(attrib.getEntityName());
 				tag.setDateShiftTrackByName("PATID");
+				tag.setDateField(true);
 			}
 			if(attrib.isIdentifier()){tag.setId(true); phi = true;}
+			if(attrib.isBirthdate()){tag.setBirthdate(true); phi = true;}
 			tag.setPhi(phi);			
 			rCol.deidTag = tag;
 			rCols.add(rCol);
