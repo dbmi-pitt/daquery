@@ -67,6 +67,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	private List<String> warnings = new ArrayList<String>();
 	private DataModel model = null;
 	private SQLElement topElement = null;
+	private List<ReturnColumn> returnColumns = null;
 	
 	public static void main(String [] args)
 	{
@@ -99,8 +100,12 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	public SelectStatement getTopSelect(){return((SelectStatement) topElement);}
 	public List<ReturnColumn> getReturnColumns()
 	{
-		SelectStatement select = getTopSelect();
-		return(select.getReturnColumns(model));
+		if(returnColumns == null)
+		{
+			SelectStatement select = getTopSelect();
+			returnColumns = select.getReturnColumns(model);
+		}
+		return(returnColumns);
 	}
 	
 	

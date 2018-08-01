@@ -11,7 +11,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.annotations.common.util.StringHelper;
 
-import edu.pitt.dbmi.daquery.common.dev.util.CreateCDMModelInfo;
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
@@ -41,7 +40,7 @@ public class DBUpdate151 implements DBUpdater {
 	
 	private Long importModel() throws IOException, DaqueryException
 	{
-		InputStream is = CreateCDMModelInfo.class.getResourceAsStream("/data-modelCDM-3.1.json");
+		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-3.1.json");
 		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
 		for(DataAttribute da : dm.getAttributes())
 			da.setDataModel(dm);

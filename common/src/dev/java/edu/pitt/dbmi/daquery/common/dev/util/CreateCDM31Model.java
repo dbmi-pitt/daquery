@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -17,8 +16,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.google.gson.Gson;
-
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
@@ -28,26 +25,25 @@ import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
-import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
-public class CreateCDMModelInfo
+public class CreateCDM31Model
 {
 	private static final String CDM_CONN_URL = "jdbc:oracle:thin:@dbmi-db-dev-02.dbmi.pitt.edu:1521:dbmi09";
 	private static final String CDM_SCHEMA_NAME = "pcori_etl_31";
-	private static final String CDM_PASSWORD = "password";
+	private static final String CDM_PASSWORD = "dbmi17etl";
 	
 	public static void main(String [] args) throws Exception
 	{
 		//AppProperties.setDevHomeDir("/home/devuser/daquery-data");
 		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		//makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
-		//dumpModelToJSON();
-		System.out.println(importModel());
+		makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
+		dumpModelToJSON();
+		//System.out.println(importModel());
 	}
 
 	private static Long importModel() throws IOException, DaqueryException
 	{
-		InputStream is = CreateCDMModelInfo.class.getResourceAsStream("/data-modelCDM-3.1.json");
+		InputStream is = CreateCDM31Model.class.getResourceAsStream("/data-modelCDM-3.1.json");
 		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
 		//dm.setId(null);
 		Session sess = null;
@@ -77,9 +73,10 @@ public class CreateCDMModelInfo
 			sess = HibernateConfiguration.openSession();
 			Query q = sess.createQuery("select m from DataModel m");
 			List<DataModel> models = q.list();
+			int i = 0;
 			for(DataModel dm : models)
 			{
-				FileWriter fw = new FileWriter(new File("/home/devuser/data-model" + dm.getName() + ".json"));
+				FileWriter fw = new FileWriter(new File("/home/devuser/data-model" + dm.getName() + ".json" + "-" + (new Integer(++i)).toString()));
 				fw.write(dm.toJson());
 				fw.close();
 			}
@@ -147,23 +144,29 @@ public class CreateCDMModelInfo
 				da.setEntityName(rs.getString("TABLE_NAME"));
 				da.setFieldName(rs.getString("COLUMN_NAME"));
 				String fType = rs.getString("TYPE_NAME");
+				da.setAggregatable(false);
 				da.setFieldType(fType);
+				da.setPhi(false);
 				if(fType.trim().toUpperCase().equals("DATE"))
+				{
 					da.setPhi(true);
-				else
-					da.setPhi(false);
-				
-				if(da.getFieldName().toUpperCase().equals("PATID") || 
-						da.getFieldName().toUpperCase().equals("ENCOUNTERID") ||
-						da.getFieldName().toUpperCase().equals("PROVIDERID") ||
-						da.getFieldName().toUpperCase().equals("PRESCRIBINGID"))
+					da.setDateField(true);
+				}
+				if(da.getFieldName().toUpperCase().equals("BIRTH_DATE"))
+				{
+					da.setPhi(true);
+					da.setBirthdate(true);
+					da.setDateField(true);
+				}
+					
+				if(da.getFieldName().toUpperCase().endsWith("ID"))							
 				{
 					da.setAggregatable(true);
 					da.setIdentifier(true);
 					da.setIdentiferName(da.getFieldName().toUpperCase());
+					da.setPhi(true);
 				}
-				else
-					da.setAggregatable(false);				
+
 				attribs.add(da);
 			}
 			dm.setAttributes(attribs);
