@@ -342,11 +342,6 @@ result_column_expr
  :
 | ( ( database_name '.' )? table_name '.' )? column_name deid_tag? ( K_AS? column_alias )?
  ;
-
-tracking_column_expr
- :
-| ( ( database_name '.' )? table_name '.' )? column_name 
- ;
  
 comparison_operator
  : '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | in_keyword | like_keyword | K_GLOB | K_MATCH | K_REGEXP
@@ -418,18 +413,26 @@ deid_tag
  : '<' K_IDENTIFIABLE ident_prop?  '>'
  ;
  
- ident_prop
-  : id_field_prop? date_shift_field_prop? obfuscate_field_prop?
-  ;
+ident_prop
+ : id_field_prop? date_shift_field_prop? obfuscate_field_prop?
+ ;
  
- id_field_prop
-  : K_ISID '=' ( K_TRUE | K_FALSE )
-  ;
+id_field_prop
+ : K_ISID '=' ( K_TRUE | K_FALSE )
+ ;
  
-  date_shift_field_prop
-  : K_DATESHIFT K_TRACKED K_BY tracking_column_expr
-  ;
+date_shift_field_prop
+ : K_DATESHIFT is_birthdate_prop? K_TRACKED K_BY tracking_column_expr 
+ ;
  
+tracking_column_expr
+ :
+ | ( ( database_name '.' )? table_name '.' )? column_name
+ ;
+ 
+  is_birthdate_prop
+  : K_ISBIRTHDATE
+  ;
   obfuscate_field_prop
   : K_OBFUSCATE '=' ( K_TRUE | K_FALSE )
   ;
@@ -593,6 +596,7 @@ keyword
  | K_INTERSECT
  | K_INTO
  | K_IS
+ | K_ISBIRTHDATE
  | K_ISID
  | K_ISNULL
  | K_JOIN
@@ -871,6 +875,7 @@ K_INSTEAD : I N S T E A D;
 K_INTERSECT : I N T E R S E C T;
 K_INTO : I N T O;
 K_IS : I S;
+K_ISBIRTHDATE : I S B I R T H D A T E;
 K_ISID : I S I D;
 K_ISNULL : I S N U L L;
 K_JOIN : J O I N;

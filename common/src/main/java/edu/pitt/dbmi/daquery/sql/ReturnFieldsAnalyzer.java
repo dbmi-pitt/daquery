@@ -44,6 +44,7 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.From_table_specCo
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Function_nameContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Id_field_propContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Insert_stmtContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Is_birthdate_propContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Obfuscate_field_propContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Pragma_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Reindex_stmtContext;
@@ -186,6 +187,13 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		{
 			
 		}
+		
+		if(node.self instanceof Is_birthdate_propContext)
+		{
+			if(parentElement instanceof DeIdTag)
+				((DeIdTag)parentElement).setBirthdate(true);
+		}
+		
 		if(node.self instanceof Count_functionContext || node.self instanceof Any_functionContext)
 		{
 			Function func = new Function();
