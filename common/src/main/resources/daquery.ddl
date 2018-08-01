@@ -103,7 +103,9 @@ CREATE TABLE DATA_ATTRIBUTE
    AGGREGATABLE boolean,
    FIELD_TYPE varchar(100),
    IDENTIFIER boolean,
-   IDENT_NAME varchar(100)
+   IDENT_NAME varchar(100),
+   BIRTH_DATE boolean,
+   DATE_FIELD boolean
 );
 
 

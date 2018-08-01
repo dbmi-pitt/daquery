@@ -48,6 +48,14 @@ public class DataAttribute
     @Column(name = "IDENT_NAME")
     private String identifierName;
     
+    @Expose
+    @Column(name = "BIRTH_DATE")
+    private boolean birthDate = false;
+    
+    @Expose
+    @Column(name = "DATE_FIELD")
+    private boolean dateField = false;
+    
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="MODEL_ID")
     DataModel dataModel;    
@@ -78,5 +86,11 @@ public class DataAttribute
     
     public String getIdentifierName(){return(identifierName);}
     public void setIdentiferName(String identName){identifierName = identName;}
+    
+    public boolean isBirthdate(){return(birthDate);}
+    public void setBirthdate(boolean isBirthdate){birthDate = isBirthdate;}
+    
+    public boolean isDateField(){return(dateField);}
+    public void setDateField(boolean dteField){dateField = dteField;}
     
 }

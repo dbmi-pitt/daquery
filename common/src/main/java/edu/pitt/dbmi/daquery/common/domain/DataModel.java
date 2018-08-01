@@ -1,10 +1,15 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
@@ -250,8 +255,8 @@ public class DataModel extends DaqueryObject implements Serializable
 				while(inputScanner.hasNextLine())
 					dataExportConf = dataExportConf + inputScanner.nextLine() + "\n";
 				inputScanner.close();
-			} */
-			
+			} 
+			*/
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			StringReader reader = new StringReader(dataExportConf);
