@@ -57,7 +57,8 @@ public class Table extends AbstractElement implements ColumnProvider, SQLElement
 				tag.setDateField(true);
 			}
 			if(attrib.isIdentifier()){tag.setId(true); phi = true;}
-			if(attrib.isBirthdate()){tag.setBirthdate(true); phi = true;}
+			if(attrib.isBirthDate()){tag.setBirthdate(true); phi = true;}
+			if(attrib.isZipCode()){tag.setZipCode(true); phi = true;}
 			tag.setPhi(phi);			
 			rCol.deidTag = tag;
 			rCols.add(rCol);

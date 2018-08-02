@@ -3,18 +3,13 @@ package edu.pitt.dbmi.daquery.update.db;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Hashtable;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.annotations.common.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
-import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
@@ -24,13 +19,19 @@ import edu.pitt.dbmi.daquery.update.DBVersion;
 @DBVersion(version=1.51f, ddlFile="db-update-v1.51.ddl")
 public class DBUpdate151 implements DBUpdater {
 
+	public static void main(String [] args)
+	{
+		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-3.1.json");
+		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
+		System.out.println(dm);
+	}
 	@Override
 	public void updateData(Connection conn) throws Exception {
 		Long id = importModel();
 		Statement s = conn.createStatement();
 		s.executeUpdate("update network set data_model_id=" + id.toString());
 		s.executeUpdate("update data_source set model_id=" + id.toString());
-		s.close();
+		s.close(); 
 	}
 	
 	@Override

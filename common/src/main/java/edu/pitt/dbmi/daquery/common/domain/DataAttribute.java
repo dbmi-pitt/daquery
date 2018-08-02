@@ -56,6 +56,10 @@ public class DataAttribute
     @Column(name = "DATE_FIELD")
     private boolean dateField = false;
     
+    @Expose
+    @Column(name = "ZIP_CODE")
+    private boolean zipCode = false;
+    
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="MODEL_ID")
     DataModel dataModel;    
@@ -87,10 +91,12 @@ public class DataAttribute
     public String getIdentifierName(){return(identifierName);}
     public void setIdentiferName(String identName){identifierName = identName;}
     
-    public boolean isBirthdate(){return(birthDate);}
-    public void setBirthdate(boolean isBirthdate){birthDate = isBirthdate;}
+    public boolean isBirthDate(){return(birthDate);}
+    public void setBirthDate(boolean isBirthdate){birthDate = isBirthdate;}
     
     public boolean isDateField(){return(dateField);}
     public void setDateField(boolean dteField){dateField = dteField;}
     
+    public boolean isZipCode(){return(zipCode);}
+    public void setZipCode(boolean zip){zipCode = zip;}
 }

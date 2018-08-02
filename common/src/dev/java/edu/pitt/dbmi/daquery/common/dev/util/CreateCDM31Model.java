@@ -34,8 +34,8 @@ public class CreateCDM31Model
 	
 	public static void main(String [] args) throws Exception
 	{
-		//AppProperties.setDevHomeDir("/home/devuser/daquery-data");
-		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
+		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
+		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
 		dumpModelToJSON();
 		//System.out.println(importModel());
@@ -152,21 +152,25 @@ public class CreateCDM31Model
 					da.setPhi(true);
 					da.setDateField(true);
 				}
-				if(da.getFieldName().toUpperCase().equals("BIRTH_DATE"))
+				String fieldName = da.getFieldName().toLowerCase().trim();
+				if(fieldName.equals("BIRTH_DATE"))
 				{
 					da.setPhi(true);
-					da.setBirthdate(true);
+					da.setBirthDate(true);
 					da.setDateField(true);
 				}
-					
-				if(da.getFieldName().toUpperCase().endsWith("ID"))							
+				if(fieldName.endsWith("ID"))							
 				{
 					da.setAggregatable(true);
 					da.setIdentifier(true);
 					da.setIdentiferName(da.getFieldName().toUpperCase());
 					da.setPhi(true);
 				}
-
+				if(fieldName.equals("ZIP_CODE"))
+				{
+					da.setZipCode(true);
+					da.setPhi(true);
+				}
 				attribs.add(da);
 			}
 			dm.setAttributes(attribs);

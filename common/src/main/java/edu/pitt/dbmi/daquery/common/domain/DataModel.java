@@ -255,8 +255,8 @@ public class DataModel extends DaqueryObject implements Serializable
 				while(inputScanner.hasNextLine())
 					dataExportConf = dataExportConf + inputScanner.nextLine() + "\n";
 				inputScanner.close();
-			} 
-			*/
+			}  */
+			
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			StringReader reader = new StringReader(dataExportConf);

@@ -105,7 +105,8 @@ CREATE TABLE DATA_ATTRIBUTE
    IDENTIFIER boolean,
    IDENT_NAME varchar(100),
    BIRTH_DATE boolean,
-   DATE_FIELD boolean
+   DATE_FIELD boolean,
+   ZIP_CODE boolean
 );
 
 
