@@ -31,7 +31,7 @@ public class DBUpdate15 implements DBUpdater {
 				if(compUrl.contains("oracle"))
 					dialect = SQLDialect.ORACLE.name();
 				else if(compUrl.contains("sqlserver"))
-					dialect = SQLDialect.SQLDialect.name();
+					dialect = SQLDialect.SQL_SERVER.name();
 				dialectsById.put(id, dialect);
 			}
 		}

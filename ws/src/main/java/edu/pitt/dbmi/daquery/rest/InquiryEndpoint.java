@@ -3,7 +3,10 @@ package edu.pitt.dbmi.daquery.rest;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -183,9 +186,12 @@ public class InquiryEndpoint extends AbstractEndpoint {
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
             
             Set<SQLCode> s = new HashSet<>();
-            s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString(), SQLDialect.ANSI));
-            s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString(), SQLDialect.ORACLE));
-            s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString(), SQLDialect.SQLDialect));
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString().equals(""))
+            	s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString(), SQLDialect.ANSI));
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString().equals(""))
+            	s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString(), SQLDialect.ORACLE));
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString().equals(""))
+            	s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString(), SQLDialect.SQL_SERVER));
             for(SQLCode c : s) {
             	c.setQuery((SQLQuery)inquiry);
             }
@@ -244,15 +250,46 @@ public class InquiryEndpoint extends AbstractEndpoint {
             inquiry.setVersion(inquiry.getVersion() + 1);
             inquiry.setInquiryName(form.get("inquiryName").toString());
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
+            
+            ArrayList<String> codeToAdd = new ArrayList<>();
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString().equals("")) codeToAdd.add("ansi");
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString().equals("")) codeToAdd.add("oracle");
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString().equals("")) codeToAdd.add("sqlServer");
             Set<SQLCode> s = ((SQLQuery)inquiry).getCode();
-            for(SQLCode c : s) {
+            Iterator<SQLCode> iter = s.iterator();
+            
+            while(iter.hasNext()) {
+            	SQLCode c = iter.next();
             	if(c.getDialect().equals(SQLDialect.ANSI.toString())) {
-            		c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString());
+            		if(!((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString().equals("")) {
+            			c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString());
+            			codeToAdd.remove("ansi");
+            		} else {
+            			iter.remove();
+            		}
             	} else if(c.getDialect().equals(SQLDialect.ORACLE.toString())) {
-            		c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString());
-            	} else if(c.getDialect().equals(SQLDialect.SQLDialect.toString())) {
-            		c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString());
+            		if(!((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString().equals("")) {
+            			c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString());
+            			codeToAdd.remove("oracle");
+            		} else {
+            			iter.remove();
+            		}
+            	} else if(c.getDialect().equals(SQLDialect.SQL_SERVER.toString())) {
+            		if(!((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString().equals("")) {
+            			c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString());
+            			codeToAdd.remove("sqlServer");
+            		} else {
+            			iter.remove();
+            		}
             	}
+            
+            }
+            for(String dialect : codeToAdd) {
+            	String dialect_enum = dialect.replaceAll("(.)(\\p{Upper})", "$1_$2").toLowerCase();
+            	s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get(dialect).toString(), SQLDialect.fromString(dialect_enum)));
+            }
+            for(SQLCode c : s) {
+            	c.setQuery((SQLQuery)inquiry);
             }
             
             dao.update(inquiry.getId(), inquiry);

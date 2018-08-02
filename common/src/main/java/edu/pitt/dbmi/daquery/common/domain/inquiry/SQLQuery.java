@@ -77,8 +77,7 @@ public class SQLQuery extends Inquiry
 	
 	public String getCode(){return(code);}
 	public void setCode(String code){this.code = code;} */
-
-	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="query")
+	@OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL, mappedBy="query", orphanRemoval=true)
 	public Set<SQLCode> getCode(){return(code);}
 	public void setCode(Set<SQLCode> code){this.code = code;}
 	public void addCode(SQLCode code)
