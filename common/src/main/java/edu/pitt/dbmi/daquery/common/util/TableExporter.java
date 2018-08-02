@@ -12,8 +12,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,41 +20,22 @@ import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
-import edu.pitt.dbmi.daquery.download.properties.OutputFile;
 import edu.pitt.dbmi.daquery.sql.ReturnFieldsAnalyzer;
 
-public class TableExporter implements DataExporter {
-	
-	DaqueryResponse daqueryResponse;
-	DaqueryRequest daqueryRequest;
-	DataModel model;
-	
-	String dataDir;
-	boolean deliverData;
-	List<String> idList;
-	boolean debugDataExport;
-	boolean threeDigitZip;
-	boolean dateShift;
-	Hashtable<String, OutputFile> conceptCDs = null;
-	int rowsPerFile;
-	int nFiles = 1;
-	int currentFile = 0;
+public class TableExporter extends AbstractExporter implements DataExporter {
+		
+	private int rowsPerFile;
+	private int nFiles = 1;
 	private String sqlCode;
 	private String failureMessage;
 	private ReturnFieldsAnalyzer sqlAnalyzer;
+	private int currentFile = 0;
 	
 	private final static Logger logger = Logger.getLogger(TableExporter.class.getName());
 	
-	public TableExporter(DaqueryResponse response, DataModel model, String dataDir) {
-		
-		this.daqueryResponse = response;
-		this.daqueryRequest = response.getRequest();
-		this.model = model;
-		this.dataDir = dataDir;
-		this.deliverData = AppProperties.getDeliverData();
-		this.debugDataExport = AppProperties.getDebugDataExport();
-		
-		this.dateShift = daqueryResponse.getRequest().getNetwork().getShiftDates();
+	public TableExporter(DaqueryResponse response, DataModel model, String dataDir) throws DaqueryException{
+		super(response, model, dataDir);
+
 		rowsPerFile = 1000;
 	}
 

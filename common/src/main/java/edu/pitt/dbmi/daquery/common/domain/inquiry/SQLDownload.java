@@ -93,7 +93,7 @@ public class SQLDownload extends SQLQuery implements Download
 			}
 			
 			if(this.isData())
-				dataExporter = new CaseExporter(response, model.getExportConfig(), AppProperties.getDBProperty("output.path"));
+				dataExporter = new CaseExporter(response, model, AppProperties.getDBProperty("output.path"));
 			else
 				dataExporter = new TableExporter(response, model, AppProperties.getDBProperty("output.path"));
 			
