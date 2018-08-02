@@ -56,7 +56,7 @@ public class Table extends AbstractElement implements ColumnProvider, SQLElement
 				tag.setDateShiftTrackByName("PATID");
 				tag.setDateField(true);
 			}
-			if(attrib.isIdentifier()){tag.setId(true); phi = true;}
+			if(attrib.isIdentifier()){tag.setId(true); phi = true; tag.setIdName(attrib.getIdentifierName());}
 			if(attrib.isBirthDate()){tag.setBirthdate(true); phi = true;}
 			if(attrib.isZipCode()){tag.setZipCode(true); phi = true;}
 			tag.setPhi(phi);			
