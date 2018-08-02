@@ -17,10 +17,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -37,7 +35,6 @@ import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.download.properties.Concept;
 import edu.pitt.dbmi.daquery.download.properties.ConceptColumn;
 import edu.pitt.dbmi.daquery.download.properties.CustomColumnSet;
@@ -50,7 +47,7 @@ import edu.pitt.dbmi.daquery.download.properties.OutputFile;
 import edu.pitt.dbmi.daquery.download.properties.ValueCode;
 
 
-public class CaseExporter implements DataExporter {
+public class CaseExporter extends AbstractExporter implements DataExporter {
 	
 	public static void main(String[] args) throws Throwable {
         AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
@@ -65,7 +62,7 @@ public class CaseExporter implements DataExporter {
         Connection conn = null;
 		Statement st = null;
 		ResultSet rs = null;
-        CaseExporter dataExporter = new CaseExporter(r.getResponses().iterator().next(), dm.getExportConfig(), AppProperties.getDBProperty("output.path"));
+        CaseExporter dataExporter = new CaseExporter(r.getResponses().iterator().next(), dm, AppProperties.getDBProperty("output.path"));
         dataExporter.init(conn, st, rs, "select PATID from demographic where PATID='PIT686766' OR PATID='PIT637837' OR PATID='PIT982221'");
         dataExporter.dumpData(new File("."), r, 1, 1, 10);
         dataExporter.close();
@@ -80,18 +77,11 @@ public class CaseExporter implements DataExporter {
 	
 	private final static Logger logger = Logger.getLogger(CaseExporter.class.getName());
 	
-	DaqueryResponse daqueryResponse;
-	DaqueryRequest daqueryRequest;
-	DataExportConfig dataExportConfig;
-	String dataDir;
-	boolean deliverData;
 	List<String> idList;
+	
 	private final int patientBlockSize = 500;
-	boolean debugDataExport;
-	boolean threeDigitZip;
-	boolean dateShift;
+	
 	Hashtable<String, OutputFile> conceptCDs = null;
-	int casesPerFile;
 	int nFiles;
 	int currentFile = 0;
 	private String failureMessage;
@@ -138,21 +128,9 @@ public class CaseExporter implements DataExporter {
 		}
 	}
 		
-	public CaseExporter(DaqueryResponse daqueryResponse, DataExportConfig dataExportConfig, String dataDir) // throws DaqueryException
+	public CaseExporter(DaqueryResponse daqueryResponse, DataModel model, String dataDir) throws DaqueryException
 	{
-		this.daqueryResponse = daqueryResponse;
-		this.daqueryRequest = daqueryResponse.getRequest();
-		this.dataExportConfig = dataExportConfig;
-		this.dataDir = dataDir;
-		this.deliverData = AppProperties.getDeliverData();
-		this.debugDataExport = AppProperties.getDebugDataExport();
-		this.threeDigitZip =  daqueryResponse.getRequest().getNetwork().getShiftDates();
-		
-		this.dateShift = daqueryResponse.getRequest().getNetwork().getShiftDates();
-		//this.idList = idList;
-		
-		casesPerFile = this.dataExportConfig.getCasesPerFile();
-		//nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
+		super(daqueryResponse, model, dataDir);
 	}
 
 	@Override
@@ -176,7 +154,7 @@ public class CaseExporter implements DataExporter {
 			conn = ds.getConnection();
 			//Connection ontologyConnection = PathDBHelper.getOntologyConnection(project_id);
 			//String ontologySchemaPrefix = PathDBHelper.getOntologySchemaPrefix(project_id);
-			for(OutputFile outputFile : dataExportConfig.outputFiles){
+			for(OutputFile outputFile : model.getExportConfig().outputFiles){
 				if (outputFile.pivotLevel != null && outputFile.pivotLevel.equals("concept")){
 					for(ConceptColumn CC : outputFile.conceptColumns){
 						conceptCDs.put(CC.conceptCD, outputFile);
@@ -344,7 +322,7 @@ public class CaseExporter implements DataExporter {
 	{
 		String filenamePrefix = daqueryRequest.getFilePrefix();
 		Hashtable<OutputFile, OutputStreamWriter> outputStreams = new Hashtable<>();
-		for(OutputFile outputfile : this.dataExportConfig.outputFiles){
+		for(OutputFile outputfile : model.getExportConfig().outputFiles){
 			if(outputfile.source == null){
 				FileOutputStream ontologyOutputStream = null;
 				String ontologyFilename = filenamePrefix + "-" + outputfile.name;
@@ -553,7 +531,7 @@ public class CaseExporter implements DataExporter {
 			Hashtable<String, Hashtable<String, Modifier>> modifiers = new Hashtable<>();
 			Hashtable<String, Hashtable<String, Concept>> conceptColumns = new Hashtable<>();
 			Hashtable<String, String[]> outLines = new Hashtable<>();
-			for(OutputFile outputFile : dataExportConfig.outputFiles){
+			for(OutputFile outputFile : model.getExportConfig().outputFiles){
 				if(outputFile.pivotLevel != null && outputFile.pivotLevel.equals("concept")){
 					buildConceptColumns(outputFile, conceptColumns);
 					outLines.put(outputFile.name, new String[COREINFO_COLUMN_COUNT + 1 + conceptColumnCount(outputFile) + (debugDataExport ? 2 : 0) ]);
@@ -605,7 +583,7 @@ public class CaseExporter implements DataExporter {
 				
 				while (rs.next()) {
 					// valueMatch pattern
-					OutputFile outputFile = getOutputFileByValueMatch(rs.getString("CONCEPT_CD"), dataExportConfig);
+					OutputFile outputFile = getOutputFileByValueMatch(rs.getString("CONCEPT_CD"), model.getExportConfig());
 					// Find outputFile in ConceptCDs HashMap
 					outputFile = outputFile == null ? ConceptCDs.get(rs.getString("CONCEPT_CD")) : outputFile;
 					if(outputFile == null) continue;
@@ -695,7 +673,7 @@ public class CaseExporter implements DataExporter {
 					}
 				}
 				
-				for(OutputFile outputFile : dataExportConfig.outputFiles){
+				for(OutputFile outputFile : model.getExportConfig().outputFiles){
 					if(outputFile.source == null){
 						String[] outLine = outLines.get(outputFile.name);
 						if(!isEmptyArray(outLine)){
@@ -777,33 +755,6 @@ public class CaseExporter implements DataExporter {
 			return(dateFormat.format(date));
 	}
 	
-	private Hashtable<String, Integer> shiftDaysByPatientId = new Hashtable<String, Integer>();
-	
-	private int getShiftDays(String patientId) throws DaqueryException {
-		String idKey = getIdKey(patientId);
-		if (!shiftDaysByPatientId.containsKey(idKey)) {
-			Network net = daqueryRequest.getNetwork();
-			if(! net.getShiftDates())
-			{
-				shiftDaysByPatientId.put(idKey, new Integer(0));
-			}
-			else
-			{
-				if(net.getMinDateShift() == net.getMaxDateShift())
-				{
-					throw new DaqueryException("Warning: dates cannot be shifted because the min and max date shift are equal.");
-				}
-				int shiftDays = 0;
-				while (shiftDays == 0) // don't allow a shift of zero
-				{
-					shiftDays = RngHelper.nextIntInRange(net.getMinDateShift(), net.getMaxDateShift()); 
-				}
-				shiftDaysByPatientId.put(idKey, new Integer(shiftDays));
-			}
-		}
-		return (shiftDaysByPatientId.get(idKey).intValue());
-	}
-	
 	private Integer maxShiftDays = null;
 	
 	private int getMaxShiftDays() throws NumberFormatException, DaqueryException {
@@ -812,116 +763,6 @@ public class CaseExporter implements DataExporter {
 
 		return (maxShiftDays.intValue());
 
-	}
-	
-	private int ptIdCounter = 1;
-	private int patientIdOffset;
-	private Hashtable<String, Integer> serialIdByI2b2Id = new Hashtable<String, Integer>();
-	
-	private String getIdKey(String val)
-	{
-		if(val == null) return(null);
-		return(val.trim().toUpperCase());
-	}
-	
-	private String getSerializedId(String patientId) {
-		String idKey = getIdKey(patientId);
-		if (!serialIdByI2b2Id.containsKey(idKey)) {
-			Integer newId = new Integer(ptIdCounter++);
-			serialIdByI2b2Id.put(idKey, this.patientIdOffset + newId);
-		}
-		String rVal = Integer.toString(serialIdByI2b2Id.get(idKey));
-		return (rVal);
-	}
-	
-	private static String csvSafeString(String val) {
-		if (StringHelper.isBlank(val))
-			return ("");
-
-		// escape entire string if has comma (,)
-		if (val.contains(",")) {
-			val = "\"" + val + "\"";
-		}
-		// escape double quotes (") in string
-		else if (val.contains("\"")) {
-			val = val.replaceAll("\"", "\"\"");
-		}
-		return val;
-	}
-	
-	private static String threeDigitZip(String zip, boolean threeDigit) {
-		if (StringHelper.isBlank(zip))
-			return ("");
-		String val = zip.trim();
-		if (!isZipCodeFormat(val)) {
-			logger.log(Level.WARNING ,"A zip code that is being exported doesn't look like a zip code: "
-					+ zip);
-			return ("");
-		}
-		
-		if(threeDigit)return (val.substring(0, 3) + "XX");
-	
-		return val;		
-	}
-	
-	private static boolean isZipCodeFormat(String zip) {
-		String val = zip.trim();
-		// remove spaces and dashes
-		val = val.replace(" ", "");
-		val = val.replace("-", "");
-		return (val.length() >= 3 && val.length() <= 9 && val.matches("d*\\d+"));
-	}
-	
-	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	// if data shifting is turned on and a shifted age is > 85
-	// change it to exactly 85
-	protected String handleBirthday(String ptId, Date birthday) throws DaqueryException {
-		Date bDay = null;
-		if (birthday == null) {
-			return "";
-		}
-		Network net = daqueryRequest.getNetwork();
-		if (net.getShiftDates()) {
-			bDay = dateShift(getShiftDays(ptId), birthday);
-			if (bDay == null) {
-				return "";
-			}
-			Calendar dob = Calendar.getInstance();
-			dob.setTime(bDay);
-			Calendar today = Calendar.getInstance();
-			int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
-			if (today.get(Calendar.MONTH) < dob.get(Calendar.MONTH)) {
-				age--;
-			} else if (today.get(Calendar.MONTH) == dob.get(Calendar.MONTH)
-					&& today.get(Calendar.DAY_OF_MONTH) < dob
-							.get(Calendar.DAY_OF_MONTH)) {
-				age--;
-			}
-			if (age >= 85) {
-				int birthYear = today.get(Calendar.YEAR) - 85;
-				Calendar newBday = Calendar.getInstance();
-				int month = today.get(Calendar.MONTH);
-				int day = today.get(Calendar.DAY_OF_MONTH);
-				newBday.set(birthYear, month, day);
-				bDay = newBday.getTime();
-			}
-			return (dateFormat.format(bDay));
-		} else {
-			return (dateFormat.format(birthday));
-		}
-	}
-	
-	private Date dateShift(int daysToShift, Date date) throws DaqueryException {
-		if (date == null)
-			return (null);
-		Network net = daqueryRequest.getNetwork();
-		if (net.getShiftDates()) {
-			Calendar dt = Calendar.getInstance();
-			dt.setTime(date);
-			dt.add(Calendar.DATE, daysToShift);
-			return (dt.getTime());
-		} else
-			return (date);
 	}
 	
 	private void buildConceptColumns(OutputFile outputFile, Hashtable<String, Hashtable<String, Concept>> conceptColumns) {
