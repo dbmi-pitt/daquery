@@ -9,4 +9,5 @@ public interface Column
 	public String getName();
 	public void setName(String name);
 	public boolean matchesName(String name);
+	public String getDisplayName();
 }

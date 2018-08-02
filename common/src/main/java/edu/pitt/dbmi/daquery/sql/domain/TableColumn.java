@@ -22,4 +22,18 @@ public class TableColumn extends AbstractColumn implements SQLElement, Column
 		else
 			return(StringHelper.equalIgnoreCase(name, alias));
 	}
+	
+	@Override public String getDisplayName()
+	{
+		String rName = null;
+		if(!StringHelper.isEmpty(alias))
+			rName = alias;
+		else if(!StringHelper.isEmpty(name))
+		{
+			rName = name;
+			if(!StringHelper.isEmpty(tableName))
+				rName = tableName + "." + rName;
+		}
+		return(rName);
+	}
 }

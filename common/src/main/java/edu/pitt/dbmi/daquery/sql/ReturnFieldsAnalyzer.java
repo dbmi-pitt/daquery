@@ -198,6 +198,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		if(node.self instanceof Count_functionContext || node.self instanceof Any_functionContext)
 		{
 			Function func = new Function();
+			func.setCallDescriptor(node.self.getText());
 			parentElement = setParentChild(parentElement, func);
 		}
 		if(node.self instanceof From_table_specContext)
