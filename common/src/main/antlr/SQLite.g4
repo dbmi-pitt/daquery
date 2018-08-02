@@ -414,9 +414,12 @@ deid_tag
  ;
  
 ident_prop
- : id_field_prop? date_shift_field_prop? obfuscate_field_prop?
+ : id_field_prop? date_shift_field_prop? obfuscate_field_prop? is_zip_prop?
  ;
- 
+
+is_zip_prop
+ : K_ISZIPCODE
+ ;
 id_field_prop
  : K_ISID '=' ( K_TRUE | K_FALSE )
  ;
@@ -599,6 +602,7 @@ keyword
  | K_ISBIRTHDATE
  | K_ISID
  | K_ISNULL
+ | K_ISZIPCODE
  | K_JOIN
  | K_KEY
  | K_LEFT
@@ -878,6 +882,7 @@ K_IS : I S;
 K_ISBIRTHDATE : I S B I R T H D A T E;
 K_ISID : I S I D;
 K_ISNULL : I S N U L L;
+K_ISZIPCODE : I S Z I P C O D E;
 K_JOIN : J O I N;
 K_KEY : K E Y;
 K_LEFT : L E F T;

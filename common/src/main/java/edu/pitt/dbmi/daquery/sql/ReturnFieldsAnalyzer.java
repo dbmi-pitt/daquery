@@ -45,6 +45,7 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Function_nameCont
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Id_field_propContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Insert_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Is_birthdate_propContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Is_zip_propContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Obfuscate_field_propContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Pragma_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Reindex_stmtContext;
@@ -276,6 +277,15 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 				((DeIdTag) parentElement).setFoundDateShift(true);
 			}
 		}
+		
+		if(node.self instanceof Is_zip_propContext)
+		{
+			if(parentElement instanceof DeIdTag)
+			{
+				((DeIdTag) parentElement).setZipCode(true);
+			}
+		}
+		
 		
 		if(node.self instanceof Obfuscate_field_propContext)
 		{

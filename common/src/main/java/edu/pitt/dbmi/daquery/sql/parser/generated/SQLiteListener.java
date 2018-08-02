@@ -558,6 +558,16 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitIdent_prop(SQLiteParser.Ident_propContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#is_zip_prop}.
+	 * @param ctx the parse tree
+	 */
+	void enterIs_zip_prop(SQLiteParser.Is_zip_propContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#is_zip_prop}.
+	 * @param ctx the parse tree
+	 */
+	void exitIs_zip_prop(SQLiteParser.Is_zip_propContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#id_field_prop}.
 	 * @param ctx the parse tree
 	 */

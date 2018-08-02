@@ -12,6 +12,7 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	private String dateShiftTrackByDBName = null;
 	private boolean dateField = false;
 	private boolean birthDate = false;
+	private boolean zipCode = false;
 	
 	//used only by parser to keep track of a tag that contains a date shift property
 	private boolean foundDateShift = false;
@@ -44,4 +45,7 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	
 	public boolean isBirthdate(){return(birthDate);}
 	public void setBirthdate(boolean isBdate){birthDate = isBdate;}
+	
+	public boolean isZipCode(){return(zipCode);}
+	public void setZipCode(boolean zip){zipCode = zip;}
 }
