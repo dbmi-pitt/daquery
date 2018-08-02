@@ -45,17 +45,20 @@ export class NewQueryComponent implements OnInit {
 
   createForm(inquiry) {
     if(inquiry){
-      let ansi_code = inquiry.code.find(x => x.dialect === 'ANSI').code;
-      let oracle_code = inquiry.code.find(x => x.dialect === 'ORACLE').code;
-      let sql_server_code = inquiry.code.find(x => x.dialect === 'SQL_SERVER').code;
+      let ansi = inquiry.code.find(x => x.dialect === 'ANSI');
+      let ansi_code = ansi ? ansi.code : "";
+      let oracle = inquiry.code.find(x => x.dialect === 'ORACLE');
+      let oracle_code = oracle ? oracle.code : "";
+      let sql_server = inquiry.code.find(x => x.dialect === 'SQL_SERVER');
+      let sql_server_code = sql_server ? sql_server.code : "";
       this.sqlDialect = {
         ansi: !(ansi_code === ""),
         oracle: !(oracle_code === ""),
         sqlServer: !(sql_server_code === "")
       };
-      if(this.sqlDialect.ansi) this.lastAddedTab = "ansi";
-      if(this.sqlDialect.oracle) this.lastAddedTab = "oracle";
       if(this.sqlDialect.sqlServer) this.lastAddedTab = "sql_server";
+      if(this.sqlDialect.oracle) this.lastAddedTab = "oracle";
+      if(this.sqlDialect.ansi) this.lastAddedTab = "ansi";
 
       this.inquiryForm = this.fb.group({
         network: '',
@@ -120,6 +123,11 @@ export class NewQueryComponent implements OnInit {
   }
 
   onRequest() {
+    if(this.inquiryForm.get('query').get('ansi').value === "" &&
+        this.inquiryForm.get('query').get('oracle').value === "" && 
+        this.inquiryForm.get('query').get('sqlServer').value === ""){
+      this.inquiryForm.get('query').setErrors({atLeastOne: true});
+    }
     if(this.inquiryForm.valid){
       if(this.editingInquiry) {
         this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
@@ -182,7 +190,7 @@ export class NewQueryComponent implements OnInit {
         if(this.inquiryForm.value.queryType === 'TABLE') inqName += "(Table)";
         let dType = this.inquiryForm.value.queryType === 'AGGREGATE' ? 'SQL_QUERY' : 'SQL_DOWNLOAD';
 
-        return {
+        let ret = {
           requestSite: {
             siteId: site.siteId,
             name: site.name
@@ -195,24 +203,22 @@ export class NewQueryComponent implements OnInit {
             version: 1,
             dataType: dType,
             queryType: this.inquiryForm.value.queryType,
-            code: [
-                {
-                  code: this.inquiryForm.get('query').get('ansi').value,
-                  dialect: 'ANSI'
-                },
-                {
-                  code: this.inquiryForm.get('query').get('oracle').value,
-                  dialect: 'ORACLE'
-                },
-                {
-                  code: this.inquiryForm.get('query').get('sqlServer').value,
-                  dialect: 'SQL_SERVER'
-                }
-              ],
+            code: [],
             inquiryName: inqName,
             inquiryDescription: this.inquiryForm.value.inquiryDescription
           }
         };
+
+        ['ansi', 'oracle', 'sqlServer'].forEach(dialect => {
+          if(this.inquiryForm.get('query').get(dialect).value != ""){
+            ret.inquiry.code.push({
+              code: this.inquiryForm.get('query').get(dialect).value,
+              dialect: dialect.toUpperCase()
+            });
+          }
+        });
+
+        return ret;
 
         // return this.requestService.sendRequest(request)
         //                           .map(data => {

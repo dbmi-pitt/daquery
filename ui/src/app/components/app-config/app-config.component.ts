@@ -30,7 +30,8 @@ export class AppConfigComponent implements OnInit {
       fileOutputDir: ['', [Validators.required]],
       localDeliveryDir: ['', [Validators.required]],
       trackingOutputDir: ['', [Validators.required]],
-      tempFileExportDir: ['', [Validators.required]]
+      tempFileExportDir: ['', [Validators.required]],
+      casePerFile: ['', Validators.required]
     })
   }
 
@@ -43,6 +44,7 @@ export class AppConfigComponent implements OnInit {
   get localDeliveryDir() { return this.appConfigForm.get('localDeliveryDir'); }
   get trackingOutputDir() { return this.appConfigForm.get('trackingOutputDir'); }
   get tempFileExportDir() { return this.appConfigForm.get('tempFileExportDir'); }
+  get casePerFile() { return this.appConfigForm.get('casePerFile'); }
 
   ngOnInit() {
   }
@@ -59,6 +61,7 @@ export class AppConfigComponent implements OnInit {
                         this.appConfigForm.get('localDeliveryDir').setValue(res.localDeliveryDir);
                         this.appConfigForm.get('trackingOutputDir').setValue(res.trackingOutputDir);
                         this.appConfigForm.get('tempFileExportDir').setValue(res.tempFileExportDir);
+                        this.appConfigForm.get('casePerFile').setValue(res.casePerFile);
                        })
   }
 
