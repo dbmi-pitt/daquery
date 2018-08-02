@@ -6,6 +6,7 @@ public class DeIdTag extends AbstractElement implements SQLElement
 {
 	private boolean phi = false;
 	private boolean isIdField = false;
+	private String idName = null;
 	private boolean obfuscate = false;
 	private String dateShiftTrackByName = null;  //this could be a field name or alias
 	private String dateShiftTrackByTableName = null;
@@ -13,6 +14,7 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	private boolean dateField = false;
 	private boolean birthDate = false;
 	private boolean zipCode = false;
+	
 	
 	//used only by parser to keep track of a tag that contains a date shift property
 	private boolean foundDateShift = false;
@@ -22,6 +24,9 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	
 	public boolean isId(){return(isIdField);}
 	public void setId(boolean isId){isIdField = isId;}
+	
+	public String getIdName(){return(idName);}
+	public void setIdName(String idName){this.idName = idName;}
 	
 	public boolean isObfuscate(){return(obfuscate);}
 	public void setObfuscate(boolean obfuscate){ this.obfuscate = obfuscate; }

@@ -16,7 +16,9 @@ abstract class AbstractExporter implements DataExporter
 {
 	private final static Logger logger = Logger.getLogger(AbstractExporter.class.getName());
 	
-	protected Hashtable<String, Integer> serialIdByI2b2Id = new Hashtable<String, Integer>();
+	//protected Hashtable<String, Integer> serialIdByI2b2Id = new Hashtable<String, Integer>();
+	protected Hashtable<String, Hashtable<String, Integer>> serializedIdsByType = new Hashtable<String, Hashtable<String, Integer>>();
+	
 	
 	private int ptIdCounter = 1;
 	private int patientIdOffset;	
@@ -47,14 +49,31 @@ abstract class AbstractExporter implements DataExporter
 		
 	}
 	
-	protected String getSerializedId(String patientId) {
-		String idKey = getIdKey(patientId);
-		if (!serialIdByI2b2Id.containsKey(idKey)) {
+	protected String getSerializedId(String id, String idType)
+	{
+		Hashtable<String, Integer> serializedIds = getSerializedIds(idType);
+		String idKey = getIdKey(id);
+		if (!serializedIds.containsKey(idKey)) {
 			Integer newId = new Integer(ptIdCounter++);
-			serialIdByI2b2Id.put(idKey, this.patientIdOffset + newId);
+			serializedIds.put(idKey, this.patientIdOffset + newId);
 		}
-		String rVal = Integer.toString(serialIdByI2b2Id.get(idKey));
+		String rVal = Integer.toString(serializedIds.get(idKey));
 		return (rVal);
+	}
+	
+	protected Hashtable<String, Integer> getSerializedIds(String idType)
+	{
+		String lclIdType;
+		if(StringHelper.isEmpty(idType))
+			lclIdType = "NULL";
+		else
+			lclIdType = idType.trim().toUpperCase();
+		
+		if(!serializedIdsByType.containsKey(lclIdType))
+		{
+			serializedIdsByType.put(lclIdType, new Hashtable<String, Integer>());
+		}
+		return(serializedIdsByType.get(lclIdType));
 	}
 	
 	private String getIdKey(String val)
@@ -140,6 +159,26 @@ abstract class AbstractExporter implements DataExporter
 		}
 	}
 	
+	protected String dateShift(String ptId, Date date) throws DaqueryException {
+		return (dateShiftToString(getShiftDays(ptId), date));
+	}
+	
+	private String dateShiftToString(int daysToShift, Date date) throws DaqueryException
+	{
+		if (date == null)
+			return ("");
+		if(dateShift)
+		{
+			Date dt = dateShift(daysToShift, date);
+			if (dt == null)
+				return ("");
+			
+			return (dateFormat.format(dt));
+		}
+		else
+			return(dateFormat.format(date));
+	}
+		
 	protected Date dateShift(int daysToShift, Date date) throws DaqueryException {
 		if (date == null)
 			return (null);

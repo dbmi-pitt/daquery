@@ -292,7 +292,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 	{
 		//make a list of all patients 
 		HashSet<String> patientIds = new HashSet<String>();
-		for(String id : serialIdByI2b2Id.keySet())
+		for(String id : getSerializedIds("CASEID").keySet())
 		{
 			if(!patientIds.contains(id))
 				patientIds.add(id);
@@ -311,8 +311,8 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			
 			if(shiftDaysByPatientId.containsKey(id))
 				shiftDays = shiftDaysByPatientId.get(id);
-			if(serialIdByI2b2Id.containsKey(id))
-				patNum = serialIdByI2b2Id.get(id);
+			if(getSerializedIds("CASEID").containsKey(id))
+				patNum = getSerializedIds("CASEID").get(id);
 			
 			trckFile.write(id + "," + ((patNum == null)?"":patNum.toString()) + "," + ((shiftDays == null)?"":shiftDays.toString()) + "\n");
 		}		
@@ -456,7 +456,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 					String patientNum = rs.getString(1);
 					//outLine[0] = csvSafeString(patientNum);
 					if(daqueryRequest.getNetwork().getSerializePatientId())
-						outLine[0] = this.getSerializedId(patientNum);
+						outLine[0] = this.getSerializedId(patientNum, "CASEID");
 					else
 						outLine[0] = patientNum;
 					
@@ -734,27 +734,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		}
 		return inClause;
 	}
-	
-	private String dateShift(String ptId, Date date) throws DaqueryException {
-		return (dateShiftToString(getShiftDays(ptId), date));
-	}
-	
-	private String dateShiftToString(int daysToShift, Date date) throws DaqueryException
-	{
-		if (date == null)
-			return ("");
-		if(dateShift)
-		{
-			Date dt = dateShift(daysToShift, date);
-			if (dt == null)
-				return ("");
-			
-			return (dateFormat.format(dt));
-		}
-		else
-			return(dateFormat.format(date));
-	}
-	
+
 	private Integer maxShiftDays = null;
 	
 	private int getMaxShiftDays() throws NumberFormatException, DaqueryException {
