@@ -52,11 +52,13 @@ import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.dao.SQLQueryDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Network;
+import edu.pitt.dbmi.daquery.common.domain.NetworkAndCode;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
@@ -64,6 +66,7 @@ import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
@@ -81,6 +84,9 @@ import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 import edu.pitt.dbmi.daquery.queue.TaskQueue;
+import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
+import edu.pitt.dbmi.daquery.sql.ReturnColumn;
+import edu.pitt.dbmi.daquery.sql.ReturnFieldsAnalyzer;
 import io.jsonwebtoken.ExpiredJwtException;
 
 @Path("/")
@@ -180,6 +186,62 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return Response.ok(200).entity(data.toJson()).build();
 	}
     
+	@POST
+	@Path("/check-sql")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response checkSql(NetworkAndCode netAndCode)
+	{
+		try
+		{
+			String sql = netAndCode.getSqlCode();
+			QueryInfo info = new QueryInfo();
+			AggregateSQLAnalyzer aggregateAnalyzer = new AggregateSQLAnalyzer(sql);
+			if(aggregateAnalyzer.isRejected())
+			{
+				Network net = NetworkDAO.queryNetwork(netAndCode.getNetworkUuid());
+				DataModel model = net.getDataModel();
+				ReturnFieldsAnalyzer rfAnalyzer = new ReturnFieldsAnalyzer(sql, model);
+				if(rfAnalyzer.isRejected())
+				{
+					info.setRejected(true);
+					info.setRejectionMessage(rfAnalyzer.getRejectionMessage());
+				}
+				else
+				{
+					info.setType("TABLE_EXPORT");
+					if(rfAnalyzer.hasWarnings())
+					{
+						info.setWarnings(true);
+						for(String warning : rfAnalyzer.getWarningList())
+							info.addWarningMessage(warning);
+					}
+					for(ReturnColumn rc : rfAnalyzer.getReturnColumns())
+					{
+						String name = rc.column.getDisplayName();
+						if(rc.deidTag == null)
+						{
+							info.addReturnVal("<b><font color=\"red\">WARNING:</fond></b> column " + name + " does not have any de-identification information.");
+						}
+						else
+						{
+							
+						}
+					}
+				}
+			}
+			else
+				info.setType("AGGREGATE");
+			return(ResponseHelper.getJsonResponseGen(200, info));
+		}
+    	catch(Throwable t)
+    	{
+    		logger.log(Level.SEVERE, "An unexpeced error occured while checking the sql.", t);
+    		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking your SQL code.", null, t));
+    	}
+		
+	}
+
 	@GET
 	@Path("/display-version")
     @Produces(MediaType.TEXT_PLAIN)
