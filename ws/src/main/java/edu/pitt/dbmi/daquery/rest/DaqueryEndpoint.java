@@ -87,6 +87,7 @@ import edu.pitt.dbmi.daquery.queue.TaskQueue;
 import edu.pitt.dbmi.daquery.sql.AggregateSQLAnalyzer;
 import edu.pitt.dbmi.daquery.sql.ReturnColumn;
 import edu.pitt.dbmi.daquery.sql.ReturnFieldsAnalyzer;
+import edu.pitt.dbmi.daquery.sql.domain.DeIdTag;
 import io.jsonwebtoken.ExpiredJwtException;
 
 @Path("/")
@@ -219,13 +220,22 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					for(ReturnColumn rc : rfAnalyzer.getReturnColumns())
 					{
 						String name = rc.column.getDisplayName();
-						if(rc.deidTag == null)
+						DeIdTag tag = rc.deidTag;
+						if(tag == null)
 						{
-							info.addReturnVal("<b><font color=\"red\">WARNING:</fond></b> column " + name + " does not have any de-identification information.");
+							info.addReturnVal("<b><font color=\"red\">" + name + ": WARNING: column does not have any de-identification information.</font></b>");
 						}
 						else
 						{
-							
+							String boldName = "<b>" + name + ":</b> ";
+							if(tag.isBirthdate())
+								info.addReturnVal(boldName + "will be deidentified as a birth day");
+							else if(tag.isDateShift())
+								info.addReturnVal(boldName + "will be deidentified by date shifting");
+							else if(tag.isId())
+								info.addReturnVal(boldName + "will be deidentified by creating a serial id");
+							else if(tag.isZipCode())
+								info.addReturnVal(boldName + "will be deidentifed by converting to a three digit zip");
 						}
 					}
 				}

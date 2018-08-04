@@ -31,7 +31,7 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	public boolean isObfuscate(){return(obfuscate);}
 	public void setObfuscate(boolean obfuscate){ this.obfuscate = obfuscate; }
 	
-	public boolean isDateShift(){return(! StringHelper.isEmpty(dateShiftTrackByName));}
+	public boolean isDateShift(){return((! StringHelper.isEmpty(dateShiftTrackByName)) || isDateField());}
 	
 	public String getDateShiftTrackByName(){return(dateShiftTrackByName);}
 	public void setDateShiftTrackByName(String name){dateShiftTrackByName = name;}
