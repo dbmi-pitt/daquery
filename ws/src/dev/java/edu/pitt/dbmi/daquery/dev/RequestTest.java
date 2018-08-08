@@ -13,6 +13,8 @@ import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
@@ -35,7 +37,7 @@ public class RequestTest
 		iq.setDataType("SQL_QUERY");
 		//iq.setAggregate(true);
 		iq.setQueryType(QueryType.AGGREGATE.name());
-		iq.setCode("select count(*) from patient_dimension");
+		iq.addCode(new SQLCode("select count(*) from patient_dimension", SQLDialect.ANSI));
 		Network net = new Network();
 		net.setNetworkId("abcd-efgh-ijkm-nopq");
 		ir.setNetwork(net);

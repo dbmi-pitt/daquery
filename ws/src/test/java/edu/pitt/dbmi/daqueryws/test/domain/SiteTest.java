@@ -2,30 +2,19 @@ package edu.pitt.dbmi.daqueryws.test.domain;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-
 import org.hibernate.Session;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
-import edu.pitt.dbmi.daquery.common.dev.util.CreateCDMModelInfo;
-import edu.pitt.dbmi.daquery.common.dev.util.PrivateProps;
 import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
-import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.EncryptionType;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public class SiteTest {

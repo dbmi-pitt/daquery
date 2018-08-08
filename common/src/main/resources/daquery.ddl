@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.5 -->
+<!-- daquery.data.version=1.51 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -101,7 +101,12 @@ CREATE TABLE DATA_ATTRIBUTE
    PHI boolean,
    MODEL_ID bigint,
    AGGREGATABLE boolean,
-   FIELD_TYPE varchar(100)
+   FIELD_TYPE varchar(100),
+   IDENTIFIER boolean,
+   IDENT_NAME varchar(100),
+   BIRTH_DATE boolean,
+   DATE_FIELD boolean,
+   ZIP_CODE boolean
 );
 
 
