@@ -425,7 +425,7 @@ id_field_prop
  ;
  
 date_shift_field_prop
- : K_DATESHIFT is_birthdate_prop? K_TRACKED K_BY tracking_column_expr 
+ : K_DATESHIFT is_birthdate_prop? (K_TRACKED K_BY tracking_column_expr)? 
  ;
  
 tracking_column_expr
@@ -437,7 +437,7 @@ tracking_column_expr
   : K_ISBIRTHDATE
   ;
   obfuscate_field_prop
-  : K_OBFUSCATE '=' ( K_TRUE | K_FALSE )
+  : K_OBFUSCATE ('=' ( K_TRUE | K_FALSE ))?
   ;
  
 from_table_spec

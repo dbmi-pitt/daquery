@@ -194,7 +194,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			if(parentElement instanceof DeIdTag)
 				((DeIdTag)parentElement).setBirthdate(true);
 		}
-		
+
 		if(node.self instanceof Count_functionContext || node.self instanceof Any_functionContext)
 		{
 			Function func = new Function();
@@ -276,6 +276,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			if(parentElement instanceof DeIdTag)
 			{
 				((DeIdTag) parentElement).setFoundDateShift(true);
+				((DeIdTag) parentElement).setDateShift(true);
 			}
 		}
 		
@@ -292,13 +293,19 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		{
 			if(parentElement instanceof DeIdTag)
 			{
-				Boolean obf = parseTrueFalseProp(node.self.getText());
-				if(obf == null)
+				String obfTxt = node.self.getText();
+				if(obfTxt.contains("="))
 				{
-					addWarning("DEID Tag obfuscate property is not parsable: " + node.self.getText());
+					Boolean obf = parseTrueFalseProp(node.self.getText());
+					if(obf == null)
+					{
+						addWarning("DEID Tag obfuscate property is not parsable: " + node.self.getText());
+					}
+					else
+						((DeIdTag) parentElement).setObfuscate(obf);
 				}
 				else
-					((DeIdTag) parentElement).setObfuscate(obf);
+					((DeIdTag) parentElement).setObfuscate(true);
 			}			
 		}
 		
