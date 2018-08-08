@@ -40,6 +40,26 @@ public class DataAttribute
     @Expose
     private boolean aggregatable = false;
     
+    @Expose
+    @Column(name = "IDENTIFIER")
+    private boolean identifier = false;
+    
+    @Expose
+    @Column(name = "IDENT_NAME")
+    private String identifierName;
+    
+    @Expose
+    @Column(name = "BIRTH_DATE")
+    private boolean birthDate = false;
+    
+    @Expose
+    @Column(name = "DATE_FIELD")
+    private boolean dateField = false;
+    
+    @Expose
+    @Column(name = "ZIP_CODE")
+    private boolean zipCode = false;
+    
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="MODEL_ID")
     DataModel dataModel;    
@@ -64,4 +84,19 @@ public class DataAttribute
     
     public DataModel getDataModel(){return(dataModel);}
     public void setDataModel(DataModel model){dataModel = model;}
+    
+    public boolean isIdentifier(){return(identifier);}
+    public void setIdentifier(boolean ident){identifier = ident;}
+    
+    public String getIdentifierName(){return(identifierName);}
+    public void setIdentiferName(String identName){identifierName = identName;}
+    
+    public boolean isBirthDate(){return(birthDate);}
+    public void setBirthDate(boolean isBirthdate){birthDate = isBirthdate;}
+    
+    public boolean isDateField(){return(dateField);}
+    public void setDateField(boolean dteField){dateField = dteField;}
+    
+    public boolean isZipCode(){return(zipCode);}
+    public void setZipCode(boolean zip){zipCode = zip;}
 }

@@ -558,6 +558,16 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitIdent_prop(SQLiteParser.Ident_propContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#is_zip_prop}.
+	 * @param ctx the parse tree
+	 */
+	void enterIs_zip_prop(SQLiteParser.Is_zip_propContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#is_zip_prop}.
+	 * @param ctx the parse tree
+	 */
+	void exitIs_zip_prop(SQLiteParser.Is_zip_propContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#id_field_prop}.
 	 * @param ctx the parse tree
 	 */
@@ -577,6 +587,26 @@ public interface SQLiteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDate_shift_field_prop(SQLiteParser.Date_shift_field_propContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#tracking_column_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#tracking_column_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#is_birthdate_prop}.
+	 * @param ctx the parse tree
+	 */
+	void enterIs_birthdate_prop(SQLiteParser.Is_birthdate_propContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#is_birthdate_prop}.
+	 * @param ctx the parse tree
+	 */
+	void exitIs_birthdate_prop(SQLiteParser.Is_birthdate_propContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#obfuscate_field_prop}.
 	 * @param ctx the parse tree

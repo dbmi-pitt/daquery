@@ -413,20 +413,31 @@ deid_tag
  : '<' K_IDENTIFIABLE ident_prop?  '>'
  ;
  
- ident_prop
-  : id_field_prop? date_shift_field_prop? obfuscate_field_prop?
-  ;
+ident_prop
+ : id_field_prop? date_shift_field_prop? obfuscate_field_prop? is_zip_prop?
+ ;
+
+is_zip_prop
+ : K_ISZIPCODE
+ ;
+id_field_prop
+ : K_ISID '=' ( K_TRUE | K_FALSE )
+ ;
  
- id_field_prop
-  : K_ISID '=' ( K_TRUE | K_FALSE )
-  ;
+date_shift_field_prop
+ : K_DATESHIFT is_birthdate_prop? (K_TRACKED K_BY tracking_column_expr)? 
+ ;
  
-  date_shift_field_prop
-  : K_DATESHIFT K_ON result_column_expr
-  ;
+tracking_column_expr
+ :
+ | ( ( database_name '.' )? table_name '.' )? column_name
+ ;
  
+  is_birthdate_prop
+  : K_ISBIRTHDATE
+  ;
   obfuscate_field_prop
-  : K_OBFUSCATE '=' ( K_TRUE | K_FALSE )
+  : K_OBFUSCATE ('=' ( K_TRUE | K_FALSE ))?
   ;
  
 from_table_spec
@@ -588,8 +599,10 @@ keyword
  | K_INTERSECT
  | K_INTO
  | K_IS
+ | K_ISBIRTHDATE
  | K_ISID
  | K_ISNULL
+ | K_ISZIPCODE
  | K_JOIN
  | K_KEY
  | K_LEFT
@@ -633,6 +646,7 @@ keyword
  | K_TEMPORARY
  | K_THEN
  | K_TO
+ | K_TRACKED
  | K_TRANSACTION
  | K_TRIGGER
  | K_TRUE
@@ -865,8 +879,10 @@ K_INSTEAD : I N S T E A D;
 K_INTERSECT : I N T E R S E C T;
 K_INTO : I N T O;
 K_IS : I S;
+K_ISBIRTHDATE : I S B I R T H D A T E;
 K_ISID : I S I D;
 K_ISNULL : I S N U L L;
+K_ISZIPCODE : I S Z I P C O D E;
 K_JOIN : J O I N;
 K_KEY : K E Y;
 K_LEFT : L E F T;
@@ -910,6 +926,7 @@ K_TEMP : T E M P;
 K_TEMPORARY : T E M P O R A R Y;
 K_THEN : T H E N;
 K_TO : T O;
+K_TRACKED : T R A C K E D;
 K_TRANSACTION : T R A N S A C T I O N;
 K_TRIGGER : T R I G G E R;
 K_TRUE : T R U E;

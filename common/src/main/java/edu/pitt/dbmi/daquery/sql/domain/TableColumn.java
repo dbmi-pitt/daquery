@@ -4,17 +4,9 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 public class TableColumn extends AbstractColumn implements SQLElement, Column
 {
-	private String name;
 	private String dbName;
 	private String tableName;
-	private String alias;
 	
-	public String getName(){return name;}
-	public void setName(String name){this.name = name;}
-	
-	public String getAlias(){return alias;}
-	public void setAlias(String alias){this.alias = alias;}
-
 	public void setDBName(String name){dbName = name;}
 	public String getDBName(){return(dbName);}
 	
@@ -25,6 +17,23 @@ public class TableColumn extends AbstractColumn implements SQLElement, Column
 	{
 		if(StringHelper.isEmpty(name)) return(false);
 		if(StringHelper.isEmpty(this.name) && StringHelper.isEmpty(alias)) return(false);
-		return(StringHelper.equalIgnoreCase(this.name, name) || StringHelper.equalIgnoreCase(name, alias));
+		if(StringHelper.isEmpty(alias))
+			return(StringHelper.equalIgnoreCase(this.name, name));
+		else
+			return(StringHelper.equalIgnoreCase(name, alias));
+	}
+	
+	@Override public String getDisplayName()
+	{
+		String rName = null;
+		if(!StringHelper.isEmpty(alias))
+			rName = alias;
+		else if(!StringHelper.isEmpty(name))
+		{
+			rName = name;
+			if(!StringHelper.isEmpty(tableName))
+				rName = tableName + "." + rName;
+		}
+		return(rName);
 	}
 }

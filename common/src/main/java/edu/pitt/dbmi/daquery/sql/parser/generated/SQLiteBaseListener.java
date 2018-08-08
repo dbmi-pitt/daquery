@@ -676,6 +676,18 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterIs_zip_prop(SQLiteParser.Is_zip_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIs_zip_prop(SQLiteParser.Is_zip_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterId_field_prop(SQLiteParser.Id_field_propContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -695,6 +707,30 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDate_shift_field_prop(SQLiteParser.Date_shift_field_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIs_birthdate_prop(SQLiteParser.Is_birthdate_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIs_birthdate_prop(SQLiteParser.Is_birthdate_propContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
