@@ -1,10 +1,14 @@
 package edu.pitt.dbmi.daquery.rest;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -15,6 +19,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -78,6 +84,7 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
+import edu.pitt.dbmi.daquery.common.util.ZipUtil;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
 import edu.pitt.dbmi.daquery.queue.TaskQueue;
@@ -187,7 +194,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	{
 		return(ResponseHelper.getBasicResponse(200, AppProperties.getDisplayVersion()));
 	}
-	
 	
 	/**
 	 * Check if the site database is set up or not.
@@ -1716,4 +1722,43 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	}
     }
     
+    @Secured("ADMIN")
+    @GET
+    @Path("/system-update/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response systemUpdate() {
+    	Response resp  = null;
+    	try
+    	{
+    		URL website = new URL("http://localhost:8080/daquery-central/daquery_updates/daquery_update.zip");
+    		ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+    		FileOutputStream fos = new FileOutputStream("daquery_update.zip");
+    		fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+    		
+    		String zipFile = System.getProperty("user.dir") + "/daquery_update.zip";
+    		String destination = System.getProperty("user.dir");
+    		
+    		ZipUtil zu = new ZipUtil();
+    		zu.unZip(zipFile, destination);
+    		
+   		
+    		logger.log(Level.SEVERE, "Before update!");
+    		Process proc = Runtime.getRuntime().exec("chmod u+x " + destination + "/daquery_update/update.sh");
+    		String[] script = new String[]{"/bin/bash", "-c", destination + "/daquery_update/update.sh"};
+    		Runtime run = Runtime.getRuntime();
+    		proc = run.exec(script);
+    		logger.log(Level.SEVERE, "After update!");
+    		    		
+			return Response.ok(200).entity("{}").build();
+    	}
+    	catch(Throwable t)
+    	{
+    		logger.log(Level.SEVERE, "An unexpeced error occured while updating the daquery application", t);
+    		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while updating the daquery application.  See the appication logs for more information.", t));
+    	}
+    	finally
+    	{
+    		if(resp != null) resp.close();
+    	}
+    }
 }
