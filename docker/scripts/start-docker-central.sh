@@ -20,7 +20,7 @@
 
 # DAQUERY_CENTRAL_WAR_DIR is the directory on the host machine containing the Daquery Central war file
 # this file must be named daquery.war
-DAQUERY_CENTRAL_WAR_DIR="/home/devuser/projects/daquery-central/target"
+DAQUERY_CENTRAL_WAR_DIR="/home/devuser/projects/daquery/central/target"
 
 if [ ! -f $DAQUERY_CENTRAL_WAR_DIR/daquery-central.war ]; then
     echo +-+-+-+-+- File daquery-central.war does not exist in $DAQUERY_CENTRAL_WAR_DIR.  Exiting. +-+-+-+-+-
@@ -73,15 +73,18 @@ DAQUERY_HOME="/home/devuser/daquery_docker_data"
 # to ensure the creation of a unique Derby database.  
 CONTAINER_DAQUERY_HOME="/localdata/daquery_data"
 
+DAQUERY_CENT_URL="localhost"
+
 # CONTAINER_NAME is the docker name for this Daquery container.  This name must
 # be unique if running multiple Daquery sites (ex: daquery-testsite1, daquery-testsite2)
 CONTAINER_NAME="daquery-testsite-$TOMCAT_REDIRECT_PORT"
 docker stop $CONTAINER_NAME
-docker pull cborromeo/daquery-baseline
+docker pull cborromeo/daquery-central
 docker rm $CONTAINER_NAME
 
+echo "Running command: docker run --name $CONTAINER_NAME -dt -v $DAQUERY_CENTRAL_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DAQUERY_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e DAQUERY_WAR_DIR=$DAQUERY_CENTRAL_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-central:latest"
 
-if docker run --name $CONTAINER_NAME -dt -v $DAQUERY_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DAQUERY_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e DAQUERY_WAR_DIR=$DAQUERY_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-baseline:latest; then
+if docker run --name $CONTAINER_NAME -dt -v $DAQUERY_CENTRAL_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DAQUERY_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e DAQUERY_WAR_DIR=$DAQUERY_CENTRAL_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-central:latest; then
     echo Daquery started on port $TOMCAT_REDIRECT_PORT, debugging on port $TOMCAT_DEBUG_PORT
     echo Using central server at $DAQUERY_CENT_URL
 fi
