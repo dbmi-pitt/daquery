@@ -14,7 +14,7 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	private boolean dateField = false;
 	private boolean birthDate = false;
 	private boolean zipCode = false;
-	
+	private boolean dateShift = false;
 	
 	//used only by parser to keep track of a tag that contains a date shift property
 	private boolean foundDateShift = false;
@@ -31,7 +31,8 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	public boolean isObfuscate(){return(obfuscate);}
 	public void setObfuscate(boolean obfuscate){ this.obfuscate = obfuscate; }
 	
-	public boolean isDateShift(){return((! StringHelper.isEmpty(dateShiftTrackByName)) || isDateField());}
+	public boolean isDateShift(){return(dateShift || (! StringHelper.isEmpty(dateShiftTrackByName)) || isDateField());}
+	public void setDateShift(boolean shift){dateShift = shift;};
 	
 	public String getDateShiftTrackByName(){return(dateShiftTrackByName);}
 	public void setDateShiftTrackByName(String name){dateShiftTrackByName = name;}
