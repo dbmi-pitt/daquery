@@ -17,7 +17,8 @@ public class QueryInfo extends DaqueryObject
 	@Expose private String rejectionMessage = null;
 	@Expose private List<String> warningMessages = new ArrayList<String>();
 	@Expose private List<String> returnList = new ArrayList<String>();
-
+	@Expose private boolean deidUnresolved = false;
+	
 	public String getType(){return(type);}
 	public void setType(String val){type = val;}
 	
@@ -37,4 +38,7 @@ public class QueryInfo extends DaqueryObject
 	public List<String> getReturnList(){return(returnList);}
 	public void setReturnList(List<String> vals){returnList = vals;}
 	public void addReturnVal(String val){returnList.add(val);}
+	
+	public boolean isDeidUnresolved(){return(deidUnresolved);}
+	public void setDeidUnresolved(boolean val){deidUnresolved = val;}
 }

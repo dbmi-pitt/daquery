@@ -26,8 +26,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -43,7 +41,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
@@ -67,7 +64,6 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryInfo;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
@@ -187,6 +183,15 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return Response.ok(200).entity(data.toJson()).build();
 	}
     
+	
+	/**
+	 * Checks SQL code for valid aggregate or table return values.
+	 * Two parameters, in JSON are required: networkUuid and sqlCode.
+	 *  
+	 * @param networkUuid The uuid of the network where this will be run
+	 * @param sqlCode The SQL code to check
+	 * @return
+	 */
 	@POST
 	@Path("/check-sql")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -223,6 +228,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 						DeIdTag tag = rc.deidTag;
 						if(tag == null)
 						{
+							info.setDeidUnresolved(true);
 							info.addReturnVal("<b><font color=\"red\">" + name + ": WARNING: column does not have any de-identification information.</font></b>");
 						}
 						else
@@ -236,6 +242,13 @@ public class DaqueryEndpoint extends AbstractEndpoint
 								info.addReturnVal(boldName + "will be deidentified by creating a serial id");
 							else if(tag.isZipCode())
 								info.addReturnVal(boldName + "will be deidentifed by converting to a three digit zip");
+							else if(tag.isPhi())
+							{
+								info.addReturnVal("<b><font color=\"red\">" + name + ": WARNING: column is marked as phi, but contains no information about deidentification.</font></b>");
+								info.setDeidUnresolved(true);
+							}
+							else
+								info.addReturnVal(boldName + "will not be deidentifed.");
 						}
 					}
 				}
