@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { DaqueryService } from '../../services/daquery.service';
+import { AuthenticationService } from '../../services/authentication.service';
+import { Observable } from 'rxjs/Observable';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-app-config',
@@ -12,10 +15,13 @@ export class AppConfigComponent implements OnInit {
   loading = false;
   error = '';
   success = false;
+  updating = false;
+  updated = false;
 
   appConfigForm: FormGroup;
   constructor(private fb: FormBuilder,
-              private daqueryService: DaqueryService) { 
+              private daqueryService: DaqueryService,
+              private authenticationService: AuthenticationService) { 
     this.createForm();
     this.getConfig();
   }
@@ -77,5 +83,37 @@ export class AppConfigComponent implements OnInit {
                        }, err => {
                           this.loading = false;
                        });
+  }
+
+  systemUpdate(){
+    if(confirm("Are you sure to update daquery?")){
+      this.updating = true;
+      this.daqueryService.systemUpdate()
+                         .subscribe(res => {
+                           console.log("get version.");
+                           let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
+                             // // get version every 5 sec 
+                             this.daqueryService.checkServer()
+                                                .subscribe(res => {
+                                                  this.updated = true;
+                                                  subscription.unsubscribe();
+                                                }, error => {
+                                                  console.log("error");
+                                                  console.log(error);
+                                                  //subscription.unsubscribe();
+                                                }, () => {
+                                                  console.log("finally");
+                                                  //subscription.unsubscribe();
+                                                });
+                            })
+                         }, err => {
+                           console.log("error.")
+                           this.updating = false;
+                         });
+    }
+  }
+
+  OK(){
+    this.authenticationService.logout();
   }
 }
