@@ -253,6 +253,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			else
 			{
 				DeIdTag tag = new DeIdTag();
+				tag.setPhi(true);
 				parentElement = setParentChild(parentElement, tag);
 			}
 		}
@@ -267,7 +268,10 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 					addWarning("DEID Tag is not parsable: " + node.self.getText());
 				}
 				else
+				{
 					((DeIdTag) parentElement).setId(isId);
+					((DeIdTag) parentElement).setPhi(isId);
+				}
 			}
 		}
 		

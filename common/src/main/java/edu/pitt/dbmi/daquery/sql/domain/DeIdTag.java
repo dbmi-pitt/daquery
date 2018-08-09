@@ -4,7 +4,7 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 public class DeIdTag extends AbstractElement implements SQLElement
 {
-	private boolean phi = false;
+	private boolean phi = true;
 	private boolean isIdField = false;
 	private String idName = null;
 	private boolean obfuscate = false;
