@@ -95,6 +95,11 @@ DAQUERY_HOME="/home/devuser/daquery_docker_data"
 # to ensure the creation of a unique Derby database.  
 CONTAINER_DAQUERY_HOME="/localdata/daquery_data"
 
+if [ -e $DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT ]; then
+    echo Removing existing database $DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT
+    sudo rm -rf $DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT
+fi
+
 # CONTAINER_NAME is the docker name for this Daquery container.  This name must
 # be unique if running multiple Daquery sites (ex: daquery-testsite1, daquery-testsite2)
 CONTAINER_NAME="daquery-testsite-$TOMCAT_REDIRECT_PORT"
