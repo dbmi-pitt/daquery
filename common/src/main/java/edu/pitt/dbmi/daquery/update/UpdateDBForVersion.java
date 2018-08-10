@@ -44,11 +44,6 @@ public class UpdateDBForVersion
 		  return fs;
 	  }
 
-	public static void main (String[] args) throws Exception
-	{
-		//updateDB();
-		System.out.println(getMaxUpdateVersion());
-	}
 	public static float getMaxUpdateVersion() throws IOException
 	{
 		List<UpdateInfo> updates = getDBUpdateClasses();

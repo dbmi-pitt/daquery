@@ -79,6 +79,10 @@ public class DataModel extends DaqueryObject implements Serializable
 	@Column(name = "DATA_EXPORT_CONF")
 	private String dataExportConf;
 	
+	@Expose
+	@Column(name = "REVISION")
+	private Long revision;
+	
 	public DataModel(){}
 	
 	public DataModel(boolean createUUID)
@@ -223,6 +227,9 @@ public class DataModel extends DaqueryObject implements Serializable
 	public String getDataExportConf() { return this.dataExportConf; }
 	public void setDataExportConf(String dataExportConf) { this.dataExportConf = dataExportConf; }
 
+	public Long getRevision(){return(revision);}
+	public void setRevision(Long rev){revision = rev;}
+	
 	@Transient
 	public DataSource getDataSource(SourceType type)
 	{
