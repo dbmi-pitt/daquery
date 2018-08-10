@@ -3,7 +3,12 @@ package edu.pitt.dbmi.daquery.update.db;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -27,10 +32,38 @@ public class DBUpdate151 implements DBUpdater {
 	}
 	@Override
 	public void updateData(Connection conn) throws Exception {
-		Long id = importModel();
+		
+		//create a list of existing network->data model->datasources
 		Statement s = conn.createStatement();
-		s.executeUpdate("update network set data_model_id=" + id.toString());
-		s.executeUpdate("update data_source set model_id=" + id.toString());
+		ResultSet nets = s.executeQuery("select net.network_id, ds.ds_id from network net left join data_source ds on net.data_model_id = ds.model_id");
+		Hashtable<String, List<Long>> netsAndSources = new Hashtable<String, List<Long>>();
+		while(nets.next())
+		{
+			String netId = nets.getString(1);
+			Long dsId = nets.getLong(2);
+			if(! netsAndSources.containsKey(netId))
+				netsAndSources.put(netId, new ArrayList<Long>());
+			if(dsId == null) dsId = new Long(-1);
+			netsAndSources.get(netId).add(dsId);
+		}
+		
+		//delete the old data models
+		s.executeUpdate("delete from data_model");
+		
+		//for each network, replace the datamodel
+		for(String netId : netsAndSources.keySet())
+		{
+			DataModel dm = importModel();
+			s.executeUpdate("update network set data_model_id=" + dm.getId() + " where network_id = '" + netId + "'");						
+			List<Long> dsIds = netsAndSources.get(netId);
+			for(Long dsId : dsIds)
+			{
+				if(dsId == null || dsId.longValue() == -1l)
+					s.executeUpdate("update data_source set model_id=null where ds_id = " + dsId);
+				else
+					s.executeUpdate("update data_source set model_id=" + dm.getId() + " where ds_id = " + dsId);				
+			}
+		}
 		s.close(); 
 	}
 	
@@ -39,10 +72,11 @@ public class DBUpdate151 implements DBUpdater {
 		//nothing to do on central for this update
 	}
 	
-	private Long importModel() throws IOException, DaqueryException
+	private DataModel importModel() throws IOException, DaqueryException
 	{
 		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-3.1.json");
 		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
+		dm.setRevision(1l);
 		for(DataAttribute da : dm.getAttributes())
 			da.setDataModel(dm);
 		//dm.setId(null);
@@ -53,7 +87,7 @@ public class DBUpdate151 implements DBUpdater {
 			Transaction t = sess.beginTransaction();
 			sess.save(dm);
 			t.commit();
-			return(dm.getId());
+			return(dm);
 		}
 		catch(Throwable tr)
 		{
