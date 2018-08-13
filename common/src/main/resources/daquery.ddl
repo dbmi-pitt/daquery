@@ -24,7 +24,8 @@ CREATE TABLE DATA_MODEL
    DATA_MODEL_ID varchar(50),
    NAME varchar(100),
    DESCRIPTION varchar(2048),
-   DATA_EXPORT_CONF long varchar
+   DATA_EXPORT_CONF long varchar,
+   REVISION bigint
 );
 
 CREATE TABLE "APP"."NOTIFICATION"
