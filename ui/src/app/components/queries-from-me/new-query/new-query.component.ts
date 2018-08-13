@@ -25,6 +25,11 @@ export class NewQueryComponent implements OnInit {
   editing: boolean = false;
   error: any;
 
+  sqlChecked = false;
+  ansiSqlAnalyzerResponse: any;
+  oracleSqlAnalyzerResponse: any;
+  sqlServerSqlAnalyzerResponse: any;
+
   sqlDialect = {
     ansi: true,
     oracle: false,
@@ -106,19 +111,27 @@ export class NewQueryComponent implements OnInit {
 
   ngOnInit() {
     this.createForm(this.editingInquiry);
+    this.networkService.getNetworks()
+                       .subscribe(networks => {
+                         this.networks = networks;
+                       });
   }
 
   onSave() {
-    if(this.editingInquiry) {
-      this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
-                         .subscribe(data => {
-                           this.requestSent.emit(true);
-                         });
+    if(!this.sqlChecked){
+     this.sqlCheck();
     } else {
-      this.requestService.saveInquires(this.inquiryForm.value)
-                        .subscribe(data => {
-                          this.requestSent.emit(true);
-                        });
+      if(this.editingInquiry) {
+        this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
+                           .subscribe(data => {
+                             this.requestSent.emit(true);
+                           });
+      } else {
+        this.requestService.saveInquires(this.inquiryForm.value)
+                          .subscribe(data => {
+                            this.requestSent.emit(true);
+                          });
+      }
     }
   }
 
@@ -139,32 +152,84 @@ export class NewQueryComponent implements OnInit {
     }
     //this.showNetworkSitePanel = !this.showNetworkSitePanel;
     if(this.inquiryForm.valid){
-      $('#myRequestModal').modal('show');
-      this.networkService.getNetworks()
-                       .subscribe(networks => {
-                         this.networks = networks;
-                         if(this.networks && this.networks.length === 1){
-                            let network = this.networks[0];
-                            this.authenticationService.renewjwt(network.networkId);
-                            this.siteService.getSites(network)
-                                            .subscribe(sites => {
-                                              const siteFGs = sites.sort(function(a,b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); })
-                                                                   .map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
-                                              const siteFormArray = this.fb.array(siteFGs);
-                                              this.inquiryForm.setControl('sitesToQuery', siteFormArray);
-                                            }, error => {
-                                              //$('#myRequestModal').modal('hide');
-                                              this.error = error;
-                                            });
-                          } else {
-                            this.inquiryForm.get('inquiryName').markAsTouched();
-                          }
-                        }, error => {
-                          this.error = error;
-                        });
+      if(!this.sqlChecked){
+        this.sqlCheck();
+      } else {
+        $('#myRequestModal').modal('show');
+        this.networkService.getNetworks()
+                         .subscribe(networks => {
+                           this.networks = networks;
+                           if(this.networks && this.networks.length === 1){
+                              let network = this.networks[0];
+                              this.authenticationService.renewjwt(network.networkId);
+                              this.siteService.getSites(network)
+                                              .subscribe(sites => {
+                                                const siteFGs = sites.sort(function(a,b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); })
+                                                                     .map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
+                                                const siteFormArray = this.fb.array(siteFGs);
+                                                this.inquiryForm.setControl('sitesToQuery', siteFormArray);
+                                              }, error => {
+                                                //$('#myRequestModal').modal('hide');
+                                                this.error = error;
+                                              });
+                            } else {
+                              this.inquiryForm.get('inquiryName').markAsTouched();
+                            }
+                          }, error => {
+                            this.error = error;
+                          });
+      }
     } else {
       this.inquiryForm.get('inquiryName').markAsTouched();
     }
+  }
+
+  sqlCheck(){
+    if(this.networks && this.networks.length === 1){
+         let ansiChecked: boolean;
+         let oracleChecked: boolean;
+         let sqlSeverChecked: boolean;
+         if(this.inquiryForm.get('query').get('ansi').value != ""){
+            this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('ansi').value})
+                               .subscribe(res => {
+                                  this.ansiSqlAnalyzerResponse = res;
+                                  ansiChecked = true;
+                                  let oChecked = oracleChecked || true;
+                                  let sChecked = sqlSeverChecked || true;
+                                  if (ansiChecked && oChecked && sChecked) this.sqlChecked = true;
+                               }, err => {
+                                  console.log(err);
+                               });
+         }
+         if(this.inquiryForm.get('query').get('oracle').value != ""){
+            this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('oracle').value})
+                               .subscribe(res => {
+                                  this.oracleSqlAnalyzerResponse = res;
+                                  oracleChecked = true;
+                                  let aChecked = ansiChecked || true;
+                                  let sChecked = sqlSeverChecked || true;
+                                  if (aChecked && oracleChecked && sChecked) this.sqlChecked = true;
+                               }, err => {
+                                  console.log(err);
+                               });
+         }
+         if(this.inquiryForm.get('query').get('sqlServer').value != ""){
+            this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('sqlServer').value})
+                               .subscribe(res => {
+                                  this.sqlServerSqlAnalyzerResponse = res;
+                                  sqlSeverChecked = true;
+                                  let aChecked = ansiChecked || true;
+                                  let oChecked = oracleChecked || true;
+                                  if (aChecked && oChecked && sqlSeverChecked) this.sqlChecked = true;
+                               }, err => {
+                                  console.log(err);
+                               });
+         }
+       }
+  }
+
+  onQueryEdit() {
+    this.sqlChecked = false;
   }
 
   onCancel() {
@@ -219,26 +284,8 @@ export class NewQueryComponent implements OnInit {
         });
 
         return ret;
-
-        // return this.requestService.sendRequest(request)
-        //                           .map(data => {
-        //                             responses.push(data);
-        //                           })
-        //                           .catch(error => {
-        //                             responses.push(error);
-        //                             return Observable.throw(error);
-        //                           })
       }
     });
-
-    // Observable.forkJoin(aa).subscribe(() => {
-    //   // $('#myRequestModal').modal('hide');
-    //   // this.requestSent.emit(true);
-    // },
-    // error => {
-    //   // $('#myRequestModal').modal('hide');
-    //   // this.requestSent.emit(true);
-    // });
 
     $('#myRequestModal').modal('hide');
     this.requestSent.emit(true);
