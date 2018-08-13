@@ -1,0 +1,1 @@
+Many of the scripts in this directory require root ssh passwordless login via a shared key to several servers.  To do this obtain the public and private keys (id_rsa and id_rsa.pub) used for this network and place in your ~/.ssh/ directory
