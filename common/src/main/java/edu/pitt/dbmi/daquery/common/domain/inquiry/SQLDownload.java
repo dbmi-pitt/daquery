@@ -74,7 +74,7 @@ public class SQLDownload extends SQLQuery implements Download
 		}
 		
 		SQLDialect dialect = ((SQLDataSource) model.getDataSource(SourceType.SQL)).getDialectEnum();
-		String lclCode = getCode(dialect);
+		String lclCode = getRunnableCode(dialect);
 		
 		Connection conn = null;
 		Statement st = null;
