@@ -10,6 +10,19 @@
             <form #f [formGroup]="inquiryForm">
               <div *ngIf="!showNetworkSitePanel">
                 <div class="form-group">
+                  <div class="form-group  has-feedback" [ngClass]="{'has-error': network.invalid && (network.dirty || network.touched), 'has-success': network.valid && (network.dirty || network.touched) }">
+                    <label for="network">Network</label>
+                    <select *ngIf="networks?.length > 1" formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
+                      <option value="">-Select-</option>
+                      <option *ngFor="let network of networks" value="{{network.networkId}}">
+                        {{ network.name }}
+                      </option>
+                    </select>
+                    <div class="help-block" *ngIf="network.invalid && (network.dirty || network.touched)">Please select a network</div>
+                    <p *ngIf="networks?.length == 1">{{ networks[0]?.name }}</p>
+                  </div>
+                </div>
+                <div class="form-group">
                   <label for="dataType">Data Type</label>
                   <div class="radio">
                     <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="AGGREGATE">Aggregate</label>
@@ -74,27 +87,53 @@
                     <div class="tab-content" formGroupName="query">
                       <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'ansi'}" id="tab_ansi" *ngIf="sqlDialect.ansi">
                         <div class="form-group has-feedback" [ngClass]="{'has-error': ansi.invalid && (ansi.dirty || ansi.touched), 'has-success': ansi.valid && (ansi.dirty || ansi.touched) }">
-                          <textarea class="form-control" rows="5" id="sql_query" formControlName="ansi" placeholder="enter ANSI SQL query"></textarea>
+                          <textarea class="form-control" rows="5" id="sql_query" formControlName="ansi" placeholder="enter ANSI SQL query" (input)="onQueryEdit()"></textarea>
                           <div class="help-block" *ngIf="ansi.invalid && (ansi.dirty || ansi.touched)">Please enter a ansi sql query</div>
                         </div>
                       </div>
                       <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'oracle'}" id="tab_oracle" *ngIf="sqlDialect.oracle">
                         <div class="form-group has-feedback" [ngClass]="{'has-error': oracle.invalid && (oracle.dirty || oracle.touched), 'has-success': oracle.valid && (oracle.dirty || oracle.touched) }">
-                          <textarea class="form-control" rows="5" id="sql_query" formControlName="oracle" placeholder="enter Oracle SQL query"></textarea>
+                          <textarea class="form-control" rows="5" id="sql_query" formControlName="oracle" placeholder="enter Oracle SQL query" (input)="onQueryEdit()"></textarea>
                           <div class="help-block" *ngIf="oracle.invalid && (oracle.dirty || oracle.touched)">Please enter a oracle sql query</div>
                         </div>
                       </div>
                       <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'sql_server'}" id="tab_sqlServer" *ngIf="sqlDialect.sqlServer">
                         <div class="form-group has-feedback" [ngClass]="{'has-error': sqlServer.invalid && (sqlServer.dirty || sqlServer.touched), 'has-success': sqlServer.valid && (sqlServer.dirty || sqlServer.touched) }">
-                          <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlServer" placeholder="enter Sql Server SQL"></textarea>
+                          <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlServer" placeholder="enter Sql Server SQL" (input)="onQueryEdit()"></textarea>
                           <div class="help-block" *ngIf="sqlServer.invalid && (sqlServer.dirty || sqlServer.touched)">Please enter a sql server sql query</div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <button class="btn btn-primary" (click)="onSave()">Save</button>
-                <button class="btn btn-success" (click)="onRequest()">Save and Request</button>
+                <div *ngIf="ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected" class="alert alert-danger alert-dismissible">
+                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                  <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                  This query was rejected.
+                </div>
+                <div *ngIf="ansiSqlAnalyzerResponse?.warnings || oracleSqlAnalyzerResponse?.warnings || sqlServerSqlAnalyzerResponse?.warnings" class="alert alert-warning alert-dismissible">
+                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                  <h4><i class="icon fa fa-warning"></i> Alert!</h4>
+                  <p>This query has the following warning(s):</p>
+                  <ul>
+                    <li *ngFor="let msg of ansiSqlAnalyzerResponse?.warningMessages">
+                      {{ msg }}
+                    </li>
+                    <li *ngFor="let msg of oracleSqlAnalyzerResponse?.warningMessages">
+                      {{ msg }}
+                    </li>
+                    <li *ngFor="let msg of sqlServerSqlAnalyzerResponse?.warningMessages">
+                      {{ msg }}
+                    </li>
+                  </ul>
+                  <p *ngIf="ansiSqlAnalyzerResponse?.deidUnresolved || oracleSqlAnalyzerResponse?.deidUnresolved || sqlServerSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
+                </div>
+                <button class="btn btn-primary" (click)="onSave()">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
+                                                                      (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
+                                                                      (sqlServerSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.warnings)) ? "Save Anyway" : "Save" }}</button>
+                <button class="btn btn-success" (click)="onRequest()" [disabled]="ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
+                                                                      (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
+                                                                      (sqlServerSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.warnings)) ? "Save and Request Anyway" : "Save and Request" }}</button>
                 <button class="btn btn-link" (click)="onCancel()">Cancel</button>
               </div>
               <!-- <div *ngIf="showNetworkSitePanel">
@@ -135,35 +174,35 @@
                       {{ error?.error?.displayMessage }}
                     </div>
                     <div *ngIf="networks" class="modal-body">
-                        <div class="form-group  has-feedback" [ngClass]="{'has-error': network.invalid && (network.dirty || network.touched), 'has-success': network.valid && (network.dirty || network.touched) }">
-                            <label for="network">Network</label>
-                            <select *ngIf="networks?.length > 1" formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
-                              <option value="">-Select-</option>
-                              <option *ngFor="let network of networks" value="{{network.networkId}}">
-                                {{ network.name }}
-                              </option>
-                            </select>
-                            <div class="help-block" *ngIf="network.invalid && (network.dirty || network.touched)">Please select a network</div>
-                            <p *ngIf="networks?.length == 1">{{ networks[0]?.name }}</p>
-                          </div>
-                          <div *ngIf="inquiryForm.controls.network.dirty || networks?.length == 1" formArrayName="sitesToQuery" class="well well-lg">
-                            <div class="form-group">
-                              <label for="sites">Site to Query</label>
-                              <div *ngIf="inquiryForm.controls.sitesToQuery.controls.length > 0" class="checkbox">
-                                <ul class="list-unstyled">
-                                  <li *ngFor="let site of inquiryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
-                                    <label class="checkbox-inline"><input type="checkbox" value="{{site.controls.siteId._value}}" formControlName="check">{{site.controls.name._value}}</label>
-                                  </li>
-                                </ul>
-                              </div>
-                              <div *ngIf="inquiryForm.controls.sitesToQuery.controls.length <= 0" class="row">
-                                <div class="col-md-4 col-md-offset-4 text-center">
-                                  <span>Loading...</span><br />
-                                  <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
-                                </div>
+                       <!--  <div class="form-group  has-feedback" [ngClass]="{'has-error': network.invalid && (network.dirty || network.touched), 'has-success': network.valid && (network.dirty || network.touched) }">
+                          <label for="network">Network</label>
+                          <select *ngIf="networks?.length > 1" formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
+                            <option value="">-Select-</option>
+                            <option *ngFor="let network of networks" value="{{network.networkId}}">
+                              {{ network.name }}
+                            </option>
+                          </select>
+                          <div class="help-block" *ngIf="network.invalid && (network.dirty || network.touched)">Please select a network</div>
+                          <p *ngIf="networks?.length == 1">{{ networks[0]?.name }}</p>
+                        </div> -->
+                        <div *ngIf="inquiryForm.controls.network.dirty || networks?.length == 1" formArrayName="sitesToQuery" class="well well-lg">
+                          <div class="form-group">
+                            <label for="sites">Site to Query</label>
+                            <div *ngIf="inquiryForm.controls.sitesToQuery.controls.length > 0" class="checkbox">
+                              <ul class="list-unstyled">
+                                <li *ngFor="let site of inquiryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
+                                  <label class="checkbox-inline"><input type="checkbox" value="{{site.controls.siteId._value}}" formControlName="check">{{site.controls.name._value}}</label>
+                                </li>
+                              </ul>
+                            </div>
+                            <div *ngIf="inquiryForm.controls.sitesToQuery.controls.length <= 0" class="row">
+                              <div class="col-md-4 col-md-offset-4 text-center">
+                                <span>Loading...</span><br />
+                                <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
                               </div>
                             </div>
                           </div>
+                        </div>
                     </div>
                     <div *ngIf="!networks" class="modal-body">
                       <div class="row">
