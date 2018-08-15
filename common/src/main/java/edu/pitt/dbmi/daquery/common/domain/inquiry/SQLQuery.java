@@ -86,6 +86,17 @@ public class SQLQuery extends Inquiry
 		code.setQuery(this);
 	}
 	
+	
+	//version of the code with any de-id tags removed
+	@Transient
+	public String getRunnableCode(SQLDialect dialect)
+	{
+		String code = getCode(dialect);
+		//remove any deid tags from the SQL
+		if(! StringHelper.isEmpty(code)) code = code.replaceAll("(?i)<\\s*identifiable.*?>", "");
+		return(code);
+	}
+	
 	@Transient
 	public String getCode(SQLDialect dialect)
 	{
@@ -114,8 +125,6 @@ public class SQLQuery extends Inquiry
 		
 		//if a matching dialect isn't found use the ANSI code
 		if(rVal == null) rVal = ansiCode;
-		//remove any deid tags from the SQL
-		if(! StringHelper.isEmpty(rVal)) rVal = rVal.replaceAll("(?i)<\\s*identifiable.*?>", "");
 		return(rVal);
 	}
 	
@@ -133,7 +142,7 @@ public class SQLQuery extends Inquiry
 			else
 			{
 				dialect = ((SQLDataSource) model.getDataSource(SourceType.SQL)).getDialectEnum();
-				lclCode = getCode(dialect);
+				lclCode = getRunnableCode(dialect);
 				if(StringHelper.isEmpty(lclCode)) errorMessage = "No SQL code found to execute on db type: " + dialect;
 			}
 			
