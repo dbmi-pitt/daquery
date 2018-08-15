@@ -37,6 +37,8 @@ import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.EmailContents;
+import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
+import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
@@ -96,6 +98,11 @@ public class RequestEndpoint extends AbstractEndpoint {
             dao.openCurrentSession();
             List requests = dao.list(directions);
             dao.closeCurrentSession();
+            
+            for(Object r : requests){
+            	DaqueryRequest request = (DaqueryRequest)r;
+            	request.setCode(((SQLQuery)request.getInquiry()).getCode(((SQLDataSource)request.getNetwork().getDataModel().getDataSource(SourceType.SQL)).getDialectEnum()));
+            }
             
             String jsonString = toJsonArray(requests);
             return Response.ok(200).entity(jsonString).build();

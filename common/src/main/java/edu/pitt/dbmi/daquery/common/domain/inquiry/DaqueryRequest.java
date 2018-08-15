@@ -79,6 +79,10 @@ public class DaqueryRequest extends DaqueryObject
     @Expose
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="request")
 	private Set<DaqueryResponse> responses;
+    
+    @Expose
+    @Transient
+    private String code;
 		
 	public DaqueryRequest() {
 		
@@ -149,6 +153,9 @@ public class DaqueryRequest extends DaqueryObject
 	
 	public Network getNetwork(){return(network);}
 	public void setNetwork(Network net){network = net;}
+	
+	public String getCode() { return code; }
+	public void setCode(String code){ this.code = code; }
 	
 	@Transient
 	public String getFilePrefix()
