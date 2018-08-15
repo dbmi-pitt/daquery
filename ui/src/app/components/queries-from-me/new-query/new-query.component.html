@@ -108,21 +108,24 @@
                 </div>
                 <div *ngIf="ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected" class="alert alert-danger alert-dismissible">
                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                  <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                  <h4><i class="icon fa fa-ban"></i> Error!</h4>
                   This query was rejected.
                 </div>
                 <div *ngIf="ansiSqlAnalyzerResponse?.warnings || oracleSqlAnalyzerResponse?.warnings || sqlServerSqlAnalyzerResponse?.warnings" class="alert alert-warning alert-dismissible">
                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                  <h4><i class="icon fa fa-warning"></i> Alert!</h4>
+                  <h4><i class="icon fa fa-warning"></i> Warning!</h4>
                   <p>This query has the following warning(s):</p>
                   <ul>
                     <li *ngFor="let msg of ansiSqlAnalyzerResponse?.warningMessages">
+                      <b> ANSI </b><br />
                       {{ msg }}
                     </li>
                     <li *ngFor="let msg of oracleSqlAnalyzerResponse?.warningMessages">
+                      <b> Oracle </b><br />
                       {{ msg }}
                     </li>
                     <li *ngFor="let msg of sqlServerSqlAnalyzerResponse?.warningMessages">
+                      <b> SQL Server > </b><br/ >
                       {{ msg }}
                     </li>
                   </ul>
