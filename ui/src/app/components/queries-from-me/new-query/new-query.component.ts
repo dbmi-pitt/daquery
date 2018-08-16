@@ -6,6 +6,8 @@ import { AuthenticationService } from '../../../services/authentication.service'
 import { RequestService } from '../../../services/request.service';
 import { Router } from '@angular/router';
 import { UserService } from 'app/services/user.service';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/forkJoin';
 
 declare var $:any;
 
@@ -119,7 +121,7 @@ export class NewQueryComponent implements OnInit {
 
   onSave() {
     if(!this.sqlChecked){
-     this.sqlCheck();
+     this.sqlCheck('save');
     } else {
       if(this.editingInquiry) {
         this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
@@ -141,20 +143,20 @@ export class NewQueryComponent implements OnInit {
         this.inquiryForm.get('query').get('sqlServer').value === ""){
       this.inquiryForm.get('query').setErrors({atLeastOne: true});
     }
-    if(this.inquiryForm.valid){
-      if(this.editingInquiry) {
-        this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
-                          .subscribe();
-      } else {
-        this.requestService.saveInquires(this.inquiryForm.value)
-                          .subscribe();
-      }
-    }
     //this.showNetworkSitePanel = !this.showNetworkSitePanel;
     if(this.inquiryForm.valid){
       if(!this.sqlChecked){
-        this.sqlCheck();
+        this.sqlCheck('request');
       } else {
+        if(this.inquiryForm.valid){
+          if(this.editingInquiry) {
+            this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
+                              .subscribe();
+          } else {
+            this.requestService.saveInquires(this.inquiryForm.value)
+                              .subscribe();
+          }
+        }
         $('#myRequestModal').modal('show');
         this.networkService.getNetworks()
                          .subscribe(networks => {
@@ -184,48 +186,36 @@ export class NewQueryComponent implements OnInit {
     }
   }
 
-  sqlCheck(){
+  sqlCheck(action: String){
     if(this.networks && this.networks.length === 1){
-         let ansiChecked: boolean;
-         let oracleChecked: boolean;
-         let sqlSeverChecked: boolean;
-         if(this.inquiryForm.get('query').get('ansi').value != ""){
-            this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('ansi').value})
-                               .subscribe(res => {
-                                  this.ansiSqlAnalyzerResponse = res;
-                                  ansiChecked = true;
-                                  let oChecked = oracleChecked || true;
-                                  let sChecked = sqlSeverChecked || true;
-                                  if (ansiChecked && oChecked && sChecked) this.sqlChecked = true;
-                               }, err => {
-                                  console.log(err);
-                               });
-         }
-         if(this.inquiryForm.get('query').get('oracle').value != ""){
-            this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('oracle').value})
-                               .subscribe(res => {
-                                  this.oracleSqlAnalyzerResponse = res;
-                                  oracleChecked = true;
-                                  let aChecked = ansiChecked || true;
-                                  let sChecked = sqlSeverChecked || true;
-                                  if (aChecked && oracleChecked && sChecked) this.sqlChecked = true;
-                               }, err => {
-                                  console.log(err);
-                               });
-         }
-         if(this.inquiryForm.get('query').get('sqlServer').value != ""){
-            this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('sqlServer').value})
-                               .subscribe(res => {
-                                  this.sqlServerSqlAnalyzerResponse = res;
-                                  sqlSeverChecked = true;
-                                  let aChecked = ansiChecked || true;
-                                  let oChecked = oracleChecked || true;
-                                  if (aChecked && oChecked && sqlSeverChecked) this.sqlChecked = true;
-                               }, err => {
-                                  console.log(err);
-                               });
-         }
-       }
+      let checkSQLs = [];
+
+      if(this.inquiryForm.get('query').get('ansi').value != ""){
+       checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('ansi').value}));
+      }
+      if(this.inquiryForm.get('query').get('oracle').value != ""){
+        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('oracle').value}));
+      }
+      if(this.inquiryForm.get('query').get('sqlServer').value != ""){
+        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('sqlServer').value}));
+      }
+      Observable.forkJoin(...checkSQLs)
+                .subscribe(res => {
+                  this.ansiSqlAnalyzerResponse = res[0];
+                  this.oracleSqlAnalyzerResponse = res[1];
+                  this.sqlServerSqlAnalyzerResponse = res[2];
+                  this.sqlChecked = true;
+
+                  if((this.ansiSqlAnalyzerResponse === undefined || (!this.ansiSqlAnalyzerResponse.rejected && !this.ansiSqlAnalyzerResponse.warnings)) &&
+                     (this.oracleSqlAnalyzerResponse === undefined || (!this.oracleSqlAnalyzerResponse.rejected && !this.oracleSqlAnalyzerResponse.warnings)) &&
+                     (this.sqlServerSqlAnalyzerResponse === undefined || (!this.sqlServerSqlAnalyzerResponse.rejected && !this.sqlServerSqlAnalyzerResponse.warnings)))
+                    if(action === 'save')
+                      this.onSave();
+                    else if(action === 'request')
+                      this.onRequest();
+                });
+
+    }
   }
 
   onQueryEdit() {

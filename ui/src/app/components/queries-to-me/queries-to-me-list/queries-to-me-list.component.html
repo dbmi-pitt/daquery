@@ -34,7 +34,7 @@
             </div>
           </div>
           <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
-            <button *ngIf="showApproveDenyBtn" class="btn btn-success" (click)="approveRequest()" [disabled]="sqlAnalyzerResponse.rejected">Approve</button>
+            <button *ngIf="showApproveDenyBtn" class="btn btn-success" (click)="approveRequest()" [disabled]="sqlAnalyzerResponse?.rejected">Approve</button>
             <button *ngIf="showApproveDenyBtn" class="btn btn-danger" (click)="denyRequest()">Deny</button>
             <button *ngIf="!showApproveDenyBtn" class="btn btn-block btn-default disabled">To respond to this request the STEWARD role is required</button>
           </div>

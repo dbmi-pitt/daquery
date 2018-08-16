@@ -66,7 +66,10 @@ public class TableExporter extends AbstractExporter implements DataExporter {
 	
 	@Override
 	public boolean hasNextExport() {
-		return true;
+		if(currentFile < nFiles)
+			return(true);
+		else
+			return(false);
 	}
 
 	@Override
