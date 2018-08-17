@@ -53,7 +53,7 @@ public class DBUpdate151 implements DBUpdater {
 		//for each network, replace the datamodel
 		for(String netId : netsAndSources.keySet())
 		{
-			DataModel dm = importModel();
+			DataModel dm = importCDM31Model(true);
 			s.executeUpdate("update network set data_model_id=" + dm.getId() + " where network_id = '" + netId + "'");						
 			List<Long> dsIds = netsAndSources.get(netId);
 			for(Long dsId : dsIds)
@@ -72,7 +72,7 @@ public class DBUpdate151 implements DBUpdater {
 		//nothing to do on central for this update
 	}
 	
-	private DataModel importModel() throws IOException, DaqueryException
+	public static DataModel importCDM31Model(boolean saveModel) throws IOException, DaqueryException
 	{
 		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-3.1.json");
 		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
@@ -80,23 +80,28 @@ public class DBUpdate151 implements DBUpdater {
 		for(DataAttribute da : dm.getAttributes())
 			da.setDataModel(dm);
 		//dm.setId(null);
-		Session sess = null;
-		try
+		if(saveModel)
 		{
-			sess = HibernateConfiguration.openSession();
-			Transaction t = sess.beginTransaction();
-			sess.save(dm);
-			t.commit();
+			Session sess = null;
+			try
+			{
+				sess = HibernateConfiguration.openSession();
+				Transaction t = sess.beginTransaction();
+				sess.save(dm);
+				t.commit();
+				return(dm);
+			}
+			catch(Throwable tr)
+			{
+				throw new DaqueryException("Error while saving data model.", tr);
+			}
+			finally
+			{
+				if(sess != null) sess.close();
+			}
+		}
+		else
 			return(dm);
-		}
-		catch(Throwable tr)
-		{
-			throw new DaqueryException("Error while saving data model.", tr);
-		}
-		finally
-		{
-			if(sess != null) sess.close();
-		}		
 		
 	}	
 }
