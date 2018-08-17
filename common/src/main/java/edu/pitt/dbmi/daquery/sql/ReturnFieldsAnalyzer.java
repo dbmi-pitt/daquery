@@ -135,15 +135,17 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		super(sql);
 		this.model = model;
 		if(!this.isRejected())
+		{
 			analyzeAggregateTree();
 		
-		for(ReturnColumn rc : getReturnColumns())
-		{
-			if(rc.multipleMatchingReferences)
-				this.addWarning("Unable to resolve PHI information for " + rc.column.getName() + " because it is ambiguously defined.");
-			else if(rc.deidTag == null)
-				this.addWarning("PHI information about returned column " + rc.column.getName() + " cannot be resolved.");
-			
+			for(ReturnColumn rc : getReturnColumns())
+			{
+				if(rc.multipleMatchingReferences)
+					this.addWarning("Unable to resolve PHI information for " + rc.column.getName() + " because it is ambiguously defined.");
+				else if(rc.deidTag == null)
+					this.addWarning("PHI information about returned column " + rc.column.getName() + " cannot be resolved.");
+				
+			}
 		}
 	}
 	
