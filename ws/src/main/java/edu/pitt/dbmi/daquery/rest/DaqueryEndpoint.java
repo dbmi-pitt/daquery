@@ -577,6 +577,20 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			}
 			request.setRequestSite(requestSite);
 
+			if(request.getRequesterSite() != null && (! StringHelper.isEmpty(request.getRequesterSite().getSiteId())))
+			{
+				String requesterSiteId = request.getRequesterSite().getSiteId();
+				Site requesterSite = SiteDAO.getSiteByNameOrId(requesterSiteId);
+				if(requesterSite == null)
+				{
+					String msg = "The requester site is invalid or cannot be found";
+					DaqueryResponse eResp = assembleErrorResponse(msg, null);
+					return(ResponseHelper.getErrorResponse(403, msg, "The querying site with id " + requesterSiteId + " is not configured to work with this site.", null, eResp));					
+				}
+				request.setRequesterSite(requesterSite);
+			}
+			
+			
 			Network net = NetworkDAO.getNetworkById(request.getNetwork().getNetworkId());
 			if(net == null)
 			{
@@ -1573,6 +1587,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setId(null);
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
+			//request.setRequesterSite(null);
+			//request.setRequestSite(null);
 			DaqueryRequestDAO.saveOrUpdate(request);
 			rVal = new DaqueryResponse(true);
 			rVal.setStatusEnum(ResponseStatus.PENDING);
