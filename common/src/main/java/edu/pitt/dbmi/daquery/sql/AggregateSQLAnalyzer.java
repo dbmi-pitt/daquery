@@ -63,6 +63,12 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 			if( resultCount > 1)
 				setRejection("Aggregate selects can only return a single result.  This SQL returns " + resultCount);
 
+			if(node.children.size() == 0)
+			{
+				setRejection("Invalid query, does not return an aggregate result.");
+				return;
+			}
+				
 			TreeNode firstCtxNode = node.children.get(0);
 			ParserRuleContext firstCtx = firstCtxNode.self;
 			ParserRuleContext columnExpr = null;
