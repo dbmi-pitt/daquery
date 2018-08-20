@@ -411,6 +411,7 @@ result_column
 
 deid_tag
  : '<' K_IDENTIFIABLE ident_prop?  '>'
+ | '<' K_NOTIDENTIFIABLE '>'
  ;
  
 ident_prop
@@ -613,6 +614,7 @@ keyword
  | K_NATURAL
  | K_NO
  | K_NOT
+ | K_NOTIDENTIFIABLE
  | K_NOTNULL
  | K_NULL
  | K_OF
@@ -893,6 +895,7 @@ K_MINUS : M I N U S;
 K_NATURAL : N A T U R A L;
 K_NO : N O;
 K_NOT : N O T;
+K_NOTIDENTIFIABLE : N O T I D E N T I F I A B L E;
 K_NOTNULL : N O T N U L L;
 K_NULL : N U L L;
 K_OF : O F;
