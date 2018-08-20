@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.common.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
@@ -141,9 +140,11 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			for(ReturnColumn rc : getReturnColumns())
 			{
 				if(rc.multipleMatchingReferences)
-					this.addWarning("Unable to resolve PHI information for " + rc.column.getName() + " because it is ambiguously defined.");
+					this.addWarning("Unable to resolve PHI information for " + rc.column.getDisplayName() + " because it is ambiguously defined.");
 				else if(rc.deidTag == null)
-					this.addWarning("PHI information about returned column " + rc.column.getName() + " cannot be resolved.");
+					this.addWarning("PHI information about returned column " + rc.column.getDisplayName() + " cannot be resolved.");
+				else if(! rc.deidTag.isPhi())
+					this.addWarning("Column " + rc.column.getDisplayName() + " is marked as not identifiable.");
 				
 			}
 		}
@@ -255,7 +256,11 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			else
 			{
 				DeIdTag tag = new DeIdTag();
-				tag.setPhi(true);
+				String fullText = node.self.getText();
+				if((! StringHelper.isEmpty(fullText)) && fullText.toUpperCase().contains("NOTIDENTIFIABLE") )
+					tag.setPhi(false);
+				else
+					tag.setPhi(true);
 				parentElement = setParentChild(parentElement, tag);
 			}
 		}

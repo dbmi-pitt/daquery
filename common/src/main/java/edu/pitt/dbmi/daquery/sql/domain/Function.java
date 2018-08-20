@@ -37,7 +37,10 @@ public class Function extends AbstractColumn implements SQLElement, Column
 		if(!StringHelper.isEmpty(alias))
 			rName = alias;
 		else if(!StringHelper.isEmpty(callDescriptor))
-			rName = callDescriptor;
+		{
+			
+			rName = callDescriptor.replaceAll("(?i)<\\s*n?o?t?identifiable.*?>", "");
+		}
 
 		return(rName);
 	}	
