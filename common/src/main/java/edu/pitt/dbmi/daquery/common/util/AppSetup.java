@@ -399,7 +399,7 @@ public class AppSetup
 		}
 		else if(tableCount != AppProperties.getCurrentTableCount())
 		{
-			log.log(Level.SEVERE, "The application database table count does not match the current model.");
+			log.log(Level.SEVERE, "The application database table count does not match the current model. Actual table count:" + tableCount + " vs configured count " + AppProperties.getCurrentTableCount());
 			return(AppSetup.DBSTATUS_INDETERMINATE);
 		}
 		Connection conn = null;
