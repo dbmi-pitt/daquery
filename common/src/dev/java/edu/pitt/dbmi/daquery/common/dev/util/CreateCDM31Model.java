@@ -30,14 +30,14 @@ public class CreateCDM31Model
 {
 	private static final String CDM_CONN_URL = "jdbc:oracle:thin:@dbmi-db-dev-02.dbmi.pitt.edu:1521:dbmi09";
 	private static final String CDM_SCHEMA_NAME = "pcori_etl_31";
-	private static final String CDM_PASSWORD = "dbmi17etl";
+	private static final String CDM_PASSWORD = "password";
 	
 	public static void main(String [] args) throws Exception
 	{
-		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
+		//AppProperties.setDevHomeDir("/home/devuser/daquery-data");
 		//AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
-		makeModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
-		dumpModelToJSON();
+		DataModel dm = createModel(CDM_CONN_URL, CDM_SCHEMA_NAME, CDM_PASSWORD, "CDM");
+		dumpModelToJSON(dm);
 		//System.out.println(importModel());
 	}
 
@@ -65,9 +65,9 @@ public class CreateCDM31Model
 		}		
 		
 	}	
-	public static void dumpModelToJSON() throws DaqueryException
+	public static void dumpModelToJSON(DataModel dm) throws DaqueryException
 	{
-		Session sess = null;
+/*		Session sess = null;
 		try
 		{
 			sess = HibernateConfiguration.openSession();
@@ -75,21 +75,23 @@ public class CreateCDM31Model
 			List<DataModel> models = q.list();
 			int i = 0;
 			for(DataModel dm : models)
-			{
-				FileWriter fw = new FileWriter(new File("/home/devuser/data-model" + dm.getName() + ".json" + "-" + (new Integer(++i)).toString()));
+			{ */
+		try
+		{
+				FileWriter fw = new FileWriter(new File("/home/devuser/data-model" + dm.getName() + ".json"));
 				fw.write(dm.toJson());
 				fw.close();
-			}
+/*			} */
 
 		}
 		catch(Throwable tr)
 		{
 			throw new DaqueryException("Error while saving model.", tr);
 		}
-		finally
+/*		finally
 		{
 			if(sess != null) sess.close();
-		}		
+		} */		
 	}
 	
 	public static DataModel makeModel(String cdmConnUrl, String cdmSchemaName, String cdmPassword, String modelName) throws DaqueryException
@@ -126,7 +128,7 @@ public class CreateCDM31Model
 			DataModel dm = new DataModel(true);
 			dm.setName("CDM-3.1");
 			dm.setDescription("PCORI Common Data Model Version 3.1");
-			DataExportConfig dec = dm.getExportConfig();
+			DataExportConfig dec = dm.getCDM31ExportConfigFromFile();
 			System.out.println(dec.getCasesPerFile());
 			SQLDataSource ds = new SQLDataSource();
 			ds.setName(modelName);
@@ -152,7 +154,7 @@ public class CreateCDM31Model
 					da.setPhi(true);
 					da.setDateField(true);
 				}
-				String fieldName = da.getFieldName().toLowerCase().trim();
+				String fieldName = da.getFieldName().toUpperCase().trim();
 				if(fieldName.equals("BIRTH_DATE"))
 				{
 					da.setPhi(true);

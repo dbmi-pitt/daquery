@@ -15,6 +15,8 @@ import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
+import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
@@ -26,9 +28,36 @@ public class DBUpdate151 implements DBUpdater {
 
 	public static void main(String [] args)
 	{
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-3.1.json");
 		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
-		System.out.println(dm);
+		Connection conn = null;
+		DBUpdate151 db151Updater = new DBUpdate151();
+		try
+		{
+			conn = ApplicationDBHelper.getConnection();
+			conn.setAutoCommit(false);
+			db151Updater.updateData(conn);
+			conn.commit();
+		}
+		catch(Throwable t)
+		{
+			t.printStackTrace(System.err);
+		}
+		finally
+		{
+			if(conn != null)
+			{
+				try{conn.close();}
+				catch(Throwable t)
+				{
+					System.err.println("Error closing connection, model could be updated...check..");
+					t.printStackTrace(System.err);
+					System.err.println("Error closing connection, model could be updated...check..");
+				}
+			}
+		}
+		
 	}
 	@Override
 	public void updateData(Connection conn) throws Exception {
