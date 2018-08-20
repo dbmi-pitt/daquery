@@ -68,7 +68,7 @@ export class NewQueryComponent implements OnInit {
       if(this.sqlDialect.ansi) this.lastAddedTab = "ansi";
 
       this.inquiryForm = this.fb.group({
-        network: '',
+        network: inquiry.network,
         sitesToQuery: this.fb.array([]),
         queryType: [inquiry.queryType.toUpperCase()],
         dataType:['SQL_QUERY'],
@@ -116,6 +116,9 @@ export class NewQueryComponent implements OnInit {
     this.networkService.getNetworks()
                        .subscribe(networks => {
                          this.networks = networks;
+                         if(networks.length === 1) {
+                           this.inquiryForm.get('network').setValue(networks[0].networkId)
+                         }
                        });
   }
 
@@ -187,7 +190,7 @@ export class NewQueryComponent implements OnInit {
   }
 
   sqlCheck(action: String){
-    if(this.networks && this.networks.length === 1){
+    if(this.inquiryForm.get('network').value != ''){
       let checkSQLs = [];
 
       if(this.inquiryForm.get('query').get('ansi').value != ""){
@@ -205,6 +208,13 @@ export class NewQueryComponent implements OnInit {
                   this.oracleSqlAnalyzerResponse = res[1];
                   this.sqlServerSqlAnalyzerResponse = res[2];
                   this.sqlChecked = true;
+                  if(this.ansiSqlAnalyzerResponse) this.inquiryForm.get('queryType').setValue(this.ansiSqlAnalyzerResponse.type);
+                  if(this.oracleSqlAnalyzerResponse) this.inquiryForm.get('queryType').setValue(this.oracleSqlAnalyzerResponse.type);
+                  if(this.sqlServerSqlAnalyzerResponse) this.inquiryForm.get('queryType').setValue(this.sqlServerSqlAnalyzerResponse.type);
+
+                  if(this.inquiryForm.get('queryType').value === undefined){
+                    this.inquiryForm.get('queryType').setValue('AGGREGATE');
+                  }
 
                   if((this.ansiSqlAnalyzerResponse === undefined || (!this.ansiSqlAnalyzerResponse.rejected && !this.ansiSqlAnalyzerResponse.warnings)) &&
                      (this.oracleSqlAnalyzerResponse === undefined || (!this.oracleSqlAnalyzerResponse.rejected && !this.oracleSqlAnalyzerResponse.warnings)) &&
