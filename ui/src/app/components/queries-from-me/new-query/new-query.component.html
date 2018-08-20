@@ -19,16 +19,16 @@
                       </option>
                     </select>
                     <div class="help-block" *ngIf="network.invalid && (network.dirty || network.touched)">Please select a network</div>
-                    <p *ngIf="networks?.length == 1">{{ networks[0]?.name }}</p>
+                    <p *ngIf="networks?.length === 1">{{ networks[0]?.name }}</p>
                   </div>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                   <label for="dataType">Data Type</label>
                   <div class="radio">
                     <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="AGGREGATE">Aggregate</label>
                     <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="TABLE">Table</label>
                   </div>
-                </div>
+                </div> -->
                 <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">
                   <label for="name">Inquiry Name</label>
                   <input type="text" class="form-control" id="inquiry-name" formControlName="inquiryName">
@@ -109,7 +109,20 @@
                 <div *ngIf="ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected" class="alert alert-danger alert-dismissible">
                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                   <h4><i class="icon fa fa-ban"></i> Error!</h4>
-                  This query was rejected.
+                  <ul>
+                    <li *ngIf="ansiSqlAnalyzerResponse">
+                      <b> ANSI </b><br /> 
+                      {{ ansiSqlAnalyzerResponse.rejectionMessage }}
+                    </li>
+                    <li *ngIf="oracleSqlAnalyzerResponse">
+                      <b> Oracle </b><br /> 
+                      {{ oracleSqlAnalyzerResponse.rejectionMessage }}
+                    </li>
+                    <li *ngIf="sqlServerSqlAnalyzerResponse">
+                      <b> SQL Server </b><br /> 
+                      {{ sqlServerSqlAnalyzerResponse.rejectionMessage }}
+                    </li>
+                  </ul>
                 </div>
                 <div *ngIf="ansiSqlAnalyzerResponse?.warnings || oracleSqlAnalyzerResponse?.warnings || sqlServerSqlAnalyzerResponse?.warnings" class="alert alert-warning alert-dismissible">
                   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
