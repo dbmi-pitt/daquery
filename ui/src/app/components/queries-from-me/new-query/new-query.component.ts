@@ -68,7 +68,7 @@ export class NewQueryComponent implements OnInit {
       if(this.sqlDialect.ansi) this.lastAddedTab = "ansi";
 
       this.inquiryForm = this.fb.group({
-        network: inquiry.network,
+        network: [inquiry.network, Validators.required],
         sitesToQuery: this.fb.array([]),
         queryType: [inquiry.queryType.toUpperCase()],
         dataType:['SQL_QUERY'],
@@ -185,6 +185,7 @@ export class NewQueryComponent implements OnInit {
                           });
       }
     } else {
+      this.inquiryForm.get('network').markAsTouched();
       this.inquiryForm.get('inquiryName').markAsTouched();
     }
   }
@@ -205,8 +206,16 @@ export class NewQueryComponent implements OnInit {
       Observable.forkJoin(...checkSQLs)
                 .subscribe(res => {
                   this.ansiSqlAnalyzerResponse = res[0];
-                  this.oracleSqlAnalyzerResponse = res[1];
-                  this.sqlServerSqlAnalyzerResponse = res[2];
+                  this.oracleSqlAnalyzerResponse = res[0];
+                  this.sqlServerSqlAnalyzerResponse = res[0];
+                  if(this.inquiryForm.get('query').get('ansi').value != ""){
+                    this.oracleSqlAnalyzerResponse = res[1];
+                    this.sqlServerSqlAnalyzerResponse = res[1];
+                  } else {
+                    this.sqlServerSqlAnalyzerResponse = res[1];
+                    if(this.inquiryForm.get('query').get('ansi').value != "" || this.inquiryForm.get('query').get('oracle').value != "")
+                      this.sqlServerSqlAnalyzerResponse = res[2];
+                  }
                   this.sqlChecked = true;
                   if(this.ansiSqlAnalyzerResponse) this.inquiryForm.get('queryType').setValue(this.ansiSqlAnalyzerResponse.type);
                   if(this.oracleSqlAnalyzerResponse) this.inquiryForm.get('queryType').setValue(this.oracleSqlAnalyzerResponse.type);
@@ -326,6 +335,7 @@ export class NewQueryComponent implements OnInit {
     this.inquiryForm.get('query').get('ansi').setValidators([Validators.required]);
     this.inquiryForm.get('query').get('ansi').updateValueAndValidity();
     this.lastAddedTab = "ansi";
+    this.ansiSqlAnalyzerResponse = null;
   }
 
   plusORACLEClick(){
@@ -333,6 +343,7 @@ export class NewQueryComponent implements OnInit {
     this.inquiryForm.get('query').get('oracle').setValidators([Validators.required]);
     this.inquiryForm.get('query').get('oracle').updateValueAndValidity();
     this.lastAddedTab = "oracle";
+    this.oracleSqlAnalyzerResponse = null;
   }
 
   plusSQLSERVERClick(){
@@ -340,6 +351,7 @@ export class NewQueryComponent implements OnInit {
     this.inquiryForm.get('query').get('sqlServer').setValidators([Validators.required]);
     this.inquiryForm.get('query').get('sqlServer').updateValueAndValidity();
     this.lastAddedTab = "sql_server";
+    this.sqlServerSqlAnalyzerResponse = null;
   }
 
   onANSITabClose(){
@@ -352,6 +364,8 @@ export class NewQueryComponent implements OnInit {
     } else if(this.sqlDialect.sqlServer){
       this.lastAddedTab = "sql_server";
     }
+    this.sqlChecked = false;
+    this.sqlCheck('check');
   }
 
   onORACLETabClose(){
@@ -364,6 +378,8 @@ export class NewQueryComponent implements OnInit {
     } else if(this.sqlDialect.ansi){
       this.lastAddedTab = "ansi";
     }
+    this.sqlChecked = false;
+    this.sqlCheck('check');
   }
 
   onSQLSERVERTabClose(){
@@ -376,5 +392,7 @@ export class NewQueryComponent implements OnInit {
     } else if(this.sqlDialect.ansi){
       this.lastAddedTab = "ansi";
     }
+    this.sqlChecked = false;
+    this.sqlCheck('check');
   }
 }
