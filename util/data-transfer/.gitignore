@@ -1,0 +1,44 @@
+.settings
+generated
+target
+*.DS_Store
+bin
+.recommenders
+*~
+dt.props
+ojdbc*.jar
+jdbc*.jar
+sqljdbc_auth.dll
+importer.out
+importer.remote.out
+bios-importer.jar.bak
+jetty-instance-*
+
+.metadata
+RemoteSystemsTempFiles
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+.settings/
+
