@@ -19,16 +19,16 @@
                       </option>
                     </select>
                     <div class="help-block" *ngIf="network.invalid && (network.dirty || network.touched)">Please select a network</div>
-                    <p *ngIf="networks?.length == 1">{{ networks[0]?.name }}</p>
+                    <p *ngIf="networks?.length === 1">{{ networks[0]?.name }}</p>
                   </div>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                   <label for="dataType">Data Type</label>
                   <div class="radio">
                     <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="AGGREGATE">Aggregate</label>
                     <label class="radio-inline"><input type="radio" name="queryType" formControlName="queryType" value="TABLE">Table</label>
                   </div>
-                </div>
+                </div> -->
                 <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">
                   <label for="name">Inquiry Name</label>
                   <input type="text" class="form-control" id="inquiry-name" formControlName="inquiryName">
@@ -49,7 +49,13 @@
                     <ul class="nav nav-tabs">
                       <li [ngClass]="{'active': lastAddedTab === 'ansi'}" *ngIf="sqlDialect.ansi">
                         <div>
-                          <a href="#tab_ansi" data-toggle="tab" aria-expanded="true">ANSI Query</a> 
+                          <a href="#tab_ansi" data-toggle="tab" aria-expanded="true">ANSI Query</a>
+                          <span *ngIf="ansiSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
+                            <small class="label bg-red">error</small>
+                          </span>
+                          <span *ngIf="ansiSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
+                            <small class="label bg-yellow">warning</small>
+                          </span>
                           <button type="button" class="close" aria-label="Close" (click)="onANSITabClose()">
                               <span aria-hidden="true">×</span>
                             </button>
@@ -58,6 +64,12 @@
                       <li [ngClass]="{'active': lastAddedTab === 'oracle'}" *ngIf="sqlDialect.oracle">
                         <div>
                           <a href="#tab_oracle" data-toggle="tab" aria-expanded="true">Oracle Query</a>
+                          <span *ngIf="oracleSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
+                            <small class="label bg-red">error</small>
+                          </span>
+                          <span *ngIf="oracleSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
+                            <small class="label bg-yellow">warning</small>
+                          </span>
                           <button type="button" class="close" aria-label="Close" (click)="onORACLETabClose()">
                             <span aria-hidden="true">×</span>
                           </button>
@@ -66,6 +78,12 @@
                       <li [ngClass]="{'active': lastAddedTab === 'sql_server'}" *ngIf="sqlDialect.sqlServer">
                         <div>
                           <a href="#tab_sqlServer" data-toggle="tab" aria-expanded="true">Sql Server Query</a>
+                          <span *ngIf="sqlServerSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
+                            <small class="label bg-red">error</small>
+                          </span>
+                          <span *ngIf="sqlServerSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
+                            <small class="label bg-yellow">warning</small>
+                          </span>
                           <button type="button" class="close" aria-label="Close" (click)="onSQLSERVERTabClose()">
                             <span aria-hidden="true">×</span>
                           </button>
@@ -90,11 +108,89 @@
                           <textarea class="form-control" rows="5" id="sql_query" formControlName="ansi" placeholder="enter ANSI SQL query" (input)="onQueryEdit()"></textarea>
                           <div class="help-block" *ngIf="ansi.invalid && (ansi.dirty || ansi.touched)">Please enter a ansi sql query</div>
                         </div>
+                        <div *ngIf="ansiSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
+                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                          <h4><i class="icon fa fa-ban"></i> Error!</h4>
+                          This query was rejected.<br />
+                          <ul>
+                            <li *ngIf="ansiSqlAnalyzerResponse">
+                              {{ ansiSqlAnalyzerResponse.rejectionMessage }}
+                            </li>
+                          </ul>
+                        </div>
+                        <div *ngIf="ansiSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
+                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                          <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+                          <p>This query has the following warning(s):</p>
+                          <ul>
+                            <li *ngFor="let msg of ansiSqlAnalyzerResponse?.warningMessages">
+                              {{ msg }}
+                            </li>
+                          </ul>
+                          <p *ngIf="ansiSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
+                        </div>
+                        <div *ngIf="ansiSqlAnalyzerResponse?.deidUnresolved && ansiSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
+                          <div class="box-header with-border">
+                            <h4 class="box-title">
+                                Return Values
+                            </h4>
+                          </div>
+                          <div class="panel-collapse collapse in" aria-expanded="true" style="">
+                            <div class="box-body">
+                              <div *ngIf="ansiSqlAnalyzerResponse?.returnList" class="callout callout-default">
+                                <ul>
+                                  <li *ngFor="let item of ansiSqlAnalyzerResponse?.returnList">
+                                    <p [innerHtml]="item"></p>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'oracle'}" id="tab_oracle" *ngIf="sqlDialect.oracle">
                         <div class="form-group has-feedback" [ngClass]="{'has-error': oracle.invalid && (oracle.dirty || oracle.touched), 'has-success': oracle.valid && (oracle.dirty || oracle.touched) }">
                           <textarea class="form-control" rows="5" id="sql_query" formControlName="oracle" placeholder="enter Oracle SQL query" (input)="onQueryEdit()"></textarea>
                           <div class="help-block" *ngIf="oracle.invalid && (oracle.dirty || oracle.touched)">Please enter a oracle sql query</div>
+                        </div>
+                        <div *ngIf="oracleSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
+                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                          <h4><i class="icon fa fa-ban"></i> Error!</h4>
+                          This query was rejected.<br />
+                          <ul>
+                            <li *ngIf="oracleSqlAnalyzerResponse">
+                              {{ oracleSqlAnalyzerResponse.rejectionMessage }}
+                            </li>
+                          </ul>
+                        </div>
+                        <div *ngIf="oracleSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
+                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                          <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+                          <p>This query has the following warning(s):</p>
+                          <ul>
+                            <li *ngFor="let msg of oracleSqlAnalyzerResponse?.warningMessages">
+                              {{ msg }}
+                            </li>
+                          </ul>
+                          <p *ngIf="oracleSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
+                        </div>
+                        <div *ngIf="oracleSqlAnalyzerResponse?.deidUnresolved && oracleSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
+                          <div class="box-header with-border">
+                            <h4 class="box-title">
+                                Return Values
+                            </h4>
+                          </div>
+                          <div class="panel-collapse collapse in" aria-expanded="true" style="">
+                            <div class="box-body">
+                              <div *ngIf="oracleSqlAnalyzerResponse?.returnList" class="callout callout-default">
+                                <ul>
+                                  <li *ngFor="let item of oracleSqlAnalyzerResponse?.returnList">
+                                    <p [innerHtml]="item"></p>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'sql_server'}" id="tab_sqlServer" *ngIf="sqlDialect.sqlServer">
@@ -102,39 +198,53 @@
                           <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlServer" placeholder="enter Sql Server SQL" (input)="onQueryEdit()"></textarea>
                           <div class="help-block" *ngIf="sqlServer.invalid && (sqlServer.dirty || sqlServer.touched)">Please enter a sql server sql query</div>
                         </div>
+                        <div *ngIf="sqlServerSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
+                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                          <h4><i class="icon fa fa-ban"></i> Error!</h4>
+                          This query was rejected.<br />
+                          <ul>
+                            <li *ngIf="sqlServerSqlAnalyzerResponse">
+                              {{ sqlServerSqlAnalyzerResponse.rejectionMessage }}
+                            </li>
+                          </ul>
+                        </div>
+                        <div *ngIf="sqlServerSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
+                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                          <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+                          <p>This query has the following warning(s):</p>
+                          <ul>
+                            <li *ngFor="let msg of sqlServerSqlAnalyzerResponse?.warningMessages">
+                              {{ msg }}
+                            </li>
+                          </ul>
+                          <p *ngIf="sqlServerSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
+                        </div>
+                        <div *ngIf="sqlServerSqlAnalyzerResponse?.deidUnresolved && sqlServerSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
+                          <div class="box-header with-border">
+                            <h4 class="box-title">
+                                Return Values
+                            </h4>
+                          </div>
+                          <div class="panel-collapse collapse in" aria-expanded="true" style="">
+                            <div class="box-body">
+                              <div *ngIf="sqlServerSqlAnalyzerResponse?.returnList" class="callout callout-default">
+                                <ul>
+                                  <li *ngFor="let item of sqlServerSqlAnalyzerResponse?.returnList">
+                                    <p [innerHtml]="item"></p>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div *ngIf="ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected" class="alert alert-danger alert-dismissible">
-                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                  <h4><i class="icon fa fa-ban"></i> Error!</h4>
-                  This query was rejected.
-                </div>
-                <div *ngIf="ansiSqlAnalyzerResponse?.warnings || oracleSqlAnalyzerResponse?.warnings || sqlServerSqlAnalyzerResponse?.warnings" class="alert alert-warning alert-dismissible">
-                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                  <h4><i class="icon fa fa-warning"></i> Warning!</h4>
-                  <p>This query has the following warning(s):</p>
-                  <ul>
-                    <li *ngFor="let msg of ansiSqlAnalyzerResponse?.warningMessages">
-                      <b> ANSI </b><br />
-                      {{ msg }}
-                    </li>
-                    <li *ngFor="let msg of oracleSqlAnalyzerResponse?.warningMessages">
-                      <b> Oracle </b><br />
-                      {{ msg }}
-                    </li>
-                    <li *ngFor="let msg of sqlServerSqlAnalyzerResponse?.warningMessages">
-                      <b> SQL Server </b><br />
-                      {{ msg }}
-                    </li>
-                  </ul>
-                  <p *ngIf="ansiSqlAnalyzerResponse?.deidUnresolved || oracleSqlAnalyzerResponse?.deidUnresolved || sqlServerSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
-                </div>
                 <button class="btn btn-primary" (click)="onSave()">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
                                                                       (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
                                                                       (sqlServerSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.warnings)) ? "Save Anyway" : "Save" }}</button>
-                <button class="btn btn-success" (click)="onRequest()" [disabled]="ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
+                <button class="btn btn-success" (click)="onRequest()" [disabled]="(ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected) && sqlChecked">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
                                                                       (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
                                                                       (sqlServerSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.warnings)) ? "Save and Request Anyway" : "Save and Request" }}</button>
                 <button class="btn btn-link" (click)="onCancel()">Cancel</button>
