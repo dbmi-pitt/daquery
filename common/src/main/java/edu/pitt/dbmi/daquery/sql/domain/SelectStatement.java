@@ -97,7 +97,7 @@ public class SelectStatement extends AbstractElement implements ColumnProvider, 
 	
 	private boolean isValidDeidTag(DeIdTag tag)
 	{
-		return(tag.isDateShift() || tag.isId() || tag.isObfuscate());
+		return(tag.isDateShift() || tag.isId() || tag.isObfuscate() || ! tag.isPhi());
 	}
 	
 	@Override public void addChild(SQLElement child)
