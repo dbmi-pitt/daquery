@@ -211,10 +211,12 @@ export class NewQueryComponent implements OnInit {
                   if(this.inquiryForm.get('query').get('ansi').value != ""){
                     this.oracleSqlAnalyzerResponse = res[1];
                     this.sqlServerSqlAnalyzerResponse = res[1];
-                  } else {
-                    this.sqlServerSqlAnalyzerResponse = res[1];
-                    if(this.inquiryForm.get('query').get('ansi').value != "" || this.inquiryForm.get('query').get('oracle').value != "")
+                    if(this.inquiryForm.get('query').get('oracle').value != ""){
                       this.sqlServerSqlAnalyzerResponse = res[2];
+                    }
+                  } else {
+                    if(this.inquiryForm.get('query').get('oracle').value != "")
+                      this.sqlServerSqlAnalyzerResponse = res[1];
                   }
                   this.sqlChecked = true;
                   if(this.ansiSqlAnalyzerResponse) this.inquiryForm.get('queryType').setValue(this.ansiSqlAnalyzerResponse.type);
