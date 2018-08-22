@@ -9,6 +9,10 @@ import edu.pitt.dbmi.util.StringHelper;
 
 public class DTProps
 {
+	public static void main(String [] args)
+	{
+		System.out.println(getProperty("HARVEST_SELECT"));
+	}
 	private static Properties props = null;
 	public static Properties getProps()
 	{
