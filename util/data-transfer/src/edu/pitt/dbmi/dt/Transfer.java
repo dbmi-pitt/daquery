@@ -154,6 +154,8 @@ public class Transfer
 			return(value.toString());
 		else if(type.startsWith("VARCHAR"))
 			return("'" + StringHelper.escapeSQLSingleQuote(value.toString()) + "'");
+		else if(type.startsWith("TIMESTAMP"))
+			return("'" + value + "'");
 		else
 		{
 			System.err.println("WARNING: UNKNOWN DATA TYPE: " + type);
