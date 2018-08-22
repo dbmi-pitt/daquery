@@ -100,7 +100,12 @@ public class Transfer
             	
             	String select = DTProps.getProperty(table.trim().toLowerCase() + "_select");
             	if(StringHelper.isBlank(select))
-            		select = "select * from " + table + " where " + defaultWhere;
+            	{
+            		if(! StringHelper.isBlank(defaultWhere))
+            			select = "select * from " + table + " where " + defaultWhere;
+            		else
+            			select = "select * from " + table;
+            	}
             	ResultSet valLine = stat.executeQuery(select);            	
             	while(valLine.next())
             	{
