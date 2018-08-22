@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
+import edu.pitt.dbmi.util.StringHelper;
+
 public class Transfer
 {
 	private static String TO_URL;
@@ -42,6 +44,7 @@ public class Transfer
 		
 		Connection toConn = null;
 		Connection fromConn = null;
+		String insertSQL = null;
 		try
 		{
 			Class.forName(TO_DRIVER);
@@ -56,6 +59,7 @@ public class Transfer
             Hashtable<String, Hashtable<String, String>> fromColumnsByTableAndType = new Hashtable<String, Hashtable<String, String>>();
 			DatabaseMetaData md = fromConn.getMetaData();
 			ResultSet rs = md.getColumns(null, "%" + FROM_USERNAME.trim().toUpperCase() + "%", "%", "%");
+			List<String> excludedTables = new ArrayList<String>();
 			while (rs.next())
 			{
 				String tableName = rs.getString("TABLE_NAME").trim().toUpperCase();
@@ -69,10 +73,18 @@ public class Transfer
 					columns.put(columnName, type);
 				}
 				else
-					System.err.println("!!!!TABLE NOT IN INCLUDE LIST IN PROPERTY FILE!!!!!" + tableName);
+				{
+					if(! excludedTables.contains(tableName))
+					{
+						excludedTables.add(tableName);
+						System.err.println("!!!!TABLE NOT IN INCLUDE LIST IN PROPERTY FILE!!!!!" + tableName);
+					}
+				}
 			}
+			String defaultWhere = DTProps.getProperty("default.where");
             for(String table : tables)
             {
+            	System.out.println("Starting export of " + table);
             	Statement stat = fromConn.createStatement();
             	Statement toStat = toConn.createStatement();
             	Hashtable<String, String> columns = fromColumnsByTableAndType.get(table);
@@ -86,7 +98,10 @@ public class Transfer
             		if(first){comma = ", ";	first = false;}
             	}
             	
-            	ResultSet valLine = stat.executeQuery("select * from " + table);            	
+            	String select = DTProps.getProperty(table.trim().toLowerCase() + "_select");
+            	if(StringHelper.isBlank(select))
+            		select = "select * from " + table + " where " + defaultWhere;
+            	ResultSet valLine = stat.executeQuery(select);            	
             	while(valLine.next())
             	{
             		first = true;
@@ -105,8 +120,8 @@ public class Transfer
                 		if(first){comma = ", ";	first = false;}
                 	}
                 	
-                	String insertSQL = "INSERT INTO " + table + " (" + columnsSql + ") VALUES " + "(" + valuesSql + ")";
-                	System.out.println(insertSQL);
+                	insertSQL = "INSERT INTO " + table + " (" + columnsSql + ") VALUES " + "(" + valuesSql + ")";
+                	//System.out.println(insertSQL);
                 	toStat.executeUpdate(insertSQL);
             	}
             	stat.close();
@@ -116,6 +131,7 @@ public class Transfer
 		}
 		catch(Throwable t)
 		{
+			System.err.println(insertSQL);
 			t.printStackTrace(System.err);
 			System.exit(1);
 		}
@@ -134,12 +150,14 @@ public class Transfer
 			return("'" + dateFormat.format((Date) value) + "'");
 		else if(type.equals("NUMBER"))
 			return(value.toString());
+		else if(type.equals("FLOAT"))
+			return(value.toString());
 		else if(type.startsWith("VARCHAR"))
-			return("'" + value + "'");
+			return("'" + StringHelper.escapeSQLSingleQuote(value.toString()) + "'");
 		else
 		{
 			System.err.println("WARNING: UNKNOWN DATA TYPE: " + type);
-			return("'" + value + "'");
+			return("'" +  StringHelper.escapeSQLSingleQuote(value.toString()) + "'");
 		}
 	}
 }

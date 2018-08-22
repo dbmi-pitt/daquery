@@ -108,6 +108,12 @@ public class StringHelper
 		return(rVal);
 	}
 
+	public static String escapeSQLSingleQuote(String val)
+	{
+		if(val == null) return(null);
+		return(val.replace("'","''"));
+			
+	}
 	public static String ensureTrailingSlashURL(String path)
 	{
 		if(path == null) return(null);
