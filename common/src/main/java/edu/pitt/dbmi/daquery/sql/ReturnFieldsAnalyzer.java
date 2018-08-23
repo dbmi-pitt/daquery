@@ -148,8 +148,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 					this.addWarning("Unable to resolve PHI information for " + rc.column.getDisplayName() + " because it is ambiguously defined.");
 				else if(rc.deidTag == null)
 					this.addWarning("PHI information about returned column " + rc.column.getDisplayName() + " cannot be resolved.");
-				else if(!rc.deidTag.isPhi())
-					this.addWarning("Column " + rc.column.getDisplayName() + " is marked as not identifiable.");
+/*				else if(!rc.deidTag.isPhi())
+					this.addWarning("Column " + rc.column.getDisplayName() + " is marked as not identifiable."); */
 				
 			}
 		}
