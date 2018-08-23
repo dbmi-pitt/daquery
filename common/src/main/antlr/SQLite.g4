@@ -314,8 +314,8 @@ expr
  | expr ( '<' | '<=' | '>' | '>=' ) expr
  | expr ( comparison_operator ) expr
  | expr and_or expr
- | count_function
- | any_function
+ | count_funct
+ | any_funct
  | '(' expr ')'
  | K_CAST '(' expr K_AS type_name ')'
  | expr K_COLLATE collation_name
@@ -405,8 +405,8 @@ result_column
  : '*'
  | table_name '.' '*'
  | result_column_expr
- | count_function
- | any_function
+ | result_count_function
+ | any_result_function
  ;
 
 deid_tag
@@ -473,7 +473,7 @@ select_core
  : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
    ( multi_from_clause )?
    ( K_WHERE expr )?
-   ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
+   ( K_GROUP K_BY (dbColumnExpr | any_funct) ( ',' (dbColumnExpr | any_funct))* ( K_HAVING expr )? )?
  | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
  ;
 
@@ -672,12 +672,20 @@ name
  : any_name
  ;
 
-count_function
- : K_COUNT '(' ( distinct_keyword? result_column_expr | '*' | K_DISTINCT? any_function )?  ')' deid_tag? (K_AS? column_alias)?
+result_count_function
+ : K_COUNT '(' ( distinct_keyword? result_column_expr | '*' | K_DISTINCT? any_funct )?  ')' deid_tag? (K_AS? column_alias)?
+ ;
+
+count_funct
+ : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' | K_DISTINCT? any_funct )?  ')' deid_tag? (K_AS? column_alias)?
+ ;
+
+any_result_function
+ : function_name '(' ( K_DISTINCT? result_column_expr ( ',' result_column_expr )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
  ;
  
-any_function
- : function_name '(' ( K_DISTINCT? result_column_expr ( ',' result_column_expr )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
+any_funct
+ : function_name '(' ( K_DISTINCT? dbColumnExpr ( ',' dbColumnExpr )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
  ;
  
 and_keyword

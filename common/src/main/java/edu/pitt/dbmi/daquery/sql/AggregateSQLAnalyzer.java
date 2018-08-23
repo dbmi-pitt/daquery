@@ -7,10 +7,10 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_aliasContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_nameContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Count_functionContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Distinct_keywordContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_columnContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_column_exprContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_count_functionContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_setContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Table_nameContext;
 
@@ -74,7 +74,7 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 			ParserRuleContext columnExpr = null;
 
 			//aggregate functions must start with a select count(...)
-			if(firstCtx instanceof Count_functionContext)
+			if(firstCtx instanceof Result_count_functionContext)
 			{
 				countFound = true;
 				if(firstCtxNode.children.size() == 0)

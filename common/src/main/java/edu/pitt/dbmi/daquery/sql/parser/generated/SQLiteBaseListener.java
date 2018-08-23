@@ -952,25 +952,49 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCount_function(SQLiteParser.Count_functionContext ctx) { }
+	@Override public void enterResult_count_function(SQLiteParser.Result_count_functionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCount_function(SQLiteParser.Count_functionContext ctx) { }
+	@Override public void exitResult_count_function(SQLiteParser.Result_count_functionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAny_function(SQLiteParser.Any_functionContext ctx) { }
+	@Override public void enterCount_funct(SQLiteParser.Count_functContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAny_function(SQLiteParser.Any_functionContext ctx) { }
+	@Override public void exitCount_funct(SQLiteParser.Count_functContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAny_result_function(SQLiteParser.Any_result_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAny_result_function(SQLiteParser.Any_result_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAny_funct(SQLiteParser.Any_functContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAny_funct(SQLiteParser.Any_functContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
