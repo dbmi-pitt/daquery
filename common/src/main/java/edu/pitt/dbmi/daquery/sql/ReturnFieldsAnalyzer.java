@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.sql;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 import org.hibernate.annotations.common.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.sql.domain.Column;
 import edu.pitt.dbmi.daquery.sql.domain.DeIdTag;
 import edu.pitt.dbmi.daquery.sql.domain.Function;
@@ -17,13 +19,12 @@ import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Alter_table_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Analyze_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Any_functionContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Any_result_functionContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Attach_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Begin_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_aliasContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_nameContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Commit_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Count_functionContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_index_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_table_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_trigger_stmtContext;
@@ -51,6 +52,7 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Reindex_stmtConte
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Release_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_columnContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_column_exprContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_count_functionContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Rollback_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Savepoint_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_coreContext;
@@ -61,6 +63,7 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Update_stmtContex
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Update_stmt_limitedContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Vacuum_stmtContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.With_select_stmtContext;
+import edu.pitt.dbmi.daquery.update.db.DBUpdate151;
 
 public class ReturnFieldsAnalyzer extends SQLAnalyzer
 {
@@ -72,6 +75,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	
 	public static void main(String [] args)
 	{
+		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-3.1.json");
+		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
 		//simple
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select count(distinct patid) as adsd from VITAL where patid like 'PIT100_' or patid like 'PIT101_';");
 		
@@ -80,7 +85,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD, (select nyj from ieu);");
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD;");
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select vital.patid<IDENTIFIABLE isId=true dateshift on tbl.dsfield obfuscate=true> adsd, selst.somefield, myfunc(lmno.abc, pq.def)<IDENTIFIABLE isId=true dateshift on tb22.dsfield222 obfuscate=true>  as mfun from VITAL, (select somefield, otherfield from adfa) selst where patid like 'PIT100_' or patid like 'PIT101_';");
-		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("insert into asdfa (abc, def, ghi) values ('ab', 'cd', 'ef');", null);
+		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select sex, count(blech1), avg(gigi) from glorg, demographic group by avg(blech2) order by count(blech3)", dm);
 		System.out.println(a.topElement);
 //<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
 		
@@ -143,7 +148,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 					this.addWarning("Unable to resolve PHI information for " + rc.column.getDisplayName() + " because it is ambiguously defined.");
 				else if(rc.deidTag == null)
 					this.addWarning("PHI information about returned column " + rc.column.getDisplayName() + " cannot be resolved.");
-				else if(! rc.deidTag.isPhi())
+				else if(!rc.deidTag.isPhi())
 					this.addWarning("Column " + rc.column.getDisplayName() + " is marked as not identifiable.");
 				
 			}
@@ -160,6 +165,14 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		if(censoredStatements.containsKey(node.self.getClass()))
 			addWarning(censoredStatements.get(node.self.getClass()) + " statements are not allowed.");
 		
+		String nodeStr = "null";
+		String parStr = "null";
+		if(node != null && node.self != null)
+			nodeStr = node.self.getClass().getSimpleName();
+		if(parentElement != null)
+			parStr = parentElement.getClass().getSimpleName();
+		
+		System.out.println("+++" + level + "\t" + nodeStr + "\t" + parStr);
 
 		if(node.self instanceof Select_coreContext)
 		{
@@ -181,7 +194,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		if(node.self instanceof Result_column_exprContext)
 		{
 			System.out.println(node.self.getText());
-			if(! (parentElement instanceof DeIdTag))
+			if(! (parentElement instanceof DeIdTag || parentElement instanceof Function))
 			{
 				TableColumn col = new TableColumn();
 				parentElement = setParentChild(parentElement, col);
@@ -198,7 +211,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 				((DeIdTag)parentElement).setBirthdate(true);
 		}
 
-		if(node.self instanceof Count_functionContext || node.self instanceof Any_functionContext)
+		if(node.self instanceof Result_count_functionContext || node.self instanceof Any_result_functionContext)
 		{
 			Function func = new Function();
 			func.setCallDescriptor(node.self.getText());
@@ -277,7 +290,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 				else
 				{
 					((DeIdTag) parentElement).setId(isId);
-					((DeIdTag) parentElement).setPhi(isId);
+					//((DeIdTag) parentElement).setPhi(isId);
 				}
 			}
 		}
