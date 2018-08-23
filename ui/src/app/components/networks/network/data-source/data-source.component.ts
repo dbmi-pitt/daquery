@@ -89,7 +89,7 @@ export class DataSourceComponent implements OnInit {
                           this.error = '';
                           this.loading = false;
                           this.success = true;
-                          this.datasourceForm.reset();
+                          //this.datasourceForm.reset();
                           setTimeout(() => {
                             this.success = false;
                           }, 3000);

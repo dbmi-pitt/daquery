@@ -442,15 +442,15 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            if(!TestConnection.checkConnection((String)databaseInfo.get("url"), (String) databaseInfo.get("driver"))) {
+            if(!TestConnection.checkConnection((String)databaseInfo.get("connectionUrl"), (String) databaseInfo.get("driverClass"))) {
             	String msg = "Database is unreachable. Check that the server and port are specified correctly.  Or check firewall settings.";
             	logger.log(Level.SEVERE, msg);
             	
             	return Response.ok(200).entity("{\"result\": false, \"errorMsg\": \"" + msg + "\", \"detailErrorMsg\": \"\"}").build();
             }
             
-            String q = ((String)databaseInfo.get("driver")).contains("oracle") ? "select * from dual" : "select 'sql'";
-            DataBaseTestResult result = TestConnection.runQuery((String) databaseInfo.get("url"), (String) databaseInfo.get("username"), (String) databaseInfo.get("password"), (String) databaseInfo.get("driver"), q);
+            String q = ((String)databaseInfo.get("driverClass")).contains("oracle") ? "select * from dual" : "select 'sql'";
+            DataBaseTestResult result = TestConnection.runQuery((String) databaseInfo.get("connectionUrl"), (String) databaseInfo.get("username"), (String) databaseInfo.get("password"), (String) databaseInfo.get("driverClass"), q);
             
             return Response.ok(200).entity(result.toJson()).build();
     	}
