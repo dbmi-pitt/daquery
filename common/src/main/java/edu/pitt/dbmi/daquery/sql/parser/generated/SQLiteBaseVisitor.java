@@ -563,14 +563,28 @@ public class SQLiteBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCount_function(SQLiteParser.Count_functionContext ctx) { return visitChildren(ctx); }
+	@Override public T visitResult_count_function(SQLiteParser.Result_count_functionContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAny_function(SQLiteParser.Any_functionContext ctx) { return visitChildren(ctx); }
+	@Override public T visitCount_funct(SQLiteParser.Count_functContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitAny_result_function(SQLiteParser.Any_result_functionContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitAny_funct(SQLiteParser.Any_functContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

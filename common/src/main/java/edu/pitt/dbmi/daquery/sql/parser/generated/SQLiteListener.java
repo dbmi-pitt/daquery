@@ -788,25 +788,45 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitName(SQLiteParser.NameContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#count_function}.
+	 * Enter a parse tree produced by {@link SQLiteParser#result_count_function}.
 	 * @param ctx the parse tree
 	 */
-	void enterCount_function(SQLiteParser.Count_functionContext ctx);
+	void enterResult_count_function(SQLiteParser.Result_count_functionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#count_function}.
+	 * Exit a parse tree produced by {@link SQLiteParser#result_count_function}.
 	 * @param ctx the parse tree
 	 */
-	void exitCount_function(SQLiteParser.Count_functionContext ctx);
+	void exitResult_count_function(SQLiteParser.Result_count_functionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#any_function}.
+	 * Enter a parse tree produced by {@link SQLiteParser#count_funct}.
 	 * @param ctx the parse tree
 	 */
-	void enterAny_function(SQLiteParser.Any_functionContext ctx);
+	void enterCount_funct(SQLiteParser.Count_functContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#any_function}.
+	 * Exit a parse tree produced by {@link SQLiteParser#count_funct}.
 	 * @param ctx the parse tree
 	 */
-	void exitAny_function(SQLiteParser.Any_functionContext ctx);
+	void exitCount_funct(SQLiteParser.Count_functContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#any_result_function}.
+	 * @param ctx the parse tree
+	 */
+	void enterAny_result_function(SQLiteParser.Any_result_functionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#any_result_function}.
+	 * @param ctx the parse tree
+	 */
+	void exitAny_result_function(SQLiteParser.Any_result_functionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#any_funct}.
+	 * @param ctx the parse tree
+	 */
+	void enterAny_funct(SQLiteParser.Any_functContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#any_funct}.
+	 * @param ctx the parse tree
+	 */
+	void exitAny_funct(SQLiteParser.Any_functContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#and_keyword}.
 	 * @param ctx the parse tree
