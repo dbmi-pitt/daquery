@@ -197,23 +197,23 @@ public class NetworkEndpoint extends AbstractEndpoint {
             network_params.put("data_model", "temp");
             
             HashMap<String, String> sqldatasource_params = new HashMap<>();
-            sqldatasource_params.put("url", ((LinkedHashMap<?, ?>)payload.get("form")).get("url").toString());
+            sqldatasource_params.put("connectionUrl", ((LinkedHashMap<?, ?>)payload.get("form")).get("connectionUrl").toString());
             sqldatasource_params.put("name", network_params.get("name") + "_datasource");
             sqldatasource_params.put("username", ((LinkedHashMap<?, ?>)payload.get("form")).get("username").toString());
             sqldatasource_params.put("password", ((LinkedHashMap<?, ?>)payload.get("form")).get("password").toString());
-            sqldatasource_params.put("driver", ((LinkedHashMap<?, ?>)payload.get("form")).get("driver").toString());
+            sqldatasource_params.put("driverClass", ((LinkedHashMap<?, ?>)payload.get("form")).get("driverClass").toString());
             
             //SQLDataSource sqlDataSource = SQLDataSourceDAO.createSQLDataSource(sqldatasource_params);
             SQLDataSource sqlDataSource = new SQLDataSource();
-            sqlDataSource.setConnectionUrl(sqldatasource_params.get("url"));
+            sqlDataSource.setConnectionUrl(sqldatasource_params.get("connectionUrl"));
             sqlDataSource.setName(sqldatasource_params.get("name"));
             sqlDataSource.setUsername(sqldatasource_params.get("username"));
             sqlDataSource.setPassword(sqldatasource_params.get("password"));
-            sqlDataSource.setDriverClass(sqldatasource_params.get("driver"));
+            sqlDataSource.setDriverClass(sqldatasource_params.get("driverClass"));
             String dialect = "";
-            if(sqldatasource_params.get("driver").contains("oracle")) {
+            if(sqldatasource_params.get("driverClass").contains("oracle")) {
             	dialect = SQLDialect.ORACLE.toString();
-            } else if (sqldatasource_params.get("driver").contains("sqlserver")) {
+            } else if (sqldatasource_params.get("driverClass").contains("sqlserver")) {
             	dialect = SQLDialect.SQL_SERVER.toString();
             } else {
             	dialect = SQLDialect.ANSI.toString();
