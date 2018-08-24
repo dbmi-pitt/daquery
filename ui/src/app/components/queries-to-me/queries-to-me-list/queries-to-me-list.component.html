@@ -6,7 +6,7 @@
           <li *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'active' : ''">
             <a style="cursor: pointer" (click)="onRequestSelect(request)"> {{request.inquiry.inquiryName}} <br />
             <span>@{{ request.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</span>  
-            <span class="label pull-right" [ngClass]="getRequestStatusLabelClass(request)">{{ request.responses[0].status }}</span></a>
+            <span *ngIf="request.responses.length > 0" class="label pull-right" [ngClass]="getRequestStatusLabelClass(request)">{{ request.responses[0].status }}</span></a>
           </li>
         </ul>
       </div>
