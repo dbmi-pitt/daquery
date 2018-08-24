@@ -218,7 +218,7 @@ public class SQLDownload extends SQLQuery implements Download
 						DaqueryErrorException dee = (DaqueryErrorException) t;
 						if(dee.getErrorInfo() != null)
 						{
-							log.log(Level.SEVERE, "\n\t" + dee.getErrorInfo().displayMessage + "\n\t" + dee.getErrorInfo().getLongMessage() + "\n\t" + dee.getErrorInfo().getStackTrace());
+							log.log(Level.SEVERE, "\nDAQUERYERROREXCEPTION\n\t" + dee.getErrorInfo().displayMessage + "\n\t" + dee.getErrorInfo().getLongMessage() + "\n\t" + dee.getErrorInfo().getStackTrace());
 						}
 					}
 					log.log(Level.SEVERE, "Unable to send an email for request with id: " + req.getRequestId() + " because an error occurred.", t);
