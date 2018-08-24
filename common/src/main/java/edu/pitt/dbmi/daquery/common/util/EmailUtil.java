@@ -1,6 +1,8 @@
 package edu.pitt.dbmi.daquery.common.util;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.core.Response;
 
@@ -11,15 +13,17 @@ import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 
 public class EmailUtil
 {
+	private final static Logger log = Logger.getLogger(EmailUtil.class.getName());
+	
 	public static void main(String [] args) throws Exception
 	{
-		AppProperties.setDevHomeDir("/home/devuser/daquery-data");
+		AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53/conf/daquery-data");
 		EmailContents ec = new EmailContents();
 		ec.subject = "tester22";
-		ec.message = "hello<br //><br //>&nbsp;&nbsp;&nbsp;&nbsp;<b>hola</b> eh?";
+		ec.message = "hello";
 		ec.toAddresses.add("shirey@pitt.edu");
-		ec.toAddresses.add("schmoo@gmail.com");
-		ec.ccAddresses.add("bill.shirey@gmail.com");
+//		ec.toAddresses.add("schmoo@gmail.com");
+//		ec.ccAddresses.add("bill.shirey@gmail.com");
 		sendEmail(ec);
 	}
 	
@@ -58,9 +62,11 @@ public class EmailUtil
 		Response resp = WSConnectionUtil.centralServerPostJSON("send-mail", contents);
 		if(resp.getStatus() != 200)
 		{
+			log.log(Level.SEVERE, "Response code: " + resp.getStatus() + " recieved while calling central server to send an email.");
 			DecodedErrorInfo info = ResponseHelper.decodeErrorResponse(resp);
 			if(info != null)
 			{
+				log.log(Level.SEVERE, "Error message: " + info.getErrorMessage());
 				if(info.getErrorInfo() != null)
 				{
 					throw new DaqueryErrorException(info.getErrorInfo());

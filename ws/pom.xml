@@ -244,12 +244,17 @@
 	        <artifactId>hibernate-ehcache</artifactId>
 	        <version>${hibernate.version}</version>
 	    </dependency>
+<dependency>
+    <groupId>com.mchange</groupId>
+      <artifactId>c3p0</artifactId>
+      <version>0.9.5.2</version>
+    </dependency> 
 	    
-	    <dependency>
+<!--	    <dependency>
 			<groupId>c3p0</groupId>
 			<artifactId>c3p0</artifactId>
 			<version>${c3p0.version}</version> 
-		</dependency> 
+		</dependency>  -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
