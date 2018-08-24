@@ -287,9 +287,13 @@ export class NewQueryComponent implements OnInit {
 
         ['ansi', 'oracle', 'sqlServer'].forEach(dialect => {
           if(this.inquiryForm.get('query').get(dialect).value != ""){
+            let sqlDialect = dialect.toUpperCase();
+            if(dialect === 'sqlServer')
+              sqlDialect = 'SQL_SERVER';
+
             ret.inquiry.code.push({
               code: this.inquiryForm.get('query').get(dialect).value,
-              dialect: dialect.toUpperCase()
+              dialect: sqlDialect
             });
           }
         });
