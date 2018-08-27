@@ -13,91 +13,93 @@
     </div>
   </div>
   <div class="col-lg-8 col-md-6">
-    <div *ngIf="selectedRequest && selectedRequest.responses.legnth > 0" class="box box-default color-palette-box">
-      <div class="box-header with-border">
-        <h3 class="box-title"> {{ selectedRequest.inquiry.inquiryName }} </h3>
-        <span class="pull-right-container">
-          <small class="pull-right">{{ selectedRequest.responses[0].statusMessage }}</small>
-          <small class="label pull-right" style="margin-right: 5px" [ngClass]="getRequestStatusLabelClass(selectedRequest)">{{ selectedRequest.responses[0].status }}</small>
-        </span>
-      </div>
-      <div class="box-body">
-        <div *ngIf="selectedRequest.responses[0].status === 'ERROR'" class="callout callout-danger">
-          <p>{{ selectedRequest.responses[0]?.errorMessage }} <button *ngIf="selectedRequest.responses[0]?.stackTrace" class="btn-link" style="color: #fff; text-decoration: underline" (click)="showErrorInfo()">More info</button></p>
+    <div *ngIf="selectedRequest" class="box box-default color-palette-box">
+      <div *ngIf="isValidSelectedRequest(selectedRequest)">
+        <div class="box-header with-border">
+          <h3 class="box-title"> {{ selectedRequest?.inquiry?.inquiryName }} </h3>
+          <span class="pull-right-container">
+            <small class="pull-right">{{ selectedRequest.responses[0].statusMessage }}</small>
+            <small class="label pull-right" style="margin-right: 5px" [ngClass]="getRequestStatusLabelClass(selectedRequest)">{{ selectedRequest.responses[0].status }}</small>
+          </span>
         </div>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="user-block">
-              <i class="fa fa-user-circle-o fa-3x" style="float: left" aria-hidden="true"></i>
-              <span class="username">{{selectedRequest.requester?.realName}}</span>
-              <span class="description">{{ selectedRequest.requesterSite.name }} | {{ selectedRequest.requester.email }} | {{ selectedRequest.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</span>
-            </div>
+        <div class="box-body">
+          <div *ngIf="selectedRequest.responses[0].status === 'ERROR'" class="callout callout-danger">
+            <p>{{ selectedRequest.responses[0]?.errorMessage }} <button *ngIf="selectedRequest.responses[0]?.stackTrace" class="btn-link" style="color: #fff; text-decoration: underline" (click)="showErrorInfo()">More info</button></p>
           </div>
-          <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
-            <button *ngIf="showApproveDenyBtn" [class]="sqlAnalyzerResponse?.deidUnresolved ? 'btn btn-warning' : 'btn btn-success'" (click)="approveRequest()" [disabled]="sqlAnalyzerResponse?.rejected">{{ sqlAnalyzerResponse?.deidUnresolved ? 'Approve with warnings' : 'Approve' }}</button>
-            <button *ngIf="showApproveDenyBtn" class="btn btn-danger" (click)="denyRequest()">Deny</button>
-            <button *ngIf="!showApproveDenyBtn" class="btn btn-block btn-default disabled">To respond to this request the STEWARD role is required</button>
-          </div>
-        </div>
-        <hr />
-        <div class="row">
-          <div class="col-md-10">
-              <label>Request description:</label>
-              <p>{{ selectedRequest.inquiry.inquiryDescription }}</p>
-          </div>
-          <div class="col-md-2">
-            <label *ngIf="selectedRequest.responses[0].value" >Result: {{ selectedRequest.responses[0].value }} </label>
-          </div>
-        </div>
-        <hr />
-        <div class="row">
-          <div class="col-md-12" style="overflow-y: auto; max-height: 57vh">
-            <label>Patient set constructed from:</label>
-            <pre>
-              <code>
-                {{ selectedRequest.code }}
-              </code>
-            </pre>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-12">
-            <div *ngIf="sqlAnalyzerResponse?.rejected" class="alert alert-danger alert-dismissible">
-              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-              <h4><i class="icon fa fa-ban"></i> Error!</h4>
-              This query was rejected.
-              <ul>
-                <li *ngIf="sqlAnalyzerResponse">>
-                  {{ sqlAnalyzerResponse.rejectionMessage }}
-                </li>
-              </ul>
-            </div>
-            <div *ngIf="sqlAnalyzerResponse?.warnings" class="alert alert-warning alert-dismissible">
-              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-              <h4><i class="icon fa fa-warning"></i> Warning!</h4>
-              <p>This query has warnings associated with de-identifying the exported data.  Please thoroughly review the information below along with the returned values for the SQL query. Warning(s):</p>
-              <ul>
-                <li *ngFor="let msg of sqlAnalyzerResponse?.warningMessages">
-                  {{ msg }}
-                </li>
-              </ul>
-              <p *ngIf="sqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values.</p>
-            </div>
-            <div *ngIf="sqlAnalyzerResponse?.deidUnresolved && sqlAnalyzerResponse?.returnList?.length > 0" class="panel box box-primary">
-              <div class="box-header with-border">
-                <h4 class="box-title">
-                    Return Values
-                </h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="user-block">
+                <i class="fa fa-user-circle-o fa-3x" style="float: left" aria-hidden="true"></i>
+                <span class="username">{{selectedRequest.requester?.realName}}</span>
+                <span class="description">{{ selectedRequest.requesterSite.name }} | {{ selectedRequest.requester.email }} | {{ selectedRequest.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</span>
               </div>
-              <div class="panel-collapse collapse in" aria-expanded="true" style="">
-                <div class="box-body">
-                  <div *ngIf="sqlAnalyzerResponse?.returnList" class="callout callout-default">
-                    <ul>
-                      <li *ngFor="let item of sqlAnalyzerResponse?.returnList">
-                        <p [innerHtml]="item"></p>
-                      </li>
-                    </ul>
+            </div>
+            <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
+              <button *ngIf="showApproveDenyBtn" [class]="sqlAnalyzerResponse?.deidUnresolved ? 'btn btn-warning' : 'btn btn-success'" (click)="approveRequest()" [disabled]="sqlAnalyzerResponse?.rejected">{{ sqlAnalyzerResponse?.deidUnresolved ? 'Approve with warnings' : 'Approve' }}</button>
+              <button *ngIf="showApproveDenyBtn" class="btn btn-danger" (click)="denyRequest()">Deny</button>
+              <button *ngIf="!showApproveDenyBtn" class="btn btn-block btn-default disabled">To respond to this request the STEWARD role is required</button>
+            </div>
+          </div>
+          <hr />
+          <div class="row">
+            <div class="col-md-10">
+                <label>Request description:</label>
+                <p>{{ selectedRequest.inquiry.inquiryDescription }}</p>
+            </div>
+            <div class="col-md-2">
+              <label *ngIf="selectedRequest.responses[0].value" >Result: {{ selectedRequest.responses[0].value }} </label>
+            </div>
+          </div>
+          <hr />
+          <div class="row">
+            <div class="col-md-12" style="overflow-y: auto; max-height: 57vh">
+              <label>Patient set constructed from:</label>
+              <pre>
+                <code>
+                  {{ selectedRequest.code }}
+                </code>
+              </pre>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div *ngIf="sqlAnalyzerResponse?.rejected" class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-ban"></i> Error!</h4>
+                This query was rejected.
+                <ul>
+                  <li *ngIf="sqlAnalyzerResponse">>
+                    {{ sqlAnalyzerResponse.rejectionMessage }}
+                  </li>
+                </ul>
+              </div>
+              <div *ngIf="sqlAnalyzerResponse?.warnings" class="alert alert-warning alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+                <p>This query has warnings associated with de-identifying the exported data.  Please thoroughly review the information below along with the returned values for the SQL query. Warning(s):</p>
+                <ul>
+                  <li *ngFor="let msg of sqlAnalyzerResponse?.warningMessages">
+                    {{ msg }}
+                  </li>
+                </ul>
+                <p *ngIf="sqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values.</p>
+              </div>
+              <div *ngIf="sqlAnalyzerResponse?.deidUnresolved && sqlAnalyzerResponse?.returnList?.length > 0" class="panel box box-primary">
+                <div class="box-header with-border">
+                  <h4 class="box-title">
+                      Return Values
+                  </h4>
+                </div>
+                <div class="panel-collapse collapse in" aria-expanded="true" style="">
+                  <div class="box-body">
+                    <div *ngIf="sqlAnalyzerResponse?.returnList" class="callout callout-default">
+                      <ul>
+                        <li *ngFor="let item of sqlAnalyzerResponse?.returnList">
+                          <p [innerHtml]="item"></p>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -105,8 +107,22 @@
           </div>
         </div>
       </div>
+      <div *ngIf="!isValidSelectedRequest(selectedRequest)">
+        <div class="box-header with-border">
+        </div>
+        <div class="box-body">
+          Invalid request
+        </div>
+      </div>
       <!-- /.box-body -->
     </div>
+  </div>
+</div>
+
+ <div *ngIf="!requests" class="row">
+  <div class="col-md-4 col-md-offset-4 text-center">
+    <span>Loading requests...</span><br />
+    <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
   </div>
 </div>
 
