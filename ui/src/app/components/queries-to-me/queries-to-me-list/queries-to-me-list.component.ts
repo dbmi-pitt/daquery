@@ -107,4 +107,8 @@ export class QueriesToMeListComponent implements OnInit {
   showErrorInfo(){
     $('#myErrorModal').modal('show');
   }
+
+  isValidSelectedRequest(selectedRequest: any){
+    return selectedRequest.responses.length > 0
+  }
 }
