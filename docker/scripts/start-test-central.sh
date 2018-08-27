@@ -18,9 +18,40 @@
 #  NC_CMD="nc -z"
 #fi
 
+# create some default paths.  These paths match the VM paths
+DAQUERY_HOME="/home/devuser/projects/daquery"
+DB_HOME="/home/devuser/daquery_docker_data"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --daquery_home=*)
+      DAQUERY_HOME="${1#*=}"
+      ;;
+    --db_home=*)
+      DB_HOME="${1#*=}"
+      ;;
+    --port=*)
+      PORT="${1#*=}"
+      ;;
+    *)
+      printf "***************************\n"
+      printf "* Error: Invalid argument.*\n"
+      printf "***************************\n"
+      exit 1
+  esac
+  shift
+done
+
+# remove any trailing slash from the paths
+DAQUERY_HOME=$(echo "$DAQUERY_HOME" | sed 's:/*$::')
+echo DAQUERY_HOME is $DAQUERY_HOME
+DB_HOME=$(echo "$DB_HOME" | sed 's:/*$::')
+echo DB_HOME is $DB_HOME
+echo PORT is $PORT
+
 # DAQUERY_CENTRAL_WAR_DIR is the directory on the host machine containing the Daquery Central war file
 # this file must be named daquery.war
-DAQUERY_CENTRAL_WAR_DIR="/home/devuser/projects/daquery/central/target"
+DAQUERY_CENTRAL_WAR_DIR="$DAQUERY_HOME/central/target"
 
 if [ ! -f $DAQUERY_CENTRAL_WAR_DIR/daquery-central.war ]; then
     echo +-+-+-+-+- File daquery-central.war does not exist in $DAQUERY_CENTRAL_WAR_DIR.  Exiting. +-+-+-+-+-
@@ -34,10 +65,10 @@ fi
 TOMCAT_REDIRECT_PORT="4001"
 
 # Check to see if a port number was passed in, if not use the default port
-if [ -z "$1" ]; then
+if [ -z "$PORT" ]; then
  echo using default port
 else
- TOMCAT_REDIRECT_PORT=$1
+ TOMCAT_REDIRECT_PORT=$PORT
 fi
 
 # Check to see if something is already running on the port that we want to use
@@ -62,12 +93,17 @@ TOMCAT_DEBUG_PORT=$(($TOMCAT_REDIRECT_PORT + 1000))
 
 # The file $DAQUERY_WAR_DIR/daquery-central.war gets copied to CONTAINER_DAQUERY_WAR_DIR
 CONTAINER_DAQUERY_WAR_DIR="/localdata/daquery_war"
-# TOMCAT_HOME is the Tomcat directory path within the container.  Both daquery.war
-# and ojdbc6-11.1.0.7.0.jar get deployed to paths within TOMCAT_HOME
+# TOMCAT_HOME is the Tomcat directory path within the container.  
 TOMCAT_HOME="/usr/local/tomcat"
 # DAQUERY_HOME is the file path for the Daquery container's Derby database on the host.
 # This parameter allows the Daquery docker site to maintain a state between runs 
-DAQUERY_HOME="/home/devuser/daquery_docker_data"
+DEFAULT_DAQUERY_HOME="/home/devuser/daquery_docker_data"
+# Check to see if a path to the database was passed in, if not use the database path
+if [ -z "$DB_HOME" ]; then
+ echo using default database home: $DEFAULT_DAQUERY_HOME
+ DB_HOME=$DEFAULT_DAQUERY_HOME
+fi
+
 # CONTAINER_DAQUERY_HOME is the file path for the Daquery container's Derby database on the container
 # This file will create a new directory called $CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT
 # to ensure the creation of a unique Derby database.  
@@ -76,21 +112,21 @@ CONTAINER_DAQUERY_HOME="/localdata/daquery_data"
 DAQUERY_CENT_URL="localhost"
 
 # This code moves the default database into the directory used by the docker image
-DAQUERY_CENTRAL_DATABASE="/home/devuser/projects/daquery/docker/docker-central/daquery_central_db.tar.gz"
+DAQUERY_CENTRAL_DATABASE="$DAQUERY_HOME/docker/docker-central/daquery_central_db.tar.gz"
 DATABASE_FILE_NAME="daquery_central_db.tar.gz"
 if [ ! -f $DAQUERY_CENTRAL_DATABASE ]; then
     echo +-+-+-+-+- Cannot find pre-configured database file does not exist in $DAQUERY_CENTRAL_DATABASE.  Exiting. +-+-+-+-+-
     exit 1
 fi
 
-if [ -e $DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT ]; then
-    echo Removing existing database $DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT
-    rm -rf $DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT
+if [ -e $DB_HOME/daquery-$TOMCAT_REDIRECT_PORT ]; then
+    echo Removing existing database $DB_HOME/daquery-$TOMCAT_REDIRECT_PORT
+    rm -rf $DB_HOME/daquery-$TOMCAT_REDIRECT_PORT
 fi
 
-cp $DAQUERY_CENTRAL_DATABASE $DAQUERY_HOME 
-chmod 755 $DAQUERY_HOME/$DATABASE_FILE_NAME
-tar -xvzf $DAQUERY_HOME/$DATABASE_FILE_NAME -C $DAQUERY_HOME
+cp $DAQUERY_CENTRAL_DATABASE $DB_HOME 
+chmod 755 $DB_HOME/$DATABASE_FILE_NAME
+tar -xvzf $DB_HOME/$DATABASE_FILE_NAME -C $DB_HOME
 
 
 # CONTAINER_NAME is the docker name for this Daquery container.  This name must
@@ -100,9 +136,9 @@ docker stop $CONTAINER_NAME
 docker pull cborromeo/daquery-central
 docker rm $CONTAINER_NAME
 
-echo "Running command: docker run --name $CONTAINER_NAME -dt -v $DAQUERY_CENTRAL_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DAQUERY_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e DAQUERY_WAR_DIR=$DAQUERY_CENTRAL_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-central:latest"
+echo "Running command: docker run --name $CONTAINER_NAME -dt -v $DAQUERY_CENTRAL_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DB_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e DAQUERY_WAR_DIR=$DAQUERY_CENTRAL_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-central:latest"
 
-if docker run --name $CONTAINER_NAME -dt -v $DAQUERY_CENTRAL_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DAQUERY_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e DAQUERY_WAR_DIR=$DAQUERY_CENTRAL_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-central:latest; then
+if docker run --name $CONTAINER_NAME -dt -v $DAQUERY_CENTRAL_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DB_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e DAQUERY_WAR_DIR=$DAQUERY_CENTRAL_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-central:latest; then
     echo Daquery started on port $TOMCAT_REDIRECT_PORT, debugging on port $TOMCAT_DEBUG_PORT
     echo Using central server at $DAQUERY_CENT_URL
 fi
