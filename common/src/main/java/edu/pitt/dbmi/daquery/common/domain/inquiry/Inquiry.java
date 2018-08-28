@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.common.domain.inquiry;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -74,8 +76,9 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	protected DaqueryUser author;
 
 	@Expose
-	protected boolean aggregate;
-	
+	@Column(name="QUERY_TYPE")
+	protected String queryType;
+		
 	public Inquiry() {
 		
 	}
@@ -126,7 +129,7 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@OneToMany(fetch = FetchType.EAGER,cascade=CascadeType.ALL, mappedBy="inquiry")
 	public Set<DaqueryRequest> getRequests(){return(requests);}
 	public void setRequests(Set<DaqueryRequest> reqs){requests = reqs;}
-
+	
 	@ManyToOne
 	@JoinColumn(name="AUTHOR_ID")
 	public DaqueryUser getAuthor(){return(author);}
@@ -136,9 +139,37 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@JoinColumn(name="NETWORK_ID")
 	public Network getNetwork(){return(network);}
 	public void setNetwork(Network net){network = net;}
-		
-	public boolean isAggregate(){return(aggregate);}
-	public void setAggregate(boolean aggregate){this.aggregate = aggregate;}
+	
+	@Transient
+	public boolean isAggregate(){
+		return this.getQueryType().equals(QueryType.AGGREGATE.value);
+	}
+	@Transient
+	public void setAggregate(boolean aggregate) {
+		this.setQueryType(QueryType.AGGREGATE.value);
+	}
+	
+	@Transient
+	public boolean isData(){
+		return this.getQueryType().equals(QueryType.DATA.value);
+	}
+	@Transient
+	public void setData(boolean data) {
+		this.setQueryType(QueryType.DATA.value);
+	}
+	
+	@Transient
+	public boolean isTable(){
+		return this.getQueryType().equals(QueryType.TABLE.value);
+	}
+	@Transient
+	public void setTable(boolean table) {
+		this.setQueryType(QueryType.TABLE.value);
+	}
+	
+	@Column(name="QUERY_TYPE")
+	public String getQueryType() { return this.queryType; }
+	public void setQueryType(String queryType) { this.queryType = queryType; }
 	
 	@Transient
 	public abstract DaqueryResponse run(DaqueryResponse response, DataModel model);

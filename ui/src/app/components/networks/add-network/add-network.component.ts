@@ -32,18 +32,18 @@ export class AddNetworkComponent implements OnInit {
   createForm() {
     this.joinNetworkForm = this.fb.group({
       network: ['', Validators.required],
-      url: ['', Validators.required],
+      connectionUrl: ['', Validators.required],
       username: ['', Validators.required],
       password: ['', Validators.required],
-      driver:  ['', Validators.required]
+      driverClass:  ['', Validators.required]
     })
   }
 
   get network() { return this.joinNetworkForm.get('network'); }
-  get url() { return this.joinNetworkForm.get('url'); }
+  get connectionUrl() { return this.joinNetworkForm.get('connectionUrl'); }
   get username() { return this.joinNetworkForm.get('username'); }
   get password() { return this.joinNetworkForm.get('password'); }
-  get driver() { return this.joinNetworkForm.get('driver'); }
+  get driverClass() { return this.joinNetworkForm.get('driverClass'); }
 
   getAvailableNetworks(){
     this.networkService.getAvailableNetworks()

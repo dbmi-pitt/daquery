@@ -11,6 +11,7 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.ExceptionHelper;
 
 
 public class ResponseTask extends AbstractTask implements Task
@@ -79,7 +80,9 @@ public class ResponseTask extends AbstractTask implements Task
 		log.log(Level.SEVERE, "Unexpected error while executing query for response with id: " + response.getResponseId(), cause);
 		response.setErrorMessage("Unexpected error while executing.  Check executing site server logs for more information.");
 		
-		try{ResponseDAO.saveOrUpdate(response);}
-		catch(Throwable t){log.log(Level.SEVERE, "Error while trying to save response error state or response with id: " + response.getResponseId(), t);}
+		try{
+			response.setStackTrace(ExceptionHelper.toString(cause, true));
+			ResponseDAO.saveOrUpdate(response);
+		} catch(Throwable t){log.log(Level.SEVERE, "Error while trying to save response error state or response with id: " + response.getResponseId(), t);}
 	}	
 }

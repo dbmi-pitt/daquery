@@ -556,7 +556,10 @@ public class WSConnectionUtil {
 		{
 			centURL = getCentralServerURL(serviceName, additionalParameters);
 			if(!checkConnection(centURL))
+			{
+				log.log(Level.SEVERE, "Unable call the central server.  " + centURL + " is not reachable.");
 					return(ResponseHelper.getErrorResponse(500, "The central server is not reachable.", "Cannot connect to " + ((! StringHelper.isEmpty(centURL))?centURL:"null"), null));
+			}
 			String url = AppProperties.getCentralServerURL();
 			Client client = getRemoteClient(url);			
 			Response rVal = client.target(centURL).request(MediaType.APPLICATION_JSON).get();
@@ -564,6 +567,7 @@ public class WSConnectionUtil {
 		}
 		catch(DaqueryErrorException dee)
 		{
+			log.log(Level.SEVERE, "Unable to call the central server.", dee);
 			String msg;
 			String lMsg = "While contacting the central server at " + AppProperties.getCentralServerURL();
 
@@ -581,10 +585,12 @@ public class WSConnectionUtil {
 		}
 		catch(KeyManagementException kme)
 		{
+			log.log(Level.SEVERE, "Unable to call the central server.", kme);
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact central server.", "An error happened while configuring the secure key management for the site connection during a get request.", kme));
 		}
 		catch(MalformedURLException mue)
 		{
+			log.log(Level.SEVERE, "Unable to call the central server.", mue);
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url during a get request, " + ((! StringHelper.isEmpty(centURL))?centURL:"null")  , mue));
 		}
 	}

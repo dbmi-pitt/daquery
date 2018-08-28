@@ -282,8 +282,13 @@ if [ "$1" = "jpda" ] ; then
   shift
 fi
 
-CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -XX:MaxPermSize=256M"
-
+if [[ -z "${DEBUG_WAIT}" ]]; then
+   CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -XX:MaxPermSize=256M"
+elif [[ $DEBUG_WAIT -eq "YES" ]]; then
+   CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -XX:MaxPermSize=256M"
+else
+   CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -XX:MaxPermSize=256M"
+fi
 
 if [ "$1" = "debug" ] ; then
   if $os400; then

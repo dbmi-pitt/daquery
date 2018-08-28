@@ -20,13 +20,13 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daqueryws.test.rest.RoleRestTest2;
+//import edu.pitt.dbmi.daqueryws.test.rest.RoleRestTest2;
 
 public class UserCreateTest
 {
 	public static void main(String [] args) throws Exception
 	{
-		RoleRestTest2.createTestUser("tester3", "tester3@pitt.edu", "abc1233", "ADMIN");
+		//RoleRestTest2.createTestUser("tester3", "tester3@pitt.edu", "abc1233", "ADMIN");
 		//AppProperties.setDevHomeDir("/home/devuser/dq-data");		
 		//String token = login("shirey@pitt.edu", "demouser");
 		//createUser(token);

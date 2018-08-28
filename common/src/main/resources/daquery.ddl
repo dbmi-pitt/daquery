@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.44 -->
+<!-- daquery.data.version=1.51 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -24,7 +24,8 @@ CREATE TABLE DATA_MODEL
    DATA_MODEL_ID varchar(50),
    NAME varchar(100),
    DESCRIPTION varchar(2048),
-   DATA_EXPORT_CONF long varchar
+   DATA_EXPORT_CONF long varchar,
+   REVISION bigint
 );
 
 CREATE TABLE "APP"."NOTIFICATION"
@@ -101,7 +102,12 @@ CREATE TABLE DATA_ATTRIBUTE
    PHI boolean,
    MODEL_ID bigint,
    AGGREGATABLE boolean,
-   FIELD_TYPE varchar(100)
+   FIELD_TYPE varchar(100),
+   IDENTIFIER boolean,
+   IDENT_NAME varchar(100),
+   BIRTH_DATE boolean,
+   DATE_FIELD boolean,
+   ZIP_CODE boolean
 );
 
 
@@ -111,6 +117,7 @@ CREATE TABLE SQL_DATA_SOURCE
    CONNECTION_URL varchar(500),
    USERNAME varchar(50),
    PWD varchar(50),
+   DIALECT varchar(30),
    DRIVER_CLASS varchar(255)
 );
 
@@ -151,7 +158,8 @@ CREATE TABLE INQUIRY
    INQUIRY_TYPE varchar(50),
    AUTHOR_ID varchar(50),
    NETWORK_ID bigint,
-   AGGREGATE boolean
+   AGGREGATE boolean,
+   QUERY_TYPE varchar(50)
 );
 
 CREATE TABLE DAQUERY_REQUEST
@@ -179,6 +187,7 @@ CREATE TABLE DAQUERY_RESPONSE
    SITE_ID bigint,
    FILESET_ID bigint,
    ERROR_MESSAGE varchar(1024),
+   STACKTRACE varchar(32000),
    RESPONSE_ID varchar(50),
    USER_ID varchar(50),
    DOWNLOAD_INQUIRY_ID bigint,
@@ -187,8 +196,7 @@ CREATE TABLE DAQUERY_RESPONSE
 
 CREATE TABLE SQL_QUERY
 (
-   INQ_ID bigint NOT NULL,
-   CODE varchar(32000)   
+   INQ_ID bigint NOT NULL 
 );
 
 CREATE TABLE FILESET
@@ -221,4 +229,20 @@ CREATE TABLE NETWORK_CONTACT
 	ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
 	NETWORK_ID bigint,
 	USER_ID varchar(50)
+);
+
+CREATE TABLE CHANGE_PASSWORD_ATTEMPT
+(
+	ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+	USER_ID varchar(50),
+	ATTEMPT_AT timestamp,
+	IP_ADDRESS varchar(50)
+);
+
+CREATE TABLE SQL_CODE
+(
+	ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
+	CODE varchar(32000),
+	DIALECT varchar(30),
+	QUERY_ID bigint
 );

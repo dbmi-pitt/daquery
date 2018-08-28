@@ -41,6 +41,7 @@ import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataBaseTestResult;
@@ -48,6 +49,7 @@ import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.TestConnection;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
+import edu.pitt.dbmi.daquery.update.db.DBUpdate151;
 
 
 
@@ -195,26 +197,36 @@ public class NetworkEndpoint extends AbstractEndpoint {
             network_params.put("data_model", "temp");
             
             HashMap<String, String> sqldatasource_params = new HashMap<>();
-            sqldatasource_params.put("url", ((LinkedHashMap<?, ?>)payload.get("form")).get("url").toString());
+            sqldatasource_params.put("connectionUrl", ((LinkedHashMap<?, ?>)payload.get("form")).get("connectionUrl").toString());
             sqldatasource_params.put("name", network_params.get("name") + "_datasource");
             sqldatasource_params.put("username", ((LinkedHashMap<?, ?>)payload.get("form")).get("username").toString());
             sqldatasource_params.put("password", ((LinkedHashMap<?, ?>)payload.get("form")).get("password").toString());
-            sqldatasource_params.put("driver", ((LinkedHashMap<?, ?>)payload.get("form")).get("driver").toString());
+            sqldatasource_params.put("driverClass", ((LinkedHashMap<?, ?>)payload.get("form")).get("driverClass").toString());
             
             //SQLDataSource sqlDataSource = SQLDataSourceDAO.createSQLDataSource(sqldatasource_params);
             SQLDataSource sqlDataSource = new SQLDataSource();
-            sqlDataSource.setConnectionUrl(sqldatasource_params.get("url"));
+            sqlDataSource.setConnectionUrl(sqldatasource_params.get("connectionUrl"));
             sqlDataSource.setName(sqldatasource_params.get("name"));
             sqlDataSource.setUsername(sqldatasource_params.get("username"));
             sqlDataSource.setPassword(sqldatasource_params.get("password"));
-            sqlDataSource.setDriverClass(sqldatasource_params.get("driver"));
+            sqlDataSource.setDriverClass(sqldatasource_params.get("driverClass"));
+            String dialect = "";
+            if(sqldatasource_params.get("driverClass").contains("oracle")) {
+            	dialect = SQLDialect.ORACLE.toString();
+            } else if (sqldatasource_params.get("driverClass").contains("sqlserver")) {
+            	dialect = SQLDialect.SQL_SERVER.toString();
+            } else {
+            	dialect = SQLDialect.ANSI.toString();
+            }
+            sqlDataSource.setDialect(dialect);
             
             Set<DataSource> dsset = new HashSet<DataSource>();
             
            
             //dModel.setName(((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
-            String netId = network_params.get("network_id");
-            DataModel dModel = getDataModelFromCentral(netId);
+            //String netId = network_params.get("network_id");
+            //DataModel dModel = getDataModelFromCentral(netId);
+            DataModel dModel = DBUpdate151.importCDM31Model(false);
             dsset.add(sqlDataSource);
             
             if(dModel != null)
@@ -310,6 +322,15 @@ public class NetworkEndpoint extends AbstractEndpoint {
             logger.info("Responding to request from: " + username);
             
             Network network = NetworkDAO.queryNetwork(id);
+            String dialect = "";
+            if(ds.getDriverClass().contains("oracle")) {
+            	dialect = SQLDialect.ORACLE.toString();
+            } else if(ds.getDriverClass().contains("sqlserver")) {
+            	dialect = SQLDialect.SQL_SERVER.toString();
+            } else {
+            	dialect = SQLDialect.ANSI.toString();
+            }
+            ds.setDialect(dialect);
             NetworkDAO.updateSQLDataSource(network, ds);
 
             return Response.ok(200).entity("{}").build();
@@ -421,15 +442,15 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
-            if(!TestConnection.checkConnection((String)databaseInfo.get("url"), (String) databaseInfo.get("driver"))) {
+            if(!TestConnection.checkConnection((String)databaseInfo.get("connectionUrl"), (String) databaseInfo.get("driverClass"))) {
             	String msg = "Database is unreachable. Check that the server and port are specified correctly.  Or check firewall settings.";
             	logger.log(Level.SEVERE, msg);
             	
             	return Response.ok(200).entity("{\"result\": false, \"errorMsg\": \"" + msg + "\", \"detailErrorMsg\": \"\"}").build();
             }
             
-            String q = ((String)databaseInfo.get("driver")).contains("oracle") ? "select * from dual" : "select 'sql'";
-            DataBaseTestResult result = TestConnection.runQuery((String) databaseInfo.get("url"), (String) databaseInfo.get("username"), (String) databaseInfo.get("password"), (String) databaseInfo.get("driver"), q);
+            String q = ((String)databaseInfo.get("driverClass")).contains("oracle") ? "select * from dual" : "select 'sql'";
+            DataBaseTestResult result = TestConnection.runQuery((String) databaseInfo.get("connectionUrl"), (String) databaseInfo.get("username"), (String) databaseInfo.get("password"), (String) databaseInfo.get("driverClass"), q);
             
             return Response.ok(200).entity(result.toJson()).build();
     	}

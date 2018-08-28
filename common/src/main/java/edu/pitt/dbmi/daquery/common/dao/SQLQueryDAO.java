@@ -6,6 +6,9 @@ package edu.pitt.dbmi.daquery.common.dao;
 import java.util.List;
 import java.util.logging.Logger;
 
+import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
@@ -21,11 +24,11 @@ private final static Logger logger = Logger.getLogger(SQLQueryDAO.class.getName(
 		SQLQuery q = new SQLQuery(true);
 		
 		try {
-			q.setAggregate(true);
+			//q.setAggregate(true);
+			q.setQueryType(QueryType.AGGREGATE.name());
 			q.setDataType("ABC");
 			q.setVersion(1);
-			q.setCode("SELECT * FROM TABLE");
-			
+			q.addCode(new SQLCode("SELECT * FROM TABLE", SQLDialect.ANSI));
 			t.openCurrentSessionwithTransaction();
 			long id = t.save(q);
 			t.closeCurrentSessionwithTransaction();
@@ -38,7 +41,9 @@ private final static Logger logger = Logger.getLogger(SQLQueryDAO.class.getName(
 			q = t.get(id);
 			t.closeCurrentSession();
 			System.out.println(q.getCode());
-			q.setCode("SELECT * FROM TABLE22");
+			
+			SQLCode cd2 = new SQLCode();
+			q.getCode().add(new SQLCode("SELECT * FROM TABLE2", SQLDialect.ANSI));			
 			
 			t.openCurrentSessionwithTransaction();
 			t.update(id, q);

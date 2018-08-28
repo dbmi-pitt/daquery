@@ -29,8 +29,6 @@ import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import oracle.net.aso.n;
-
 
 
 
@@ -360,6 +358,8 @@ public class NetworkDAO extends AbstractDAO {
 			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setUsername(sqlDatasource.getUsername());
 			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setPassword(sqlDatasource.getPassword());
 			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setDriverClass(sqlDatasource.getDriverClass());
+			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setDialect(sqlDatasource.getDialect());
+
 			
 			s.saveOrUpdate(network.getDataModel().getDataSource(SourceType.SQL));
 			t.commit();

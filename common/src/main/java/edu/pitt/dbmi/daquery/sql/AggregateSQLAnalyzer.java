@@ -7,10 +7,11 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_aliasContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_nameContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Count_functionContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.DbColumnExprContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Distinct_keywordContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_columnContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_column_exprContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_count_functionContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_setContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Table_nameContext;
 
 public class AggregateSQLAnalyzer extends SQLAnalyzer
@@ -25,11 +26,14 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	
 	public static void main(String [] args)
 	{
-		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(distinct patid) as adsd from VITAL where patid like 'PIT100_' or patid like 'PIT101_';");
-		System.out.println(a.isRejected());
+		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(patid) adsd from VITAL, (select adf from adfa) asd where patid like 'PIT100_' or patid like 'PIT101_' union select adf from adsfadf;");
 		if(a.isRejected())
+		{
+			System.out.println("Rejected!!!");
 			System.out.println("\t" + a.getRejectionMessage());
-		System.out.println(a.convertToValuesSql());
+		}
+		else
+			System.out.println(a.convertToValuesSql());
 	}
 	
 	public AggregateSQLAnalyzer(String sql)
@@ -48,6 +52,10 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	
 	private void analyzeNode(TreeNode node, int level)
 	{
+				
+		if(node.self instanceof Select_setContext)
+			 setRejection("Select sets (UNION/INTERSECT/MINUS/EXCEPT) are not supported.");
+		
 		if(node.self instanceof Result_columnContext && !firstResultFound )
 		{
 			firstResultFound = true;
@@ -55,12 +63,18 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 			if( resultCount > 1)
 				setRejection("Aggregate selects can only return a single result.  This SQL returns " + resultCount);
 
+			if(node.children.size() == 0)
+			{
+				setRejection("Invalid query, does not return an aggregate result.");
+				return;
+			}
+				
 			TreeNode firstCtxNode = node.children.get(0);
 			ParserRuleContext firstCtx = firstCtxNode.self;
 			ParserRuleContext columnExpr = null;
 
 			//aggregate functions must start with a select count(...)
-			if(firstCtx instanceof Count_functionContext)
+			if(firstCtx instanceof Result_count_functionContext)
 			{
 				countFound = true;
 				if(firstCtxNode.children.size() == 0)
@@ -70,7 +84,7 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 				else if(firstCtxNode.children.size() == 3)
 				{
 					if(! ((firstCtxNode.children.get(0).self instanceof Distinct_keywordContext) &&
-						  (firstCtxNode.children.get(1).self instanceof DbColumnExprContext) &&
+						  (firstCtxNode.children.get(1).self instanceof Result_column_exprContext) &&
 						  (firstCtxNode.children.get(2).self instanceof Column_aliasContext)
 					  ))
 						setRejection("Invalid aggregte count function modifier.");
@@ -87,7 +101,7 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 						aggregateDistinct = true;
 						columnExpr = firstCtxNode.children.get(1).self;
 					}
-					else if((firstCtxNode.children.get(0).self instanceof DbColumnExprContext) && (firstCtxNode.children.get(1).self instanceof Column_aliasContext))
+					else if((firstCtxNode.children.get(0).self instanceof Result_column_exprContext) && (firstCtxNode.children.get(1).self instanceof Column_aliasContext))
 					{ 
 					    columnExpr = firstCtxNode.children.get(0).self;	  
 					}
@@ -103,9 +117,9 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 				if(! isRejected())
 				{				
 					//we only aggregate for a single db column
-					if( columnExpr instanceof DbColumnExprContext)
+					if( columnExpr instanceof Result_column_exprContext)
 					{
-						DbColumnExprContext dbColContext = (DbColumnExprContext) columnExpr;
+						Result_column_exprContext dbColContext = (Result_column_exprContext) columnExpr;
 						int nChildren = dbColContext.children.size();
 						for(int i = 0; i < nChildren; i++)
 						{
