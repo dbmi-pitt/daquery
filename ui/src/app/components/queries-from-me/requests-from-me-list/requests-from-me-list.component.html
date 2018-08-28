@@ -10,7 +10,7 @@
     <tbody *ngFor="let requestGroup of (requestGroups | mapValues)">
       <tr>
         <td (click)="requestGroup.active = !requestGroup.active"><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}"></i> {{ requestGroup.val[0].inquiry.inquiryName }}</td>
-        <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd HH:mm a' }}</td>
+        <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
         <td></td>
       </tr>
       <tr *ngIf="requestGroup.active">
@@ -35,7 +35,7 @@
                       <div class="form-group">
                         <label class="col-sm-2 control-label">Code</label>
                         <div class="col-sm-10" style="padding-top: 7px">
-                          {{ requestGroup.val[0].inquiry.code }}
+                          {{ requestGroup.val[0].inquiry.code[0].code }}
                         </div>
                       </div>
                     </div>
@@ -57,7 +57,7 @@
               <tr *ngFor="let request of requestGroup.val">
                 <td>{{ request.requestSite.name }}</td>
                 <td>{{ request.responses[0]?.status }}</td>
-                <td>{{ request.responses[0]?.replyTimestamp | date:'yyyy-MM-dd HH:mm a' }}</td>
+                <td>{{ request.responses[0]?.replyTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
                 <td>{{ getRequestResult(request.responses[0]) }}
                     <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED', 'PENDING', 'DENIED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
                     <span *ngIf="request.responses[0]?.hasError" class="pull-right-container">
@@ -66,7 +66,7 @@
                     <a title="{{ getFilePaths(request.responses[0]) }}" data-toggle="tooltip" data-placement="top"><i *ngIf="request.responses[0]?.files" class="fa fa-question-circle"></i></a>
                 </td>
                 <td>
-                  <button *ngIf="request.inquiry.aggregate" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
+                  <button *ngIf="request.inquiry.queryType === 'AGGREGATE'" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
                 </td>
               </tr>
             </tbody>

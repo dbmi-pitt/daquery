@@ -86,7 +86,7 @@ export class AddSiteComponent implements OnInit {
     this.submitting = true;
     this.submitted = true;
     if(this.connectSiteForm.valid){
-      let selectedSite = this.sites.find(x => x.siteId = this.connectSiteForm.controls["site"].value);
+      let selectedSite = this.sites.find(x => x.siteId === this.connectSiteForm.controls["site"].value);
       this.siteService.requestConnectSite(this.connectSiteForm.value)
                       .subscribe(site => {
                         alert("Your request to connect to " + selectedSite.name + " has been emailed to " + selectedSite.adminEmail + ".");

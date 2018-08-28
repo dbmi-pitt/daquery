@@ -48,6 +48,14 @@ export class RequestService {
                     });
   }
 
+  checkSQL(netAndCode: any): Observable<any[]>{
+    return this.http.post('/daquery/ws/check-sql', netAndCode)
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
   saveInquires(inquiry: any) {
     return this.http.post('/daquery/ws/inquiries', inquiry)
                     .catch(error => {

@@ -86,8 +86,14 @@ public class TaskQueue
 		@Override
 		public void run()
 		{
-			try{task.startup();}catch(Throwable t){task.errorState(Task.ErrorPeriod.STARTUP, t);}
-			try{task.execute();}catch(Throwable t){task.errorState(Task.ErrorPeriod.EXECUTE, t);}
+			try{task.startup();
+			}catch(Throwable t){
+				task.errorState(Task.ErrorPeriod.STARTUP, t);
+			}
+			try{task.execute();
+			}catch(Throwable t){
+				task.errorState(Task.ErrorPeriod.EXECUTE, t);
+			}
 			try
 			{
 				task.shutdown();

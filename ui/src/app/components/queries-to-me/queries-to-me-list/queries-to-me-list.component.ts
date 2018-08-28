@@ -17,8 +17,11 @@ export class QueriesToMeListComponent implements OnInit {
 
   requests: any[];
   selectedRequest: any;
-
   showApproveDenyBtn = false;
+  showStackTrace = false;
+
+  sqlAnalyzerResponse: any;
+
   constructor(private requestService: RequestService,
               private userService: UserService,
               private roleGuard: RoleGuard) {
@@ -42,6 +45,16 @@ export class QueriesToMeListComponent implements OnInit {
 
   onRequestSelect(request: any){
     this.selectedRequest = request;
+    this.sqlCheck();
+  }
+
+  sqlCheck(){
+    this.requestService.checkSQL({networkUuid: this.selectedRequest.network.networkId, sqlCode: this.selectedRequest.code})
+                       .subscribe(res => {
+                          this.sqlAnalyzerResponse = res;
+                       }, err => {
+                          console.log(err);
+                       });
   }
 
   getRequestStatusLabelClass(request: any){
@@ -89,5 +102,13 @@ export class QueriesToMeListComponent implements OnInit {
                         resolve();
                       })
     });
+  }
+
+  showErrorInfo(){
+    $('#myErrorModal').modal('show');
+  }
+
+  isValidSelectedRequest(selectedRequest: any){
+    return selectedRequest.responses.length > 0
   }
 }

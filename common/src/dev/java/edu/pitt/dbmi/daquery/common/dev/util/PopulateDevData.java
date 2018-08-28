@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -24,7 +25,9 @@ import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.RequestDirection;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
@@ -42,7 +45,7 @@ public class PopulateDevData
 	public static void main(String [] args) throws Exception
 	{
 	
-//		AppProperties.setDevHomeDir("/home/devuser/dq-data");
+		AppProperties.setDevHomeDir("/usr/local/apache-tomcat-6.0.53");
 /*		assembleRequest();
 		Session s = HibernateConfiguration.openSession();
 		Query q = s.createQuery("select r from DaqueryRequest r");
@@ -50,7 +53,7 @@ public class PopulateDevData
 		for(DaqueryRequest req : reqs)
 			System.out.println(req.getId()); */
 		
-/*		assembleNetworkAndInquiry();
+		assembleNetworkAndInquiry();
 		Session s = HibernateConfiguration.openSession();
 		Query q = s.createQuery("select i from Inquiry i");
 		List<Inquiry> inqs = q.list();
@@ -59,8 +62,8 @@ public class PopulateDevData
 			System.out.println(inq.getId());
 			Network net = inq.getNetwork();
 			System.out.println(net.getName());
-			System.out.println(net.getIncomingQuerySites().size());
-		} */
+			System.out.println(((SQLQuery) inq).getCode().size());
+		} 
 		
 /*		DaqueryUser tu = createTestUser();
 		save(tu);
@@ -92,7 +95,8 @@ public class PopulateDevData
 		save(user);
 		Inquiry inq = createInquiryData(user);
 		inq.setNetwork(net);
-		inq.setAggregate(true);
+		//inq.setAggregate(true);
+		inq.setQueryType(QueryType.AGGREGATE.name());
 		save(inq);
 		save(net);				
 		
@@ -133,8 +137,7 @@ public class PopulateDevData
 		SQLQuery sqlQ = new SQLQuery(true);
 		sqlQ.setVersion(1);
 		sqlQ.setAuthor(author);
-		sqlQ.setSqlDialectEnum(SQLDialect.ORACLE);
-		sqlQ.setCode("select count(patid) from demographic;");
+		sqlQ.addCode(new SQLCode("This is a sql query", SQLDialect.ORACLE));
 		return(sqlQ);
 		
 		

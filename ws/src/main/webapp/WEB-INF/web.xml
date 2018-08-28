@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:web="http://xmlns.jcp.org/xml/ns/javaee">
+<web-app xmlns:web="http://xmlns.jcp.org/xml/ns/javaee" version="2.4">
   <display-name>daquery-ws</display-name>	  
   <servlet>
     <servlet-name>daquery-ws</servlet-name>

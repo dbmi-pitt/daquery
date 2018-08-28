@@ -96,6 +96,7 @@ if [ -z "$PORT" ]; then
  echo using default port: $TOMCAT_REDIRECT_PORT
 else
  TOMCAT_REDIRECT_PORT=$PORT
+
 fi
 
 # Check to see if something is already running on the port that we want to use
