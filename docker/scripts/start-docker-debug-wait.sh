@@ -19,7 +19,7 @@
 # create some default paths.  These paths match the VM paths
 DAQUERY_HOME="/home/devuser/projects/daquery"
 DB_HOME="/home/devuser/daquery_docker_data"
-DEFAULT_OJDBC_DIR="/home/devuser/projects/daquery/ws/lib"
+DEFAULT_OJDBC_DIR="/home/devuser/projects/daquery/ws/lib/ojdbc6-11.1.0.7.0.jar"
 
 
 #which version of nc do we have?
@@ -71,7 +71,7 @@ echo OJDBC_DIR is $OJDBC_DIR
 
 echo PORT is $PORT
 
-if [ ! -f $OJDBC_DIR/ojdbc6-11.1.0.7.0.jar ]; then
+if [ ! -f $OJDBC_DIR ]; then
     echo +-+-+-+-+- File ojdbc6-11.1.0.7.0.jar does not exist in path $OJDBC_DIR.  Exiting. +-+-+-+-+-
     exit 1
 fi
