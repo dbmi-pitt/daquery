@@ -127,7 +127,7 @@ public class DomainTestSuite {
 		return password;
 	}
 
-	private static String getTestPort()
+	public static String getTestPort()
 	{
 		String port = props.getProperty("test.port", "");
 		return port;
