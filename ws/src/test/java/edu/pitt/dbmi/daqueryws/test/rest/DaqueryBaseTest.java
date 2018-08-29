@@ -14,6 +14,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import io.restassured.RestAssured;
@@ -37,7 +39,11 @@ public class DaqueryBaseTest {
     	
         String port = System.getProperty("server.port");
         if (port == null) {
-            RestAssured.port = Integer.valueOf(defaultPort);
+        	if (DomainTestSuite.testPort.isEmpty()) {
+        		RestAssured.port = Integer.valueOf(defaultPort);
+        	} else {
+        		RestAssured.port = Integer.valueOf(DomainTestSuite.testPort);
+        	}
         }
         else{
             RestAssured.port = Integer.valueOf(port);
