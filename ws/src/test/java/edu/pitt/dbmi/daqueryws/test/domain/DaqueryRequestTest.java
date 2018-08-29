@@ -17,9 +17,9 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.RequestDirection;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 
@@ -27,32 +27,22 @@ public class DaqueryRequestTest {
 
 	private static String networkname = "DaqueryRequestTest_Network";
 	private static String networkUUID = "";
-	private static String inrequestname = "In Request Name DaqueryRequestTest";
 	private static String inrequestUUID = "";
-	private static String outrequestname = "Out Request Name DaqueryRequestTest";
 	private static String outrequestUUID = "";
-	private static String connectionurl = "jdbc:oracle:thin:@//server-a.dept.university.edu:1521/OracleSID";
 	private static String username = "datasourceusername";
 	private static String password = "datasourcepassword";
 
 	//site data elements
 	private static String sitename = "DaqueryRequestTestSite";
-	private static String siteurl = "http://DaqueryRequestTestURL.com";
 	private static String adminemail = "TestSiteAdmin@email.com";
-	private static String accesskey = "TestSiteAccessKey";
-	private static String commenckey = "TestSiteCommEncKey";
-	private static String commenctype = "TestSitecommEncType";
 	private static String siteUUID = "";
 	
 	//DaqueryUser data elements
 	private static String daqueryusername = "DaqueryRequestTest_User";
 	private static String email = "daqueryusertester@dummyaccounts.com";
-	private static String daquerypassword = "dummy";
 	private static String realname = "Daquery Tester, Esq.";
 	
 	//SQLQuery data elements
-	private static String inquiryname = "DaqueryRequestTestSQLQuery";
-	private static String inquirydesc = "Description of test inquiry";
 	private static String inquirySQLcode = "SELECT * FROM table X";
 	private static String inquiryUUID = "";
 	
@@ -151,10 +141,9 @@ public class DaqueryRequestTest {
 			
 			SQLQuery q = new SQLQuery(true);
 			q.setAuthor(u);
-			q.setCode(inquirySQLcode);
+			q.addCode(new SQLCode(inquirySQLcode, SQLDialect.ANSI));
 			q.setDataType("B positive");
 			q.setNetwork(n);
-			q.setSqlDialectEnum(SQLDialect.ANSI);
 			Set<DaqueryRequest> drset = new HashSet<DaqueryRequest>();
 			drset.add(dr);
 			q.setRequests(drset);

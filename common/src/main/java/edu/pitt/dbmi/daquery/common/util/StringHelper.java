@@ -1,13 +1,21 @@
 package edu.pitt.dbmi.daquery.common.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class StringHelper
 {
+	private final static Logger logger = Logger.getLogger(StringHelper.class.getName());
+	
 	public static boolean startsWithIgnoreCase(String val, String match)
 	{
 		if(StringHelper.isEmpty(val) || StringHelper.isEmpty(match))
@@ -15,7 +23,13 @@ public class StringHelper
 		else
 			return(val.toUpperCase().startsWith(match.toUpperCase()));
 	}
-	
+	public static boolean containsIgnoreCase(String val, String match)
+	{
+		if(StringHelper.isEmpty(val) || StringHelper.isEmpty(match))
+			return(false);
+		else
+			return(val.toUpperCase().contains(match.toUpperCase()));
+	}
 	public static String stackToString(Throwable t)
 	{
 		StringWriter sWriter = new StringWriter();
@@ -203,4 +217,28 @@ public class StringHelper
 		String toVal = val.trim();
 		return toVal.substring(0,1).toUpperCase() + toVal.substring(1).toLowerCase();
 	}
+    
+	public static String stringFromStream(InputStream is) throws IOException {
+
+		BufferedReader reader = null;
+		StringBuilder builder = new StringBuilder();
+
+		String temp;
+		try
+		{
+			reader = new BufferedReader(new InputStreamReader(is));
+			while ((temp = reader.readLine()) != null){builder.append(temp);}
+
+		}
+		finally
+		{
+			if (reader != null)
+			{
+				try {reader.close();} catch (Throwable t) { logger.log(Level.SEVERE, "Unable to close an InputStream while reading to string.", t);	}
+			}
+		}
+
+		return builder.toString();
+
+	}    
 }

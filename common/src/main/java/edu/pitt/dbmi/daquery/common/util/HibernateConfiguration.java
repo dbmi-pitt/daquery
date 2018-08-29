@@ -26,6 +26,7 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDownload;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 
@@ -85,6 +86,7 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(RemoteRole.class);
     	hibernateConf.addAnnotatedClass(SiteConnection.class);
     	hibernateConf.addAnnotatedClass(ChangePasswordAttempt.class);
+    	hibernateConf.addAnnotatedClass(SQLCode.class);
     	
     	
         	

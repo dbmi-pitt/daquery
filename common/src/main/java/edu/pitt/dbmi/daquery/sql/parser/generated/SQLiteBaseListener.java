@@ -136,13 +136,13 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCompound_select_stmt(SQLiteParser.Compound_select_stmtContext ctx) { }
+	@Override public void enterSelect_set(SQLiteParser.Select_setContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCompound_select_stmt(SQLiteParser.Compound_select_stmtContext ctx) { }
+	@Override public void exitSelect_set(SQLiteParser.Select_setContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -304,18 +304,6 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterInsert_stmt(SQLiteParser.Insert_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -388,13 +376,13 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSimple_select_stmt(SQLiteParser.Simple_select_stmtContext ctx) { }
+	@Override public void enterWith_select_stmt(SQLiteParser.With_select_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSimple_select_stmt(SQLiteParser.Simple_select_stmtContext ctx) { }
+	@Override public void exitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -407,18 +395,6 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSelect_stmt(SQLiteParser.Select_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSelect_or_values(SQLiteParser.Select_or_valuesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSelect_or_values(SQLiteParser.Select_or_valuesContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -527,6 +503,18 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDbColumnExpr(SQLiteParser.DbColumnExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterResult_column_expr(SQLiteParser.Result_column_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitResult_column_expr(SQLiteParser.Result_column_exprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -664,6 +652,114 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterDeid_tag(SQLiteParser.Deid_tagContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDeid_tag(SQLiteParser.Deid_tagContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIdent_prop(SQLiteParser.Ident_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIdent_prop(SQLiteParser.Ident_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIs_zip_prop(SQLiteParser.Is_zip_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIs_zip_prop(SQLiteParser.Is_zip_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterId_field_prop(SQLiteParser.Id_field_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitId_field_prop(SQLiteParser.Id_field_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDate_shift_field_prop(SQLiteParser.Date_shift_field_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDate_shift_field_prop(SQLiteParser.Date_shift_field_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTracking_column_expr(SQLiteParser.Tracking_column_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIs_birthdate_prop(SQLiteParser.Is_birthdate_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIs_birthdate_prop(SQLiteParser.Is_birthdate_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterObfuscate_field_prop(SQLiteParser.Obfuscate_field_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitObfuscate_field_prop(SQLiteParser.Obfuscate_field_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFrom_table_spec(SQLiteParser.From_table_specContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFrom_table_spec(SQLiteParser.From_table_specContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterTable_or_subquery(SQLiteParser.Table_or_subqueryContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -736,13 +832,13 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCompound_operator(SQLiteParser.Compound_operatorContext ctx) { }
+	@Override public void enterSet_operator(SQLiteParser.Set_operatorContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCompound_operator(SQLiteParser.Compound_operatorContext ctx) { }
+	@Override public void exitSet_operator(SQLiteParser.Set_operatorContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -856,25 +952,49 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCount_function(SQLiteParser.Count_functionContext ctx) { }
+	@Override public void enterResult_count_function(SQLiteParser.Result_count_functionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCount_function(SQLiteParser.Count_functionContext ctx) { }
+	@Override public void exitResult_count_function(SQLiteParser.Result_count_functionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAny_function(SQLiteParser.Any_functionContext ctx) { }
+	@Override public void enterCount_funct(SQLiteParser.Count_functContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAny_function(SQLiteParser.Any_functionContext ctx) { }
+	@Override public void exitCount_funct(SQLiteParser.Count_functContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAny_result_function(SQLiteParser.Any_result_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAny_result_function(SQLiteParser.Any_result_functionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAny_funct(SQLiteParser.Any_functContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAny_funct(SQLiteParser.Any_functContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1163,6 +1283,18 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAny_name(SQLiteParser.Any_nameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAnything_at_all(SQLiteParser.Anything_at_allContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAnything_at_all(SQLiteParser.Anything_at_allContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

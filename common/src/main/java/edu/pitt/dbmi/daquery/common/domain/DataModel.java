@@ -1,12 +1,14 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
@@ -25,19 +27,12 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
 
-import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
-import edu.pitt.dbmi.daquery.update.db.DBUpdate137;
+import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
 
 @Entity
 @Table(name="DATA_MODEL")
@@ -46,6 +41,17 @@ public class DataModel extends DaqueryObject implements Serializable
 
 	private static final long serialVersionUID = 29292842342523123l;
 
+	private static final DataAttribute emptyAttribute = new DataAttribute();
+	private static final List<DataAttribute> emptyAttributeList = new ArrayList<DataAttribute>();
+	
+	private static Hashtable<String, Hashtable<String, DataAttribute>> attributeInfoByModelId = new Hashtable<String, Hashtable<String, DataAttribute>>();
+	private static Hashtable<String, Hashtable<String, List<DataAttribute>>> attributeByTableByModelId = new Hashtable<String, Hashtable<String, List<DataAttribute>>>();
+	
+	@Transient
+	private Hashtable<String, DataAttribute> attributesByAttributeName = null;
+	@Transient
+	private Hashtable<String, List<DataAttribute>> attributesByTableName = null;
+	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name = "ID", unique=true, nullable=false)
@@ -65,12 +71,17 @@ public class DataModel extends DaqueryObject implements Serializable
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="dataModel")
 	private Set<DataSource> dataSources;	
 
+	@Expose
 	@OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy="dataModel")
 	private Set<DataAttribute> attributes;	
 
 	@Expose
 	@Column(name = "DATA_EXPORT_CONF")
 	private String dataExportConf;
+	
+	@Expose
+	@Column(name = "REVISION")
+	private Long revision;
 	
 	public DataModel(){}
 	
@@ -83,6 +94,116 @@ public class DataModel extends DaqueryObject implements Serializable
 	public DataModel(String uuid)
 	{
 		setDataModelId(uuid);
+	}
+	
+	public boolean contains(edu.pitt.dbmi.daquery.sql.domain.Table table)
+	{
+		if(table == null || StringHelper.isEmpty(table.getName())) return(false);
+		String key = getTableKey(table.getName());
+		return(getAttributesByTable().containsKey(key));
+	}
+	public List<DataAttribute> getAttributesForTable(edu.pitt.dbmi.daquery.sql.domain.Table table)
+	{
+		String key = getTableKey(table.getName());
+		if(! getAttributesByTable().containsKey(key)) return emptyAttributeList;
+		return(getAttributesByTable().get(key));
+	}
+	public String getTableKey(String name)
+	{
+		return(name.trim().toUpperCase());
+	}
+	public Hashtable<String, List<DataAttribute>> getAttributesByTable()
+	{
+		if(attributesByTableName == null)
+		{
+			if(attributeByTableByModelId.containsKey(dataModelId))
+				attributesByTableName = attributeByTableByModelId.get(dataModelId);
+			else
+			{
+				attributesByTableName = buildAttributesByTable();
+				attributeByTableByModelId.put(dataModelId, attributesByTableName);
+			}
+		}
+		return(attributesByTableName);
+	}
+	
+	Hashtable<String, List<DataAttribute>> buildAttributesByTable()
+	{
+		Hashtable<String, List<DataAttribute>> tbl = new Hashtable<String, List<DataAttribute>>();
+		for(DataAttribute da : this.attributes)
+		{
+			if((! StringHelper.isEmpty(da.getEntityName())) && (! StringHelper.isEmpty(da.getFieldName())))
+			{
+				
+				String key = getTableKey(da.getEntityName());
+				if(! tbl.containsKey(key))
+					tbl.put(key, new ArrayList<DataAttribute>());
+				tbl.get(key).add(da);
+			}
+		}
+		return(tbl);		
+	}
+	
+	public boolean contains(TableColumn col)
+	{
+		if(StringHelper.isBlank(col.getName()) || StringHelper.isBlank(col.getTableName())) return(false);
+		String key = getAttribKey(col.getName(), col.getTableName());
+		Hashtable<String, DataAttribute> attribs = getAttributeTable();
+		return(attribs.containsKey(key));
+	}
+	
+	public DataAttribute getAttribute(TableColumn col)
+	{
+		if(col == null) return null;
+		return(getAttribute(col.getName(), col.getTableName()));
+	}
+	
+	private DataAttribute getAttribute(String attribName, String tableName)
+	{
+		if(StringHelper.isEmpty(attribName) || StringHelper.isEmpty(tableName))
+			return(null);
+		String key = getAttribKey(attribName, tableName);
+		Hashtable<String, DataAttribute> attribs = getAttributeTable();
+		DataAttribute rVal = null;
+		if(attribs.containsKey(key))
+		{
+			DataAttribute da = attribs.get(key);
+			if(! da.equals(emptyAttribute)) rVal = da;
+		}
+		return(rVal);
+	}
+	private String getAttribKey(String attribName, String tableName)
+	{
+		return(attribName.trim().toUpperCase() + ":" + tableName.trim().toUpperCase());
+	}
+	
+	private Hashtable<String, DataAttribute> getAttributeTable()
+	{
+		if(attributesByAttributeName == null)
+		{
+			if(attributeInfoByModelId.containsKey(dataModelId))
+				attributesByAttributeName = attributeInfoByModelId.get(dataModelId);
+			else
+			{
+				attributesByAttributeName = buildAttributeTable();
+				attributeInfoByModelId.put(dataModelId, attributesByAttributeName);
+			}
+		}
+		return(attributesByAttributeName);
+	}
+	
+	private Hashtable<String, DataAttribute> buildAttributeTable()
+	{
+		Hashtable<String, DataAttribute> tbl = new Hashtable<String, DataAttribute>();
+		for(DataAttribute da : this.attributes)
+		{
+			if((! StringHelper.isEmpty(da.getEntityName())) && (! StringHelper.isEmpty(da.getFieldName())))
+			{
+				String key = getAttribKey(da.getFieldName(), da.getEntityName());
+				tbl.put(key, da);
+			}
+		}
+		return(tbl);
 	}
 	
 	public long getId(){return(id);}
@@ -106,12 +227,15 @@ public class DataModel extends DaqueryObject implements Serializable
 	public String getDataExportConf() { return this.dataExportConf; }
 	public void setDataExportConf(String dataExportConf) { this.dataExportConf = dataExportConf; }
 
+	public Long getRevision(){return(revision);}
+	public void setRevision(Long rev){revision = rev;}
+	
 	@Transient
 	public DataSource getDataSource(SourceType type)
 	{
 		for(DataSource ds: dataSources)
 		{
-			if(ds.getSourceTypeEnum() == type)
+			if(ds.getSourceTypeEnum().equals(type))
 			{
 				return(ds);
 			}
@@ -123,16 +247,9 @@ public class DataModel extends DaqueryObject implements Serializable
 	public DataExportConfig getExportConfig() throws DaqueryException
 	{
 		try {
-			//TODO: Hack for now.  If export config is empty read it from our file
-			if(StringHelper.isBlank(dataExportConf))
-			{
-				InputStream is = DataModel.class.getResourceAsStream("/data-export-config-cdm-v3.1.xml");
-				Scanner inputScanner = new Scanner(is);
-				dataExportConf = "";
-				while(inputScanner.hasNextLine())
-					dataExportConf = dataExportConf + inputScanner.nextLine() + "\n";
-				inputScanner.close();
-			}
+
+			if(StringHelper.isBlank(dataExportConf)) return null;
+			
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			StringReader reader = new StringReader(dataExportConf);
@@ -141,6 +258,40 @@ public class DataModel extends DaqueryObject implements Serializable
 		} catch(JAXBException je) {
 			throw new DaqueryException("Error data export configuration.  Possibly the XML is not formated correctly.", je);
 		}
+
+	}
+	
+	@Transient
+	public DataExportConfig getCDM31ExportConfigFromFile() throws DaqueryException
+	{
+		try
+		{
+			InputStream is = DataModel.class.getResourceAsStream("/data-export-config-cdm-v3.1.xml");
+			if(is == null)
+			{
+				is = new FileInputStream(new File("/home/devuser/projects/daquery/ws/src/main/resources/data-export-config-cdm-v3.1.xml"));
+			}
+			Scanner inputScanner = new Scanner(is);
+			dataExportConf = "";
+			while(inputScanner.hasNextLine())
+				dataExportConf = dataExportConf + inputScanner.nextLine() + "\n";
+			inputScanner.close();
+
+			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			StringReader reader = new StringReader(dataExportConf);
+			DataExportConfig exportConfig = (DataExportConfig) jaxbUnmarshaller.unmarshal(reader);
+			reader.close();
+			return(exportConfig);
+		}
+		catch(JAXBException je)
+		{
+			throw new DaqueryException("Error data export configuration.  Possibly the XML is not formated correctly.", je);
+		}
+		catch(FileNotFoundException fnfe)
+		{
+			throw new DaqueryException("File not found!!!!");
+		}		
 	}
 	
 //	@Override

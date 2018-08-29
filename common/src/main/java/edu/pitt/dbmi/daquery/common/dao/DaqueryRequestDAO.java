@@ -8,6 +8,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
@@ -25,6 +27,11 @@ public class DaqueryRequestDAO extends AbstractDAO {
 	
 	public static void saveOrUpdate(DaqueryRequest request) throws DaqueryException
 	{
+		if(request.getInquiry() instanceof SQLQuery) {
+			for(SQLCode c : ((SQLQuery)request.getInquiry()).getCode()) {
+				c.setQuery((SQLQuery)(request.getInquiry()));
+			}
+		}
 		AbstractDAO.updateOrSave(request);
 	}
 	

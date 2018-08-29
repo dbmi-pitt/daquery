@@ -1,8 +1,6 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
 import java.io.Serializable;
-import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -16,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -59,7 +56,6 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
     @JoinColumn(name="MODEL_ID")
     DataModel dataModel;
 	
-	
 	public DataSource() {
 		
 	}
@@ -82,7 +78,7 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 
 	public DataModel getDataModel(){return(dataModel);}
 	public void setDataModel(DataModel model){dataModel = model;}
-
+	
 	@Transient
 	public SourceType getSourceTypeEnum()
 	{

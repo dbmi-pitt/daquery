@@ -9,6 +9,7 @@ import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.queue.QueueManager;
 import edu.pitt.dbmi.daquery.queue.ResponseTask;
@@ -26,7 +27,8 @@ public class TestDataExport
 			DaqueryRequest aggReq = aggResponse.getRequest();
 
 			Inquiry inq = aggResponse.getDownloadDirective();
-			inq.setAggregate(false);
+			//inq.setAggregate(false);
+			inq.setQueryType(QueryType.DATA.name());
 			inq.setAuthor((DaqueryUser) aggReq.getRequester());
 			inq.setInquiryDescription(aggReq.getInquiry().getInquiryDescription() + " [DOWNLOAD]");
 			inq.setInquiryName(aggReq.getInquiry().getInquiryName());
