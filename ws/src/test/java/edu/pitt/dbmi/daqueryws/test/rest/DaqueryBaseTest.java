@@ -34,7 +34,7 @@ public class DaqueryBaseTest {
     @BeforeClass
     public static void setup() {
     	
-    	DomainTestSuite.init();
+    	DomainTestSuite.getPropertiesFromFile();
         String port = System.getProperty("server.port");
         if (port == null) {
             RestAssured.port = Integer.valueOf(defaultPort);
@@ -44,7 +44,7 @@ public class DaqueryBaseTest {
         }
         System.out.println("Here is DomainTestSuite.testPort: " + DomainTestSuite.testPort);
         
-        if (!DomainTestSuite.testPort.isEmpty()) {
+        if (!DomainTestSuite.getTestPort().isEmpty()) {
         	RestAssured.port = Integer.valueOf(DomainTestSuite.testPort);
         }
         System.out.println("Here is System.getProperty(\"server.port\"): " + System.getProperty("server.port"));
