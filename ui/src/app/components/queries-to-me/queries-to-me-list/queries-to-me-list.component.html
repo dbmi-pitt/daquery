@@ -35,7 +35,7 @@
               </div>
             </div>
             <div *ngIf="selectedRequest.responses[0].status === 'PENDING'" class="col-md-6">
-              <button *ngIf="showApproveDenyBtn" [class]="sqlAnalyzerResponse?.deidUnresolved ? 'btn btn-warning' : 'btn btn-success'" (click)="approveRequest()" [disabled]="sqlAnalyzerResponse?.rejected">{{ sqlAnalyzerResponse?.deidUnresolved ? 'Approve with warnings' : 'Approve' }}</button>
+              <button *ngIf="showApproveDenyBtn" [class]="sqlAnalyzerResponse?.deidUnresolved ? 'btn btn-warning' : 'btn btn-success'" (click)="approveRequest()" [disabled]="sqlAnalyzerResponse?.rejected || !selectedRequest.code">{{ sqlAnalyzerResponse?.deidUnresolved ? 'Approve with warnings' : 'Approve' }}</button>
               <button *ngIf="showApproveDenyBtn" class="btn btn-danger" (click)="denyRequest()">Deny</button>
               <button *ngIf="!showApproveDenyBtn" class="btn btn-block btn-default disabled">To respond to this request the STEWARD role is required</button>
             </div>
@@ -51,14 +51,19 @@
             </div>
           </div>
           <hr />
-          <div class="row">
+          <div *ngIf="selectedRequest.code" class="row">
             <div class="col-md-12" style="overflow-y: auto; max-height: 57vh">
-              <label>Patient set constructed from:</label>
+              <label>Query will be executed:</label>
               <pre>
                 <code>
                   {{ selectedRequest.code }}
                 </code>
               </pre>
+            </div>
+          </div>
+          <div *ngIf="!selectedRequest.code" class="row">
+            <div class="col-md-12">
+              <p class="text-red">No SQL code found to execute on db type {{selectedRequest.network.dataModel.dataSources[0].dialect}}</p>
             </div>
           </div>
 
