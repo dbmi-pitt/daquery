@@ -76,6 +76,15 @@ public class SQLDownload extends SQLQuery implements Download
 		SQLDialect dialect = ((SQLDataSource) model.getDataSource(SourceType.SQL)).getDialectEnum();
 		String lclCode = getRunnableCode(dialect);
 		
+		if(StringHelper.isEmpty(lclCode))
+		{
+			errorMessage = "No SQL code found to execute on db type: " + dialect;
+			response.setStatusEnum(ResponseStatus.ERROR);
+			response.setErrorMessage(errorMessage);
+			return(response);			
+		}
+		
+		
 		Connection conn = null;
 		Statement st = null;
 		ResultSet rs = null;

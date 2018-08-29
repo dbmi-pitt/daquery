@@ -208,6 +208,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		try
 		{
 			String sql = netAndCode.getSqlCode();
+			if(StringHelper.isEmpty(sql))
+				return(ResponseHelper.getErrorResponse(400, "No code provided.", null, null));
 			QueryInfo info = new QueryInfo();
 			AggregateSQLAnalyzer aggregateAnalyzer = new AggregateSQLAnalyzer(sql);
 			if(aggregateAnalyzer.isRejected())
