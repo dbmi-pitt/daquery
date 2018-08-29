@@ -37,8 +37,12 @@ import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.EmailContents;
+import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
+import edu.pitt.dbmi.daquery.common.domain.SourceType;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.EmailUtil;
@@ -94,6 +98,11 @@ public class RequestEndpoint extends AbstractEndpoint {
             dao.openCurrentSession();
             List requests = dao.list(directions);
             dao.closeCurrentSession();
+            
+            for(Object r : requests){
+            	DaqueryRequest request = (DaqueryRequest)r;
+            	request.setCode(((SQLQuery)request.getInquiry()).getCode(((SQLDataSource)request.getNetwork().getDataModel().getDataSource(SourceType.SQL)).getDialectEnum()));
+            }
             
             String jsonString = toJsonArray(requests);
             return Response.ok(200).entity(jsonString).build();
@@ -182,7 +191,19 @@ public class RequestEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
+            Object dobj = form.get("dialect");
+            if(dobj == null)
+            	return(ResponseHelper.getErrorResponse(400, "Dialect parameter required.", null, null));
+            
+            String dialectStr = dobj.toString();
+            SQLDialect dialect = SQLDialect.fromString(dialectStr);
+            if(dialect == null)
+            	return(ResponseHelper.getErrorResponse(400, "Invalid dialect value: " + dialectStr, null, null));
+            
+            
             DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
+            
+            
             
             dao.openCurrentSessionwithTransaction();
             
@@ -197,13 +218,14 @@ public class RequestEndpoint extends AbstractEndpoint {
 		            request.setSentTimestamp(new Date());
 		            request.setRequestGroup(requestGroupUUID.toString());
 		            Inquiry inquiry = new SQLQuery(true);
-		            inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+		            //inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+		            inquiry.setQueryType(form.get("dataType").toString().toUpperCase());
 		            inquiry.setAuthor(currentUser);
 		            inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network").toString()));
 		            inquiry.setVersion(1);
 		            inquiry.setInquiryName(form.get("inquiryName").toString());
 		            inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
-		            ((SQLQuery) inquiry).setCode(form.get("oracleQuery").toString());
+		            ((SQLQuery) inquiry).addCode(new SQLCode(form.get("oracleQuery").toString(), dialect));
 		            request.setInquiry(inquiry);
 		            dao.save(request);
             	}

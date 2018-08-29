@@ -19,7 +19,7 @@ public class ResponseDAO extends AbstractDAO
 {
 	private final static Logger log = Logger.getLogger(ResponseDAO.class.getName());
 	
-	public static void saveOrUpdate(DaqueryResponse response) throws DaqueryException
+	public static synchronized void saveOrUpdate(DaqueryResponse response) throws DaqueryException
 	{
 		response.setReplyTimestamp(new Date());
 		AbstractDAO.updateOrSave(response);

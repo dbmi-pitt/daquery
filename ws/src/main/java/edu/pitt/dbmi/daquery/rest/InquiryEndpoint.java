@@ -3,8 +3,13 @@ package edu.pitt.dbmi.daquery.rest;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +34,9 @@ import edu.pitt.dbmi.daquery.common.dao.InquiryDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryType;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 
@@ -169,13 +177,26 @@ public class InquiryEndpoint extends AbstractEndpoint {
             dao.openCurrentSessionwithTransaction();
             // only create SQLQuery for now
             Inquiry inquiry = new SQLQuery(true);
-            inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+            //inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+            inquiry.setQueryType(form.get("queryType").toString().toUpperCase());
             inquiry.setAuthor(currentUser);
             inquiry.setNetwork(NetworkDAO.queryNetwork(form.get("network").toString()));
             inquiry.setVersion(1);
             inquiry.setInquiryName(form.get("inquiryName").toString());
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
-            ((SQLQuery) inquiry).setCode(form.get("sqlQuery").toString());
+            
+            Set<SQLCode> s = new HashSet<>();
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString().equals(""))
+            	s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString(), SQLDialect.ANSI));
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString().equals(""))
+            	s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString(), SQLDialect.ORACLE));
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString().equals(""))
+            	s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString(), SQLDialect.SQL_SERVER));
+            for(SQLCode c : s) {
+            	c.setQuery((SQLQuery)inquiry);
+            }
+            ((SQLQuery)inquiry).setCode(s);
+
             dao.save(inquiry);
             dao.closeCurrentSessionwithTransaction();
             
@@ -223,12 +244,54 @@ public class InquiryEndpoint extends AbstractEndpoint {
             
             dao.openCurrentSessionwithTransaction();
             Inquiry inquiry = dao.getByUUID(id);
-            inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+            //inquiry.setAggregate(form.get("dataType").toString().toLowerCase().equals("aggregate"));
+            inquiry.setQueryType(form.get("queryType").toString().toUpperCase());
             inquiry.setAuthor(currentUser);
             inquiry.setVersion(inquiry.getVersion() + 1);
             inquiry.setInquiryName(form.get("inquiryName").toString());
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
-            ((SQLQuery)inquiry).setCode(form.get("sqlQuery").toString());
+            
+            ArrayList<String> codeToAdd = new ArrayList<>();
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString().equals("")) codeToAdd.add("ansi");
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString().equals("")) codeToAdd.add("oracle");
+            if(!((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString().equals("")) codeToAdd.add("sqlServer");
+            Set<SQLCode> s = ((SQLQuery)inquiry).getCode();
+            Iterator<SQLCode> iter = s.iterator();
+            
+            while(iter.hasNext()) {
+            	SQLCode c = iter.next();
+            	if(c.getDialect().equals(SQLDialect.ANSI.toString())) {
+            		if(!((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString().equals("")) {
+            			c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString());
+            			codeToAdd.remove("ansi");
+            		} else {
+            			iter.remove();
+            		}
+            	} else if(c.getDialect().equals(SQLDialect.ORACLE.toString())) {
+            		if(!((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString().equals("")) {
+            			c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("oracle").toString());
+            			codeToAdd.remove("oracle");
+            		} else {
+            			iter.remove();
+            		}
+            	} else if(c.getDialect().equals(SQLDialect.SQL_SERVER.toString())) {
+            		if(!((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString().equals("")) {
+            			c.setCode(((LinkedHashMap<?, ?>)form.get("query")).get("sqlServer").toString());
+            			codeToAdd.remove("sqlServer");
+            		} else {
+            			iter.remove();
+            		}
+            	}
+            
+            }
+            for(String dialect : codeToAdd) {
+            	String dialect_enum = dialect.replaceAll("(.)(\\p{Upper})", "$1_$2").toLowerCase();
+            	s.add(new SQLCode(((LinkedHashMap<?, ?>)form.get("query")).get(dialect).toString(), SQLDialect.fromString(dialect_enum)));
+            }
+            for(SQLCode c : s) {
+            	c.setQuery((SQLQuery)inquiry);
+            }
+            
             dao.update(inquiry.getId(), inquiry);
             dao.closeCurrentSessionwithTransaction();
             

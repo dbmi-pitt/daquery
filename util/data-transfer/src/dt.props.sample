@@ -1,0 +1,32 @@
+#sql server where data will be copied to
+to.jdbc.class=com.microsoft.sqlserver.jdbc.SQLServerDriver
+to.url=jdbc:sqlserver://dbmi-sql-dev-01.dbmi.pitt.edu;databaseName=CDM41;
+to.username=pcori_etl
+to.password=
+
+#oracle server where data will be copied from
+from.jdbc.class=oracle.jdbc.driver.OracleDriver
+from.url=jdbc:oracle:thin:@dbmi-db-prod-02.dbmi.pitt.edu:1521:dbmi11
+#from.username=pcori_etl_31
+#from.password=
+from.username=cdm_41_etl
+from.password=
+
+#list of tables to copy
+#cdm 3.1
+#from.included.tables=CONDITION,DEATH,DEATH_CAUSE,DEMOGRAPHIC,DIAGNOSIS,DISPENSING,ENCOUNTER,ENROLLMENT,LAB_RESULT_CM,PCORNET_TRIAL,PRESCRIBING,PRO_CM,PROCEDURES,VITAL
+
+#cdm4.1
+from.included.tables=CONDITION,DEATH,DEATH_CAUSE,DEMOGRAPHIC,DIAGNOSIS,DISPENSING,ENCOUNTER,ENROLLMENT,HARVEST,LAB_RESULT_CM,MED_ADMIN,OBS_CLIN,OBS_GEN,PATH_COHORT,PATH_STUDY,PATH_TRIAL,PCORNET_TRIAL,PCORNET_TRIAL,PRESCRIBING,PRO_CM,PROCEDURES,PROVIDER,RUCA_MAPPING,VITAL
+
+#where clause that will be tacked on to select quries when retrieving data from each table
+#exclude or leave blank if all records are needed.
+default.where=PATID like 'PIT1%'
+
+#if the above where default.where clause doesn't work for a particular table, specify a table specific select here in the form, tablename_select
+#the following are all for the CDM4.1 transfer
+harvest_select=select * from harvest
+ruca_mapping_select=select * from ruca_mapping
+provider_select=select * from provider
+path_cohort_select=select * from path_cohort
+path_study_select=select * from path_study

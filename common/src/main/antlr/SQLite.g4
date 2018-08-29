@@ -42,7 +42,7 @@ error
  ;
 
 sql_stmt_list
- : sql_stmt ( sql_stmt )*
+ : sql_stmt ( sql_stmt )* ( anything_at_all )*
  ;
 
 sql_stmt
@@ -51,7 +51,6 @@ sql_stmt
                                       | attach_stmt
                                       | begin_stmt
                                       | commit_stmt
-                                      | compound_select_stmt
                                       | create_index_stmt
                                       | create_table_stmt
                                       | create_trigger_stmt
@@ -64,18 +63,18 @@ sql_stmt
                                       | drop_table_stmt
                                       | drop_trigger_stmt
                                       | drop_view_stmt
-                                      | factored_select_stmt
                                       | insert_stmt
                                       | pragma_stmt
                                       | reindex_stmt
                                       | release_stmt
                                       | rollback_stmt
                                       | savepoint_stmt
-                                      | simple_select_stmt
+                                      | select_set                                      
                                       | select_stmt
                                       | update_stmt
                                       | update_stmt_limited
-                                      | vacuum_stmt ) end_of_select
+                                      | vacuum_stmt
+                                      | with_select_stmt ) end_of_select
  ;
 
 end_of_select
@@ -105,13 +104,13 @@ commit_stmt
  : ( K_COMMIT | K_END ) ( K_TRANSACTION transaction_name? )?
  ;
 
-compound_select_stmt
+select_set
  : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( ( K_UNION K_ALL? | K_INTERSECT | K_EXCEPT ) select_core )+
+   select_core ( set_operator select_core )+
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
-
+ 
 create_index_stmt
  : K_CREATE K_UNIQUE? K_INDEX ( K_IF K_NOT K_EXISTS )?
    ( database_name '.' )? index_name K_ON table_name '(' indexed_column ( ',' indexed_column )* ')'
@@ -182,13 +181,6 @@ drop_view_stmt
  : K_DROP K_VIEW ( K_IF K_EXISTS )? ( database_name '.' )? view_name
  ;
 
-factored_select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( compound_operator select_core )*
-   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
- ;
-
 insert_stmt
  : with_clause? ( K_INSERT 
                 | K_REPLACE
@@ -227,25 +219,17 @@ savepoint_stmt
  : K_SAVEPOINT savepoint_name
  ;
 
-simple_select_stmt
+with_select_stmt
  : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
- ;
-
-select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_or_values ( compound_operator select_or_values )*
+   select_core 
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
-
-select_or_values
- : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
-   ( multi_from_clause )?
-   ( K_WHERE expr )?
-   ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
- | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
+ 
+select_stmt
+ : select_core 
+   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
 
 update_stmt
@@ -317,6 +301,7 @@ conflict_clause
     AND
     OR
 */
+
 expr
  : literal_value
  | BIND_PARAMETER
@@ -329,8 +314,8 @@ expr
  | expr ( '<' | '<=' | '>' | '>=' ) expr
  | expr ( comparison_operator ) expr
  | expr and_or expr
- | count_function
- | any_function
+ | count_funct
+ | any_funct
  | '(' expr ')'
  | K_CAST '(' expr K_AS type_name ')'
  | expr K_COLLATE collation_name
@@ -345,6 +330,7 @@ expr
                     | ( database_name '.' )? table_name )
  | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'
  | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END
+ | K_EXTRACT '(' ( K_YEAR | K_MONTH | K_DAY | K_HOUR | K_MINUTE | K_SECOND | K_TIMEZONE_HOUR | K_TIMEZONE_MINUTE | K_TIMEZONE_REGION | K_TIMEZONE_ABBR ) K_FROM expr ')'  
  | raise_function
  ;
 
@@ -352,6 +338,12 @@ dbColumnExpr
  :
  | ( ( database_name '.' )? table_name '.' )? column_name ( K_AS? column_alias )?
  ;
+ 
+result_column_expr
+ :
+| ( ( database_name '.' )? table_name '.' )? column_name deid_tag? ( K_AS? column_alias )?
+ ;
+ 
 comparison_operator
  : '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | in_keyword | like_keyword | K_GLOB | K_MATCH | K_REGEXP
  ;
@@ -413,15 +405,51 @@ common_table_expression
 result_column
  : '*'
  | table_name '.' '*'
- | dbColumnExpr
- | count_function
- | any_function
+ | result_column_expr
+ | result_count_function
+ | any_result_function
  ;
 
-table_or_subquery
+deid_tag
+ : '<' K_IDENTIFIABLE ident_prop?  '>'
+ | '<' K_NOTIDENTIFIABLE '>'
+ ;
+ 
+ident_prop
+ : id_field_prop? date_shift_field_prop? obfuscate_field_prop? is_zip_prop?
+ ;
+
+is_zip_prop
+ : K_ISZIPCODE
+ ;
+id_field_prop
+ : K_ISID '=' ( K_TRUE | K_FALSE )
+ ;
+ 
+date_shift_field_prop
+ : K_DATESHIFT is_birthdate_prop? (K_TRACKED K_BY tracking_column_expr)? 
+ ;
+ 
+tracking_column_expr
+ :
+ | ( ( database_name '.' )? table_name '.' )? column_name
+ ;
+ 
+  is_birthdate_prop
+  : K_ISBIRTHDATE
+  ;
+  obfuscate_field_prop
+  : K_OBFUSCATE ('=' ( K_TRUE | K_FALSE ))?
+  ;
+ 
+from_table_spec
  : ( database_name '.' )? table_name ( K_AS? table_alias )?
    ( K_INDEXED K_BY index_name
    | K_NOT K_INDEXED )?
+ ;
+ 
+table_or_subquery
+ : from_table_spec
  | '(' ( table_or_subquery ( ',' table_or_subquery )*
        | join_clause )
    ')' ( K_AS? table_alias )?
@@ -446,7 +474,7 @@ select_core
  : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
    ( multi_from_clause )?
    ( K_WHERE expr )?
-   ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
+   ( K_GROUP K_BY (dbColumnExpr | any_funct) ( ',' (dbColumnExpr | any_funct))* ( K_HAVING expr )? )?
  | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
  ;
 
@@ -454,11 +482,12 @@ multi_from_clause
  : K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause )
  ;
 
-compound_operator
+set_operator
  : K_UNION
  | K_UNION K_ALL
  | K_INTERSECT
  | K_EXCEPT
+ | K_MINUS
  ;
 
 cte_table_name
@@ -532,6 +561,8 @@ keyword
  | K_CURRENT_TIME
  | K_CURRENT_TIMESTAMP
  | K_DATABASE
+ | K_DATESHIFT
+ | K_DAY
  | K_DEFAULT
  | K_DEFERRABLE
  | K_DEFERRED
@@ -546,9 +577,11 @@ keyword
  | K_ESCAPE
  | K_EXCEPT
  | K_EXCLUSIVE
+ | K_EXTRACT
  | K_EXISTS
  | K_EXPLAIN
  | K_FAIL
+ | K_FALSE
  | K_FOR
  | K_FOREIGN
  | K_FROM
@@ -556,6 +589,8 @@ keyword
  | K_GLOB
  | K_GROUP
  | K_HAVING
+ | K_HOUR
+ | K_IDENTIFIABLE
  | K_IF
  | K_IGNORE
  | K_IMMEDIATE
@@ -569,20 +604,28 @@ keyword
  | K_INTERSECT
  | K_INTO
  | K_IS
+ | K_ISBIRTHDATE
+ | K_ISID
  | K_ISNULL
+ | K_ISZIPCODE
  | K_JOIN
  | K_KEY
  | K_LEFT
  | K_LIKE
  | K_LIMIT
  | K_MATCH
+ | K_MINUS
+ | K_MINUTE
+ | K_MONTH
  | K_NATURAL
  | K_NO
  | K_NOT
+ | K_NOTIDENTIFIABLE
  | K_NOTNULL
  | K_NULL
  | K_OF
  | K_OFFSET
+ | K_OFFUSCATE
  | K_ON
  | K_OR
  | K_ORDER
@@ -604,15 +647,22 @@ keyword
  | K_ROLLBACK
  | K_ROW
  | K_SAVEPOINT
+ | K_SECOND
  | K_SELECT
  | K_SET
  | K_TABLE
  | K_TEMP
  | K_TEMPORARY
  | K_THEN
+ | K_TIMEZONE_ABBR
+ | K_TIMEZONE_HOUR
+ | K_TIMEZONE_MINUTE
+ | K_TIMEZONE_REGION
  | K_TO
+ | K_TRACKED
  | K_TRANSACTION
  | K_TRIGGER
+ | K_TRUE
  | K_UNION
  | K_UNIQUE
  | K_UPDATE
@@ -625,6 +675,7 @@ keyword
  | K_WHERE
  | K_WITH
  | K_WITHOUT
+ | K_YEAR
  ;
 
 // TODO check all names below
@@ -633,12 +684,20 @@ name
  : any_name
  ;
 
-count_function
- : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' | K_DISTINCT? any_function )?  ')' (K_AS? column_alias)?
+result_count_function
+ : K_COUNT '(' ( distinct_keyword? result_column_expr | '*' | K_DISTINCT? any_funct )?  ')' deid_tag? (K_AS? column_alias)?
+ ;
+
+count_funct
+ : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' | K_DISTINCT? any_funct )?  ')' deid_tag? (K_AS? column_alias)?
+ ;
+
+any_result_function
+ : function_name '(' ( K_DISTINCT? result_column_expr ( ',' result_column_expr )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
  ;
  
-any_function
- : function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
+any_funct
+ : function_name '(' ( K_DISTINCT? dbColumnExpr ( ',' dbColumnExpr )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
  ;
  
 and_keyword
@@ -740,6 +799,10 @@ any_name
  | '(' any_name ')'
  ;
 
+anything_at_all
+ : (.)+
+ ;
+
 SCOL : ';';
 DOT : '.';
 OPEN_PAR : '(';
@@ -798,6 +861,8 @@ K_CURRENT_DATE : C U R R E N T '_' D A T E;
 K_CURRENT_TIME : C U R R E N T '_' T I M E;
 K_CURRENT_TIMESTAMP : C U R R E N T '_' T I M E S T A M P;
 K_DATABASE : D A T A B A S E;
+K_DATESHIFT : D A T E S H I F T;
+K_DAY : D A Y;
 K_DEFAULT : D E F A U L T;
 K_DEFERRABLE : D E F E R R A B L E;
 K_DEFERRED : D E F E R R E D;
@@ -814,6 +879,8 @@ K_EXCEPT : E X C E P T;
 K_EXCLUSIVE : E X C L U S I V E;
 K_EXISTS : E X I S T S;
 K_EXPLAIN : E X P L A I N;
+K_EXTRACT : E X T R A C T;
+K_FALSE : F A L S E;
 K_FAIL : F A I L;
 K_FOR : F O R;
 K_FOREIGN : F O R E I G N;
@@ -822,7 +889,9 @@ K_FULL : F U L L;
 K_GLOB : G L O B;
 K_GROUP : G R O U P;
 K_HAVING : H A V I N G;
+K_HOUR : H O U R;
 K_IF : I F;
+K_IDENTIFIABLE : I D E N T I F I A B L E;
 K_IGNORE : I G N O R E;
 K_IMMEDIATE : I M M E D I A T E;
 K_IN : I N;
@@ -835,20 +904,28 @@ K_INSTEAD : I N S T E A D;
 K_INTERSECT : I N T E R S E C T;
 K_INTO : I N T O;
 K_IS : I S;
+K_ISBIRTHDATE : I S B I R T H D A T E;
+K_ISID : I S I D;
 K_ISNULL : I S N U L L;
+K_ISZIPCODE : I S Z I P C O D E;
 K_JOIN : J O I N;
 K_KEY : K E Y;
 K_LEFT : L E F T;
 K_LIKE : L I K E;
 K_LIMIT : L I M I T;
 K_MATCH : M A T C H;
+K_MINUS : M I N U S;
+K_MINUTE : M I N U T E;
+K_MONTH : M O N T H;
 K_NATURAL : N A T U R A L;
 K_NO : N O;
 K_NOT : N O T;
+K_NOTIDENTIFIABLE : N O T I D E N T I F I A B L E;
 K_NOTNULL : N O T N U L L;
 K_NULL : N U L L;
 K_OF : O F;
 K_OFFSET : O F F S E T;
+K_OBFUSCATE : O B F U S C A T E;
 K_ON : O N;
 K_OR : O R;
 K_ORDER : O R D E R;
@@ -870,15 +947,22 @@ K_RIGHT : R I G H T;
 K_ROLLBACK : R O L L B A C K;
 K_ROW : R O W;
 K_SAVEPOINT : S A V E P O I N T;
+K_SECOND : S E C O N D;
 K_SELECT : S E L E C T;
 K_SET : S E T;
 K_TABLE : T A B L E;
 K_TEMP : T E M P;
 K_TEMPORARY : T E M P O R A R Y;
 K_THEN : T H E N;
+K_TIMEZONE_ABBR : T I M E Z O N E '_' A B B R;
+K_TIMEZONE_HOUR : T I M E Z O N E '_' H O U R;
+K_TIMEZONE_MINUTE : T I M E Z O N E '_' M I N U T E;
+K_TIMEZONE_REGION : T I M E Z O N E '_' R E G I O N;
 K_TO : T O;
+K_TRACKED : T R A C K E D;
 K_TRANSACTION : T R A N S A C T I O N;
 K_TRIGGER : T R I G G E R;
+K_TRUE : T R U E;
 K_UNION : U N I O N;
 K_UNIQUE : U N I Q U E;
 K_UPDATE : U P D A T E;
@@ -891,6 +975,7 @@ K_WHEN : W H E N;
 K_WHERE : W H E R E;
 K_WITH : W I T H;
 K_WITHOUT : W I T H O U T;
+K_YEAR : Y E A R;
 
 IDENTIFIER
  : '"' (~'"' | '""')* '"'

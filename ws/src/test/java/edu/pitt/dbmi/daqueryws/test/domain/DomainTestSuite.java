@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -10,9 +11,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
@@ -24,8 +30,10 @@ import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
+import edu.pitt.dbmi.daquery.common.util.ApplicationPropertiesFile;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
+import edu.pitt.dbmi.daquery.common.util.StringHelper;
 
 
 @RunWith(Suite.class)
@@ -44,10 +52,11 @@ import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 public class DomainTestSuite {
 	
     private final static Logger logger = Logger.getLogger(DomainTestSuite.class.getName());
+	private static Properties props = null;
   
     public static String databaseHomeDir = "/opt/apache-tomcat-6.0.53";
-    public static String adminEmail = "shirey@pitt.edu";
-    public static String adminPassword = "demouser";
+    public static String adminEmail = "";
+    public static String adminPassword = "";
     public static String adminRealName = "Test UserAdmin Account";
     public static String localSiteName = "testSite1";
 
@@ -55,10 +64,16 @@ public class DomainTestSuite {
     public static void init() {
     	AppProperties.setDevHomeDir(DomainTestSuite.databaseHomeDir);
     	String localSiteURL = "http://localhost:8008/";
+    	
     	//String adminEmail = "dqadmin@pitt.edu";
     	//String adminPassword = "temppassword";
     	//String adminRealName = "Test User";
     	try {
+    		props = getPropertiesFromFile();
+    		DomainTestSuite.adminEmail = getTestUsername();
+    		assertFalse(DomainTestSuite.adminEmail.isEmpty());
+    		DomainTestSuite.adminPassword = getTestPassword();
+    		assertFalse(DomainTestSuite.adminPassword.isEmpty());    		
 			assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), localSiteName, localSiteURL, adminEmail, adminPassword, adminRealName));
 			if(AppSetup.isErroredSetup())
 				throw new DaqueryException(AppSetup.getErrorMessage());
@@ -74,6 +89,42 @@ public class DomainTestSuite {
 	    		logger.info(e.getMessage());
 	    }
     }
+
+	public static Properties getPropertiesFromFile()
+	{
+		if(props == null)
+		{
+			String testFilePath = "/opt/apache-tomcat-6.0.53/conf/test.properties";
+			File initialFile = new File(testFilePath);
+		    InputStream is = null;
+		    
+		    try {is = new FileInputStream(initialFile);}
+		    catch (Throwable t)
+		    {
+				logger.log(Level.SEVERE, "Find file " + testFilePath, t);		    	
+		    }
+			props = new Properties();
+			try{props.load(is);}
+			catch(Throwable t)
+			{
+				logger.log(Level.SEVERE, "Unable to load test.properties from " + AppProperties.getConfDirectory(), t);
+			}
+		}
+		return(props);
+	}
+
+	private static String getTestUsername()
+	{
+		String username = props.getProperty("test.username", "");
+		return username;
+	}
+
+	private static String getTestPassword()
+	{
+		String username = props.getProperty("test.password", "");
+		return username;
+	}
+
     
     @Test
     //I added this method because maven's surefire plugin does not like it

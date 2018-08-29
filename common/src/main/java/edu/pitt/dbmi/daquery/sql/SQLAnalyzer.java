@@ -9,19 +9,16 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.NoViableAltException;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.hibernate.internal.util.StringHelper;
 
 import edu.pitt.dbmi.daquery.sql.parser.SqlAbstractVisitor;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteLexer;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Count_functionContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.DbColumnExprContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Distinct_keywordContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.End_of_selectContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_columnContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Anything_at_allContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Sql_stmtContext;
 
 public class SQLAnalyzer extends SqlAbstractVisitor
 {
@@ -66,9 +63,10 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 				String cName = node.self.getClass().getSimpleName();
 				System.out.println(cName + ":  " + node.self.getText());
 			}
-			
-			if(node.self instanceof End_of_selectContext) statementCount++;
 		}
+		if(node.self instanceof Sql_stmtContext) statementCount++;
+		if(node.self instanceof Anything_at_allContext) 
+			setRejection("Extra or unknown code found at the end of the statement.");
 		
 		if(! rejected)
 		{
@@ -79,6 +77,12 @@ public class SQLAnalyzer extends SqlAbstractVisitor
 	}
 	public SQLAnalyzer(String sql)
 	{
+		if(StringHelper.isEmpty(sql))
+		{
+			rejectMessage = "No SQL code provided.";
+			logger.log(Level.SEVERE, "No SQL code provided to parser.");
+			return;
+		}
 		try
 		{
 			

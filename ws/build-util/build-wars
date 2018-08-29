@@ -1,5 +1,5 @@
 cd ../../common/
-mvn clean install
+./build-no-test.sh
 cd ../central/
 mvn clean install
 cd ../ws/

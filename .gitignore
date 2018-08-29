@@ -1,6 +1,8 @@
 *~
 .settings/
 npm-debug.log
+.metadata
+RemoteSystemsTempFiles
 
 build.version
 

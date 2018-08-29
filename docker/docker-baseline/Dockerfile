@@ -17,7 +17,7 @@ COPY apache-tomcat-6.0.53.tar.gz /localdata/apache-tomcat-6.0.53.tar.gz
 RUN chmod 755 /localdata/apache-tomcat-6.0.53.tar.gz
 RUN cd /localdata && tar xvzf apache-tomcat-6.0.53.tar.gz
 RUN mv -f /localdata/apache-tomcat-6.0.53 /usr/local/tomcat
-COPY catalina.sh /usr/local/tomcat/bin
+COPY catalina.sh /usr/local/tomcat/bin/catalina.sh
 RUN echo 'export CATALINA_HOME=/usr/local/tomcat' >>~/.bashrc
 RUN echo 'export PATH=$CATALINA_HOME/bin:$PATH' >>~/.bashrc
 

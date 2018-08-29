@@ -3,6 +3,8 @@ package edu.pitt.dbmi.daquery.dev;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDownload;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
@@ -16,7 +18,7 @@ public class RequestResponseDataTest
 		{
 			AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
 			SQLDownload sd = new SQLDownload(true);
-			sd.setCode("22222222ABCD blech");
+			sd.addCode(new SQLCode("22222222ABCD blech", SQLDialect.ANSI));
 			sd.setInquiryDescription("222222la la la");
 			
 			s = HibernateConfiguration.openSession();
