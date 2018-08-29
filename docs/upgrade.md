@@ -3,7 +3,7 @@ layout: page
 ---
 ## Daquery Data Tool: Upgrading
 
-To upgrade Daquery it is usually a simple manner of redeploying the Daquery war file.  If other steps are needed for a particular build those steps will be listed on the release page for that build. Before proceeding check the [release](https://github.com/dbmi-pitt/daquery/releases/latest) for any additional instructions.
+To upgrade Daquery it is usually a simple manner of redeploying the Daquery war file.  If other steps are needed for a particular build those steps will be listed on the release page for that build. Before proceeding check the [release](https://github.com/dbmi-pitt/daquery/releases/latest){:target="_blank"} for any additional instructions.
 
 * Login to your Daquery server as root or a user who has root privileges.
 
@@ -23,7 +23,7 @@ To upgrade Daquery it is usually a simple manner of redeploying the Daquery war 
 [root@pathi2b2 ~]# rm -rf /path/to/tomcat/webapps/daquery
 [root@pathi2b2 ~]# rm -rf /path/to/tomcat/work/Catalina/localhost/daquery
 ```
-* Download a copy of the war file from the Daquery [release page](https://github.com/dbmi-pitt/daquery/releases/latest) then copy it to the Tomcat webapps directory:
+* Download a copy of the war file from the Daquery [release page](https://github.com/dbmi-pitt/daquery/releases/latest){:target="_blank"} then copy it to the Tomcat webapps directory:
 ```
 [root@pathi2b2 ~]# cp daquery.war /path/to/tomcat/webapps/
 [root@pathi2b2 ~]# chown tomcat:tomcat /path/to/tomcat/webapps/daquery.war
