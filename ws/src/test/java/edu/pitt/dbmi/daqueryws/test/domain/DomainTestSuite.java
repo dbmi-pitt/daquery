@@ -59,6 +59,7 @@ public class DomainTestSuite {
     public static String adminPassword = "";
     public static String adminRealName = "Test UserAdmin Account";
     public static String localSiteName = "testSite1";
+    public static String testPort = "";
 
     @BeforeClass
     public static void init() {
@@ -74,6 +75,7 @@ public class DomainTestSuite {
     		assertFalse(DomainTestSuite.adminEmail.isEmpty());
     		DomainTestSuite.adminPassword = getTestPassword();
     		assertFalse(DomainTestSuite.adminPassword.isEmpty());    		
+    		DomainTestSuite.testPort = getTestPort();
 			assertTrue(AppSetup.initialSetup(UUID.randomUUID().toString(), localSiteName, localSiteURL, adminEmail, adminPassword, adminRealName));
 			if(AppSetup.isErroredSetup())
 				throw new DaqueryException(AppSetup.getErrorMessage());
@@ -121,8 +123,14 @@ public class DomainTestSuite {
 
 	private static String getTestPassword()
 	{
-		String username = props.getProperty("test.password", "");
-		return username;
+		String password = props.getProperty("test.password", "");
+		return password;
+	}
+
+	private static String getTestPort()
+	{
+		String port = props.getProperty("test.port", "");
+		return port;
 	}
 
     
