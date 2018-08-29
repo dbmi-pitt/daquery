@@ -34,7 +34,7 @@ public class DaqueryBaseTest {
     @BeforeClass
     public static void setup() {
     	
-    	
+    	DomainTestSuite.init();
         String port = System.getProperty("server.port");
         if (port == null) {
             RestAssured.port = Integer.valueOf(defaultPort);
