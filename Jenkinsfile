@@ -15,6 +15,12 @@ node {
             sh "mvn -B -DskipTests clean install"
         }
     }
+    stage('Dependency: daquery central') {
+        dir('central') {
+            echo 'Building daquery central'
+            sh "mvn -B -DskipTests clean install"
+       }
+    }
     stage('Dependency: daquery UI') {
         dir('ui') {
             echo 'Building daquery UI'
