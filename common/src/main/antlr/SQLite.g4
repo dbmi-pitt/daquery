@@ -330,6 +330,7 @@ expr
                     | ( database_name '.' )? table_name )
  | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'
  | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END
+ | K_EXTRACT '(' ( K_YEAR | K_MONTH | K_DAY | K_HOUR | K_MINUTE | K_SECOND | K_TIMEZONE_HOUR | K_TIMEZONE_MINUTE | K_TIMEZONE_REGION | K_TIMEZONE_ABBR ) K_FROM expr ')'  
  | raise_function
  ;
 
@@ -561,6 +562,7 @@ keyword
  | K_CURRENT_TIMESTAMP
  | K_DATABASE
  | K_DATESHIFT
+ | K_DAY
  | K_DEFAULT
  | K_DEFERRABLE
  | K_DEFERRED
@@ -575,6 +577,7 @@ keyword
  | K_ESCAPE
  | K_EXCEPT
  | K_EXCLUSIVE
+ | K_EXTRACT
  | K_EXISTS
  | K_EXPLAIN
  | K_FAIL
@@ -586,6 +589,7 @@ keyword
  | K_GLOB
  | K_GROUP
  | K_HAVING
+ | K_HOUR
  | K_IDENTIFIABLE
  | K_IF
  | K_IGNORE
@@ -611,6 +615,8 @@ keyword
  | K_LIMIT
  | K_MATCH
  | K_MINUS
+ | K_MINUTE
+ | K_MONTH
  | K_NATURAL
  | K_NO
  | K_NOT
@@ -641,12 +647,17 @@ keyword
  | K_ROLLBACK
  | K_ROW
  | K_SAVEPOINT
+ | K_SECOND
  | K_SELECT
  | K_SET
  | K_TABLE
  | K_TEMP
  | K_TEMPORARY
  | K_THEN
+ | K_TIMEZONE_ABBR
+ | K_TIMEZONE_HOUR
+ | K_TIMEZONE_MINUTE
+ | K_TIMEZONE_REGION
  | K_TO
  | K_TRACKED
  | K_TRANSACTION
@@ -664,6 +675,7 @@ keyword
  | K_WHERE
  | K_WITH
  | K_WITHOUT
+ | K_YEAR
  ;
 
 // TODO check all names below
@@ -850,6 +862,7 @@ K_CURRENT_TIME : C U R R E N T '_' T I M E;
 K_CURRENT_TIMESTAMP : C U R R E N T '_' T I M E S T A M P;
 K_DATABASE : D A T A B A S E;
 K_DATESHIFT : D A T E S H I F T;
+K_DAY : D A Y;
 K_DEFAULT : D E F A U L T;
 K_DEFERRABLE : D E F E R R A B L E;
 K_DEFERRED : D E F E R R E D;
@@ -866,6 +879,7 @@ K_EXCEPT : E X C E P T;
 K_EXCLUSIVE : E X C L U S I V E;
 K_EXISTS : E X I S T S;
 K_EXPLAIN : E X P L A I N;
+K_EXTRACT : E X T R A C T;
 K_FALSE : F A L S E;
 K_FAIL : F A I L;
 K_FOR : F O R;
@@ -875,6 +889,7 @@ K_FULL : F U L L;
 K_GLOB : G L O B;
 K_GROUP : G R O U P;
 K_HAVING : H A V I N G;
+K_HOUR : H O U R;
 K_IF : I F;
 K_IDENTIFIABLE : I D E N T I F I A B L E;
 K_IGNORE : I G N O R E;
@@ -900,6 +915,8 @@ K_LIKE : L I K E;
 K_LIMIT : L I M I T;
 K_MATCH : M A T C H;
 K_MINUS : M I N U S;
+K_MINUTE : M I N U T E;
+K_MONTH : M O N T H;
 K_NATURAL : N A T U R A L;
 K_NO : N O;
 K_NOT : N O T;
@@ -930,12 +947,17 @@ K_RIGHT : R I G H T;
 K_ROLLBACK : R O L L B A C K;
 K_ROW : R O W;
 K_SAVEPOINT : S A V E P O I N T;
+K_SECOND : S E C O N D;
 K_SELECT : S E L E C T;
 K_SET : S E T;
 K_TABLE : T A B L E;
 K_TEMP : T E M P;
 K_TEMPORARY : T E M P O R A R Y;
 K_THEN : T H E N;
+K_TIMEZONE_ABBR : T I M E Z O N E '_' A B B R;
+K_TIMEZONE_HOUR : T I M E Z O N E '_' H O U R;
+K_TIMEZONE_MINUTE : T I M E Z O N E '_' M I N U T E;
+K_TIMEZONE_REGION : T I M E Z O N E '_' R E G I O N;
 K_TO : T O;
 K_TRACKED : T R A C K E D;
 K_TRANSACTION : T R A N S A C T I O N;
@@ -953,6 +975,7 @@ K_WHEN : W H E N;
 K_WHERE : W H E R E;
 K_WITH : W I T H;
 K_WITHOUT : W I T H O U T;
+K_YEAR : Y E A R;
 
 IDENTIFIER
  : '"' (~'"' | '""')* '"'
