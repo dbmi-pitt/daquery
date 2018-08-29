@@ -41,6 +41,8 @@ node {
             //delete the database at the filesystem level
             //delete the files within the database directory
             sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+            //copy the test.properties file to a location that the application expects
+            sh 'cp /home/jenkins/test.properties /opt/apache-tomcat-6.0.53/conf/test.properties'
             //run the POJO Junit tests
             //This call also builds the database and added test data for the Rest tests
             sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite test'
