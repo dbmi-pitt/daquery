@@ -31,7 +31,7 @@
                 </div> -->
                 <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">
                   <label for="name">Inquiry Name</label>
-                  <input type="text" class="form-control" id="inquiry-name" formControlName="inquiryName">
+                  <input type="text" class="form-control" id="inquiry-name" formControlName="inquiryName" maxlength="100">
                   <div class="help-block" *ngIf="inquiryName.invalid && (inquiryName.dirty || inquiryName.touched)">Please enter a inquiry name</div>
                 </div>
                 <!-- <div class="form-group">
