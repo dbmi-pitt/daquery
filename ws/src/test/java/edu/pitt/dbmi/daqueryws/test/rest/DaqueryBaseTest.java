@@ -42,9 +42,13 @@ public class DaqueryBaseTest {
         else{
             RestAssured.port = Integer.valueOf(port);
         }
+        System.out.println("Here is DomainTestSuite.testPort: " + DomainTestSuite.testPort);
+        
         if (!DomainTestSuite.testPort.isEmpty()) {
         	RestAssured.port = Integer.valueOf(DomainTestSuite.testPort);
         }
+        System.out.println("Here is System.getProperty(\"server.port\"): " + System.getProperty("server.port"));
+        System.out.println("Here is RestAssured.port: " + RestAssured.port);
 
 
         String basePath = System.getProperty("server.base");
