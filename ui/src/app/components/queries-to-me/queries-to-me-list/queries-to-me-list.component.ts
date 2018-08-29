@@ -45,7 +45,9 @@ export class QueriesToMeListComponent implements OnInit {
 
   onRequestSelect(request: any){
     this.selectedRequest = request;
-    this.sqlCheck();
+    if(this.selectedRequest.network.networkId && this.selectedRequest.code){
+      this.sqlCheck();
+    }
   }
 
   sqlCheck(){
