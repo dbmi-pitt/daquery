@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.47 -->
+<!-- daquery.data.version=1.52 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -145,7 +145,7 @@ CREATE TABLE INQUIRY
 (
    ID bigint NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1) PRIMARY KEY,
    INQUIRY_ID varchar(50),
-   INQUIRY_NAME varchar(50),
+   INQUIRY_NAME varchar(100),
    INQUIRY_DESCRIPTION varchar(500),
    VERSION int,
    INQUIRY_TYPE varchar(50),
