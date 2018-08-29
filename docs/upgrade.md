@@ -28,7 +28,7 @@ To upgrade Daquery it is usually a simple manner of redeploying the Daquery war 
 [root@pathi2b2 ~]# cp daquery.war /path/to/tomcat/webapps/
 [root@pathi2b2 ~]# chown tomcat:tomcat /path/to/tomcat/webapps/daquery.war
 ```
-Start Tomcat
+* Start Tomcat
 ```
 [root@pathi2b2 ~]# service tomcat start
 ```
