@@ -30,10 +30,10 @@ import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
-import edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
-public class RoleRestTest extends DaqueryBaseTest {
+public class RoleRestT3st extends DaqueryBaseTest {
 
 	private static String userpassword = "demouser";
 	//append a string to the end of the user accounts to avoid overwriting existing users
@@ -99,7 +99,8 @@ public class RoleRestTest extends DaqueryBaseTest {
 	private static void createTestUser(String username, String email, String password, String rolename) throws Exception
 	{
 
-		login(DomainTestSuite.adminEmail, DomainTestSuite.adminPassword);
+		login("chb69@pitt.edu", "demouser");
+		//login(DaqueryBaseTest.username, DaqueryBaseTest.password);
         //Map<String, String> user = new HashMap<>();
 		JsonObject user = new JsonObject();
         user.addProperty("email", email);
@@ -115,8 +116,8 @@ public class RoleRestTest extends DaqueryBaseTest {
 		String serviceName = "users";
 		try
 		{
-			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(defaultServerName, defaultPort));
-			newURL = "http://" + defaultServerName + ":" + defaultPort;
+			//assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(defaultServerName, defaultPort));
+			newURL = RestAssured.baseURI + ":" + RestAssured.port;
 			client = WSConnectionUtil.getRemoteClient(newURL);
 		} catch (Exception e) {
 			//any exception fails the test
@@ -190,15 +191,18 @@ public class RoleRestTest extends DaqueryBaseTest {
 		Map<String, String> args = new HashMap<String, String>();
 		args.put("email", username);
 		args.put("password", password);
-		String getURL = WSConnectionUtil.buildGetUrl("http://"+defaultServerName + ":" + defaultPort, "users/login", args);
+		//String getURL = RestAssured.baseURI + ":" + RestAssured.port +  "/daquery/ws/users/login?email=" + username + "&password=" + password;
+		String getURL = WSConnectionUtil.buildGetUrl(RestAssured.baseURI + ":" + RestAssured.port, "users/login", args);
+		System.out.println("In RoleRestTest:login.  URL is: " + getURL);
 		try
 		{
 			URL url = new URL(getURL);
-			if(!WSConnectionUtil.checkConnection(url.getHost(), url.getPort()))
+			System.out.println("In RoleRestTest:login.  URL is: " + url.getHost() + ", " + url.getPort());
+			/*if(!WSConnectionUtil.checkConnection(url.getHost(), url.getPort()))
 			{
 				System.err.println("Server is not reachable for site localhost:8080.");
 				System.exit(1);
-			}
+			}*/
 
 			client = WSConnectionUtil.getRemoteClient(getURL);
 		}
@@ -243,7 +247,7 @@ public class RoleRestTest extends DaqueryBaseTest {
 		String serviceName = "roleaccesstest/allroles";
 		try
 		{
-			login(DomainTestSuite.adminEmail, DomainTestSuite.adminPassword);
+			login(DaqueryBaseTest.username, DaqueryBaseTest.password);
 			assertTrue("Cannot connect to server", WSConnectionUtil.checkConnection(defaultServerName, defaultPort));
 			newURL = "http://" + defaultServerName + ":" + defaultPort;
 			client = WSConnectionUtil.getRemoteClient(newURL);

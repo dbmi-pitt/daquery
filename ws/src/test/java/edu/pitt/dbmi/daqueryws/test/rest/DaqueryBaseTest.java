@@ -31,12 +31,17 @@ public class DaqueryBaseTest {
 	public static String currentToken = "";
 	public static Integer defaultPort = 9090;
 	public static String defaultServerName = "localhost";
+	public static String username = "";
+	public static String password = "";
+	
 		
     @BeforeClass
     public static void setup() {
     	
     	Properties props = DomainTestSuite.getPropertiesFromFile();
-    	String propPort = props.getProperty("test.port", "");
+    	String propPort = props.getProperty("rest.test.port", "");
+    	username = props.getProperty("rest.test.username", "");
+    	password = props.getProperty("rest.test.password", "");
     	
         String port = System.getProperty("server.port");
         if (port == null) {
@@ -77,8 +82,9 @@ public class DaqueryBaseTest {
 	//I have to login before running any of the other testing methods...
     //I need a valid token for all the other calls
 	public static void checkLogin() {
-        currentToken = given().pathParam("email", DomainTestSuite.adminEmail)
-               .pathParam("password", DomainTestSuite.adminPassword)
+        currentToken = given().pathParam("email", username)
+               .pathParam("password", password)
+        .log().all()
         .when().get("users/login?email={email}&password={password}")
         .then().statusCode(200)
         .extract().path("token");
