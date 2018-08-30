@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class DaqueryBaseTest {
 	
@@ -34,7 +35,10 @@ public class DaqueryBaseTest {
     @BeforeClass
     public static void setup() {
     	
-    	DomainTestSuite.getPropertiesFromFile();
+    	Properties props = DomainTestSuite.getPropertiesFromFile();
+    	String propPort = props.getProperty("test.port", "");
+        System.out.println("Here is Props.testPort: " + propPort);
+    	
         String port = System.getProperty("server.port");
         if (port == null) {
             RestAssured.port = Integer.valueOf(defaultPort);
