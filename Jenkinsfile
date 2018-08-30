@@ -34,6 +34,17 @@ node {
             sh "mvn -B -DskipTests clean install"
        }
     }
+
+    /* PREREQUISITES:
+    The Tomcat related tests require several prerequisites to be met:
+    1.  The tomcat server at /opt/apache-tomcat-6.0.53 must be modified to run
+        on a port other than 8080.  Jenkins uses 8080 by default.  Modify the
+        /opt/apache-tomcat-6.0.53/conf/server.xml file to change the port (I use 9090).
+    2.  The tests require a file called test.properties to exist in /home/jenkins/test.properties
+        This file contains several test settings (usernames, passwords, etc.).  This file 
+        is NOT STORED in git!!  You must create it and save it in the /home/jenkins directory.
+        The port number in this file must match the server.xml port (see above).
+    */
     stage('Deploy web ui to Tomcat') {
          dir('ws') {
             sh '/opt/apache-tomcat-6.0.53/clean.sh'
