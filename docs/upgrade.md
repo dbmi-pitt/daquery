@@ -14,7 +14,7 @@ To upgrade Daquery it is usually a simple manner of redeploying the Daquery war 
 * Make a backup copy of the war and application db
 ```
 [root@pathi2b2 ~]# mkdir ~/daquery-backups
-[root@pathi2b2 ~]# cp /path/to/tomcat/webapps/daquery.war ~/daquery-backups/.`date +%m-%d-%y`
+[root@pathi2b2 ~]# cp /path/to/tomcat/webapps/daquery.war ~/daquery-backups/.daquery.war.`date +%m-%d-%y`
 [root@pathi2b2 ~]# tar -cvzf ~/daquery-backups/dq-db.`date +%m-%d-%y`.tar.gz /path/to/tomcat/conf/daquery-db 
 ```
 * Remove the Daquery war and Tomcat's Daquery directories, as root run the following commands:
@@ -28,7 +28,7 @@ To upgrade Daquery it is usually a simple manner of redeploying the Daquery war 
 [root@pathi2b2 ~]# cp daquery.war /path/to/tomcat/webapps/
 [root@pathi2b2 ~]# chown tomcat:tomcat /path/to/tomcat/webapps/daquery.war
 ```
-Start Tomcat
+* Start Tomcat
 ```
 [root@pathi2b2 ~]# service tomcat start
 ```
