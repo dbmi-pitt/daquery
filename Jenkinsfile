@@ -51,7 +51,7 @@ node {
             sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
             //delete the database at the filesystem level
             //delete the files within the database directory
-            sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+            //sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
             //copy the test.properties file to a location that the application expects
             sh 'cp /home/jenkins/test.properties /opt/apache-tomcat-6.0.53/conf/test.properties'
             //run the POJO Junit tests
