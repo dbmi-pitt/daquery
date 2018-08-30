@@ -58,6 +58,13 @@ public class SQLQuery extends Inquiry
 		super(generateUUID);
 	}
 	
+	public static void main(String [] args)
+	{
+		String mycode = "adfadf<IDENTIFIABLE>zzzzzz<NOTIDENTIFIABLE>aaaaaa";
+		String cde = mycode.replaceAll("(?i)<\\s*(not)*identifiable.*?>", "MMMM");
+		System.out.println(cde);
+	}
+	
 /*	@Transient
 	public SQLDialect getSqlDialectEnum()
 	{
@@ -93,7 +100,7 @@ public class SQLQuery extends Inquiry
 	{
 		String code = getCode(dialect);
 		//remove any deid tags from the SQL
-		if(! StringHelper.isEmpty(code)) code = code.replaceAll("(?i)<\\s*identifiable.*?>", "");
+		if(! StringHelper.isEmpty(code)) code = code.replaceAll("(?i)<\\s*(not)*identifiable.*?>", "");
 		return(code);
 	}
 	
