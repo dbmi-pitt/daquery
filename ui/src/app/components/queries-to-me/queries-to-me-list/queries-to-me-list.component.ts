@@ -25,7 +25,6 @@ export class QueriesToMeListComponent implements OnInit {
   constructor(private requestService: RequestService,
               private userService: UserService,
               private roleGuard: RoleGuard) {
-
   }
 
   async ngOnInit() {
@@ -44,6 +43,7 @@ export class QueriesToMeListComponent implements OnInit {
   }
 
   onRequestSelect(request: any){
+    this.sqlAnalyzerResponse = null;
     this.selectedRequest = request;
     if(this.selectedRequest.network.networkId && this.selectedRequest.code){
       this.sqlCheck();
