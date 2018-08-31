@@ -25,7 +25,7 @@ public class UserTest extends DaqueryBaseTest {
 		.headers("Authorization", "Bearer " + currentToken)
 		.when().get("users").then().statusCode(200)
 		.extract().response().path("id");
-		userTestUUID = uuidList.get(0)syntaxerror;
+		userTestUUID = uuidList.get(0);
 
 	}
 	
