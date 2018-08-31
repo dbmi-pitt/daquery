@@ -61,7 +61,7 @@ node {
             sleep 20
             //sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test test'
             sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.UserTest test'
-            sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.SiteTest test'
+            //sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.SiteTest test'
             //POST-TEST CLEANUP
             //delete the database at the filesystem level
             //delete the files within the database directory
