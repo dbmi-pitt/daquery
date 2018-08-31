@@ -77,9 +77,17 @@ node {
 
         currentBuild.result = "FAILURE"
 
-            mail body: "project build error is here: ${env.BUILD_URL}" ,
-            subject: 'project build failed',
-            to: 'chb69@pitt.edu'
+           // mail body: "project build error is here: ${env.BUILD_URL}" ,
+           // subject: 'project build failed',
+           // to: 'chb69@pitt.edu'
+
+    emailext(
+        subject: 'project build failed',
+        body: "project build error is here: ${env.BUILD_URL}" ,
+        attachLog: true,
+        compressLog: true,
+        recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+    )
 
         throw err
     }
