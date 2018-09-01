@@ -44,6 +44,7 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery.CodeAndDialect;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.EmailUtil;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
@@ -101,7 +102,11 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             for(Object r : requests){
             	DaqueryRequest request = (DaqueryRequest)r;
-            	request.setCode(((SQLQuery)request.getInquiry()).getCode(((SQLDataSource)request.getNetwork().getDataModel().getDataSource(SourceType.SQL)).getDialectEnum()));
+            	CodeAndDialect cAndD = ((SQLQuery)request.getInquiry()).getCode(((SQLDataSource)request.getNetwork().getDataModel().getDataSource(SourceType.SQL)).getDialectEnum());
+            	if(cAndD == null || StringHelper.isEmpty(cAndD.code))
+            		request.setCode("");
+            	else
+            		request.setCode(cAndD.code);
             }
             
             String jsonString = toJsonArray(requests);
