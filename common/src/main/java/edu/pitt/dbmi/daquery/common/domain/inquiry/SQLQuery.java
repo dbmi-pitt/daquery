@@ -17,6 +17,7 @@ import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 
+import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
@@ -96,31 +97,34 @@ public class SQLQuery extends Inquiry
 	
 	//version of the code with any de-id tags removed
 	@Transient
-	public String getRunnableCode(SQLDialect dialect)
+	public CodeAndDialect getRunnableCode(SQLDialect dialect)
 	{
-		String code = getCode(dialect);
+		CodeAndDialect cAndD = getCode(dialect);
 		//remove any deid tags from the SQL
-		if(! StringHelper.isEmpty(code)) code = code.replaceAll("(?i)<\\s*(not)*identifiable.*?>", "");
-		return(code);
+		if(cAndD != null && ! StringHelper.isEmpty(cAndD.code))
+			cAndD.code = cAndD.code.replaceAll("(?i)<\\s*(not)*identifiable.*?>", "");
+		return(cAndD);
 	}
 	
 	@Transient
-	public String getCode(SQLDialect dialect)
+	public CodeAndDialect getCode(SQLDialect dialect)
 	{
 		if(code == null) return(null);
 		SQLDialect searchDialect;
 		if(dialect == null) searchDialect = SQLDialect.ANSI;
 		else searchDialect = dialect;
 		
-		String rVal = null;
+		String rCode = null;
 		String ansiCode = null;
+		SQLDialect foundDialect = null;
 		for(SQLCode c : code)
 		{
 			if(c != null && c.getDialectEnum() != null)
 			{
-				if(rVal == null && c.getDialectEnum().equals(searchDialect) && (! StringHelper.isEmpty(c.getCode())))
+				if(rCode == null && c.getDialectEnum().equals(searchDialect) && (! StringHelper.isEmpty(c.getCode())))
 				{
-					rVal = c.getCode();
+					rCode = c.getCode();
+					foundDialect = searchDialect;
 				}
 				//store ansi code if we find it
 				if(c.getDialectEnum().equals(SQLDialect.ANSI) && (! StringHelper.isEmpty(c.getCode())))
@@ -131,8 +135,14 @@ public class SQLQuery extends Inquiry
 		}
 		
 		//if a matching dialect isn't found use the ANSI code
-		if(rVal == null) rVal = ansiCode;
-		return(rVal);
+		if(rCode == null)
+		{
+			rCode = ansiCode;
+			foundDialect = SQLDialect.ANSI;
+		}
+		if(rCode == null) return(null);
+		else return(new CodeAndDialect(rCode, foundDialect));
+
 	}
 	
 	@Override
@@ -141,7 +151,7 @@ public class SQLQuery extends Inquiry
 		try
 		{
 			SQLDialect dialect = null;
-			String lclCode = null;
+			CodeAndDialect cAndD = null;
 			SQLDataSource ds = null;
 			String errorMessage = null;
 			if(model == null) errorMessage = "No data model found.";
@@ -149,8 +159,8 @@ public class SQLQuery extends Inquiry
 			else
 			{
 				dialect = ((SQLDataSource) model.getDataSource(SourceType.SQL)).getDialectEnum();
-				lclCode = getRunnableCode(dialect);
-				if(StringHelper.isEmpty(lclCode)) errorMessage = "No SQL code found to execute on db type: " + dialect;
+				cAndD = getRunnableCode(dialect);
+				if(cAndD == null || StringHelper.isEmpty(cAndD.code)) errorMessage = "No SQL code found to execute on db type: " + dialect;
 			}
 			
 			if(errorMessage != null)
@@ -164,7 +174,7 @@ public class SQLQuery extends Inquiry
 			if(isAggregate())
 			//if(getQueryType().equals(QueryType.AGGREGATE.value))
 			{
-				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(lclCode);
+				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(cAndD.code);
 				if(analyze.isRejected())
 				{
 					response.setStatusEnum(ResponseStatus.ERROR);
@@ -172,9 +182,8 @@ public class SQLQuery extends Inquiry
 				}
 				else
 				{
-
 					//String sql = "select count(patid) from demographic;";
-					Long val = ds.executeAggregate(lclCode);
+					Long val = ds.executeAggregate(cAndD.code);
 					String strVal = null;
 					if(val != null) strVal = RngHelper.obfuscateAggregateResult(val, response.getRequest().getNetwork()).toString();
 					response.setValue(strVal);
@@ -184,7 +193,12 @@ public class SQLQuery extends Inquiry
 					{
 						response.setDownloadAvailable(true);
 						SQLDownload dLoad = new SQLDownload(true);
-						dLoad.addCode(new SQLCode(aggregateValueSql, dialect));
+						Long id = (Long) AbstractDAO.save(dLoad);
+						dLoad = AbstractDAO.get(SQLDownload.class, id);						
+						SQLCode cde = new SQLCode(aggregateValueSql, cAndD.dialect);
+						cde.setQuery(dLoad);
+						AbstractDAO.updateOrSave(cde);
+						dLoad.addCode(cde);
 						response.setDownloadDirective(dLoad);
 					}
 					else
@@ -231,4 +245,17 @@ public class SQLQuery extends Inquiry
 		else
 			return(err);
 	}
+	
+	public class CodeAndDialect
+	{
+		public SQLDialect dialect;
+		public String code;
+		
+		CodeAndDialect(String code, SQLDialect dialect)
+		{
+			this.code = code;
+			this.dialect = dialect;
+		}
+	}
+	
 }
