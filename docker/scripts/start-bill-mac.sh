@@ -1,0 +1,1 @@
+./start-docker-bill.sh --daquery_home="/Users/bill/Documents/workspace/daquery" --db_home="/Users/bill/daquery_docker_data" --ojdbc_lib_dir="/Users/bill/Documents/workspace/daquery/ws/lib" --central_url="http://192.168.1.154:8080"
