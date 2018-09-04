@@ -87,7 +87,7 @@ node {
          }
 
     }
-    catch (err) {
+    } catch (err) {
 
         currentBuild.result = "FAILURE"
 
