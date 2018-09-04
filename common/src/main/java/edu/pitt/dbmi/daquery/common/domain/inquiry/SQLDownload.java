@@ -74,9 +74,9 @@ public class SQLDownload extends SQLQuery implements Download
 		}
 		
 		SQLDialect dialect = ((SQLDataSource) model.getDataSource(SourceType.SQL)).getDialectEnum();
-		String lclCode = getRunnableCode(dialect);
+		CodeAndDialect cAndD = getRunnableCode(dialect);
 		
-		if(StringHelper.isEmpty(lclCode))
+		if(cAndD == null || StringHelper.isEmpty(cAndD.code))
 		{
 			errorMessage = "No SQL code found to execute on db type: " + dialect;
 			response.setStatusEnum(ResponseStatus.ERROR);
@@ -94,7 +94,7 @@ public class SQLDownload extends SQLQuery implements Download
 		{
 			sess = HibernateConfiguration.openSession();
 			conn = ds.getConnection();
-			if(StringHelper.isEmpty(lclCode))
+			if(StringHelper.isEmpty(cAndD.code))
 			{
 				response.setStatusEnum(ResponseStatus.ERROR);
 				response.setErrorMessage("No query provided to gather case identifiers for download.");
@@ -109,7 +109,7 @@ public class SQLDownload extends SQLQuery implements Download
 			Integer totalFiles = null;
 			List<String> filenames = null;
 			boolean initSuccess;
-			if(initSuccess = dataExporter.init(conn, st, rs, lclCode))
+			if(initSuccess = dataExporter.init(conn, st, rs, cAndD.code))
 			{
 				totalFiles = dataExporter.getNumFiles();
 				int fileCount = 1;
