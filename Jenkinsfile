@@ -72,6 +72,20 @@ node {
        }
 
     }
+    stage('Deploy Docker Images') {
+         dir('docker') {
+            //make some of the folders Docker is expecting
+            sh 'mkdir -p /home/jenkins/projects/daquery/docker/docker-baseline'
+            sh 'mkdir -p /home/jenkins/projects/daquery/ws/target'
+            //copy the two .war files into place
+            sh 'cp ../ws/target/daquery.war /home/jenkins/projects/daquery/ws/target'
+            sh 'cp ../ws/target/daquery-central.war /home/jenkins/projects/daquery/ws/target'
+            //copy the connected Daquery derby database
+            sh 'cp docker-baseline/daquery_connected_site_db.tar.gz /home/jenkins/projects/daquery/docker/docker-baseline/daquery_connected_site_db.tar.gz'
+            
+
+         }
+
     }
     catch (err) {
 

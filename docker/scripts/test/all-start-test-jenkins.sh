@@ -4,8 +4,8 @@
 # These items can be used for testing.
 
 
-./start-test-central.sh --daquery_home=/home/devuser/projects/daquery --db_home=/home/jenkins/daquery_docker_data
-./start-test-connected.sh --daquery_home=/home/devuser/projects/daquery --db_home=/home/jenkins/daquery_docker_data --ojdbc_lib_dir=/home/jenkins/ --central_url="http://136.142.228.23:4001"
-./start-test-noconnection.sh --daquery_home=/home/devuser/projects/daquery --db_home=/home/jenkins/daquery_docker_data --ojdbc_lib_dir=/home/jenkins/ --central_url="http://136.142.228.23:4001"
+./start-test-central.sh --daquery_home=/home/jenkins/projects/daquery --db_home=/home/jenkins/daquery_docker_data
+./start-test-connected.sh --daquery_home=/home/jenkins/projects/daquery --db_home=/home/jenkins/daquery_docker_data --ojdbc_lib_dir=/home/jenkins/daquery_lib/ --central_url="http://136.142.228.23:4001"
+./start-test-noconnection.sh --daquery_home=/home/jenkins/projects/daquery --db_home=/home/jenkins/daquery_docker_data --ojdbc_lib_dir=/home/jenkins/daquery_lib/ --central_url="http://136.142.228.23:4001"
 
 
