@@ -812,6 +812,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 						{
 							cd.setQuery(null);
 							dDir.getCode().remove(cd);
+							AbstractDAO.delete(cd);
 						}
 					}
 					Fileset files = resp.getFiles();
