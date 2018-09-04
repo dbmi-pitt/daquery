@@ -239,6 +239,23 @@ export class NewQueryComponent implements OnInit {
     }
   }
 
+  sqlAnalyzerMsg() {
+    let ret = "";
+    if(this.ansiSqlAnalyzerResponse && (this.ansiSqlAnalyzerResponse.rejected || this.ansiSqlAnalyzerResponse.warnings))
+      ret += "ANSI query, ";
+    if(this.oracleSqlAnalyzerResponse && (this.oracleSqlAnalyzerResponse.rejected || this.oracleSqlAnalyzerResponse.warnings))
+      ret += "ORACLE query, ";
+    if(this.sqlServerSqlAnalyzerResponse && (this.sqlServerSqlAnalyzerResponse.rejected || this.sqlServerSqlAnalyzerResponse.warnings))
+      ret += "SQLServer query, ";
+
+    if(ret != ""){
+      ret = ret.substring(0, ret.length - 2); 
+      ret += " has error or warning";
+    }
+
+    return ret;
+  }
+
   onQueryEdit() {
     this.sqlChecked = false;
   }
