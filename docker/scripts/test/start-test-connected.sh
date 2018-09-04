@@ -21,7 +21,8 @@
 # create some default paths.  These paths match the VM paths
 DAQUERY_HOME="/home/devuser/projects/daquery"
 DB_HOME="/home/devuser/daquery_docker_data"
-DEFAULT_OJDBC_DIR="/home/devuser/projects/daquery/ws/lib/ojdbc6-11.1.0.7.0.jar"
+DEFAULT_OJDBC_LIB_DIR="/home/devuser/projects/daquery/ws/lib"
+
 
 #which version of nc do we have?
 #if file `which nc` | grep -qe 'link.*ncat'; then
@@ -29,7 +30,12 @@ DEFAULT_OJDBC_DIR="/home/devuser/projects/daquery/ws/lib/ojdbc6-11.1.0.7.0.jar"
 #else
 #  NC_CMD="nc -z"
 #fi
+# DAQUERY_CENT_URL is the IP address (or hostname) of the Daquery Central server you want the site
+# to use
+#DAQUERY_CENT_URL="http://10.0.2.15:8080"
 
+# Check to see if a port number, daquery home, ojdbc jar or db home  was passed in, if not use environment
+# variables or the defaults set above will be used
 while [ $# -gt 0 ]; do
   case "$1" in
     --daquery_home=*)
@@ -38,11 +44,14 @@ while [ $# -gt 0 ]; do
     --db_home=*)
       DB_HOME="${1#*=}"
       ;;
-    --ojdbc_lib=*)
-      OJDBC_LIB="${1#*=}"
+    --ojdbc_lib_dir=*)
+      OJDBC_LIB_DIR="${1#*=}"
       ;;
     --port=*)
       PORT="${1#*=}"
+      ;;
+    --central_url=*)
+      DAQUERY_CENT_URL="${1#*=}"
       ;;
     *)
       printf "***************************\n"
@@ -54,11 +63,9 @@ while [ $# -gt 0 ]; do
 done
 
 # Check to see if a port number was passed in, if not use the default port
-if [ -z "$OJDBC_LIB" ]; then
- echo using default OJDBC_LIB Path: $DEFAULT_OJDBC_DIR
- OJDBC_DIR=$DEFAULT_OJDBC_DIR
-else
- OJDBC_DIR=$OJDBC_LIB
+if [ -z "$OJDBC_LIB_DIR" ]; then
+ echo using default OJDBC_LIB_DIR Path: $DEFAULT_OJDBC_LIB_DIR
+ OJDBC_LIB_DIR=$DEFAULT_OJDBC_LIB_DIR
 fi
 
 # remove any trailing slash from the paths
@@ -66,13 +73,12 @@ DAQUERY_HOME=$(echo "$DAQUERY_HOME" | sed 's:/*$::')
 echo DAQUERY_HOME is $DAQUERY_HOME
 DB_HOME=$(echo "$DB_HOME" | sed 's:/*$::')
 echo DB_HOME is $DB_HOME
-OJDBC_DIR=$(echo "$OJDBC_DIR" | sed 's:/*$::')
-echo OJDBC_DIR is $OJDBC_DIR
+echo OJDBC_LIB_DIR is $OJDBC_LIB_DIR
 
 echo PORT is $PORT
 
-if [ ! -f $OJDBC_DIR ]; then
-    echo +-+-+-+-+- File ojdbc6-11.1.0.7.0.jar does not exist in path $OJDBC_DIR.  Exiting. +-+-+-+-+-
+if [ ! -d $OJDBC_LIB_DIR ]; then
+    echo +-+-+-+-+- The directory $OJDBC_LIB_DIR does not exist.  Exiting. +-+-+-+-+-
     exit 1
 fi
 
@@ -125,10 +131,8 @@ CONTAINER_DAQUERY_WAR_DIR="/localdata/daquery_war"
 # TOMCAT_HOME is the Tomcat directory path within the container.  Both daquery.war
 # and ojdbc6-11.1.0.7.0.jar get deployed to paths within TOMCAT_HOME
 TOMCAT_HOME="/usr/local/tomcat"
-# DAQUERY_CENT_URL is the IP address (or hostname) of the Daquery Central server you want the site
-# to use
-DAQUERY_CENT_URL="http://10.0.2.15:4001"
-# DEFAULT_DAQUERY_HOME is the default file path for the Daquery container's Derby database on the host.
+
+# DAQUERY_HOME is the file path for the Daquery container's Derby database on the host.
 # This parameter allows the Daquery docker site to maintain a state between runs 
 DEFAULT_DAQUERY_HOME="/home/devuser/daquery_docker_data"
 # Check to see if a path to the database was passed in, if not use the database path
@@ -167,7 +171,7 @@ docker stop $CONTAINER_NAME
 docker pull cborromeo/daquery-baseline
 docker rm $CONTAINER_NAME
 
-if docker run --name $CONTAINER_NAME -dt -v $OJDBC_DIR:$CONTAINER_OJDBC_DIR -v $DAQUERY_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DB_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e OJDBC_DIR=$OJDBC_DIR -e DAQUERY_WAR_DIR=$DAQUERY_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_OJDBC_DIR=$CONTAINER_OJDBC_DIR -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-baseline:latest; then
+if docker run --name $CONTAINER_NAME -dt -v $OJDBC_LIB_DIR:$CONTAINER_OJDBC_DIR -v $DAQUERY_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DB_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e OJDBC_LIB_DIR=$OJDBC_LIB_DIR -e DAQUERY_WAR_DIR=$DAQUERY_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_OJDBC_DIR=$CONTAINER_OJDBC_DIR -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-baseline:latest; then
     echo Daquery started on port $TOMCAT_REDIRECT_PORT, debugging on port $TOMCAT_DEBUG_PORT
     echo Using central server at $DAQUERY_CENT_URL
 fi
