@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
@@ -47,8 +48,9 @@ public class InquiryDAO extends AbstractDAO {
 	}
 	
 	public List listSavedInquiries() throws DaqueryException {
-		List i =  getCurrentSession().createCriteria(Inquiry.class)
-				  				     .list();
+		Query q = getCurrentSession().createQuery("select i from Inquiry i");
+		List i = q.list();		
+		//List i =  getCurrentSession().createCriteria(Inquiry.class).list();
 		List ret = new ArrayList();
 		for(Object a : i) {
 			Inquiry inquiry = ((Inquiry) a);
