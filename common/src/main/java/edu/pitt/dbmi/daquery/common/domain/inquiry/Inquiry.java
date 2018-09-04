@@ -174,6 +174,21 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Transient
 	public abstract DaqueryResponse run(DaqueryResponse response, DataModel model);
 	
-	
+	@Override
+	public String toString()
+	{
+		String rVal = null;
+		if(inquiryName == null)
+			rVal = "null:";
+		else
+			rVal = inquiryName + ":";
+		
+		if(inquiryId == null)
+			rVal = rVal + "null";
+		else
+			rVal = rVal + inquiryId;
+		
+		return(rVal);
+	}
 	
 }
