@@ -49,7 +49,7 @@ public class InquiryDAO extends AbstractDAO {
 	
 	public List listSavedInquiries() throws DaqueryException {
 		Query q = getCurrentSession().createQuery("select i from Inquiry i");
-		List i = q.list();
+		List i = q.list();		
 		//List i =  getCurrentSession().createCriteria(Inquiry.class).list();
 		List ret = new ArrayList();
 //		long inquiryCount = 0;
