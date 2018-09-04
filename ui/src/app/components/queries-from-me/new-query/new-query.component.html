@@ -240,6 +240,7 @@
                       </div>
                     </div>
                   </div>
+                  <p class="text-red">{{ sqlAnalyzerMsg() }}</p>
                 </div>
                 <button class="btn btn-primary" (click)="onSave()">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
                                                                       (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
