@@ -787,28 +787,32 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					DaqueryResponse resp = mapper.readValue(json, type);
 					rVal.setStatus(resp.getStatus());
 					rVal.setValue(resp.getValue());
-					rVal.setDownloadAvailable(resp.isDownloadAvailable());
-					rVal.setDownloadDirective(resp.getDownloadDirective());
 					rVal.setStatusMessage(resp.getStatusMessage());
 					rVal.setErrorMessage(resp.getErrorMessage());
-					if(rVal.getDownloadDirective() != null && rVal.getDownloadDirective() instanceof SQLQuery && ((SQLQuery) rVal.getDownloadDirective()).getCode() != null)
+					rVal.setDownloadAvailable(resp.isDownloadAvailable());					
+					if(resp.isDownloadAvailable() && resp.getDownloadDirective() != null && resp.getDownloadDirective() instanceof SQLQuery && ((SQLQuery) resp.getDownloadDirective()).getCode() != null)
 					{
-						SQLQuery dDir = (SQLQuery) rVal.getDownloadDirective();
-						Set<SQLCode> toRemove = new HashSet<SQLCode>();
+						SQLQuery dDir = (SQLQuery) resp.getDownloadDirective();
+						rVal.setDownloadDirective(resp.getDownloadDirective());
+						List<SQLCode> toRemove = new ArrayList<SQLCode>();
 						for(SQLCode cde : dDir.getCode())
 						{
-							if(cde.getId() != null && !(cde.getId().longValue() == 0))
-							{
-								Long newId = (Long) AbstractDAO.save(cde);
-								SQLCode nC = AbstractDAO.get(SQLCode.class, newId);
-								dDir.getCode().add(nC);
-								nC.setQuery(dDir);
-							}
-							else
-								cde.setQuery(dDir);
+							toRemove.add(cde);
+							cde.setQuery(null);
+							SQLCode nextCDE = new SQLCode();
+							nextCDE.setCode(cde.getCode());
+							nextCDE.setDialectEnum(cde.getDialectEnum());
+							Long newId = (Long) AbstractDAO.save(nextCDE);
+							SQLCode nC = AbstractDAO.get(SQLCode.class, newId);
+							dDir.getCode().add(nC);
+							nC.setQuery(dDir);
+							AbstractDAO.updateOrSave(dDir);
 						}
-						for(SQLCode cde: toRemove)
-							dDir.getCode().remove(cde);
+						for(SQLCode cd : toRemove)
+						{
+							cd.setQuery(null);
+							dDir.getCode().remove(cd);
+						}
 					}
 					Fileset files = resp.getFiles();
 					if(files != null)
