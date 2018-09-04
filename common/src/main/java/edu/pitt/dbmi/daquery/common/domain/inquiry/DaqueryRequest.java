@@ -172,4 +172,19 @@ public class DaqueryRequest extends DaqueryObject
 		return username + inqName + dtTime;
 	}
 
+	@Override
+	public String toString()
+	{
+		String rVal = null;
+		if(getInquiry() == null || getInquiry().getInquiryName() == null)
+			rVal = "null:";
+		else
+			rVal = getInquiry().getInquiryName() + ":";
+		
+		if(getRequestId() == null)
+			rVal = rVal + "null";
+		else
+			rVal = rVal + getRequestId();
+				return(rVal);
+	}
 }
