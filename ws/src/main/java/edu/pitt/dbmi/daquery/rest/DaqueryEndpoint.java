@@ -14,8 +14,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +49,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.pitt.dbmi.daquery.common.dao.AbstractDAO;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
@@ -71,6 +74,7 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.QueryInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.ResponseStatus;
+import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
@@ -787,6 +791,25 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					rVal.setDownloadDirective(resp.getDownloadDirective());
 					rVal.setStatusMessage(resp.getStatusMessage());
 					rVal.setErrorMessage(resp.getErrorMessage());
+					if(rVal.getDownloadDirective() != null && rVal.getDownloadDirective() instanceof SQLQuery && ((SQLQuery) rVal.getDownloadDirective()).getCode() != null)
+					{
+						SQLQuery dDir = (SQLQuery) rVal.getDownloadDirective();
+						Set<SQLCode> toRemove = new HashSet<SQLCode>();
+						for(SQLCode cde : dDir.getCode())
+						{
+							if(cde.getId() != null && !(cde.getId().longValue() == 0))
+							{
+								Long newId = (Long) AbstractDAO.save(cde);
+								SQLCode nC = AbstractDAO.get(SQLCode.class, newId);
+								dDir.getCode().add(nC);
+								nC.setQuery(dDir);
+							}
+							else
+								cde.setQuery(dDir);
+						}
+						for(SQLCode cde: toRemove)
+							dDir.getCode().remove(cde);
+					}
 					Fileset files = resp.getFiles();
 					if(files != null)
 						files.setId(null);

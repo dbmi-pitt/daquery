@@ -16,10 +16,41 @@
 # this file must be named ojdbc6-11.1.0.7.0.jar
 
 
-# create some default paths.  These paths match the VM paths
-DAQUERY_HOME="/home/devuser/projects/daquery"
-DB_HOME="/home/devuser/daquery_docker_data"
+# DAQUERY_HOME is the file path for the Daquery container's Derby database on the host.
+# This parameter allows the Daquery docker site to maintain a state between runs 
+# Create an external DAQUERY_HOME environment variable pointing the this directory
+# or the below will be used.
+DEFAULT_DAQUERY_HOME="/home/devuser/projects/daquery"
+
+# DB_HOME is the host's file path where the application derby database will be stored/used
+# Set this variable via an external environment variable or the below will be used
+DEFAULT_DB_HOME="/home/devuser/daquery_docker_data"
+
 DEFAULT_OJDBC_LIB="/home/devuser/projects/daquery/ws/lib/ojdbc6-11.1.0.7.0.jar"
+
+# DAQUERY_CENT_URL is the IP address (or hostname) of the Daquery Central server you want the site
+# to use, set an external environment variable or this default will be used
+DEFAULT_DAQUERY_CENT_URL="http://10.0.2.15:8080"
+
+if [ -z $DAQUERY_HOME ]; then
+  echo using default daquery home: $DEFAULT_DAQUERY_HOME
+  DAQUERY_HOME=$DEFAULT_DAQUERY_HOME
+fi
+
+if [ -z $DB_HOME ]; then
+  echo user default database directory $DEFAULT_DB_HOME
+  DB_HOME=$DEFAULT_DB_HOME
+fi
+
+if [ -z $OJDBC_LIB ]; then
+ echo using default OJDBC_LIB Path: $DEFAULT_OJDBC_LIB
+ OJDBC_LIB=$DEFAULT_OJDBC_LIB
+fi
+
+if [ -z $DAQUERY_CENT_URL ]; then
+  echo using default central server url: $DEFAULT_DAQUERY_CENT_URL
+  DAQUERY_CENT_URL=$DEFAULT_DAQUERY_CENT_URL
+fi
 
 
 #which version of nc do we have?
@@ -29,6 +60,8 @@ DEFAULT_OJDBC_LIB="/home/devuser/projects/daquery/ws/lib/ojdbc6-11.1.0.7.0.jar"
 #  NC_CMD="nc -z"
 #fi
 
+# Check to see if a port number, daquery home, ojdbc jar or db home  was passed in, if not use environment
+# variables or the defaults set above will be used
 while [ $# -gt 0 ]; do
   case "$1" in
     --daquery_home=*)
@@ -51,12 +84,6 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-
-# Check to see if a port number was passed in, if not use the default port
-if [ -z "$OJDBC_LIB" ]; then
- echo using default OJDBC_LIB Path: $DEFAULT_OJDBC_LIB
- OJDBC_LIB=$DEFAULT_OJDBC_LIB
-fi
 
 # remove any trailing slash from the paths
 DAQUERY_HOME=$(echo "$DAQUERY_HOME" | sed 's:/*$::')
@@ -121,17 +148,6 @@ CONTAINER_DAQUERY_WAR_DIR="/localdata/daquery_war"
 # TOMCAT_HOME is the Tomcat directory path within the container.  Both daquery.war
 # and ojdbc6-11.1.0.7.0.jar get deployed to paths within TOMCAT_HOME
 TOMCAT_HOME="/usr/local/tomcat"
-# DAQUERY_CENT_URL is the IP address (or hostname) of the Daquery Central server you want the site
-# to use
-DAQUERY_CENT_URL="http://10.0.2.15:8080"
-# DAQUERY_HOME is the file path for the Daquery container's Derby database on the host.
-# This parameter allows the Daquery docker site to maintain a state between runs 
-DEFAULT_DAQUERY_HOME="/home/devuser/daquery_docker_data"
-# Check to see if a path to the database was passed in, if not use the database path
-if [ -z "$DB_HOME" ]; then
- echo using default database home: $DEFAULT_DAQUERY_HOME
- DB_HOME=$DEFAULT_DAQUERY_HOME
-fi
 
 # CONTAINER_DAQUERY_HOME is the file path for the Daquery container's Derby database on the container
 # This file will create a new directory called $CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT

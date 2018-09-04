@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.common.dao;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -66,6 +67,50 @@ public abstract class AbstractDAO {
 	currentTransaction = t;
     }    
     
+    public static void delete(DaqueryObject obj) throws DaqueryException
+    {
+		Session session = null;
+		try
+		{
+			session = HibernateConfiguration.openSession();
+			session.delete(obj);
+		}
+		catch(Throwable tr)
+		{
+			tr.printStackTrace();
+			String msg = "Unhandled exception while trying to delete a daquery object";
+			log.log(Level.SEVERE, msg, tr);
+			throw new DaqueryException(msg, tr);			
+		}
+		finally
+		{
+			if(session != null) session.close();
+		}    	
+    	
+    }
+    
+    public static <T> T get(Class<T> clazz, Long id) throws DaqueryException
+    {
+		Session session = null;
+		try
+		{
+			session = HibernateConfiguration.openSession();
+			T rVal = (T) session.get(clazz, id);
+			return(rVal);
+		}
+		catch(Throwable tr)
+		{
+			tr.printStackTrace();
+			String msg = "Unhandled exception while trying to get a daquery object with id: " + id;
+			log.log(Level.SEVERE, msg, tr);
+			throw new DaqueryException(msg, tr);			
+		}
+		finally
+		{
+			if(session != null) session.close();
+		}    	
+    }
+    
 	public static void updateOrSave(DaqueryObject obj) throws DaqueryException
 	{
 		Session session = null;
@@ -80,6 +125,31 @@ public abstract class AbstractDAO {
 		catch(Throwable tr)
 		{
 			if(t != null) t.rollback();
+			String msg = "Unhandled exception while trying to save a daquery object.";
+			log.log(Level.SEVERE, msg, tr);
+			throw new DaqueryException(msg, tr);			
+		}
+		finally
+		{
+			if(session != null) session.close();
+		}
+	}    
+	
+	public static Serializable save(DaqueryObject obj) throws DaqueryException
+	{
+		Session session = null;
+		Transaction t = null;
+		try
+		{
+			session = HibernateConfiguration.openSession();
+			t = session.beginTransaction();
+			Serializable rObj = session.save(obj);
+			t.commit();
+			return(rObj);
+		}
+		catch(Throwable tr)
+		{
+			if(t != null) t.rollback();
 			tr.printStackTrace();
 			String msg = "Unhandled exception while trying to save a daquery object.";
 			log.log(Level.SEVERE, msg, t);
@@ -88,8 +158,8 @@ public abstract class AbstractDAO {
 		finally
 		{
 			if(session != null) session.close();
-		}
-	}    
+		}		
+	}
 	
 	/**
 	 * Very generic query method that returns a List of objects from the database.
