@@ -5,7 +5,7 @@
 
 
 ./start-test-central.sh --daquery_home=/home/devuser/projects/daquery --db_home=/home/jenkins/daquery_docker_data
-./start-test-connected.sh --daquery_home=/home/devuser/projects/daquery --db_home=/home/jenkins/daquery_docker_data --ojdbc_lib=/home/jenkins/ojdbc6-11.1.0.7.0.jar
-./start-test-noconnection.sh --daquery_home=/home/devuser/projects/daquery --db_home=/home/jenkins/daquery_docker_data --ojdbc_lib=/home/jenkins/ojdbc6-11.1.0.7.0.jar
+./start-test-connected.sh --daquery_home=/home/devuser/projects/daquery --db_home=/home/jenkins/daquery_docker_data --ojdbc_lib_dir=/home/jenkins/ --central_url="http://136.142.228.23:4001"
+./start-test-noconnection.sh --daquery_home=/home/devuser/projects/daquery --db_home=/home/jenkins/daquery_docker_data --ojdbc_lib_dir=/home/jenkins/ --central_url="http://136.142.228.23:4001"
 
 
