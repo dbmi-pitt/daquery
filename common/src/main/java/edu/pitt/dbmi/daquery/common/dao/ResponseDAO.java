@@ -23,6 +23,7 @@ public class ResponseDAO extends AbstractDAO
 	{
 		response.setReplyTimestamp(new Date());
 		AbstractDAO.updateOrSave(response);
+		
 	}
 	
 	public static DaqueryResponse getResponseById(String responseId) throws DaqueryException

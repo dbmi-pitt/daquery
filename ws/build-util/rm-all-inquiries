@@ -1,0 +1,18 @@
+#DERBY_PATH=/opt/apache-tomcat-6.0.53/conf/daquery-db/
+#DERBY_PATH=/home/devuser/daquery_docker_data/daquery-4001/conf/daquery-db/
+#DERBY_PATH=/usr/local/apache-tomcat-6.0.53/conf/daquery-db/
+DERBY_PATH=/Users/bill/daquery_docker_data/daquery-4001/conf/daquery-db/
+#/usr/local/derby/bin/ij <<EOF
+/usr/local/bin/ij <<EOF
+  connect 'jdbc:derby:$DERBY_PATH';
+  delete from daquery_request;
+  delete from daquery_response;
+  delete from inquiry;
+  delete from sql_code;
+  delete from sql_download;
+  delete from sql_query;
+  commit;
+  disconnect;
+  exit;
+EOF
+chown -R devuser:devuser $DERBY_PATH
