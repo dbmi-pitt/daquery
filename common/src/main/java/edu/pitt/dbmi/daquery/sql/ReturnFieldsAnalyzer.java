@@ -172,7 +172,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		if(parentElement != null)
 			parStr = parentElement.getClass().getSimpleName();
 		
-		System.out.println("+++" + level + "\t" + nodeStr + "\t" + parStr);
+		//System.out.println("+++" + level + "\t" + nodeStr + "\t" + parStr);
 
 		if(node.self instanceof Select_coreContext)
 		{
@@ -180,8 +180,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			parentElement = setParentChild(parentElement, newSel);
 			if(topElement == null) topElement = newSel;
 						
-			System.out.print(Integer.toString(level) + ": ");
-			System.out.println("select_core");			
+			//System.out.print(Integer.toString(level) + ": ");
+			//System.out.println("select_core");			
 		}
 		if(node.self instanceof Result_columnContext)
 		{
@@ -193,7 +193,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		}
 		if(node.self instanceof Result_column_exprContext)
 		{
-			System.out.println(node.self.getText());
+//			System.out.println(node.self.getText());
 			if(! (parentElement instanceof DeIdTag || parentElement instanceof Function))
 			{
 				TableColumn col = new TableColumn();
@@ -236,8 +236,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		}
 		if(node.self instanceof Column_nameContext)
 		{
-			if(parentElement != null)
-				System.out.println(parentElement.getClass().getSimpleName() + ":" + node.self.getText());
+//			if(parentElement != null)
+//				System.out.println(parentElement.getClass().getSimpleName() + ":" + node.self.getText());
 			if(isColumn(parentElement)) ((TableColumn) parentElement).setName(node.self.getText());
 			if(parentElement instanceof DeIdTag && ((DeIdTag) parentElement).foundDateShift()) ((DeIdTag) parentElement).setDateShiftTrackByName(node.self.getText());
 		}
@@ -335,8 +335,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		
 		if(! isRejected())
 		{
-			if(parentElement instanceof DeIdTag)
-				System.out.println("here");
+//			if(parentElement instanceof DeIdTag)
+//				System.out.println("here");
 			int nextLevel = level + 1;
 			for(TreeNode n : node.children)
 			{
