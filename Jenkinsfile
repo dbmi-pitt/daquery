@@ -82,7 +82,8 @@ node {
             sh 'cp ../ws/target/daquery.war /home/jenkins/projects/daquery/ws/target'
             sh 'cp ../central/target/daquery-central.war /home/jenkins/projects/daquery/central/target'
             //copy the connected Daquery derby database
-            sh 'cp docker-baseline/daquery_connected_site_db.tar.gz /home/jenkins/projects/daquery/docker/docker-baseline/daquery_connected_site_db.tar.gz'
+            sh 'cp docker-baseline/daquery_connected_site_db.tar.gz /home/jenkins/daquery_docker_data/daquery_connected_site_db.tar.gz'
+            sh 'cp docker-central/daquery_central_db.tar.gz /home/jenkins/daquery_docker_data/daquery_central_db.tar.gz'
             sh 'scripts/test/all-start-test-jenkins.sh &'
 
          }
