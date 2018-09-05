@@ -156,9 +156,10 @@ fi
 # CONTAINER_NAME is the docker name for this Daquery container.  This name must
 # be unique if running multiple Daquery sites (ex: daquery-testsite1, daquery-testsite2)
 CONTAINER_NAME="daquery-testsite-$TOMCAT_REDIRECT_PORT"
-docker stop $CONTAINER_NAME
+# NOTE: for this line silence an error if it cannot find the container but adding the "|| true" 
+docker stop $CONTAINER_NAME || true
 docker pull cborromeo/daquery-baseline
-docker rm $CONTAINER_NAME
+docker rm $CONTAINER_NAME || true
 
 
 if docker run --name $CONTAINER_NAME -dt -v $OJDBC_LIB_DIR:$CONTAINER_OJDBC_DIR -v $DAQUERY_WAR_DIR:$CONTAINER_DAQUERY_WAR_DIR -v $DB_HOME:$CONTAINER_DAQUERY_HOME -p $TOMCAT_REDIRECT_PORT:8080 -p $TOMCAT_DEBUG_PORT:8000 -e OJDBC_LIB_DIR=$OJDBC_LIB_DIR -e DAQUERY_WAR_DIR=$DAQUERY_WAR_DIR -e TOMCAT_HOME=$TOMCAT_HOME -e CONTAINER_OJDBC_DIR=$CONTAINER_OJDBC_DIR -e CONTAINER_DAQUERY_WAR_DIR=$CONTAINER_DAQUERY_WAR_DIR -e DAQUERY_HOME=$CONTAINER_DAQUERY_HOME/daquery-$TOMCAT_REDIRECT_PORT -e DAQUERY_CENT_URL=$DAQUERY_CENT_URL cborromeo/daquery-baseline:latest; then
