@@ -101,7 +101,9 @@ node {
 
     emailext (
         subject: 'project build failed',
-        body: "project build error is here: ${env.BUILD_URL}<br/>The error is: ${e.message}" ,
+        body: "project build error is here: ${env.BUILD_URL}
+               The error is: ${e.message}
+               Here is the stack trace: ${e.getStackTrace()}" ,
         attachLog: true,
         compressLog: true,
         recipientProviders: [[$class: 'CulpritsRecipientProvider']]
