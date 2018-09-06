@@ -12,7 +12,7 @@ Each joined network can have a set of contacts which will receive notifications 
 -------------------------------------------------------------------
 * Log into Daquery with a user account that has admin rights.
 
-* Make sure any users who you want to make a contact are added as local users.  See the [edit user page](edit-user.html) for more information.
+* Make sure any users who you want to add as contacts are local users.  See the [edit user page](edit-user.html) for more information on adding users.
 
 * Choose the network that you want to edit by navigating to the Networks page and clicking the "Edit Network" link for the network that you want to change the contacts for.
 
@@ -27,14 +27,14 @@ Each joined network can have a set of contacts which will receive notifications 
 <img src="images/choose-net-contacts.png" alt="Choose Network Contact" style="width: 800px;"/>
 
 
-##System Notifications
+## System Notifications
 Daquery send system level notifications to specified admins on certain events such as when a site has been requested to receive requests from another site.
 
 #### Editing System Contacts
 -------------------------------------------------------------------
 * Log into Daquery with a user account that has admin rights.
 
-* Make sure any users who you want to make a contact are added as local users with **_admin rights_**. Only users with admin rights are permitted to be system contact.  See the [edit user page](edit-user.html) for more information on adding users.
+* Make sure any users who you want to add as contacts are added as local users with **_admin rights_**. Only users with admin rights are permitted to be system contact.  See the [edit user page](edit-user.html) for more information on adding or editing users.
 
 * Open the system contact page by clicking the system properties menu in the upper right corner of the application and choosing the "App Contact" menu item.
 
