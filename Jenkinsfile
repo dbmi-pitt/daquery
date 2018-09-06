@@ -91,7 +91,7 @@ node {
          }
 
     }
-    } catch (err) {
+    } catch (Exception e) {
 
         currentBuild.result = "FAILURE"
 
@@ -101,7 +101,7 @@ node {
 
     emailext(
         subject: 'project build failed',
-        body: "project build error is here: ${env.BUILD_URL}<br/>The error is: ${err}" ,
+        body: "project build error is here: ${env.BUILD_URL}<br/>The error is: ${e.message}" ,
         attachLog: true,
         compressLog: true,
         recipientProviders: [[$class: 'CulpritsRecipientProvider']]
