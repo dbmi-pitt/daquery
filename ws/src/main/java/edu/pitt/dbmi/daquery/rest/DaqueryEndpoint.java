@@ -790,29 +790,32 @@ public class DaqueryEndpoint extends AbstractEndpoint
 					rVal.setStatusMessage(resp.getStatusMessage());
 					rVal.setErrorMessage(resp.getErrorMessage());
 					rVal.setDownloadAvailable(resp.isDownloadAvailable());					
-					if(resp.isDownloadAvailable() && resp.getDownloadDirective() != null && resp.getDownloadDirective() instanceof SQLQuery && ((SQLQuery) resp.getDownloadDirective()).getCode() != null)
+					if(resp.isDownloadAvailable() != null && resp.isDownloadAvailable().booleanValue() && resp.getDownloadDirective() != null)
 					{
-						SQLQuery dDir = (SQLQuery) resp.getDownloadDirective();
-						rVal.setDownloadDirective(resp.getDownloadDirective());
-						List<SQLCode> toRemove = new ArrayList<SQLCode>();
-						for(SQLCode cde : dDir.getCode())
+						if(resp.getDownloadDirective() instanceof SQLQuery && ((SQLQuery) resp.getDownloadDirective()).getCode() != null)
 						{
-							toRemove.add(cde);
-							cde.setQuery(null);
-							SQLCode nextCDE = new SQLCode();
-							nextCDE.setCode(cde.getCode());
-							nextCDE.setDialectEnum(cde.getDialectEnum());
-							Long newId = (Long) AbstractDAO.save(nextCDE);
-							SQLCode nC = AbstractDAO.get(SQLCode.class, newId);
-							dDir.getCode().add(nC);
-							nC.setQuery(dDir);
-							AbstractDAO.updateOrSave(dDir);
-						}
-						for(SQLCode cd : toRemove)
-						{
-							cd.setQuery(null);
-							dDir.getCode().remove(cd);
-							AbstractDAO.delete(cd);
+							SQLQuery dDir = (SQLQuery) resp.getDownloadDirective();
+							rVal.setDownloadDirective(resp.getDownloadDirective());
+							List<SQLCode> toRemove = new ArrayList<SQLCode>();
+							for(SQLCode cde : dDir.getCode())
+							{
+								toRemove.add(cde);
+								cde.setQuery(null);
+								SQLCode nextCDE = new SQLCode();
+								nextCDE.setCode(cde.getCode());
+								nextCDE.setDialectEnum(cde.getDialectEnum());
+								Long newId = (Long) AbstractDAO.save(nextCDE);
+								SQLCode nC = AbstractDAO.get(SQLCode.class, newId);
+								dDir.getCode().add(nC);
+								nC.setQuery(dDir);
+								AbstractDAO.updateOrSave(dDir);
+							}
+							for(SQLCode cd : toRemove)
+							{
+								cd.setQuery(null);
+								dDir.getCode().remove(cd);
+								AbstractDAO.delete(cd);
+							}
 						}
 					}
 					Fileset files = resp.getFiles();
