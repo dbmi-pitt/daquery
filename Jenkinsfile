@@ -99,7 +99,7 @@ node {
            // subject: 'project build failed',
            // to: 'chb69@pitt.edu'
 
-    emailext(
+    emailext (
         subject: 'project build failed',
         body: "project build error is here: ${env.BUILD_URL}<br/>The error is: ${e.message}" ,
         attachLog: true,
