@@ -28,12 +28,14 @@ import { AuthGuard } from './_guards/auth.guard';
 import { RoleGuard } from './_guards/role.guard';
 import { EditUserComponent } from "./components/users/edit-user/edit-user.component";
 import { ForceChangePasswordComponent } from "./components/force-change-password/force-change-password.component";
+import { SystemUpdateWarningComponent } from "./components/system-update-warning/system-update-warning.component";
 
 const appRoutes:Routes = [
   { path: 'setup', component: SetupComponent },
   { path: "", component: LoginComponent },
   { path: "login", component: LoginComponent },
   { path: "force-change-password", component: ForceChangePasswordComponent },
+  { path: "system-update-warning", component: SystemUpdateWarningComponent },
   { path: '', component: DashboardComponent,
     children: [
       { path: "queries-to-me", component: QueriesToMeComponent, canActivate: [AuthGuard] },

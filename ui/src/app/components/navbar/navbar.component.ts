@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NotificationService } from '../../services/notification.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { Notification } from '../../models/notification.model';
+import { DaqueryService } from '../../services/daquery.service';
 import { AuthGuard } from '../../_guards/auth.guard';
 import { Observable } from 'rxjs/Rx';
 import { Location } from '@angular/common';
@@ -18,11 +19,13 @@ export class NavbarComponent implements OnInit {
   notifications: Notification[] = [];
   showAppConfig = false;
   user: any;
+  updateAvailable: any;
 
   constructor(private authenticationService: AuthenticationService,
               private notificationService: NotificationService,
               private authGuard: AuthGuard,
-              private roleGuard: RoleGuard) { }
+              private roleGuard: RoleGuard,
+              private daqueryService: DaqueryService) { }
 
   ngOnInit() {
     if(this.canActive(["admin"])) {
@@ -30,6 +33,7 @@ export class NavbarComponent implements OnInit {
     }
     this.user = JSON.parse(localStorage.getItem('currentUser'));
     this.getNotifications();
+    this.isUpdateAvailable();
   }
 
   canActive(allowedRoles: string[]): boolean {
@@ -44,6 +48,16 @@ export class NavbarComponent implements OnInit {
     //           .subscribe(notifications => {
     //             this.notifications = notifications;
     //           });
+  }
+
+  isUpdateAvailable() {
+    this.daqueryService.isUpdateAvailable()
+                       .subscribe(res => {
+                         if(res.updateAvailable === false){
+                         } else {
+                           this.updateAvailable = true;
+                         }
+                       });
   }
 
   logout(){

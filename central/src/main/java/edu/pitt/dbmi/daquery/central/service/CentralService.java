@@ -27,6 +27,7 @@ import com.google.gson.GsonBuilder;
 
 import edu.pitt.dbmi.daquery.central.ConnectionRequest;
 import edu.pitt.dbmi.daquery.central.ConnectionRequestStatus;
+import edu.pitt.dbmi.daquery.central.DaqueryVersion;
 import edu.pitt.dbmi.daquery.central.SiteContact;
 import edu.pitt.dbmi.daquery.central.util.DBHelper;
 import edu.pitt.dbmi.daquery.central.util.DaqueryCentralException;
@@ -536,5 +537,32 @@ public class CentralService{
 		{
 			if(sess != null) sess.close();
 		}
+	}
+	
+	/**
+	 * Get the latest build number.
+	 * 
+	 * @return 200 with a data model, 404 if the network or model is not found.
+	 */
+	@GET
+	@Path("/latest-build")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response latestBuild()
+	{
+		try {
+			// create connection request
+			DaqueryVersion dv = DBHelper.getLatestDaqueryVersion();
+			if(dv == null){
+				return ResponseHelper.getErrorResponse(404, "lastest build not found", "lastest build not found", null);
+			}
+			HashMap<String, String> retJson = new HashMap<>();
+			retJson.put("build_num", dv.build_num.toString());
+			retJson.put("package_url", dv.package_url.toString());
+			retJson.put("force_update", dv.force_update.toString());
+			return ResponseHelper.getJsonResponseGen(200, retJson);
+		} catch (Throwable t){
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while on the central server while retrieving latest build number", "Error while retrieving latest build number", t));
+		}
+			
 	}
 }

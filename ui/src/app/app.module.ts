@@ -79,6 +79,7 @@ import { RemoteUsersComponent } from './components/remote-users/remote-users.com
 import { NetworkContactsComponent } from './components/networks/network/network-contacts/network-contacts.component';
 import { SiteContactsComponent } from './components/site-contacts/site-contacts.component';
 import { ForceChangePasswordComponent } from './components/force-change-password/force-change-password.component';
+import { SystemUpdateWarningComponent } from './components/system-update-warning/system-update-warning.component';
 
 
 @NgModule({
@@ -130,6 +131,7 @@ import { ForceChangePasswordComponent } from './components/force-change-password
     NetworkContactsComponent,
     SiteContactsComponent,
     ForceChangePasswordComponent,
+    SystemUpdateWarningComponent,
   ],
   imports: [
     BrowserModule,
