@@ -77,7 +77,7 @@ export class RecentQueryComponent implements OnInit {
           dataType: 'SQL_DOWNLOAD',
           inquiryId: request.response.downloadDirective ? request.response.downloadDirective.inquiryId : '',
           queryType: 'DATA',
-          inquiryName: request.inquiry.inquiryName + "(Data)",
+          inquiryName: request.inquiry.inquiryName + "(Case Export)",
           inquiryDescription: request.inquiry.inquiryDescription,
           code: request.response.downloadDirective ? request.response.downloadDirective.code : ''
         }

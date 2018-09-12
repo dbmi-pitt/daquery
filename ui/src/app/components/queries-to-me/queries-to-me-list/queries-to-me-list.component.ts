@@ -113,4 +113,8 @@ export class QueriesToMeListComponent implements OnInit {
   isValidSelectedRequest(selectedRequest: any){
     return selectedRequest.responses.length > 0
   }
+
+  showReturnValues() {
+    return this.sqlAnalyzerResponse.returnList.length > 0 && this.selectedRequest.inquiry.queryType !== 'DATA';
+  }
 }

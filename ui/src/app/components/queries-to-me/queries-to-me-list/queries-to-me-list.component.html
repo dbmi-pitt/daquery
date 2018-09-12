@@ -53,7 +53,7 @@
           <hr />
           <div *ngIf="selectedRequest.code" class="row">
             <div class="col-md-12" style="overflow-y: auto; max-height: 57vh">
-              <label>Query will be executed:</label>
+              <label>Full cases will be exported where this query will be used to define the case list:</label>
               <pre>
                 <code>
                   {{ selectedRequest.code }}
@@ -90,7 +90,7 @@
                 </ul>
                 <p *ngIf="sqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values.</p>
               </div>
-              <div *ngIf="sqlAnalyzerResponse?.returnList?.length > 0" class="panel box box-primary">
+              <div *ngIf="showReturnValues()" class="panel box box-primary">
                 <div class="box-header with-border">
                   <h4 class="box-title">
                       Return Values

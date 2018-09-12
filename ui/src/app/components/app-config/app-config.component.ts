@@ -17,6 +17,7 @@ export class AppConfigComponent implements OnInit {
   success = false;
   updating = false;
   updated = false;
+  updateAvailable: any;
 
   appConfigForm: FormGroup;
   constructor(private fb: FormBuilder,
@@ -53,6 +54,7 @@ export class AppConfigComponent implements OnInit {
   get casePerFile() { return this.appConfigForm.get('casePerFile'); }
 
   ngOnInit() {
+    this.isUpdateAvailable();
   }
 
   getConfig(){
@@ -115,5 +117,15 @@ export class AppConfigComponent implements OnInit {
 
   OK(){
     this.authenticationService.logout();
+  }
+
+  isUpdateAvailable() {
+    this.daqueryService.isUpdateAvailable()
+                       .subscribe(res => {
+                         if(res.updateAvailable === false){
+                         } else {
+                           this.updateAvailable = true;
+                         }
+                       });
   }
 }

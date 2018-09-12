@@ -107,6 +107,6 @@ export class DashboardComponent implements OnInit {
     this.daqueryService.getVersion()
                        .subscribe(ver => {
                          this.version = ver;
-                       })
+                       });
   }
 }

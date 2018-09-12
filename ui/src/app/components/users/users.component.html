@@ -4,7 +4,7 @@
 <section class="content">
   <div class="row">
     <div class="col-sm-12 col-md-4 placeholder">
-      <button class="btn btn-primary" (click)="showAddUser=!showAddUser">Add User</button>
+      <button id="btn_add_user" class="btn btn-primary" (click)="showAddUser=!showAddUser">Add User</button>
       </div>
   </div>
   <app-add-user *ngIf="showAddUser" (showAddUser)="toggleShowAddUser($event)" (newUser)="addNewUser($event)"></app-add-user>
