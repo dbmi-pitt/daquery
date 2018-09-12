@@ -294,6 +294,38 @@ public class DataModel extends DaqueryObject implements Serializable
 		}		
 	}
 	
+	@Transient
+	public DataExportConfig getCDM41ExportConfigFromFile() throws DaqueryException
+	{
+		try
+		{
+			InputStream is = DataModel.class.getResourceAsStream("/data-export-config-cdm-v4.1.xml");
+			if(is == null)
+			{
+				is = new FileInputStream(new File("/home/devuser/projects/daquery/ws/src/main/resources/data-export-config-cdm-v4.1.xml"));
+			}
+			Scanner inputScanner = new Scanner(is);
+			dataExportConf = "";
+			while(inputScanner.hasNextLine())
+				dataExportConf = dataExportConf + inputScanner.nextLine() + "\n";
+			inputScanner.close();
+
+			JAXBContext jaxbContext = JAXBContext.newInstance(DataExportConfig.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			StringReader reader = new StringReader(dataExportConf);
+			DataExportConfig exportConfig = (DataExportConfig) jaxbUnmarshaller.unmarshal(reader);
+			reader.close();
+			return(exportConfig);
+		}
+		catch(JAXBException je)
+		{
+			throw new DaqueryException("Error data export configuration.  Possibly the XML is not formated correctly.", je);
+		}
+		catch(FileNotFoundException fnfe)
+		{
+			throw new DaqueryException("File not found!!!!");
+		}		
+	}	
 //	@Override
 //	public String toJson() {
 //        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
