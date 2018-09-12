@@ -52,7 +52,7 @@ export class AddSiteComponent implements OnInit {
       this.createForm(id);
       await this.getNetwork(id);
       this.getAvailableSites(this.network);
-      this.getAlias();
+      //this.getAlias();
     });
   }
 
