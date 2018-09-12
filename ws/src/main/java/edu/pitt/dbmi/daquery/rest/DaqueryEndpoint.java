@@ -1853,6 +1853,33 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	}
     }
     
+    @GET
+    @Path("/is-update-available/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response isUpdateAvailable(){
+    	Response resp = null;
+    	try {
+    		String currentBuild = AppProperties.getBuildNo();
+    		resp = WSConnectionUtil.centralServerGet("latest-build", null);
+    		if(resp.getStatus() == 200) {
+    			String jsonval = resp.readEntity(String.class);
+    			Map<String, String> jmap = JSONHelper.toMap(jsonval);
+    			if(Integer.parseInt(jmap.get("build_num")) > Integer.parseInt(currentBuild)){
+    				return Response.ok(200).entity(jsonval).build();
+    			} else {
+    				return Response.ok(200).entity("{\"updateAvailable\": false}").build();
+    			}
+    		}
+    		
+    		return Response.ok(200).entity("false").build();
+    	} catch(Exception e) {
+    		logger.log(Level.SEVERE, "An unexpeced error occured while checking is update available", e);
+    		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while checking is update available.  See the appication logs for more information.", e));
+    	} finally {
+    		if(resp != null) resp.close();
+    	}
+    }
+    
     @Secured("ADMIN")
     @GET
     @Path("/system-update/")

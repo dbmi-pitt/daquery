@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SetupService } from '../../services/setup.service';
 import { AuthenticationService } from '../../services/authentication.service';
+import { DaqueryService } from '../../services/daquery.service';
 
 @Component({
     moduleId: module.id,
@@ -16,7 +17,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private router: Router,
     private setupService: SetupService,
-    private authenticationService: AuthenticationService) { }
+    private authenticationService: AuthenticationService,
+    private daqueryService: DaqueryService) { }
 
   ngOnInit() {
     // get setup flag. if not setup, redirect to setup page
@@ -35,7 +37,14 @@ export class LoginComponent implements OnInit {
     this.authenticationService.login(this.model.email, this.model.password)
                               .subscribe(result => {
                                 if (result === 'success') {
-                                  this.router.navigate(['/queries-to-me']);
+                                  this.daqueryService.isUpdateAvailable()
+                                                     .subscribe(res => {
+                                                       if(res.updateAvailable === false){
+                                                         this.router.navigate(['/queries-to-me']);
+                                                       } else {
+                                                         this.router.navigate(['/system-update-warning']);
+                                                       }
+                                                     });
                                 } else if (result === 'fail'){
                                   this.error = 'Email or password is incorrect';
                                   this.loading = false;

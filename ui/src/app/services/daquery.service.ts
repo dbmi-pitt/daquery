@@ -61,6 +61,13 @@ export class DaqueryService {
                     });
   }
 
+  isUpdateAvailable() {
+    return this.http.get('/daquery/ws/is-update-available')
+                    .catch(error => {
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
   systemUpdate(){
     return this.http.get('/daquery/ws/system-update')
                     .catch(error => {

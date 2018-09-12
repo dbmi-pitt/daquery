@@ -23,7 +23,7 @@
               <b>Password</b> <a class="pull-right">********</a>
             </li>
           </ul>
-          <a class="btn btn-primary btn-block" (click)="editMode = true">Edit</a>
+          <a id="a_edit_user" class="btn btn-primary btn-block" (click)="editMode = true">Edit</a>
         </div>
         <div *ngIf="editMode" class="box-body box-profile">
           <form #f [formGroup]="profileForm" (ngSubmit)="onSubmit()" novalidate>
@@ -39,9 +39,9 @@
               <div class="help-block" *ngIf="realName.invalid && (realName.dirty || realName.touched)">Please enter a real name</div>
             </div>
             <div class="radio">
-              <label class="radio-inline"><input type="radio" name="status" formControlName="status" value="PWD_EXPIRED">Expired</label>
-              <label class="radio-inline"><input type="radio" name="status" formControlName="status" value="DISABLED">Disabled</label>
-              <label class="radio-inline"><input type="radio" name="status" formControlName="status" value="ACTIVE">Active</label>
+              <label class="radio-inline"><input id="rb_expired" type="radio" name="status" formControlName="status" value="PWD_EXPIRED">Expired</label>
+              <label class="radio-inline"><input id="rb_disabled" type="radio" name="status" formControlName="status" value="DISABLED">Disabled</label>
+              <label class="radio-inline"><input id="rb_active" type="radio" name="status" formControlName="status" value="ACTIVE">Active</label>
             </div>
             <p class="text-muted"><b>ROLES:</b> {{ listRoles(user.roles) | uppercase }}</p>
             <ul *ngIf="currentUserRoles.includes('admin')" class="list-unstyled" formArrayName="roles">
@@ -73,7 +73,7 @@
               </li>
             </ul>
             <button class="btn btn-default btn-block btn-flat" (click)="editMode = false">Cancel</button>
-            <button [disabled]="profileForm.invalid || submitting" class="btn btn-primary btn-block btn-flat">
+            <button id="btn_submit" [disabled]="profileForm.invalid || submitting" class="btn btn-primary btn-block btn-flat">
               <i *ngIf="submitting" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
               <span *ngIf="!submitting">submit</span>
             </button>

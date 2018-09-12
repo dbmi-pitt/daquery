@@ -16,6 +16,7 @@ import org.hibernate.Session;
 import edu.pitt.dbmi.daquery.common.util.*;
 import edu.pitt.dbmi.daquery.central.ConnectionRequest;
 import edu.pitt.dbmi.daquery.central.ConnectionRequestStatus;
+import edu.pitt.dbmi.daquery.central.DaqueryVersion;
 import edu.pitt.dbmi.daquery.central.SiteContact;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
@@ -237,6 +238,34 @@ public class DBHelper
 			}
 		} catch (Throwable t) {
 			String msg = "An unexpected error occurred while looking up the connection request with network_id: " + networkId + " from_site_id: " + fromSiteId + " to_site_id: " + toSiteId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryCentralException(msg, t);
+		} finally {
+			ApplicationDBHelper.closeConnection(conn, ps, rs);
+		}
+	}
+	
+	/**
+	 * Get the latest daquery_version
+	 * @throws DaqueryCentralException
+	 */
+	public static DaqueryVersion getLatestDaqueryVersion() throws DaqueryCentralException {
+		String sql = "select * from daquery_version order by build_num desc fetch first row only";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = ApplicationDBHelper.getConnection();
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			if(rs.next()) {
+				return new DaqueryVersion(rs);
+			} else {
+				return null;
+			}
+		} catch (Throwable t) {
+			String msg = "An unexpected error occurred while looking up the lastest daquery version";
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryCentralException(msg, t);
 		} finally {

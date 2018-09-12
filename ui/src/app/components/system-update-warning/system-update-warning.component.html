@@ -1,0 +1,38 @@
+<div class="login-box">
+  <div class="login-logo">
+    <b>Daquery</b><i class="fa fa-glass"></i>
+  </div>
+  <div class="login-box-body">
+    <div *ngIf="!updating">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="alert alert-warning alert-dismissible">
+            <h4><i class="icon fa fa-warning"></i> System Update {{ forceUpdate ? "Required" : "Available"}}!</h4>
+            <p *ngIf="!currentUserRoles.includes('admin')"> The system update is necessary. Please ask your admin login and update daquery.</p>
+            <p *ngIf="currentUserRoles.includes('admin')">There is system update available. Click the "System Updage" button to update your daquery.</p>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="currentUserRoles.includes('admin')" class="row">
+        <button class="btn btn-danger btn-block" (click)="systemUpdate()">
+          <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+          <span *ngIf="!loading">System Update</span>
+        </button>
+      </div>
+      <div *ngIf="!currentUserRoles.includes('admin')" class="row">
+        <div class="col-md-6 col-md-offset-4">
+          <button class="btn btn-default" (click)="onLogout()">Log out</button>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="updating">
+      <p *ngIf="!updated">System is updating...</p>
+      <p *ngIf="updated">Update is completed. Please re-login daquery to start your journey.</p>
+      <i *ngIf="!updated" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+      <button *ngIf="updated" class="btn btn-primary btn-block btn-flat" (click)="OK()">
+        <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+        <span *ngIf="!loading">OK</span>
+      </button>
+    </div>
+  </div>
+</div>
