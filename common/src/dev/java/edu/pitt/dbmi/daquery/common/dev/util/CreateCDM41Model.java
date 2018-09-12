@@ -1,27 +1,16 @@
 package edu.pitt.dbmi.daquery.common.dev.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 
-import javax.persistence.Transient;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -29,16 +18,15 @@ import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 
-public class CreateCDM31Model
+public class CreateCDM41Model
 {
-	private static final String CDM_CONN_URL = "jdbc:oracle:thin:@dbmi-db-dev-02.dbmi.pitt.edu:1521:dbmi09";
-	private static final String CDM_SCHEMA_NAME = "pcori_etl_31";
+	private static final String CDM_CONN_URL = "jdbc:oracle:thin:@dbmi-db-prod-02.dbmi.pitt.edu:1521:dbmi11";
+	private static final String CDM_SCHEMA_NAME = "cdm_41_etl";
 	private static final String CDM_PASSWORD = "password";
 	
 	public static void main(String [] args) throws Exception
@@ -52,7 +40,7 @@ public class CreateCDM31Model
 
 	private static Long importModel() throws IOException, DaqueryException
 	{
-		InputStream is = CreateCDM31Model.class.getResourceAsStream("/data-modelCDM-3.1.json");
+		InputStream is = CreateCDM41Model.class.getResourceAsStream("/data-modelCDM-4.1.json");
 		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
 		//dm.setId(null);
 		Session sess = null;
@@ -126,6 +114,19 @@ public class CreateCDM31Model
 			if(sess != null) sess.close();
 		}
 	}
+	private static final String [] TABLES_TO_EXCLUDE = {"REDCAP_ANSWER_MAPPING", "REDCAP_EVENT_MAPPING", "REDCAP_PATIENT_MAPPING", "RUCA_MAPPING"};
+	private static final String [] FIELDS_TO_EXCLUDE = {"ENCOUNTER.RAW_PAYER_NAME_PRIMARY", "ENCOUNTER.RAW_PAYER_NAME_SECONDARY"};
+	private static boolean inExcludeLists(String tableName, String fieldName)
+	{
+		String tName = tableName.toUpperCase().trim();
+		String fName = tName + "." + fieldName.toUpperCase().trim();
+		for(String tbl : TABLES_TO_EXCLUDE)
+			if(tbl.equals(tName)) return(true);
+		for(String field : FIELDS_TO_EXCLUDE)
+			if(field.equals(fName)) return(true);
+		
+		return(false);
+	}
 	private static DataModel createModel(String cdmConnUrl, String cdmSchemaName, String cdmPassword, String modelName) throws DaqueryException
 	{
 		Connection conn = null;
@@ -135,8 +136,8 @@ public class CreateCDM31Model
 			conn = DriverManager.getConnection(cdmConnUrl, cdmSchemaName, cdmPassword);
 			
 			DataModel dm = new DataModel(true);
-			dm.setName("CDM-3.1");
-			dm.setDescription("PCORI Common Data Model Version 3.1");
+			dm.setName("CDM-4.1");
+			dm.setDescription("PCORI Common Data Model Version 4.1");
 			DataExportConfig dec = dm.getCDM31ExportConfigFromFile();
 			System.out.println(dec.getCasesPerFile());
 			SQLDataSource ds = new SQLDataSource();
@@ -150,39 +151,44 @@ public class CreateCDM31Model
 			ResultSet rs = md.getColumns(null, "%" + cdmSchemaName.trim().toUpperCase() + "%", "%", "%");
 			while (rs.next())
 			{
-				DataAttribute da = new DataAttribute();
-				da.setDataModel(dm);
-				da.setEntityName(rs.getString("TABLE_NAME"));
-				da.setFieldName(rs.getString("COLUMN_NAME"));
-				String fType = rs.getString("TYPE_NAME");
-				da.setAggregatable(false);
-				da.setFieldType(fType);
-				da.setPhi(false);
-				if(fType.trim().toUpperCase().equals("DATE"))
+				String tableName = rs.getString("TABLE_NAME");
+				String fName = rs.getString("COLUMN_NAME");
+				if(! inExcludeLists(tableName, fName)  )
 				{
-					da.setPhi(true);
-					da.setDateField(true);
+					DataAttribute da = new DataAttribute();
+					da.setDataModel(dm);
+					da.setEntityName(tableName);
+					da.setFieldName(fName);
+					String fType = rs.getString("TYPE_NAME");
+					da.setAggregatable(false);
+					da.setFieldType(fType);
+					da.setPhi(false);
+					if(fType.trim().toUpperCase().equals("DATE"))
+					{
+						da.setPhi(true);
+						da.setDateField(true);
+					}
+					String fieldName = da.getFieldName().toUpperCase().trim();
+					if(fieldName.equals("BIRTH_DATE"))
+					{
+						da.setPhi(true);
+						da.setBirthDate(true);
+						da.setDateField(true);
+					}
+					if(fieldName.endsWith("ID") || fieldName.contains("_ID_"))							
+					{
+						da.setAggregatable(true);
+						da.setIdentifier(true);
+						da.setIdentiferName(da.getFieldName().toUpperCase());
+						da.setPhi(true);
+					}
+					if(fieldName.equals("ZIP_CODE"))
+					{
+						da.setZipCode(true);
+						da.setPhi(true);
+					}
+					attribs.add(da);
 				}
-				String fieldName = da.getFieldName().toUpperCase().trim();
-				if(fieldName.equals("BIRTH_DATE"))
-				{
-					da.setPhi(true);
-					da.setBirthDate(true);
-					da.setDateField(true);
-				}
-				if(fieldName.endsWith("ID"))							
-				{
-					da.setAggregatable(true);
-					da.setIdentifier(true);
-					da.setIdentiferName(da.getFieldName().toUpperCase());
-					da.setPhi(true);
-				}
-				if(fieldName.equals("ZIP_CODE"))
-				{
-					da.setZipCode(true);
-					da.setPhi(true);
-				}
-				attribs.add(da);
 			}
 			dm.setAttributes(attribs);
 			return(dm);
@@ -198,5 +204,5 @@ public class CreateCDM31Model
 			catch(Throwable t){System.err.println("Error closing connection."); t.printStackTrace();}
 			
 		}
-	}	
+	}
 }
