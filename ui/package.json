@@ -10,12 +10,13 @@
     "prod": "ng build --prod --bh=/daquery/",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "v": "ng -v"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "4.4.6",
-    "@angular/cli": "^1.4.10",
+    "@angular/cli": "1.4.10",
     "@angular/common": "4.4.6",
     "@angular/compiler": "4.4.6",
     "@angular/core": "4.4.6",
