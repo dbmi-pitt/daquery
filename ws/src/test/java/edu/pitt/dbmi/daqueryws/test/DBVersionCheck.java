@@ -13,7 +13,7 @@ import edu.pitt.dbmi.daquery.update.UpdateDBForVersion;
 
 public class DBVersionCheck {
 
-	private static final float INFINITESIMAL = 1e-10f;
+	private static final float MAX_SIG = 0.00001f;
 	@Test
 	public void test()
 	{
@@ -22,8 +22,8 @@ public class DBVersionCheck {
 			String ddlFile = AppProperties.getInitializationDDL();
 			Float ddlVersion = DDLReader.getVerion(ddlFile);
 			float updateVersion = UpdateDBForVersion.getMaxUpdateVersion();
-			float upMin = updateVersion - INFINITESIMAL;
-			float upMax = updateVersion + INFINITESIMAL;
+			float upMin = updateVersion - MAX_SIG;
+			float upMax = updateVersion + MAX_SIG;
 			if(ddlVersion == null)
 				fail("No db version found for daquery db in " + ddlFile);
 			if(! (upMin < ddlVersion.floatValue() && upMax > ddlVersion.floatValue()))
