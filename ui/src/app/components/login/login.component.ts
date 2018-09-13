@@ -39,7 +39,7 @@ export class LoginComponent implements OnInit {
                                 if (result === 'success') {
                                   this.daqueryService.isUpdateAvailable()
                                                      .subscribe(res => {
-                                                       if(res.updateAvailable === false){
+                                                       if(res == null || res.updateAvailable === false){
                                                          this.router.navigate(['/queries-to-me']);
                                                        } else {
                                                          this.router.navigate(['/system-update-warning']);
