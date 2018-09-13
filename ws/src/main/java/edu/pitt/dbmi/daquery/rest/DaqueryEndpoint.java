@@ -1874,7 +1874,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     			}
     		}
     		
-    		return Response.ok(200).entity("false").build();
+    		return Response.ok(200).entity("{\"updateAvailable\": false}").build();
     	} catch(Exception e) {
     		logger.log(Level.SEVERE, "An unexpeced error occured while checking is update available", e);
     		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while checking is update available.  See the appication logs for more information.", e));
