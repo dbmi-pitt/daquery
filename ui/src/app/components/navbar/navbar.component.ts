@@ -53,7 +53,7 @@ export class NavbarComponent implements OnInit {
   isUpdateAvailable() {
     this.daqueryService.isUpdateAvailable()
                        .subscribe(res => {
-                         if(res.updateAvailable === false){
+                         if(res == null || res.updateAvailable === false){
                          } else {
                            this.updateAvailable = true;
                          }
