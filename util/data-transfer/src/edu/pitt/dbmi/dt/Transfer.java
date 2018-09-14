@@ -125,6 +125,8 @@ public class Transfer
                 		Object dbValue;
                 		if(cType.equals("DATE"))
                 			dbValue = valLine.getDate(column);
+                		else if(cType.startsWith("TIMESTAMP"))
+                			dbValue = valLine.getDate(column);
                 		else
                 			dbValue = valLine.getString(column);
                 		String value = convertValue(cType, dbValue);
@@ -154,6 +156,7 @@ public class Transfer
 		}		
 	}
 	
+	private static SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static String convertValue(String type, Object value)
 	{
@@ -161,7 +164,7 @@ public class Transfer
 		if(type.equals("DATE"))
 		{
 			if(DB_TYPE.equals("ORA"))
-				return("TO_DATE('" + dateFormat.format((Date) value) + "', 'yyyy-mm/dd')");
+				return("TO_DATE('" + dateFormat.format((Date) value) + "', 'yyyy-mm-dd')");
 			else
 				return("'" + dateFormat.format((Date) value) + "'");
 		}
@@ -172,7 +175,10 @@ public class Transfer
 		else if(type.startsWith("VARCHAR"))
 			return("'" + StringHelper.escapeSQLSingleQuote(value.toString()) + "'");
 		else if(type.startsWith("TIMESTAMP"))
-			return("'" + value + "'");
+			if(DB_TYPE.equals("ORA"))
+				return("TO_TIMESTAMP('" + dateTimeFormat.format((Date) value) + "', 'YYYY-MM-DD HH24:MI:SS')");
+			else
+				return("'" + value + "'");
 		else
 		{
 			System.err.println("WARNING: UNKNOWN DATA TYPE: " + type);
