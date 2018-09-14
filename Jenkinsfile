@@ -72,6 +72,7 @@ node {
        }
 
     }
+/*
     stage('Deploy Docker Images') {
          dir('docker') {
             //make some of the folders Docker is expecting
@@ -91,6 +92,7 @@ node {
          }
 
     }
+*/
     } catch (Exception e) {
 
         currentBuild.result = "FAILURE"
