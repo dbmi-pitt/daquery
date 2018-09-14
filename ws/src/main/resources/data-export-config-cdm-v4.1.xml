@@ -197,7 +197,6 @@
     <custom-column-set>
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='PRO Date' colName='PRO_DATE' />
-	    <field name='PRO Response' colName='PRO_RESPONSE' />
 	    <field name='PRO Method' colName='PRO_METHOD' />
 	    <field name='PRO Mode' colName='PRO_MODE' />
 	    <field name='PRO CAT' colName='PRO_CAT' />
