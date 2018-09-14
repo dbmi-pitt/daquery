@@ -1891,7 +1891,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	Response resp  = null;
     	try
     	{
-    		URL website = new URL("http://localhost:8080/daquery-central/daquery_updates/daquery_update.zip");
+    		String url = null;
+    		resp = WSConnectionUtil.centralServerGet("latest-build", null);
+    		if(resp.getStatus() == 200) {
+    			String jsonval = resp.readEntity(String.class);
+    			Map<String, String> jmap = JSONHelper.toMap(jsonval);
+    			url = jmap.get("package_url");
+    		}
+    		URL website = new URL(url);
     		ReadableByteChannel rbc = Channels.newChannel(website.openStream());
     		FileOutputStream fos = new FileOutputStream("daquery_update.zip");
     		fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
