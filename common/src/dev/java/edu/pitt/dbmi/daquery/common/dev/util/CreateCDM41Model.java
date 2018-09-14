@@ -27,7 +27,7 @@ public class CreateCDM41Model
 {
 	private static final String CDM_CONN_URL = "jdbc:oracle:thin:@dbmi-db-prod-02.dbmi.pitt.edu:1521:dbmi11";
 	private static final String CDM_SCHEMA_NAME = "cdm_41_etl";
-	private static final String CDM_PASSWORD = "password";
+	private static final String CDM_PASSWORD = "dbmi72etl";
 	
 	public static void main(String [] args) throws Exception
 	{
@@ -138,7 +138,7 @@ public class CreateCDM41Model
 			DataModel dm = new DataModel(true);
 			dm.setName("CDM-4.1");
 			dm.setDescription("PCORI Common Data Model Version 4.1");
-			DataExportConfig dec = dm.getCDM31ExportConfigFromFile();
+			DataExportConfig dec = dm.getCDM41ExportConfigFromFile();
 			System.out.println(dec.getCasesPerFile());
 			SQLDataSource ds = new SQLDataSource();
 			ds.setName(modelName);
