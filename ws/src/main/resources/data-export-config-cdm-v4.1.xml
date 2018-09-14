@@ -197,7 +197,6 @@
     <custom-column-set>
 	    <field name='Encounter Id' colName='ENCOUNTERID' />
 	    <field name='PRO Date' colName='PRO_DATE' />
-	    <field name='PRO Response' colName='PRO_RESPONSE' />
 	    <field name='PRO Method' colName='PRO_METHOD' />
 	    <field name='PRO Mode' colName='PRO_MODE' />
 	    <field name='PRO CAT' colName='PRO_CAT' />
@@ -349,6 +348,38 @@
        <field name='RAW_OBSGEN_UNIT' colName='RAW_OBSGEN_UNIT'/>
     </custom-column-set>
 </outputFile>
+<outputFile name='path_trial.csv' source='path_trial'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+       <field name='COHORTID' colName='COHORTID'/>
+       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
+       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
+       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
+       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='pcornet_trial.csv' source='pcornet_trial'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+       <field name='PARTICIPANTID' colName='PARTICIPANTID'/>
+       <field name='TRIALID' colName='TRIALID'/>
+       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
+       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
+       <field name='TRIAL_INVITE_CODE' colName='TRIAL_INVITE_CODE'/>
+       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
+       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
+    </custom-column-set>
+</outputFile>
+<!-- <outputFile name='provider.csv' source='provider'>
+    <custom-column-set>
+       <field name='PROVIDERID' colName='PROVIDERID'/>
+       <field name='PROVIDER_NPI' colName='PROVIDER_NPI'/>
+       <field name='PROVIDER_NPI_FLAG' colName='PROVIDER_NPI_FLAG'/>
+       <field name='PROVIDER_SEX' colName='PROVIDER_SEX'/>
+       <field name='PROVIDER_SPECIALTY_PRIMARY' colName='PROVIDER_SPECIALTY_PRIMARY'/>
+       <field name='RAW_PROVIDER_SPECIALTY_PRIMARY' colName='RAW_PROVIDER_SPECIALTY_PRIMARY'/>
+    </custom-column-set>
+</outputFile>
 <outputFile name='path_cohort.csv' source='path_cohort'>
     <custom-column-set>
        <field name='ACCRUAL_TYPE' colName='ACCRUAL_TYPE'/>
@@ -375,37 +406,5 @@
        <field name='STUDY_DEFINITION' colName='STUDY_DEFINITION'/>
        <field name='STUDY_NAME       ' colName='STUDY_NAME       '/>
     </custom-column-set>
-</outputFile>
-<outputFile name='path_trial.csv' source='path_trial'>
-	<idColumn>PATID</idColumn>
-    <custom-column-set>
-       <field name='COHORTID' colName='COHORTID'/>
-       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
-       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
-       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
-       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
-    </custom-column-set>
-</outputFile>
-<outputFile name='pcornet_trial.csv' source='pcornet_trial'>
-	<idColumn>PATID</idColumn>
-    <custom-column-set>
-       <field name='PARTICIPANTID' colName='PARTICIPANTID'/>
-       <field name='TRIALID' colName='TRIALID'/>
-       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
-       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
-       <field name='TRIAL_INVITE_CODE' colName='TRIAL_INVITE_CODE'/>
-       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
-       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
-    </custom-column-set>
-</outputFile>
-<outputFile name='provider.csv' source='provider'>
-    <custom-column-set>
-       <field name='PROVIDERID' colName='PROVIDERID'/>
-       <field name='PROVIDER_NPI' colName='PROVIDER_NPI'/>
-       <field name='PROVIDER_NPI_FLAG' colName='PROVIDER_NPI_FLAG'/>
-       <field name='PROVIDER_SEX' colName='PROVIDER_SEX'/>
-       <field name='PROVIDER_SPECIALTY_PRIMARY' colName='PROVIDER_SPECIALTY_PRIMARY'/>
-       <field name='RAW_PROVIDER_SPECIALTY_PRIMARY' colName='RAW_PROVIDER_SPECIALTY_PRIMARY'/>
-    </custom-column-set>
-</outputFile>
+</outputFile> -->
 </dataExportConfig>

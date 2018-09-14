@@ -25,6 +25,8 @@ public class Transfer
 	private static String FROM_PASSWORD;
 	private static String FROM_DRIVER;
 	
+	private static String DB_TYPE;
+	
 	public static void main(String [] args)
 	{
 		transfer();
@@ -41,6 +43,11 @@ public class Transfer
 		FROM_USERNAME = DTProps.getProperty("from.username");
 		FROM_PASSWORD = DTProps.getProperty("from.password");
 		FROM_DRIVER = DTProps.getProperty("from.jdbc.class");
+		
+		if(TO_DRIVER.toUpperCase().contains("ORACLE"))
+			DB_TYPE = "ORA";
+		else
+			DB_TYPE = "OTHER"; 
 		
 		Connection toConn = null;
 		Connection fromConn = null;
@@ -152,7 +159,12 @@ public class Transfer
 	{
 		if(value == null) return("null");
 		if(type.equals("DATE"))
-			return("'" + dateFormat.format((Date) value) + "'");
+		{
+			if(DB_TYPE.equals("ORA"))
+				return("TO_DATE('" + dateFormat.format((Date) value) + "', 'yyyy-mm/dd')");
+			else
+				return("'" + dateFormat.format((Date) value) + "'");
+		}
 		else if(type.equals("NUMBER"))
 			return(value.toString());
 		else if(type.equals("FLOAT"))

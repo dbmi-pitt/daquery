@@ -1,15 +1,7 @@
 package edu.pitt.dbmi.daqueryws.test.domain;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
-
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,6 +13,14 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
 import edu.pitt.dbmi.daquery.common.dao.RoleDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
@@ -30,10 +30,9 @@ import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.AppSetup;
-import edu.pitt.dbmi.daquery.common.util.ApplicationPropertiesFile;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
-import edu.pitt.dbmi.daquery.common.util.StringHelper;
+import edu.pitt.dbmi.daqueryws.test.DBVersionCheck;
 
 
 @RunWith(Suite.class)
@@ -46,7 +45,8 @@ import edu.pitt.dbmi.daquery.common.util.StringHelper;
    RoleTest.class,
    SASDataSourceTest.class,
    SiteTest.class,
-   SQLDataSourceTest.class
+   SQLDataSourceTest.class,
+   DBVersionCheck.class
 })
 
 public class DomainTestSuite {
