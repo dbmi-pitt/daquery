@@ -90,28 +90,34 @@ export class AppConfigComponent implements OnInit {
   systemUpdate(){
     if(confirm("Are you sure to update daquery?")){
       this.updating = true;
-      this.daqueryService.systemUpdate()
-                         .subscribe(res => {
-                           console.log("get version.");
-                           let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
-                             // // get version every 5 sec 
-                             this.daqueryService.checkServer()
-                                                .subscribe(res => {
-                                                  this.updated = true;
-                                                  subscription.unsubscribe();
-                                                }, error => {
-                                                  console.log("error");
-                                                  console.log(error);
-                                                  //subscription.unsubscribe();
-                                                }, () => {
-                                                  console.log("finally");
-                                                  //subscription.unsubscribe();
-                                                });
-                            })
-                         }, err => {
-                           console.log("error.")
-                           this.updating = false;
-                         });
+      let currentBuild = -1;
+      this.daqueryService.getVersion()
+                        .subscribe(res => {
+                          currentBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
+                          this.daqueryService.systemUpdate()
+                                             .subscribe(res => {
+                                               console.log("get version.");
+                                               let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
+                                                 // // get version every 5 sec 
+                                                 this.daqueryService.checkServer()
+                                                                    .subscribe(res => {
+                                                                      let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
+                                                                      this.updated = updatedBuild >= currentBuild;
+                                                                      subscription.unsubscribe();
+                                                                    }, error => {
+                                                                      console.log("error");
+                                                                      console.log(error);
+                                                                      //subscription.unsubscribe();
+                                                                    }, () => {
+                                                                      console.log("finally");
+                                                                      //subscription.unsubscribe();
+                                                                    });
+                                                })
+                                             }, err => {
+                                               console.log("error.")
+                                               this.updating = false;
+                                             });
+      });
     }
   }
 

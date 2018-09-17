@@ -43,13 +43,13 @@ export class SystemUpdateWarningComponent implements OnInit {
                           this.daqueryService.systemUpdate()
                                              .subscribe(res => {
                                                console.log("get version.");
-                                               let subscription = Observable.interval(200 * environment.responseCheckIntervalInSecond).subscribe(x => {
+                                               let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
                                                  // // get version every 2 sec 
                                                  this.daqueryService.checkServer()
                                                                     .subscribe(res => {
                                                                       this.updating = false;
                                                                       let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
-                                                                      this.updated_success = updatedBuild > currentBuild;
+                                                                      this.updated_success = updatedBuild >= currentBuild;
                                                                       subscription.unsubscribe();
                                                                     }, error => {
                                                                       console.log("error");
