@@ -53,7 +53,8 @@
           <hr />
           <div *ngIf="selectedRequest.code" class="row">
             <div class="col-md-12" style="overflow-y: auto; max-height: 57vh">
-              <label>Full cases will be exported where this query will be used to define the case list:</label>
+              <label *ngIf="selectedRequest.inquiry.queryType === 'DATA'">Full cases will be exported where this query will be used to define the case list:</label>
+              <label *ngIf="selectedRequest.inquiry.queryType !== 'DATA'">Query will be executed:</label>
               <pre>
                 <code>
                   {{ selectedRequest.code }}
