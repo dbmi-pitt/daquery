@@ -1,10 +1,12 @@
 package edu.pitt.dbmi.daquery.rest;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -1874,7 +1876,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     			}
     		}
     		
-    		return Response.ok(200).entity("false").build();
+    		return Response.ok(200).entity("{\"updateAvailable\": false}").build();
     	} catch(Exception e) {
     		logger.log(Level.SEVERE, "An unexpeced error occured while checking is update available", e);
     		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while checking is update available.  See the appication logs for more information.", e));
@@ -1891,23 +1893,41 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	Response resp  = null;
     	try
     	{
-    		URL website = new URL("http://localhost:8080/daquery-central/daquery_updates/daquery_update.zip");
+    		String url = null;
+    		resp = WSConnectionUtil.centralServerGet("latest-build", null);
+    		if(resp.getStatus() == 200) {
+    			String jsonval = resp.readEntity(String.class);
+    			Map<String, String> jmap = JSONHelper.toMap(jsonval);
+    			url = jmap.get("package_url");
+    		}
+    		URL website = new URL(url);
     		ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-    		FileOutputStream fos = new FileOutputStream("daquery_update.zip");
+    		FileOutputStream fos = new FileOutputStream(AppProperties.getHomeDirectory() + "/temp/daquery_update.zip");
     		fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
     		
-    		String zipFile = System.getProperty("user.dir") + "/daquery_update.zip";
-    		String destination = System.getProperty("user.dir");
+    		String zipFile = AppProperties.getHomeDirectory() + "/temp/daquery_update.zip";
+    		String destination = AppProperties.getHomeDirectory() + "/temp";
     		
     		ZipUtil zu = new ZipUtil();
     		zu.unZip(zipFile, destination);
     		
    		
     		logger.log(Level.SEVERE, "Before update!");
-    		Process proc = Runtime.getRuntime().exec("chmod u+x " + destination + "/daquery_update/update.sh");
-    		String[] script = new String[]{"/bin/bash", "-c", destination + "/daquery_update/update.sh"};
+    		Process proc = Runtime.getRuntime().exec("chmod u+x " + destination + "/daquery_update/daquery_update/update.sh");
+    		String[] script = new String[]{"/bin/bash", "-c", destination + "/daquery_update/daquery_update/update.sh"};
     		Runtime run = Runtime.getRuntime();
     		proc = run.exec(script);
+    		proc.waitFor();
+
+    		StringBuilder sb = new StringBuilder();
+    	    BufferedReader reader = 
+    	         new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+    	    String line = "";			
+    	    while ((line = reader.readLine())!= null) {
+    	    	sb.append(line + "\n");
+    	    }
+    	    logger.log(Level.INFO, sb.toString());
     		logger.log(Level.SEVERE, "After update!");
     		    		
 			return Response.ok(200).entity("{}").build();

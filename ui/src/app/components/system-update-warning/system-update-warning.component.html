@@ -3,7 +3,7 @@
     <b>Daquery</b><i class="fa fa-glass"></i>
   </div>
   <div class="login-box-body">
-    <div *ngIf="!updating">
+    <div *ngIf="!started">
       <div class="row">
         <div class="col-md-12">
           <div class="alert alert-warning alert-dismissible">
@@ -25,11 +25,12 @@
         </div>
       </div>
     </div>
-    <div *ngIf="updating">
-      <p *ngIf="!updated">System is updating...</p>
-      <p *ngIf="updated">Update is completed. Please re-login daquery to start your journey.</p>
-      <i *ngIf="!updated" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
-      <button *ngIf="updated" class="btn btn-primary btn-block btn-flat" (click)="OK()">
+    <div *ngIf="started">
+      <p *ngIf="updating && !updated_success">System is updating...</p>
+      <p *ngIf="!updating && updated_success">Update is completed. Please re-login daquery to start your journey.</p>
+      <p *ngIf="!updating && !updated_success">Update is failed.</p>
+      <i *ngIf="updating && !updated_success" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+      <button *ngIf="!updating" class="btn btn-primary btn-block btn-flat" (click)="OK()">
         <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
         <span *ngIf="!loading">OK</span>
       </button>

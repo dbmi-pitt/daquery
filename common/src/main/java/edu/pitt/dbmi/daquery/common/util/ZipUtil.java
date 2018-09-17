@@ -24,7 +24,7 @@ public class ZipUtil {
     	// create a directory with the same name to which the contents will be extracte
     	String zipPath = zFile.substring(0, zFile.length()-4);
     	File temp = new File(zipPath);
-    	temp.mkdir();
+    	//temp.mkdir();
     	        
     	ZipFile zipFile = null;
 
