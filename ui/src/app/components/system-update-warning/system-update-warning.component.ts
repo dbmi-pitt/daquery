@@ -49,10 +49,7 @@ export class SystemUpdateWarningComponent implements OnInit {
                                                                     .subscribe(res => {
                                                                       this.updating = false;
                                                                       let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
-                                                                      if(updatedBuild > currentBuild)
-                                                                        this.updated_success = true;
-                                                                      else
-                                                                        this.updated_success = false;
+                                                                      this.updated_success = updatedBuild > currentBuild;
                                                                       subscription.unsubscribe();
                                                                     }, error => {
                                                                       console.log("error");
