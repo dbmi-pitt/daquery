@@ -15,8 +15,9 @@ export class SystemUpdateWarningComponent implements OnInit {
   currentUserRoles: string[] = this.currentUser.roles.map(r => r.name.toLowerCase());
 
   forceUpdate: boolean = false;
+  started: boolean = false;
   updating: boolean = false;
-  updated: boolean = false;
+  updated_success: boolean = false;
   constructor(private authenticationService: AuthenticationService,
               private daqueryService: DaqueryService) { }
 
@@ -34,28 +35,39 @@ export class SystemUpdateWarningComponent implements OnInit {
   systemUpdate(){
     if(confirm("Are you sure to update daquery?")){
       this.updating = true;
-      this.daqueryService.systemUpdate()
-                         .subscribe(res => {
-                           console.log("get version.");
-                           let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
-                             // // get version every 5 sec 
-                             this.daqueryService.checkServer()
-                                                .subscribe(res => {
-                                                  this.updated = true;
-                                                  subscription.unsubscribe();
-                                                }, error => {
-                                                  console.log("error");
-                                                  console.log(error);
-                                                  //subscription.unsubscribe();
-                                                }, () => {
-                                                  console.log("finally");
-                                                  //subscription.unsubscribe();
-                                                });
-                            })
-                         }, err => {
-                           console.log("error.")
-                           this.updating = false;
-                         });
+      this.started = true;
+      let currentBuild = -1;
+      this.daqueryService.getVersion()
+                        .subscribe(res => {
+                          currentBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
+                          this.daqueryService.systemUpdate()
+                                             .subscribe(res => {
+                                               console.log("get version.");
+                                               let subscription = Observable.interval(200 * environment.responseCheckIntervalInSecond).subscribe(x => {
+                                                 // // get version every 2 sec 
+                                                 this.daqueryService.checkServer()
+                                                                    .subscribe(res => {
+                                                                      this.updating = false;
+                                                                      let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
+                                                                      if(updatedBuild > currentBuild)
+                                                                        this.updated_success = true;
+                                                                      else
+                                                                        this.updated_success = false;
+                                                                      subscription.unsubscribe();
+                                                                    }, error => {
+                                                                      console.log("error");
+                                                                      console.log(error);
+                                                                      //subscription.unsubscribe();
+                                                                    }, () => {
+                                                                      console.log("finally");
+                                                                      //subscription.unsubscribe();
+                                                                    });
+                                                })
+                                             }, err => {
+                                               console.log("error.")
+                                               this.updating = false;
+                                             });
+                        })
     }
   }
 
