@@ -1917,17 +1917,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		String[] script = new String[]{"/bin/bash", "-c", destination + "/daquery_update/daquery_update/update.sh"};
     		Runtime run = Runtime.getRuntime();
     		proc = run.exec(script);
-    		proc.waitFor();
-
-    		StringBuilder sb = new StringBuilder();
-    	    BufferedReader reader = 
-    	         new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-    	    String line = "";			
-    	    while ((line = reader.readLine())!= null) {
-    	    	sb.append(line + "\n");
-    	    }
-    	    logger.log(Level.INFO, sb.toString());
+    		
     		logger.log(Level.SEVERE, "After update!");
     		    		
 			return Response.ok(200).entity("{}").build();
