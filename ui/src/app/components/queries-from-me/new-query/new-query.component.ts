@@ -241,18 +241,50 @@ export class NewQueryComponent implements OnInit {
 
   sqlAnalyzerMsg() {
     let ret = "";
+    let tabCount = 0;
+    let tabNames = ["", "", ""];
     if(this.ansiSqlAnalyzerResponse && (this.ansiSqlAnalyzerResponse.rejected || this.ansiSqlAnalyzerResponse.warnings))
-      ret += "ANSI query, ";
-    if(this.oracleSqlAnalyzerResponse && (this.oracleSqlAnalyzerResponse.rejected || this.oracleSqlAnalyzerResponse.warnings))
-      ret += "ORACLE query, ";
-    if(this.sqlServerSqlAnalyzerResponse && (this.sqlServerSqlAnalyzerResponse.rejected || this.sqlServerSqlAnalyzerResponse.warnings))
-      ret += "SQLServer query, ";
-
-    if(ret != ""){
-      ret = ret.substring(0, ret.length - 2); 
-      ret += " has error or warning";
+    {
+	tabNames[tabCount] = "ANSI";
+	tabCount++;
     }
-
+    if(this.oracleSqlAnalyzerResponse && (this.oracleSqlAnalyzerResponse.rejected || this.oracleSqlAnalyzerResponse.warnings))
+    {
+	tabNames[tabCount] = "ORACLE";
+	tabCount++;
+    }
+    if(this.sqlServerSqlAnalyzerResponse && (this.sqlServerSqlAnalyzerResponse.rejected || this.sqlServerSqlAnalyzerResponse.warnings))
+    {
+	tabNames[tabCount] = "SQL Server";
+	tabCount++;
+    }
+    if(tabCount > 0)
+    {
+	ret = "The ";
+	for(var i = 0; i < tabCount; i++)
+	{
+		if(i == 0)
+		{
+			ret += tabNames[i];			
+		}
+		else if(i == (tabCount - 1))
+		{
+			ret += " and " + tabNames[i];
+		}
+		else
+		{
+			ret += ", " + tabNames[i];
+		}
+	}
+	if(tabCount > 1)
+	{
+		ret += " query tabs have errors or warnings."
+	}
+	else
+	{
+		ret += " query tab has an error or warning."
+	}
+    }
     return ret;
   }
 
