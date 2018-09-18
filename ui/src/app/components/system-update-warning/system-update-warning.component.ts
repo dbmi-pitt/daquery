@@ -43,7 +43,7 @@ export class SystemUpdateWarningComponent implements OnInit {
                           this.daqueryService.systemUpdate()
                                              .subscribe(res => {
                                                console.log("get version.");
-                                               let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
+                                               let subscription = Observable.interval(200 * environment.responseCheckIntervalInSecond).subscribe(x => {
                                                  // // get version every 2 sec 
                                                  this.daqueryService.checkServer()
                                                                     .subscribe(res => {

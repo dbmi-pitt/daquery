@@ -1914,7 +1914,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
    		
     		logger.log(Level.SEVERE, "Before update!");
     		Process proc = Runtime.getRuntime().exec("chmod u+x " + destination + "/daquery_update/daquery_update/update.sh");
-    		String[] script = new String[]{"/bin/bash", "-c", destination + "/daquery_update/daquery_update/update.sh"};
+    		String[] script = new String[]{"/bin/bash", "-c", destination + "/daquery_update/daquery_update/update.sh " + AppProperties.getHomeDirectory()};
     		//String[] script = new String[]{"/bin/bash", "-c", "ls"};
     		Runtime run = Runtime.getRuntime();
     		proc = run.exec(script);
