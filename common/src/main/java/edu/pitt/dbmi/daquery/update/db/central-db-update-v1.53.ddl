@@ -8,4 +8,4 @@ CREATE TABLE DAQUERY_VERSION
 	FORCE_UPDATE boolean
 );
 
-INSERT INTO DAQUERY_VERSION (BUILD_NUM, PACKAGE_URL, RELEASE_DATE, VERSION, FORCE_UPDATE) VALUES (1469, 'http://localhost:8080/daquery-central/daquery_updates/daquery_update.zip', '2018-09-01 00:00:00', '1.1.1', false);
+--INSERT INTO DAQUERY_VERSION (BUILD_NUM, PACKAGE_URL, RELEASE_DATE, VERSION, FORCE_UPDATE) VALUES (1469, 'http://localhost:8080/daquery-central/daquery_updates/daquery_update.zip', '2018-09-01 00:00:00', '1.1.1', false);
