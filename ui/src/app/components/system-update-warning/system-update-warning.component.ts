@@ -28,7 +28,7 @@ export class SystemUpdateWarningComponent implements OnInit {
   isUpdateAvailable() {
     this.daqueryService.isUpdateAvailable()
                        .subscribe(res => {
-                         this.forceUpdate = res.force_update;
+                         this.forceUpdate = res.force_update === "true";
                        });
   }
 
