@@ -1890,6 +1890,41 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @Path("/system-update/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response systemUpdate() {
+    	// Check Paths available.
+    	try{
+	    	File f = new File(AppProperties.getHomeDirectory() + "/temp/");
+	    	if(!f.canWrite()) {
+	    		logger.log(Level.SEVERE, "tomcat/temp is not exist or writable");
+	    		return(ResponseHelper.getErrorResponse(500, "tomcat/temp is not exist or writable.", "tomcat/temp is not exist or writable. See the appication logs for more information.", null));
+	    	}
+	    	
+	    	f = new File(AppProperties.getHomeDirectory() + "/temp/daquery_backup");
+	    	if(!f.exists()) {
+	    		f.mkdir();
+	    	}
+    	} catch (Throwable t) {
+    		logger.log(Level.SEVERE, "tomcat paths is not exist or accessible");
+    		return(ResponseHelper.getErrorResponse(500, "tomcat paths is not exist or accessible.", "tomcat paths is not exist or accessible. See the appication logs for more information.", null));
+    	}
+    	
+    	//Check if bash shell exist
+    	Process proc = Runtime.getRuntime().exec("echo $BASH_VERSION");
+		proc.waitFor();
+
+		StringBuilder sb = new StringBuilder();
+	    BufferedReader reader = 
+	         new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+	    String line = "";			
+	    while ((line = reader.readLine())!= null) {
+	    	sb.append(line + "\n");
+	    }
+	    if(sb.toString().trim().equals("")){
+	    	logger.log(Level.SEVERE, "bash is not running");
+    		return(ResponseHelper.getErrorResponse(500, "bash is not running.", "bash is not running. See the appication logs for more information.", null));
+	    }
+	    
+	    
     	Response resp  = null;
     	try
     	{

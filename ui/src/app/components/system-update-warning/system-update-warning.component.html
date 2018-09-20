@@ -19,7 +19,12 @@
           <span *ngIf="!loading">System Update</span>
         </button>
       </div>
-      <div *ngIf="!currentUserRoles.includes('admin')" class="row">
+      <div>
+        <button *ngIf="!forceUpdate" class="btn btn-link btn-block" [routerLink]="['/queries-to-me']">
+          Enter Daquery
+        </button>
+      </div>
+      <div *ngIf="!currentUserRoles.includes('admin') && forceUpdate" class="row">
         <div class="col-md-6 col-md-offset-4">
           <button class="btn btn-default" (click)="onLogout()">Log out</button>
         </div>
