@@ -54,8 +54,8 @@ export class DaqueryService {
                     });
   }
 
-  checkServer() {
-    return this.http.get('/daquery/ws/display-version', {responseType: 'text'})
+  checkUpdate() {
+    return this.http.get('/daquery/ws/check-update', {responseType: 'text'})
                     .catch(error => {
                       return Observable.throw(error || 'Server error');
                     });

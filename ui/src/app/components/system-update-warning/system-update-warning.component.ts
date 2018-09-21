@@ -18,6 +18,7 @@ export class SystemUpdateWarningComponent implements OnInit {
   started: boolean = false;
   updating: boolean = false;
   updated_success: boolean = false;
+  update_message: String;
   constructor(private authenticationService: AuthenticationService,
               private daqueryService: DaqueryService) { }
 
@@ -45,11 +46,14 @@ export class SystemUpdateWarningComponent implements OnInit {
                                                console.log("get version.");
                                                let subscription = Observable.interval(200 * environment.responseCheckIntervalInSecond).subscribe(x => {
                                                  // // get version every 2 sec 
-                                                 this.daqueryService.checkServer()
+                                                 this.daqueryService.checkUpdate()
                                                                     .subscribe(res => {
                                                                       this.updating = false;
-                                                                      let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
-                                                                      this.updated_success = updatedBuild >= currentBuild;
+                                                                      let update_res = JSON.parse(res);
+                                                                      this.updated_success = update_res.status === 'updated';
+                                                                      this.update_message = update_res.message;
+                                                                      // let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
+                                                                      // this.updated_success = updatedBuild >= currentBuild;
                                                                       subscription.unsubscribe();
                                                                     }, error => {
                                                                       console.log("error");
@@ -63,6 +67,8 @@ export class SystemUpdateWarningComponent implements OnInit {
                                              }, err => {
                                                console.log("error.")
                                                this.updating = false;
+                                               this.updated_success = false;
+                                               this.update_message = err.error.displayMessage;
                                              });
                         })
     }

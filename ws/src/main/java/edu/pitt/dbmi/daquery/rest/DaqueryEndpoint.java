@@ -289,6 +289,21 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		return(ResponseHelper.getBasicResponse(200, AppProperties.getDisplayVersion()));
 	}
 	
+	@GET
+	@Path("/check-update")
+    @Produces(MediaType.TEXT_PLAIN)
+	public Response checkUpdate()
+	{
+		try {
+			return ResponseHelper.getBasicResponse(200, "{\"status\": \"" + AppProperties.getDBProperty("update_status") + "\", \"message\": \"" + AppProperties.getDBProperty("update_message") + "\"}");
+		} catch (DaqueryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ResponseHelper.getErrorResponse(500, "Cannot get update message", "Check the application error logs for more information.", null);
+	}
+
+	
 	/**
 	 * Check if the site database is set up or not.
 	 * 
@@ -1862,7 +1877,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @GET
     @Path("/is-update-available/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response isUpdateAvailable(){
+    public Response isUpdateAvailable() throws DaqueryException{
     	Response resp = null;
     	try {
     		String currentBuild = AppProperties.getBuildNo();
@@ -1879,6 +1894,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		
     		return Response.ok(200).entity("{\"updateAvailable\": false}").build();
     	} catch(Exception e) {
+    		AppProperties.setDBProperty("update_status", "failed");
+    		AppProperties.setDBProperty("update_message", "An unexpeced error occured while updating the daquery application");
     		logger.log(Level.SEVERE, "An unexpeced error occured while checking is update available", e);
     		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while checking is update available.  See the appication logs for more information.", e));
     	} finally {
@@ -1890,27 +1907,29 @@ public class DaqueryEndpoint extends AbstractEndpoint
     @GET
     @Path("/system-update/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response systemUpdate() {
+    public Response systemUpdate() throws DaqueryException {
     	// Check Paths available.
     	try{
 	    	File f = new File(AppProperties.getHomeDirectory() + "/temp/");
 	    	if(!f.canWrite()) {
+	    		AppProperties.setDBProperty("update_status", "failed");
+	    		AppProperties.setDBProperty("update_message", "Tomcat temp directory is not accessible.");
 	    		logger.log(Level.SEVERE, "tomcat/temp is not exist or writable");
 	    		return(ResponseHelper.getErrorResponse(500, "tomcat/temp is not exist or writable.", "tomcat/temp is not exist or writable. See the appication logs for more information.", null));
 	    	}
 	    	
-	    	f = new File(AppProperties.getHomeDirectory() + "/temp/daquery_backup");
-	    	if(!f.exists()) {
-	    		f.mkdir();
-	    	} else {
-	    		for(File c : f.listFiles()){
-	    			c.delete();
-	    		}
-	    		if(!f.delete())
-	    			throw new FileNotFoundException("Failed to delete daquery_backup");
-	    		
-	    		f.mkdir();
-	    	}
+//	    	f = new File(AppProperties.getHomeDirectory() + "/temp/daquery_backup");
+//	    	if(!f.exists()) {
+//	    		f.mkdir();
+//	    	} else {
+//	    		for(File c : f.listFiles()){
+//	    			c.delete();
+//	    		}
+//	    		if(!f.delete())
+//	    			throw new FileNotFoundException("Failed to delete daquery_backup");
+//	    		
+//	    		f.mkdir();
+//	    	}
     	} catch (Throwable t) {
     		logger.log(Level.SEVERE, "tomcat paths is not exist or accessible");
     		return(ResponseHelper.getErrorResponse(500, "tomcat paths is not exist or accessible.", "tomcat paths is not exist or accessible. See the appication logs for more information.", null));
@@ -1930,10 +1949,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		    	sb.append(line + "\n");
 		    }
 		    if(sb.toString().trim().equals("")){
-		    	logger.log(Level.SEVERE, "bash is not running");
+		    	AppProperties.setDBProperty("update_status", "failed");
+	    		AppProperties.setDBProperty("update_message", "Bash is not the current shell");
+		    	logger.log(Level.SEVERE, "bash is not the current shell");
 	    		return(ResponseHelper.getErrorResponse(500, "bash is not running.", "bash is not running. See the appication logs for more information.", null));
 		    }
     	} catch (Throwable t){
+    		AppProperties.setDBProperty("update_status", "failed");
+    		AppProperties.setDBProperty("update_message", "An unexpeced error occured while updating the daquery application");
     		logger.log(Level.SEVERE, "An unexpeced error occured while updating the daquery application", t);
     		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while updating the daquery application.  See the appication logs for more information.", t));
     	}
@@ -1965,13 +1988,15 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		for(String n : fileNames){
 	    		File f = new File(AppProperties.getHomeDirectory() + "/temp/daquery_update/daquery_update/" + n);
 	    		if(!(f.exists() && !f.isDirectory())){
+	    			AppProperties.setDBProperty("update_status", "failed");
+	        		AppProperties.setDBProperty("update_message", "Update file(s) missing");
 	    			logger.log(Level.SEVERE, n + "file missing");
 	        		return(ResponseHelper.getErrorResponse(500, n + "file missing", n + "file missing. See the appication logs for more information.", null));
 	    		}
     		}
     		
     		// Mark database updating
-    		AppProperties.setDBProperty("status", "updating");
+    		AppProperties.setDBProperty("update_status", "updating");
    		
     		logger.log(Level.SEVERE, "Before update!");
     		Process proc = Runtime.getRuntime().exec("chmod u+x " + destination + "/daquery_update/daquery_update/update.sh");
@@ -1996,6 +2021,8 @@ public class DaqueryEndpoint extends AbstractEndpoint
     	}
     	catch(Throwable t)
     	{
+    		AppProperties.setDBProperty("update_status", "failed");
+    		AppProperties.setDBProperty("update_message", "An unexpeced error occured while updating the daquery application");
     		logger.log(Level.SEVERE, "An unexpeced error occured while updating the daquery application", t);
     		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while updating the daquery application.  See the appication logs for more information.", t));
     	}
