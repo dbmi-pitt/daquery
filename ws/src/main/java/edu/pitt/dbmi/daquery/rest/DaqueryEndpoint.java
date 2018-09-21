@@ -3,6 +3,7 @@ package edu.pitt.dbmi.daquery.rest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1901,28 +1902,41 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	    	f = new File(AppProperties.getHomeDirectory() + "/temp/daquery_backup");
 	    	if(!f.exists()) {
 	    		f.mkdir();
+	    	} else {
+	    		for(File c : f.listFiles()){
+	    			c.delete();
+	    		}
+	    		if(!f.delete())
+	    			throw new FileNotFoundException("Failed to delete daquery_backup");
+	    		
+	    		f.mkdir();
 	    	}
     	} catch (Throwable t) {
     		logger.log(Level.SEVERE, "tomcat paths is not exist or accessible");
     		return(ResponseHelper.getErrorResponse(500, "tomcat paths is not exist or accessible.", "tomcat paths is not exist or accessible. See the appication logs for more information.", null));
     	}
     	
-    	//Check if bash shell exist
-    	Process proc = Runtime.getRuntime().exec("echo $BASH_VERSION");
-		proc.waitFor();
-
-		StringBuilder sb = new StringBuilder();
-	    BufferedReader reader = 
-	         new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-	    String line = "";			
-	    while ((line = reader.readLine())!= null) {
-	    	sb.append(line + "\n");
-	    }
-	    if(sb.toString().trim().equals("")){
-	    	logger.log(Level.SEVERE, "bash is not running");
-    		return(ResponseHelper.getErrorResponse(500, "bash is not running.", "bash is not running. See the appication logs for more information.", null));
-	    }
+    	try{
+	    	//Check if bash shell exist
+	    	Process proc = Runtime.getRuntime().exec("echo $BASH_VERSION");
+			proc.waitFor();
+	
+			StringBuilder sb = new StringBuilder();
+		    BufferedReader reader = 
+		         new BufferedReader(new InputStreamReader(proc.getInputStream()));
+	
+		    String line = "";			
+		    while ((line = reader.readLine())!= null) {
+		    	sb.append(line + "\n");
+		    }
+		    if(sb.toString().trim().equals("")){
+		    	logger.log(Level.SEVERE, "bash is not running");
+	    		return(ResponseHelper.getErrorResponse(500, "bash is not running.", "bash is not running. See the appication logs for more information.", null));
+		    }
+    	} catch (Throwable t){
+    		logger.log(Level.SEVERE, "An unexpeced error occured while updating the daquery application", t);
+    		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while updating the daquery application.  See the appication logs for more information.", t));
+    	}
 	    
 	    
     	Response resp  = null;
@@ -1946,6 +1960,18 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		ZipUtil zu = new ZipUtil();
     		zu.unZip(zipFile, destination);
     		
+    		// Check file list
+    		String[] fileNames = new String[]{"daquery.war", "update.sh"};
+    		for(String n : fileNames){
+	    		File f = new File(AppProperties.getHomeDirectory() + "/temp/daquery_update/daquery_update/" + n);
+	    		if(!(f.exists() && !f.isDirectory())){
+	    			logger.log(Level.SEVERE, n + "file missing");
+	        		return(ResponseHelper.getErrorResponse(500, n + "file missing", n + "file missing. See the appication logs for more information.", null));
+	    		}
+    		}
+    		
+    		// Mark database updating
+    		AppProperties.setDBProperty("status", "updating");
    		
     		logger.log(Level.SEVERE, "Before update!");
     		Process proc = Runtime.getRuntime().exec("chmod u+x " + destination + "/daquery_update/daquery_update/update.sh");
