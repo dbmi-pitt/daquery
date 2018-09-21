@@ -16,8 +16,11 @@ public class StartupListener implements ServletContextListener
 
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
+		// if error msg in update log
+			// roll back the war file and db
+		// if mark updating
 		UpdateDBForVersion.updateDB();
-		
+		// mark updated
 	}
 	
 }
