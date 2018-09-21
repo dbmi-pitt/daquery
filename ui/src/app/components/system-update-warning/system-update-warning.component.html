@@ -33,7 +33,7 @@
     <div *ngIf="started">
       <p *ngIf="updating && !updated_success">System is updating...</p>
       <p *ngIf="!updating && updated_success">Update is completed. Please re-login daquery to start your journey.</p>
-      <p *ngIf="!updating && !updated_success">Update is failed.</p>
+      <p *ngIf="!updating && !updated_success">{{ update_message }}</p>
       <i *ngIf="updating && !updated_success" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
       <button *ngIf="!updating" class="btn btn-primary btn-block btn-flat" (click)="OK()">
         <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>

@@ -99,7 +99,7 @@ export class AppConfigComponent implements OnInit {
                                                console.log("get version.");
                                                let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
                                                  // // get version every 5 sec 
-                                                 this.daqueryService.checkServer()
+                                                 this.daqueryService.checkUpdate()
                                                                     .subscribe(res => {
                                                                       let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
                                                                       this.updated = updatedBuild >= currentBuild;
