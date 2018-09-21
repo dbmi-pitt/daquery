@@ -26,6 +26,6 @@ RUN echo 'export PATH=$CATALINA_HOME/bin:$PATH' >>~/.bashrc
 # catalina.sh, run it like /usr/local/tomcat/bin/catalina.sh run
 COPY start_site.sh /localdata/start_site.sh
 RUN chmod 755 /localdata/start_site.sh
-#CMD ["/localdata/start_site.sh"]
-CMD ["/usr/local/tomcat/bin/startup.sh"]
+CMD ["/localdata/start_site.sh"]
+
 
