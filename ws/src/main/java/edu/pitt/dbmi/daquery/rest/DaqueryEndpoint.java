@@ -2008,7 +2008,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	    			AppProperties.setDBProperty("update_status", "failed");
 	        		AppProperties.setDBProperty("update_message", "Update file(s) missing");
 	    			logger.log(Level.SEVERE, n + "file missing");
-	        		return(ResponseHelper.getErrorResponse(500, n + "file missing", n + "file missing. See the appication logs for more information.", null));
+	        		return(ResponseHelper.getErrorResponse(500, "update zip file is not completed. " + n + " file missing", "update zip file is not completed. " + n + " file missing. See the appication logs for more information.", null));
 	    		}
     		}
     		
