@@ -1935,6 +1935,23 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		return(ResponseHelper.getErrorResponse(500, "tomcat paths is not exist or accessible.", "tomcat paths is not exist or accessible. See the appication logs for more information.", null));
     	}
     	
+    	try {
+    		// Check script file list
+    		String[] fileNames = new String[]{"startup.sh", "shutdown.sh"};
+    		for(String n : fileNames){
+	    		File f = new File(AppProperties.getHomeDirectory() + "/bin/" + n);
+	    		if(!(f.exists() && !f.isDirectory())){
+	    			AppProperties.setDBProperty("update_status", "failed");
+	        		AppProperties.setDBProperty("update_message", "startup or(and) shutdown script is missing");
+	    			logger.log(Level.SEVERE, n + "file missing");
+	        		return(ResponseHelper.getErrorResponse(500, n + " file missing", n + "file missing. See the appication logs for more information.", null));
+	    		}
+    		}
+    	} catch (Throwable t) {
+    		logger.log(Level.SEVERE, "tomcat script is not exist or accessible");
+    		return(ResponseHelper.getErrorResponse(500, "tomcat script is not exist or accessible.", "tomcat script is not exist or accessible. See the appication logs for more information.", null));
+    	}
+    	
     	try{
 	    	//Check if bash shell exist
 	    	Process proc = Runtime.getRuntime().exec("echo $BASH_VERSION");
