@@ -73,7 +73,7 @@ node {
 
     }
 /*
-//adding a comment to trigger a Jenkins build
+//adding a comment to trigger a Jenkins build  
     stage('Deploy Docker Images') {
          dir('docker') {
             //make some of the folders Docker is expecting
