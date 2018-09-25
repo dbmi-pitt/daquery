@@ -18,6 +18,8 @@ export class AppConfigComponent implements OnInit {
   updating = false;
   updated = false;
   updateAvailable: any;
+  updated_success: boolean = false;
+  update_message: String;
 
   appConfigForm: FormGroup;
   constructor(private fb: FormBuilder,
@@ -101,16 +103,19 @@ export class AppConfigComponent implements OnInit {
                                                  // // get version every 5 sec 
                                                  this.daqueryService.checkUpdate()
                                                                     .subscribe(res => {
-                                                                      let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
-                                                                      this.updated = updatedBuild >= currentBuild;
+                                                                      this.updating = false;
+                                                                      this.updated = true;
+                                                                      let update_res = JSON.parse(res);
+                                                                      this.updated_success = update_res.status === 'updated';
+                                                                      this.update_message = update_res.message;
+                                                                      // let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
+                                                                      // this.updated = updatedBuild >= currentBuild;
                                                                       subscription.unsubscribe();
                                                                     }, error => {
                                                                       console.log("error");
                                                                       console.log(error);
-                                                                      //subscription.unsubscribe();
                                                                     }, () => {
                                                                       console.log("finally");
-                                                                      //subscription.unsubscribe();
                                                                     });
                                                 })
                                              }, err => {
