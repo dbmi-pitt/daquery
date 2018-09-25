@@ -1732,7 +1732,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 		{
 			String msg = "No response recieved for this request.";
 			DaqueryResponse eResp = assembleErrorResponse(msg, null);					
-			return(ResponseHelper.getErrorResponse(500, msg, "A response was not recieved from the task queue for this request.  Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null, eResp));
+			return(ResponseHelper.getErrorResponse(500, msg, "A response was not recieved from the task queue for this request. Please contact the site admin from where the response was sent to look at the server log files for potential issues.", null, eResp));
 		}
 		else
 		{
@@ -1917,19 +1917,6 @@ public class DaqueryEndpoint extends AbstractEndpoint
 	    		logger.log(Level.SEVERE, "tomcat/temp is not exist or writable");
 	    		return(ResponseHelper.getErrorResponse(500, "tomcat/temp is not exist or writable.", "tomcat/temp is not exist or writable. See the appication logs for more information.", null));
 	    	}
-	    	
-//	    	f = new File(AppProperties.getHomeDirectory() + "/temp/daquery_backup");
-//	    	if(!f.exists()) {
-//	    		f.mkdir();
-//	    	} else {
-//	    		for(File c : f.listFiles()){
-//	    			c.delete();
-//	    		}
-//	    		if(!f.delete())
-//	    			throw new FileNotFoundException("Failed to delete daquery_backup");
-//	    		
-//	    		f.mkdir();
-//	    	}
     	} catch (Throwable t) {
     		logger.log(Level.SEVERE, "tomcat paths is not exist or accessible");
     		return(ResponseHelper.getErrorResponse(500, "tomcat paths is not exist or accessible.", "tomcat paths is not exist or accessible. See the appication logs for more information.", null));
