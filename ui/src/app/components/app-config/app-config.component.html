@@ -10,7 +10,7 @@
   <div *ngIf="updateAvailable" class="callout callout-danger">
     <h4>Update Available!</h4>
 
-    <p>There is system update available. Click the "System Updage" button to update your daquery.</p>
+    <p>There is system update available. Click the "System Updage" button to update Daquery.</p>
     <button class="btn btn-default btn-block btn-flat" (click)="systemUpdate()">
       <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
       <span *ngIf="!loading">System Update</span>
@@ -100,8 +100,8 @@
 
   <!-- Modal content -->
   <div class="modal-content">
-    <p *ngIf="!updated">System is updating...</p>
-    <p *ngIf="updated">Update is completed. Please re-login daquery to start your journey.</p>
+    <p *ngIf="!updated">Daquery is updating.  This may take several minutes.</p>
+    <p *ngIf="updated">The update is complete. Please re-login Daquery.</p>
     <i *ngIf="!updated" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
     <button *ngIf="updated" class="btn btn-primary btn-block btn-flat" (click)="OK()">
       <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>

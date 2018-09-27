@@ -8,8 +8,8 @@
         <div class="col-md-12">
           <div class="alert alert-warning alert-dismissible">
             <h4><i class="icon fa fa-warning"></i> System Update {{ forceUpdate ? "Required" : "Available"}}!</h4>
-            <p *ngIf="!currentUserRoles.includes('admin')"> The system update is necessary. Please ask your admin login and update daquery.</p>
-            <p *ngIf="currentUserRoles.includes('admin')">There is system update available. Click the "System Updage" button to update your daquery.</p>
+            <p *ngIf="!currentUserRoles.includes('admin')">A Daquery system update is required. Please ask an administrator to login and perform the update.</p>
+            <p *ngIf="currentUserRoles.includes('admin')">There is system update available. Click the "System Updage" button to update Daquery.</p>
           </div>
         </div>
       </div>
@@ -31,8 +31,8 @@
       </div>
     </div>
     <div *ngIf="started">
-      <p *ngIf="updating && !updated_success">System is updating...</p>
-      <p *ngIf="!updating && updated_success">Update is completed. Please re-login daquery to start your journey.</p>
+      <p *ngIf="updating && !updated_success">Daquery is updating. This may take several minutes.</p>
+      <p *ngIf="!updating && updated_success">The update is complete. Please re-login Daquery.</p>
       <div *ngIf="!updating && !updated_success" class="alert alert-error alert-dismissible">
         <h4><i class="icon fa fa-ban"></i> System Update Failed!</h4>
         <p>{{ update_message }}</p>
