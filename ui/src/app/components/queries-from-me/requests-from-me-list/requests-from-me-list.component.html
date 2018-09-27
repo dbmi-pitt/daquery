@@ -3,15 +3,25 @@
     <caption>Requests</caption>
     <thead>
       <tr>
+        <th></th>
+        <th></th>
+        <th>
+          <button class="btn btn-default btn-block pull-right" (click)="archiveClick()"><i class="fa fa-archive"></i> {{ showArchive ? 'Hide Archive' : 'Show Archive' }}</button>
+        </th>
+      </tr>
+    </thead>
+    <thead>
+      <tr>
         <th>Request</th>
         <th>Date/Time</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody *ngFor="let requestGroup of (requestGroups | mapValues)">
       <tr>
         <td (click)="requestGroup.active = !requestGroup.active"><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}"></i> {{ requestGroup.val[0].inquiry.inquiryName }}</td>
         <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
-        <td></td>
+        <td><button class="btn btn-default" (click)="onArchive(request, $event)" title="Archive"><i class="fa fa-archive"></i></button></td>
       </tr>
       <tr *ngIf="requestGroup.active">
         <td colspan="4">
@@ -76,9 +86,9 @@
     </tbody>
   </table>
   <div *ngIf="!requests" class="row">
-      <div class="col-md-4 col-md-offset-4 text-center">
-        <span>Loading requests...</span><br />
-        <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
-      </div>
+    <div class="col-md-4 col-md-offset-4 text-center">
+      <span>Loading requests...</span><br />
+      <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
     </div>
+  </div>
 </div>

@@ -19,6 +19,7 @@ export class QueriesToMeListComponent implements OnInit {
   selectedRequest: any;
   showApproveDenyBtn = false;
   showStackTrace = false;
+  showArchive = false;
 
   sqlAnalyzerResponse: any;
 
@@ -116,5 +117,17 @@ export class QueriesToMeListComponent implements OnInit {
 
   showReturnValues() {
     return this.sqlAnalyzerResponse.returnList.length > 0 && this.selectedRequest.inquiry.queryType !== 'DATA';
+  }
+
+  archiveClick() {
+    this.showArchive = !this.showArchive;
+  }
+
+  onArchive(request:any, event: any){
+    event.stopPropagation();
+    console.log("on Archive");
+    // hide the request
+
+    // mark the request archived to db
   }
 }
