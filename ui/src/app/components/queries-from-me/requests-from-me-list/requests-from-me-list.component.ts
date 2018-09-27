@@ -16,6 +16,7 @@ export class RequestsFromMeListComponent implements OnInit {
   requests: any[];
   inquiries: any[];
   requestGroups: Map<String, any[]> = new Map<String, any[]>();
+  showArchive = false;
 
   constructor(private requestService: RequestService,
               private responseService: ResponseService,
@@ -136,5 +137,9 @@ export class RequestsFromMeListComponent implements OnInit {
     if(response.files){
       return response.files.filepaths.join('\n');
     }
+  }
+
+  archiveClick() {
+    this.showArchive = !this.showArchive;
   }
 }
