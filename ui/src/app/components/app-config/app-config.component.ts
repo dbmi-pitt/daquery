@@ -15,8 +15,10 @@ export class AppConfigComponent implements OnInit {
   loading = false;
   error = '';
   success = false;
-  updating = false;
-  updated = false;
+  updating: boolean = false;
+  updated: boolean = false;
+  updated_success: boolean = false;
+  update_message: String;
   updateAvailable: any;
 
   appConfigForm: FormGroup;
@@ -101,8 +103,13 @@ export class AppConfigComponent implements OnInit {
                                                  // // get version every 5 sec 
                                                  this.daqueryService.checkUpdate()
                                                                     .subscribe(res => {
-                                                                      let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
-                                                                      this.updated = updatedBuild >= currentBuild;
+                                                                      this.updating = false;
+                                                                      this.updated = true;
+                                                                      let update_res = JSON.parse(res);
+                                                                      this.updated_success = update_res.status === 'updated';
+                                                                      this.update_message = update_res.message;
+                                                                      // let updatedBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
+                                                                      // this.updated = updatedBuild >= currentBuild;
                                                                       subscription.unsubscribe();
                                                                     }, error => {
                                                                       console.log("error");
