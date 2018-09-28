@@ -38,11 +38,6 @@ public class AppProperties
 		{
 			rVal = devHomeDir;
 		}
-		else if (! StringHelper.isBlank(System.getenv("DAQUERY_HOME")))
-		{
-			devHomeDir = System.getenv("DAQUERY_HOME");
-			rVal = devHomeDir;
-		}
 		else if (System.getProperty("catalina.home") == null)
 		{
 			rVal = System.getenv("CATALINA_HOME");
@@ -53,7 +48,12 @@ public class AppProperties
 	}
 	
 	public static String getConfDirectory()
-	{	if ( getHomeDirectory() == null )
+	{
+		if (! StringHelper.isBlank(System.getenv("DAQUERY_CONF_DIR")))
+		{
+			return(StringHelper.ensureTrailingSlashFile(System.getenv("DAQUERY_CONF_DIR")));
+		}		
+		else if ( getHomeDirectory() == null )
 			return null;
 		else
 			return(StringHelper.ensureTrailingSlashFile(getHomeDirectory()) + confDir + File.separator);
@@ -62,6 +62,7 @@ public class AppProperties
 	public static String getDBDir() throws Exception
 	{
 		String sep = File.separator;
+		
 		if (getHomeDirectory() == null)
 			return(null);
 		else
