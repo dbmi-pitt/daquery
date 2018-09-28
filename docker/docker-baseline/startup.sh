@@ -19,12 +19,6 @@
 # Start Script for the CATALINA Server
 # -----------------------------------------------------------------------------
 
-#added for daquery support in docker
-echo 'Deploy JDBC driver A' > /tmp/ds.log
-cp $CONTAINER_OJDBC_DIR/*.jar $TOMCAT_HOME/lib/ >> /tmp/ds.log 2>&1
-echo 'Deploy daquery.war to Tomcat' >> /tmp/ds.log 2>&1
-cp $CONTAINER_DAQUERY_WAR_DIR/daquery.war $TOMCAT_HOME/webapps/ >> /tmp/ds.log 2>&1
-
 # Better OS/400 detection: see Bugzilla 31132
 os400=false
 darwin=false
