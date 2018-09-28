@@ -7,14 +7,18 @@
     <h4><i class="icon fa fa-check"></i> Succeeded!</h4>
     App Configuration is updated!
   </div>
-  <div *ngIf="updateAvailable" class="callout callout-danger">
-    <h4>Update Available!</h4>
+  <div class="row">
+    <div class="col-md-6 col-md-offset-3">
+      <div *ngIf="updateAvailable" class="callout callout-danger">
+        <h4>Update Available!</h4>
 
-    <p>There is system update available. Click the "System Updage" button to update Daquery.</p>
-    <button class="btn btn-default btn-block btn-flat" (click)="systemUpdate()">
-      <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
-      <span *ngIf="!loading">System Update</span>
-    </button>
+        <p>There is system update available. Click the "System Updage" button to update Daquery.</p>
+        <button class="btn btn-default btn-block btn-flat" (click)="systemUpdate()">
+          <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+          <span *ngIf="!loading">System Update</span>
+        </button>
+      </div>
+    </div>
   </div>
   <div class="row">
     <div class="col-md-6 col-md-offset-3">

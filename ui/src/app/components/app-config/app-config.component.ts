@@ -15,8 +15,10 @@ export class AppConfigComponent implements OnInit {
   loading = false;
   error = '';
   success = false;
-  updating = false;
-  updated = false;
+  updating: boolean = false;
+  updated: boolean = false;
+  updated_success: boolean = false;
+  update_message: String;
   updateAvailable: any;
   updated_success: boolean = false;
   update_message: String;
