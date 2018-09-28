@@ -20,7 +20,7 @@
         </button>
       </div>
       <div>
-        <button *ngIf="!forceUpdate" class="btn btn-link btn-block" [routerLink]="['/queries-to-me']">
+        <button *ngIf="!forceUpdate" class="btn btn-lg btn-link btn-block" [routerLink]="['/queries-to-me']">
           Enter Daquery
         </button>
       </div>
@@ -31,13 +31,13 @@
       </div>
     </div>
     <div *ngIf="started">
-      <p *ngIf="updating && !updated_success">Daquery is updating. This may take several minutes.</p>
-      <p *ngIf="!updating && updated_success">The update is complete. Please re-login Daquery.</p>
+      <h3 *ngIf="updating && !updated_success">Daquery is updating. This may take several minutes.</h3>
+      <h3 *ngIf="!updating && updated_success">The update is complete. Please re-login Daquery.</h3>
       <div *ngIf="!updating && !updated_success" class="alert alert-error alert-dismissible">
         <h4><i class="icon fa fa-ban"></i> System Update Failed!</h4>
         <p>{{ update_message }}</p>
       </div>
-      <i *ngIf="updating && !updated_success" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+      <i *ngIf="updating && !updated_success" class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
       <button *ngIf="!updating" class="btn btn-primary btn-block btn-flat" (click)="OK()">
         <i *ngIf="loading" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
         <span *ngIf="!loading">OK</span>
