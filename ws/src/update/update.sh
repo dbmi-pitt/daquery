@@ -1,5 +1,6 @@
 
 TOMCAT_PATH="$1"
+echo TOMCAT_PATH is $TOMCAT_PATH >> $OUTPUT_LOG
 ERROR_LOG=$TOMCAT_PATH/temp/daquery_update/daquery_update/daquery-update-error.log
 OUTPUT_LOG=$TOMCAT_PATH/temp/daquery_update/daquery_update/daquery-update.out
 RESTART_COMMAND=$TOMCAT_PATH/bin/startup.sh
@@ -18,13 +19,13 @@ restore_and_exit() {
   exit 1
 }
 
-
+sleep 60 >> $OUTPUT_LOG 2>&1
 if ! $TOMCAT_PATH/bin/shutdown.sh >> $OUTPUT_LOG 2>&1; then
   echo Tomcat shutdown failed. Nothing updated. >> $ERROR_LOG
   $RESTART_COMMAND
   exit 1
 fi
-
+sleep 20 >> $OUTPUT_LOG 2>&1
 if ! cp $TOMCAT_PATH/webapps/daquery.war $TOMCAT_PATH/daquery_bak.war >> $OUTPUT_LOG 2>&1; then
   echo Failed to make a backup of the application war file. Nothing updated. >> $ERROR_LOG
   $RESTART_COMMAND
@@ -47,6 +48,7 @@ fi
 #  restore_and_exit
 #fi
 
+echo rm $TOMCAT_PATH/webapps/daquery.war >> $OUTPUT_LOG 2>&1
 if ! rm -f $TOMCAT_PATH/webapps/daquery.war >> $OUTPUT_LOG 2>&1; then
   echo Failed to remove the application war file.  >> $ERROR_LOG
   restore_and_exit
@@ -57,18 +59,19 @@ if ! rm -rf $TOMCAT_PATH/webapps/daquery/ >> $OUTPUT_LOG 2>&1; then
   restore_and_exit
 fi
 
+echo cp $TOMCAT_PATH/temp/daquery_update/daquery_update/daquery.war $TOMCAT_PATH/webapps/  >> $OUTPUT_LOG 2>&1
 if ! cp $TOMCAT_PATH/temp/daquery_update/daquery_update/daquery.war $TOMCAT_PATH/webapps/ >> $OUTPUT_LOG 2>&1; then
   echo Failed to copy the daquery war file into place. >> $ERROR_LOG
   restore_and_exit
 fi
 
-if ! sleep 10 >> $OUTPUT_LOG 2>&1; then
-  echo blech >> $ERROR_LOG
-  restore_and_exit
-fi
-
 $RESTART_COMMAND >> $OUTPUT_LOG 2>&1
 
+if ! sleep 10 >> $OUTPUT_LOG 2>&1; then
+  echo Failed to sleep during restart. >> $ERROR_LOG
+  exit 1
+  #restore_and_exit
+fi
 
 echo "Update Completed Successfully" >> $ERROR_LOG
 
