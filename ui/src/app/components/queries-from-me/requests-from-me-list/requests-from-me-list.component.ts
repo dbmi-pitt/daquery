@@ -142,4 +142,17 @@ export class RequestsFromMeListComponent implements OnInit {
   archiveClick() {
     this.showArchive = !this.showArchive;
   }
+
+  onArchive(requestGroup:any, event: any){
+    event.stopPropagation();
+    // hide the requestGroupe
+    requestGroup.show = false;
+    // mark each requests archived in this group
+    requestGroup.val.forEach(request => {
+      this.requestService.archiveRequest(requestGroup.requestId)
+                         .subscribe(res => {
+                          console.log(res);
+                        })
+    });
+  }
 }

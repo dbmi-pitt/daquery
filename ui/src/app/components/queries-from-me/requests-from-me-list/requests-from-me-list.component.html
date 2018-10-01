@@ -1,5 +1,5 @@
 <div>
-  <table *ngIf="requests" class="table table-striped">
+  <table *ngIf="requests" class="table">
     <caption>Requests</caption>
     <thead>
       <tr>
@@ -18,10 +18,10 @@
       </tr>
     </thead>
     <tbody *ngFor="let requestGroup of (requestGroups | mapValues)">
-      <tr>
+      <tr [ngClass]="{'archived-row' : requestGroup.show != null && !requestGroup.show}"  *ngIf="showArchive || requestGroup.show == null || requestGroup.show">
         <td (click)="requestGroup.active = !requestGroup.active"><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}"></i> {{ requestGroup.val[0].inquiry.inquiryName }}</td>
         <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
-        <td><button class="btn btn-default" (click)="onArchive(request, $event)" title="Archive"><i class="fa fa-archive"></i></button></td>
+        <td><button class="btn btn-default" (click)="onArchive(requestGroup, $event)" title="Archive"><i class="fa fa-archive"></i></button></td>
       </tr>
       <tr *ngIf="requestGroup.active">
         <td colspan="4">

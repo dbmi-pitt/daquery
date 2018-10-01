@@ -1,0 +1,2 @@
+alter table DAQUERY_REQUEST ADD COLUMN ARCHIVED boolean;
+

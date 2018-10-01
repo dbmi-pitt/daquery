@@ -83,6 +83,9 @@ public class DaqueryRequest extends DaqueryObject
     @Expose
     @Transient
     private String code;
+    
+    @Expose
+    private Boolean archived;
 		
 	public DaqueryRequest() {
 		
@@ -130,6 +133,9 @@ public class DaqueryRequest extends DaqueryObject
 	
 	public Set<DaqueryResponse> getResponses(){return(responses);}
 	public void setResponses(Set<DaqueryResponse> resps){responses = resps;}
+	
+	public Boolean getArchived(){return archived;}
+	public void setArchived(Boolean archived){this.archived = archived;}
 	
 	public RequestDirection getDirectionEnum()
 	{

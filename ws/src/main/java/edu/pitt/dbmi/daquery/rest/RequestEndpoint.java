@@ -421,6 +421,52 @@ public class RequestEndpoint extends AbstractEndpoint {
     }
     
     /**
+     * Arhive request 
+     * example url: daquery-ws/ws/requests/1/archive
+     * @return 200 OK Request
+     * @throws 500 Server Error	error message
+     * @throws 401 Unauthorized	
+     */
+    @PUT
+    @Path("/{id}/archive")
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response archiveRequest(@PathParam("id") String id) {
+        DaqueryRequestDAO dao = new DaqueryRequestDAO();
+    	try {
+
+            logger.info("#### updating a request");
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
+            
+            DaqueryRequest request = DaqueryRequestDAO.getRequestById(id);
+            request.setArchived(true);
+            DaqueryRequestDAO.saveOrUpdate(request);
+            
+            String jsonString = request.toJson();
+            return Response.ok(201).entity(jsonString).build();
+
+    	} catch (HibernateException he) {
+    		String msg = "Could not access the database when updating a new request.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered updating a new request.";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
+        }
+    }
+    
+    /**
      * Export Data
      * 
      * @param request_id

@@ -104,6 +104,22 @@ export class RequestService {
                     })
   }
 
+  archiveRequest(requestId: string){
+    return this.http.put(`/daquery/ws/requests/${requestId}/archive`, '')
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  restoreRequest(requestId: string){
+    return this.http.put(`/daquery/ws/requests/${requestId}/restore`, '')
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
   private jwt() {
     // create authorization header with jwt token
     // let currentUser = JSON.parse(localStorage.getItem('currentUser'));
