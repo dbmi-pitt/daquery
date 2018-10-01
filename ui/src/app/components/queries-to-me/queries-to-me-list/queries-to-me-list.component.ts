@@ -116,7 +116,7 @@ export class QueriesToMeListComponent implements OnInit {
   }
 
   showReturnValues() {
-    return this.sqlAnalyzerResponse.returnList.length > 0 && this.selectedRequest.inquiry.queryType !== 'DATA';
+    return this.sqlAnalyzerResponse && this.sqlAnalyzerResponse.returnList.length > 0 && this.selectedRequest.inquiry.queryType !== 'DATA';
   }
 
   archiveClick() {
@@ -125,9 +125,12 @@ export class QueriesToMeListComponent implements OnInit {
 
   onArchive(request:any, event: any){
     event.stopPropagation();
-    console.log("on Archive");
     // hide the request
-
+    request.show = false;
     // mark the request archived to db
+    this.requestService.archiveRequest(request.requestId)
+                       .subscribe(res => {
+                        console.log(res);
+                      })
   }
 }

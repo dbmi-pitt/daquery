@@ -11,8 +11,8 @@
         </div>
         <ul class="nav nav-pills nav-stacked">
           <li *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'active' : ''">
-            <a style="cursor: pointer" (click)="onRequestSelect(request)"> {{request.inquiry.inquiryName}} 
-            <button class="btn btn-default btn-xs pull-right" (click)="onArchive(request, $event)"><i class="fa fa-archive"></i></button>
+            <a [ngClass]="{'archived-row' : request.show != null && !request.show}" *ngIf="showArchive || (request.show == null || request.show)" style="cursor: pointer" (click)="onRequestSelect(request)"> {{request.inquiry.inquiryName}} 
+            <button *ngIf="!request.archived" class="btn btn-default btn-xs pull-right" (click)="onArchive(request, $event)"><i class="fa fa-archive"></i></button>
             <br />
             <br />
             <span>@{{ request.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</span>  
