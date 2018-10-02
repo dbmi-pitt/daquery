@@ -197,6 +197,12 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#select_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -244,6 +250,18 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitConflict_clause(SQLiteParser.Conflict_clauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#any_result_column_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAny_result_column_expr(SQLiteParser.Any_result_column_exprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#math_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMath_expr(SQLiteParser.Math_exprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#expr}.
 	 * @param ctx the parse tree
@@ -556,6 +574,12 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDatabase_name(SQLiteParser.Database_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#with_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWith_name(SQLiteParser.With_nameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#table_name}.
 	 * @param ctx the parse tree
