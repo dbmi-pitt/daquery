@@ -20,8 +20,6 @@ export class AppConfigComponent implements OnInit {
   updated_success: boolean = false;
   update_message: String;
   updateAvailable: any;
-  updated_success: boolean = false;
-  update_message: String;
 
   appConfigForm: FormGroup;
   constructor(private fb: FormBuilder,
