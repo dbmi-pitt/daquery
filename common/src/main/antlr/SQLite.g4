@@ -220,11 +220,12 @@ savepoint_stmt
  ;
 
 with_select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core 
-   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
- ;
+ : K_WITH K_RECURSIVE? with_name K_AS '(' select_stmt ')' ( ',' with_name K_AS '(' select_stmt ')' )* final_with_select_stmt
+ ; 
+ 
+final_with_select_stmt
+ : select_stmt
+ ; 
  
 select_stmt
  : select_core 
@@ -301,6 +302,31 @@ conflict_clause
     AND
     OR
 */
+ 
+any_result_column_expr
+ : literal_value
+ | BIND_PARAMETER
+ | dbColumnExpr
+ | unary_operator any_result_column_expr
+ | any_result_column_expr '||' any_result_column_expr
+ | any_result_column_expr ( '*' | '/' | '%' ) any_result_column_expr
+ | any_result_column_expr ( '+' | '-' ) any_result_column_expr
+ | any_result_column_expr ( '<<' | '>>' | '&' | '|' ) any_result_column_expr
+ | any_result_column_expr ( '<' | '<=' | '>' | '>=' ) any_result_column_expr
+ | any_result_column_expr ( comparison_operator ) any_result_column_expr
+ | any_result_column_expr and_or any_result_column_expr
+ | count_funct
+ | any_funct
+ | '(' any_result_column_expr ')'
+ | K_CAST '(' any_result_column_expr K_AS type_name ')'
+ | any_result_column_expr K_COLLATE collation_name
+ | any_result_column_expr K_NOT? ( K_LIKE | K_GLOB | K_REGEXP | K_MATCH ) any_result_column_expr ( K_ESCAPE any_result_column_expr )?
+ | any_result_column_expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
+ | any_result_column_expr K_IS K_NOT? any_result_column_expr
+ | any_result_column_expr K_NOT? K_BETWEEN any_result_column_expr K_AND any_result_column_expr
+ | K_CASE any_result_column_expr? ( K_WHEN any_result_column_expr K_THEN any_result_column_expr )+ ( K_ELSE any_result_column_expr )? K_END
+ | raise_function
+ ; 
 
 expr
  : literal_value
@@ -331,7 +357,6 @@ expr
  | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'
  | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END
  | K_EXTRACT '(' ( K_YEAR | K_MONTH | K_DAY | K_HOUR | K_MINUTE | K_SECOND | K_TIMEZONE_HOUR | K_TIMEZONE_MINUTE | K_TIMEZONE_REGION | K_TIMEZONE_ABBR ) K_FROM expr ')'  
- | raise_function
  ;
 
 dbColumnExpr
@@ -401,13 +426,14 @@ pragma_value
 common_table_expression
  : table_name ( '(' column_name ( ',' column_name )* ')' )? K_AS '(' select_stmt ')'
  ;
-
+ 
 result_column
  : '*'
  | table_name '.' '*'
  | result_column_expr
  | result_count_function
  | any_result_function
+ | any_result_column_expr ( K_AS? column_alias )?
  ;
 
 deid_tag
@@ -477,7 +503,7 @@ select_core
    ( K_GROUP K_BY (dbColumnExpr | any_funct) ( ',' (dbColumnExpr | any_funct))* ( K_HAVING expr )? )?
  | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
  ;
-
+ 
 multi_from_clause
  : K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause )
  ;
@@ -693,11 +719,11 @@ count_funct
  ;
 
 any_result_function
- : function_name '(' ( K_DISTINCT? result_column_expr ( ',' result_column_expr )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
+ : function_name '(' ( K_DISTINCT? result_column_expr | math_expr | any_result_function ( ',' result_column_expr | math_expr | any_result_function )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
  ;
  
 any_funct
- : function_name '(' ( K_DISTINCT? dbColumnExpr ( ',' dbColumnExpr )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
+ : function_name '(' ( K_DISTINCT? dbColumnExpr | math_expr | any_funct ( ',' dbColumnExpr | math_expr | any_funct)* | '*' )? ')' deid_tag? (K_AS? column_alias)?
  ;
  
 and_keyword
@@ -733,6 +759,10 @@ function_name
  ;
 
 database_name
+ : any_name
+ ;
+
+with_name
  : any_name
  ;
 

@@ -318,6 +318,16 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#select_stmt}.
 	 * @param ctx the parse tree
 	 */
@@ -397,6 +407,26 @@ public interface SQLiteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitConflict_clause(SQLiteParser.Conflict_clauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#any_result_column_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterAny_result_column_expr(SQLiteParser.Any_result_column_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#any_result_column_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitAny_result_column_expr(SQLiteParser.Any_result_column_exprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#math_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMath_expr(SQLiteParser.Math_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#math_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMath_expr(SQLiteParser.Math_exprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#expr}.
 	 * @param ctx the parse tree
@@ -917,6 +947,16 @@ public interface SQLiteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDatabase_name(SQLiteParser.Database_nameContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#with_name}.
+	 * @param ctx the parse tree
+	 */
+	void enterWith_name(SQLiteParser.With_nameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#with_name}.
+	 * @param ctx the parse tree
+	 */
+	void exitWith_name(SQLiteParser.With_nameContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#table_name}.
 	 * @param ctx the parse tree

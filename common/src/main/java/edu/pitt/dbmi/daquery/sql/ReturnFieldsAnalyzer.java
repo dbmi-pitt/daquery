@@ -10,59 +10,17 @@ import org.hibernate.annotations.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.sql.domain.Column;
+import edu.pitt.dbmi.daquery.sql.domain.ColumnProvider;
 import edu.pitt.dbmi.daquery.sql.domain.DeIdTag;
+import edu.pitt.dbmi.daquery.sql.domain.FinalWithSelect;
 import edu.pitt.dbmi.daquery.sql.domain.Function;
 import edu.pitt.dbmi.daquery.sql.domain.SQLElement;
 import edu.pitt.dbmi.daquery.sql.domain.SelectStatement;
 import edu.pitt.dbmi.daquery.sql.domain.Table;
 import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
+import edu.pitt.dbmi.daquery.sql.domain.WithSelect;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Alter_table_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Analyze_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Any_result_functionContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Attach_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Begin_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_aliasContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_nameContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Commit_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_index_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_table_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_trigger_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_view_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Create_virtual_table_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Database_nameContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Date_shift_field_propContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Deid_tagContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Delete_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Delete_stmt_limitedContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Detach_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Drop_index_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Drop_table_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Drop_trigger_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Drop_view_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.From_table_specContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Function_nameContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Id_field_propContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Insert_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Is_birthdate_propContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Is_zip_propContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Obfuscate_field_propContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Pragma_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Reindex_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Release_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_columnContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_column_exprContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_count_functionContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Rollback_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Savepoint_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_coreContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_setContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Table_nameContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Tracking_column_exprContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Update_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Update_stmt_limitedContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Vacuum_stmtContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.With_select_stmtContext;
+import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.*;
 import edu.pitt.dbmi.daquery.update.db.DBUpdate151;
 
 public class ReturnFieldsAnalyzer extends SQLAnalyzer
@@ -72,6 +30,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	private DataModel model = null;
 	private SQLElement topElement = null;
 	private List<ReturnColumn> returnColumns = null;
+	private String saveWithName = null;
 	
 	public static void main(String [] args)
 	{
@@ -83,9 +42,14 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		
 		
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD, (select nyj from ieu);");
-		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD;");
+		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD;", dm);
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select vital.patid<IDENTIFIABLE isId=true dateshift on tbl.dsfield obfuscate=true> adsd, selst.somefield, myfunc(lmno.abc, pq.def)<IDENTIFIABLE isId=true dateshift on tb22.dsfield222 obfuscate=true>  as mfun from VITAL, (select somefield, otherfield from adfa) selst where patid like 'PIT100_' or patid like 'PIT101_';");
-		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select sex, count(blech1), avg(gigi) from glorg, demographic group by avg(blech2) order by count(blech3)", dm);
+		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select sex, count(blech1), avg(gigi) from glorg, demographic group by avg(blech2) order by count(blech3)", dm);
+		String withTest = "WITH PAT_LIST AS (SELECT DISTINCT patid FROM DIAGNOSIS WHERE DX LIKE '250%' OR DX LIKE 'E08.%' OR DX LIKE 'E09.%' OR DX LIKE 'E10.%' OR DX LIKE 'E11.%' OR DX LIKE 'E13.%' OR DX IN ('E08', 'E09', 'E10', 'E11', 'E13')), PAT_CNT AS (SELECT COUNT(*) as n_patients_dx FROM PAT_LIST), PAT_NO_LAB_CNT AS (SELECT COUNT(DISTINCT PATID) as n_patients_no_lab FROM PAT_LIST WHERE PATID NOT IN (SELECT patid FROM LAB_RESULT_CM WHERE LAB_LOINC = '4548-4')), RESULT_CNT AS (SELECT COUNT(RESULT_NUM) as results, COUNT(*) as total FROM LAB_RESULT_CM WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4'), ANALYSIS AS (SELECT ROUND(AVG(result_num), 1) as mean, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL) SELECT mean, n_patients_dx, n_patients_labs, n_patients_no_lab, (n_patients_dx - n_patients_no_lab - n_patients_labs) as n_patients_null_lab, n_results, ROUND((1 - (n_results / total)) * 100, 2) as pct_null FROM ANALYSIS;";
+		//String withTest = "WITH PAT_LIST AS (SELECT DISTINCT patid FROM DIAGNOSIS WHERE DX LIKE '250%'), PAT_CNT AS (SELECT COUNT(*) as n_patients_dx FROM PAT_LIST) select n_patients_dx from PAT_CNT";
+		//String funcTest = "SELECT (x + Y + z / m), ROUND(AVG(result_num), 1) as mean, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
+		//String exprTest = "SELECT (a - (b/3) + 1 - (X *2/3 + (4-y))), abc from blech";
+		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer(withTest, dm);
 		System.out.println(a.topElement);
 //<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
 		
@@ -103,12 +67,12 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	
 	
 	
-	public SelectStatement getTopSelect(){return((SelectStatement) topElement);}
+	public ColumnProvider getTopSelect(){return((ColumnProvider) topElement);}
 	public List<ReturnColumn> getReturnColumns()
 	{
 		if(returnColumns == null)
 		{
-			SelectStatement select = getTopSelect();
+			ColumnProvider select = getTopSelect();
 			returnColumns = select.getReturnColumns(model);
 		}
 		return(returnColumns);
@@ -176,12 +140,37 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 
 		if(node.self instanceof Select_coreContext)
 		{
-			SelectStatement newSel = new SelectStatement();
+			if(!( parentElement != null && parentElement instanceof FinalWithSelect))
+			{
+				SelectStatement newSel = new SelectStatement();
+				parentElement = setParentChild(parentElement, newSel);
+				if(saveWithName != null)
+				{
+					newSel.setAlias(saveWithName);
+					saveWithName = null;
+				}
+				if(topElement == null) topElement = newSel;
+							
+				//System.out.print(Integer.toString(level) + ": ");
+				//System.out.println("select_core");
+			}
+		}
+		
+		if(node.self instanceof With_select_stmtContext)
+		{
+			WithSelect newSel = new WithSelect();
 			parentElement = setParentChild(parentElement, newSel);
 			if(topElement == null) topElement = newSel;
-						
-			//System.out.print(Integer.toString(level) + ": ");
-			//System.out.println("select_core");			
+		}
+		if(node.self instanceof Final_with_select_stmtContext)
+		{
+			FinalWithSelect ss = new FinalWithSelect();
+			if(parentElement != null && parentElement instanceof WithSelect)
+				parentElement = setParentChild(parentElement, ss);
+		}
+		if(node.self instanceof With_nameContext)
+		{
+			saveWithName = node.self.getText();
 		}
 		if(node.self instanceof Result_columnContext)
 		{
@@ -211,7 +200,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 				((DeIdTag)parentElement).setBirthdate(true);
 		}
 
-		if(node.self instanceof Result_count_functionContext || node.self instanceof Any_result_functionContext)
+		if(node.self instanceof Result_count_functionContext || node.self instanceof Any_result_functionContext || (node.self instanceof Any_result_column_exprContext && parentElement instanceof SelectStatement))
 		{
 			Function func = new Function();
 			func.setCallDescriptor(node.self.getText());
@@ -374,7 +363,6 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	static
 	{
 		censoredStatements.put(Select_setContext.class, "Select set (UNION/INTERSECT/MINUS/EXCEPT)");
-		censoredStatements.put(With_select_stmtContext.class, "With");
 		censoredStatements.put(Alter_table_stmtContext.class, "Alter Table");
 		censoredStatements.put(Analyze_stmtContext.class, "Analyze");
 		censoredStatements.put(Attach_stmtContext.class, "Attach");
