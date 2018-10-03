@@ -718,12 +718,22 @@ count_funct
  : K_COUNT '(' ( distinct_keyword? dbColumnExpr | '*' | K_DISTINCT? any_funct )?  ')' deid_tag? (K_AS? column_alias)?
  ;
 
+/* result_column_expr | any_funct mmmm */
 any_result_function
- : function_name '(' ( K_DISTINCT? result_column_expr | math_expr | any_result_function ( ',' result_column_expr | math_expr | any_result_function )* | '*' )? ')' deid_tag? (K_AS? column_alias)?
+ : function_name '(' ( K_DISTINCT? (result_column_expr | any_funct | math_expr | literal_value)? ( ','  (result_column_expr | any_funct | math_expr | literal_value | '*') )*  )? ')' deid_tag? (K_AS? column_alias)?
  ;
  
 any_funct
- : function_name '(' ( K_DISTINCT? dbColumnExpr | math_expr | any_funct ( ',' dbColumnExpr | math_expr | any_funct)* | '*' )? ')' deid_tag? (K_AS? column_alias)?
+ : function_name '(' ( K_DISTINCT? (dbColumnExpr | any_funct | math_expr | literal_value)? ( ',' (dbColumnExpr | any_funct | math_expr | literal_value | '*') )*  )? ')' deid_tag? (K_AS? column_alias)?
+ ;
+ 
+math_expr
+ : NUMERIC_LITERAL
+ | dbColumnExpr
+ | any_funct
+ | math_expr ( '*' | '/' | '%' ) math_expr
+ | math_expr ( '+' | '-' ) math_expr
+ | '(' math_expr ')'
  ;
  
 and_keyword
