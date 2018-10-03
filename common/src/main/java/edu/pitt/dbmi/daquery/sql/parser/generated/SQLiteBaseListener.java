@@ -508,18 +508,6 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMath_expr(SQLiteParser.Math_exprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMath_expr(SQLiteParser.Math_exprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterExpr(SQLiteParser.ExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1031,6 +1019,18 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAny_funct(SQLiteParser.Any_functContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMath_expr(SQLiteParser.Math_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMath_expr(SQLiteParser.Math_exprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

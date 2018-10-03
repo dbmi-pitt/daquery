@@ -257,12 +257,6 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAny_result_column_expr(SQLiteParser.Any_result_column_exprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLiteParser#math_expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMath_expr(SQLiteParser.Math_exprContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -520,6 +514,12 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAny_funct(SQLiteParser.Any_functContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#math_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMath_expr(SQLiteParser.Math_exprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#and_keyword}.
 	 * @param ctx the parse tree

@@ -418,16 +418,6 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitAny_result_column_expr(SQLiteParser.Any_result_column_exprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#math_expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterMath_expr(SQLiteParser.Math_exprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#math_expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitMath_expr(SQLiteParser.Math_exprContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#expr}.
 	 * @param ctx the parse tree
 	 */
@@ -857,6 +847,16 @@ public interface SQLiteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAny_funct(SQLiteParser.Any_functContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#math_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMath_expr(SQLiteParser.Math_exprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#math_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMath_expr(SQLiteParser.Math_exprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#and_keyword}.
 	 * @param ctx the parse tree
