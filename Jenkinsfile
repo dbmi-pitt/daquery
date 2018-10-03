@@ -72,7 +72,7 @@ node {
        }
 
     }
-/*
+
 //adding a comment to trigger a Jenkins build
     stage('Deploy Docker Images') {
          dir('docker') {
@@ -93,7 +93,7 @@ node {
          }
 
     }
-*/
+
     } catch (Exception e) {
 
         currentBuild.result = "FAILURE"
