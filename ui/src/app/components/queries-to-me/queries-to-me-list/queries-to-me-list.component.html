@@ -3,10 +3,10 @@
     <div class="box box-solid">
       <div class="box-body no-padding">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-8">
           </div>
-          <div class="col-md-6">
-            <button class="btn btn-default btn-block pull-right" (click)="archiveClick()"><i class="fa fa-archive"></i> {{ showArchive ? 'Hide Archive' : 'Show Archive' }}</button>
+          <div class="col-md-4">
+            <switch [status]="true" [onColor]="'green'" [offColor]="'blue'" [onText]="'Current'" [offText]="'Archived'" (statusChange)="onSwitchChange($event)"></switch>
           </div>
         </div>
         <ul class="nav nav-pills nav-stacked">
