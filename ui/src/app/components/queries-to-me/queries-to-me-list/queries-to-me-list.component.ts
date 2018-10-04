@@ -119,7 +119,7 @@ export class QueriesToMeListComponent implements OnInit {
     return this.sqlAnalyzerResponse && this.sqlAnalyzerResponse.returnList.length > 0 && this.selectedRequest.inquiry.queryType !== 'DATA';
   }
 
-  onSwitchChange(){
+  onSwitchChange(event: any){
     this.showArchived = !this.showArchived;
     this.requests = null;
     this.selectedRequest = null;
