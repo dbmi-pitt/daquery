@@ -15,13 +15,21 @@ export class RequestService {
 
   queriesToMe = [];
   queriesFromMe = [];
-  getRequestsToMe(): Observable<any[]> {
-    return this.http.get('/daquery/ws/requests?direction=IN!IN-OUT')
+  getRequestsToMe(archived: boolean): Observable<any[]> {
+    return this.http.get('/daquery/ws/requests?direction=IN!IN-OUT&archived=' + archived)
                     .catch(error => {
                       this.error.error = error;
                       return Observable.throw(error || 'Server error');
                     });
   }
+
+  // getArchivedRequestToMe(): Observable<any[]> {
+  //   return this.http.get('/daquery/ws/requests?direction=IN!IN-OUT&archived=true')
+  //                   .catch(error => {
+  //                     this.error.error = error;
+  //                     return Observable.throw(error || 'Server error');
+  //                   })
+  // }
 
   getQueryToMe(id: number){
     //return QUERIES_TO_ME.slice(0).find(query => query.id === id);
@@ -32,8 +40,8 @@ export class RequestService {
                     });
   }
 
-  getRequestsFromMe(): Observable<any[]> {
-    return this.http.get('/daquery/ws/requests?direction=OUT!IN-OUT')
+  getRequestsFromMe(archived: boolean): Observable<any[]> {
+    return this.http.get('/daquery/ws/requests?direction=OUT!IN-OUT&archived=' + archived)
                     .catch(error => {
                       this.error.error = error;
                       return Observable.throw(error || 'Server error');
@@ -106,6 +114,14 @@ export class RequestService {
 
   archiveRequest(requestId: string){
     return this.http.put(`/daquery/ws/requests/${requestId}/archive`, '')
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    })
+  }
+
+  archiveRequestGroup(requestGroupId: string){
+    return this.http.post(`/daquery/ws/requests/archive-all?groupId=${requestGroupId}`, null)
                     .catch(error => {
                       this.error.error = error;
                       return Observable.throw(error || 'Server error');

@@ -19,7 +19,7 @@ export class QueriesToMeListComponent implements OnInit {
   selectedRequest: any;
   showApproveDenyBtn = false;
   showStackTrace = false;
-  showArchive = false;
+  showArchived = false;
 
   sqlAnalyzerResponse: any;
 
@@ -29,15 +29,15 @@ export class QueriesToMeListComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.getRequestsToMe();
+    this.getRequestsToMe(false);
     await this.updateCurrentUser();
     if(this.canActive(["steward"])) {
       this.showApproveDenyBtn = true;
     }
   }
 
-  getRequestsToMe() {
-    this.requestService.getRequestsToMe()
+  getRequestsToMe(archived: boolean) {
+    this.requestService.getRequestsToMe(archived)
                        .subscribe(requests => {
                          this.requests = requests;
                        });
@@ -119,8 +119,11 @@ export class QueriesToMeListComponent implements OnInit {
     return this.sqlAnalyzerResponse && this.sqlAnalyzerResponse.returnList.length > 0 && this.selectedRequest.inquiry.queryType !== 'DATA';
   }
 
-  archiveClick() {
-    this.showArchive = !this.showArchive;
+  onSwitchChange(){
+    this.showArchived = !this.showArchived;
+    this.requests = null;
+    this.selectedRequest = null;
+    this.getRequestsToMe(this.showArchived);
   }
 
   onArchive(request:any, event: any){
