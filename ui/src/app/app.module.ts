@@ -1,4 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -80,7 +81,7 @@ import { NetworkContactsComponent } from './components/networks/network/network-
 import { SiteContactsComponent } from './components/site-contacts/site-contacts.component';
 import { ForceChangePasswordComponent } from './components/force-change-password/force-change-password.component';
 import { SystemUpdateWarningComponent } from './components/system-update-warning/system-update-warning.component';
-
+import { BootstrapSwitchModule } from 'angular2-bootstrap-switch';
 
 @NgModule({
   declarations: [
@@ -141,7 +142,9 @@ import { SystemUpdateWarningComponent } from './components/system-update-warning
     ReactiveFormsModule,
     routing,
     MomentModule,
-    NgIdleKeepaliveModule.forRoot()
+    NgIdleKeepaliveModule.forRoot(),
+    BootstrapSwitchModule.forRoot(),
+    BrowserAnimationsModule
   ],
   providers: [AuthGuard, 
               RoleGuard,

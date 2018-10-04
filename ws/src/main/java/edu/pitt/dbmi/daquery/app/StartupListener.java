@@ -25,6 +25,7 @@ public class StartupListener implements ServletContextListener
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
 		try {
+			boolean failed = false;
 			if(AppProperties.getDBProperty("update_status") != null && AppProperties.getDBProperty("update_status").equals("updating")){
 				File f  = new File(AppProperties.getHomeDirectory() + "/temp/daquery_update/daquery_update/daquery-update-error.log");
 				BufferedReader br = new BufferedReader(new FileReader(f)); 
@@ -40,16 +41,17 @@ public class StartupListener implements ServletContextListener
 					}
 				}
 				
-				if(updateSuccessfully){
-					UpdateDBForVersion.updateDB();
+				if(updateSuccessfully){		
 					AppProperties.setDBProperty("update_status", "updated");
 					AppProperties.setDBProperty("update_message", "Update Completed Successfully");
 				} else {
+					failed = true;
 					AppProperties.setDBProperty("update_status", "failed");
 					AppProperties.setDBProperty("update_message", sb.toString());
 				}
 				
 			}
+			if(! failed) UpdateDBForVersion.updateDB();
 		} catch (DaqueryException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

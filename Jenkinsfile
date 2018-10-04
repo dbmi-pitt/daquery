@@ -72,7 +72,7 @@ node {
        }
 
     }
-/*
+
 //adding a comment to trigger a Jenkins build
     stage('Deploy Docker Images') {
          dir('docker') {
@@ -89,11 +89,14 @@ node {
             sh 'cp docker-baseline/daquery_connected_site_db.tar.gz /home/jenkins/projects/daquery/docker/docker-baseline/daquery_connected_site_db.tar.gz'
             sh 'cp docker-central/daquery_central_db.tar.gz /home/jenkins/projects/daquery/docker/docker-central/daquery_central_db.tar.gz'
             sh 'scripts/test/all-start-test-jenkins.sh'
+            
+            //stop any Docker images that were launched
+            sh 'scripts/test/stop-docker-all.sh'
 
          }
 
     }
-*/
+
     } catch (Exception e) {
 
         currentBuild.result = "FAILURE"

@@ -1,13 +1,12 @@
 <div>
-  <table *ngIf="requests" class="table table-striped">
+  <switch [status]="true" [onColor]="'green'" [offColor]="'blue'" [onText]="'Current'" [offText]="'Archived'" (statusChange)="onSwitchChange($event)"></switch>
+  <table *ngIf="requests" class="table">
     <caption>Requests</caption>
     <thead>
       <tr>
         <th></th>
         <th></th>
-        <th>
-          <button class="btn btn-default btn-block pull-right" (click)="archiveClick()"><i class="fa fa-archive"></i> {{ showArchive ? 'Hide Archive' : 'Show Archive' }}</button>
-        </th>
+        <th></th>
       </tr>
     </thead>
     <thead>
@@ -18,10 +17,10 @@
       </tr>
     </thead>
     <tbody *ngFor="let requestGroup of (requestGroups | mapValues)">
-      <tr>
+      <tr [ngClass]="{'archived-row' : requestGroup.show != null && !requestGroup.show}"  *ngIf="showArchive || requestGroup.show == null || requestGroup.show">
         <td (click)="requestGroup.active = !requestGroup.active"><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}"></i> {{ requestGroup.val[0].inquiry.inquiryName }}</td>
         <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
-        <td><button class="btn btn-default" (click)="onArchive(request, $event)" title="Archive"><i class="fa fa-archive"></i></button></td>
+        <td><button class="btn btn-default" (click)="onArchiveAll(requestGroup, $event)" title="Archive All"><i class="fa fa-archive"></i></button></td>
       </tr>
       <tr *ngIf="requestGroup.active">
         <td colspan="4">
@@ -64,21 +63,24 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let request of requestGroup.val">
-                <td>{{ request.requestSite.name }}</td>
-                <td>{{ request.responses[0]?.status }}</td>
-                <td>{{ request.responses[0]?.replyTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
-                <td>{{ getRequestResult(request.responses[0]) }}
-                    <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED', 'PENDING', 'DENIED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
-                    <span *ngIf="request.responses[0]?.hasError" class="pull-right-container">
-                      <small class="label bg-red">Network Error</small>
-                    </span>
-                    <a title="{{ getFilePaths(request.responses[0]) }}" data-toggle="tooltip" data-placement="top"><i *ngIf="request.responses[0]?.files" class="fa fa-question-circle"></i></a>
-                </td>
-                <td>
-                  <button *ngIf="request.inquiry.queryType === 'AGGREGATE'" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
-                </td>
-              </tr>
+              <ng-container *ngFor="let request of requestGroup.val">
+                <tr *ngIf="!request.archived">
+                  <td>{{ request.requestSite.name }}</td>
+                  <td>{{ request.responses[0]?.status }}</td>
+                  <td>{{ request.responses[0]?.replyTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
+                  <td>{{ getRequestResult(request.responses[0]) }}
+                      <i *ngIf="!['ERROR', 'COMPLETED', 'STALLED', 'PENDING', 'DENIED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+                      <span *ngIf="request.responses[0]?.hasError" class="pull-right-container">
+                        <small class="label bg-red">Network Error</small>
+                      </span>
+                      <a title="{{ getFilePaths(request.responses[0]) }}" data-toggle="tooltip" data-placement="top"><i *ngIf="request.responses[0]?.files" class="fa fa-question-circle"></i></a>
+                  </td>
+                  <td>
+                    <button *ngIf="request.inquiry.queryType === 'AGGREGATE'" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
+                    <button class="btn btn-default btn-xs" (click)="onArchive(request, $event)" title="Archive"><i class="fa fa-archive"></i></button>
+                  </td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
         </td>
