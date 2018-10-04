@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { environment } from '../../../../environments/environment';
 import { MapValuesPipe } from '../../../pipes/iteratable.pipe';
 import { Router } from '@angular/router';
+//import { BootstrapSwitchComponent } from 'angular2-bootstrap-switch';
 
 @Component({
   selector: 'app-requests-from-me-list',
@@ -16,7 +17,7 @@ export class RequestsFromMeListComponent implements OnInit {
   requests: any[];
   inquiries: any[];
   requestGroups: Map<String, any[]> = new Map<String, any[]>();
-  showArchive = false;
+  showArchived = false;
 
   constructor(private requestService: RequestService,
               private responseService: ResponseService,
@@ -24,55 +25,59 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   notifyMe() {
-    this.getRequestsFromMe();
+    this.getRequestsFromMe(false);
   }
 
   ngOnInit() {
-    this.getRequestsFromMe();
+    this.getRequestsFromMe(false);
   }
 
-  getRequestsFromMe() {
-    this.requestService.getRequestsFromMe()
+  getRequestsFromMe(archived: boolean) {
+    this.requestService.getRequestsFromMe(archived)
                        .subscribe((requests) => {
-                         let self = this;
-                         this.requests = requests;
-                         this.requestGroups = new Map<String, any[]>();
-                         this.requests.forEach((request) => {
-                           if(self.requestGroups.has(request.requestGroup)){
-                             self.requestGroups.get(request.requestGroup).push(request);
-                           } else {
-                             self.requestGroups.set(request.requestGroup, []);
-                             self.requestGroups.get(request.requestGroup).push(request);
-                           }
-                         });
+                          this.groupRequests(requests);
+                        });
+  }
 
-                         this.requests.forEach((request) => {
-                          let response = request.responses[0];
-                          if(response && !['ERROR', 'COMPLETED', 'STALLED', 'DENIED'].includes(response.status)){
-                             let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
-                               this.responseService.getResponse(response.responseId)
-                                                   .subscribe(res => {
-                                                     response.status = res.status;
-                                                     response.errorMessage = res.errorMessage;
-                                                     response.value = res.value;
-                                                     response.statusMessage = res.statusMessage;
-                                                     response.files = res.files;
-                                                     if(['ERROR', 'COMPLETED', 'STALLED', 'DENIED'].includes(response.status)){
-                                                       subscription.unsubscribe();
-                                                     }
-                                                   },
-                                                  error => {
-                                                    response.hasError = true;
-                                                    subscription.unsubscribe();
-                                                  },
-                                                  () => {
-                                                    if(!this.router.url.includes("queries-from-me"))
-                                                      subscription.unsubscribe();
-                                                  });
-                             })
-                          }
-                        });
-                        });
+  groupRequests(requests: any){
+    let self = this;
+    this.requests = requests;
+    this.requestGroups = new Map<String, any[]>();
+    this.requests.forEach((request) => {
+     if(self.requestGroups.has(request.requestGroup)){
+       self.requestGroups.get(request.requestGroup).push(request);
+     } else {
+       self.requestGroups.set(request.requestGroup, []);
+       self.requestGroups.get(request.requestGroup).push(request);
+     }
+    });
+
+    this.requests.forEach((request) => {
+      let response = request.responses[0];
+      if(response && !['ERROR', 'COMPLETED', 'STALLED', 'DENIED'].includes(response.status)){
+        let subscription = Observable.interval(1000 * environment.responseCheckIntervalInSecond).subscribe(x => {
+          this.responseService.getResponse(response.responseId)
+                                .subscribe(res => {
+                                 response.status = res.status;
+                                 response.errorMessage = res.errorMessage;
+                                 response.value = res.value;
+                                 response.statusMessage = res.statusMessage;
+                                 response.files = res.files;
+                                 if(['ERROR', 'COMPLETED', 'STALLED', 'DENIED'].includes(response.status)){
+                                   subscription.unsubscribe();
+                                 }
+                               },
+                              error => {
+                                response.hasError = true;
+                                subscription.unsubscribe();
+                              },
+                              () => {
+                                if(!this.router.url.includes("queries-from-me"))
+                                  subscription.unsubscribe();
+                              });
+        });
+      }
+    });
   }
 
   getSavedInquiries(){
@@ -111,11 +116,12 @@ export class RequestsFromMeListComponent implements OnInit {
           inquiryName: request.inquiry.inquiryName + "(Case Export)",
           inquiryDescription: request.inquiry.inquiryDescription,
           code: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.code : ''
-        }
+        },
+        archived: false
       };
       this.requestService.requestData(dataRequest)
                         .subscribe(() => {
-                            this.getRequestsFromMe();
+                            this.getRequestsFromMe(this.showArchived);
                         });
     }
   }
@@ -140,6 +146,48 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   archiveClick() {
-    this.showArchive = !this.showArchive;
+    this.showArchived = !this.showArchived;
+    this.requests = null;
+    this.getRequestsFromMe(this.showArchived);
+  }
+
+  onSwitchChange(event: any) {
+    this.showArchived = !this.showArchived;
+    this.requests = null;
+    this.getRequestsFromMe(this.showArchived);
+  }
+
+  onArchive(request:any, event: any){
+    event.stopPropagation();
+    // hide the requestGroupe
+    request.show = false;
+    // mark each requests archived in this group
+    // requestGroup.val.forEach(request => {
+    //   this.requestService.archiveRequest(requestGroup.requestId)
+    //                      .subscribe(res => {
+    //                       console.log(res);
+    //                     })
+    // });
+    this.requestService.archiveRequest(request.requestId)
+                       .subscribe(res => {
+                         console.log(res);
+                       });
+  }
+
+  onArchiveAll(requestGroup:any, event: any){
+    event.stopPropagation();
+    // hide the requestGroupe
+    requestGroup.show = false;
+    // mark each requests archived in this group
+    // requestGroup.val.forEach(request => {
+    //   this.requestService.archiveRequest(requestGroup.requestId)
+    //                      .subscribe(res => {
+    //                       console.log(res);
+    //                     })
+    // });
+    this.requestService.archiveRequestGroup(requestGroup.key)
+                       .subscribe(res => {
+                         console.log(res);
+                       });
   }
 }

@@ -60,6 +60,31 @@ public class DaqueryRequestDAO extends AbstractDAO {
 			if(sess != null) sess.close();
 		}		
 	}
+	
+	public static List<DaqueryRequest> getRequestsByGroupId(String groupId) throws DaqueryException{		
+		Session sess = null;
+		try
+		{	
+			if(StringHelper.isBlank(groupId)) return(null);
+			sess = HibernateConfiguration.openSession();
+			Query q = sess.createQuery("SELECT r FROM DaqueryRequest r "
+									 + "join fetch r.network"
+									 + " WHERE upper(r.requestGroup) = :group_id")
+						  .setParameter("group_id", groupId.toUpperCase().trim());
+			List<DaqueryRequest> req =  q.list(); //q.uniqueResult();
+			return req;
+		}
+		catch(Throwable t)
+		{
+			String msg = "Unhandled exception while trying to retrieve a DaqueryRequest with groupId: " + groupId;
+			log.log(Level.SEVERE, msg, t);
+			throw new DaqueryException(msg + "Check the site server logs for more information", t);
+		}
+		finally
+		{
+			if(sess != null) sess.close();
+		}		
+	}
 
 	public long save(DaqueryRequest request) {
 		return (Long) getCurrentSession().save(request);
@@ -69,7 +94,7 @@ public class DaqueryRequestDAO extends AbstractDAO {
 		return (DaqueryRequest) getCurrentSession().get(DaqueryRequest.class, id);
 	}
 	
-	public List<DaqueryRequest> list(String[] directions) throws DaqueryException
+	public List<DaqueryRequest> list(String[] directions, String archived) throws DaqueryException
 	{
 		Session sess = null;
 		try
@@ -81,7 +106,7 @@ public class DaqueryRequestDAO extends AbstractDAO {
 				directs += comma + "'" + dir + "'";
 				comma = ", ";
 			}
-			String hql = "select req from DaqueryRequest req where direction in (" + directs + ") order by sentTimestamp desc";
+			String hql = "select req from DaqueryRequest req where direction in (" + directs + ") and archived=" + archived + " order by sentTimestamp desc";
 			sess = HibernateConfiguration.openSession();
 			Query q = sess.createQuery(hql);
 			List<DaqueryRequest> requests = q.list();
