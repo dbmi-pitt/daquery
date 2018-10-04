@@ -116,7 +116,8 @@ export class RequestsFromMeListComponent implements OnInit {
           inquiryName: request.inquiry.inquiryName + "(Case Export)",
           inquiryDescription: request.inquiry.inquiryDescription,
           code: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.code : ''
-        }
+        },
+        archived: false
       };
       this.requestService.requestData(dataRequest)
                         .subscribe(() => {

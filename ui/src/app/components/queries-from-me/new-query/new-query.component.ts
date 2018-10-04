@@ -331,7 +331,8 @@ export class NewQueryComponent implements OnInit {
             code: [],
             inquiryName: inqName,
             inquiryDescription: this.inquiryForm.value.inquiryDescription
-          }
+          },
+          archived: false
         };
 
         ['ansi', 'oracle', 'sqlServer'].forEach(dialect => {
