@@ -1,5 +1,6 @@
 package edu.pitt.dbmi.daquery.queue;
 
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,6 +62,7 @@ public class ResponseTask extends AbstractTask implements Task
 	@Override
 	public void execute() throws DaqueryException {
 		response.setStatusEnum(ResponseStatus.EXECUTING);
+		response.getRequest().setExecutedTimestamp(new Date());
 		ResponseDAO.saveOrUpdate(response);
 		response = inquiry.run(response, model);
 		ResponseDAO.saveOrUpdate(response);

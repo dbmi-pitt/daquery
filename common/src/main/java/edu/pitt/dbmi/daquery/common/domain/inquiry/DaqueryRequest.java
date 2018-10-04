@@ -62,6 +62,11 @@ public class DaqueryRequest extends DaqueryObject
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="SENT_TIMESTAMP")
     private Date sentTimestamp;
+    
+    @Expose
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="EXECUTED_TIMESTAMP")
+    private Date executedTimestamp;
 
     @Expose
     @OneToOne(fetch=FetchType.EAGER)
@@ -121,6 +126,9 @@ public class DaqueryRequest extends DaqueryObject
 	
 	public Date getSentTimestamp(){return(sentTimestamp);}
 	public void setSentTimestamp(Date timestamp){sentTimestamp = timestamp;}
+	
+	public Date getExecutedTimestamp(){return(executedTimestamp);}
+	public void setExecutedTimestamp(Date timestamp){executedTimestamp = timestamp;}
 	
 	public UserInfo getRequester(){return(requester);}
 	public void setRequester(UserInfo user){requester = user;}
