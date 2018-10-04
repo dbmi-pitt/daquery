@@ -50,6 +50,7 @@ import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.TestConnection;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 import edu.pitt.dbmi.daquery.update.db.DBUpdate151;
+import edu.pitt.dbmi.daquery.update.db.DBUpdate154;
 
 
 
@@ -226,7 +227,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
             //dModel.setName(((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
             //String netId = network_params.get("network_id");
             //DataModel dModel = getDataModelFromCentral(netId);
-            DataModel dModel = DBUpdate151.importCDM31Model(false);
+            DataModel dModel = DBUpdate154.importCDM41Model(false);
             dsset.add(sqlDataSource);
             
             if(dModel != null)
