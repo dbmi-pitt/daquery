@@ -9,7 +9,8 @@ export CLASSPATH=$DERBY_INSTALL/lib/derby.jar:$DERBY_INSTALL/lib/derbytools.jar:
 export DB_HOME=/home/jenkins/daquery_docker_data
 export CENTRAL_IP_ADDRESS="http://136.142.228.23"
 # build the code before testing it on Docker
-cd ../../..
+# this cd command assumes the user is in the [main daquery_dir]/docker directory
+cd ../
 ./build-all.sh
 
 cd docker/scripts/test
