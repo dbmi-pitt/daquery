@@ -81,11 +81,17 @@
           <div class="help-block" *ngIf="(!tempFileExportDir.hasError('required') && tempFileExportDir.hasError('validateEqual')) && (tempFileExportDir.dirty || tempFileExportDir.touched)">Temporary Export Storage</div>
         </div>
         <div class="form-group has-feedback" [ngClass]="{'has-error': casePerFile.invalid && (casePerFile.dirty || casePerFile.touched), 'has-success': casePerFile.valid && (casePerFile.dirty || casePerFile.touched) }">
-            <label>Exported Cases Per File</label>
-            <input type="text" class="form-control" formControlName="casePerFile" name="casePerFile" />
-            <p class="help-block">The number of cases (patients) included in a single export file. If more than this number are exported multiple export files will be created.</p>
-            <div class="help-block" *ngIf="(!casePerFile.hasError('required') && casePerFile.hasError('validateEqual')) && (casePerFile.dirty || casePerFile.touched)">Case per Export File</div>
-          </div>
+          <label>Exported Cases Per File</label>
+          <input type="text" class="form-control" formControlName="casePerFile" name="casePerFile" />
+          <p class="help-block">The number of cases (patients) included in a single export file. If more than this number are exported multiple export files will be created.</p>
+          <div class="help-block" *ngIf="(!casePerFile.hasError('required') && casePerFile.hasError('validateEqual')) && (casePerFile.dirty || casePerFile.touched)">Case per Export File</div>
+        </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': centralURL.invalid && (centralURL.dirty || centralURL.touched), 'has-success': centralURL.valid && (centralURL.dirty || centralURL.touched) }">
+          <label>Exported Cases Per File</label>
+          <input type="text" class="form-control" formControlName="centralURL" name="centralURL" />
+          <p class="help-block">The number of cases (patients) included in a single export file. If more than this number are exported multiple export files will be created.</p>
+          <div class="help-block" *ngIf="(!centralURL.hasError('required') && centralURL.hasError('validateEqual')) && (centralURL.dirty || centralURL.touched)">Case per Export File</div>
+        </div>
         <div class="row">
           <div class="col-xs-4">
             <button [disabled]="appConfigForm.invalid || loading" class="btn btn-primary btn-block btn-flat">
