@@ -496,6 +496,27 @@ join_constraint
    | K_USING '(' column_name ( ',' column_name )* ')' )?
  ;
 
+compound_select_stmt
+ : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
+   select_core ( ( K_UNION K_ALL? | K_INTERSECT | K_EXCEPT ) select_core )+
+   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
+;
+
+factored_select_stmt
+ : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
+   select_core ( compound_operator select_core )*
+   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
+;
+
+compound_operator
+ : K_UNION
+ | K_UNION K_ALL
+ | K_INTERSECT
+ | K_EXCEPT
+;
+
 select_core
  : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
    ( multi_from_clause )?
