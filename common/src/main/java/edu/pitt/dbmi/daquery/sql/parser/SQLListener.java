@@ -33,11 +33,6 @@ public class SQLListener extends AbstractSQLListener
 	
 	} */
 	
-	@Override public void enterCommon_table_expression(SQLiteParser.Common_table_expressionContext ctx)
-	{
-	
-	}
-
 	@Override public void enterExpr(SQLiteParser.ExprContext ctx)
 	{
 	
@@ -52,12 +47,7 @@ public class SQLListener extends AbstractSQLListener
 	{
 	
 	}
-	
-	@Override public void exitSelect_set(SQLiteParser.Select_setContext ctx)
-	{
-	
-	}
-	
+		
 	@Override public void exitAnything_at_all(SQLiteParser.Anything_at_allContext ctx)
 	{
 		

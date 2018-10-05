@@ -11,6 +11,7 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.sql.domain.Column;
 import edu.pitt.dbmi.daquery.sql.domain.ColumnProvider;
+import edu.pitt.dbmi.daquery.sql.domain.CompoundSelect;
 import edu.pitt.dbmi.daquery.sql.domain.DeIdTag;
 import edu.pitt.dbmi.daquery.sql.domain.FinalWithSelect;
 import edu.pitt.dbmi.daquery.sql.domain.Function;
@@ -45,7 +46,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select XYZ from ABCD;", dm);
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select vital.patid<IDENTIFIABLE isId=true dateshift on tbl.dsfield obfuscate=true> adsd, selst.somefield, myfunc(lmno.abc, pq.def)<IDENTIFIABLE isId=true dateshift on tb22.dsfield222 obfuscate=true>  as mfun from VITAL, (select somefield, otherfield from adfa) selst where patid like 'PIT100_' or patid like 'PIT101_';");
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select sex, count(blech1), avg(gigi) from glorg, demographic group by avg(blech2) order by count(blech3)", dm);
-		String withTest = "WITH PAT_LIST AS "
+		/*String withTest = "WITH PAT_LIST AS "
 				+ "(SELECT DISTINCT patid as ppii FROM DIAGNOSIS WHERE "
 				+ "    DX LIKE '250%' OR DX LIKE 'E08.%' OR DX LIKE 'E09.%' OR DX LIKE 'E10.%' OR DX LIKE 'E11.%' OR DX LIKE 'E13.%' OR DX IN ('E08', 'E09', 'E10', 'E11', 'E13')), "
 				+ " PAT_CNT AS (SELECT COUNT(*) as n_patients_dx FROM PAT_LIST), "
@@ -69,19 +70,18 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 				+ "(n_patients_dx - n_patients_no_lab - n_patients_labs) as n_patients_null_lab, "
 				+ "n_results, "
 				+ "ROUND((1 - (n_results / total)) * 100, 2) as pct_null, PPII FROM ANALYSIS, PAT_LIST; ";
-		
+		*/
 		//String withTest = "WITH PAT_LIST AS (SELECT DISTINCT patid FROM DIAGNOSIS WHERE DX LIKE '250%'), PAT_CNT AS (SELECT COUNT(*) as n_patients_dx FROM PAT_LIST) select n_patients_dx from PAT_CNT";
 		//String funcTest = "SELECT ROUND(1+2, 1, xyx, AVG(X, ddd, FNC(abc))) as mean from blech"; //, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
 		//String funcTest = "SELECT COUN(ABC - 1, J, ZIM(Z, BLIM(X))) as mean  from blech"; //, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
 		//String exprTest = "SELECT (a - (b/3) + 1 - (X *2/3 + (4-y))), abc from blech";
-		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer(withTest, dm);
+		String compTest = "Select abc from def union select hij from mlm minus select abc from xyz";
+		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer(compTest, dm);
 		System.out.println(a.topElement);
 //<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
 		
-		for(ReturnColumn rc : a.returnColumns)
-		{
-			System.out.println("-----" + rc.column.getDisplayName() + " : " + rc.column.getName() + " : " + rc.deidTag.isPhi());
-		}
+		for(ReturnColumn rc :a.getReturnColumns())
+			System.out.println(getDisplayColumnInfo(rc));
 		if(a.hasWarnings())
 		{
 			System.out.println("WARNING:");
@@ -95,6 +95,34 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	}
 	
 	
+	private static String getDisplayColumnInfo(ReturnColumn rc)
+	{
+		String rVal;
+		String name = rc.column.getDisplayName();
+		DeIdTag tag = rc.deidTag;
+		if(tag == null)
+		{
+			rVal = "++++++++" + name + ": WARNING: column does not have any de-identification information.</font></b>";
+		}
+		else
+		{
+			if(tag.isBirthdate())
+				rVal = name + "will be deidentified as a birth day";
+			else if(tag.isDateShift())
+				rVal = name + "will be deidentified by date shifting";
+			else if(tag.isId())
+				rVal = name + "will be deidentified by creating a serial id";
+			else if(tag.isZipCode())
+				rVal = name + "will be deidentifed by converting to a three digit zip";
+			else if(tag.isPhi())
+			{
+				rVal = "------" + name + ": WARNING: column is marked as phi, but contains no information about deidentification.</font></b>";
+			}
+			else
+				rVal = name + "will not be deidentifed.";
+		}
+		return rVal;
+	}
 	
 	public ColumnProvider getTopSelect(){return((ColumnProvider) topElement);}
 	public List<ReturnColumn> getReturnColumns()
@@ -169,7 +197,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 
 		if(node.self instanceof Select_coreContext)
 		{
-			if(!( parentElement != null && parentElement instanceof FinalWithSelect))
+			if(!( parentElement != null && (parentElement instanceof FinalWithSelect)))
 			{
 				SelectStatement newSel = new SelectStatement();
 				parentElement = setParentChild(parentElement, newSel);
@@ -201,6 +229,13 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		{
 			saveWithName = node.self.getText();
 		}
+		if(node.self instanceof Compound_select_stmtContext)
+		{
+			CompoundSelect compSel = new CompoundSelect();
+			parentElement = setParentChild(parentElement, compSel);
+			if(topElement == null) topElement = compSel;
+		}
+		
 		if(node.self instanceof Result_columnContext)
 		{
 			String nodeTxt = node.self.getText();
@@ -211,7 +246,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		}
 		if(node.self instanceof Result_column_exprContext)
 		{
-//			System.out.println(node.self.getText());
+			System.out.println(node.self.getText());
 			if(! (parentElement instanceof DeIdTag || parentElement instanceof Function))
 			{
 				TableColumn col = new TableColumn();
@@ -391,7 +426,6 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	private static Hashtable<Class<?>, String> censoredStatements = new Hashtable<Class<?>, String>();
 	static
 	{
-		censoredStatements.put(Select_setContext.class, "Select set (UNION/INTERSECT/MINUS/EXCEPT)");
 		censoredStatements.put(Alter_table_stmtContext.class, "Alter Table");
 		censoredStatements.put(Analyze_stmtContext.class, "Analyze");
 		censoredStatements.put(Attach_stmtContext.class, "Attach");

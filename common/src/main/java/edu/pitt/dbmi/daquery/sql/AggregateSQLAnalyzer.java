@@ -11,7 +11,6 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Distinct_keywordC
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_columnContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_column_exprContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_count_functionContext;
-import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Select_setContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Table_nameContext;
 
 public class AggregateSQLAnalyzer extends SQLAnalyzer
@@ -52,10 +51,7 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	
 	private void analyzeNode(TreeNode node, int level)
 	{
-				
-		if(node.self instanceof Select_setContext)
-			 setRejection("Select sets (UNION/INTERSECT/MINUS/EXCEPT) are not supported.");
-		
+						
 		if(node.self instanceof Result_columnContext && !firstResultFound )
 		{
 			firstResultFound = true;

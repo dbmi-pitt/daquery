@@ -71,12 +71,6 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCommit_stmt(SQLiteParser.Commit_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLiteParser#select_set}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelect_set(SQLiteParser.Select_setContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#create_index_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -190,24 +184,6 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSavepoint_stmt(SQLiteParser.Savepoint_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLiteParser#with_select_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLiteParser#select_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSelect_stmt(SQLiteParser.Select_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#update_stmt}.
 	 * @param ctx the parse tree
@@ -329,12 +305,6 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPragma_value(SQLiteParser.Pragma_valueContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLiteParser#common_table_expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCommon_table_expression(SQLiteParser.Common_table_expressionContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#result_column}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -425,17 +395,29 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCompound_select_stmt(SQLiteParser.Compound_select_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLiteParser#factored_select_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#compound_operator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitCompound_operator(SQLiteParser.Compound_operatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#with_select_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#select_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelect_stmt(SQLiteParser.Select_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#select_core}.
 	 * @param ctx the parse tree
@@ -448,12 +430,6 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMulti_from_clause(SQLiteParser.Multi_from_clauseContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SQLiteParser#set_operator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSet_operator(SQLiteParser.Set_operatorContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#cte_table_name}.
 	 * @param ctx the parse tree
