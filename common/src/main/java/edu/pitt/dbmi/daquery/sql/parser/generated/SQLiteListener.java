@@ -108,16 +108,6 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitCommit_stmt(SQLiteParser.Commit_stmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#select_set}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelect_set(SQLiteParser.Select_setContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#select_set}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelect_set(SQLiteParser.Select_setContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#create_index_stmt}.
 	 * @param ctx the parse tree
 	 */
@@ -307,36 +297,6 @@ public interface SQLiteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSavepoint_stmt(SQLiteParser.Savepoint_stmtContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#with_select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterWith_select_stmt(SQLiteParser.With_select_stmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#with_select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelect_stmt(SQLiteParser.Select_stmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelect_stmt(SQLiteParser.Select_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#update_stmt}.
 	 * @param ctx the parse tree
@@ -538,16 +498,6 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitPragma_value(SQLiteParser.Pragma_valueContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#common_table_expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterCommon_table_expression(SQLiteParser.Common_table_expressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#common_table_expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitCommon_table_expression(SQLiteParser.Common_table_expressionContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#result_column}.
 	 * @param ctx the parse tree
 	 */
@@ -698,16 +648,6 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitCompound_select_stmt(SQLiteParser.Compound_select_stmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#factored_select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#factored_select_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#compound_operator}.
 	 * @param ctx the parse tree
 	 */
@@ -717,6 +657,36 @@ public interface SQLiteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompound_operator(SQLiteParser.Compound_operatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#with_select_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterWith_select_stmt(SQLiteParser.With_select_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#with_select_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitWith_select_stmt(SQLiteParser.With_select_stmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#final_with_select_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitFinal_with_select_stmt(SQLiteParser.Final_with_select_stmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#select_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelect_stmt(SQLiteParser.Select_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#select_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelect_stmt(SQLiteParser.Select_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#select_core}.
 	 * @param ctx the parse tree
@@ -737,16 +707,6 @@ public interface SQLiteListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitMulti_from_clause(SQLiteParser.Multi_from_clauseContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SQLiteParser#set_operator}.
-	 * @param ctx the parse tree
-	 */
-	void enterSet_operator(SQLiteParser.Set_operatorContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLiteParser#set_operator}.
-	 * @param ctx the parse tree
-	 */
-	void exitSet_operator(SQLiteParser.Set_operatorContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#cte_table_name}.
 	 * @param ctx the parse tree

@@ -51,6 +51,7 @@ sql_stmt
                                       | attach_stmt
                                       | begin_stmt
                                       | commit_stmt
+                                      | compound_select_stmt
                                       | create_index_stmt
                                       | create_table_stmt
                                       | create_trigger_stmt
@@ -69,7 +70,6 @@ sql_stmt
                                       | release_stmt
                                       | rollback_stmt
                                       | savepoint_stmt
-                                      | select_set                                      
                                       | select_stmt
                                       | update_stmt
                                       | update_stmt_limited
@@ -102,13 +102,6 @@ begin_stmt
 
 commit_stmt
  : ( K_COMMIT | K_END ) ( K_TRANSACTION transaction_name? )?
- ;
-
-select_set
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( set_operator select_core )+
-   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
  
 create_index_stmt
@@ -217,20 +210,6 @@ rollback_stmt
 
 savepoint_stmt
  : K_SAVEPOINT savepoint_name
- ;
-
-with_select_stmt
- : K_WITH K_RECURSIVE? with_name K_AS '(' select_stmt ')' ( ',' with_name K_AS '(' select_stmt ')' )* final_with_select_stmt
- ; 
- 
-final_with_select_stmt
- : select_stmt
- ; 
- 
-select_stmt
- : select_core 
-   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
 
 update_stmt
@@ -349,12 +328,12 @@ expr
  | expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
  | expr K_IS K_NOT? expr
  | expr K_NOT? K_BETWEEN expr K_AND expr
- | expr K_NOT? K_IN ( '(' ( select_stmt
+ | expr K_NOT? K_IN ( '(' ( select_stmt | compound_select_stmt
                           | expr ( ',' expr )*
                           )? 
                       ')'
                     | ( database_name '.' )? table_name )
- | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'
+ | ( ( K_NOT )? K_EXISTS )? '(' ( select_stmt | compound_select_stmt) ')'
  | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END
  | K_EXTRACT '(' ( K_YEAR | K_MONTH | K_DAY | K_HOUR | K_MINUTE | K_SECOND | K_TIMEZONE_HOUR | K_TIMEZONE_MINUTE | K_TIMEZONE_REGION | K_TIMEZONE_ABBR ) K_FROM expr ')'  
  ;
@@ -405,7 +384,7 @@ table_constraint
  ;
 
 with_clause
- : K_WITH K_RECURSIVE? cte_table_name K_AS '(' select_stmt ')' ( ',' cte_table_name K_AS '(' select_stmt ')' )*
+ : K_WITH K_RECURSIVE? cte_table_name K_AS '(' (select_stmt | compound_select_stmt) ')' ( ',' cte_table_name K_AS '(' (select_stmt | compound_select_stmt) ')' )*
  ;
 
 qualified_table_name
@@ -421,10 +400,6 @@ pragma_value
  : signed_number
  | name
  | STRING_LITERAL
- ;
-
-common_table_expression
- : table_name ( '(' column_name ( ',' column_name )* ')' )? K_AS '(' select_stmt ')'
  ;
  
 result_column
@@ -479,7 +454,7 @@ table_or_subquery
  | '(' ( table_or_subquery ( ',' table_or_subquery )*
        | join_clause )
    ')' ( K_AS? table_alias )?
- | '(' select_stmt ')' ( K_AS? table_alias )?
+ | '(' (select_stmt | compound_select_stmt) ')' ( K_AS? table_alias )?
  ;
 
 join_clause
@@ -497,15 +472,7 @@ join_constraint
  ;
 
 compound_select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( ( K_UNION K_ALL? | K_INTERSECT | K_EXCEPT ) select_core )+
-   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
-;
-
-factored_select_stmt
- : ( K_WITH K_RECURSIVE? common_table_expression ( ',' common_table_expression )* )?
-   select_core ( compound_operator select_core )*
+ : select_core compound_operator select_core ( compound_operator select_core )*
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
 ;
@@ -514,8 +481,23 @@ compound_operator
  : K_UNION
  | K_UNION K_ALL
  | K_INTERSECT
+ | K_MINUS
  | K_EXCEPT
 ;
+
+with_select_stmt
+ : K_WITH K_RECURSIVE? with_name K_AS '(' (select_stmt | compound_select_stmt) ')' ( ',' with_name K_AS '(' (select_stmt | compound_select_stmt) ')' )* final_with_select_stmt 
+ ; 
+ 
+final_with_select_stmt
+ : ( select_stmt | compound_select_stmt )
+ ; 
+ 
+select_stmt
+ : select_core 
+   ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
+   ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
+ ;
 
 select_core
  : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
@@ -527,14 +509,6 @@ select_core
  
 multi_from_clause
  : K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause )
- ;
-
-set_operator
- : K_UNION
- | K_UNION K_ALL
- | K_INTERSECT
- | K_EXCEPT
- | K_MINUS
  ;
 
 cte_table_name
