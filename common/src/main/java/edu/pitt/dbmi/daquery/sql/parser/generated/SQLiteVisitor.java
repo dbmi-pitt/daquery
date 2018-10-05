@@ -419,6 +419,24 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitJoin_constraint(SQLiteParser.Join_constraintContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#compound_select_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCompound_select_stmt(SQLiteParser.Compound_select_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#factored_select_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFactored_select_stmt(SQLiteParser.Factored_select_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#compound_operator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCompound_operator(SQLiteParser.Compound_operatorContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#select_core}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
