@@ -1051,6 +1051,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		properties.put("trackingOutputDir", AppProperties.getTrackingDir());
     		properties.put("tempFileExportDir", AppProperties.getTempFileExportDir());
     		properties.put("casePerFile", AppProperties.getCasePerFile());
+    		properties.put("centralURL", AppProperties.getCentralURL());
             return ResponseHelper.getJsonResponseGen(200, properties);
 
         } catch (Exception e) {
@@ -1083,6 +1084,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		 * localDeliveryDir
     		 * trackingOutputDir
     		 * tempFileExportDir
+    		 * centralURL
     		 */
             
     		 // Get the HTTP Authorization header from the request
@@ -1151,6 +1153,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		AppProperties.setTrackingDir((String) properties.get("trackingOutputDir"));
     		AppProperties.setTempFileExportDir((String) properties.get("tempFileExportDir"));
     		AppProperties.setCasePerFile((String) properties.get("casePerFile"));
+    		AppProperties.setCentralURL((String) properties.get("centralURL"));
 
             return ResponseHelper.getJsonResponseGen(200, properties);
 

@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.56 -->
+<!-- daquery.data.version=1.57 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -174,7 +174,8 @@ CREATE TABLE DAQUERY_REQUEST
    DIRECTION varchar(6),
    NETWORK_ID bigint,
    REQUEST_GROUP varchar(50),
-   ARCHIVED boolean
+   ARCHIVED boolean,
+   EXECUTED_TIMESTAMP timestamp
 );
 
 CREATE TABLE DAQUERY_RESPONSE

@@ -40,7 +40,8 @@ export class AppConfigComponent implements OnInit {
       localDeliveryDir: ['', [Validators.required]],
       trackingOutputDir: ['', [Validators.required]],
       tempFileExportDir: ['', [Validators.required]],
-      casePerFile: ['', Validators.required]
+      casePerFile: ['', Validators.required],
+      centralURL: ['', Validators.required]
     })
   }
 
@@ -54,6 +55,7 @@ export class AppConfigComponent implements OnInit {
   get trackingOutputDir() { return this.appConfigForm.get('trackingOutputDir'); }
   get tempFileExportDir() { return this.appConfigForm.get('tempFileExportDir'); }
   get casePerFile() { return this.appConfigForm.get('casePerFile'); }
+  get centralURL() { return this.appConfigForm.get('centralURL'); }
 
   ngOnInit() {
     this.isUpdateAvailable();
@@ -72,6 +74,7 @@ export class AppConfigComponent implements OnInit {
                         this.appConfigForm.get('trackingOutputDir').setValue(res.trackingOutputDir);
                         this.appConfigForm.get('tempFileExportDir').setValue(res.tempFileExportDir);
                         this.appConfigForm.get('casePerFile').setValue(res.casePerFile);
+                        this.appConfigForm.get('centralURL').setValue(res.centralURL);
                        })
   }
 
@@ -94,7 +97,7 @@ export class AppConfigComponent implements OnInit {
       this.updating = true;
       let currentBuild = -1;
       this.daqueryService.getVersion()
-                        .subscribe(res => {
+                         .subscribe(res => {
                           currentBuild = parseInt(res.match(/build \d{4}/)[0].substr(6));
                           this.daqueryService.systemUpdate()
                                              .subscribe(res => {
