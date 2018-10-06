@@ -164,19 +164,20 @@ public class AppProperties
 		return(StringHelper.equalIgnoreCase(isCent, "true") || StringHelper.equalIgnoreCase(isCent, "yes"));
 	}
 	
-	public static String getCentralServerURL()
+	public static String getCentralServerURL() throws DaqueryException
 	{
-		if(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL")))
-		{
-			return(System.getenv("DAQUERY_CENT_URL"));
-		}
-		String propertyName = ".central.server.url";
-		if(isDebugMode())
-			propertyName = "dev" + propertyName;
-		else
-			propertyName = "prod" + propertyName;
-		
-		return(ApplicationPropertiesFile.getPropertiesFromFile().getProperty(propertyName));
+//		if(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL")))
+//		{
+//			return(System.getenv("DAQUERY_CENT_URL"));
+//		}
+//		String propertyName = ".central.server.url";
+//		if(isDebugMode())
+//			propertyName = "dev" + propertyName;
+//		else
+//			propertyName = "prod" + propertyName;
+//		
+//		return(ApplicationPropertiesFile.getPropertiesFromFile().getProperty(propertyName));
+		return AppProperties.getCentralURL();
 	}
 	
 	public static void setDBProperty(String propertyName, String value) throws DaqueryException
@@ -405,6 +406,21 @@ public class AppProperties
 	public static void setCasePerFile(String val) throws DaqueryException
 	{
 		setDBProperty("case.per.file", val);
+	}
+	
+	private static final String defaultCentralURL = "https://pathi2b2-test.dbmi.pitt.edu:6443";
+	public static String getCentralURL() throws DaqueryException
+	{
+		String val = getDBProperty("central.url");
+		if(val == null)
+			return defaultCentralURL;
+		else
+			return val;
+	}
+	
+	public static void setCentralURL(String val) throws DaqueryException
+	{
+		setDBProperty("central.url", val);
 	}
 	
 	
