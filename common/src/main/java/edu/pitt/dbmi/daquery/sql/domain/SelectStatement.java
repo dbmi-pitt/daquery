@@ -12,6 +12,7 @@ public class SelectStatement extends AbstractElement implements Select, ColumnPr
 	private String alias;
 	private List<Column> columns = new ArrayList<Column>();
 	protected List<ColumnProvider> columnProviders = new ArrayList<ColumnProvider>();
+	private int countFunctionTotal = 0;
 	
 	public String getAlias(){return alias;}
 	public void setAlias(String alias){this.alias = alias;}
@@ -130,5 +131,10 @@ public class SelectStatement extends AbstractElement implements Select, ColumnPr
 			columnProviders.get(columnProviders.size() - 1).setAlias(name);
 	}
 	
+	public void incrementCountFunctionTotal(){countFunctionTotal++;}
+	public Integer getCountFunctionTotal()
+	{
+		return(new Integer(countFunctionTotal));
+	}	
 }
 

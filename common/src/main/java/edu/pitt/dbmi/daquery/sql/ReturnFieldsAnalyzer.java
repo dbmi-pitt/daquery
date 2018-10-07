@@ -270,6 +270,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		{
 			Function func = new Function();
 			func.setCallDescriptor(node.self.getText());
+			if(node.self instanceof Result_count_functionContext && parentElement instanceof Select)
+				((Select)parentElement).incrementCountFunctionTotal();
 			parentElement = setParentChild(parentElement, func);
 		}
 		if(node.self instanceof From_table_specContext)

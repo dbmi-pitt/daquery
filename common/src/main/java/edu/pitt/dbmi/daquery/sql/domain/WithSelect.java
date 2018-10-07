@@ -149,6 +149,14 @@ public class WithSelect extends AbstractElement implements Select, ColumnProvide
 	{
 		if(columnProviders.size() > 0)
 			columnProviders.get(columnProviders.size() - 1).setAlias(name);
-	}	
+	}
+	
+	//do nothing, this is counted in the final select.
+	public void incrementCountFunctionTotal(){}
+	public Integer getCountFunctionTotal()
+	{
+		if(select == null) return(null);
+		return(select.getCountFunctionTotal());
+	}
 }
 
