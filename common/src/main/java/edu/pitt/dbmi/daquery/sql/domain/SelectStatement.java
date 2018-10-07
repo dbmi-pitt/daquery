@@ -7,11 +7,11 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.ReturnColumn;
 
-public class SelectStatement extends AbstractElement implements ColumnProvider, SQLElement
+public class SelectStatement extends AbstractElement implements Select, ColumnProvider, SQLElement
 {
 	private String alias;
 	private List<Column> columns = new ArrayList<Column>();
-	private List<ColumnProvider> columnProviders = new ArrayList<ColumnProvider>();
+	protected List<ColumnProvider> columnProviders = new ArrayList<ColumnProvider>();
 	
 	public String getAlias(){return alias;}
 	public void setAlias(String alias){this.alias = alias;}
@@ -122,6 +122,12 @@ public class SelectStatement extends AbstractElement implements ColumnProvider, 
 	public void addProvider(ColumnProvider prov)
 	{
 		columnProviders.add(prov);
+	}
+	@Override
+	public void setRecentChildAlias(String name)
+	{
+		if(columnProviders.size() > 0)
+			columnProviders.get(columnProviders.size() - 1).setAlias(name);
 	}
 	
 }

@@ -7,7 +7,7 @@ import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.ReturnColumn;
 
-public class WithSelect extends AbstractElement implements ColumnProvider, SQLElement
+public class WithSelect extends AbstractElement implements Select, ColumnProvider, SQLElement
 {
 	private SelectStatement select = null;
 	private List<ColumnProvider> columnProviders = new ArrayList<ColumnProvider>();
@@ -143,5 +143,12 @@ public class WithSelect extends AbstractElement implements ColumnProvider, SQLEl
 		if(select != null)
 			select.setAlias(al);
 	}
+	
+	@Override
+	public void setRecentChildAlias(String name)
+	{
+		if(columnProviders.size() > 0)
+			columnProviders.get(columnProviders.size() - 1).setAlias(name);
+	}	
 }
 

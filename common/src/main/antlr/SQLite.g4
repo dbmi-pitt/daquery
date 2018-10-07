@@ -476,7 +476,7 @@ compound_select_stmt
    ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
 ;
-
+ 
 compound_operator
  : K_UNION
  | K_UNION K_ALL
