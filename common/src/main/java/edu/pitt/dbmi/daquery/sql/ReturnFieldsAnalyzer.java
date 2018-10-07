@@ -30,7 +30,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 
 	private List<String> warnings = new ArrayList<String>();
 	private DataModel model = null;
-	private SQLElement topElement = null;
+	private Select topElement = null;
 	private List<ReturnColumn> returnColumns = null;
 	private String saveWithName = null;
 	
@@ -76,7 +76,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		//String funcTest = "SELECT ROUND(1+2, 1, xyx, AVG(X, ddd, FNC(abc))) as mean from blech"; //, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
 		//String funcTest = "SELECT COUN(ABC - 1, J, ZIM(Z, BLIM(X))) as mean  from blech"; //, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
 		//String exprTest = "SELECT (a - (b/3) + 1 - (X *2/3 + (4-y))), abc from blech";
-		String compTest = "select abc from (Select abc from def union select hij from mlm minus select abc from xyz) as subq";
+		String compTest = "select count(abc) from (Select count(xyz) from def union select hij from mlm minus select abc from xyz) as subq";
 		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer(compTest, dm);
 		System.out.println(a.topElement);
 //<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
@@ -125,7 +125,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		return rVal;
 	}
 	
-	public ColumnProvider getTopSelect(){return((ColumnProvider) topElement);}
+	public Select getTopSelect(){return(topElement);}
 	public List<ReturnColumn> getReturnColumns()
 	{
 		if(returnColumns == null)
@@ -137,7 +137,10 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	}
 	
 	
-	public boolean hasWarnings(){return(warnings.size() > 0);}
+	public boolean hasWarnings()
+	{
+		return(warnings.size() > 0);
+	}
 	private void addWarning(String warning){warnings.add(warning);}
 	public String getWarnings()
 	{
@@ -164,16 +167,20 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		{
 			analyzeAggregateTree();
 		
+			int rcCount = 0;
 			for(ReturnColumn rc : getReturnColumns())
 			{
+				rcCount++;
 				if(rc.multipleMatchingReferences)
 					this.addWarning("Unable to resolve PHI information for " + rc.column.getDisplayName() + " because it is ambiguously defined.");
 				else if(rc.deidTag == null)
 					this.addWarning("PHI information about returned column " + rc.column.getDisplayName() + " cannot be resolved.");
 /*				else if(!rc.deidTag.isPhi())
 					this.addWarning("Column " + rc.column.getDisplayName() + " is marked as not identifiable."); */
-				
 			}
+			if(this.getTopSelect() != null && rcCount == 1 && getTopSelect().getCountFunctionTotal() != null && getTopSelect().getCountFunctionTotal() == 1)
+				this.addWarning("The single returned count cannot be resolved to an aggregatable field.  The results will need to be approved by the site(s) before being returned.");
+			
 		}
 	}
 	
@@ -186,7 +193,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	{
 		
 		if(censoredStatements.containsKey(node.self.getClass()))
-			addWarning(censoredStatements.get(node.self.getClass()) + " statements are not allowed.");
+			setRejection(censoredStatements.get(node.self.getClass()) + " statements are not allowed.");
 		
 /*		String nodeStr = "null";
 		String parStr = "null";
