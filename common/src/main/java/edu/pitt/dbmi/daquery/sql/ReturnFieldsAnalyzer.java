@@ -16,6 +16,7 @@ import edu.pitt.dbmi.daquery.sql.domain.DeIdTag;
 import edu.pitt.dbmi.daquery.sql.domain.FinalWithSelect;
 import edu.pitt.dbmi.daquery.sql.domain.Function;
 import edu.pitt.dbmi.daquery.sql.domain.SQLElement;
+import edu.pitt.dbmi.daquery.sql.domain.Select;
 import edu.pitt.dbmi.daquery.sql.domain.SelectStatement;
 import edu.pitt.dbmi.daquery.sql.domain.Table;
 import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
@@ -75,7 +76,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		//String funcTest = "SELECT ROUND(1+2, 1, xyx, AVG(X, ddd, FNC(abc))) as mean from blech"; //, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
 		//String funcTest = "SELECT COUN(ABC - 1, J, ZIM(Z, BLIM(X))) as mean  from blech"; //, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
 		//String exprTest = "SELECT (a - (b/3) + 1 - (X *2/3 + (4-y))), abc from blech";
-		String compTest = "Select abc from def union select hij from mlm minus select abc from xyz";
+		String compTest = "select abc from (Select abc from def union select hij from mlm minus select abc from xyz) as subq";
 		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer(compTest, dm);
 		System.out.println(a.topElement);
 //<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
@@ -183,18 +184,19 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	
 	private void analyzeNode(TreeNode node, int level, SQLElement parentElement)
 	{
+		
 		if(censoredStatements.containsKey(node.self.getClass()))
 			addWarning(censoredStatements.get(node.self.getClass()) + " statements are not allowed.");
 		
-		String nodeStr = "null";
+/*		String nodeStr = "null";
 		String parStr = "null";
 		if(node != null && node.self != null)
 			nodeStr = node.self.getClass().getSimpleName();
 		if(parentElement != null)
 			parStr = parentElement.getClass().getSimpleName();
 		
-		//System.out.println("+++" + level + "\t" + nodeStr + "\t" + parStr);
-
+		System.out.println("+++" + level + "\t" + nodeStr + "\t" + parStr);
+*/		
 		if(node.self instanceof Select_coreContext)
 		{
 			if(!( parentElement != null && (parentElement instanceof FinalWithSelect)))
@@ -365,7 +367,13 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			}
 		}
 		
-		
+		if(node.self instanceof Table_aliasContext)
+		{
+			if(parentElement != null && parentElement instanceof Select)
+			{
+				((Select) parentElement).setRecentChildAlias(node.self.getText());
+			}
+		}
 		if(node.self instanceof Obfuscate_field_propContext)
 		{
 			if(parentElement instanceof DeIdTag)
