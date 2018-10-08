@@ -50,6 +50,10 @@ public class DataModel extends DaqueryObject implements Serializable
 	private Hashtable<String, DataAttribute> attributesByAttributeName = null;
 	@Transient
 	private Hashtable<String, List<DataAttribute>> attributesByTableName = null;
+
+	@Transient
+	List<DataAttribute> aggregatableAttributes = null;
+
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -211,7 +215,6 @@ public class DataModel extends DaqueryObject implements Serializable
 		return(tbl);
 	}
 
-	List<DataAttribute> aggregatableAttributes = null;
 	List<DataAttribute> getAggregatableAttributes()
 	{
 		if(aggregatableAttributes == null)
