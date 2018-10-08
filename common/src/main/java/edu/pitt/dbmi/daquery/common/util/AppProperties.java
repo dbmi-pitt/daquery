@@ -408,12 +408,22 @@ public class AppProperties
 		setDBProperty("case.per.file", val);
 	}
 	
-	private static final String defaultCentralURL = "https://pathi2b2-test.dbmi.pitt.edu:6443";
+	public static String getDefaultCentralServerURL() throws DaqueryException
+	{
+		if(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL")))
+		{
+			return(System.getenv("DAQUERY_CENT_URL"));
+		}
+		String propertyName = "default.central.server.url";
+		
+		return(ApplicationPropertiesFile.getPropertiesFromFile().getProperty(propertyName));
+	}
+	
 	public static String getCentralURL() throws DaqueryException
 	{
 		String val = getDBProperty("central.url");
 		if(val == null)
-			return defaultCentralURL;
+			return getDefaultCentralServerURL();
 		else
 			return val;
 	}

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
@@ -35,8 +36,10 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -514,6 +517,10 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			    	AppProperties.setFileOutputDir(System.getProperty("java.io.tmpdir"));
 			    	AppProperties.setLocalDeliveryDir(System.getProperty("java.io.tmpdir"));
 			    	AppProperties.setTrackingDir(System.getProperty("java.io.tmpdir"));
+			    	
+		    		AppProperties.setTempFileExportDir(AppProperties.getTempFileExportDir());
+		    		AppProperties.setCasePerFile(AppProperties.getCasePerFile());
+		    		AppProperties.setCentralURL(AppProperties.getCentralURL());
 			    	
 			    	DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 			    	Map<String, Object> addtionalVal = new HashMap<String, Object>();
@@ -1144,6 +1151,14 @@ public class DaqueryEndpoint extends AbstractEndpoint
             		return ResponseHelper.getErrorResponse(500, "The temp file export directory is not able to create.", "The temp file export directory is not able to create.", null);
             	}
             }
+            
+            // Test Central URL
+            String url = (String) properties.get("centralURL");
+            Client client = WSConnectionUtil.getRemoteClient(url);			
+			Response rVal = client.target(url+"/daquery-central/hello").request().get();
+			if(rVal.getStatus() != 200){
+				return ResponseHelper.getErrorResponse(500, "The Central Server URL you entered is not accessible.", "The Central Server URL you entered is not accessible.", null);
+			}
             	
     		AppProperties.setTaskQueueMaxLength(TaskQueue.MAIN_QUEUE, ((Integer) properties.get("taskQueueMaxLength")).intValue());
     		AppProperties.setTaskQueueMaxLength(TaskQueue.EXPORT_QUEUE, ((Integer) properties.get("exportTaskQueueMaxLength")).intValue());
@@ -1157,6 +1172,9 @@ public class DaqueryEndpoint extends AbstractEndpoint
 
             return ResponseHelper.getJsonResponseGen(200, properties);
 
+        } catch (ProcessingException pe){
+        	pe.printStackTrace();
+            return ResponseHelper.getErrorResponse(500, "The Central Server URL you entered is not accessible.", "The Central Server URL you entered is not accessible.", pe);
         } catch (Exception e) {
         	e.printStackTrace();
             return ResponseHelper.getErrorResponse(500, "", "", e);
