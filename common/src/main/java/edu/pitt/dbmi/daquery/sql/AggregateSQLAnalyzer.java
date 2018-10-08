@@ -1,8 +1,12 @@
 package edu.pitt.dbmi.daquery.sql;
 
+import java.io.InputStream;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.util.JSONHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.parser.TreeNode;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Column_aliasContext;
@@ -12,6 +16,7 @@ import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_columnCont
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_column_exprContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Result_count_functionContext;
 import edu.pitt.dbmi.daquery.sql.parser.generated.SQLiteParser.Table_nameContext;
+import edu.pitt.dbmi.daquery.update.db.DBUpdate151;
 
 public class AggregateSQLAnalyzer extends SQLAnalyzer
 {
@@ -21,11 +26,13 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	private String aggregateColumnName = null;
 	private String aggregateTableName = null;
 	private boolean aggregateDistinct = false;
-	
+	private DataModel model;
 	
 	public static void main(String [] args)
 	{
-		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(patid) adsd from VITAL, (select adf from adfa) asd where patid like 'PIT100_' or patid like 'PIT101_' union select adf from adsfadf;");
+		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-4.1.json");
+		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
+		AggregateSQLAnalyzer a = new AggregateSQLAnalyzer("select count(patid) adsd from VITAL, (select adf from adfa) asd where patid like 'PIT100_' or patid like 'PIT101_' union select adf from adsfadf;", dm);
 		if(a.isRejected())
 		{
 			System.out.println("Rejected!!!");
@@ -35,9 +42,10 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 			System.out.println(a.convertToValuesSql());
 	}
 	
-	public AggregateSQLAnalyzer(String sql)
+	public AggregateSQLAnalyzer(String sql, DataModel model)
 	{
 		super(sql);
+		this.model = model;
 		if(!this.isRejected())
 			analyzeAggregateTree();
 	}
@@ -51,7 +59,12 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 	
 	private void analyzeNode(TreeNode node, int level)
 	{
-						
+		if(node.self instanceof Column_aliasContext)
+		{
+			String alias = node.self.getText();
+			if(model.isAggregatableName(alias)) setRejection(alias + " is an illegal alias name.");
+		}
+		
 		if(node.self instanceof Result_columnContext && !firstResultFound )
 		{
 			firstResultFound = true;
@@ -156,9 +169,13 @@ public class AggregateSQLAnalyzer extends SQLAnalyzer
 		if(isRejected()) return(null);
 		if(StringHelper.isEmpty(aggregateColumnName)) return(null);
 		
-		//HACK- for now, hard code PATID- this needs to be tied to the current DataModel
 		//only allow queries that are aggregating over patients to be converted to download
-		if(! (aggregateColumnName.trim().toUpperCase().equals("PATID"))) return(null);
+		//if(! (aggregateColumnName.trim().toUpperCase().equals("PATID"))) return(null);		
+		if(! model.isAggregatableName(aggregateColumnName))
+		{
+			this.setRejection(aggregateColumnName + " is not an aggregatable field.");
+			return(null);
+		}
 		
 		String rSQL = baseSQL.trim();
 		rSQL = rSQL.replaceFirst("(?i)select\\s+count\\(.*?\\)", "");
