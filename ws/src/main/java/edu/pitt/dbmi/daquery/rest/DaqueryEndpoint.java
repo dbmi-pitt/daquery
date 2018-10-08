@@ -218,11 +218,11 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			if(StringHelper.isEmpty(sql))
 				return(ResponseHelper.getErrorResponse(400, "No code provided.", null, null));
 			QueryInfo info = new QueryInfo();
-			AggregateSQLAnalyzer aggregateAnalyzer = new AggregateSQLAnalyzer(sql);
+			Network net = NetworkDAO.queryNetwork(netAndCode.getNetworkUuid());
+			DataModel model = net.getDataModel();
+			AggregateSQLAnalyzer aggregateAnalyzer = new AggregateSQLAnalyzer(sql, model);
 			if(aggregateAnalyzer.isRejected())
 			{
-				Network net = NetworkDAO.queryNetwork(netAndCode.getNetworkUuid());
-				DataModel model = net.getDataModel();
 				ReturnFieldsAnalyzer rfAnalyzer = new ReturnFieldsAnalyzer(sql, model);
 				if(rfAnalyzer.isRejected())
 				{
