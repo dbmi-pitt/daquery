@@ -174,7 +174,7 @@ public class SQLQuery extends Inquiry
 			if(isAggregate())
 			//if(getQueryType().equals(QueryType.AGGREGATE.value))
 			{
-				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(cAndD.code);
+				AggregateSQLAnalyzer analyze = new AggregateSQLAnalyzer(cAndD.code, model);
 				if(analyze.isRejected())
 				{
 					response.setStatusEnum(ResponseStatus.ERROR);

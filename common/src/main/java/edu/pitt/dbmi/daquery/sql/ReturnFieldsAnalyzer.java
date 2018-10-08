@@ -36,7 +36,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 	
 	public static void main(String [] args)
 	{
-		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-3.1.json");
+		InputStream is = DBUpdate151.class.getResourceAsStream("/data-modelCDM-4.1.json");
 		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
 		//simple
 		//ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer("select count(distinct patid) as adsd from VITAL where patid like 'PIT100_' or patid like 'PIT101_';");

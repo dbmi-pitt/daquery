@@ -37,8 +37,7 @@ import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
 @Entity
 @Table(name="DATA_MODEL")
 public class DataModel extends DaqueryObject implements Serializable
-{	
-
+{
 	private static final long serialVersionUID = 29292842342523123l;
 
 	private static final DataAttribute emptyAttribute = new DataAttribute();
@@ -78,24 +77,30 @@ public class DataModel extends DaqueryObject implements Serializable
 	@Expose
 	@Column(name = "DATA_EXPORT_CONF")
 	private String dataExportConf;
-	
+
 	@Expose
 	@Column(name = "REVISION")
 	private Long revision;
-	
+
 	public DataModel(){}
-	
+
 	public DataModel(boolean createUUID)
 	{
 		if (createUUID)
 			setDataModelId(UUID.randomUUID().toString());
 	}
-	
+
 	public DataModel(String uuid)
 	{
 		setDataModelId(uuid);
 	}
-	
+
+	public static void main(String [] args)
+	{
+		String [] bs = "a.b".split("\\.");
+		System.out.println(bs[bs.length -1]);
+	}
+
 	public boolean contains(edu.pitt.dbmi.daquery.sql.domain.Table table)
 	{
 		if(table == null || StringHelper.isEmpty(table.getName())) return(false);
@@ -126,7 +131,7 @@ public class DataModel extends DaqueryObject implements Serializable
 		}
 		return(attributesByTableName);
 	}
-	
+
 	Hashtable<String, List<DataAttribute>> buildAttributesByTable()
 	{
 		Hashtable<String, List<DataAttribute>> tbl = new Hashtable<String, List<DataAttribute>>();
@@ -143,7 +148,7 @@ public class DataModel extends DaqueryObject implements Serializable
 		}
 		return(tbl);		
 	}
-	
+
 	public boolean contains(TableColumn col)
 	{
 		if(StringHelper.isBlank(col.getName()) || StringHelper.isBlank(col.getTableName())) return(false);
@@ -151,13 +156,13 @@ public class DataModel extends DaqueryObject implements Serializable
 		Hashtable<String, DataAttribute> attribs = getAttributeTable();
 		return(attribs.containsKey(key));
 	}
-	
+
 	public DataAttribute getAttribute(TableColumn col)
 	{
 		if(col == null) return null;
 		return(getAttribute(col.getName(), col.getTableName()));
 	}
-	
+
 	private DataAttribute getAttribute(String attribName, String tableName)
 	{
 		if(StringHelper.isEmpty(attribName) || StringHelper.isEmpty(tableName))
@@ -176,7 +181,7 @@ public class DataModel extends DaqueryObject implements Serializable
 	{
 		return(attribName.trim().toUpperCase() + ":" + tableName.trim().toUpperCase());
 	}
-	
+
 	private Hashtable<String, DataAttribute> getAttributeTable()
 	{
 		if(attributesByAttributeName == null)
@@ -191,7 +196,7 @@ public class DataModel extends DaqueryObject implements Serializable
 		}
 		return(attributesByAttributeName);
 	}
-	
+
 	private Hashtable<String, DataAttribute> buildAttributeTable()
 	{
 		Hashtable<String, DataAttribute> tbl = new Hashtable<String, DataAttribute>();
@@ -205,25 +210,52 @@ public class DataModel extends DaqueryObject implements Serializable
 		}
 		return(tbl);
 	}
-	
+
+	List<DataAttribute> aggregatableAttributes = null;
+	List<DataAttribute> getAggregatableAttributes()
+	{
+		if(aggregatableAttributes == null)
+		{
+			aggregatableAttributes = new ArrayList<DataAttribute>();
+			for(DataAttribute da : getAttributes())
+				if(da.isAggregatable()) aggregatableAttributes.add(da);
+		}
+		return(aggregatableAttributes);
+	}
+	public boolean isAggregatableName(String name)
+	{
+		if(StringHelper.isEmpty(name)) return(false);
+		String uName = name.trim().toUpperCase();
+		String [] parts = uName.split("\\.");
+		String fieldName = parts[parts.length - 1];
+		for(DataAttribute da : getAggregatableAttributes())
+		{
+			String field = da.getFieldName();
+			if(!StringHelper.isEmpty(field))
+			{
+				if(field.toUpperCase().trim().equals(fieldName)) return(true);
+			}
+		}
+		return(false);
+	}
 	public long getId(){return(id);}
 	public void setId(Long id){this.id = id;}
-	
+
 	public String getName(){return(name);}
 	public void setName(String name){this.name = name;}
-	
+
 	public String getDescription(){return(description);}
 	public void setDescription(String desc){this.description = desc;}	
-	
+
 	public String getDataModelId(){return(dataModelId);}
 	public void setDataModelId(String id){dataModelId = id;}
-	
+
 	public Set<DataSource> getDataSources(){return(dataSources);}
 	public void setDataSources(Set<DataSource> sources){dataSources = sources;}
-	
+
 	public Set<DataAttribute> getAttributes(){return(attributes);}
 	public void setAttributes(Set<DataAttribute> attribs){attributes = attribs;}
-	
+
 	public String getDataExportConf() { return this.dataExportConf; }
 	public void setDataExportConf(String dataExportConf) { this.dataExportConf = dataExportConf; }
 
