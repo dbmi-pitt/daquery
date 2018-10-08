@@ -628,6 +628,18 @@ public class SQLiteBaseListener implements SQLiteListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterNot_identifiable_prop(SQLiteParser.Not_identifiable_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNot_identifiable_prop(SQLiteParser.Not_identifiable_propContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIdent_prop(SQLiteParser.Ident_propContext ctx) { }
 	/**
 	 * {@inheritDoc}

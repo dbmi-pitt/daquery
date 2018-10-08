@@ -518,6 +518,16 @@ public interface SQLiteListener extends ParseTreeListener {
 	 */
 	void exitDeid_tag(SQLiteParser.Deid_tagContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLiteParser#not_identifiable_prop}.
+	 * @param ctx the parse tree
+	 */
+	void enterNot_identifiable_prop(SQLiteParser.Not_identifiable_propContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLiteParser#not_identifiable_prop}.
+	 * @param ctx the parse tree
+	 */
+	void exitNot_identifiable_prop(SQLiteParser.Not_identifiable_propContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLiteParser#ident_prop}.
 	 * @param ctx the parse tree
 	 */

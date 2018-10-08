@@ -76,7 +76,7 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 		//String funcTest = "SELECT ROUND(1+2, 1, xyx, AVG(X, ddd, FNC(abc))) as mean from blech"; //, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
 		//String funcTest = "SELECT COUN(ABC - 1, J, ZIM(Z, BLIM(X))) as mean  from blech"; //, COUNT(DISTINCT PATID) as n_patients_labs, AVG(PAT_CNT.n_patients_dx) as n_patients_dx, AVG(PAT_NO_LAB_CNT.n_patients_no_lab) as n_patients_no_lab, AVG(RESULT_CNT.results) as n_results, AVG(RESULT_CNT.total) as total FROM LAB_RESULT_CM, PAT_CNT, PAT_NO_LAB_CNT, RESULT_CNT WHERE PATID IN (SELECT patid FROM PAT_LIST) AND LAB_LOINC = '4548-4' AND RESULT_NUM IS NOT NULL";
 		//String exprTest = "SELECT (a - (b/3) + 1 - (X *2/3 + (4-y))), abc from blech";
-		String compTest = "select count(abc) from (Select count(xyz) from def union select hij from mlm minus select abc from xyz) as subq";
+		String compTest = "select count(abc)<NOTIDENTIFIABLE> from (Select count(xyz) from def union select hij from mlm minus select abc from xyz) as subq";
 		ReturnFieldsAnalyzer a = new ReturnFieldsAnalyzer(compTest, dm);
 		System.out.println(a.topElement);
 //<IDENTIFIABLE isId=true/false dateShift ON tbl.field obfuscate=true/false>
@@ -175,6 +175,8 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 					this.addWarning("Unable to resolve PHI information for " + rc.column.getDisplayName() + " because it is ambiguously defined.");
 				else if(rc.deidTag == null)
 					this.addWarning("PHI information about returned column " + rc.column.getDisplayName() + " cannot be resolved.");
+				else if(rc.deidTag.isTaggedAsNotIdentifiable())
+					this.addWarning("The returned column " + rc.column.getDisplayName() + " is tagged as not being identifying data. Please confirm this before sending or approving this query.");
 /*				else if(!rc.deidTag.isPhi())
 					this.addWarning("Column " + rc.column.getDisplayName() + " is marked as not identifiable."); */
 			}
@@ -365,6 +367,14 @@ public class ReturnFieldsAnalyzer extends SQLAnalyzer
 			{
 				((DeIdTag) parentElement).setFoundDateShift(true);
 				((DeIdTag) parentElement).setDateShift(true);
+			}
+		}
+		
+		if(node.self instanceof Not_identifiable_propContext)
+		{
+			if(parentElement instanceof DeIdTag)
+			{
+				((DeIdTag) parentElement).setTaggedAsNotIdentifiable(true);
 			}
 		}
 		

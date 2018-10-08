@@ -15,6 +15,7 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	private boolean birthDate = false;
 	private boolean zipCode = false;
 	private boolean dateShift = false;
+	private boolean taggedAsNotIdentifiable = false;
 	
 	//used only by parser to keep track of a tag that contains a date shift property
 	private boolean foundDateShift = false;
@@ -54,4 +55,8 @@ public class DeIdTag extends AbstractElement implements SQLElement
 	
 	public boolean isZipCode(){return(zipCode);}
 	public void setZipCode(boolean zip){zipCode = zip;}
+	
+	public boolean isTaggedAsNotIdentifiable(){return(taggedAsNotIdentifiable);}
+	public void setTaggedAsNotIdentifiable(boolean tag){taggedAsNotIdentifiable = tag;}
+	
 }

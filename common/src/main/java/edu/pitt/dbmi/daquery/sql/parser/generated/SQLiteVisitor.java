@@ -317,6 +317,12 @@ public interface SQLiteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeid_tag(SQLiteParser.Deid_tagContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLiteParser#not_identifiable_prop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNot_identifiable_prop(SQLiteParser.Not_identifiable_propContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLiteParser#ident_prop}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

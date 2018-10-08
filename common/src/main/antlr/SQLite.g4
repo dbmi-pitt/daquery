@@ -413,7 +413,11 @@ result_column
 
 deid_tag
  : '<' K_IDENTIFIABLE ident_prop?  '>'
- | '<' K_NOTIDENTIFIABLE '>'
+ | '<' not_identifiable_prop '>'
+ ;
+ 
+not_identifiable_prop
+ :  K_NOTIDENTIFIABLE
  ;
  
 ident_prop
