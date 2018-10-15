@@ -222,7 +222,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 				return(ResponseHelper.getErrorResponse(400, "No code provided.", null, null));
 			QueryInfo info = new QueryInfo();
 			Network net = NetworkDAO.queryNetwork(netAndCode.getNetworkUuid());
-			DataModel model = net.getDataModel();
+			DataModel model = net.getDataModels().iterator().next();
 			AggregateSQLAnalyzer aggregateAnalyzer = new AggregateSQLAnalyzer(sql, model);
 			if(aggregateAnalyzer.isRejected())
 			{
@@ -1256,7 +1256,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setId(null);
 			request.setRequesterSite(site);
 			DaqueryRequestDAO.saveOrUpdate(request);
-			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
+			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModels().iterator().next());
 			QueueManager.getNamedQueue(TaskQueue.MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();
 			rVal.setRequest(request);
@@ -1320,7 +1320,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
 			request.setSentTimestamp(new Date());
 			request.setRequester(uInfo);
 			DaqueryRequestDAO.saveOrUpdate(request);
-			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModel());
+			ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), net.getDataModels().iterator().next());
 			QueueManager.getNamedQueue(TaskQueue.MAIN_QUEUE).addTask(task);
 			rVal = task.getResponse();
 			rVal.setRequest(request);

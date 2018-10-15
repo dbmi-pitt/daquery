@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.57 -->
+<!-- daquery.data.version=1.58 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -25,7 +25,8 @@ CREATE TABLE DATA_MODEL
    NAME varchar(100),
    DESCRIPTION varchar(2048),
    DATA_EXPORT_CONF long varchar,
-   REVISION bigint
+   REVISION bigint,
+   NETWORK_ID varchar(50)
 );
 
 CREATE TABLE "APP"."NOTIFICATION"

@@ -102,7 +102,7 @@ public class RequestEndpoint extends AbstractEndpoint {
             
             for(Object r : requests){
             	DaqueryRequest request = (DaqueryRequest)r;
-            	CodeAndDialect cAndD = ((SQLQuery)request.getInquiry()).getCode(((SQLDataSource)request.getNetwork().getDataModel().getDataSource(SourceType.SQL)).getDialectEnum());
+            	CodeAndDialect cAndD = ((SQLQuery)request.getInquiry()).getCode(((SQLDataSource)request.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL)).getDialectEnum());
             	if(cAndD == null || StringHelper.isEmpty(cAndD.code))
             		request.setCode("");
             	else
@@ -330,7 +330,7 @@ public class RequestEndpoint extends AbstractEndpoint {
             }
             
             TaskQueue queue = QueueManager.getNamedQueue(TaskQueue.EXPORT_QUEUE);
-            ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), request.getNetwork().getDataModel());
+            ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), request.getNetwork().getDataModels().iterator().next());
             queue.addTask(task);
 
             String jsonString = task.getResponse().toJson();

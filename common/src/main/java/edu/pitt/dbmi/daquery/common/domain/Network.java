@@ -73,9 +73,8 @@ public class Network extends DaqueryObject implements Serializable {
 	private String name;
 
 	@Expose
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="DATA_MODEL_ID")
-    private DataModel dataModel;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="network")
+    private Set<DataModel> dataModels;
 	
 	@Expose
 	@Column(name="MAX_DATE_SHIFT")
@@ -260,11 +259,11 @@ public class Network extends DaqueryObject implements Serializable {
 	}
 	public void setTruncateZipCode(Boolean trun){truncateZipCode = trun;}
 	
-	public DataModel getDataModel()
+	public Set<DataModel> getDataModels()
 	{
-		return(dataModel);
+		return(dataModels);
 	}
-	public void setDataModel(DataModel model){dataModel = model;}
+	public void setDataModels(Set<DataModel> models){dataModels = models;}
     
 	public SiteConnection findIncomingSite(String siteUUID)
 	{

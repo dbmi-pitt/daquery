@@ -90,7 +90,7 @@ public class PopulateDevData
 		String localSiteId = nas.localSite.getSiteId();
 		AppProperties.setDBProperty(SiteDAO.LOCAL_SITE_ID_PROP_NAME, localSiteId);
 		DaqueryUser user = createTestUser();
-		save(net.getDataModel());
+		save(net.getDataModels().iterator().next());
 		save(net);
 		save(user);
 		Inquiry inq = createInquiryData(user);
@@ -236,7 +236,9 @@ public class PopulateDevData
 		dataSources.add(sqlDS);
 		dm.setDataSources(dataSources);
 		sqlDS.setDataModel(dm);
-		net.setDataModel(dm);
+		Set<DataModel> dms = new HashSet<>();
+		dms.add(dm);
+		net.setDataModels(dms);
 		
 		NetAndSite ns = new NetAndSite();
 		ns.net = net;

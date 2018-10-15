@@ -198,9 +198,9 @@ public class DBHelper
 			//a defined Data Model XML.  It kept throwing errors.
 			if(net != null && net.findOutgoingSite(siteId) != null)
 			{
-				if (net.getDataModel() != null)
+				if (net.getDataModels().iterator().next() != null)
 				{
-					net.getDataModel().setDataSources(new HashSet<DataSource>());
+					net.getDataModels().iterator().next().setDataSources(new HashSet<DataSource>());
 					//net.getDataModel().setDataExportConf("");
 				}
 				returnNets.add(net);

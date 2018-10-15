@@ -519,12 +519,12 @@ public class CentralService{
 			if(net == null)
 				return(ResponseHelper.getErrorResponse(404, "Network not found.", "Network with id " + netId + " was not found.", null));
 			
-			if(net.getDataModel() == null)
+			if(net.getDataModels().iterator().next() == null)
 				return(ResponseHelper.getErrorResponse(404, "Data model not found.", "The network with id " + netId + " does not have a data model associated with it.", null));
 			
 			//we need to remove the DataAttribute Set from the DataModel before we 
 			//return it as JSON.  We also need to remove the DataSource info
-			DataModel dmTemp = net.getDataModel();
+			DataModel dmTemp = net.getDataModels().iterator().next();
 			dmTemp.setAttributes(new HashSet<DataAttribute>());
 			dmTemp.setDataSources(new HashSet<DataSource>());
 			return(ResponseHelper.getJsonResponseGen(200, dmTemp));			
