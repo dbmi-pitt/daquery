@@ -26,13 +26,16 @@ if ! $TOMCAT_PATH/bin/shutdown.sh >> $OUTPUT_LOG 2>&1; then
   exit 1
 fi
 sleep 20 >> $OUTPUT_LOG 2>&1
-if ! cp $TOMCAT_PATH/webapps/daquery.war $TOMCAT_PATH/daquery_bak.war >> $OUTPUT_LOG 2>&1; then
+
+foldername='daquery_backup_'$(date +%Y%m%d_%H%M%S)
+mkdir $TOMCAT_PATH/"$foldername"
+if ! cp $TOMCAT_PATH/webapps/daquery.war $TOMCAT_PATH/"$foldername"/daquery_bak.war >> $OUTPUT_LOG 2>&1; then
   echo Failed to make a backup of the application war file. Nothing updated. >> $ERROR_LOG
   $RESTART_COMMAND
   exit 1
 fi
 
-if ! cp -rp $TOMCAT_PATH/conf/daquery-db $TOMCAT_PATH/daquery-db-bak/ >> $OUTPUT_LOG 2>&1; then
+if ! cp -rp $TOMCAT_PATH/conf/daquery-db $TOMCAT_PATH//"$foldername"/daquery-db-bak/ >> $OUTPUT_LOG 2>&1; then
   echo Failed to make a backup of the application database.  Nothing updated. >> $ERROR_LOG
   $RESTART_COMMAND
   exit 1

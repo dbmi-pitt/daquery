@@ -1985,6 +1985,24 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		logger.log(Level.SEVERE, "An unexpeced error occured while updating the daquery application", t);
     		return(ResponseHelper.getErrorResponse(500, "An unexpected error occured.", "An unexpected error occured while updating the daquery application.  See the appication logs for more information.", t));
     	}
+    	
+    	try {
+    		// Check Task Queues if empty
+    		boolean mainQueueClear = QueueManager.getNamedQueue(TaskQueue.MAIN_QUEUE).queueLength() == 0;
+    		boolean exportQueueClear = QueueManager.getNamedQueue(TaskQueue.EXPORT_QUEUE).queueLength() == 0;
+    		
+    		if(!mainQueueClear || !exportQueueClear){
+    			AppProperties.setDBProperty("update_status", "failed");
+	    		AppProperties.setDBProperty("update_message", "There are jobs are still running");
+		    	logger.log(Level.SEVERE, "There are jobs are still running");
+	    		return(ResponseHelper.getErrorResponse(500, "There are jobs are still running.", "There are jobs are still running. See the appication logs for more information.", null));
+    		}
+    	} catch (Throwable t) {
+    		AppProperties.setDBProperty("update_status", "failed");
+    		AppProperties.setDBProperty("update_message", "Error happen when check the task queues");
+	    	logger.log(Level.SEVERE, "Error happen when check the task queues");
+    		return(ResponseHelper.getErrorResponse(500, "Error happen when check the task queues.", "Error happen when check the task queues. See the appication logs for more information.", null));
+    	}
 	    
 	    
     	Response resp  = null;
