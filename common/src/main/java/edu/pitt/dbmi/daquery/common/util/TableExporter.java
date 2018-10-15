@@ -166,7 +166,7 @@ dateShift
  */
 		
 		Connection conn = null;
-		SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModel().getDataSource(SourceType.SQL);
+		SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL);
 		conn = ds.getConnection();
 		Statement s = null;
 		ResultSet rs = null;

@@ -150,7 +150,8 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		ResultSet rs = null;
 		try {
 		// Get all the concept_cd from ontology
-			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModel().getDataSource(SourceType.SQL);
+			// ### DataModel Select
+			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL);
 			conn = ds.getConnection();
 			//Connection ontologyConnection = PathDBHelper.getOntologyConnection(project_id);
 			//String ontologySchemaPrefix = PathDBHelper.getOntologySchemaPrefix(project_id);
@@ -416,7 +417,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		Statement s = null;
 		ResultSet rs = null;
 		try {
-			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModel().getDataSource(SourceType.SQL);
+			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL);
 			conn = ds.getConnection();
 			
 			buildCSVHeader(writer, outputFile.custom_column_set);
@@ -519,7 +520,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		ResultSet rs = null;
 		try {
 			Network net = daqueryRequest.getNetwork();
-			SQLDataSource ds = (SQLDataSource) net.getDataModel().getDataSource(SourceType.SQL);
+			SQLDataSource ds = (SQLDataSource) net.getDataModels().iterator().next().getDataSource(SourceType.SQL);
 			conn = ds.getConnection();
 			String DatabaseName = conn.getMetaData().getDatabaseProductName();
 			

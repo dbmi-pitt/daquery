@@ -20,6 +20,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -66,6 +68,10 @@ public class DataModel extends DaqueryObject implements Serializable
 	@Expose
 	@Column(name = "DATA_MODEL_ID")
 	private String dataModelId;
+	
+	@ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="NETWORK_ID")
+    Network network;
 
 	@Expose
 	private String description;

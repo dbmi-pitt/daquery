@@ -2,10 +2,12 @@ package edu.pitt.dbmi.daquery.common.dao;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 //works for Java 1.8
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -141,7 +143,9 @@ public class NetworkDAO extends AbstractDAO {
     		Network network = new Network();
     		network.setName(params.get("name"));
     		network.setNetworkId(params.get("network_id"));
-    		network.setDataModel(dataModel);
+    		Set<DataModel> dataModels =  new HashSet<>();
+    		dataModels.add(dataModel);
+    		network.setDataModels(dataModels);
 //<<<<<<< HEAD
 //    		network.setObfuscateAggregateResults(false);
 //    		network.setAggregateObfuscateType("");
@@ -354,14 +358,14 @@ public class NetworkDAO extends AbstractDAO {
     		s = HibernateConfiguration.openSession();
     		Transaction t = s.beginTransaction();
     		
-			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setConnectionUrl(sqlDatasource.getConnectionUrl());
-			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setUsername(sqlDatasource.getUsername());
-			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setPassword(sqlDatasource.getPassword());
-			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setDriverClass(sqlDatasource.getDriverClass());
-			((SQLDataSource) network.getDataModel().getDataSource(SourceType.SQL)).setDialect(sqlDatasource.getDialect());
+			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setConnectionUrl(sqlDatasource.getConnectionUrl());
+			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setUsername(sqlDatasource.getUsername());
+			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setPassword(sqlDatasource.getPassword());
+			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setDriverClass(sqlDatasource.getDriverClass());
+			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setDialect(sqlDatasource.getDialect());
 
 			
-			s.saveOrUpdate(network.getDataModel().getDataSource(SourceType.SQL));
+			s.saveOrUpdate(network.getDataModels().iterator().next().getDataSource(SourceType.SQL));
 			t.commit();
 			return;
     	} catch(HibernateException e) {
