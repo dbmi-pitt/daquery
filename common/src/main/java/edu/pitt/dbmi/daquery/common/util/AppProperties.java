@@ -239,7 +239,7 @@ public class AppProperties
 		}
 		catch(Throwable t)
 		{
-			String msg = "An unexpected error occured while setting the application database property: " + propertyName;
+			String msg = "An unexpected error occured while getting the application database property: " + propertyName;
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryException(msg + " Check the application logs for further information.", t);
 		}
@@ -421,11 +421,26 @@ public class AppProperties
 	
 	public static String getCentralURL() throws DaqueryException
 	{
-		String val = getDBProperty("central.url");
-		if(val == null)
+		try{
+			String centralURLDominant = "";
+			if(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL"))){
+				centralURLDominant = System.getenv("DAQUERY_CENT_URL");
+			}
+			String val = getDBProperty("central.url");
+			if(val == null)
+				if(!centralURLDominant.equals("")){
+					AppProperties.setCentralURL(centralURLDominant);
+					return centralURLDominant;
+				} else {
+					String centralURLFromPropFile = getDefaultCentralServerURL();
+					AppProperties.setCentralURL(centralURLFromPropFile);
+					return centralURLFromPropFile;
+				}
+			else
+				return centralURLDominant.equals("") ? val : centralURLDominant;
+		} catch(Throwable t){
 			return getDefaultCentralServerURL();
-		else
-			return val;
+		}
 	}
 	
 	public static void setCentralURL(String val) throws DaqueryException
