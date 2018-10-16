@@ -20,6 +20,8 @@ export class AppConfigComponent implements OnInit {
   updated_success: boolean = false;
   update_message: String;
   updateAvailable: any;
+  centralURLENVSet: boolean = false;
+  centralURLENV: String;
 
   appConfigForm: FormGroup;
   constructor(private fb: FormBuilder,
@@ -75,6 +77,8 @@ export class AppConfigComponent implements OnInit {
                         this.appConfigForm.get('tempFileExportDir').setValue(res.tempFileExportDir);
                         this.appConfigForm.get('casePerFile').setValue(res.casePerFile);
                         this.appConfigForm.get('centralURL').setValue(res.centralURL);
+                        this.centralURLENVSet = (res.centralURLENVSet === 'true');
+                        this.centralURLENV = res.centralURLENVSet === 'true' ? res.centralURL : "";
                        })
   }
 

@@ -422,11 +422,22 @@ public class AppProperties
 	public static String getCentralURL() throws DaqueryException
 	{
 		try{
+			String centralURLDominant = "";
+			if(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL"))){
+				centralURLDominant = System.getenv("DAQUERY_CENT_URL");
+			}
 			String val = getDBProperty("central.url");
 			if(val == null)
-				return getDefaultCentralServerURL();
+				if(!centralURLDominant.equals("")){
+					AppProperties.setCentralURL(centralURLDominant);
+					return centralURLDominant;
+				} else {
+					String centralURLFromPropFile = getDefaultCentralServerURL();
+					AppProperties.setCentralURL(centralURLFromPropFile);
+					return centralURLFromPropFile;
+				}
 			else
-				return val;
+				return centralURLDominant.equals("") ? val : centralURLDominant;
 		} catch(Throwable t){
 			return getDefaultCentralServerURL();
 		}

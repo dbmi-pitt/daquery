@@ -89,8 +89,11 @@
         <div class="form-group has-feedback" [ngClass]="{'has-error': centralURL.invalid && (centralURL.dirty || centralURL.touched), 'has-success': centralURL.valid && (centralURL.dirty || centralURL.touched) }">
           <label>Daquery Central URL</label>
           <input type="text" class="form-control" formControlName="centralURL" name="centralURL" />
-          <p class="help-block">The number of cases (patients) included in a single export file. If more than this number are exported multiple export files will be created.</p>
-          <div class="help-block" *ngIf="(!centralURL.hasError('required') && centralURL.hasError('validateEqual')) && (centralURL.dirty || centralURL.touched)">Case per Export File</div>
+          <p class="help-block">The daquery central server URL</p>
+          <div class="help-block" *ngIf="(!centralURL.hasError('required') && centralURL.hasError('validateEqual')) && (centralURL.dirty || centralURL.touched)">Central URL</div>
+          <div class="help-block text-red" *ngIf="centralURLENVSet">
+            Warning: Central Server URL is being overridden by the DAQUERY_CENT_URL environment variable. Currently set to: {{ centralURLENV }}
+          </div>
         </div>
         <div class="row">
           <div class="col-xs-4">
