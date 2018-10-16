@@ -1,0 +1,1 @@
+alter table NETWORK DROP COLUMN DATA_MODEL_ID;
