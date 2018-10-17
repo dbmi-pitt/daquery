@@ -1059,6 +1059,7 @@ public class DaqueryEndpoint extends AbstractEndpoint
     		properties.put("tempFileExportDir", AppProperties.getTempFileExportDir());
     		properties.put("casePerFile", AppProperties.getCasePerFile());
     		properties.put("centralURL", AppProperties.getCentralURL());
+    		properties.put("centralURLENVSet", String.valueOf(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL"))));
             return ResponseHelper.getJsonResponseGen(200, properties);
 
         } catch (Exception e) {
