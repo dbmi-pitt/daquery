@@ -25,7 +25,7 @@ CREATE TABLE DATA_MODEL
    DESCRIPTION varchar(2048),
    DATA_EXPORT_CONF long varchar,
    REVISION bigint,
-   NETWORK_ID varchar(50)
+   NETWORK_ID bigint
 );
 
 CREATE TABLE "APP"."NOTIFICATION"

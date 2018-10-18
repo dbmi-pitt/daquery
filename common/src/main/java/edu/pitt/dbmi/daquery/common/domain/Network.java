@@ -73,7 +73,7 @@ public class Network extends DaqueryObject implements Serializable {
 	private String name;
 
 	@Expose
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="network")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="network", orphanRemoval = true)
     private Set<DataModel> dataModels;
 	
 	@Expose

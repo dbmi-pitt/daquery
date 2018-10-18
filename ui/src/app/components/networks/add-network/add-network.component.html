@@ -7,7 +7,7 @@
           <div class="form-group has-feedback" [ngClass]="{'has-error': network.invalid && (submitted || network.dirty || network.touched), 'has-success': network.valid && (submitted || network.dirty || network.touched) }">
             <label for="available-networks">Available Networks</label>
             <i *ngIf="loadingAvailableNetworks" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-            <select *ngIf="!loadingAvailableNetworks" formControlName="network" class="form-control">
+            <select *ngIf="!loadingAvailableNetworks" formControlName="network" class="form-control" (change)="onNetworkSelect()">
               <option value="">-Select-</option>
               <option *ngFor="let network of availableNetworks" value="{{ network.networkId }}">
                 {{ network.name }}
@@ -16,36 +16,49 @@
             <div class="help-block" *ngIf="network.invalid && (submitted || network.dirty || network.touched)">Please select a network</div>
           </div>
           <hr />
-          <div class="form-group has-feedback" [ngClass]="{'has-error': driverClass.invalid && (submitted || driverClass.dirty || driverClass.touched), 'has-success': driverClass.valid && (submitted || driverClass.dirty || driverClass.touched) }">
-              <label>CDM Database Type</label>
-              <!-- <input type="text" formControlName="driverClass" class="form-control" name="driverClass" placeholder="Data source driver"> -->
-              <select formControlName="driverClass" class="form-control" name="driverClass" (change)="onChange($event)">
-                <option value="oracle.jdbc.driver.OracleDriver" data-urlexample="jdbc:oracle:thin:@server.url:1521:sid">Oracle</option>
-                <option value="com.microsoft.sqlserver.jdbc.SQLServerDriver" data-urlexample="jdbc:sqlserver://server.name:1433;databaseName=DB_NAME;">SQL Server</option>
+          <div *ngIf="selectedNetwork">
+            <div class="form-group has-feedback" [ngClass]="{'has-error': dataModel.invalid && (submitted || dataModel.dirty || dataModel.touched), 'has-success': dataModel.valid && (submitted || dataModel.dirty || dataModel.touched) }">
+              <label for="dataModel">Data Model</label>
+              <i *ngIf="loadingAvailableDataModels" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+              <select *ngIf="!loadingAvailableDataModels" formControlName="dataModel" class="form-control">
+                <option value="">-Select-</option>
+                <option *ngFor="let dataModel of selectedNetwork.dataModels" value="{{ dataModel.dataModelId }}">
+                  {{ dataModel.name }}
+                </option>
               </select>
-              <div class="help-block" *ngIf="driverClass.invalid && (submitted || driverClass.dirty || driverClass.touched)">Please enter the data source driver</div>
+              <div class="help-block" *ngIf="dataModel.invalid && (submitted || dataModel.dirty || dataModel.touched)">Please select a dataModel</div>
             </div>
-          <div class="form-group has-feedback" [ngClass]="{'has-error': connectionUrl.invalid && (submitted || connectionUrl.dirty || connectionUrl.touched), 'has-success': connectionUrl.valid && (submitted || connectionUrl.dirty || connectionUrl.touched) }">
-            <label>CDM JDBC URL e.g. ({{ urlexample }})</label>
-            <input type="text" formControlName="connectionUrl" class="form-control" name="connectionUrl" placeholder="Data source URL">
-            <div class="help-block" *ngIf="connectionUrl.invalid && (submitted || connectionUrl.dirty || connectionUrl.touched)">Please enter the Data source url</div>
-          </div>
-          <div class="form-group has-feedback" [ngClass]="{'has-error': username.invalid && (submitted || username.dirty || username.touched), 'has-success': username.valid && (submitted || username.dirty || username.touched) }">
-            <label>CDM Data Source Username</label>
-            <input type="text" formControlName="username" class="form-control" name="username" placeholder="Data source Username">
-            <div class="help-block" *ngIf="username.invalid && (submitted || username.dirty || username.touched)">Please enter the Data source username</div>
-          </div>
-          <div class="form-group has-feedback" [ngClass]="{'has-error': password.invalid && (submitted || password.dirty || password.touched), 'has-success': password.valid && (submitted || password.dirty || password.touched) }">
-            <label>CDM Data Source Password</label>
-            <input type="password" formControlName="password" class="form-control" name="password" placeholder="Data source Password">
-            <div class="help-block" *ngIf="password.invalid && (submitted || password.dirty || password.touched)">Please enter the datamodel password</div>
-          </div>
-          <div *ngIf="testResult" [ngClass]="{'text-green': testResult.result, 'text-red': !testResult.result}">{{ testResult.errorMsg }}. {{ testResult.detailErrorMsg }}</div>
-          <button class="btn btn-primary btn-flat">Join</button>
-          <button [disabled]="testing" class="btn btn-info btn-flat" (click)="testDataSource($event)">
+            <div class="form-group has-feedback" [ngClass]="{'has-error': driverClass.invalid && (submitted || driverClass.dirty || driverClass.touched), 'has-success': driverClass.valid && (submitted || driverClass.dirty || driverClass.touched) }">
+                <label>CDM Database Type</label>
+                <!-- <input type="text" formControlName="driverClass" class="form-control" name="driverClass" placeholder="Data source driver"> -->
+                <select formControlName="driverClass" class="form-control" name="driverClass" (change)="onChange($event)">
+                  <option value="oracle.jdbc.driver.OracleDriver" data-urlexample="jdbc:oracle:thin:@server.url:1521:sid">Oracle</option>
+                  <option value="com.microsoft.sqlserver.jdbc.SQLServerDriver" data-urlexample="jdbc:sqlserver://server.name:1433;databaseName=DB_NAME;">SQL Server</option>
+                </select>
+                <div class="help-block" *ngIf="driverClass.invalid && (submitted || driverClass.dirty || driverClass.touched)">Please enter the data source driver</div>
+              </div>
+            <div class="form-group has-feedback" [ngClass]="{'has-error': connectionUrl.invalid && (submitted || connectionUrl.dirty || connectionUrl.touched), 'has-success': connectionUrl.valid && (submitted || connectionUrl.dirty || connectionUrl.touched) }">
+              <label>CDM JDBC URL e.g. ({{ urlexample }})</label>
+              <input type="text" formControlName="connectionUrl" class="form-control" name="connectionUrl" placeholder="Data source URL">
+              <div class="help-block" *ngIf="connectionUrl.invalid && (submitted || connectionUrl.dirty || connectionUrl.touched)">Please enter the Data source url</div>
+            </div>
+            <div class="form-group has-feedback" [ngClass]="{'has-error': username.invalid && (submitted || username.dirty || username.touched), 'has-success': username.valid && (submitted || username.dirty || username.touched) }">
+              <label>CDM Data Source Username</label>
+              <input type="text" formControlName="username" class="form-control" name="username" placeholder="Data source Username">
+              <div class="help-block" *ngIf="username.invalid && (submitted || username.dirty || username.touched)">Please enter the Data source username</div>
+            </div>
+            <div class="form-group has-feedback" [ngClass]="{'has-error': password.invalid && (submitted || password.dirty || password.touched), 'has-success': password.valid && (submitted || password.dirty || password.touched) }">
+              <label>CDM Data Source Password</label>
+              <input type="password" formControlName="password" class="form-control" name="password" placeholder="Data source Password">
+              <div class="help-block" *ngIf="password.invalid && (submitted || password.dirty || password.touched)">Please enter the datamodel password</div>
+            </div>
+            <div *ngIf="testResult" [ngClass]="{'text-green': testResult.result, 'text-red': !testResult.result}">{{ testResult.errorMsg }}. {{ testResult.detailErrorMsg }}</div>
+            <button class="btn btn-primary btn-flat">Join</button>
+            <button [disabled]="testing" class="btn btn-info btn-flat" (click)="testDataSource($event)">
               <i *ngIf="testing" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
               <span *ngIf="!testing">Test</span>
             </button>
+            </div>
         </form>
       </div>
     </div>

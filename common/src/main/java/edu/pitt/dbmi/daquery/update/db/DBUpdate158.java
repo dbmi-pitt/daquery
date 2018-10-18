@@ -20,13 +20,13 @@ public class DBUpdate158 implements DBUpdater {
 	@Override
 	public void updateData(Connection conn) throws Exception {
 		Statement s = conn.createStatement();
-		ResultSet rs = s.executeQuery("select NETWORK_ID, DATA_MODEL_ID from NETWORK");
+		ResultSet rs = s.executeQuery("select ID, DATA_MODEL_ID from NETWORK");
 		List<String> qs = new ArrayList<>();
  		while(rs.next())
 		{
-			String network_id = rs.getString(1);
+			int network_id = rs.getInt(1);
 			int data_model_id = rs.getInt(2);
-			qs.add("update DATA_MODEL set NETWORK_ID = '" + network_id + "' where ID=" + data_model_id);
+			qs.add("update DATA_MODEL set NETWORK_ID = " + network_id + " where ID=" + data_model_id);
 		}
 		rs.close();
 		

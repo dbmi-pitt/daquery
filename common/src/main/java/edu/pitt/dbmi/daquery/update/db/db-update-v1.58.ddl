@@ -1,1 +1,1 @@
-alter table DATA_MODEL ADD COLUMN NETWORK_ID varchar(50);
+alter table DATA_MODEL ADD COLUMN NETWORK_ID bigint;

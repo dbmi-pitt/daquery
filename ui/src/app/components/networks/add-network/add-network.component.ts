@@ -15,6 +15,7 @@ export class AddNetworkComponent implements OnInit {
   joinNetworkForm: FormGroup;
   testResult: any;
   testing: boolean;
+  selectedNetwork: any;
 
   urlexample: String = "";
   @Output()
@@ -32,6 +33,7 @@ export class AddNetworkComponent implements OnInit {
   createForm() {
     this.joinNetworkForm = this.fb.group({
       network: ['', Validators.required],
+      dataModel: ['', Validators.required],
       connectionUrl: ['', Validators.required],
       username: ['', Validators.required],
       password: ['', Validators.required],
@@ -40,6 +42,7 @@ export class AddNetworkComponent implements OnInit {
   }
 
   get network() { return this.joinNetworkForm.get('network'); }
+  get dataModel() { return this.joinNetworkForm.get('dataModel'); }
   get connectionUrl() { return this.joinNetworkForm.get('connectionUrl'); }
   get username() { return this.joinNetworkForm.get('username'); }
   get password() { return this.joinNetworkForm.get('password'); }
@@ -84,6 +87,10 @@ export class AddNetworkComponent implements OnInit {
                           this.testResult = res;
                           this.testing = false;
                        });
+  }
+
+  onNetworkSelect(){
+    this.selectedNetwork = this.availableNetworks.find(e => e.networkId === this.joinNetworkForm.value.network);
   }
 
 }
