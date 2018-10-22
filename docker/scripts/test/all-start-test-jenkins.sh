@@ -6,9 +6,9 @@ export DB_HOME=/home/jenkins/daquery_docker_data
 export CENTRAL_IP_ADDRESS="http://136.142.228.23"
 
 # build the code before testing it on Docker
+cd ..
 echo | pwd
 echo | ls -al
-cd ../../..
 ./build-all.sh
 
 cd docker/scripts/test
