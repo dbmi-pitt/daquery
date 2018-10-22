@@ -19,4 +19,5 @@
 test.properties
 *.lst
 testng_output.txt
+target/classes/
 
