@@ -32,7 +32,7 @@ DEFAULT_OJDBC_LIB_DIR="/home/devuser/projects/daquery/ws/lib"
 #fi
 # DAQUERY_CENT_URL is the IP address (or hostname) of the Daquery Central server you want the site
 # to use
-#DAQUERY_CENT_URL="http://10.0.2.15:8080"
+# DAQUERY_CENT_URL="http://10.0.2.15:8080"
 
 # Check to see if a port number, daquery home, ojdbc jar or db home  was passed in, if not use environment
 # variables or the defaults set above will be used
