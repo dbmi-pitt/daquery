@@ -104,7 +104,8 @@ node {
     
            //stop any Docker images that were launched
            sh '../docker/scripts/test/stop-docker-all.sh'
-   }
+         }
+    }
 
     } catch (Exception e) {
 
