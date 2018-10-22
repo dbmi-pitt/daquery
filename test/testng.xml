@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Suite" verbose="2">
+	<test name="Test" parallel="none">
+		<classes>
+		    <class name="edu.pitt.dbmi.DaQery_SelWebTest.Daquery_Base" />
+<!-- 			<class name="dbmi.DaQery_SelWebTest.Daquery_ValidLogin" />
+			<class name="dbmi.DaQery_SelWebTest.Daquery_Network" />
+			<class name="dbmi.DaQery_SelWebTest.Daquery_InValidLogin" />
+			<class name="dbmi.DaQery_SelWebTest.Daquery_UserPage" />
+
+			<class name="dbmi.DaQery_SelWebTest.Daquery_LandingPageVerify" />
+			<class name="dbmi.DaQery_SelWebTest.Daquery_RequestFromMe" />
+			<class name="dbmi.DaQery_SelWebTest.Daquery_RequestFromMeNext" />
+			<class name="dbmi.DaQery_SelWebTest.Daquery_RequestToMe" />  -->
+		</classes>
+	</test> <!-- Test -->
+</suite> <!-- Suite -->
