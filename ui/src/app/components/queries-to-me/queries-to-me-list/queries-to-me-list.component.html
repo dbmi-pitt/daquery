@@ -1,14 +1,12 @@
 <div class="row">
   <div class="col-lg-4 col-md-6" style="overflow-y: auto; max-height: 82vh">
+    <div class="row">
+      <div class="col-md-4">
+        <switch [status]="true" [onColor]="'green'" [offColor]="'blue'" [onText]="'Current'" [offText]="'Archived'" [size]="'normal'" (statusChange)="onSwitchChange($event)"></switch>
+      </div>
+    </div>
     <div class="box box-solid">
       <div class="box-body no-padding">
-        <div class="row">
-          <div class="col-md-8">
-          </div>
-          <div class="col-md-4">
-            <switch [status]="true" [onColor]="'green'" [offColor]="'blue'" [onText]="'Current'" [offText]="'Archived'" [size]="'normal'" (statusChange)="onSwitchChange($event)"></switch>
-          </div>
-        </div>
         <ul class="nav nav-pills nav-stacked">
           <li *ngFor="let request of requests" [ngClass]="selectedRequest === request ? 'active' : ''">
             <a [ngClass]="{'archived-row' : request.show != null && !request.show}" *ngIf="showArchive || (request.show == null || request.show)" style="cursor: pointer" (click)="onRequestSelect(request)"> {{request.inquiry.inquiryName}} 
