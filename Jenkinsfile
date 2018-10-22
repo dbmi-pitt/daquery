@@ -91,11 +91,20 @@ node {
             sh 'scripts/test/all-start-test-jenkins.sh'
             
             //stop any Docker images that were launched
-            sh 'scripts/test/stop-docker-all.sh'
+            //sh 'scripts/test/stop-docker-all.sh'
 
          }
 
     }
+
+    stage('Run Selenium Tests') {
+         dir('test') {
+           sh 'cp /home/jenkins/test.properties_jenkins test.properties'
+           sh './testng.sh'
+    
+           //stop any Docker images that were launched
+           sh '../docker/scripts/test/stop-docker-all.sh'
+   }
 
     } catch (Exception e) {
 
