@@ -125,8 +125,9 @@ if [ -e $DB_HOME/daquery-$TOMCAT_REDIRECT_PORT ]; then
 fi
 
 cp $DAQUERY_CENTRAL_DATABASE $DB_HOME 
-chmod 755 $DB_HOME/$DATABASE_FILE_NAME
+sudo chmod 755 $DB_HOME/$DATABASE_FILE_NAME
 tar -xvzf $DB_HOME/$DATABASE_FILE_NAME -C $DB_HOME
+sudo chmod 755 -R $DB_HOME 
 
 
 # CONTAINER_NAME is the docker name for this Daquery container.  This name must
