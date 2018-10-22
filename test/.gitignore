@@ -16,7 +16,7 @@
 # Testing files
 *.html
 **/test-output
-test.properties
+test.properties*
 *.lst
 testng_output.txt
 target/classes/
