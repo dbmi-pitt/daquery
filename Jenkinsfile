@@ -99,7 +99,7 @@ node {
          }
 
     }
-
+/* Not ready for prime time 
     stage('Run Selenium Tests') {
          dir('test') {
            try {
@@ -111,7 +111,7 @@ node {
            }
          }
     }
-
+*/
     } catch (Exception e) {
 
         currentBuild.result = "FAILURE"
