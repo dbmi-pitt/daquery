@@ -94,7 +94,7 @@ node {
             sh 'scripts/test/all-start-test-jenkins.sh'
             
             //stop any Docker images that were launched
-            //sh 'scripts/test/stop-docker-all.sh'
+            // //sh 'scripts/test/stop-docker-all.sh'
 
          }
 
