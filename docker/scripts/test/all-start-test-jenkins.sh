@@ -3,7 +3,8 @@
 # This file launches 3 items: a Daquery Central Server and two sites.
 # These items can be used for testing.
 export DB_HOME=/home/jenkins/daquery_docker_data
-export CENTRAL_IP_ADDRESS="http://136.142.228.23"
+#export CENTRAL_IP_ADDRESS="http://136.142.228.23"
+export CENTRAL_IP_ADDRESS="http://172.17.0.1"
 
 # build the code before testing it on Docker
 cd ..
