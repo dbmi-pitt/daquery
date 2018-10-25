@@ -28,8 +28,8 @@ export class NetworkService {
                     });
   }
 
-  getDatamodel(network_id: number): Observable<any> {
-    return this.http.get(`/daquery/ws/networks/${network_id}/datamodel`)
+  getDatamodels(network_id: number): Observable<any> {
+    return this.http.get(`/daquery/ws/networks/${network_id}/datamodels`)
                     .catch(error => {
                       this.error.error = error;
                       return Observable.throw(error || 'Server error');

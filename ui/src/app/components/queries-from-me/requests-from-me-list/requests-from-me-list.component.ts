@@ -107,6 +107,7 @@ export class RequestsFromMeListComponent implements OnInit {
         network: {
           networkId: request.network.networkId
         },
+        dataModelId: request.dataModelId,
         requestGroup: request.requestGroup + ":DataRequest",
         inquiry: {
           version: 1,

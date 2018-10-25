@@ -22,6 +22,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -35,6 +37,7 @@ import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.sql.domain.TableColumn;
+
 
 @Entity
 @Table(name="DATA_MODEL")
@@ -254,10 +257,13 @@ public class DataModel extends DaqueryObject implements Serializable
 	public void setName(String name){this.name = name;}
 
 	public String getDescription(){return(description);}
-	public void setDescription(String desc){this.description = desc;}	
+	public void setDescription(String desc){this.description = desc;}
 
 	public String getDataModelId(){return(dataModelId);}
 	public void setDataModelId(String id){dataModelId = id;}
+	
+	public Network getNetwork() { return network; }
+	public void setNetwork(Network network) { this.network = network; }
 
 	public Set<DataSource> getDataSources(){return(dataSources);}
 	public void setDataSources(Set<DataSource> sources){dataSources = sources;}

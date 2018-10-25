@@ -4,6 +4,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -42,6 +43,7 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDialect;
+import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.DaqueryErrorException;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataBaseTestResult;
@@ -190,12 +192,29 @@ public class NetworkEndpoint extends AbstractEndpoint {
             String username = principal.getName();
             logger.info("Responding to request from: " + username);
             
+            // get networks from daquery central
+            Map<String, String> idParam = new HashMap<String, String>();
+			idParam.put("site-id", AppProperties.getDBProperty("site.id"));
+			Response resp = WSConnectionUtil.centralServerGet("availableNetworks", idParam);
+			if (resp.getStatus() != 200) {
+				return ResponseHelper.getErrorResponse(500, "Error happen when download network info from daquery cenral", "Please ask the admin to check the log files for more information.", null);
+			}
+			
+			String json = resp.readEntity(String.class);
+			Network[] netsFromCentral = JSONHelper.gson.fromJson(json, Network[].class);
+            
             HashMap<String, String> network_params = new HashMap<>();
             network_params.put("id", ((LinkedHashMap<?, ?>)payload.get("network")).get("id").toString());
             network_params.put("network_id", ((LinkedHashMap<?, ?>)payload.get("form")).get("network").toString());
             network_params.put("name", ((LinkedHashMap<?, ?>)payload.get("network")).get("name").toString());
-            //network_params.put("data_model", ((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
             network_params.put("data_model", "temp");
+            Network net = null;
+            for(Network n : netsFromCentral){
+            	if(n.getNetworkId().equals(network_params.get("network_id"))){
+            		net = n;
+            		break;
+            	}
+            }
             
             HashMap<String, String> sqldatasource_params = new HashMap<>();
             sqldatasource_params.put("connectionUrl", ((LinkedHashMap<?, ?>)payload.get("form")).get("connectionUrl").toString());
@@ -223,22 +242,31 @@ public class NetworkEndpoint extends AbstractEndpoint {
             
             Set<DataSource> dsset = new HashSet<DataSource>();
             
-           
+            
             //dModel.setName(((LinkedHashMap<?, ?>)payload.get("network")).get("dataModel").toString());
             //String netId = network_params.get("network_id");
             //DataModel dModel = getDataModelFromCentral(netId);
-            DataModel dModel = DBUpdate154.importCDM41Model(false);
-            dsset.add(sqlDataSource);
+//            DataModel dModel = DBUpdate154.importCDM41Model(false);
             
+            DataModel dModel = null;
+            for(DataModel dm : net.getDataModels()){
+            	if(dm.getDataModelId().equals(((LinkedHashMap<?, ?>)payload.get("form")).get("dataModel"))){
+            		dModel = dm;
+            		break;
+            	}
+            }
+            
+            dsset.add(sqlDataSource);
             if(dModel != null)
 	            dModel.setDataSources(dsset);
+            dModel.setActive(true);
 	        sqlDataSource.setDataModel(dModel);
 	        Site localSite = SiteDAO.getLocalSite();
-	        Network network = NetworkDAO.createNetwork(network_params, dModel, localSite);
+	        Network network = NetworkDAO.createNetwork(network_params, net.getDataModels(), localSite);
 
-            String json = network.toJson();
+            String ret_json = network.toJson();
 
-            return Response.ok(200).entity(json).build();
+            return Response.ok(200).entity(ret_json).build();
         } catch (Exception e) {
     		String msg = "An unexpected error was encountered when joining a network.";
     		logger.log(Level.SEVERE, msg, e);
@@ -271,10 +299,10 @@ public class NetworkEndpoint extends AbstractEndpoint {
      */
     @GET
     @Secured
-    @Path("/{id}/datamodel")
+    @Path("/{id}/datamodels")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDatamodelbyNetworkId(@PathParam("id") String id) {
+    public Response getDatamodelsbyNetworkId(@PathParam("id") String id) {
     	try {
 
             logger.info("#### returning network by uuid=" + id);
@@ -284,9 +312,11 @@ public class NetworkEndpoint extends AbstractEndpoint {
             logger.info("Responding to request from: " + username);
             
             Network network = NetworkDAO.queryNetwork(id);
-            DataModel datamodel = NetworkDAO.getDatamodelbyNetworkId(network);
-             
-            String json = datamodel.toJson();
+            Set<DataModel> datamodels = network.getDataModels();
+            
+            List listOfDataModels = new ArrayList(datamodels);
+            
+            String json = toJsonArray(listOfDataModels);
 
             return Response.ok(200).entity(json).build();
     	} catch (HibernateException he) {

@@ -32,6 +32,7 @@ import org.hibernate.HibernateException;
 
 import edu.pitt.dbmi.daquery.common.dao.DaqueryRequestDAO;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
+import edu.pitt.dbmi.daquery.common.dao.DataModelDAO;
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
@@ -330,7 +331,7 @@ public class RequestEndpoint extends AbstractEndpoint {
             }
             
             TaskQueue queue = QueueManager.getNamedQueue(TaskQueue.EXPORT_QUEUE);
-            ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), request.getNetwork().getDataModels().iterator().next());
+            ResponseTask task = new ResponseTask(request, DaqueryUserDAO.getSysUser(), DataModelDAO.getDataModelbyId(request.getNetwork().getId(), request.getDataModelId()));
             queue.addTask(task);
 
             String jsonString = task.getResponse().toJson();

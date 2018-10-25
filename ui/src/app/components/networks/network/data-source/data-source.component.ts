@@ -17,7 +17,8 @@ export class DataSourceComponent implements OnInit {
   submitted = false;
   network_id: number;
   network: any = null;
-  datamodel: any = null;
+  dataModels: any[];
+  selectedDataModel: any;
   sqldatasource: any = null;
   datasourceForm: FormGroup;
   error: any;
@@ -41,6 +42,7 @@ export class DataSourceComponent implements OnInit {
 
   createForm() {
     this.datasourceForm = this.fb.group({
+      dataModel: ['', Validators.required],
       connectionUrl: ['', Validators.required],
       username: ['', Validators.required],
       password: ['', Validators.required],
@@ -49,6 +51,7 @@ export class DataSourceComponent implements OnInit {
     })
   }
 
+  get dataModel() { return this.datasourceForm.get('dataModel'); }
   get connectionUrl() { return this.datasourceForm.get('connectionUrl'); }
   get username() { return this.datasourceForm.get('username'); }
   get password() { return this.datasourceForm.get('password'); }
@@ -62,14 +65,39 @@ export class DataSourceComponent implements OnInit {
   }
 
   getDatamodel(network_id: number) {
-    this.networkService.getDatamodel(network_id)
-                       .subscribe(datamodel => {
-                          this.datamodel = datamodel;
-                          this.datasourceForm.get('connectionUrl').setValue(this.datamodel.dataSources[0].connectionUrl);
-                          this.datasourceForm.get('username').setValue(this.datamodel.dataSources[0].username);
-                          this.datasourceForm.get('password').setValue(this.datamodel.dataSources[0].password);
-                          this.datasourceForm.get('driverClass').setValue(this.datamodel.dataSources[0].driverClass);
+    this.networkService.getDatamodels(network_id)
+                       .subscribe(datamodels => {
+                          this.dataModels = datamodels;
+                          this.selectedDataModel = datamodels[0];
+                          this.datasourceForm.get('dataModel').setValue(this.selectedDataModel.dataModelId);
+                          try{
+                            this.datasourceForm.get('connectionUrl').setValue(this.selectedDataModel.dataSources[0].connectionUrl);
+                            this.datasourceForm.get('username').setValue(this.selectedDataModel.dataSources[0].username);
+                            this.datasourceForm.get('password').setValue(this.selectedDataModel.dataSources[0].password);
+                            this.datasourceForm.get('driverClass').setValue(this.selectedDataModel.dataSources[0].driverClass);
+                          } catch (err) {
+                            this.datasourceForm.get('connectionUrl').setValue("");
+                            this.datasourceForm.get('username').setValue("");
+                            this.datasourceForm.get('password').setValue("");
+                            this.datasourceForm.get('driverClass').setValue("");
+                          }
                        });
+  }
+
+  onDataModelChange(){
+    this.selectedDataModel = this.dataModels.find(x => x.dataModelId == this.datasourceForm.get('dataModel').value);
+    this.datasourceForm.get('dataModel').setValue(this.selectedDataModel.dataModelId);
+    try{
+      this.datasourceForm.get('connectionUrl').setValue(this.selectedDataModel.dataSources[0].connectionUrl);
+      this.datasourceForm.get('username').setValue(this.selectedDataModel.dataSources[0].username);
+      this.datasourceForm.get('password').setValue(this.selectedDataModel.dataSources[0].password);
+      this.datasourceForm.get('driverClass').setValue(this.selectedDataModel.dataSources[0].driverClass);
+    } catch (err) {
+      this.datasourceForm.get('connectionUrl').setValue("");
+      this.datasourceForm.get('username').setValue("");
+      this.datasourceForm.get('password').setValue("");
+      this.datasourceForm.get('driverClass').setValue("");
+    }
   }
 
   getSqlDatasource(network_id: number): Promise<any> {
