@@ -259,7 +259,6 @@ public class NetworkEndpoint extends AbstractEndpoint {
             dsset.add(sqlDataSource);
             if(dModel != null)
 	            dModel.setDataSources(dsset);
-            dModel.setActive(true);
 	        sqlDataSource.setDataModel(dModel);
 	        Site localSite = SiteDAO.getLocalSite();
 	        Network network = NetworkDAO.createNetwork(network_params, net.getDataModels(), localSite);
