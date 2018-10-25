@@ -121,6 +121,7 @@ export class NewQueryComponent implements OnInit {
                        .subscribe(networks => {
                          this.networks = networks;
                          if(networks.length === 1) {
+                           this.selectedNetwork = networks[0];
                            this.inquiryForm.get('network').setValue(networks[0].networkId)
                          }
                        });
