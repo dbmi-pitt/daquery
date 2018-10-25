@@ -49,25 +49,28 @@ node {
     */
     stage('Deploy web ui to Tomcat') {
          dir('ws') {
-            sh '/opt/apache-tomcat-6.0.53/clean.sh'
-            sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
-            //delete the database at the filesystem level
-            //delete the files within the database directory
-            //sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
-            //copy the test.properties file to a location that the application expects
-            sh 'cp /home/jenkins/test.properties /opt/apache-tomcat-6.0.53/conf/test.properties'
-            //run the POJO Junit tests
-            //This call also builds the database and added test data for the Rest tests
-            sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite test'
-            sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
-            sleep 20
-            ////sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test test'
-            sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.UserTest test'
-            //sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.SiteTest test'
-            //POST-TEST CLEANUP
-            //delete the database at the filesystem level
-            //delete the files within the database directory
-            sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+            try {
+		    sh '/opt/apache-tomcat-6.0.53/clean.sh'
+		    sh 'cp target/daquery.war /opt/apache-tomcat-6.0.53/webapps/'
+		    //delete the database at the filesystem level
+		    //delete the files within the database directory
+		    //sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+		    //copy the test.properties file to a location that the application expects
+		    sh 'cp /home/jenkins/test.properties /opt/apache-tomcat-6.0.53/conf/test.properties'
+		    //run the POJO Junit tests
+		    //This call also builds the database and added test data for the Rest tests
+		    sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.domain.DomainTestSuite test'
+		    sh '/opt/apache-tomcat-6.0.53/bin/startup.sh &'
+		    sleep 20
+		    ////sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.*Test test'
+		    sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.UserTest test'
+		    //sh 'mvn -Dtest=edu.pitt.dbmi.daqueryws.test.rest.SiteTest test'
+            } finally {
+		    //POST-TEST CLEANUP
+		    //delete the database at the filesystem level
+		    //delete the files within the database directory
+		    sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+            }
                                  
        }
 
@@ -91,12 +94,24 @@ node {
             sh 'scripts/test/all-start-test-jenkins.sh'
             
             //stop any Docker images that were launched
-            sh 'scripts/test/stop-docker-all.sh'
+            //sh 'scripts/test/stop-docker-all.sh'
 
          }
 
     }
-
+/* Not ready for prime time 
+    stage('Run Selenium Tests') {
+         dir('test') {
+           try {
+		   sh 'cp /home/jenkins/test.properties_jenkins test.properties'
+		   sh './testng.sh'
+           } finally {	    
+		   //stop any Docker images that were launched
+		   sh '../docker/scripts/test/stop-docker-all.sh'
+           }
+         }
+    }
+*/
     } catch (Exception e) {
 
         currentBuild.result = "FAILURE"
