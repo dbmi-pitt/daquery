@@ -21,6 +21,7 @@ import org.hibernate.Transaction;
 import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.Site;
@@ -132,20 +133,23 @@ public class NetworkDAO extends AbstractDAO {
     }
     
 	
-    public static Network createNetwork(HashMap<String, String> params, DataModel dataModel, Site localSite) throws Exception {
+    public static Network createNetwork(HashMap<String, String> params, Set<DataModel> dataModels, Site localSite) throws Exception {
     	Session s = null;
     	try {
     		s = HibernateConfiguration.openSession();
     		s.getTransaction().begin();
     		
-    		s.save(dataModel);
+    		//s.save(dataModel);
     		
     		Network network = new Network();
     		network.setName(params.get("name"));
     		network.setNetworkId(params.get("network_id"));
-    		Set<DataModel> dataModels =  new HashSet<>();
-    		dataModels.add(dataModel);
+//    		Set<DataModel> dataModels =  new HashSet<>();
+//    		dataModels.add(dataModel);
     		network.setDataModels(dataModels);
+    		for(DataModel dm : dataModels){
+    			dm.setNetwork(network);
+    		}
 //<<<<<<< HEAD
 //    		network.setObfuscateAggregateResults(false);
 //    		network.setAggregateObfuscateType("");
@@ -358,14 +362,43 @@ public class NetworkDAO extends AbstractDAO {
     		s = HibernateConfiguration.openSession();
     		Transaction t = s.beginTransaction();
     		
-			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setConnectionUrl(sqlDatasource.getConnectionUrl());
-			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setUsername(sqlDatasource.getUsername());
-			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setPassword(sqlDatasource.getPassword());
-			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setDriverClass(sqlDatasource.getDriverClass());
-			((SQLDataSource) network.getDataModels().iterator().next().getDataSource(SourceType.SQL)).setDialect(sqlDatasource.getDialect());
+    		DataModel dataModel = null;
+    		for(DataModel dm : network.getDataModels()){
+    			if (dm.getDataModelId().equals(sqlDatasource.getDataModel().getDataModelId())) {
+    				dataModel = dm;
+    				break;
+    			}
+    		}
+    		
+    		if (dataModel == null)
+    			throw new DaqueryException("DataModel is not found when updateSQLDataSource");
+    		
+    		if(dataModel.getDataSource(SourceType.SQL) == null){
+    			SQLDataSource ds = new SQLDataSource();
+    			ds.setDataModel(dataModel);
+    			ds.setName(network.getName() + "_ds");
+    			ds.setConnectionUrl(sqlDatasource.getConnectionUrl());
+    			ds.setUsername(sqlDatasource.getUsername());
+    			ds.setPassword(sqlDatasource.getPassword());
+    			ds.setDriverClass(sqlDatasource.getDriverClass());
+    			ds.setDialect(sqlDatasource.getDialect());
+    			ds.setSourceTypeEnum(SourceType.SQL);
+    			if(dataModel.getDataSources() == null){
+    				Set<DataSource> dss = new HashSet<DataSource>();
+    				dss.add(ds);
+    				dataModel.setDataSources(dss);
+    			} else {
+    				dataModel.getDataSources().add(ds);
+    			}
+    		} else {
+				((SQLDataSource) dataModel.getDataSource(SourceType.SQL)).setConnectionUrl(sqlDatasource.getConnectionUrl());
+				((SQLDataSource) dataModel.getDataSource(SourceType.SQL)).setUsername(sqlDatasource.getUsername());
+				((SQLDataSource) dataModel.getDataSource(SourceType.SQL)).setPassword(sqlDatasource.getPassword());
+				((SQLDataSource) dataModel.getDataSource(SourceType.SQL)).setDriverClass(sqlDatasource.getDriverClass());
+				((SQLDataSource) dataModel.getDataSource(SourceType.SQL)).setDialect(sqlDatasource.getDialect());
+    		}
 
-			
-			s.saveOrUpdate(network.getDataModels().iterator().next().getDataSource(SourceType.SQL));
+			s.saveOrUpdate(dataModel.getDataSource(SourceType.SQL));
 			t.commit();
 			return;
     	} catch(HibernateException e) {

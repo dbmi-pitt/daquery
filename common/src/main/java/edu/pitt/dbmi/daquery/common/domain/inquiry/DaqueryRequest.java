@@ -57,6 +57,10 @@ public class DaqueryRequest extends DaqueryObject
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="REQUESTER_SITE_ID")
     private Site requesterSite;
+	
+	@Expose
+	@Column(name = "DATA_MODEL_ID")
+	private String dataModelId;
     
     @Expose
     @Temporal(TemporalType.TIMESTAMP)
@@ -132,6 +136,9 @@ public class DaqueryRequest extends DaqueryObject
 	
 	public UserInfo getRequester(){return(requester);}
 	public void setRequester(UserInfo user){requester = user;}
+	
+	public String getDataModelId() { return dataModelId; }
+	public void setDataModelId(String dataModelId) { this.dataModelId = dataModelId; }
 	
 	public String getDirection(){return(direction);}
 	public void setDirection(String direction){this.direction = direction;}

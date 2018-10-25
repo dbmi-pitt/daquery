@@ -88,4 +88,7 @@ public abstract class DataSource extends DaqueryObject implements Serializable {
 		}
 		return(SourceType.valueOf(dtype));
 	}
+	public void setSourceTypeEnum(SourceType dtype){
+		this.dtype = dtype.toString();
+	}
 }

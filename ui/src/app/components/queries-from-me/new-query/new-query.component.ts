@@ -21,6 +21,7 @@ export class NewQueryComponent implements OnInit {
   @Input() editingInquiry: any;
   inquiryForm: FormGroup;
   networks: any[];
+  selectedNetwork: any;
 
   showNetworkSitePanel = false;
   onSending = false;
@@ -68,7 +69,8 @@ export class NewQueryComponent implements OnInit {
       if(this.sqlDialect.ansi) this.lastAddedTab = "ansi";
 
       this.inquiryForm = this.fb.group({
-        network: [inquiry.network, Validators.required],
+        network: ['', Validators.required],
+        dataModel: ['', Validators.required],
         sitesToQuery: this.fb.array([]),
         queryType: [inquiry.queryType.toUpperCase()],
         dataType:['SQL_QUERY'],
@@ -84,6 +86,7 @@ export class NewQueryComponent implements OnInit {
     } else {
       this.inquiryForm = this.fb.group({
         network: '',
+        dataModel: '',
         sitesToQuery: this.fb.array([]),
         queryType: ['AGGREGATE'],
         dataType: ['SQL_QUERY'],
@@ -103,6 +106,7 @@ export class NewQueryComponent implements OnInit {
   get inquiryDescription() { return this.inquiryForm.get('inquiryDescription'); }
   get sqlQuery() { return this.inquiryForm.get('sqlQuery'); }
   get network() { return this.inquiryForm.get('network'); }
+  // get dataModel() { return this.inquiryForm.get('dataModel'); }
   get sitesToQuery() { return this.inquiryForm.get('sitesToQuery'); }
   get queryType() { return this.inquiryForm.get('queryType'); }
   get dataType() { return this.inquiryForm.get('dataType'); }
@@ -323,6 +327,7 @@ export class NewQueryComponent implements OnInit {
           network: {
             networkId: this.inquiryForm.value.network || this.networks[0].networkId
           },
+          dataModelId: this.inquiryForm.value.dataModel,
           requestGroup: requestGroupUUID,
           inquiry: {
             version: 1,
@@ -359,6 +364,7 @@ export class NewQueryComponent implements OnInit {
 
   networkOnChange(value){
     let network = this.networks.find(n => n.networkId === value);
+    this.selectedNetwork = network;
     this.authenticationService.renewjwt(network.networkId);
     if(network === undefined) {
       this.inquiryForm.setControl('sitesToQuery', this.fb.array([]));

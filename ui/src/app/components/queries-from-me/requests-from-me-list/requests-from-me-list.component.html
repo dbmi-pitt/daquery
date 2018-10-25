@@ -58,8 +58,8 @@
                 <th>Site</th>
                 <th>Status</th>
                 <th>Date/Time</th>
-                <th>Result</th>
-                <th style="width: 192px">Action</th>
+                <th style="width: 300px">Result</th>
+                <th style="width: 190px">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -76,8 +76,8 @@
                       <a title="{{ getFilePaths(request.responses[0]) }}" data-toggle="tooltip" data-placement="top"><i *ngIf="request.responses[0]?.files" class="fa fa-question-circle"></i></a>
                   </td>
                   <td>
-                    <button *ngIf="request.inquiry.queryType === 'AGGREGATE'" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
                     <button class="btn btn-default btn-xs" (click)="onArchive(request, $event)" title="Archive"><i class="fa fa-archive"></i></button>
+                    <button *ngIf="request.inquiry.queryType === 'AGGREGATE'" [disabled]="!request.responses[0]?.downloadAvailable" class="btn btn-primary btn-xs" (click)="requestData(request)">Request Data</button>
                   </td>
                 </tr>
               </ng-container>

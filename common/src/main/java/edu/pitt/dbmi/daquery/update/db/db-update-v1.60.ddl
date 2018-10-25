@@ -1,0 +1,1 @@
+alter table DAQUERY_REQUEST ADD COLUMN DATA_MODEL_ID varchar(50);
