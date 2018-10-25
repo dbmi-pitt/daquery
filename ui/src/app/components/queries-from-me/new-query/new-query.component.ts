@@ -106,7 +106,7 @@ export class NewQueryComponent implements OnInit {
   get inquiryDescription() { return this.inquiryForm.get('inquiryDescription'); }
   get sqlQuery() { return this.inquiryForm.get('sqlQuery'); }
   get network() { return this.inquiryForm.get('network'); }
-  // get dataModel() { return this.inquiryForm.get('dataModel'); }
+  get dataModel() { return this.inquiryForm.get('dataModel'); }
   get sitesToQuery() { return this.inquiryForm.get('sitesToQuery'); }
   get queryType() { return this.inquiryForm.get('queryType'); }
   get dataType() { return this.inquiryForm.get('dataType'); }
@@ -123,6 +123,9 @@ export class NewQueryComponent implements OnInit {
                          if(networks.length === 1) {
                            this.selectedNetwork = networks[0];
                            this.inquiryForm.get('network').setValue(networks[0].networkId)
+                           if(networks[0].dataModels.length === 1){
+                             this.inquiryForm.get('dataModel').setValue(networks[0].dataModels[0].dataModelId)
+                           }
                          }
                        });
   }
@@ -370,6 +373,9 @@ export class NewQueryComponent implements OnInit {
     if(network === undefined) {
       this.inquiryForm.setControl('sitesToQuery', this.fb.array([]));
     } else {
+      if(network.dataModels.length === 1){
+       this.inquiryForm.get('dataModel').setValue(network.dataModels[0].dataModelId)
+     }
       this.siteService.getSites(network)
                       .subscribe(sites => {
                         const siteFGs = sites.map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
