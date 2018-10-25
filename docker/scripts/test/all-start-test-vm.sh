@@ -4,16 +4,22 @@
 # These items can be used for testing.
 
 # export some environment variables for ij
-export DERBY_INSTALL=/usr/local/db-derby-10.12.1.1-bin
+export DERBY_INSTALL=/opt/Apache/db-derby-10.12.1.1-bin
 export CLASSPATH=$DERBY_INSTALL/lib/derby.jar:$DERBY_INSTALL/lib/derbytools.jar:
 export DB_HOME=/home/devuser/daquery_docker_data
 export CENTRAL_IP_ADDRESS="http://10.0.2.15"
+
+# stop docker if running
+./stop-docker-all.sh
+
 # build the code before testing it on Docker
 cd ../../..
 ./build-all.sh
 
 cd docker/scripts/test
 
+# remove existing central database
+sudo rm -rf $DB_HOME/daquery-4001
 ./start-test-central.sh --daquery_home=/home/devuser/projects/daquery/ --db_home=$DB_HOME
 #./start-test-connected.sh --daquery_home=/home/devuser/projects/daquery/ --db_home=/home/devuser/daquery_docker_data --ojdbc_lib_dir=/home/devuser/projects/daquery/ws/lib --central_url="http://10.0.2.15:4001"
 # remove existing site database
@@ -25,17 +31,19 @@ sudo rm -rf $DB_HOME/daquery-4003
 
 # change owner of the daquery databases (just in case root takes ownership of the .lck file)
 sudo chown -R devuser:devuser $DB_HOME/*
+$DB_HOME/fix-permissions.sh 
 
 # update the database with the correct values
-java org.apache.derby.tools.ij << EOF
-connect 'jdbc:derby:$DB_HOME/daquery-4001/conf/daquery-centraldb/';
-UPDATE site set URL='$CENTRAL_IP_ADDRESS' || ':4002' WHERE name='dev-4002'; 
-UPDATE site set URL='$CENTRAL_IP_ADDRESS' || ':4003' WHERE name='dev-4003'; 
-disconnect;
-connect 'jdbc:derby:$DB_HOME/daquery-4002/conf/daquery-db/';
-UPDATE site set URL='$CENTRAL_IP_ADDRESS' || ':4002' WHERE name='dev-4002'; 
-exit;
-EOF
+#java org.apache.derby.tools.ij << EOF
+#connect 'jdbc:derby:$DB_HOME/daquery-4001/conf/daquery-centraldb/';
+#UPDATE site set URL='$CENTRAL_IP_ADDRESS' || ':4002' WHERE name='dev-4002'; 
+#UPDATE site set URL='$CENTRAL_IP_ADDRESS' || ':4003' WHERE name='dev-4003'; 
+#disconnect;
+#connect 'jdbc:derby:$DB_HOME/daquery-4002/conf/daquery-db/';
+#UPDATE site set URL='$CENTRAL_IP_ADDRESS' || ':4002' WHERE name='dev-4002';
+#disconnect; 
+#exit;
+#EOF
 
 
 
