@@ -1,4 +1,4 @@
-<div class="row">
+<div *ngIf="networks && networks.length > 0" class="row">
   <div class="col-md-12">
     <div class="box box-info">
       <div class="box-header with-border">
@@ -343,6 +343,25 @@
             </form>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="networks && networks.length <= 0" class="row">
+  <div class="col-md-12">
+    <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">New Inquiry</h3>
+      </div>
+      <div class="box-body">
+        <div class="callout callout-danger">
+          <h4>No network found!</h4>
+
+          <p>Please join a network before sending a request.</p>
+        </div>
+
+        <button class="btn btn-default" (click)="onCancel()">OK</button>
       </div>
     </div>
   </div>
