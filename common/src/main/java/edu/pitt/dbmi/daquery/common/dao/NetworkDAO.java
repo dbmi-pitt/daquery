@@ -20,6 +20,7 @@ import org.hibernate.Transaction;
 
 import edu.pitt.dbmi.daquery.common.domain.ConnectionDirection;
 import edu.pitt.dbmi.daquery.common.domain.DaqueryUser;
+import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
@@ -149,6 +150,8 @@ public class NetworkDAO extends AbstractDAO {
     		network.setDataModels(dataModels);
     		for(DataModel dm : dataModels){
     			dm.setNetwork(network);
+    			for(DataAttribute da : dm.getAttributes())
+    				da.setDataModel(dm);
     		}
 //<<<<<<< HEAD
 //    		network.setObfuscateAggregateResults(false);

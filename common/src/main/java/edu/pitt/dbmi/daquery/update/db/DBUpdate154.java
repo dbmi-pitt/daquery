@@ -6,17 +6,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import edu.pitt.dbmi.daquery.common.domain.DataAttribute;
-import edu.pitt.dbmi.daquery.common.domain.DataModel;
-import edu.pitt.dbmi.daquery.common.util.AppProperties;
-import edu.pitt.dbmi.daquery.common.util.ApplicationDBHelper;
+import edu.pitt.dbmi.daquery.update.old.domain.DataAttributeOld;
+import edu.pitt.dbmi.daquery.update.old.domain.DataModelOld;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 import edu.pitt.dbmi.daquery.common.util.JSONHelper;
@@ -26,6 +23,8 @@ import edu.pitt.dbmi.daquery.update.DBVersion;
 @DBVersion(version=1.54f)
 public class DBUpdate154 implements DBUpdater {
 
+	static boolean cdmUpdated = false;
+	
 	public static void main(String [] args)
 	{
 	}
@@ -48,11 +47,12 @@ public class DBUpdate154 implements DBUpdater {
 		
 		//delete the old data models
 		s.executeUpdate("delete from data_model");
-		
+		s.executeUpdate("delete from data_attribute");
+		cdmUpdated = true;
 		//for each network, replace the datamodel
 		for(String netId : netsAndSources.keySet())
 		{
-			DataModel dm = importCDM41Model(true);
+			DataModelOld dm = importCDM41Model(true);
 			s.executeUpdate("update network set data_model_id=" + dm.getId() + " where network_id = '" + netId + "'");						
 			List<Long> dsIds = netsAndSources.get(netId);
 			for(Long dsId : dsIds)
@@ -71,12 +71,12 @@ public class DBUpdate154 implements DBUpdater {
 		//nothing to do on central for this update
 	}
 	
-	public static DataModel importCDM41Model(boolean saveModel) throws IOException, DaqueryException
+	public static DataModelOld importCDM41Model(boolean saveModel) throws IOException, DaqueryException
 	{
 		InputStream is = DBUpdate154.class.getResourceAsStream("/data-modelCDM-4.1.json");
-		DataModel dm = JSONHelper.fromJson(is, DataModel.class);
+		DataModelOld dm = JSONHelper.fromJson(is, DataModelOld.class);
 		dm.setRevision(1l);
-		for(DataAttribute da : dm.getAttributes())
+		for(DataAttributeOld da : dm.getAttributes())
 			da.setDataModel(dm);
 		//dm.setId(null);
 		if(saveModel)
