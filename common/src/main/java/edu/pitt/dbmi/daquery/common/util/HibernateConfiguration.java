@@ -29,6 +29,8 @@ import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLCode;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLDownload;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
+import edu.pitt.dbmi.daquery.update.old.domain.DataAttributeOld;
+import edu.pitt.dbmi.daquery.update.old.domain.DataModelOld;
 
 /**
  *  Singleton used to configure and get a Hibernate Session application wide. 
@@ -87,6 +89,8 @@ public class HibernateConfiguration {
     	hibernateConf.addAnnotatedClass(SiteConnection.class);
     	hibernateConf.addAnnotatedClass(ChangePasswordAttempt.class);
     	hibernateConf.addAnnotatedClass(SQLCode.class);
+    	hibernateConf.addAnnotatedClass(DataModelOld.class);
+    	hibernateConf.addAnnotatedClass(DataAttributeOld.class);
     	
     	
         	
