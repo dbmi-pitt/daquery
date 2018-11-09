@@ -1952,9 +1952,8 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			AppProperties.setDBProperty("update_message",
 					"An unexpeced error occured while updating the daquery application");
 			logger.log(Level.SEVERE, "An unexpeced error occured while checking is update available", e);
-			return (ResponseHelper.getErrorResponse(500, "An unexpected error occured.",
-					"An unexpected error occured while checking is update available.  See the appication logs for more information.",
-					e));
+			return Response.ok(200).entity("{\"updateAvailable\": false}").build();
+
 		} finally {
 			if (resp != null)
 				resp.close();
