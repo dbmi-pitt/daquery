@@ -12,5 +12,3 @@ Installation instructions can be found [here](https://dbmi-pitt.github.io/daquer
 
 Upgrade instructions can be found [here](https://dbmi-pitt.github.io/daquery/upgrade.html).
 
-
-
