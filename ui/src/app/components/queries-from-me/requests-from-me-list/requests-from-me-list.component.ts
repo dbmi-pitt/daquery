@@ -128,7 +128,7 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   getRequestResult(response: any){
-    if(!response) return '';
+    if(!response) return 'Response Not Found';
     if(response.status === 'ERROR'){
       return response.errorMessage;
     } else {
@@ -141,8 +141,10 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   getFilePaths(response: any){
-    if(response.files){
+    if(response && response.files){
       return response.files.filepaths.join('\n');
+    } else {
+      return '';
     }
   }
 
