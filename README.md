@@ -11,3 +11,4 @@ See additional README files in each component directory for more information abo
 Installation instructions can be found [here](https://dbmi-pitt.github.io/daquery/install.html).
 
 Upgrade instructions can be found [here](https://dbmi-pitt.github.io/daquery/upgrade.html).
+
