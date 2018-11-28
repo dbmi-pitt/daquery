@@ -106,7 +106,7 @@ public class DaqueryRequestDAO extends AbstractDAO {
 				directs += comma + "'" + dir + "'";
 				comma = ", ";
 			}
-			String hql = "select req from DaqueryRequest req where direction in (" + directs + ") and archived=" + archived + " order by sentTimestamp desc";
+			String hql = "select req from DaqueryRequest req JOIN fetch req.inquiry join fetch req.responses join fetch req.requester where req.direction in (" + directs + ") and req.archived=" + archived + " order by req.sentTimestamp desc";
 			sess = HibernateConfiguration.openSession();
 			Query q = sess.createQuery(hql);
 			List<DaqueryRequest> requests = q.list();
