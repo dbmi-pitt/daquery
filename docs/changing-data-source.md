@@ -7,7 +7,7 @@ layout: page
 
 ## Changing A Data Source
 
-To join the PaTH network:
+To change a data source for a Network:
  * Log into the application with an account that has administrative rights.
  * Click the "Networks" menu pick in the left hand menu.
  * Click the "Edit Network" link on the network that you want to change the data source on.
