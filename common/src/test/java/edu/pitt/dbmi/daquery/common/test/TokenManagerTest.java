@@ -68,6 +68,14 @@ public class TokenManagerTest {
 		}
 	}
 	
+	@Test(expected = TokenException.class)
+	public void testAddDuplicateToken() throws TokenInvalidException, IOException, JsonMappingException, TokenException, JsonParseException {
+		TokenManager tm = TokenManager.getTokenManager();
+		String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
+		KeyedJWT jwt = tm.getToken(tokenid);
+		tm.addToken(tokenid, jwt);
+	}
+	
 	@Test
 	public void testDeleteToken() {
 		try {
