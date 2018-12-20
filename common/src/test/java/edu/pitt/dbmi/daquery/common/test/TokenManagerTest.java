@@ -6,7 +6,11 @@ import java.io.IOException;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
+
+import javax.crypto.spec.SecretKeySpec;
+
 import java.util.Date;
 
 import org.junit.Test;
@@ -58,7 +62,6 @@ public class TokenManagerTest {
 			TokenManager tm = TokenManager.getTokenManager();
 			String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
 			KeyedJWT jwt = tm.getToken(tokenid);
-			System.out.println("Returned token data: " + jwt.getToken().toString());
 			Assert.assertNotNull("Cannot find token with tokenid = " + tokenid, jwt);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -83,16 +86,12 @@ public class TokenManagerTest {
 		tm.deleteToken("badtoken");
 	}
 
-	@Test
-	public void testGetToken() {
-		try {
-			TokenManager tm = TokenManager.getTokenManager();
-			for (int i=0;i < validTokens.size(); i++) {
-				KeyedJWT jwt = tm.getToken(validTokens.get(i));
-				Assert.assertNotNull("Cannot find token with tokenid = " + validTokens.get(i), jwt);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+	@Test(expected = TokenException.class)
+	public void testGetToken() throws TokenException {
+		TokenManager tm = TokenManager.getTokenManager();
+		for (int i=0;i < validTokens.size(); i++) {
+			KeyedJWT jwt = tm.getToken(validTokens.get(i));
+			Assert.assertNotNull("Cannot find token with tokenid = " + validTokens.get(i), jwt);
 		}
 	}
 
@@ -122,5 +121,30 @@ public class TokenManagerTest {
 		JsonWebToken tok = jwt.getToken();
 		tok.validate(tokenkey);
 	}
-	
+
+	@Test(expected = TokenInvalidException.class)
+	public void testBadTokenKey() throws TokenInvalidException, IOException, JsonMappingException, TokenException, JsonParseException {
+		TokenManager tm = TokenManager.getTokenManager();
+		String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
+		KeyedJWT kj = tm.getToken(tokenid);
+		JsonWebToken jwt = kj.getToken();
+    	String keyString = "badkey";
+        Key badkey = new SecretKeySpec(keyString.getBytes(), 0, keyString.getBytes().length, "DES");
+		jwt.validate(badkey);
+	}	
+
+	@Test
+	public void testGoodTokenKey() {
+		TokenManager tm = TokenManager.getTokenManager();
+		try {
+			String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
+			KeyedJWT kj = tm.getToken(tokenid);
+			JsonWebToken jwt = kj.getToken();
+	        Key goodkey = kj.getTokenKey();
+			Assert.assertTrue(jwt.validate(goodkey));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
+
 }
