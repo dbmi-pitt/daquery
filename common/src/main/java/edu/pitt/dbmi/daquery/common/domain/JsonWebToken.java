@@ -78,12 +78,45 @@ public class JsonWebToken extends DaqueryObject
 		this.iat = jwt.iat;
 		this.exp = jwt.exp;
 		this.net = jwt.net;
+		this.tokenid = jwt.tokenid;
 		if(validate)
 		{
 			validate();
 		}
 	}
-	
+
+	/**
+	 * Constructor to create from a token and validate. Given an existing token, the token will be decoded
+	 * and parsed.  The JWT fields will be set in the instance based on the parsed results.
+	 * 
+	 * After it is parsed the token will be validated if validate is set to true, otherwise it will not be validated.
+	 * If the token is validated and found to be invalid an exception will be thrown.
+	 */
+
+	public JsonWebToken(String token, Key tokenkey, boolean validate) throws IOException, JsonMappingException, JsonParseException, TokenInvalidException
+	{
+		if(token != null && token.toUpperCase().trim().startsWith("BEARER"))
+			this.token = token.trim().substring(6).trim();
+		else
+			this.token = token.trim();
+		String [] tokenParts = token.split("\\.");
+		String middle = tokenParts[1];
+		String json = StringUtils.newStringUtf8(Base64.decodeBase64(middle.getBytes()));		
+		ObjectMapper mapper = new ObjectMapper();
+		TypeReference<JsonWebToken> type = new TypeReference<JsonWebToken>(){};
+		JsonWebToken jwt = mapper.readValue(json, type);
+		this.sub = jwt.sub;
+		this.iss = jwt.iss;
+		this.iat = jwt.iat;
+		this.exp = jwt.exp;
+		this.net = jwt.net;
+		this.tokenid = jwt.tokenid;
+		if(validate)
+		{
+			validate(tokenkey);
+		}
+	}
+
 	/**
 	 * Constructor to create a new JWT from a userId, siteId and networkId.  The networkId is optional.
 	 * This issues the token (retrieved with getToken).
@@ -113,6 +146,9 @@ public class JsonWebToken extends DaqueryObject
 	@Expose
 	public String net;
 	
+	@Expose 
+	public String tokenid;
+	
 	public String getUserId(){return(sub);}
 	public void setUserId(String userUUID){sub = userUUID;}
 	
@@ -121,6 +157,9 @@ public class JsonWebToken extends DaqueryObject
 	
 	public String getNetworkId(){return(net);}
 	public void setNetworkId(String networkUUID){net = networkUUID;}
+	
+	public String getTokenId(){return(tokenid);}
+	public void setTokenId(String newTokenId) {tokenid = newTokenId;}
 	
 	public String getToken(){return(token);}
 	
@@ -167,7 +206,48 @@ public class JsonWebToken extends DaqueryObject
 	    	throw new TokenInvalidException("Unsupported token format", unsupported);
 	    }
      }	
-	
+
+    /**
+     * Validate a JWT token
+     * @param JWT token
+     * @return - the UUID extracted from the token
+     * @throws TokenInvalidException 
+     * @throws ExpiredJwtException if the token is expired
+     * ClaimJwtException if the validation of an JTW claim failed
+     * MalformedJwtException if the JWT if malformed
+     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
+     * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
+     */
+    public boolean validate(Key tokenkey) throws TokenInvalidException {
+        // Check if it was issued by the server and if it's not expired
+        // Throw an Exception if the token is invalid
+    	
+        try {
+        	//check the validity of the signed portion
+	        Claims claims = Jwts.parser().setSigningKey(tokenkey).parseClaimsJws(token).getBody();
+	        
+	        //check the user and site against the token payload
+	        if(!StringHelper.equalIgnoreCase(claims.getIssuer(), getSiteId()))
+	        		throw new TokenInvalidException("The provided site id does not match the claimed site id");
+
+	        if(!StringHelper.equalIgnoreCase(claims.getSubject(), getUserId()))
+	        		throw new TokenInvalidException("The provided user id does not match the claimed userid");
+
+	        return true;
+        } catch (ExpiredJwtException expired) {
+        	throw new TokenInvalidException("Token expired.", expired);
+	    } catch (ClaimJwtException claim) {
+	    	throw new TokenInvalidException("Invalid token", claim);
+	    } catch (MalformedJwtException malformed) {
+	    	throw new TokenInvalidException("Malformed token", malformed);
+	    } catch (SignatureException sig) {
+	    	throw new TokenInvalidException("Invalid token signature", sig);
+	    } catch (UnsupportedJwtException unsupported) {
+	    	throw new TokenInvalidException("Unsupported token format", unsupported);
+	    }
+     }	
+    
+    
     /**
      * Create a JWT based on a user's uuid.  The JWT is set to expire in 15 minutes.
      * @param uuid- a user's uuid
@@ -197,6 +277,13 @@ public class JsonWebToken extends DaqueryObject
         JwtBuilder builder = Jwts.builder().setClaims(clms);        
         String jwtToken = builder.signWith(SignatureAlgorithm.HS512, key).compact();
         return jwtToken;
-    }    
+    }
+
+	@Override
+	public String toString() {
+		return "JsonWebToken [token=" + token + ", sub=" + sub + ", iss=" + iss + ", iat=" + iat + ", exp=" + exp
+				+ ", net=" + net + ", tokenid=" + tokenid + "]";
+	}    
+
     
 }
