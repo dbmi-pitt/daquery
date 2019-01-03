@@ -40,6 +40,7 @@ public class JsonWebToken extends DaqueryObject
 {
 	private static final long serialVersionUID = 89483934534534l;
 	
+	@Deprecated
 	public JsonWebToken(){}
 	
 	/**
@@ -48,6 +49,7 @@ public class JsonWebToken extends DaqueryObject
 	 * 
 	 * After it is parsed the token will be validated.  If the token is invalid an exception will be thrown.
 	 */
+	@Deprecated
 	public JsonWebToken(String token) throws JsonParseException, IOException, TokenInvalidException
 	{
 		this(token, true);
@@ -61,6 +63,7 @@ public class JsonWebToken extends DaqueryObject
 	 * If the token is validated and found to be invalid an exception will be thrown.
 	 */
 
+	@Deprecated
 	public JsonWebToken(String token, boolean validate) throws IOException, JsonMappingException, JsonParseException, TokenInvalidException
 	{
 		if(token != null && token.toUpperCase().trim().startsWith("BEARER"))
@@ -121,11 +124,29 @@ public class JsonWebToken extends DaqueryObject
 	 * Constructor to create a new JWT from a userId, siteId and networkId.  The networkId is optional.
 	 * This issues the token (retrieved with getToken).
 	 */
+	@Deprecated
 	public JsonWebToken(String userId, String siteId, String networkId)
 	{
-		token = issueToken(userId, siteId, networkId);
+		this.token = issueToken(userId, siteId, networkId);
 	}
-	
+
+	public JsonWebToken(String userId, String siteId, String networkId, String tokenid, Key tokenkey)
+	{
+    	this.sub = userId;
+    	this.iss = siteId;
+    	this.net = networkId;
+        Calendar date = Calendar.getInstance();
+        long t=date.getTimeInMillis();
+        //add thirty minutes to current time to create
+        //a token that expires in 30 minutes (30 * 60 milliseconds)
+        Date expiryTimestamp = new Date(t + ((TokenManager.getExpirationMinutes() +1) * 60000));
+        Date now = new Date();
+        this.iat = now.getTime();
+        this.exp = expiryTimestamp.getTime();
+        this.tokenid = tokenid;
+		this.token = generateTokenString(tokenkey);
+	}
+
 	@Expose
 	private String token;
 	
@@ -163,6 +184,9 @@ public class JsonWebToken extends DaqueryObject
 	
 	public String getToken(){return(token);}
 	
+	public long getExpiration() { return exp;}
+	
+	
 	
     /**
      * Validate a JWT token
@@ -175,6 +199,7 @@ public class JsonWebToken extends DaqueryObject
      * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
      * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
      */
+	@Deprecated
     public boolean validate() throws TokenInvalidException {
         // Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
@@ -210,7 +235,7 @@ public class JsonWebToken extends DaqueryObject
     /**
      * Validate a JWT token
      * @param JWT token
-     * @return - the UUID extracted from the token
+     * @return - boolean indicating if the token is valid
      * @throws TokenInvalidException 
      * @throws ExpiredJwtException if the token is expired
      * ClaimJwtException if the validation of an JTW claim failed
@@ -225,7 +250,6 @@ public class JsonWebToken extends DaqueryObject
         try {
         	//check the validity of the signed portion
 	        Claims claims = Jwts.parser().setSigningKey(tokenkey).parseClaimsJws(token).getBody();
-	        
 	        //check the user and site against the token payload
 	        if(!StringHelper.equalIgnoreCase(claims.getIssuer(), getSiteId()))
 	        		throw new TokenInvalidException("The provided site id does not match the claimed site id");
@@ -233,6 +257,16 @@ public class JsonWebToken extends DaqueryObject
 	        if(!StringHelper.equalIgnoreCase(claims.getSubject(), getUserId()))
 	        		throw new TokenInvalidException("The provided user id does not match the claimed userid");
 
+	        //check if the token is expired.
+	        //NOTE: the parseClaimsJws method doesn't automatically
+	        //check the "exp" attribute.  So check if it is expired 
+	        Calendar date = Calendar.getInstance();
+	        long now=date.getTimeInMillis();
+	        long exp = (long)claims.get("exp");
+	        if (exp < now) {
+        		throw new TokenInvalidException("Token expired.");	        	
+	        }
+	        
 	        return true;
         } catch (ExpiredJwtException expired) {
         	throw new TokenInvalidException("Token expired.", expired);
@@ -253,10 +287,11 @@ public class JsonWebToken extends DaqueryObject
      * @param uuid- a user's uuid
      * @return a String representing the JWT for the user set to expire in 15 minutes.
      */
+    @Deprecated
     private String issueToken(String userUuid, String siteUUID, String networkUUID) {
-    	sub = userUuid;
-    	iss = siteUUID;
-    	net = networkUUID;
+    	this.sub = userUuid;
+    	this.iss = siteUUID;
+    	this.net = networkUUID;
         Key key = KeyGenerator.generateKey();
         Calendar date = Calendar.getInstance();
         long t=date.getTimeInMillis();
@@ -265,8 +300,8 @@ public class JsonWebToken extends DaqueryObject
         Date fifteenMinuteExpiry = new Date(t + (30 * 60000));
         Claims c;
         Date now = new Date();
-        iat = now.getTime();
-        exp = fifteenMinuteExpiry.getTime();
+        this.iat = now.getTime();
+        this.exp = fifteenMinuteExpiry.getTime();
         Map<String, Object> clms = new HashMap<String, Object>();
         clms.put("sub", userUuid);
         clms.put("iss", siteUUID);
@@ -279,6 +314,21 @@ public class JsonWebToken extends DaqueryObject
         return jwtToken;
     }
 
+    
+    private String generateTokenString(Key tokenkey) {
+        Map<String, Object> clms = new HashMap<String, Object>();
+        clms.put("sub", this.sub);
+        clms.put("iss", this.iss);
+        clms.put("iat", this.iat);
+        clms.put("exp", this.exp);
+        clms.put("tokenid", this.tokenid);
+        if(! StringHelper.isEmpty(this.net))
+        	clms.put("net", this.net);
+        JwtBuilder builder = Jwts.builder().setClaims(clms);        
+        String jwtToken = builder.signWith(SignatureAlgorithm.HS512, tokenkey).compact();
+        return jwtToken;
+    }
+    
 	@Override
 	public String toString() {
 		return "JsonWebToken [token=" + token + ", sub=" + sub + ", iss=" + iss + ", iat=" + iat + ", exp=" + exp
