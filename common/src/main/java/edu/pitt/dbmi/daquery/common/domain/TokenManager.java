@@ -2,9 +2,11 @@ package edu.pitt.dbmi.daquery.common.domain;
 
 import java.io.IOException;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,10 +29,12 @@ public class TokenManager {
 		private Key token_key;
 		private String userid;
 		private JsonWebToken token;
+		private long expDate;
 		
 		public KeyedJWT(Key newkey, JsonWebToken newtoken) {
 			this.token_key = newkey;
 			this.token = newtoken;
+			this.expDate = newtoken.getExpiration();
 		}
 
 		public Key getTokenKey() {
@@ -48,11 +52,19 @@ public class TokenManager {
 		public void setToken(JsonWebToken token) {
 			this.token = token;
 		}
+		
+		public long getExpirationDate() {
+			return expDate;
+		}
+		
+		public void setExpirationDate(long newdate) {
+			this.expDate = newdate;
+		}
 	}
 	
 	private static TokenManager manager = null;
 	private HashMap<String, KeyedJWT>tokenTable = null;
-	private int expirationMinutes = 15;
+	private static int expirationMinutes = 15;
 	
 	private TokenManager() {
 		tokenTable = new HashMap<String, KeyedJWT>();
@@ -62,15 +74,46 @@ public class TokenManager {
 		if (manager == null) {
 			manager = new TokenManager();
 		}
+		manager.validateCurrentTokens();
 		return manager;		
 	}
 
-	public int getExpirationMinutes() {
-		return this.expirationMinutes;
+	public static int getExpirationMinutes() {
+		return expirationMinutes;
 	}
 	
-	public void setExpirationMinutes(int newminutes) {
-		this.expirationMinutes = newminutes;
+	public static void setExpirationMinutes(int newminutes) {
+		expirationMinutes = newminutes;
+	}
+	
+	/**
+	 * Loop through the list of tokens and delete any expired tokens
+	 */
+	public void validateCurrentTokens() {
+		List<String> invalidTokenIds = new ArrayList<String>();
+		if (tokenTable == null) {
+			return;
+		}
+		for (KeyedJWT kj : tokenTable.values() ) {
+			String tokenid = kj.getToken().getTokenId();
+			long exp = kj.getExpirationDate();
+	        Calendar date = Calendar.getInstance();
+	        long t=date.getTimeInMillis();
+	        //the expcutoff represents the current time, plus a delta of one minute 
+	        long expcutoff = t + (60000);
+	        if (exp < expcutoff) {
+	        	invalidTokenIds.add(tokenid);
+	        	//System.out.println("Gonna delete this token with expdate of " + exp + " because it is now " + expcutoff);
+	        }
+
+		}
+		for (String tokenid : invalidTokenIds) {
+			try {
+				deleteToken(tokenid);
+			} catch (TokenException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private String addToken(JsonWebToken token) throws TokenException {
@@ -84,8 +127,7 @@ public class TokenManager {
 	public String addToken(String userUuid, String siteUUID, String networkUUID) throws IOException, JsonMappingException, TokenException, TokenInvalidException, JsonParseException {
 		Key token_key = generateTokenKey();
 		String tokenid = generateTokenId();
-		String newTokenString = issueToken(userUuid, siteUUID, networkUUID, token_key, tokenid);
-		JsonWebToken jwt = new JsonWebToken(newTokenString, token_key, true);
+		JsonWebToken jwt = new JsonWebToken(userUuid, siteUUID, networkUUID, tokenid, token_key);
 		KeyedJWT keyjwt = manager.new KeyedJWT(token_key, jwt);
 		addToken(tokenid, keyjwt);
 		return tokenid;
@@ -141,7 +183,7 @@ public class TokenManager {
      * @param uuid- a user's uuid
      * @return a String representing the JWT for the user set to expire in 15 minutes.
      */
-    private static String issueToken(String userUuid, String siteUUID, String networkUUID, Key newkey, String tokenid) {
+    private static String issueToken_OLD(String userUuid, String siteUUID, String networkUUID, Key newkey) {
     	String sub = userUuid;
     	String iss = siteUUID;
     	String net = networkUUID;
@@ -149,17 +191,18 @@ public class TokenManager {
         long t=date.getTimeInMillis();
 
         TokenManager tm = TokenManager.getTokenManager();
-        Date expiry = new Date(t + (tm.getExpirationMinutes() * 60000));
+        //Date expiry = new Date(t + (tm.getExpirationMinutes() * 60000));
         Claims c;
         Date now = new Date();
         long iat = now.getTime();
-        long exp = expiry.getTime();
+        long exp = t + (tm.getExpirationMinutes() * 60000);
+        Date expiry = new Date(exp);
         Map<String, Object> clms = new HashMap<String, Object>();
         clms.put("sub", userUuid);
         clms.put("iss", siteUUID);
-        clms.put("tokenid", tokenid);
+        //clms.put("tokenid", tokenid);
         clms.put("iat", new Date());
-        clms.put("exp", expiry);
+        clms.put("exp", exp);
         if(! StringHelper.isEmpty(networkUUID))
         	clms.put("net", networkUUID);
         JwtBuilder builder = Jwts.builder().setClaims(clms);

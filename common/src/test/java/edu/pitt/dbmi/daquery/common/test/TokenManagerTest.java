@@ -122,7 +122,7 @@ public class TokenManagerTest {
 		long startTime = System.currentTimeMillis();
 		long elapsedTime = 0L;
 
-		while (elapsedTime < 2*60*1000) {
+		while (elapsedTime < 4*60*1000) {
 		    elapsedTime = (new Date()).getTime() - startTime;
 		}
 		
