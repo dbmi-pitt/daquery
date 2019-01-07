@@ -3,6 +3,7 @@ package edu.pitt.dbmi.daquery.rest;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.security.Key;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,8 @@ import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager.KeyedJWT;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
@@ -90,9 +93,13 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
+        String tokenid = (String)requestContext.getProperty("tokenid");
         JsonWebToken jwtReporting = null;
         try {
 
+        	TokenManager tm = TokenManager.getTokenManager();
+        	KeyedJWT kj = tm.getToken(token);
+        	Key tokenkey = kj.getTokenKey();
         	//get the info from the token, but don't validate yet
         	final JsonWebToken jwt = new JsonWebToken(token, false);
         	jwtReporting = new JsonWebToken();
@@ -123,7 +130,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 //	            }
 	            
 	            //an exception will be thrown if the token isn't valid
-	            jwt.validate();
+	            jwt.validate(tokenkey);
         	}
         	else
         	{
