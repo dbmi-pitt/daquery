@@ -64,7 +64,7 @@ public class TokenManager {
 	
 	private static TokenManager manager = null;
 	private HashMap<String, KeyedJWT>tokenTable = null;
-	private static int expirationMinutes = 15;
+	private static int expirationMinutes = 1;
 	
 	private TokenManager() {
 		tokenTable = new HashMap<String, KeyedJWT>();
@@ -89,27 +89,28 @@ public class TokenManager {
 	/**
 	 * Loop through the list of tokens and delete any expired tokens
 	 */
-	public void validateCurrentTokens() {
-		List<String> invalidTokenIds = new ArrayList<String>();
+	public synchronized void validateCurrentTokens() {
+		List<String> invalidTokens = new ArrayList<String>();
 		if (tokenTable == null) {
 			return;
 		}
 		for (KeyedJWT kj : tokenTable.values() ) {
-			String tokenid = kj.getToken().getTokenId();
+			Key tokenkey = kj.getTokenKey();
+			String token = kj.getToken().generateTokenString(tokenkey);
 			long exp = kj.getExpirationDate();
 	        Calendar date = Calendar.getInstance();
 	        long t=date.getTimeInMillis();
 	        //the expcutoff represents the current time, plus a delta of one minute 
 	        long expcutoff = t + (60000);
 	        if (exp < expcutoff) {
-	        	invalidTokenIds.add(tokenid);
+	        	invalidTokens.add(token);
 	        	//System.out.println("Gonna delete this token with expdate of " + exp + " because it is now " + expcutoff);
 	        }
 
 		}
-		for (String tokenid : invalidTokenIds) {
+		for (String token : invalidTokens) {
 			try {
-				deleteToken(tokenid);
+				deleteToken(token);
 			} catch (TokenException e) {
 				e.printStackTrace();
 			}
@@ -120,8 +121,9 @@ public class TokenManager {
 		String tokenid = generateTokenId();
 		Key token_key = generateTokenKey();
 		KeyedJWT keyjwt = manager.new KeyedJWT(token_key, token);
-		addToken(tokenid, keyjwt);
-		return tokenid;
+		String tokenString = keyjwt.getToken().generateTokenString(token_key);
+		addToken(tokenString, keyjwt);
+		return tokenString;
 	}
 	
 	public String addToken(String userUuid, String siteUUID, String networkUUID) throws IOException, JsonMappingException, TokenException, TokenInvalidException, JsonParseException {
@@ -129,35 +131,37 @@ public class TokenManager {
 		String tokenid = generateTokenId();
 		JsonWebToken jwt = new JsonWebToken(userUuid, siteUUID, networkUUID, tokenid, token_key);
 		KeyedJWT keyjwt = manager.new KeyedJWT(token_key, jwt);
-		addToken(tokenid, keyjwt);
-		return tokenid;
+		String tokenString = keyjwt.getToken().generateTokenString(token_key);
+		addToken(tokenString, keyjwt);
+		return tokenString;
 	}
 
 	private void addToken(String tokenid, JsonWebToken token) throws TokenException {
 		Key token_key = generateTokenKey();
 		KeyedJWT keyjwt = manager.new KeyedJWT(token_key, token);
-		addToken(tokenid, keyjwt);		
+		String tokenString = keyjwt.getToken().generateTokenString(token_key);
+		addToken(tokenString, keyjwt);		
 	}
 		
-	public void addToken(String tokenid, KeyedJWT new_keyjwt) throws TokenException {
-		if (tokenTable.containsKey(tokenid)) {
-			throw new TokenException("Duplicate token found.  Tokenid " + tokenid + " already exists in token table.");
+	public void addToken(String tokenString, KeyedJWT new_keyjwt) throws TokenException {
+		if (tokenTable.containsKey(tokenString)) {
+			throw new TokenException("Duplicate token found.  Token " + tokenString + " already exists in token table.");
 		}
-		tokenTable.put(tokenid, new_keyjwt);		
+		tokenTable.put(tokenString, new_keyjwt);		
 	}
 	
-	public void deleteToken(String tokenid) throws TokenException {
-		KeyedJWT retToken = tokenTable.remove(tokenid);
+	public void deleteToken(String tokenString) throws TokenException {
+		KeyedJWT retToken = tokenTable.remove(tokenString);
 		if (retToken == null) {
-			throw new TokenException("No token found.  Cannot delete tokenid " + tokenid + " not found in token table.");						
+			throw new TokenException("No token found.  Cannot delete token " + tokenString + " not found in token table.");						
 		}
 	}
 	
-	public KeyedJWT getToken(String tokenid) throws TokenException {
-		KeyedJWT retToken = tokenTable.get(tokenid);
+	public KeyedJWT getToken(String tokenString) throws TokenException {
+		KeyedJWT retToken = tokenTable.get(tokenString);
 		if (retToken == null) {
 			//no Tolkien found
-			throw new TokenException("No token found.  Tokenid " + tokenid + " not found in token table.");			
+			throw new TokenException("No token found.  Token " + tokenString + " not found in token table.");			
 		}	
 		return retToken;
 	}

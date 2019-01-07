@@ -46,9 +46,9 @@ public class TokenManagerTest {
 		try {
 			for (int i=0; i < 5; i++) {
 				TokenManager tm = TokenManager.getTokenManager();
-				String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
-				KeyedJWT jwt = tm.getToken(tokenid);
-				validTokens.add(tokenid);
+				String token = tm.addToken(userUuid, siteUUID, networkUUID);
+				KeyedJWT jwt = tm.getToken(token);
+				validTokens.add(token);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -127,7 +127,8 @@ public class TokenManagerTest {
 		}
 		
 		JsonWebToken tok = jwt.getToken();
-		tok.validate(tokenkey);
+		boolean b = tok.validate(tokenkey);
+		System.out.println("here");
 	}
 
 	@Test(expected = TokenInvalidException.class)

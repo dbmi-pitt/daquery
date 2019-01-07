@@ -245,13 +245,13 @@ public class RoleRestTest2 extends DaqueryBaseTest {
 	private static void performUserLogin(String userEmail, String password) {
 		
 		System.out.println("in performUserLogin");
-		System.out.println("in performUserLogin: " + currentToken);
-        currentToken = given().pathParam("email", userEmail)
+		System.out.println("in performUserLogin: " + currentTokenid);
+        currentTokenid = given().pathParam("email", userEmail)
                .pathParam("password", password)
         .when().get("users/login?email={email}&password={password}")
         .then().statusCode(200)
-        .extract().path("token");
-		System.out.println("in performUserLogin: " + currentToken);
+        .extract().path("tokenid");
+		System.out.println("in performUserLogin: " + currentTokenid);
 	}
 
 	private static String login(String username, String password) throws Exception

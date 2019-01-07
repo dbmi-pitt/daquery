@@ -315,7 +315,7 @@ public class JsonWebToken extends DaqueryObject
     }
 
     
-    private String generateTokenString(Key tokenkey) {
+    public String generateTokenString(Key tokenkey) {
         Map<String, Object> clms = new HashMap<String, Object>();
         clms.put("sub", this.sub);
         clms.put("iss", this.iss);
