@@ -109,6 +109,26 @@ public class TokenManagerTest {
 		tm.getToken("badtoken");
 	}
 	
+	@Test(expected = TokenException.class)
+	public void renewToken() throws TokenException {
+		try {
+			TokenManager tm = TokenManager.getTokenManager();
+			String tokenString = validTokens.get(validTokens.size()-1);
+			String newTokenString = tm.renewToken(tokenString);
+			//there are two tests to run
+			//1) when renewing a token, the token strings should not match
+			Assert.assertTrue("Error old token " + tokenString + " is the same as the new token " + newTokenString, tokenString.compareTo(newTokenString) != 0);
+			//2_ we should also throw an error if the old token is still in the manager
+			tm.getToken(tokenString);
+			Assert.fail("Error: the old token " + tokenString + " is still in the token manager");
+		} catch (TokenException te) {
+			throw new TokenException("Token not found");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail("Error deleting token with tokenid = " + validTokens.get(0) + ".  Error: " + e.getMessage());
+		}
+	}
+	
 	@Test(expected = TokenInvalidException.class)
 	public void testExpiredToken() throws TokenInvalidException, IOException, JsonMappingException, TokenException, JsonParseException {
 		TokenManager tm = TokenManager.getTokenManager();
@@ -127,33 +147,10 @@ public class TokenManagerTest {
 		}
 		
 		JsonWebToken tok = jwt.getToken();
-		boolean b = tok.validate(tokenkey);
+		boolean b = tok.validate();
 		System.out.println("here");
 	}
 
-	@Test(expected = TokenInvalidException.class)
-	public void testBadTokenKey() throws TokenInvalidException, IOException, JsonMappingException, TokenException, JsonParseException {
-		TokenManager tm = TokenManager.getTokenManager();
-		String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
-		KeyedJWT kj = tm.getToken(tokenid);
-		JsonWebToken jwt = kj.getToken();
-    	String keyString = "badkey";
-        Key badkey = new SecretKeySpec(keyString.getBytes(), 0, keyString.getBytes().length, "DES");
-		jwt.validate(badkey);
-	}	
 
-	@Test
-	public void testGoodTokenKey() {
-		TokenManager tm = TokenManager.getTokenManager();
-		try {
-			String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
-			KeyedJWT kj = tm.getToken(tokenid);
-			JsonWebToken jwt = kj.getToken();
-	        Key goodkey = kj.getTokenKey();
-			Assert.assertTrue(jwt.validate(goodkey));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}	
 
 }
