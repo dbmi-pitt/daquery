@@ -27,7 +27,6 @@ public class TokenManager {
 		
 	public class KeyedJWT {
 		private Key token_key;
-		private String userid;
 		private JsonWebToken token;
 		private long expDate;
 		
@@ -70,11 +69,11 @@ public class TokenManager {
 		tokenTable = new HashMap<String, KeyedJWT>();
 	}
 	
-	public static TokenManager getTokenManager() {
+	public synchronized static TokenManager getTokenManager() {
 		if (manager == null) {
 			manager = new TokenManager();
 		}
-		manager.validateCurrentTokens();
+		manager.clearExpiredTokens();
 		return manager;		
 	}
 
@@ -89,7 +88,7 @@ public class TokenManager {
 	/**
 	 * Loop through the list of tokens and delete any expired tokens
 	 */
-	public synchronized void validateCurrentTokens() {
+	private void clearExpiredTokens() {
 		List<String> invalidTokens = new ArrayList<String>();
 		if (tokenTable == null) {
 			return;
@@ -117,15 +116,6 @@ public class TokenManager {
 		}
 	}
 	
-	private String addToken(JsonWebToken token) throws TokenException {
-		String tokenid = generateTokenId();
-		Key token_key = generateTokenKey();
-		KeyedJWT keyjwt = manager.new KeyedJWT(token_key, token);
-		String tokenString = keyjwt.getToken().generateTokenString(token_key);
-		addToken(tokenString, keyjwt);
-		return tokenString;
-	}
-	
 	public String addToken(String userUuid, String siteUUID, String networkUUID) throws IOException, JsonMappingException, TokenException, TokenInvalidException, JsonParseException {
 		Key token_key = generateTokenKey();
 		String tokenid = generateTokenId();
@@ -136,13 +126,15 @@ public class TokenManager {
 		return tokenString;
 	}
 
-	private void addToken(String tokenid, JsonWebToken token) throws TokenException {
-		Key token_key = generateTokenKey();
-		KeyedJWT keyjwt = manager.new KeyedJWT(token_key, token);
-		String tokenString = keyjwt.getToken().generateTokenString(token_key);
-		addToken(tokenString, keyjwt);		
+	public String renewToken(String oldTokenString) throws IOException, JsonMappingException, TokenException, TokenInvalidException, JsonParseException {
+		KeyedJWT kj = getToken(oldTokenString);
+		JsonWebToken jwt = kj.getToken();
+		//call validate to extract the data from the token string
+		jwt.validate();
+		deleteToken(oldTokenString);		
+		return addToken(jwt.getUserId(), jwt.getSiteId(), jwt.getNetworkId());
 	}
-		
+
 	public void addToken(String tokenString, KeyedJWT new_keyjwt) throws TokenException {
 		if (tokenTable.containsKey(tokenString)) {
 			throw new TokenException("Duplicate token found.  Token " + tokenString + " already exists in token table.");
@@ -182,38 +174,5 @@ public class TokenManager {
         return key;
     }
     
-    /**
-     * Create a JWT based on a user's uuid.  The JWT is set to expire in 15 minutes.
-     * @param uuid- a user's uuid
-     * @return a String representing the JWT for the user set to expire in 15 minutes.
-     */
-    private static String issueToken_OLD(String userUuid, String siteUUID, String networkUUID, Key newkey) {
-    	String sub = userUuid;
-    	String iss = siteUUID;
-    	String net = networkUUID;
-        Calendar date = Calendar.getInstance();
-        long t=date.getTimeInMillis();
-
-        TokenManager tm = TokenManager.getTokenManager();
-        //Date expiry = new Date(t + (tm.getExpirationMinutes() * 60000));
-        Claims c;
-        Date now = new Date();
-        long iat = now.getTime();
-        long exp = t + (tm.getExpirationMinutes() * 60000);
-        Date expiry = new Date(exp);
-        Map<String, Object> clms = new HashMap<String, Object>();
-        clms.put("sub", userUuid);
-        clms.put("iss", siteUUID);
-        //clms.put("tokenid", tokenid);
-        clms.put("iat", new Date());
-        clms.put("exp", exp);
-        if(! StringHelper.isEmpty(networkUUID))
-        	clms.put("net", networkUUID);
-        JwtBuilder builder = Jwts.builder().setClaims(clms);
-        builder.setExpiration(expiry);
-        String jwtToken = builder.signWith(SignatureAlgorithm.HS512, newkey).compact();
-        return jwtToken;
-    }    
-
 	
 }
