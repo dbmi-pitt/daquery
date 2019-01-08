@@ -64,7 +64,7 @@ public class TokenManager {
 	
 	private static TokenManager manager = null;
 	private HashMap<String, KeyedJWT>tokenTable = null;
-	private static int expirationMinutes = 1;
+	private static int expirationMinutes = 15;
 	
 	private TokenManager() {
 		tokenTable = new HashMap<String, KeyedJWT>();
