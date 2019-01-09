@@ -64,6 +64,8 @@ import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.RemoteUser;
 import edu.pitt.dbmi.daquery.common.domain.Role;
 import edu.pitt.dbmi.daquery.common.domain.Site;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager.KeyedJWT;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.UserStatus;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
@@ -999,11 +1001,10 @@ public class UserEndpoint extends AbstractEndpoint {
     {
     	String securityToken = httpHeaders.getHeaderString("Authorization");
 		try {
-			JsonWebToken jwt = new JsonWebToken(securityToken);
-		} catch (JsonParseException e) {
-			return(ResponseHelper.getErrorResponse(400, "Invalid login token recieved.", "", e));
-		} catch (IOException e) {
-			return(ResponseHelper.getErrorResponse(400, "Invalid login token recieved.", "", e));
+			TokenManager tm = TokenManager.getTokenManager();
+			KeyedJWT kj = tm.getToken(securityToken);
+			JsonWebToken jwt = kj.getToken();
+			jwt.validate();
 		} catch (TokenInvalidException e) {
 			return(ResponseHelper.getErrorResponse(401, "Not Authorized", e.getMessage(), e));
 		} catch (Throwable t) {

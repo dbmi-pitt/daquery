@@ -133,7 +133,25 @@ public class ResponseHelper {
 		}
 
     }
-	
+
+    public static Response getRenewedTokenResponse(int responseCode, Integer subcode, String renewedTokenString, Map<String, Object> additionalReturnValues) throws DaqueryException
+    {
+    	try {
+	        HashMap<String, Object> vals = new HashMap<String, Object>();
+	        vals.put("token", renewedTokenString);
+	        if(additionalReturnValues != null)
+	        	vals.putAll(additionalReturnValues);
+	        
+	        return(getJsonResponse(responseCode, subcode, vals));
+    	} catch(Exception e)
+		{
+			logger.log(Level.SEVERE, String.format("Error occured while renewing a token.\nError message:%s\n", e.getMessage()));
+			return(getBasicResponse(500, "Error occured while creating a token.  Check the site logs for more information."));
+		}
+
+    }
+    
+    
     /**
      * Given an HTTP status code, a subcode and a list (map) of key value pairs,
      * construct a web response object with a json payload.
