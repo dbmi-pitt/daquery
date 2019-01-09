@@ -43,38 +43,15 @@ public class JsonWebToken extends DaqueryObject
 	private static final long serialVersionUID = 89483934534534l;
 	
 	/**
-	 * Constructor to create from a token and validate. Given an existing token, the token will be decoded
-	 * and parsed.  The JWT fields will be set in the instance based on the parsed results.
-	 * 
-	 * After it is parsed the token will be validated if validate is set to true, otherwise it will not be validated.
-	 * If the token is validated and found to be invalid an exception will be thrown.
+	 * Given a userId, siteId, networkId, tokenid, and token key generate a new Json Web token
+	 * The token will have an issue timestamp of the current time and the expiration timestamp will
+	 * be the current time plus the TokenManager expiration time.
+	 * @param userId
+	 * @param siteId
+	 * @param networkId
+	 * @param tokenid
+	 * @param tokenkey
 	 */
-
-	public JsonWebToken(String token, Key tokenkey, boolean validate) throws IOException, JsonMappingException, JsonParseException, TokenInvalidException
-	{
-		if(token != null && token.toUpperCase().trim().startsWith("BEARER"))
-			this.token = token.trim().substring(6).trim();
-		else
-			this.token = token.trim();
-		String [] tokenParts = token.split("\\.");
-		String middle = tokenParts[1];
-		String json = StringUtils.newStringUtf8(Base64.decodeBase64(middle.getBytes()));		
-		ObjectMapper mapper = new ObjectMapper();
-		TypeReference<JsonWebToken> type = new TypeReference<JsonWebToken>(){};
-		JsonWebToken jwt = mapper.readValue(json, type);
-		this.sub = jwt.sub;
-		this.iss = jwt.iss;
-		this.iat = jwt.iat;
-		this.exp = jwt.exp;
-		this.net = jwt.net;
-		this.tokenid = jwt.tokenid;
-		this.token = generateTokenString(tokenkey);
-		if(validate)
-		{
-			validate();
-		}
-	}
-
 	public JsonWebToken(String userId, String siteId, String networkId, String tokenid, Key tokenkey)
 	{
     	this.sub = userId;
@@ -84,7 +61,7 @@ public class JsonWebToken extends DaqueryObject
         long t=date.getTimeInMillis();
         //add thirty minutes to current time to create
         //a token that expires in 30 minutes (30 * 60 milliseconds)
-        Date expiryTimestamp = new Date(t + ((TokenManager.getExpirationMinutes() +1) * 60000));
+        Date expiryTimestamp = new Date(t + (TokenManager.getExpirationMinutes()  * 60000));
         Date now = new Date();
         this.iat = now.getTime();
         this.exp = expiryTimestamp.getTime();
@@ -192,6 +169,11 @@ public class JsonWebToken extends DaqueryObject
 	    }
      }	
         
+    /**
+     * Return a String representing the current token
+     * @param tokenkey- the key for the current token
+     * @return- a String representing the current token
+     */
     public String generateTokenString(Key tokenkey) {
         Map<String, Object> clms = new HashMap<String, Object>();
         clms.put("sub", this.sub);
