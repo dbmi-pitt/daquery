@@ -19,8 +19,9 @@ public class UserTest extends DaqueryBaseTest {
 
 	
 	//return the UUID for first user found
-	@Test
-	public void findAllUsersTest() {
+	//this sets the userTestUUID list for the rest of the tests
+	@BeforeClass
+	public void initializeUUIDList() {
 		List<String> uuidList = given().with().contentType("application/json")
 		.headers("Authorization", "Bearer " + currentToken)
 		.when().get("users").then().statusCode(200)
@@ -55,14 +56,14 @@ public class UserTest extends DaqueryBaseTest {
 	
 	/* TODO: skip this for now.  Apparently we are returning a 200 for this
 	 * the ResponseHelper code returns a new token in this case
-	@Test
+*/	@Test
 	public void checkExpiredToken() {
 		given().with().contentType("application/json")
 		.headers("Authorization", "Bearer " + currentToken)
 		.when().get("users").then().statusCode(401);
 
 	}
-	*/
+	
 	
 	
 }
