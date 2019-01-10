@@ -83,13 +83,13 @@ public class DaqueryBaseTest {
 	//I have to login before running any of the other testing methods...
     //I need a valid token for all the other calls
 	public static void checkLogin() {
-        currentTokenid = given().pathParam("email", username)
+        currentToken = given().pathParam("email", username)
                .pathParam("password", password)
         .log().all()
         .when().get("users/login?email={email}&password={password}")
         .then().statusCode(200)
-        .extract().path("tokenid");
-		System.out.println("in checkLogin: " + currentTokenid);
+        .extract().path("token");
+		System.out.println("in checkLogin: " + currentToken);
 	}
 	
 
