@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class UserTest extends DaqueryBaseTest {
 
-	private String userTestUUID = "";
+	private static String userTestUUID = "";
 	
 	private String badToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI0ZTIyNGFiZi03OWVkLTQxZTktOGI3Yy1iODYxZTI3NzEwYTkiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvZGFxdWVyeS13cy93cy91c2Vycy9sb2dpbiIsImlhdCI6MTUwNzEyMDUyMiwiZXhwIjoxNTA3MTIxNDIyfQ.zlxdwkHOXSldVAgdbpVcTQ0uGSW8fI_LPHtgEMIh5u5BspvOzmXusl09HYeOk_lSrTSkqho-zRBTNL2wBY8feA";
 	
@@ -21,7 +21,7 @@ public class UserTest extends DaqueryBaseTest {
 	//return the UUID for first user found
 	//this sets the userTestUUID list for the rest of the tests
 	@BeforeClass
-	public void initializeUUIDList() {
+	public static void initializeUUIDList() {
 		List<String> uuidList = given().with().contentType("application/json")
 		.headers("Authorization", "Bearer " + currentToken)
 		.when().get("users").then().statusCode(200)
