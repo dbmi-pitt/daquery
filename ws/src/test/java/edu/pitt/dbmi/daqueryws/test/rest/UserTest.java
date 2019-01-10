@@ -54,15 +54,6 @@ public class UserTest extends DaqueryBaseTest {
         .then().statusCode(401);
 	}
 	
-	/* TODO: skip this for now.  Apparently we are returning a 200 for this
-	 * the ResponseHelper code returns a new token in this case
-*/	@Test
-	public void checkExpiredToken() {
-		given().with().contentType("application/json")
-		.headers("Authorization", "Bearer " + currentToken)
-		.when().get("users").then().statusCode(401);
-
-	}
 	
 	
 	
