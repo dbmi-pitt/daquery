@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager.KeyedJWT;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
 
 
@@ -113,16 +115,43 @@ public class ResponseHelper {
      */
     public static Response getTokenResponse(int responseCode, Integer subcode, String userId, String siteUUID, String networkUUID, Map<String, Object> additionalReturnValues) throws DaqueryException
     {
-        // Issue a token for the user
-        JsonWebToken token = new JsonWebToken(userId, siteUUID, networkUUID);
-        HashMap<String, Object> vals = new HashMap<String, Object>();
-        vals.put("token", token.getToken());
-        if(additionalReturnValues != null)
-        	vals.putAll(additionalReturnValues);
-        
-        return(getJsonResponse(responseCode, subcode, vals));
+    	try {
+	        // Issue a token for the user
+	    	TokenManager tm = TokenManager.getTokenManager();
+	    	String token = tm.addToken(userId, siteUUID, networkUUID);
+	        //JsonWebToken token = new JsonWebToken(userId, siteUUID, networkUUID);
+	        HashMap<String, Object> vals = new HashMap<String, Object>();
+	        vals.put("token", token);
+	        if(additionalReturnValues != null)
+	        	vals.putAll(additionalReturnValues);
+	        
+	        return(getJsonResponse(responseCode, subcode, vals));
+    	} catch(Exception e)
+		{
+			logger.log(Level.SEVERE, String.format("Error occured while creating token for user %s, network %s, site %s\nError message:%s\n", userId, networkUUID, siteUUID, e.getMessage()));
+			return(getBasicResponse(500, "Error occured while creating a token.  Check the site logs for more information."));
+		}
+
     }
-	
+
+    public static Response getRenewedTokenResponse(int responseCode, Integer subcode, String renewedTokenString, Map<String, Object> additionalReturnValues) throws DaqueryException
+    {
+    	try {
+	        HashMap<String, Object> vals = new HashMap<String, Object>();
+	        vals.put("token", renewedTokenString);
+	        if(additionalReturnValues != null)
+	        	vals.putAll(additionalReturnValues);
+	        
+	        return(getJsonResponse(responseCode, subcode, vals));
+    	} catch(Exception e)
+		{
+			logger.log(Level.SEVERE, String.format("Error occured while renewing a token.\nError message:%s\n", e.getMessage()));
+			return(getBasicResponse(500, "Error occured while creating a token.  Check the site logs for more information."));
+		}
+
+    }
+    
+    
     /**
      * Given an HTTP status code, a subcode and a list (map) of key value pairs,
      * construct a web response object with a json payload.

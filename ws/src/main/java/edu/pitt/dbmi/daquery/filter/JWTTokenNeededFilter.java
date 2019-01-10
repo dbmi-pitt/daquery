@@ -12,6 +12,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import edu.pitt.dbmi.daquery.common.domain.TokenManager;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager.KeyedJWT;
 import edu.pitt.dbmi.daquery.common.util.KeyGenerator;
 
 import java.io.IOException;
@@ -61,8 +63,12 @@ public class JWTTokenNeededFilter implements ContainerRequestFilter {
         try {
 
             // Validate the token
-            Key key = keyGenerator.generateKey();
-            Jwts.parser().setSigningKey(key).parseClaimsJws(token);
+            /*Key key = keyGenerator.generateKey();
+            Jwts.parser().setSigningKey(key).parseClaimsJws(token);*/
+    		TokenManager tm = TokenManager.getTokenManager();
+    		KeyedJWT jwt = tm.getToken(token);
+            Jwts.parser().setSigningKey(jwt.getTokenKey()).parseClaimsJws(token);    		
+       	
             logger.info("#### valid token : " + token);
 
         } catch (Exception e) {

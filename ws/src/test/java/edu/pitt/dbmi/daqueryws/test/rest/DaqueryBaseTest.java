@@ -28,6 +28,7 @@ import java.util.Properties;
 
 public class DaqueryBaseTest {
 	
+	public static String currentTokenid = "";
 	public static String currentToken = "";
 	public static Integer defaultPort = 9090;
 	public static String defaultServerName = "localhost";
@@ -82,13 +83,13 @@ public class DaqueryBaseTest {
 	//I have to login before running any of the other testing methods...
     //I need a valid token for all the other calls
 	public static void checkLogin() {
-        currentToken = given().pathParam("email", username)
+        currentTokenid = given().pathParam("email", username)
                .pathParam("password", password)
         .log().all()
         .when().get("users/login?email={email}&password={password}")
         .then().statusCode(200)
-        .extract().path("token");
-		System.out.println("in checkLogin: " + currentToken);
+        .extract().path("tokenid");
+		System.out.println("in checkLogin: " + currentTokenid);
 	}
 	
 

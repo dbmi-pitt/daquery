@@ -74,6 +74,8 @@ import edu.pitt.dbmi.daquery.common.domain.NetworkAndCode;
 import edu.pitt.dbmi.daquery.common.domain.Site;
 import edu.pitt.dbmi.daquery.common.domain.SiteConnection;
 import edu.pitt.dbmi.daquery.common.domain.SiteStatus;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager.KeyedJWT;
 import edu.pitt.dbmi.daquery.common.domain.UserInfo;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryRequest;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
@@ -606,7 +608,10 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			request.setNetwork(net);
 			request.getInquiry().setNetwork(net);
 			String securityToken = httpHeaders.getHeaderString("Authorization");
-			JsonWebToken jwt = new JsonWebToken(securityToken);
+			TokenManager tm = TokenManager.getTokenManager();
+			KeyedJWT kw = tm.getToken(securityToken);
+			JsonWebToken jwt = kw.getToken();
+			jwt.validate();
 			String requesterId = jwt.getUserId();
 
 			boolean isLocalRequester = DaqueryUserDAO.isLocalUserId(requesterId);
@@ -941,40 +946,20 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 	@Path("/renew-jwt")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response renewJWT(@HeaderParam(HttpHeaders.AUTHORIZATION) String jwt,
+	public Response renewJWT(@HeaderParam(HttpHeaders.AUTHORIZATION) String oldTokenString,
 			@DefaultValue("") @QueryParam("networkId") String networkId) {
 
-		JsonWebToken token = null;
 		try {
-			token = new JsonWebToken(jwt);
-
-			/*
-			 * Principal principal = securityContext.getUserPrincipal(); String
-			 * uuid = principal.getName(); user =
-			 * DaqueryUserDAO.queryUserByID(uuid);
-			 */
+			TokenManager tm = TokenManager.getTokenManager();
+			String renewedTokenString = tm.renewToken(oldTokenString);
 
 			// Get the HTTP Authorization header from the request
-			logger.log(Level.INFO, "#### renew jwt : " + jwt);
+			logger.log(Level.INFO, "#### renew jwt : " + oldTokenString);
 
-			String netId = (StringHelper.isEmpty(networkId)) ? token.getNetworkId() : networkId;
-
-			Response rVal = ResponseHelper.getTokenResponse(200, null, token.getUserId(), token.getSiteId(), netId,
-					null);
+			Response rVal = ResponseHelper.getRenewedTokenResponse(200, null, renewedTokenString, null);
 
 			return rVal;
 
-		} catch (ExpiredJwtException expired) {
-			logger.info("Expired token: " + expired.getLocalizedMessage());
-			try {
-				return (ResponseHelper.expiredTokenResponse(token.getUserId(), token.getSiteId(),
-						token.getNetworkId()));
-			} catch (Throwable t) {
-				String msg = "Unexpected error while generating an expired token response.";
-				logger.log(Level.SEVERE, msg, t);
-				return (ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null,
-						t));
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(500).build();
