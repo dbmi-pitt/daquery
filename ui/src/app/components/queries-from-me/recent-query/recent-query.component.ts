@@ -80,6 +80,7 @@ export class RecentQueryComponent implements OnInit {
           queryType: 'DATA',
           inquiryName: request.inquiry.inquiryName + "(Case Export)",
           inquiryDescription: request.inquiry.inquiryDescription,
+          notDateShift: request.inquiry.notDateShift,
           code: request.response.downloadDirective ? request.response.downloadDirective.code : ''
         },
         archived: false

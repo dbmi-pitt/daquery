@@ -1,0 +1,1 @@
+alter table INQUIRY ADD COLUMN NOT_DATE_SHIFT boolean;

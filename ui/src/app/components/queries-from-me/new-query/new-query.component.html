@@ -47,6 +47,13 @@
                   <input type="text" class="form-control" id="inquiry-description" formControlName="inquiryDescription">
                   <div class="help-block" *ngIf="inquiryDescription.hasError('maxlength') && (inquiryDescription.dirty || inquiryDescription.touched)">Please enter no more than 500 characters</div>
                 </div>
+                <div class="form-group has-feedback" [ngClass]="{'has-error': notDateShift.invalid && (notDateShift.dirty || notDateShift.touched), 'has-success': notDateShift.valid && (notDateShift.dirty || notDateShift.touched) }">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" id="date-shift" formControlName="notDateShift" name="notDateShift">Do not date shift any data retreived based on this query.
+                    </label>
+                  </div>
+                </div>
                 <div class="form-group">
                   <label for="query">SQL</label>
                   <div class="nav-tabs-custom">

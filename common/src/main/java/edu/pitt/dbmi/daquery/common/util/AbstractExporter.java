@@ -183,7 +183,7 @@ abstract class AbstractExporter implements DataExporter
 		if (date == null)
 			return (null);
 		Network net = daqueryRequest.getNetwork();
-		if (net.getShiftDates()) {
+		if (!daqueryRequest.getInquiry().getNotDateShift() && net.getShiftDates()) {
 			Calendar dt = Calendar.getInstance();
 			dt.setTime(date);
 			dt.add(Calendar.DATE, daysToShift);

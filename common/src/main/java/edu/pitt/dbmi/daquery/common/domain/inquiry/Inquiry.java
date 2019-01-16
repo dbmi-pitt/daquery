@@ -65,6 +65,9 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	private String inquiryDescription;
 	
 	@Expose
+	private Boolean notDateShift;
+	
+	@Expose
 	private int version;	
 	
 	@Expose
@@ -109,6 +112,10 @@ public abstract class Inquiry extends DaqueryObject implements Serializable
 	@Column(name = "INQUIRY_DESCRIPTION", length=50)
 	public String getInquiryDescription(){return(inquiryDescription);}
 	public void setInquiryDescription(String desc){inquiryDescription = desc;}
+	
+	@Column(name = "NOT_DATE_SHIFT")
+	public Boolean getNotDateShift() { return notDateShift == null ? false : notDateShift; }
+	public void setNotDateShift(Boolean ds){ notDateShift = ds; }
 	
 	public int getVersion(){return(version);}
 	public void setVersion(int vers){version = vers;}

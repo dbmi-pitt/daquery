@@ -88,6 +88,11 @@
                   </li>
                 </ul>
               </div>
+              <div *ngIf="selectedRequest.inquiry.notDateShift" class="alert alert-warning alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+                <p>This data will be exported WITHOUT DATE SHIFTING. Please confirm that this is allowed before approving.</p>
+              </div>
               <div *ngIf="sqlAnalyzerResponse?.warnings" class="alert alert-warning alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                 <h4><i class="icon fa fa-warning"></i> Warning!</h4>

@@ -75,6 +75,7 @@ export class NewQueryComponent implements OnInit {
         queryType: [inquiry.queryType.toUpperCase()],
         dataType:['SQL_QUERY'],
         inquiryName: [inquiry.inquiryName, Validators.required],
+        notDateShift: inquiry.notDateShift,
         studyName: '',
         inquiryDescription: [inquiry.inquiryDescription, Validators.maxLength(500)],
         query: this.fb.group({
@@ -91,6 +92,7 @@ export class NewQueryComponent implements OnInit {
         queryType: ['AGGREGATE'],
         dataType: ['SQL_QUERY'],
         inquiryName: ['', Validators.required],
+        notDateShift: false,
         studyName: '',
         inquiryDescription: ['', Validators.maxLength(500)],
         query: this.fb.group({
@@ -104,6 +106,7 @@ export class NewQueryComponent implements OnInit {
 
   get inquiryName() { return this.inquiryForm.get('inquiryName'); }
   get inquiryDescription() { return this.inquiryForm.get('inquiryDescription'); }
+  get notDateShift() { return this.inquiryForm.get('notDateShift'); }
   get sqlQuery() { return this.inquiryForm.get('sqlQuery'); }
   get network() { return this.inquiryForm.get('network'); }
   get dataModel() { return this.inquiryForm.get('dataModel'); }
@@ -203,13 +206,13 @@ export class NewQueryComponent implements OnInit {
       let checkSQLs = [];
 
       if(this.inquiryForm.get('query').get('ansi').value != ""){
-       checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('ansi').value}));
+       checkSQLs.push(this.requestService.checkSQL({networkUuid: this.inquiryForm.get('network').value, sqlCode: this.inquiryForm.get('query').get('ansi').value}));
       }
       if(this.inquiryForm.get('query').get('oracle').value != ""){
-        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('oracle').value}));
+        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.inquiryForm.get('network').value, sqlCode: this.inquiryForm.get('query').get('oracle').value}));
       }
       if(this.inquiryForm.get('query').get('sqlServer').value != ""){
-        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('sqlServer').value}));
+        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.inquiryForm.get('network').value, sqlCode: this.inquiryForm.get('query').get('sqlServer').value}));
       }
       Observable.forkJoin(...checkSQLs)
                 .subscribe(res => {
@@ -339,7 +342,8 @@ export class NewQueryComponent implements OnInit {
             queryType: this.inquiryForm.value.queryType,
             code: [],
             inquiryName: inqName,
-            inquiryDescription: this.inquiryForm.value.inquiryDescription
+            inquiryDescription: this.inquiryForm.value.inquiryDescription,
+            notDateShift: this.inquiryForm.value.notDateShift
           },
           archived: false
         };
