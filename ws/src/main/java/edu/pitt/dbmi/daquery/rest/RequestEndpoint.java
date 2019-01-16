@@ -231,6 +231,7 @@ public class RequestEndpoint extends AbstractEndpoint {
 		            inquiry.setVersion(1);
 		            inquiry.setInquiryName(form.get("inquiryName").toString());
 		            inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
+		            inquiry.setNotDateShift(form.get("notDateShift").toString().equals("true"));
 		            ((SQLQuery) inquiry).addCode(new SQLCode(form.get("oracleQuery").toString(), dialect));
 		            request.setInquiry(inquiry);
 		            dao.save(request);

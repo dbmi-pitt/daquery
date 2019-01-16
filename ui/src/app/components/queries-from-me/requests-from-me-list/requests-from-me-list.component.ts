@@ -116,11 +116,21 @@ export class RequestsFromMeListComponent implements OnInit {
           queryType: 'DATA',
           inquiryName: request.inquiry.inquiryName + "(Case Export)",
           inquiryDescription: request.inquiry.inquiryDescription,
+          notDateShift: request.inquiry.notDateShift,
           code: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.code : ''
         },
         archived: false
       };
       this.requestService.requestData(dataRequest)
+                        .subscribe(() => {
+                            this.getRequestsFromMe(this.showArchived);
+                        });
+    }
+  }
+
+  resubmit(request: any){
+    if(confirm("Do you want to resubmit the request?")){
+      this.requestService.sendRequest(request, false)
                         .subscribe(() => {
                             this.getRequestsFromMe(this.showArchived);
                         });

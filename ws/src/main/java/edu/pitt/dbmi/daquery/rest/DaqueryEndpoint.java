@@ -609,7 +609,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			request.getInquiry().setNetwork(net);
 			String securityToken = httpHeaders.getHeaderString("Authorization");
 			TokenManager tm = TokenManager.getTokenManager();
-			KeyedJWT kw = tm.getToken(securityToken);
+			KeyedJWT kw = tm.getToken(securityToken.substring("Bearer".length()).trim());
 			JsonWebToken jwt = kw.getToken();
 			jwt.validate();
 			String requesterId = jwt.getUserId();
@@ -951,7 +951,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 
 		try {
 			TokenManager tm = TokenManager.getTokenManager();
-			String renewedTokenString = tm.renewToken(oldTokenString);
+			String renewedTokenString = tm.renewToken(oldTokenString.substring("Bearer".length()).trim());
 
 			// Get the HTTP Authorization header from the request
 			logger.log(Level.INFO, "#### renew jwt : " + oldTokenString);

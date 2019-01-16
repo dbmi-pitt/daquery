@@ -184,6 +184,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             inquiry.setVersion(1);
             inquiry.setInquiryName(form.get("inquiryName").toString());
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
+            inquiry.setNotDateShift(form.get("notDateShift").toString().equals("true"));
             
             Set<SQLCode> s = new HashSet<>();
             if(!((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString().equals(""))
@@ -250,6 +251,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
             inquiry.setVersion(inquiry.getVersion() + 1);
             inquiry.setInquiryName(form.get("inquiryName").toString());
             inquiry.setInquiryDescription(form.get("inquiryDescription").toString());
+            inquiry.setNotDateShift(form.get("notDateShift").toString().equals("true"));
             
             ArrayList<String> codeToAdd = new ArrayList<>();
             if(!((LinkedHashMap<?, ?>)form.get("query")).get("ansi").toString().equals("")) codeToAdd.add("ansi");
