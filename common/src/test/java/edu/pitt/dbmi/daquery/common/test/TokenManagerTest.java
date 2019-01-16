@@ -80,7 +80,8 @@ public class TokenManagerTest {
 	public void testDeleteToken() {
 		try {
 			TokenManager tm = TokenManager.getTokenManager();
-			tm.deleteToken(validTokens.get(0));
+			String token = tm.addToken(userUuid, siteUUID, networkUUID);
+			tm.deleteToken(token);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail("Error deleting token with tokenid = " + validTokens.get(0) + ".  Error: " + e.getMessage());
