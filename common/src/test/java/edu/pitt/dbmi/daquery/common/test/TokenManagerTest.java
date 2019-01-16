@@ -46,6 +46,7 @@ public class TokenManagerTest {
 		try {
 			for (int i=0; i < 5; i++) {
 				TokenManager tm = TokenManager.getTokenManager();
+				tm.setExpirationMinutes(1);
 				String token = tm.addToken(userUuid, siteUUID, networkUUID);
 				KeyedJWT jwt = tm.getToken(token);
 				validTokens.add(token);
