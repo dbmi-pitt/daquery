@@ -1,4 +1,4 @@
-<!-- daquery.data.version=1.60 -->
+<!-- daquery.data.version=1.61 -->
 
 CREATE TABLE "APP"."NETWORK"
 (
@@ -159,7 +159,8 @@ CREATE TABLE INQUIRY
    AUTHOR_ID varchar(50),
    NETWORK_ID bigint,
    AGGREGATE boolean,
-   QUERY_TYPE varchar(50)
+   QUERY_TYPE varchar(50),
+   NOT_DATE_SHIFT boolean
 );
 
 CREATE TABLE DAQUERY_REQUEST
