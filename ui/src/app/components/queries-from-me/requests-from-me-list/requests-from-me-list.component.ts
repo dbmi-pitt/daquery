@@ -132,7 +132,16 @@ export class RequestsFromMeListComponent implements OnInit {
     if(confirm("Do you want to resubmit the request?")){
       this.requestService.sendRequest(request, false)
                         .subscribe(() => {
-                            this.getRequestsFromMe(this.showArchived);
+                          this.requests = null;
+                          this.getRequestsFromMe(this.showArchived);
+                        },
+                        error => {
+                          this.requests = null;
+                          this.getRequestsFromMe(this.showArchived);
+                        },
+                        () => {
+                          this.requests = null;
+                          this.getRequestsFromMe(this.showArchived);
                         });
     }
   }
