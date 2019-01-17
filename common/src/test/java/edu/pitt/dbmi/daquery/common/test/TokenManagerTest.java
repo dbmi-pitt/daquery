@@ -46,6 +46,7 @@ public class TokenManagerTest {
 		try {
 			for (int i=0; i < 5; i++) {
 				TokenManager tm = TokenManager.getTokenManager();
+				tm.setExpirationMinutes(1);
 				String token = tm.addToken(userUuid, siteUUID, networkUUID);
 				KeyedJWT jwt = tm.getToken(token);
 				validTokens.add(token);
@@ -80,7 +81,8 @@ public class TokenManagerTest {
 	public void testDeleteToken() {
 		try {
 			TokenManager tm = TokenManager.getTokenManager();
-			tm.deleteToken(validTokens.get(0));
+			String token = tm.addToken(userUuid, siteUUID, networkUUID);
+			tm.deleteToken(token);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail("Error deleting token with tokenid = " + validTokens.get(0) + ".  Error: " + e.getMessage());
