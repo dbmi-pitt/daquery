@@ -173,6 +173,9 @@ public class TokenManager {
 	 * @throws JsonParseException
 	 */
 	public String renewToken(String oldTokenString) throws IOException, JsonMappingException, TokenException, TokenInvalidException, JsonParseException {
+		if (oldTokenString.startsWith("Bearer ")) {
+			oldTokenString = oldTokenString.substring(6);
+		}
 		KeyedJWT kj = getToken(oldTokenString);
 		JsonWebToken jwt = kj.getToken();
 		//call validate to extract the data from the token string
@@ -213,6 +216,9 @@ public class TokenManager {
 	 * @throws TokenException- throw an exception if the tokenString is not found
 	 */
 	public KeyedJWT getToken(String tokenString) throws TokenException {
+		if (tokenString.startsWith("Bearer ")) {
+			tokenString = tokenString.substring(6);
+		}
 		KeyedJWT retToken = tokenTable.get(tokenString);
 		if (retToken == null) {
 			//no Tolkien found
