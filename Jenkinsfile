@@ -69,7 +69,9 @@ node {
 		    //POST-TEST CLEANUP
 		    //delete the database at the filesystem level
 		    //delete the files within the database directory
-		    sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+		    steps {
+			    sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db'
+			    sh 'if [ $? -ne 0 ]; then echo "Unable to delete old database files.  Return code was not zero but $?"'
             }
                                  
        }
