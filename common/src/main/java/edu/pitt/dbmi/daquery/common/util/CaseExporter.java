@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -445,7 +446,16 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 				String query = "select " + outputFile.idColumn + ", " + columns + " from " + outputFile.source
 								+ " where " + outputFile.idColumn + " IN (" + inClause + ")"
 								+ " order by " + outputFile.idColumn;
-				rs = s.executeQuery(query);
+				try{
+					rs = s.executeQuery(query);
+				} catch (SQLSyntaxErrorException ssee){
+					if(ssee.getMessage().contains("table or view does not exist")){
+						logger.log(Level.INFO, "table is not exist", ssee);
+						continue;
+					} else {
+						throw ssee;
+					}
+				}
 				
 				String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
 				Arrays.fill(outLine, "");
