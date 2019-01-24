@@ -79,7 +79,7 @@ public class DaqueryUser extends UserInfo {
     
 	//bi-directional many-to-many association to Role
     @Expose
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.MERGE)
 	@JoinTable(name="USER_ROLE",
 	           joinColumns={@JoinColumn(name="USER_ID", nullable=false)},
 	           inverseJoinColumns={@JoinColumn(name="ROLE_ID", nullable=false)}

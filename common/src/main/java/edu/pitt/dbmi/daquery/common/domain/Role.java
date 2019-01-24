@@ -55,7 +55,7 @@ public class Role extends DaqueryObject implements Serializable {
 
 	@JsonIgnore
 	//bi-directional many-to-many association to User
-	@ManyToMany(mappedBy="roles", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	@ManyToMany(mappedBy="roles", fetch=FetchType.EAGER)
 	private List<DaqueryUser> users;
 
 	public Role() {}
