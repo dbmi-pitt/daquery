@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -412,13 +413,20 @@ public class WSConnectionUtil {
 		Session sess = null;
 		try
 		{
-			if(!checkConnection(toSite))
-			{
+			int tryTime = 1;
+			int retryTime = AppProperties.getConnectionRetryTime();
+			while(tryTime < retryTime){
+				if(checkConnection(toSite))
+					break;
+				TimeUnit.MINUTES.sleep(1);
+				tryTime += 1;
+			}
+			if(tryTime >= retryTime){
 				ErrorInfo ei = new ErrorInfo();
 				ei.setDisplayMessage("Site unreachable during file transfer.");
 				ei.setLongMessage("Cannot contact site " + toSite.getName() + " at " + toSite.getUrl());
 				throw new DaqueryErrorException(ei);
-			}			
+			}
 			String errMsg = "";
 
 			if(! localFileAndPath.exists())
