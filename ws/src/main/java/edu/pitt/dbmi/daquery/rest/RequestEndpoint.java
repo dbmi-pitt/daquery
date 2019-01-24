@@ -96,7 +96,7 @@ public class RequestEndpoint extends AbstractEndpoint {
             logger.info("Responding to request from: " + username);
             
             String[] directions = direction.split("\\!");
-            
+
             dao.openCurrentSession();
             List requests = dao.list(directions, archived);
             dao.closeCurrentSession();
@@ -108,6 +108,11 @@ public class RequestEndpoint extends AbstractEndpoint {
             		request.setCode("");
             	else
             		request.setCode(cAndD.code);
+            }
+            
+            for(Object r : requests) {
+            	DaqueryRequest request = (DaqueryRequest)r;
+            	request.getNetwork().setDataModels(null);
             }
             
             String jsonString = toJsonArray(requests);
