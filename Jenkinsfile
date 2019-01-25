@@ -129,9 +129,6 @@ node {
     )
 
         throw err
-    } finally {
-		//sh 'rm -rf /opt/apache-tomcat-6.0.53/conf/daquery-db && if [ $? -ne 0 ]; then echo "Unable to delete old database files.  Return code was not zero but $?"'
-    
     }
 
 
