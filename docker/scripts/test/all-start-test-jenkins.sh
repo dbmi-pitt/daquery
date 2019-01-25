@@ -13,6 +13,8 @@ echo | ls -al
 
 cd docker/scripts/test
 
+./fix-permissions.sh
+
 ./start-test-central.sh --daquery_home=/home/jenkins/projects/daquery/ --db_home=$DB_HOME
 ./start-test-connected.sh --daquery_home=/home/jenkins/projects/daquery --db_home=$DB_HOME --ojdbc_lib_dir=/home/jenkins/daquery_lib/ --central_url="$CENTRAL_IP_ADDRESS:4001"
 ./start-test-noconnection.sh --daquery_home=/home/jenkins/projects/daquery --db_home=$DB_HOME --ojdbc_lib_dir=/home/jenkins/daquery_lib/ --central_url="$CENTRAL_IP_ADDRESS:4001"
