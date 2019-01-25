@@ -434,6 +434,15 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 					
 			int nLoads = (int) Math.ceil(((double) patients.size()) / ((double) patientsPerLoad));
 			
+			HashSet<String> columnSet = new HashSet<>();
+			String getColumnsQuery = "select COLUMN_NAME from ALL_TAB_COLUMNS where LOWER(Table_Name) = 'demographic'"; //'" + outputFile.source.toLowerCase() + "'";
+			s = conn.createStatement();
+			rs = s.executeQuery(getColumnsQuery);
+			while(rs.next()){
+				String name = rs.getString(1);
+				columnSet.add(name);
+			}
+			
 			String columns = "";
 			for(Field f : outputFile.custom_column_set.fields){
 				columns += f.colName + ", ";
