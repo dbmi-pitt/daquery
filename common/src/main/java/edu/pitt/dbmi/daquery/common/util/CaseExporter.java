@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 
+import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
@@ -53,8 +54,8 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 	public static void main(String[] args) throws Throwable {
         AppProperties.setDevHomeDir("/opt/apache-tomcat-6.0.53");
         Session s = HibernateConfiguration.openSession();
-        DaqueryRequest r = (DaqueryRequest) s.get(DaqueryRequest.class, new Long(1601l));
-        DataModel dm = (DataModel) s.get(DataModel.class, Long.parseLong("1"));
+        DaqueryRequest r = (DaqueryRequest) s.get(DaqueryRequest.class, new Long(1009l));
+        DataModel dm = (DataModel) s.get(DataModel.class, Long.parseLong("102"));
         //DataExport de = new DataExport(dm.getDataExportConf());
 //        List<String> pList = new ArrayList<String>();
 //        pList.add("PIT686766");
@@ -64,11 +65,81 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		Statement st = null;
 		ResultSet rs = null;
         CaseExporter dataExporter = new CaseExporter(r.getResponses().iterator().next(), dm, AppProperties.getDBProperty("output.path"));
-        dataExporter.init(conn, st, rs, "select PATID from demographic where PATID='PIT686766' OR PATID='PIT637837' OR PATID='PIT982221'");
-        dataExporter.dumpData(new File("."), r, 1, 1, 10);
-        dataExporter.close();
+//        dataExporter.init(conn, st, rs, "select PATID from demographic where PATID='PIT686766' OR PATID='PIT637837' OR PATID='PIT982221'");
+//        dataExporter.dumpData(new File("."), r, 1, 1, 10);
+//        dataExporter.close();
         //while(dataExporter.hasNextExport())
         //	dataExporter.exportNext();
+        
+        SQLDataSource ds = (SQLDataSource) NetworkDAO.getNetworkById(1).getDataModels().iterator().next().getDataSource(SourceType.SQL);
+        ds.setUsername("cdm_41_etl");
+        ds.setPassword("dbmi72etl");
+		conn = ds.getConnection();
+		st = conn.createStatement();
+		String query = "SELECT DISTINCT DEMOGRAPHIC.PATID " +
+					   "FROM CDM_41_ETL.DEMOGRAPHIC " +
+					   "WHERE TRUNC((TRUNC(TO_DATE('01/01/2014','MM/DD/YYYY') - DEMOGRAPHIC.BIRTH_DATE) / 365.25)) >= 55";
+		
+		ArrayList<String> patids = new ArrayList<>();
+		try{
+			rs = st.executeQuery(query);
+			while(rs.next()){
+				patids.add(rs.getString(1));
+			}
+			
+			long startTime = System.nanoTime();
+			int load = 0;
+			System.out.println("patid size :" + patids.size());
+			while((patids.size() - load * 500 > 0) && load * 500 <= 70000){
+				String inClause = dataExporter.buildQueryInClause(patids, load, 500);
+				String entQuery = "select PATID, ENCOUNTERID, ADMIT_DATE, ADMIT_TIME, DISCHARGE_DATE, DISCHARGE_TIME, PROVIDERID, " + 
+								"FACILITY_LOCATION, ENC_TYPE, FACILITYID, DISCHARGE_DISPOSITION, DISCHARGE_STATUS, DRG, DRG_TYPE, " + 
+								"ADMITTING_SOURCE, RAW_SITEID, RAW_ENC_TYPE, RAW_DISCHARGE_DISPOSITION, RAW_DISCHARGE_STATUS, RAW_DRG_TYPE, " + 
+								"RAW_ADMITTING_SOURCE, FACILITY_TYPE, PAYER_TYPE_PRIMARY, PAYER_TYPE_SECONDARY, RAW_FACILITY_TYPE, " + 
+								"RAW_PAYER_ID_PRIMARY, RAW_PAYER_ID_SECONDARY, RAW_PAYER_TYPE_PRIMARY, RAW_PAYER_TYPE_SECONDARY from encounter enc " + 
+								"WHERE enc.PATID IN (" + inClause + ")";
+				rs = st.executeQuery(entQuery);
+				while(rs.next()){
+					String a = rs.getString(1);
+				}
+				load += 1;
+				System.out.println("load :" + load);
+			}
+			long endTime = System.nanoTime();
+			long duration = (endTime - startTime); 
+			System.out.println("where clause: " + duration / 1000000000 + "sec");
+			System.out.println("count: " + load * 500);
+//			long startTime = System.nanoTime();
+//		
+//			query = "insert into CDM_41_ETL.QUERY_SET_TEMP (" + 
+//					"SELECT DISTINCT DEMOGRAPHIC.PATID " +
+//					"FROM CDM_41_ETL.DEMOGRAPHIC " +
+//					"WHERE TRUNC((TRUNC(TO_DATE('01/01/2014','MM/DD/YYYY') - DEMOGRAPHIC.BIRTH_DATE) / 365.25)) >= 55)";
+//		
+//			st.executeQuery(query);
+//			
+//			String entQuery = "select enc.PATID, ENCOUNTERID, ADMIT_DATE, ADMIT_TIME, DISCHARGE_DATE, DISCHARGE_TIME, PROVIDERID, " + 
+//						"FACILITY_LOCATION, ENC_TYPE, FACILITYID, DISCHARGE_DISPOSITION, DISCHARGE_STATUS, DRG, DRG_TYPE, ADMITTING_SOURCE, " + 
+//					"RAW_SITEID, RAW_ENC_TYPE, RAW_DISCHARGE_DISPOSITION, RAW_DISCHARGE_STATUS, RAW_DRG_TYPE, RAW_ADMITTING_SOURCE, " + 
+//					"FACILITY_TYPE, PAYER_TYPE_PRIMARY, PAYER_TYPE_SECONDARY, RAW_FACILITY_TYPE, RAW_PAYER_ID_PRIMARY, RAW_PAYER_ID_SECONDARY, " + 
+//					"RAW_PAYER_TYPE_PRIMARY, RAW_PAYER_TYPE_SECONDARY from encounter enc, QUERY_SET_TEMP setids where setids.PATID = enc.patid";
+//			
+//			rs = st.executeQuery(entQuery);
+//			int count = 1;
+//			while(count < 70000 && rs.next()){
+//				String a = rs.getString(1);
+//				count += 1;
+//			}
+//			long endTime = System.nanoTime();
+//			long duration = (endTime - startTime); 
+//			System.out.println("where clause: " + duration / 1000000000 + "sec" );
+//			System.out.println("count:" + count);
+
+		}catch (Throwable t) {
+			throw t;
+		}finally {
+			dataExporter.close();
+		}
 	}
 	
 	private static final int BASICINFO_COLUMN_COUNT = 9;
@@ -435,7 +506,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			int nLoads = (int) Math.ceil(((double) patients.size()) / ((double) patientsPerLoad));
 			
 			HashSet<String> columnSet = new HashSet<>();
-			String getColumnsQuery = "select COLUMN_NAME from ALL_TAB_COLUMNS where LOWER(Table_Name) = 'demographic'"; //'" + outputFile.source.toLowerCase() + "'";
+			String getColumnsQuery = "select COLUMN_NAME from ALL_TAB_COLUMNS where LOWER(Table_Name) = '"+ outputFile.source.toLowerCase() + "'";
 			s = conn.createStatement();
 			rs = s.executeQuery(getColumnsQuery);
 			while(rs.next()){
@@ -445,7 +516,10 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			
 			String columns = "";
 			for(Field f : outputFile.custom_column_set.fields){
-				columns += f.colName + ", ";
+				if(columnSet.contains(f.colName))
+					columns += f.colName + ", ";
+				else
+					columns += "'' AS " + f.colName + ", ";
 			}
 			columns = columns.substring(0, columns.length() - 2);
 
