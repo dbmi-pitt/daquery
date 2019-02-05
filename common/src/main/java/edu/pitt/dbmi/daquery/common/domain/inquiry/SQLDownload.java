@@ -114,7 +114,12 @@ public class SQLDownload extends SQLQuery implements Download
 			
 //			Random rnd = new Random();
 //			int n = 100000 + rnd.nextInt(900000);
-			String tempTableName = "#QUERY_SET_TEMP" + UUID.randomUUID().toString().replaceAll("-", "");
+			String tempTableName = "";
+			if(ds.getDriverClass().contains("oracle")) {
+				tempTableName = "QUERY_SET_TEMP";
+			} else {
+				tempTableName = "#QUERY_SET_TEMP" + UUID.randomUUID().toString().replaceAll("-", "");
+			}
 			
 			if(initSuccess = dataExporter.init(conn, rs, cAndD.code, ds, tempTableName))
 			{
