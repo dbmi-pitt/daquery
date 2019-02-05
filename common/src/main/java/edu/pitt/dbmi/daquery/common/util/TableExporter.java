@@ -43,9 +43,10 @@ public class TableExporter extends AbstractExporter implements DataExporter {
 
 		rowsPerFile = 1000;
 	}
-
+	
 	@Override
-	public boolean init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
+	public boolean init(Connection conn, ResultSet rs, String sql, SQLDataSource ds, String tempTableName)
+			throws Throwable {
 		this.sqlCode = sql;
 		sqlAnalyzer = new ReturnFieldsAnalyzer(sql, model);
 		if(sqlAnalyzer.isRejected())
@@ -53,7 +54,7 @@ public class TableExporter extends AbstractExporter implements DataExporter {
 			failureMessage = sqlAnalyzer.getRejectionMessage();
 			return(false);
 		}
-		return(true);
+		return true;
 	}
 	
 	@Override
@@ -73,7 +74,7 @@ public class TableExporter extends AbstractExporter implements DataExporter {
 	}
 
 	@Override
-	public String exportNext() throws Throwable {
+	public String exportNext(Connection conn, String tempTableName) throws Throwable {
 		try
 		{
 			//just make sure all is okay with the tracking file writer before doing any export- several errors could get thrown from this call
@@ -84,7 +85,7 @@ public class TableExporter extends AbstractExporter implements DataExporter {
 			currentFile++;
 
 			File tmpDir = FileHelper.createExportTempDirectory();
-			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, rowsPerFile);
+			File zipFile = dumpData(conn, tmpDir, daqueryRequest, currentFile, nFiles, rowsPerFile);
 	
 			//send the file to remote requester
 			String outputFilename = daqueryRequest.getFilePrefix() + "_" + currentFile + ".zip";
@@ -131,7 +132,7 @@ public class TableExporter extends AbstractExporter implements DataExporter {
 		
 	}
 	
-	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int rowPerFile) throws Throwable
+	private File dumpData(Connection conn, File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int rowPerFile) throws Throwable
 	{
 		String filenamePrefix = daqueryRequest.getFilePrefix();
 //		Hashtable<OutputFile, OutputStreamWriter> outputStreams = new Hashtable<>();
@@ -165,16 +166,14 @@ dateShift
 		
  */
 		
-		Connection conn = null;
-		SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL);
-		conn = ds.getConnection();
-		Statement s = null;
+//		SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL);
+//		conn = ds.getConnection();
 		ResultSet rs = null;
 		
 		String runSQL = sqlCode.trim();
 		if(runSQL.endsWith(";"))
 			runSQL = runSQL.substring(0, runSQL.length() - 1);
-		s = conn.createStatement();
+		Statement s = conn.createStatement();
 		rs = s.executeQuery(runSQL);
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
@@ -218,7 +217,10 @@ dateShift
 		//create a zip file containing the two files that we just wrote			
 		File zipFile = new File(tmpDir.getAbsolutePath() + File.separator + daqueryRequest.getFilePrefix() + ".zip");
 		FileHelper.zipDirectory(tmpDir, zipFile, false);
-		
+
+		rs.close();
+		s.close();
+
 		return zipFile;
 	}
 
@@ -246,5 +248,4 @@ dateShift
 		// TODO Auto-generated method stub
 		return this.rowsPerFile;
 	}
-
 }

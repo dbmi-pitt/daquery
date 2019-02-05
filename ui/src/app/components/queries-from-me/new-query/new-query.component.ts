@@ -203,13 +203,13 @@ export class NewQueryComponent implements OnInit {
       let checkSQLs = [];
 
       if(this.inquiryForm.get('query').get('ansi').value != ""){
-       checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('ansi').value}));
+       checkSQLs.push(this.requestService.checkSQL({networkUuid: this.inquiryForm.get('network').value, sqlCode: this.inquiryForm.get('query').get('ansi').value}));
       }
       if(this.inquiryForm.get('query').get('oracle').value != ""){
-        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('oracle').value}));
+        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.inquiryForm.get('network').value, sqlCode: this.inquiryForm.get('query').get('oracle').value}));
       }
       if(this.inquiryForm.get('query').get('sqlServer').value != ""){
-        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.networks[0].networkId, sqlCode: this.inquiryForm.get('query').get('sqlServer').value}));
+        checkSQLs.push(this.requestService.checkSQL({networkUuid: this.inquiryForm.get('network').value, sqlCode: this.inquiryForm.get('query').get('sqlServer').value}));
       }
       Observable.forkJoin(...checkSQLs)
                 .subscribe(res => {
