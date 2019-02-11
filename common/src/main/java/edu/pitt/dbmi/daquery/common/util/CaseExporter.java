@@ -560,10 +560,10 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 					outLine_sb.append(patientNum + ",");
 					if (dateShift) {
 						//outLine[outLine.length - 1] = Integer.toString(getShiftDays(patientNum));
-						outLine_sb.append(Integer.toString(getShiftDays(patientNum)) + "\n");
+						outLine_sb.append(Integer.toString(getShiftDays(patientNum)));
 					} else {
 						//outLine[outLine.length - 1] = "0";
-						outLine_sb.append("0" + "\n");
+						outLine_sb.append("0");
 					}
 				}
 				
@@ -575,8 +575,8 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 //					delim = ",";
 //				}
 //				
-//				outLine_sb.append("\n");
-//				String preRow = outLine_sb.toString();
+				outLine_sb.append("\n");
+				String preRow = outLine_sb.toString();
 				writer.write(outLine_sb.toString());
 			}
 			long endTime = System.nanoTime();
