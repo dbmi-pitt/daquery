@@ -44,7 +44,11 @@ abstract class AbstractExporter implements DataExporter
 		
 		this.dateShift = response.getRequest().getNetwork().getShiftDates();
 		
-		casesPerFile = model.getExportConfig().getCasesPerFile();
+		if(AppProperties.getDBProperty("case.per.file") != null){
+			casesPerFile = Integer.parseInt(AppProperties.getDBProperty("case.per.file"));
+		} else {
+			casesPerFile = model.getExportConfig().getCasesPerFile();
+		}
 		
 		
 	}
@@ -102,8 +106,8 @@ abstract class AbstractExporter implements DataExporter
 			return ("");
 		String val = zip.trim();
 		if (!isZipCodeFormat(val)) {
-			logger.log(Level.WARNING ,"A zip code that is being exported doesn't look like a zip code: "
-					+ zip);
+//			logger.log(Level.WARNING ,"A zip code that is being exported doesn't look like a zip code: "
+//					+ zip);
 			return ("");
 		}
 		

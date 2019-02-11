@@ -110,6 +110,11 @@ public class RequestEndpoint extends AbstractEndpoint {
             		request.setCode(cAndD.code);
             }
             
+            for(Object r : requests) {
+            	DaqueryRequest request = (DaqueryRequest)r;
+            	request.getNetwork().setDataModels(null);
+            }
+            
             String jsonString = toJsonArray(requests);
             return Response.ok(200).entity(jsonString).build();
 
