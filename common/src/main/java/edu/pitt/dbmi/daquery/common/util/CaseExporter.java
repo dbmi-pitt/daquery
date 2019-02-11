@@ -285,6 +285,10 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 	{
 		try
 		{
+			//clear hashtables
+			this.serializedIdsByType = new Hashtable<String, Hashtable<String, Integer>>();
+			this.shiftDaysByPatientId = new Hashtable<String, Integer>();
+			
 			//just make sure all is okay with the tracking file writer before doing any export- several errors could get thrown from this call
 			getTrackingFileWriter();
 			
@@ -485,65 +489,99 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			columns = columns.substring(0, columns.length() - 2);
 
 			String startPatid = this.idList.get((currentFileNum - 1) * casesPerFile);
+			String endPatid = "";
+			if(currentFileNum * casesPerFile - 1 > this.idList.size()){
+				endPatid = this.idList.get(this.idList.size() - 1);
+			} else {
+				endPatid = this.idList.get(currentFileNum * casesPerFile - 1);
+			}
 			
-			String entQuery = "select src.* from " + outputFile.source + " src , " + tempTableName + " setids where setids.PATID = src.patid and src.patid >= '" + startPatid + "' order by src.patid";
+			long startTime = System.nanoTime();
+			String entQuery = "select src.* from " + outputFile.source + " src , " + tempTableName + 
+					" setids where setids.PATID = src.patid and src.patid >= '" + startPatid + 
+					"' and src.patid <= '" + endPatid + "'";
 			Statement s = conn.createStatement();
 			rs = s.executeQuery(entQuery);
 			String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
 			Arrays.fill(outLine, "");
+			rs.setFetchSize(100);
 			
+			
+			StringBuilder outLine_sb = new StringBuilder();
 			while(rs.next()){
+				outLine_sb.setLength(0);
 				// create a new row
+				/*
 				outLine = new String[outLine.length];
 				Arrays.fill(outLine, "");
+				*/
 				
 				String patientNum = rs.getString(1);
 				//outLine[0] = csvSafeString(patientNum);
-				if(daqueryRequest.getNetwork().getSerializePatientId())
-					outLine[0] = this.getSerializedId(patientNum, "CASEID");
-				else
-					outLine[0] = patientNum;
+				if(daqueryRequest.getNetwork().getSerializePatientId()){
+					//outLine[0] = this.getSerializedId(patientNum, "CASEID");
+					outLine_sb.append(this.getSerializedId(patientNum, "CASEID") + ",");
+				} else {
+					//outLine[0] = patientNum;
+					outLine_sb.append(patientNum + ",");
+				}
 				
 				int outLineEnd = debugDataExport ? outLine.length - 2 : outLine.length;
 				for(int j = 2; j <= outLineEnd; j++){
-					if(outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("zip"))
-						outLine[j-1] = threeDigitZip(rs.getString(j), threeDigitZip);
-					else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("birthday"))
-						outLine[j-1] = csvSafeString(handleBirthday(patientNum, rs.getDate(j)));
+					if(outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("zip")){
+						//outLine[j-1] = threeDigitZip(rs.getString(j), threeDigitZip);
+						outLine_sb.append(threeDigitZip(rs.getString(j), threeDigitZip) + ",");
+					}
+					else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("birthday")){
+						//outLine[j-1] = csvSafeString(handleBirthday(patientNum, rs.getDate(j)));
+						outLine_sb.append(csvSafeString(handleBirthday(patientNum, rs.getDate(j))) + ",");
+					}
 					else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("source")){
 						String SourceSystem = rs.getString(j);
-						outLine[j-1] = csvSafeString(SourceSystem);
+						//outLine[j-1] = csvSafeString(SourceSystem);
+						outLine_sb.append(csvSafeString(SourceSystem) + ",");
 					}
 					else{
 						Object obj = rs.getObject(j);
-						if(obj instanceof Date)
-							outLine[j-1] = csvSafeString(dateShift(patientNum, (Date)obj));
-						else
-							outLine[j-1] = obj == null ? "" : csvSafeString(obj.toString());
+						if(obj instanceof Date){
+							//outLine[j-1] = csvSafeString(dateShift(patientNum, (Date)obj));
+							outLine_sb.append(csvSafeString(dateShift(patientNum, (Date)obj)) + ",");
+						}
+						else{
+							//outLine[j-1] = obj == null ? "" : csvSafeString(obj.toString());
+							outLine_sb.append(obj == null ? "" : csvSafeString(obj.toString()) + ",");
+						}
 					}
 				}
 				
 				// For testing purpose
 				if (debugDataExport) {
-					outLine[outLine.length - 2] = patientNum;
+					//outLine[outLine.length - 2] = patientNum;
+					outLine_sb.append(patientNum + ",");
 					if (dateShift) {
-						outLine[outLine.length - 1] = Integer.toString(getShiftDays(patientNum));
+						//outLine[outLine.length - 1] = Integer.toString(getShiftDays(patientNum));
+						outLine_sb.append(Integer.toString(getShiftDays(patientNum)) + "\n");
 					} else {
-						outLine[outLine.length - 1] = "0";
+						//outLine[outLine.length - 1] = "0";
+						outLine_sb.append("0" + "\n");
 					}
 				}
 				
 				// write the previous entry to file
-				StringBuilder outLine_sb = new StringBuilder();
-				String delim = "";
-				for(int j = 0; j < outLine.length; j++){
-					outLine_sb.append(delim).append(outLine[j]);
-					delim = ",";
-				}
-			
-				String preRow = outLine_sb.toString() + "\n";
-				writer.write(preRow);
+//				outLine_sb.setLength(0);
+//				String delim = "";
+//				for(int j = 0; j < outLine.length; j++){
+//					outLine_sb.append(delim + outLine[j]);
+//					delim = ",";
+//				}
+//				
+//				outLine_sb.append("\n");
+//				String preRow = outLine_sb.toString();
+				writer.write(outLine_sb.toString());
 			}
+			long endTime = System.nanoTime();
+			long duration = (endTime - startTime);
+			System.out.println("File: " + outputFile.name + " done. " + ((float)duration / 1000000000) + "sec");
 			
 			rs.close();
 			s.close();
@@ -613,7 +651,6 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 //				rs.close();
 //				s.close();
 //			}
-				
 			writer.close();
 		} catch (Throwable t) {
 			logger.log(Level.SEVERE, "Unexpected error while generating an observation CSV file.", t);
