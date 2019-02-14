@@ -497,15 +497,15 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			}
 			
 			long startTime = System.nanoTime();
-			String entQuery = "select src.* from " + outputFile.source + " src , " + tempTableName + 
+			String entQuery = "select src.patid, " + columns + " from " + outputFile.source + " src , " + tempTableName + 
 					" setids where setids.PATID = src.patid and src.patid >= '" + startPatid + 
 					"' and src.patid <= '" + endPatid + "'";
-			Statement s = conn.createStatement();
+			Statement s = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+		              java.sql.ResultSet.CONCUR_READ_ONLY);
+			s.setFetchSize(10);
 			rs = s.executeQuery(entQuery);
 			String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
 			Arrays.fill(outLine, "");
-			rs.setFetchSize(100);
-			
 			
 			StringBuilder outLine_sb = new StringBuilder();
 			while(rs.next()){
@@ -545,11 +545,19 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 						Object obj = rs.getObject(j);
 						if(obj instanceof Date){
 							//outLine[j-1] = csvSafeString(dateShift(patientNum, (Date)obj));
-							outLine_sb.append(csvSafeString(dateShift(patientNum, (Date)obj)) + ",");
+							//outLine_sb.append(csvSafeString(dateShift(patientNum, (Date)obj)) + ",");
+							csvSafeString(dateShift(patientNum, (Date)obj), outLine_sb);
+							outLine_sb.append(",");
 						}
 						else{
 							//outLine[j-1] = obj == null ? "" : csvSafeString(obj.toString());
-							outLine_sb.append(obj == null ? "" : csvSafeString(obj.toString()) + ",");
+							if(obj == null){
+								outLine_sb.append(",");
+							} else {
+								csvSafeString(obj.toString(), outLine_sb);
+								outLine_sb.append(",");
+							}
+							//outLine_sb.append(obj == null ? "" : csvSafeString(obj.toString()) + ",");
 						}
 					}
 				}
