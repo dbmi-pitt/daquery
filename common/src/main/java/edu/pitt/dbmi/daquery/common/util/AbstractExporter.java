@@ -101,6 +101,19 @@ abstract class AbstractExporter implements DataExporter
 		return val;
 	}
 	
+	protected static void csvSafeString(String val, StringBuilder sb) {
+		// escape entire string if has comma (,)
+		if (val.contains(",")) {
+			//val = "\"" + val + "\"";
+			sb.append("\"").append(val).append("\"");
+		}
+		// escape double quotes (") in string
+		else if (val.contains("\"")) {
+			val = val.replaceAll("\"", "\"\"");
+		}
+		sb.append(val);
+	}
+	
 	protected static String threeDigitZip(String zip, boolean threeDigit) {
 		if (StringHelper.isBlank(zip))
 			return ("");
