@@ -47,6 +47,9 @@
               <button *ngIf="showApproveDenyBtn" class="btn btn-danger" (click)="denyRequest()">Deny</button>
               <button *ngIf="!showApproveDenyBtn" class="btn btn-block btn-default disabled">To respond to this request the STEWARD role is required</button>
             </div>
+            <div *ngIf="showResubmitBtn"class="col-md-6">
+              <button class="btn btn-info" (click)="approveRequest()" [disabled]="sqlAnalyzerResponse?.rejected || !selectedRequest.code">Resubmit</button>
+            </div>
           </div>
           <hr />
           <div class="row">

@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
+import edu.pitt.dbmi.daquery.common.domain.RemoteRole;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.Inquiry;
 import edu.pitt.dbmi.daquery.common.domain.inquiry.SQLQuery;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
+import edu.pitt.dbmi.daquery.common.util.HibernateConfiguration;
 
 public class InquiryDAO extends AbstractDAO {
 	private final static Logger logger = Logger.getLogger(InquiryDAO.class.getName());
@@ -49,7 +52,7 @@ public class InquiryDAO extends AbstractDAO {
 	
 	public List listSavedInquiries() throws DaqueryException {
 		Query q = getCurrentSession().createQuery("select i from Inquiry i");
-		List i = q.list();		
+		List i = q.list();
 		//List i =  getCurrentSession().createCriteria(Inquiry.class).list();
 		List ret = new ArrayList();
 //		long inquiryCount = 0;

@@ -18,6 +18,7 @@ export class QueriesToMeListComponent implements OnInit {
   requests: any[];
   selectedRequest: any;
   showApproveDenyBtn = false;
+  showResubmitBtn = false;
   showStackTrace = false;
   showArchived = false;
 
@@ -48,6 +49,14 @@ export class QueriesToMeListComponent implements OnInit {
     this.selectedRequest = request;
     if(this.selectedRequest.network.networkId && this.selectedRequest.code){
       this.sqlCheck();
+    }
+    if(this.showApproveDenyBtn &&
+      (this.selectedRequest.responses[0].status.toUpperCase() === "COMPLETED" ||
+       this.selectedRequest.responses[0].status.toUpperCase() === "ERROR" || 
+       this.selectedRequest.responses[0].status.toUpperCase() === "STALLED")) {
+      this.showResubmitBtn = true;
+    } else {
+      this.showResubmitBtn = false;
     }
   }
 

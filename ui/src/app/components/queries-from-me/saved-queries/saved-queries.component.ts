@@ -34,6 +34,17 @@ export class SavedQueriesComponent implements OnInit {
     this.editInquiry.emit(inquiry);
   }
 
+  onDeleteClick(inquiry: any){
+    if(confirm("Are you sure to delete this inquiry?")){
+      this.requestService.deleteInquiry(inquiry.inquiryId)
+                         .subscribe(res => {
+                            if(res === 200){
+                              this.inquiries = this.inquiries.filter(i => i.inquiryId != inquiry.inquiryId);
+                            }
+                         })
+    }
+  }
+
   notifyMe() {
     this.getSavedInquiries();
   }
