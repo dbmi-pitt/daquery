@@ -80,6 +80,14 @@ export class RequestService {
                     });
   }
 
+  deleteInquiry(id: string){
+    return this.http.delete(`/daquery/ws/inquiries/${id}`)
+                    .catch(error => {
+                      this.error.error = error;
+                      return Observable.throw(error || 'Server error');
+                    });
+  }
+
   sendRequest(inquiry: any, showError: boolean) {
     return this.http.post('/daquery/ws/request', inquiry)
                     .catch(error => {
