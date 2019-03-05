@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -20,11 +21,12 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -40,43 +42,27 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.RequestEntityProcessing;
+import org.glassfish.jersey.internal.util.Base64;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
-import edu.pitt.dbmi.daquery.common.dao.ResponseDAO;
+import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
 import edu.pitt.dbmi.daquery.common.dao.SiteDAO;
 import edu.pitt.dbmi.daquery.common.domain.DecodedErrorInfo;
 import edu.pitt.dbmi.daquery.common.domain.EmailContents;
 import edu.pitt.dbmi.daquery.common.domain.ErrorInfo;
+import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.Site;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.DaqueryResponse;
-import edu.pitt.dbmi.daquery.common.domain.inquiry.Fileset;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager;
+import edu.pitt.dbmi.daquery.common.domain.TokenManager.KeyedJWT;
+import io.jsonwebtoken.Claims;
 
 public class WSConnectionUtil {
  
 	private final static Logger log = Logger.getLogger(WSConnectionUtil.class.getName());
-/*	protected static SSLSocketFactory daquerySSLFactory = null;
-	
-	
-	
-	static
-	{
-		try {
-			daquerySSLFactory = getDaqueryKeyStoreSSLFactory();
-		} catch (Exception e) {
-			log.log(Level.SEVERE, "Unable to set daquerySSLFactory");
-			System.err.println("Unable to set daquerySSLFactory" + e.getMessage());
-		}
-	} */
-	
-	public static void main(String [] args) throws Exception
-	{
-
-	}
 	
 	public static boolean checkConnection(String url)
 	{
@@ -400,8 +386,13 @@ public class WSConnectionUtil {
 
 		Builder builder = client.target(getURL)
 				.request(MediaType.APPLICATION_JSON); //.get();
-		if(!StringHelper.isEmpty(jwToken))
-			builder = builder.header("Authorization", "Bearer " + jwToken);
+		if(!StringHelper.isEmpty(jwToken)) {
+			String bearerString = jwToken;
+			if (!bearerString.startsWith("Bearer ")) {
+				bearerString = "Bearer " + jwToken;
+			}
+			builder = builder.header("Authorization", bearerString);
+		}
 		resp = builder.get();
 		return(resp);
 	}
@@ -707,5 +698,106 @@ public class WSConnectionUtil {
 		{
 			return(ResponseHelper.getErrorResponse(500, "Unable to contact the central server because of a bad site address." , "This was due to a malformed url: " + centServerURL, mue));
 		}
-	}		
+	}
+	
+	public static boolean hasRole(List<String> rolenames, String userId, String networkId) {
+        //if there are no roles specified, then just set userHasRole to true and move along
+        if (rolenames.isEmpty()) {
+        	return true;
+        }
+        else {
+        	for (String role : rolenames) {
+        		try {
+	        		//if the user is in one of the roles, set userHasRole to true and return
+	        		if (DaqueryUserDAO.hasRole(userId, networkId, role) == true) {
+	        			return true;
+	        		}
+        		} catch (Exception e) {
+    				log.log(Level.WARNING, "Error encountered trying to check user's role access:\n" + e.getMessage());
+        			return false;
+        		}
+        			
+        	}
+        }
+        return false;
+		
+	}
+
+	/**
+	 * This method parses the claims from a token string without the token key
+	 * @param tokenString
+	 * @return
+	 */
+	public static Map<String, Object> extractClaims(String tokenString) {
+		Map<String, Object> retClaims = new HashMap<String, Object>();
+		String[] tokenSections = tokenString.split(Pattern.quote("."));
+		if (tokenSections.length != 3) {
+			System.out.println("Cannot find 3 sections to this token string: " + tokenString);
+		}
+    	String encodedclaimsstring = tokenSections[1];
+    	String decodedclaimsstring = Base64.decodeAsString(encodedclaimsstring);
+    	
+    	//clean up the decoded claims string
+    	decodedclaimsstring = decodedclaimsstring.replaceAll("\\{|\\}", "");
+    	decodedclaimsstring = decodedclaimsstring.replaceAll("\"", "");
+    	
+		String[] elements = decodedclaimsstring.split(",");
+		for(String s1: elements) {
+		    String[] keyValue = s1.split(":");
+		    retClaims.put(keyValue[0], keyValue[1]);
+        }
+        return retClaims;		
+	}
+	
+	public static boolean authenticateUser(String tokenString, List<String> rolenames) {
+        // Extract the token from the HTTP Authorization header
+        String token = tokenString.substring("Bearer".length()).trim();
+
+        //String tokenid = (String)requestContext.getProperty("tokenid");
+        JsonWebToken jwtReporting = null;
+        try {
+
+        	TokenManager tm = TokenManager.getTokenManager();
+        	KeyedJWT kj = tm.getToken(token);
+        	Key tokenkey = kj.getTokenKey();
+        	//get the info from the token, but don't validate yet
+        	final JsonWebToken jwt = kj.getToken();
+        	
+        	Site mySite = SiteDAO.getLocalSite();
+        	//check if the user is a local user or remote user 
+        	if(StringHelper.equalIgnoreCase(mySite.getSiteId(), jwt.getSiteId()))
+        	{
+        		//validate a local user
+	            if (!DaqueryUserDAO.isUserValid(jwt.getUserId()) && !DaqueryUserDAO.isUserPwdExpired(jwt.getUserId())) {
+	        		String msg = "User account [" + jwt.getUserId() +"] is not valid.";
+	        		log.log(Level.SEVERE, msg);
+	                throw new Exception(msg);
+	            }
+	            	            
+	            //an exception will be thrown if the token isn't valid
+	            jwt.validate();
+        	}
+        	else
+        	{
+        		//validate a remote user via a web service call
+        		Site site = SiteDAO.querySiteByID(jwt.getSiteId());
+        		
+        		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/validateToken", null, jwt.getTokenString());
+        		if(resp.getStatus() != 200)
+        		{
+        			//requestContext.abortWith(resp);
+        		}
+        	}
+        	return false;
+		} catch (Exception e) {
+			log.log(Level.WARNING, "Error encountered trying to check user's role access:\n" + e.getMessage());
+			return false;
+		}
+	}
+	
+	public static void main(String[] args) {
+		String token = "eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE1NDkzODYyMDIwNDUsInN1YiI6ImE3ZDUxOWRlLTEyZGUtNDRhYS1hZWE3LTgxZWUwY2I4OWMwOCIsImlzcyI6ImVjZmRkNDUwLTNkZDgtNGNlZC05NTk5LWM2NWNlN2M5ZjEyMyIsInRva2VuaWQiOiI5M2ZjMzA4Ni1jN2IzLTRlZTEtODRjMi0wZjAwYjMyNTQ3ZjIiLCJpYXQiOjE1NDkzODUzMDIwNDV9.xfpF069305RlEMW9yLjHzQk2DHwOHXsrMMd2Tk7UwKxWFOUYYejignwm5i7aNPzb5PI9gMI_jVkWkPCnORsieg";
+		Map<String, Object> newClaims = extractClaims(token);
+		System.out.println(token);
+	}
 }

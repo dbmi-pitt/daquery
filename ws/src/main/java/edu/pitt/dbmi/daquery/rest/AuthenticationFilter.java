@@ -5,9 +5,11 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.security.Key;
 import java.security.Principal;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,9 +21,13 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+
+import org.glassfish.jersey.message.internal.MediaTypes;
+import org.glassfish.jersey.server.ContainerRequest;
 
 import edu.pitt.dbmi.daquery.common.auth.TokenInvalidException;
 import edu.pitt.dbmi.daquery.common.dao.DaqueryUserDAO;
@@ -32,7 +38,6 @@ import edu.pitt.dbmi.daquery.common.domain.TokenManager;
 import edu.pitt.dbmi.daquery.common.domain.TokenManager.KeyedJWT;
 import edu.pitt.dbmi.daquery.common.util.AppProperties;
 import edu.pitt.dbmi.daquery.common.util.ResponseHelper;
-import edu.pitt.dbmi.daquery.common.util.StringHelper;
 import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 
@@ -68,7 +73,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        //TODO: Reject any communication coming across anything other than HTTPS:
+        //Reject any communication coming across anything other than HTTPS:
     	//here is the check:
     	if (!AppProperties.isDebugMode()) {
     	
@@ -93,20 +98,27 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
-        String tokenid = (String)requestContext.getProperty("tokenid");
-        JsonWebToken jwtReporting = null;
+    	final Map<String,Object> claims = WSConnectionUtil.extractClaims(token);
+    	final String siteId = (String)claims.get("iss");
+    	final String userId = (String)claims.get("sub");
+    	final String networkId = (String)claims.get("net");
+
+        //String networkId = "";
         try {
 
-        	TokenManager tm = TokenManager.getTokenManager();
-        	KeyedJWT kj = tm.getToken(token);
-        	Key tokenkey = kj.getTokenKey();
-        	//get the info from the token, but don't validate yet
-        	final JsonWebToken jwt = kj.getToken();
-        	
+        	//first, check if the request is going to another site 
         	Site mySite = SiteDAO.getLocalSite();
-        	//check if the user is a local user or remote user 
-        	if(StringHelper.equalIgnoreCase(mySite.getSiteId(), jwt.getSiteId()))
-        	{
+        	
+        	//check if the token is a local user or remote token 
+        	if(mySite.getSiteId().equalsIgnoreCase(siteId))
+        	{   
+        		TokenManager tm = TokenManager.getTokenManager();
+	        	KeyedJWT kj = tm.getToken(token);
+	        	Key tokenkey = kj.getTokenKey();
+	        	//get the info from the token, but don't validate yet
+	        	final JsonWebToken jwt = kj.getToken();
+	        	//networkId = jwt.getNetworkId();
+
         		//validate a local user
 	            if (!DaqueryUserDAO.isUserValid(jwt.getUserId()) && !DaqueryUserDAO.isUserPwdExpired(jwt.getUserId())) {
 	        		String msg = "User account [" + jwt.getUserId() +"] is not valid.";
@@ -120,14 +132,18 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         	else
         	{
         		//validate a remote user via a web service call
-        		Site site = SiteDAO.querySiteByID(jwt.getSiteId());
+        		Site site = SiteDAO.querySiteByID(siteId);
+       
+    	        System.out.println("@@@@@@@ IN AuthenticationFilter remote site" );
         		
-        		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/validateToken", null, jwt.getToken());
+        		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/validateToken", null, token);
         		if(resp.getStatus() != 200)
         		{
         			requestContext.abortWith(resp);
         		}
+        		//else extract network id
         	}
+
         	//last check, can the user access this web service call?  
         	//this is determined by the roles listed in connection with the @Secured annotation 
             // Get the resource class which matches with the requested URL
@@ -143,25 +159,22 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             List<String> roleSuperset = new ArrayList<String>();
             roleSuperset.addAll(classRoles);
             roleSuperset.addAll(methodRoles);
+            if (requestContext instanceof ContainerRequest)
+            {
+                ContainerRequest request = (ContainerRequest) requestContext;
+
+                if ( requestContext.getUriInfo().getRequestUri().getPath().compareTo("/daquery/ws/request") == 0 
+                  && MediaTypes.typeEqual(MediaType.APPLICATION_JSON_TYPE,request.getMediaType())
+                  	)
+                {
+                    System.out.println("this is the netowrk id: " + networkId);
+                }
+            }
             
-            boolean userHasRole = false;
-            //if there are no roles specified, then just set userHasRole to true and move along
-            if (roleSuperset.isEmpty()) {
-            	userHasRole = true;
-            }
-            else {
-            	for (String role : roleSuperset) {
-            		//if the user is in one of the roles, set userHasRole to true and return
-            		if (DaqueryUserDAO.hasRole(jwt.getUserId(), jwt.getNetworkId(), role) == true) {
-            			userHasRole = true;
-            			break;
-            		}
-            			
-            	}
-            }
+            boolean userHasRole = WSConnectionUtil.hasRole(roleSuperset, userId, networkId);
             if (!userHasRole) {
         		String msg = "You are not authorized to access this functionality in the website.";
-        		logger.log(Level.SEVERE, msg + "  Found this user: [" + jwt.getUserId() + "] trying to access this method: [" 
+        		logger.log(Level.SEVERE, msg + "  Found this user: [" + userId + "] trying to access this method: [" 
         				+ resourceMethod.toString() +"].  This method requires one of these role(s): [" + roleSuperset.toString()  + "] ");
                 throw new NotAuthorizedException(msg + "  " + "Authorization header must be provided");    		
             }
@@ -178,7 +191,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
                         @Override
                         public String getName() {
-                            return jwt.getUserId();
+                            return userId;
                         }
                         
                     };
@@ -186,13 +199,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
                 @Override
                 public boolean isUserInRole(String role) {
-                	try {
-                		return DaqueryUserDAO.hasRole(jwt.getUserId(), jwt.getNetworkId(), role);
+                	//hardcode this since the role is checked elsewhere
+                	return true;
+/*                	try {
+                		return DaqueryUserDAO.hasRole(userId, networkId, role);
                 	} catch (Exception e) {
-	            		String msg = "An error occured while determining if user [" +jwt.getUserId() + "] in network [" + jwt.getNetworkId() + "] has role [" + role + "]";
+	            		String msg = "An error occured while determining if user [" +userId + "] in network [" + networkId + "] has role [" + role + "]";
 	            		logger.log(Level.SEVERE, msg, e);	            		
                 		return false;
-                	}
+                	}*/
                 }
 
                 @Override
@@ -210,7 +225,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         {
     		String msg = "Encountered a TokenInvalidException.";
     		logger.log(Level.SEVERE, msg, tie);	            		
-        	try{requestContext.abortWith(ResponseHelper.expiredTokenResponse(jwtReporting.getUserId(), jwtReporting.getSiteId(), jwtReporting.getNetworkId()));}
+        	try{requestContext.abortWith(ResponseHelper.expiredTokenResponse(userId, siteId, networkId));}
         	catch(Throwable t)
         	{
         		String msg2 = "Encountered an error handling a TokenInvalidException.";
