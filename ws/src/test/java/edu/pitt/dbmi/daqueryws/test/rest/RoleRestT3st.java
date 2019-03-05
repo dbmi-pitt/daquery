@@ -228,8 +228,8 @@ public class RoleRestT3st extends DaqueryBaseTest {
 		}
 		String json = answer.readEntity(String.class);
 		JsonWebToken jwt = JSONHelper.gson.fromJson(json, JsonWebToken.class);
-		currentToken = jwt.getToken();
-		return(jwt.getToken());
+		currentToken = jwt.getTokenString();
+		return(jwt.getTokenString());
 	}	
 	
 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -23,6 +24,7 @@ import edu.pitt.dbmi.daquery.common.domain.JsonWebToken;
 import edu.pitt.dbmi.daquery.common.domain.TokenManager;
 import edu.pitt.dbmi.daquery.common.domain.TokenManager.KeyedJWT;
 import edu.pitt.dbmi.daquery.common.util.TokenException;
+import edu.pitt.dbmi.daquery.common.util.WSConnectionUtil;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -49,7 +51,8 @@ public class TokenManagerTest {
 				tm.setExpirationMinutes(1);
 				String token = tm.addToken(userUuid, siteUUID, networkUUID);
 				KeyedJWT jwt = tm.getToken(token);
-				validTokens.add(token);
+				String tokenEntryString = jwt.getToken().getTokenString();
+				validTokens.add(tokenEntryString);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -74,7 +77,7 @@ public class TokenManagerTest {
 		TokenManager tm = TokenManager.getTokenManager();
 		String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
 		KeyedJWT jwt = tm.getToken(tokenid);
-		tm.addToken(tokenid, jwt);
+		tm.addToken(jwt);
 	}
 	
 	@Test
@@ -102,6 +105,29 @@ public class TokenManagerTest {
 		for (int i=0;i < validTokens.size(); i++) {
 			KeyedJWT jwt = tm.getToken(validTokens.get(i));
 			Assert.assertNotNull("Cannot find token with tokenid = " + validTokens.get(i), jwt);
+		}
+	}
+	
+	@Test
+	public void testRenewToken() throws TokenInvalidException, IOException, JsonMappingException, TokenException, JsonParseException {
+		TokenManager tm = TokenManager.getTokenManager();
+		String tokenString = tm.addToken(userUuid, siteUUID, networkUUID);
+		String renewedToken = tm.renewToken(tokenString);
+		Assert.assertFalse("original token same as renewed token", tokenString.compareTo(renewedToken) == 0);
+	}
+	
+	@Test
+	public void testGetTokenWithoutNetwork() throws TokenException {
+		try {
+		TokenManager tm = TokenManager.getTokenManager();
+		String token = tm.addToken(userUuid, siteUUID, "");
+		KeyedJWT kj = tm.getToken(token);
+		JsonWebToken jwt = kj.getToken();
+		String s = jwt.getTokenString();
+		KeyedJWT jwt2 = tm.getToken(s);
+		Assert.assertNotNull("Cannot find token with tokenid = " + s, jwt2);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -136,8 +162,11 @@ public class TokenManagerTest {
 		TokenManager tm = TokenManager.getTokenManager();
 		//change the expiration to one minute
 		tm.setExpirationMinutes(1);
-		String tokenid = tm.addToken(userUuid, siteUUID, networkUUID);
-		KeyedJWT jwt = tm.getToken(tokenid);
+		String tokenString = tm.addToken(userUuid, siteUUID, networkUUID);
+		//Map<String, Object> claims = WSConnectionUtil.extractClaims(tokenString);
+		//String tokenid = JsonWebToken.extractTokenId(claims);
+		
+		KeyedJWT jwt = tm.getToken(tokenString);
 		Key tokenkey = jwt.getTokenKey();
 		
 		//just a quick-n-dirty two minute wait
