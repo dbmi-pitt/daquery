@@ -632,6 +632,45 @@ public class UserEndpoint extends AbstractEndpoint {
 	    	
 	    }
     }
+
+    @GET
+    @Path("/validateToken")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response validateToken()
+    {
+    	String securityToken = httpHeaders.getHeaderString("Authorization");
+    	String networkid = "";
+		try {
+			TokenManager tm = TokenManager.getTokenManager();
+			KeyedJWT kj = tm.getToken(securityToken);
+			JsonWebToken jwt = kj.getToken();
+			networkid = jwt.getNetworkId();
+			if (networkid == null) {
+				networkid = "";
+			}
+			jwt.validate();
+		} catch (TokenInvalidException e) {
+    		String msg = "An unexpected error occured while creating a new account for token [" + securityToken + "].";
+    		logger.log(Level.SEVERE, msg, e);
+			return(ResponseHelper.getErrorResponse(401, "Not Authorized", e.getMessage(), e));
+		} catch (Throwable t) {
+    		String msg = "An unexpected error occured while creating a new account for token [" + securityToken + "].";
+    		logger.log(Level.SEVERE, msg, t);
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking user credentials at a remote site.", null, t));
+		}
+		//return(ResponseHelper.getBasicResponse(200, "valid"));
+		Map<String, String> retMap = new HashMap<>();
+		logger.log(Level.INFO, "@@@@@@@In validateToken, networkid is [" + networkid + "]");
+		System.out.println("I@@@@@n validateToken, networkid is [" + networkid + "]");
+		retMap.put("networkid", networkid);
+		try {
+			return(ResponseHelper.getJsonResponseGen(200, retMap));
+		} catch (Throwable t) {
+    		String msg = "An unexpected error occured while creating a new account for token [" + securityToken + "].";
+    		logger.log(Level.SEVERE, msg, t);
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking user credentials at a remote site.", null, t));			
+		}
+    }
     
     /**
      * Create a new user account with the given login and password combination.
@@ -994,22 +1033,4 @@ public class UserEndpoint extends AbstractEndpoint {
 		}
     }
     
-    @GET
-    @Path("/validateToken")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response validateToken()
-    {
-    	String securityToken = httpHeaders.getHeaderString("Authorization");
-		try {
-			TokenManager tm = TokenManager.getTokenManager();
-			KeyedJWT kj = tm.getToken(securityToken);
-			JsonWebToken jwt = kj.getToken();
-			jwt.validate();
-		} catch (TokenInvalidException e) {
-			return(ResponseHelper.getErrorResponse(401, "Not Authorized", e.getMessage(), e));
-		} catch (Throwable t) {
-			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking user credentials at a remote site.", null, t));
-		}
-		return(ResponseHelper.getBasicResponse(200, "valid"));
-    }
 }
