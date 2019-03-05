@@ -542,11 +542,15 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 	}
 
 	@POST
+	@Secured({"ADMIN","STEWARD","DATA_QUERIER","AGGREGATE_QUERIER"})
 	@Path("request")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response request(DaqueryRequest request) throws DaqueryException {
-		Response response = null;
+        System.out.println("@@@@@@@ In DaqueryEndpoint request call" );
+
+        
+        Response response = null;
 		try {
 			if (request == null || request.getRequestSite() == null || request.getRequestSite().getSiteId() == null) {
 				String msg = "A request site with a valid request site UUID is required.";
@@ -609,11 +613,14 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			request.setNetwork(net);
 			request.getInquiry().setNetwork(net);
 			String securityToken = httpHeaders.getHeaderString("Authorization");
-			TokenManager tm = TokenManager.getTokenManager();
-			KeyedJWT kw = tm.getToken(securityToken.substring("Bearer".length()).trim());
-			JsonWebToken jwt = kw.getToken();
-			jwt.validate();
-			String requesterId = jwt.getUserId();
+			//TokenManager tm = TokenManager.getTokenManager();
+			//KeyedJWT kw = tm.getToken(securityToken.substring("Bearer".length()).trim());
+			//JsonWebToken jwt = kw.getToken();
+			//jwt.validate();
+			//String requesterId = jwt.getUserId();
+	    	Map<String,Object> claims = WSConnectionUtil.extractClaims(securityToken);
+	    	String requesterId = (String)claims.get("sub");
+
 
 			boolean isLocalRequester = DaqueryUserDAO.isLocalUserId(requesterId);
 			if (isLocalRequester)
@@ -755,11 +762,12 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 	}
 
 	@GET
-	// @Secured
+	@Secured({"ADMIN","STEWARD","DATA_QUERIER","AGGREGATE_QUERIER"})
 	@Path("/response/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response response(@PathParam("id") String id) {
+        System.out.println("@@@@@@@ In DaqueryEndpoint response/{id} call" );
 		if (StringHelper.isBlank(id))
 			return (ResponseHelper.getErrorResponse(400, "A response id required.",
 					"The response id should be provided as a path parameter in the request url : server/daquery/ws/response/{id}",
@@ -780,7 +788,9 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			String requestSiteId = rVal.getRequest().getRequestSite().getSiteId();
 			if (!mySite.getSiteId().equals(requestSiteId)) { // remote response
 				Site remoteSite = SiteDAO.getSiteByNameOrId(requestSiteId);
-				httpResponse = WSConnectionUtil.getFromRemoteSite(remoteSite, "/response/" + id, null, null);
+				Map<String, String> arguments = new HashMap<String, String>();
+				arguments.put("networkid", rVal.getRequest().getNetwork().getNetworkId());
+				httpResponse = WSConnectionUtil.getFromRemoteSite(remoteSite, "/response/" + id, arguments, httpHeaders.getHeaderString("Authorization"));
 
 				if (httpResponse.getStatus() == 200) {
 					String json = httpResponse.readEntity(String.class);
@@ -950,9 +960,16 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 	public Response renewJWT(@HeaderParam(HttpHeaders.AUTHORIZATION) String oldTokenString,
 			@DefaultValue("") @QueryParam("networkId") String networkId) {
 
+        System.out.println("@@@@@@@ In DaqueryEndpoint renew-jwt call" );
 		try {
 			TokenManager tm = TokenManager.getTokenManager();
-			String renewedTokenString = tm.renewToken(oldTokenString.substring("Bearer".length()).trim());
+			oldTokenString = oldTokenString.substring("Bearer".length()).trim();
+			String renewedTokenString = "";
+			if (networkId.equalsIgnoreCase("")) { 
+				renewedTokenString = tm.renewToken(oldTokenString);
+			} else {
+				renewedTokenString = tm.renewToken(oldTokenString, networkId);				
+			}
 
 			// Get the HTTP Authorization header from the request
 			logger.log(Level.INFO, "#### renew jwt : " + oldTokenString);
@@ -1329,6 +1346,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 
 	private Response handleRemoteAggregateRequestFromUI(DaqueryRequest request, Response response, Site requestSite,
 			String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
+        System.out.println("@@@@@@@ In DaqueryEndpoint rhandleRemoteAggregateRequestFromUI call" );
 		request.setDirection("OUT");
 		request.setSentTimestamp(new Date());
 		DaqueryRequestDAO.updateOrSave(request);
@@ -1529,6 +1547,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 
 	private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite,
 			String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
+        System.out.println("@@@@@@@ In DaqueryEndpoint handleRemoteDataRequestFromUI call" );
 		request.setDirection("OUT");
 		request.setSentTimestamp(new Date());
 		DaqueryRequestDAO.updateOrSave(request);
