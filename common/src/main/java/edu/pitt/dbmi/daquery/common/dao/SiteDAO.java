@@ -201,8 +201,11 @@ public class SiteDAO extends AbstractDAO {
     		{
     			for(SiteConnection sc : net.getSiteConnections())
     			{
-    				if(SiteConnection.isOutgoing(sc) && SiteConnection.isConnected(sc) && sc.getSite() != null)
-    					rVals.add(sc.getSite());
+    				if(SiteConnection.isOutgoing(sc) && SiteConnection.isConnected(sc) && sc.getSite() != null){
+    					if(!(Boolean.parseBoolean(AppProperties.getNotList()) && SiteDAO.getLocalSite().getSiteId().equals(sc.getSite().getSiteId()))){
+    						rVals.add(sc.getSite());
+    					}
+    				}
     			}
     		}
     		return(rVals);

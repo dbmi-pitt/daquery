@@ -95,6 +95,16 @@
             Warning: Central Server URL is being overridden by the DAQUERY_CENT_URL environment variable. Currently set to: {{ centralURLENV }}
           </div>
         </div>
+        <div class="form-group has-feedback" [ngClass]="{'has-error': notList.invalid && (notList.dirty || notList.touched), 'has-success': notList.valid && (notList.dirty || notList.touched) }">
+          <label>Do NOT Display</label>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" formControlName="notList" name="notList">
+              Do NOT display my site when running queries (Act as a central node only)
+            </label>
+          </div>
+          <div class="help-block" *ngIf="(!notList.hasError('required') && notList.hasError('validateEqual')) && (notList.dirty || notList.touched)">Do NOT Display</div>
+        </div>
         <div class="row">
           <div class="col-xs-4">
             <button [disabled]="appConfigForm.invalid || loading" class="btn btn-primary btn-block btn-flat">

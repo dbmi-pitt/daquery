@@ -43,7 +43,8 @@ export class AppConfigComponent implements OnInit {
       trackingOutputDir: ['', [Validators.required]],
       tempFileExportDir: ['', [Validators.required]],
       casePerFile: ['', Validators.required],
-      centralURL: ['', Validators.required]
+      centralURL: ['', Validators.required],
+      notList: ['']
     })
   }
 
@@ -58,6 +59,7 @@ export class AppConfigComponent implements OnInit {
   get tempFileExportDir() { return this.appConfigForm.get('tempFileExportDir'); }
   get casePerFile() { return this.appConfigForm.get('casePerFile'); }
   get centralURL() { return this.appConfigForm.get('centralURL'); }
+  get notList() { return this.appConfigForm.get('notList'); }
 
   ngOnInit() {
     this.isUpdateAvailable();
@@ -77,6 +79,7 @@ export class AppConfigComponent implements OnInit {
                         this.appConfigForm.get('tempFileExportDir').setValue(res.tempFileExportDir);
                         this.appConfigForm.get('casePerFile').setValue(res.casePerFile);
                         this.appConfigForm.get('centralURL').setValue(res.centralURL);
+                        this.appConfigForm.get('notList').setValue(res.notList === 'true' ? true : false);
                         this.centralURLENVSet = (res.centralURLENVSet === 'true');
                         this.centralURLENV = res.centralURLENVSet === 'true' ? res.centralURL : "";
                        })

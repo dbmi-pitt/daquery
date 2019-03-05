@@ -508,6 +508,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 					AppProperties.setTempFileExportDir(AppProperties.getTempFileExportDir());
 					AppProperties.setCasePerFile(AppProperties.getCasePerFile());
 					AppProperties.setCentralURL(AppProperties.getCentralURL());
+					AppProperties.setNotList(AppProperties.getNotList());
 
 					DaqueryUser currentUser = DaqueryUserDAO.getAdminUser();
 					Map<String, Object> addtionalVal = new HashMap<String, Object>();
@@ -1009,6 +1010,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			properties.put("centralURL", AppProperties.getCentralURL());
 			properties.put("centralURLENVSet",
 					String.valueOf(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL"))));
+			properties.put("notList", AppProperties.getNotList());
 			return ResponseHelper.getJsonResponseGen(200, properties);
 
 		} catch (Exception e) {
@@ -1127,6 +1129,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			AppProperties.setTempFileExportDir((String) properties.get("tempFileExportDir"));
 			AppProperties.setCasePerFile((String) properties.get("casePerFile"));
 			AppProperties.setCentralURL((String) properties.get("centralURL"));
+			AppProperties.setNotList(properties.get("notList").toString());
 
 			return ResponseHelper.getJsonResponseGen(200, properties);
 

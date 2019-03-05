@@ -161,7 +161,6 @@ public class NetworkEndpoint extends AbstractEndpoint {
             if (network == null) {
                 return Response.status(NOT_FOUND).build();
             }
-        
             
             String json = network.toJson();
 
