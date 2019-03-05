@@ -32,6 +32,7 @@ export class NewQueryComponent implements OnInit {
   ansiSqlAnalyzerResponse: any;
   oracleSqlAnalyzerResponse: any;
   sqlServerSqlAnalyzerResponse: any;
+  gettingSites = false;
 
   sqlDialect = {
     ansi: true,
@@ -75,7 +76,7 @@ export class NewQueryComponent implements OnInit {
         queryType: [inquiry.queryType.toUpperCase()],
         dataType:['SQL_QUERY'],
         inquiryName: [inquiry.inquiryName, Validators.required],
-        notDateShift: inquiry.notDateShift,
+        notDateShift: inquiry.notDateShift === undefined ? false : inquiry.notDateShift,
         studyName: '',
         inquiryDescription: [inquiry.inquiryDescription, Validators.maxLength(500)],
         query: this.fb.group({
@@ -172,18 +173,20 @@ export class NewQueryComponent implements OnInit {
           }
         }
         $('#myRequestModal').modal('show');
+        this.gettingSites = true;
         this.networkService.getNetworks()
                          .subscribe(networks => {
                            this.networks = networks;
                            if(this.networks && this.networks.length === 1){
                               let network = this.networks[0];
-                              this.authenticationService.renewjwt(network.networkId);
+                              //this.authenticationService.renewjwt(network.networkId);
                               this.siteService.getSites(network)
                                               .subscribe(sites => {
                                                 const siteFGs = sites.sort(function(a,b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); })
                                                                      .map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
                                                 const siteFormArray = this.fb.array(siteFGs);
                                                 this.inquiryForm.setControl('sitesToQuery', siteFormArray);
+                                                this.gettingSites = false;
                                               }, error => {
                                                 //$('#myRequestModal').modal('hide');
                                                 this.error = error;

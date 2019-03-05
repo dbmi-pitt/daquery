@@ -448,6 +448,24 @@ public class AppProperties
 		setDBProperty("central.url", val);
 	}
 	
+	private static final String defaultNotList = "true";
+	public static String getNotList() throws DaqueryException {
+		try {
+			String val = getDBProperty("not.list");
+			if(val == null){ 
+				return defaultNotList;
+			} else {
+				return val;
+			}
+		} catch (Throwable t) {
+			return defaultNotList;
+		}
+	}
+	
+	public static void setNotList(String val) throws DaqueryException {
+		setDBProperty("not.list", val);
+	}
+	
 	
 	public static String getTrackingDir() throws DaqueryException
 	{
