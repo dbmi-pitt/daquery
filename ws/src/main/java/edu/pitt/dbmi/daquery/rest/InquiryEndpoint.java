@@ -18,6 +18,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -107,6 +108,7 @@ public class InquiryEndpoint extends AbstractEndpoint {
      * Get inquiry by id
      * example url: daquery-ws/ws/inquiries/1
      * @return 200 OK Inquiry
+     * 
      * @throws 500 Server Error	error message
      * @throws 401 Unauthorized	
      */
@@ -306,6 +308,51 @@ public class InquiryEndpoint extends AbstractEndpoint {
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
         } catch (Exception e) {
     		String msg = "An unexpected error occurred when updating inquiry [" + id + "].";
+    		logger.log(Level.SEVERE, msg, e);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
+        } finally {
+        	if (dao.getCurrentSession() != null) {
+        		dao.closeCurrentSession();
+        	}
+        }
+    }
+    
+    /**
+     * Delete inquiry
+     * example url: daquery-ws/ws/inquiries/1
+     * @return 200 OK Inquiry
+     * @throws 500 Server Error	error message
+     * @throws 401 Unauthorized	
+     */
+    @DELETE
+    @Path("/{id}")
+    @Secured
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteInquiry(@PathParam("id") String id) {
+    	InquiryDAO dao = new InquiryDAO();
+    	try {
+            logger.info("#### deleting  inquiry id: " + id);
+
+            Principal principal = securityContext.getUserPrincipal();
+            String username = principal.getName();
+            logger.info("Responding to request from: " + username);
+            
+            DaqueryUser currentUser = DaqueryUserDAO.queryUserByUsername(username);
+            
+            dao.openCurrentSessionwithTransaction();
+            Inquiry inquiry = dao.getByUUID(id);
+            dao.delete(inquiry);
+            dao.closeCurrentSessionwithTransaction();
+            
+            return Response.ok(200).build();
+
+    	} catch (HibernateException he) {
+    		String msg = "Could not access the database when creating a new inquiry.";
+    		logger.log(Level.SEVERE, msg, he);
+    		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", he));
+        } catch (Exception e) {
+    		String msg = "An unexpected error was encountered when creating a new inquiry.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg, "Please ask the admin to check the log files for more information.", e));
         } finally {
