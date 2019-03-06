@@ -179,7 +179,7 @@ export class NewQueryComponent implements OnInit {
                            this.networks = networks;
                            if(this.networks && this.networks.length === 1){
                               let network = this.networks[0];
-                              //this.authenticationService.renewjwt(network.networkId);
+                              this.authenticationService.renewjwt(network.networkId);
                               this.siteService.getSites(network)
                                               .subscribe(sites => {
                                                 const siteFGs = sites.sort(function(a,b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); })
@@ -192,7 +192,9 @@ export class NewQueryComponent implements OnInit {
                                                 this.error = error;
                                               });
                             } else {
+                              this.authenticationService.renewjwt(this.selectedNetwork.networkId);
                               this.inquiryForm.get('inquiryName').markAsTouched();
+                              this.gettingSites = false;
                             }
                           }, error => {
                             this.error = error;
@@ -201,6 +203,7 @@ export class NewQueryComponent implements OnInit {
     } else {
       this.inquiryForm.get('network').markAsTouched();
       this.inquiryForm.get('inquiryName').markAsTouched();
+      this.inquiryForm.get('dataModel').markAsTouched();
     }
   }
 
@@ -376,7 +379,7 @@ export class NewQueryComponent implements OnInit {
   networkOnChange(value){
     let network = this.networks.find(n => n.networkId === value);
     this.selectedNetwork = network;
-    this.authenticationService.renewjwt(network.networkId);
+    //this.authenticationService.renewjwt(network.networkId);
     if(network === undefined) {
       this.inquiryForm.setControl('sitesToQuery', this.fb.array([]));
     } else {
