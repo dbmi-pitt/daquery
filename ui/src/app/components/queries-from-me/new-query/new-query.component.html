@@ -23,15 +23,17 @@
                   </div>
                 </div>
                 <div *ngIf="selectedNetwork" class="form-group">
-                  <label for="dataType">Data Model</label>
-                  <select *ngIf="selectedNetwork.dataModels?.length > 1" formControlName="dataModel" class="form-control">
-                    <option value="">-Select-</option>
-                    <option *ngFor="let dataModel of selectedNetwork.dataModels" [attr.value]="dataModel.dataModelId" selected="{{ selectedNetwork.dataModels.length == 1 ? 'selected' : ''}}">
-                      {{ dataModel.name }}
-                    </option>
-                  </select>
-                  <div class="help-block" *ngIf="dataModel.invalid && (dataModel.dirty || dataModel.touched)">Please select a data model</div>
-                  <p *ngIf="selectedNetwork?.dataModels?.length === 1">{{ selectedNetwork.dataModels[0]?.name }}</p>
+                  <div class="form-group  has-feedback" [ngClass]="{'has-error': dataModel.invalid && (dataModel.dirty || dataModel.touched), 'has-success': dataModel.valid && (dataModel.dirty || dataModel.touched) }">
+                    <label for="dataType">Data Model</label>
+                    <select *ngIf="selectedNetwork.dataModels?.length > 1" formControlName="dataModel" class="form-control">
+                      <option value="">-Select-</option>
+                      <option *ngFor="let dataModel of selectedNetwork.dataModels" [attr.value]="dataModel.dataModelId" selected="{{ selectedNetwork.dataModels.length == 1 ? 'selected' : ''}}">
+                        {{ dataModel.name }}
+                      </option>
+                    </select>
+                    <div class="help-block" *ngIf="dataModel.invalid && (dataModel.dirty || dataModel.touched)">Please select a data model</div>
+                    <p *ngIf="selectedNetwork?.dataModels?.length === 1">{{ selectedNetwork.dataModels[0]?.name }}</p>
+                  </div>
                 </div>
                 <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">
                   <label for="name">Inquiry Name</label>
