@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { environment } from '../../../../environments/environment';
 import { MapValuesPipe } from '../../../pipes/iteratable.pipe';
 import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../services/authentication.service';
 //import { BootstrapSwitchComponent } from 'angular2-bootstrap-switch';
 
 @Component({
@@ -21,6 +22,7 @@ export class RequestsFromMeListComponent implements OnInit {
 
   constructor(private requestService: RequestService,
               private responseService: ResponseService,
+              private authenticationService: AuthenticationService,
               private router : Router) { 
   }
 
@@ -129,21 +131,23 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   resubmit(request: any){
-    if(confirm("Do you want to resubmit the request?")){
-      this.requestService.sendRequest(request, false)
-                        .subscribe(() => {
-                          this.requests = null;
-                          this.getRequestsFromMe(this.showArchived);
-                        },
-                        error => {
-                          this.requests = null;
-                          this.getRequestsFromMe(this.showArchived);
-                        },
-                        () => {
-                          this.requests = null;
-                          this.getRequestsFromMe(this.showArchived);
-                        });
-    }
+    this.authenticationService.renewjwt(request.network.networkId).subscribe(() => {
+      if(confirm("Do you want to resubmit the request?")){
+        this.requestService.sendRequest(request, false)
+                          .subscribe(() => {
+                            this.requests = null;
+                            this.getRequestsFromMe(this.showArchived);
+                          },
+                          error => {
+                            this.requests = null;
+                            this.getRequestsFromMe(this.showArchived);
+                          },
+                          () => {
+                            this.requests = null;
+                            this.getRequestsFromMe(this.showArchived);
+                          });
+      }
+    });
   }
 
   getRequestResult(response: any){
