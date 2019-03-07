@@ -67,10 +67,10 @@ export class AuthenticationService {
     this.router.navigate(['./login']);
   }
 
-  renewjwt(networkId: string): void {
+  renewjwt(networkId: string): Observable<any> {
     const params = new HttpParams().set('networkId', networkId);
-    this.http.get('/daquery/ws/renew-jwt', {params: params}).subscribe(() => {
-      console.log('jwt renewed.')
+    return this.http.get('/daquery/ws/renew-jwt', {params: params}).map(() => {
+      console.log('jwt renewed.');
     });
   }
 

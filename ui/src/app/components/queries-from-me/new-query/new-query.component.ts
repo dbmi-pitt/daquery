@@ -179,22 +179,23 @@ export class NewQueryComponent implements OnInit {
                            this.networks = networks;
                            if(this.networks && this.networks.length === 1){
                               let network = this.networks[0];
-                              this.authenticationService.renewjwt(network.networkId);
-                              this.siteService.getSites(network)
-                                              .subscribe(sites => {
-                                                const siteFGs = sites.sort(function(a,b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); })
-                                                                     .map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
-                                                const siteFormArray = this.fb.array(siteFGs);
-                                                this.inquiryForm.setControl('sitesToQuery', siteFormArray);
-                                                this.gettingSites = false;
-                                              }, error => {
-                                                //$('#myRequestModal').modal('hide');
-                                                this.error = error;
-                                              });
+                              this.authenticationService.renewjwt(network.networkId).subscribe(() => {
+                                this.siteService.getSites(network)
+                                                .subscribe(sites => {
+                                                  const siteFGs = sites.sort(function(a,b) { return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0); })
+                                                                       .map(site => this.fb.group({"name": site.name, "siteId": site.siteId, "check": false}));
+                                                  const siteFormArray = this.fb.array(siteFGs);
+                                                  this.inquiryForm.setControl('sitesToQuery', siteFormArray);
+                                                  this.gettingSites = false;
+                                                }, error => {
+                                                  //$('#myRequestModal').modal('hide');
+                                                  this.error = error;
+                                                });
+                              });
                             } else {
-                              this.authenticationService.renewjwt(this.selectedNetwork.networkId);
-                              this.inquiryForm.get('inquiryName').markAsTouched();
-                              this.gettingSites = false;
+                              this.authenticationService.renewjwt(this.selectedNetwork.networkId).subscribe(() => {                              this.inquiryForm.get('inquiryName').markAsTouched();
+                                this.gettingSites = false;
+                              });
                             }
                           }, error => {
                             this.error = error;

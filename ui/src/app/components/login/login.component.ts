@@ -21,6 +21,8 @@ export class LoginComponent implements OnInit {
     private daqueryService: DaqueryService) { }
 
   ngOnInit() {
+    // clear out old jwt
+    localStorage.setItem('jwt', JSON.stringify(""));
     // get setup flag. if not setup, redirect to setup page
     this.setupService.getSetup()
                      .subscribe(isSetup => {
