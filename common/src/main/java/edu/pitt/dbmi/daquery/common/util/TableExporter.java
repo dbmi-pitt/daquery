@@ -238,7 +238,11 @@ dateShift
 			else if(tag.isZipCode())
 				writer.write(threeDigitZip(rs.getString(colNum), threeDigitZip));
 			else if(tag.isId())
-				writer.write(getSerializedId(rs.getString(colNum), tag.getIdName()));
+			{
+				String val = getSerializedId(rs.getString(colNum), tag.getIdName());
+				if(StringHelper.isBlank(val)) val = "";
+				writer.write(val);
+			}
 			else
 				writer.write(csvSafeString(rs.getString(colNum)));
 		}	
