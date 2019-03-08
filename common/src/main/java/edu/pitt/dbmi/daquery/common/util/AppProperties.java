@@ -129,6 +129,17 @@ public class AppProperties
 		}
 	}
 	
+	public static int getConnectionRetryTime()
+	{
+		try{
+			return(Integer.parseInt(ApplicationPropertiesFile.getPropertiesFromFile().getProperty("connection.retry.time")));
+		}
+		catch(Throwable t)
+		{
+			return(10);
+		}
+	}
+	
 	public static String getInitializationDDL()
 	{
 		return(ApplicationPropertiesFile.getPropertiesFromFile().getProperty("initialization.ddl.file"));

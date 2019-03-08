@@ -82,7 +82,7 @@
         </div>
         <div class="form-group has-feedback" [ngClass]="{'has-error': casePerFile.invalid && (casePerFile.dirty || casePerFile.touched), 'has-success': casePerFile.valid && (casePerFile.dirty || casePerFile.touched) }">
           <label>Exported Cases Per File</label>
-          <input type="text" class="form-control" formControlName="casePerFile" name="casePerFile" />
+          <input type="number" class="form-control" formControlName="casePerFile" name="casePerFile" />
           <p class="help-block">The number of cases (patients) included in a single export file. If more than this number are exported multiple export files will be created.</p>
           <div class="help-block" *ngIf="(!casePerFile.hasError('required') && casePerFile.hasError('validateEqual')) && (casePerFile.dirty || casePerFile.touched)">Case per Export File</div>
         </div>

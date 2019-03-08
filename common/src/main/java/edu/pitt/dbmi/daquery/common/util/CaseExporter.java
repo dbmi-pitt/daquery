@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
@@ -25,6 +26,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +34,7 @@ import org.hibernate.Session;
 
 import edu.pitt.dbmi.daquery.common.dao.NetworkDAO;
 import edu.pitt.dbmi.daquery.common.domain.DataModel;
+import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.domain.Network;
 import edu.pitt.dbmi.daquery.common.domain.SQLDataSource;
 import edu.pitt.dbmi.daquery.common.domain.SourceType;
@@ -65,9 +68,9 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		Statement st = null;
 		ResultSet rs = null;
         CaseExporter dataExporter = new CaseExporter(r.getResponses().iterator().next(), dm, AppProperties.getDBProperty("output.path"));
-//        dataExporter.init(conn, st, rs, "select PATID from demographic where PATID='PIT686766' OR PATID='PIT637837' OR PATID='PIT982221'");
-//        dataExporter.dumpData(new File("."), r, 1, 1, 10);
-//        dataExporter.close();
+        //dataExporter.init(conn, st, rs, "select PATID from demographic where PATID='PIT686766' OR PATID='PIT637837' OR PATID='PIT982221'");
+        //dataExporter.dumpData(new File("."), r, 1, 1, 10);
+        dataExporter.close();
         //while(dataExporter.hasNextExport())
         //	dataExporter.exportNext();
         
@@ -159,16 +162,34 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 	private String failureMessage;
 	
 	@Override
-	public boolean init(Connection conn, Statement st, ResultSet rs, String sql) throws Throwable {
+	public boolean init(Connection conn, ResultSet rs, String sql, SQLDataSource ds, String tempTableName) throws Throwable {
+		DatabaseMetaData dbm = conn.getMetaData();
+		// check if "employee" table is there
+		ResultSet tables = dbm.getTables(null, null, "QUERY_SET_TEMP", null);
+		
+		if(ds.getDriverClass().contains("oracle")) {
+			if (!tables.next()) {
+				throw new DaqueryErrorException("Global temp table does not exist.");
+			}
+		} else if(ds.getDriverClass().contains("sqlserver")){
+//			if (!tables.next()) {
+//				String createTempTable = "CREATE TABLE " + tempTableName + " ([PATID] [varchar](50) " +
+//										"PRIMARY KEY CLUSTERED " + 
+//										"([PATID] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]) ON [PRIMARY]";
+//				st = conn.createStatement();
+//				st.execute(createTempTable);
+//			}
+		}
+		
 		//get the list of identifiers			
-		List<String> pList = new ArrayList<String>();			
+		List<String> pList = new ArrayList<String>();
 		try
 		{
 			sql = sql.trim();
 			if(sql.endsWith(";"))
 				sql = sql.substring(0, sql.length() - 1);
-			st = conn.createStatement();
-			rs = st.executeQuery(sql);
+			Statement st = conn.createStatement();
+			rs = st.executeQuery(sql + " order by patid");
 			while(rs.next())
 			{
 				String val = rs.getString(1);
@@ -186,9 +207,11 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 				}
 			}
 			
+			rs.close();
+			st.close();
+			
 			this.idList = pList;
 			nFiles = (int) Math.ceil((double)idList.size() / casesPerFile);
-			return(true);
 		}
 		catch(Throwable t)
 		{
@@ -198,6 +221,28 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 //			response.setStackTrace(StringHelper.stackToString(t));
 //			return(response);
 		}
+		
+		// Put patid into global temp table
+		try {
+			if(sql.endsWith(";"))
+				sql = sql.substring(0, sql.length() - 1);
+			String insertTempTableQuery = "";
+			if(ds.getDriverClass().contains("oracle"))
+				insertTempTableQuery = "insert into QUERY_SET_TEMP (" + sql + ")";
+			else
+				if(sql.toLowerCase().indexOf("from", 0) > 0){
+					String sqlFirstPart = sql.substring(0, sql.toLowerCase().indexOf("from", 0));
+					String sqlSecondPart = sql.substring(sql.toLowerCase().indexOf("from", 0));
+					insertTempTableQuery = sqlFirstPart + "into " + tempTableName + " " + sqlSecondPart;
+				}
+			Statement st = conn.createStatement();
+			st.execute(insertTempTableQuery);
+			st.close();
+			return true;
+		} catch (Throwable t){
+			throw t;
+		}
+		
 	}
 		
 	public CaseExporter(DaqueryResponse daqueryResponse, DataModel model, String dataDir) throws DaqueryException
@@ -308,10 +353,14 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 	
 	//returns the file and path where the exported file is stored
 	//either remotely or locally 
-	public String exportNext() throws Throwable
+	public String exportNext(Connection conn, String tempTableName) throws Throwable
 	{
 		try
 		{
+			//clear hashtables
+			this.serializedIdsByType = new Hashtable<String, Hashtable<String, Integer>>();
+			this.shiftDaysByPatientId = new Hashtable<String, Integer>();
+			
 			//just make sure all is okay with the tracking file writer before doing any export- several errors could get thrown from this call
 			getTrackingFileWriter();
 			
@@ -319,7 +368,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 				currentFile++;
 
 			File tmpDir = FileHelper.createExportTempDirectory();
-			File zipFile = dumpData(tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile);
+			File zipFile = dumpData(conn, tmpDir, daqueryRequest, currentFile, nFiles, casesPerFile, tempTableName);
 	
 			//send the file to remote requester
 			String outputFilename = daqueryRequest.getFilePrefix() + "_" + currentFile + ".zip";
@@ -335,7 +384,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 				Path p = Paths.get(AppProperties.getLocalDeliveryDir(), outputFilename);
 				Files.copy(zipFile.toPath(), p, StandardCopyOption.REPLACE_EXISTING );
 				filename = p.toString();
-			}	
+			}
 			FileHelper.deleteDirectory(tmpDir);
 			return(filename);
 
@@ -391,7 +440,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		}		
 	}
 	
-	private File dumpData(File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile) throws Throwable
+	private File dumpData(Connection conn, File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile, String tempTableName) throws Throwable
 	{
 		String filenamePrefix = daqueryRequest.getFilePrefix();
 		Hashtable<OutputFile, OutputStreamWriter> outputStreams = new Hashtable<>();
@@ -404,7 +453,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 				outputStreams.put(outputfile, new OutputStreamWriter(ontologyOutputStream));
 				
 			}else{
-				writeCustomCSVFile(new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile);
+				writeCustomCSVFile(conn, new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile, tempTableName);
 			}
 		}
 		
@@ -484,17 +533,16 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		// send finish locally msg to requester site.
 	}
 	
-	private void writeCustomCSVFile(OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile) throws Throwable {
-		Connection conn = null;
-		Statement s = null;
+	private void writeCustomCSVFile(Connection conn, OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile, String tempTableName) throws Throwable {
 		ResultSet rs = null;
 		try {
-			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL);
-			conn = ds.getConnection();
+//			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL);
+//			conn = ds.getConnection();
 			
 			buildCSVHeader(writer, outputFile.custom_column_set);
 			
-			ArrayList<String> patients = getPatientIDofCurrPage(currentFileNum, patientsPerFile); 
+			//*
+			//ArrayList<String> patients = getPatientIDofCurrPage(currentFileNum, patientsPerFile); 
 			int patientsPerLoad = this.patientBlockSize;
 //			if(outputFile.source.equals("patient_dimension")){
 //				patientsPerLoad = this.propFile.getPatientDimensionPatientBlockSize() == null ? this.patientDimensionPatientBlockSize : this.propFile.getPatientDimensionPatientBlockSize();
@@ -502,109 +550,196 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 //				patientsPerLoad = this.propFile.getVistiDimensionPatientBlockSize() == null ? this.visitDimensionPatientBlockSize : this.propFile.getVistiDimensionPatientBlockSize();
 //			}
 			patientsPerLoad = patientsPerLoad > 1000 ? 1000 : patientsPerLoad;
-					
-			int nLoads = (int) Math.ceil(((double) patients.size()) / ((double) patientsPerLoad));
 			
-			HashSet<String> columnSet = new HashSet<>();
-			String getColumnsQuery = "select COLUMN_NAME from ALL_TAB_COLUMNS where LOWER(Table_Name) = '"+ outputFile.source.toLowerCase() + "'";
-			s = conn.createStatement();
-			rs = s.executeQuery(getColumnsQuery);
-			while(rs.next()){
-				String name = rs.getString(1);
-				columnSet.add(name);
-			}
+			//*
+			//int nLoads = (int) Math.ceil(((double) patients.size()) / ((double) patientsPerLoad));
 			
 			String columns = "";
 			for(Field f : outputFile.custom_column_set.fields){
-				if(columnSet.contains(f.colName))
-					columns += f.colName + ", ";
-				else
-					columns += "'' AS " + f.colName + ", ";
+				columns += f.colName + ", ";
 			}
 			columns = columns.substring(0, columns.length() - 2);
 
-			for (int i = 0; i < nLoads; i++) {
-				String inClause = buildQueryInClause(patients, i, patientsPerLoad);
-				s = conn.createStatement();
-				String query = "select " + outputFile.idColumn + ", " + columns + " from " + outputFile.source
-								+ " where " + outputFile.idColumn + " IN (" + inClause + ")"
-								+ " order by " + outputFile.idColumn;
-				try{
-					rs = s.executeQuery(query);
-				} catch (SQLSyntaxErrorException ssee){
-					if(ssee.getMessage().contains("table or view does not exist")){
-						logger.log(Level.INFO, "table is not exist", ssee);
-						continue;
-					} else {
-						throw ssee;
-					}
+			String startPatid = this.idList.get((currentFileNum - 1) * casesPerFile);
+			String endPatid = "";
+			if(currentFileNum * casesPerFile - 1 > this.idList.size()){
+				endPatid = this.idList.get(this.idList.size() - 1);
+			} else {
+				endPatid = this.idList.get(currentFileNum * casesPerFile - 1);
+			}
+			
+			long startTime = System.nanoTime();
+			String entQuery = "select src.patid, " + columns + " from " + outputFile.source + " src , " + tempTableName + 
+					" setids where setids.PATID = src.patid and src.patid >= '" + startPatid + 
+					"' and src.patid <= '" + endPatid + "'";
+			Statement s = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+		              java.sql.ResultSet.CONCUR_READ_ONLY);
+			s.setFetchSize(10);
+			rs = s.executeQuery(entQuery);
+			String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
+			Arrays.fill(outLine, "");
+			
+			StringBuilder outLine_sb = new StringBuilder();
+			while(rs.next()){
+				outLine_sb.setLength(0);
+				// create a new row
+				/*
+				outLine = new String[outLine.length];
+				Arrays.fill(outLine, "");
+				*/
+				
+				String patientNum = rs.getString(1);
+				//outLine[0] = csvSafeString(patientNum);
+				if(daqueryRequest.getNetwork().getSerializePatientId()){
+					//outLine[0] = this.getSerializedId(patientNum, "CASEID");
+					outLine_sb.append(this.getSerializedId(patientNum, "CASEID") + ",");
+				} else {
+					//outLine[0] = patientNum;
+					outLine_sb.append(patientNum + ",");
 				}
 				
-				String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
-				Arrays.fill(outLine, "");
-				while (rs.next()) {
-					// create a new row
-					outLine = new String[outLine.length];
-					Arrays.fill(outLine, "");
-					
-					String patientNum = rs.getString(1);
-					//outLine[0] = csvSafeString(patientNum);
-					if(daqueryRequest.getNetwork().getSerializePatientId())
-						outLine[0] = this.getSerializedId(patientNum, "CASEID");
-					else
-						outLine[0] = patientNum;
-					
-					int outLineEnd = debugDataExport ? outLine.length - 2 : outLine.length;
-					for(int j = 2; j <= outLineEnd; j++){
-						if(outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("zip"))
-							outLine[j-1] = threeDigitZip(rs.getString(j), threeDigitZip);
-						else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("birthday"))
-							outLine[j-1] = csvSafeString(handleBirthday(patientNum, rs.getDate(j)));
-						else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("source")){
-							String SourceSystem = rs.getString(j);
-							outLine[j-1] = csvSafeString(SourceSystem);
+				int outLineEnd = debugDataExport ? outLine.length - 2 : outLine.length;
+				for(int j = 2; j <= outLineEnd; j++){
+					if(outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("zip")){
+						//outLine[j-1] = threeDigitZip(rs.getString(j), threeDigitZip);
+						outLine_sb.append(threeDigitZip(rs.getString(j), threeDigitZip) + ",");
+					}
+					else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("birthday")){
+						//outLine[j-1] = csvSafeString(handleBirthday(patientNum, rs.getDate(j)));
+						outLine_sb.append(csvSafeString(handleBirthday(patientNum, rs.getDate(j))) + ",");
+					}
+					else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("source")){
+						String SourceSystem = rs.getString(j);
+						//outLine[j-1] = csvSafeString(SourceSystem);
+						outLine_sb.append(csvSafeString(SourceSystem) + ",");
+					}
+					else{
+						Object obj = rs.getObject(j);
+						if(obj instanceof Date){
+							//outLine[j-1] = csvSafeString(dateShift(patientNum, (Date)obj));
+							//outLine_sb.append(csvSafeString(dateShift(patientNum, (Date)obj)) + ",");
+							csvSafeString(dateShift(patientNum, (Date)obj), outLine_sb);
+							outLine_sb.append(",");
 						}
 						else{
-							Object obj = rs.getObject(j);
-							if(obj instanceof Date)
-								outLine[j-1] = csvSafeString(dateShift(patientNum, (Date)obj));
-							else
-								outLine[j-1] = obj == null ? "" : csvSafeString(obj.toString());
+							//outLine[j-1] = obj == null ? "" : csvSafeString(obj.toString());
+							if(obj == null){
+								outLine_sb.append(",");
+							} else {
+								csvSafeString(obj.toString(), outLine_sb);
+								outLine_sb.append(",");
+							}
+							//outLine_sb.append(obj == null ? "" : csvSafeString(obj.toString()) + ",");
 						}
 					}
-					
-					// For testing purpose
-					if (debugDataExport) {
-						outLine[outLine.length - 2] = patientNum;
-						if (dateShift) {
-							outLine[outLine.length - 1] = Integer.toString(getShiftDays(patientNum));
-						} else {
-							outLine[outLine.length - 1] = "0";
-						}
-					}
-					
-					// write the previous entry to file
-					StringBuilder outLine_sb = new StringBuilder();
-					String delim = "";
-					for(int j = 0; j < outLine.length; j++){
-						outLine_sb.append(delim).append(outLine[j]);
-						delim = ",";
-					}
-				
-					String preRow = outLine_sb.toString() + "\n";
-					writer.write(preRow);			
 				}
-				rs.close();
-				s.close();
-			}
 				
+				// For testing purpose
+				if (debugDataExport) {
+					//outLine[outLine.length - 2] = patientNum;
+					outLine_sb.append(patientNum + ",");
+					if (dateShift) {
+						//outLine[outLine.length - 1] = Integer.toString(getShiftDays(patientNum));
+						outLine_sb.append(Integer.toString(getShiftDays(patientNum)) + ",");
+					} else {
+						//outLine[outLine.length - 1] = "0";
+						outLine_sb.append("0" + ",");
+					}
+				}
+				
+				// write the previous entry to file
+//				outLine_sb.setLength(0);
+//				String delim = "";
+//				for(int j = 0; j < outLine.length; j++){
+//					outLine_sb.append(delim + outLine[j]);
+//					delim = ",";
+//				}
+//				
+				outLine_sb.deleteCharAt(outLine_sb.length() - 1);
+				outLine_sb.append("\n");
+				String preRow = outLine_sb.toString();
+				writer.write(outLine_sb.toString());
+			}
+			long endTime = System.nanoTime();
+			long duration = (endTime - startTime);
+			System.out.println("File: " + outputFile.name + " done. " + ((float)duration / 1000000000) + "sec");
+			
+			rs.close();
+			s.close();
+			
+//			for (int i = 0; i < nLoads; i++) {
+//				String inClause = buildQueryInClause(patients, i, patientsPerLoad);
+//				s = conn.createStatement();
+//				String query = "select " + outputFile.idColumn + ", " + columns + " from " + outputFile.source
+//								+ " where " + outputFile.idColumn + " IN (" + inClause + ")"
+//								+ " order by " + outputFile.idColumn;
+//				rs = s.executeQuery(query);
+//				
+//				String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
+//				Arrays.fill(outLine, "");
+//				while (rs.next()) {
+//					// create a new row
+//					outLine = new String[outLine.length];
+//					Arrays.fill(outLine, "");
+//					
+//					String patientNum = rs.getString(1);
+//					//outLine[0] = csvSafeString(patientNum);
+//					if(daqueryRequest.getNetwork().getSerializePatientId())
+//						outLine[0] = this.getSerializedId(patientNum, "CASEID");
+//					else
+//						outLine[0] = patientNum;
+//					
+//					int outLineEnd = debugDataExport ? outLine.length - 2 : outLine.length;
+//					for(int j = 2; j <= outLineEnd; j++){
+//						if(outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("zip"))
+//							outLine[j-1] = threeDigitZip(rs.getString(j), threeDigitZip);
+//						else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("birthday"))
+//							outLine[j-1] = csvSafeString(handleBirthday(patientNum, rs.getDate(j)));
+//						else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("source")){
+//							String SourceSystem = rs.getString(j);
+//							outLine[j-1] = csvSafeString(SourceSystem);
+//						}
+//						else{
+//							Object obj = rs.getObject(j);
+//							if(obj instanceof Date)
+//								outLine[j-1] = csvSafeString(dateShift(patientNum, (Date)obj));
+//							else
+//								outLine[j-1] = obj == null ? "" : csvSafeString(obj.toString());
+//						}
+//					}
+//					
+//					// For testing purpose
+//					if (debugDataExport) {
+//						outLine[outLine.length - 2] = patientNum;
+//						if (dateShift) {
+//							outLine[outLine.length - 1] = Integer.toString(getShiftDays(patientNum));
+//						} else {
+//							outLine[outLine.length - 1] = "0";
+//						}
+//					}
+//					
+//					// write the previous entry to file
+//					StringBuilder outLine_sb = new StringBuilder();
+//					String delim = "";
+//					for(int j = 0; j < outLine.length; j++){
+//						outLine_sb.append(delim).append(outLine[j]);
+//						delim = ",";
+//					}
+//				
+//					String preRow = outLine_sb.toString() + "\n";
+//					writer.write(preRow);			
+//				}
+//				rs.close();
+//				s.close();
+//			}
 			writer.close();
 		} catch (Throwable t) {
 			logger.log(Level.SEVERE, "Unexpected error while generating an observation CSV file.", t);
 			throw t;
-		} finally {
-			ApplicationDBHelper.closeConnection(conn, s, rs);
-		}
+		} 
+//		finally {
+//			ApplicationDBHelper.closeConnection(conn, s, rs);
+//		}
 	}
 	
 	public void writeOntologyCSVFile(Hashtable<OutputFile, OutputStreamWriter> outputStreams, DaqueryRequest daqueryRequest, int currPage, int pageSize, Hashtable<String, OutputFile> ConceptCDs) throws Throwable {

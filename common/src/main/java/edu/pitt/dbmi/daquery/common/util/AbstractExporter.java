@@ -44,13 +44,19 @@ abstract class AbstractExporter implements DataExporter
 		
 		this.dateShift = response.getRequest().getNetwork().getShiftDates();
 		
-		casesPerFile = model.getExportConfig().getCasesPerFile();
+		if(AppProperties.getDBProperty("case.per.file") != null){
+			casesPerFile = Integer.parseInt(AppProperties.getDBProperty("case.per.file"));
+		} else {
+			casesPerFile = model.getExportConfig().getCasesPerFile();
+		}
 		
 		
 	}
 	
 	protected String getSerializedId(String id, String idType)
 	{
+		if(id == null)
+			return(null);
 		Hashtable<String, Integer> serializedIds = getSerializedIds(idType);
 		String idKey = getIdKey(id);
 		if (!serializedIds.containsKey(idKey)) {
@@ -97,13 +103,26 @@ abstract class AbstractExporter implements DataExporter
 		return val;
 	}
 	
+	protected static void csvSafeString(String val, StringBuilder sb) {
+		// escape entire string if has comma (,)
+		if (val.contains(",")) {
+			//val = "\"" + val + "\"";
+			sb.append("\"").append(val).append("\"");
+		}
+		// escape double quotes (") in string
+		else if (val.contains("\"")) {
+			val = val.replaceAll("\"", "\"\"");
+		}
+		sb.append(val);
+	}
+	
 	protected static String threeDigitZip(String zip, boolean threeDigit) {
 		if (StringHelper.isBlank(zip))
 			return ("");
 		String val = zip.trim();
 		if (!isZipCodeFormat(val)) {
-			logger.log(Level.WARNING ,"A zip code that is being exported doesn't look like a zip code: "
-					+ zip);
+//			logger.log(Level.WARNING ,"A zip code that is being exported doesn't look like a zip code: "
+//					+ zip);
 			return ("");
 		}
 		
