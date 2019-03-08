@@ -1144,7 +1144,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			AppProperties.setLocalDeliveryDir((String) properties.get("localDeliveryDir"));
 			AppProperties.setTrackingDir((String) properties.get("trackingOutputDir"));
 			AppProperties.setTempFileExportDir((String) properties.get("tempFileExportDir"));
-			AppProperties.setCasePerFile((String) properties.get("casePerFile"));
+			AppProperties.setCasePerFile(((Integer) properties.get("casePerFile")).toString());
 			AppProperties.setCentralURL((String) properties.get("centralURL"));
 			AppProperties.setNotList(properties.get("notList").toString());
 

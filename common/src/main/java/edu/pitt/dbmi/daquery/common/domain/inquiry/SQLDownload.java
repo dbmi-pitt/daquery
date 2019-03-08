@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -109,7 +111,17 @@ public class SQLDownload extends SQLQuery implements Download
 			Integer totalFiles = null;
 			List<String> filenames = null;
 			boolean initSuccess;
-			if(initSuccess = dataExporter.init(conn, st, rs, cAndD.code))
+			
+//			Random rnd = new Random();
+//			int n = 100000 + rnd.nextInt(900000);
+			String tempTableName = "";
+			if(ds.getDriverClass().contains("oracle")) {
+				tempTableName = "QUERY_SET_TEMP";
+			} else {
+				tempTableName = "#QUERY_SET_TEMP" + UUID.randomUUID().toString().replaceAll("-", "");
+			}
+			
+			if(initSuccess = dataExporter.init(conn, rs, cAndD.code, ds, tempTableName))
 			{
 				totalFiles = dataExporter.getNumFiles();
 				int fileCount = 1;
@@ -120,7 +132,7 @@ public class SQLDownload extends SQLQuery implements Download
 					Transaction t2 = sess.beginTransaction();
 					sess.saveOrUpdate(response);
 					t2.commit();
-					String fn = dataExporter.exportNext();
+					String fn = dataExporter.exportNext(conn, tempTableName);
 					if(fn != null)
 						filenames.add(fn);
 					fileCount++;
