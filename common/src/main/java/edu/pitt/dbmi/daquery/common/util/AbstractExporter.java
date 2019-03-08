@@ -55,6 +55,8 @@ abstract class AbstractExporter implements DataExporter
 	
 	protected String getSerializedId(String id, String idType)
 	{
+		if(id == null)
+			return(null);
 		Hashtable<String, Integer> serializedIds = getSerializedIds(idType);
 		String idKey = getIdKey(id);
 		if (!serializedIds.containsKey(idKey)) {
