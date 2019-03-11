@@ -69,7 +69,7 @@
                   <td>{{ request.responses[0]?.status }}</td>
                   <td>{{ request.responses[0]?.replyTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
                   <td>{{ getRequestResult(request.responses[0]) }}
-                      <i *ngIf="request.responses[0] && !['ERROR', 'COMPLETED', 'STALLED', 'PENDING', 'DENIED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+                      <i *ngIf="request.hasOwnProperty('responses') && !['ERROR', 'COMPLETED', 'STALLED', 'PENDING', 'DENIED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
                       <span *ngIf="request.responses[0]?.hasError" class="pull-right-container">
                         <small class="label bg-red">Network Error</small>
                       </span>
