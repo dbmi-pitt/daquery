@@ -133,7 +133,11 @@ export class RequestsFromMeListComponent implements OnInit {
   resubmit(request: any){
     this.authenticationService.renewjwt(request.network.networkId).subscribe(() => {
       if(confirm("Do you want to resubmit the request?")){
-        this.requestService.sendRequest(request, false)
+        let newRequest = Object.assign({}, request);
+        delete newRequest.id;
+        delete newRequest.requestId;
+        delete newRequest.responses;
+        this.requestService.requestData(newRequest)
                           .subscribe(() => {
                             this.requests = null;
                             this.getRequestsFromMe(this.showArchived);
