@@ -100,34 +100,36 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   requestData(request: any) {
-    if(confirm("Do you want to request this data?")){
-      let dataRequest = {
-        requestSite: {
-          siteId: request.requestSite.siteId,
-          name: request.requestSite.name
-        },
-        network: {
-          networkId: request.network.networkId
-        },
-        dataModelId: request.dataModelId,
-        requestGroup: request.requestGroup + ":DataRequest",
-        inquiry: {
-          version: 1,
-          dataType: 'SQL_DOWNLOAD',
-          inquiryId: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.inquiryId : '',
-          queryType: 'DATA',
-          inquiryName: request.inquiry.inquiryName + "(Case Export)",
-          inquiryDescription: request.inquiry.inquiryDescription,
-          notDateShift: request.inquiry.notDateShift,
-          code: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.code : ''
-        },
-        archived: false
-      };
-      this.requestService.requestData(dataRequest)
-                        .subscribe(() => {
-                            this.getRequestsFromMe(this.showArchived);
-                        });
-    }
+    this.authenticationService.renewjwt(request.network.networkId).subscribe(() => {
+      if(confirm("Do you want to request this data?")){
+        let dataRequest = {
+          requestSite: {
+            siteId: request.requestSite.siteId,
+            name: request.requestSite.name
+          },
+          network: {
+            networkId: request.network.networkId
+          },
+          dataModelId: request.dataModelId,
+          requestGroup: request.requestGroup + ":DataRequest",
+          inquiry: {
+            version: 1,
+            dataType: 'SQL_DOWNLOAD',
+            inquiryId: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.inquiryId : '',
+            queryType: 'DATA',
+            inquiryName: request.inquiry.inquiryName + "(Case Export)",
+            inquiryDescription: request.inquiry.inquiryDescription,
+            notDateShift: request.inquiry.notDateShift,
+            code: request.responses[0].downloadDirective ? request.responses[0].downloadDirective.code : ''
+          },
+          archived: false
+        };
+        this.requestService.requestData(dataRequest)
+                          .subscribe(() => {
+                              this.getRequestsFromMe(this.showArchived);
+                          });
+      }
+    });
   }
 
   resubmit(request: any){
