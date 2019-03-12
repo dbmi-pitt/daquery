@@ -160,18 +160,21 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 	int nFiles;
 	int currentFile = 0;
 	private String failureMessage;
+	private String dataBaseType;
 	
 	@Override
 	public boolean init(Connection conn, ResultSet rs, String sql, SQLDataSource ds, String tempTableName) throws Throwable {
 		DatabaseMetaData dbm = conn.getMetaData();
-		// check if "employee" table is there
+		// check if table is there
 		ResultSet tables = dbm.getTables(null, null, "QUERY_SET_TEMP", null);
 		
 		if(ds.getDriverClass().contains("oracle")) {
+			dataBaseType = "oracle";
 			if (!tables.next()) {
 				throw new DaqueryErrorException("Global temp table does not exist.");
 			}
 		} else if(ds.getDriverClass().contains("sqlserver")){
+			dataBaseType = "sqlserver";
 //			if (!tables.next()) {
 //				String createTempTable = "CREATE TABLE " + tempTableName + " ([PATID] [varchar](50) " +
 //										"PRIMARY KEY CLUSTERED " + 
@@ -535,6 +538,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 	
 	private void writeCustomCSVFile(Connection conn, OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile, String tempTableName) throws Throwable {
 		ResultSet rs = null;
+		Statement s = null;
 		try {
 //			SQLDataSource ds = (SQLDataSource) daqueryRequest.getNetwork().getDataModels().iterator().next().getDataSource(SourceType.SQL);
 //			conn = ds.getConnection();
@@ -554,9 +558,26 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			//*
 			//int nLoads = (int) Math.ceil(((double) patients.size()) / ((double) patientsPerLoad));
 			
+			HashSet<String> columnSet = new HashSet<>();
+			String getColumnsQuery = "";
+			if(dataBaseType.equals("oracle")) {
+				getColumnsQuery = "select COLUMN_NAME from ALL_TAB_COLUMNS where LOWER(Table_Name) = '"+ outputFile.source.toLowerCase() + "'";
+			} else if(dataBaseType.equals("sqlserver")){
+				getColumnsQuery = "select column_name from information_schema.columns where LOWER(table_Name) = '"+ outputFile.source.toLowerCase() + "'";
+			}
+			s = conn.createStatement();
+			rs = s.executeQuery(getColumnsQuery);
+			while(rs.next()){
+				String name = rs.getString(1);
+				columnSet.add(name);
+			}
+			
 			String columns = "";
 			for(Field f : outputFile.custom_column_set.fields){
-				columns += f.colName + ", ";
+				if(columnSet.contains(f.colName))
+					columns += f.colName + ", ";
+				else
+					columns += "'' AS " + f.colName + ", ";
 			}
 			columns = columns.substring(0, columns.length() - 2);
 
@@ -572,10 +593,18 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			String entQuery = "select src.patid, " + columns + " from " + outputFile.source + " src , " + tempTableName + 
 					" setids where setids.PATID = src.patid and src.patid >= '" + startPatid + 
 					"' and src.patid <= '" + endPatid + "'";
-			Statement s = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+			s = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
 		              java.sql.ResultSet.CONCUR_READ_ONLY);
 			s.setFetchSize(10);
-			rs = s.executeQuery(entQuery);
+			try{
+				rs = s.executeQuery(entQuery);
+			} catch (SQLSyntaxErrorException ssee){
+				if(ssee.getMessage().contains("table or view does not exist")){
+					logger.log(Level.INFO, "table is not exist", ssee);
+				} else {
+					throw ssee;
+				}
+			}
 			String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
 			Arrays.fill(outLine, "");
 			
