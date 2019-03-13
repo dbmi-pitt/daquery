@@ -14,8 +14,8 @@ export class NetworkComponent implements OnInit {
 
   network_id: number;
   network: any = null;
-  inSites = [];
-  outSites = [];
+  inSites = null;
+  outSites = null;
   pendingSites = [];
   error: string;
   approving: boolean = false;
