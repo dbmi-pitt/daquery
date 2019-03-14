@@ -459,7 +459,7 @@ public class AppProperties
 		setDBProperty("central.url", val);
 	}
 	
-	private static final String defaultNotList = "true";
+	private static final String defaultNotList = "false";
 	public static String getNotList() throws DaqueryException {
 		try {
 			String val = getDBProperty("not.list");
