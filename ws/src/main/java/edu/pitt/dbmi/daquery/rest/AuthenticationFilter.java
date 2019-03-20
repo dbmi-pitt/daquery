@@ -102,6 +102,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     	final String siteId = (String)claims.get("iss");
     	final String userId = (String)claims.get("sub");
     	final String networkId = (String)claims.get("net");
+    	
+        List<String> roleSuperset = new ArrayList<String>();
 
         //String networkId = "";
         try {
@@ -156,10 +158,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             Method resourceMethod = resourceInfo.getResourceMethod();
             List<String> methodRoles = extractRoles(resourceMethod);
             
-            List<String> roleSuperset = new ArrayList<String>();
             roleSuperset.addAll(classRoles);
             roleSuperset.addAll(methodRoles);
-            if (requestContext instanceof ContainerRequest)
+            /*if (requestContext instanceof ContainerRequest)
             {
                 ContainerRequest request = (ContainerRequest) requestContext;
 
@@ -167,9 +168,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                   && MediaTypes.typeEqual(MediaType.APPLICATION_JSON_TYPE,request.getMediaType())
                   	)
                 {
-                    System.out.println("this is the netowrk id: " + networkId);
+                    System.out.println("this is the network id: " + networkId);
                 }
-            }
+            }*/
             
             boolean userHasRole = WSConnectionUtil.hasRole(roleSuperset, userId, networkId);
             if (!userHasRole) {
@@ -221,8 +222,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 }
             });
         }
-        catch(TokenInvalidException tie)
+        catch(NotAuthorizedException nae)
         {
+        	String msg = "This method requires one of these role(s): [" + roleSuperset.toString()  + "].  Please contact your site administrator and request one of these roles.";
+            requestContext.abortWith(ResponseHelper.getErrorResponse(401, "You do not have the correct role to access this data.", msg, nae));
+        	
+        } catch(TokenInvalidException tie) {
     		String msg = "Encountered a TokenInvalidException.";
     		logger.log(Level.SEVERE, msg, tie);	            		
         	try{requestContext.abortWith(ResponseHelper.expiredTokenResponse(userId, siteId, networkId));}
