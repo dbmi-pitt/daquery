@@ -137,12 +137,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         		Site site = SiteDAO.querySiteByID(siteId);
        
     	        System.out.println("@@@@@@@ IN AuthenticationFilter remote site" );
-        		
+        		/*
         		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/validateToken", null, token);
         		if(resp.getStatus() != 200)
         		{
         			requestContext.abortWith(resp);
-        		}
+        		}*/
         		//else extract network id
         	}
 
