@@ -337,7 +337,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 	 * 
 	 * @return A list of NetworkInfo objects encoded as json
 	 */
-	@Secured("ADMIN")
+	@Secured(localRoles = {"ADMIN"})
 	@GET
 	@Path("/available-networks-to-query/")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -542,12 +542,11 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 	}
 
 	@POST
-	@Secured({"ADMIN","STEWARD","DATA_QUERIER","AGGREGATE_QUERIER"})
+	@Secured(localRoles={"ADMIN","STEWARD"},remoteRoles={"DATA_QUERIER","AGGREGATE_QUERIER"})
 	@Path("request")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response request(DaqueryRequest request) throws DaqueryException {
-        System.out.println("@@@@@@@ In DaqueryEndpoint request call" );
 
         
         Response response = null;
@@ -762,12 +761,11 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 	}
 
 	@GET
-	@Secured({"ADMIN","STEWARD","DATA_QUERIER","AGGREGATE_QUERIER"})
+	@Secured(localRoles={"ADMIN","STEWARD","VIEWER"},remoteRoles={"DATA_QUERIER","AGGREGATE_QUERIER"})
 	@Path("/response/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response response(@PathParam("id") String id) {
-        System.out.println("@@@@@@@ In DaqueryEndpoint response/{id} call" );
 		if (StringHelper.isBlank(id))
 			return (ResponseHelper.getErrorResponse(400, "A response id required.",
 					"The response id should be provided as a path parameter in the request url : server/daquery/ws/response/{id}",
@@ -1346,8 +1344,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 
 	private Response handleRemoteAggregateRequestFromUI(DaqueryRequest request, Response response, Site requestSite,
 			String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
-        System.out.println("@@@@@@@ In DaqueryEndpoint rhandleRemoteAggregateRequestFromUI call" );
-		request.setDirection("OUT");
+ 		request.setDirection("OUT");
 		request.setSentTimestamp(new Date());
 		SQLCode code = (((SQLQuery)request.getInquiry()).getCode()).iterator().next();
 		code.setQuery((SQLQuery) request.getInquiry());
@@ -1549,7 +1546,6 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 
 	private Response handleRemoteDataRequestFromUI(DaqueryRequest request, Response response, Site requestSite,
 			String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
-        System.out.println("@@@@@@@ In DaqueryEndpoint handleRemoteDataRequestFromUI call" );
 		request.setDirection("OUT");
 		request.setSentTimestamp(new Date());
 		SQLCode code = (((SQLQuery)request.getInquiry()).getCode()).iterator().next();
@@ -1971,7 +1967,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		}
 	}
 
-	@Secured("ADMIN")
+	@Secured(localRoles={"ADMIN"})
 	@GET
 	@Path("/system-update/")
 	@Produces(MediaType.APPLICATION_JSON)

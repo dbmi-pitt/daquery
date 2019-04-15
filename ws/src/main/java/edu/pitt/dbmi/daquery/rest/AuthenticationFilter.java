@@ -129,53 +129,30 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 	            //an exception will be thrown if the token isn't valid
 	            jwt.validate();
         	}
-        	else
-        	{
-        		//validate a remote user via a web service call
-        		Site site = SiteDAO.querySiteByID(siteId);
-       
-    	        System.out.println("@@@@@@@ IN AuthenticationFilter remote site" );
-        		
-        		Response resp = WSConnectionUtil.getFromRemoteSite(site, "users/validateToken", null, token);
-        		if(resp.getStatus() != 200)
-        		{
-        			requestContext.abortWith(resp);
-        		}
-        		//else extract network id
-        	}
-
-        	//last check, can the user access this web service call?  
-        	//this is determined by the roles listed in connection with the @Secured annotation 
-            // Get the resource class which matches with the requested URL
-            // Extract the roles declared by it
-            Class<?> resourceClass = resourceInfo.getResourceClass();
-            List<String> classRoles = extractRoles(resourceClass);
 
             // Get the resource method which matches with the requested URL
             // Extract the roles declared by it
             Method resourceMethod = resourceInfo.getResourceMethod();
-            List<String> methodRoles = extractRoles(resourceMethod);
-            
-            List<String> roleSuperset = new ArrayList<String>();
-            roleSuperset.addAll(classRoles);
-            roleSuperset.addAll(methodRoles);
-            if (requestContext instanceof ContainerRequest)
-            {
-                ContainerRequest request = (ContainerRequest) requestContext;
 
-                if ( requestContext.getUriInfo().getRequestUri().getPath().compareTo("/daquery/ws/request") == 0 
-                  && MediaTypes.typeEqual(MediaType.APPLICATION_JSON_TYPE,request.getMediaType())
-                  	)
-                {
-                    System.out.println("this is the netowrk id: " + networkId);
-                }
-            }
+            //last check, can the user access this web service call?  
+        	//this is determined by the roles listed in connection with the @Secured annotation 
+            // Get the resource class which matches with the requested URL
+            // Extract the roles declared by it
+            Class<?> resourceClass = resourceInfo.getResourceClass();
+            List<String> localRoles = extractLocalRoles(resourceClass);
+            boolean userHasLocalRole = WSConnectionUtil.hasRole(localRoles, userId, networkId);
+
+            List<String> remoteRoles = extractRemoteRoles(resourceMethod);
             
-            boolean userHasRole = WSConnectionUtil.hasRole(roleSuperset, userId, networkId);
-            if (!userHasRole) {
+            String debugmsg = "  Found this user: [" + userId + "] trying to access this method: [" 
+    				+ resourceMethod.toString() +"].  This method requires one of these local role(s): [" + localRoles.toString()  + "] or one of these remote role(s): [" + remoteRoles.toString() + "] ";
+            System.out.println(debugmsg);
+            
+            boolean userRemoteHasRole = WSConnectionUtil.hasRole(remoteRoles, userId, networkId);
+            if (!userRemoteHasRole && !userHasLocalRole) {
         		String msg = "You are not authorized to access this functionality in the website.";
         		logger.log(Level.SEVERE, msg + "  Found this user: [" + userId + "] trying to access this method: [" 
-        				+ resourceMethod.toString() +"].  This method requires one of these role(s): [" + roleSuperset.toString()  + "] ");
+        				+ resourceMethod.toString() +"].  This method requires one of these local role(s): [" + localRoles.toString()  + "] or one of these remote role(s): [" + remoteRoles.toString() + "] ");
                 throw new NotAuthorizedException(msg + "  " + "Authorization header must be provided");    		
             }
             
@@ -199,15 +176,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
                 @Override
                 public boolean isUserInRole(String role) {
+                	//this is part of the ContainerRequestFilter interface
                 	//hardcode this since the role is checked elsewhere
                 	return true;
-/*                	try {
-                		return DaqueryUserDAO.hasRole(userId, networkId, role);
-                	} catch (Exception e) {
-	            		String msg = "An error occured while determining if user [" +userId + "] in network [" + networkId + "] has role [" + role + "]";
-	            		logger.log(Level.SEVERE, msg, e);	            		
-                		return false;
-                	}*/
                 }
 
                 @Override
@@ -250,7 +221,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
      * @return a List of the valid UserRoles for the web service call or 
      * an empty list if no UserRoles are assigned to the web service call 
      */
-    private List<String> extractRoles(AnnotatedElement annotatedElement) {
+    private List<String> extractLocalRoles(AnnotatedElement annotatedElement) {
         if (annotatedElement == null) {
             return new ArrayList<String>();
         } else {
@@ -258,7 +229,21 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             if (secured == null) {
                 return new ArrayList<String>();
             } else {
-                String[] allowedRoles = secured.value();
+                String[] allowedRoles = secured.localRoles();
+                return Arrays.asList(allowedRoles);
+            }
+        }
+    }
+
+    private List<String> extractRemoteRoles(AnnotatedElement annotatedElement) {
+        if (annotatedElement == null) {
+            return new ArrayList<String>();
+        } else {
+            Secured secured = annotatedElement.getAnnotation(Secured.class);
+            if (secured == null) {
+                return new ArrayList<String>();
+            } else {
+                String[] allowedRoles = secured.remoteRoles();
                 return Arrays.asList(allowedRoles);
             }
         }

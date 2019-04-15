@@ -70,8 +70,7 @@ public class RoleAccessEndpoint extends AbstractEndpoint  {
 	
     @GET
     @Path("/allroles")
-    //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Secured({"ADMIN"})
+    @Secured(localRoles={"ADMIN"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
@@ -91,8 +90,7 @@ public class RoleAccessEndpoint extends AbstractEndpoint  {
 	
     @GET
     @Path("/admin")
-    //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Secured({"ADMIN"})
+    @Secured(localRoles={"ADMIN"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
@@ -106,42 +104,10 @@ public class RoleAccessEndpoint extends AbstractEndpoint  {
         return Response.ok(200).build();
     }
 
-    @GET
-    @Path("/aggregate")
-    //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Secured({"AGGREGATE_QUERIER"})
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    /**
-     * This method returns a 200 if the user successfully
-     * access this method.  The @Secured annotation determines which
-     * user role can succesfully access the web service method.
-     * @return a 200 if the user can successfully access the method
-     */
-    public Response aggregateResponse() {
-        return Response.ok(200).build();
-    }
-
-    @GET
-    @Path("/datadownload")
-    //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Secured({"DATA_QUERIER"})
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    /**
-     * This method returns a 200 if the user successfully
-     * access this method.  The @Secured annotation determines which
-     * user role can succesfully access the web service method.
-     * @return a 200 if the user can successfully access the method
-     */
-    public Response datadownloadResponse() {
-        return Response.ok(200).build();
-    }
 
     @GET
     @Path("/steward")
-    //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Secured({"STEWARD"})
+    @Secured(localRoles={"STEWARD"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
@@ -156,8 +122,7 @@ public class RoleAccessEndpoint extends AbstractEndpoint  {
 
     @GET
     @Path("/viewer")
-    //@Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
-    @Secured({"VIEWER"})
+    @Secured(localRoles={"VIEWER"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
