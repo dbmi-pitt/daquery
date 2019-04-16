@@ -323,7 +323,7 @@ public class DaqueryUserDAO extends AbstractDAO {
 	    		}
     		}
     		
-    		if(networkUUID != null)
+    		if(networkUUID != null && !networkUUID.isEmpty())
     		{
     			String sql = "select REMOTE_USER_ROLE.USER_ID from REMOTE_USER_ROLE, ROLE " +
     						   "where ROLE.id = REMOTE_USER_ROLE.role_id and " +
