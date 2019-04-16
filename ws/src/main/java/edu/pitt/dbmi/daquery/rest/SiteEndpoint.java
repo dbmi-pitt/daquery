@@ -79,7 +79,7 @@ public class SiteEndpoint extends AbstractEndpoint {
 	
 	
     @GET
-    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
+	@Secured(localRoles={"ADMIN","STEWARD","VIEWER"},remoteRoles={"DATA_QUERIER","AGGREGATE_QUERIER"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
@@ -173,7 +173,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     //all sites that aren't already connected?
 	@GET
     @Path("/available")
-    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
+	@Secured(localRoles={"ADMIN","STEWARD","VIEWER"},remoteRoles={"DATA_QUERIER","AGGREGATE_QUERIER"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAvailableSites(@QueryParam("network_id") long networkId) {
@@ -262,7 +262,7 @@ public class SiteEndpoint extends AbstractEndpoint {
      */
 	@GET
     @Path("/pending")
-    @Secured({"ADMIN", "AGGREGATE", "DATADOWNLOAD", "STEWARD", "VIEWER"})
+	@Secured(localRoles={"ADMIN","STEWARD","VIEWER"},remoteRoles={"DATA_QUERIER","AGGREGATE_QUERIER"})
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPendingSites(@QueryParam("network_id") long networkId) {
