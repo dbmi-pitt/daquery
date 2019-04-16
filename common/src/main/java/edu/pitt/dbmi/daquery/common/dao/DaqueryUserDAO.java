@@ -307,6 +307,7 @@ public class DaqueryUserDAO extends AbstractDAO {
     	
     	try {
     		DaqueryUser currentUser = queryUserByID(userUUID);
+    		//first check the local Roles
     		if(currentUser != null)
     		{
 	    		List<Role> roleList = currentUser.getRoles();
@@ -323,7 +324,8 @@ public class DaqueryUserDAO extends AbstractDAO {
 	    		}
     		}
     		
-    		if(networkUUID != null)
+    		//next, check the remote roles
+    		if(networkUUID != null && !networkUUID.isEmpty())
     		{
     			String sql = "select REMOTE_USER_ROLE.USER_ID from REMOTE_USER_ROLE, ROLE " +
     						   "where ROLE.id = REMOTE_USER_ROLE.role_id and " +
