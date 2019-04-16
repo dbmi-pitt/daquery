@@ -102,6 +102,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     	final String siteId = (String)claims.get("iss");
     	final String userId = (String)claims.get("sub");
     	final String networkId = (String)claims.get("net");
+    	
+        List<String> roleSuperset = new ArrayList<String>();
 
         //String networkId = "";
         try {
@@ -143,11 +145,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             boolean userHasLocalRole = WSConnectionUtil.hasRole(localRoles, userId, networkId);
 
             List<String> remoteRoles = extractRemoteRoles(resourceMethod);
-            
-            String debugmsg = "  Found this user: [" + userId + "] trying to access this method: [" 
-    				+ resourceMethod.toString() +"].  This method requires one of these local role(s): [" + localRoles.toString()  + "] or one of these remote role(s): [" + remoteRoles.toString() + "] ";
-            System.out.println(debugmsg);
-            
+                        
             boolean userRemoteHasRole = WSConnectionUtil.hasRole(remoteRoles, userId, networkId);
             if (!userRemoteHasRole && !userHasLocalRole) {
         		String msg = "You are not authorized to access this functionality in the website.";
@@ -192,8 +190,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 }
             });
         }
-        catch(TokenInvalidException tie)
+        catch(NotAuthorizedException nae)
         {
+        	String msg = "This method requires one of these role(s): [" + roleSuperset.toString()  + "].  Please contact your site administrator and request one of these roles.";
+            requestContext.abortWith(ResponseHelper.getErrorResponse(401, "You do not have the correct role to access this data.", msg, nae));
+        	
+        } catch(TokenInvalidException tie) {
     		String msg = "Encountered a TokenInvalidException.";
     		logger.log(Level.SEVERE, msg, tie);	            		
         	try{requestContext.abortWith(ResponseHelper.expiredTokenResponse(userId, siteId, networkId));}
@@ -204,7 +206,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         		requestContext.abortWith(ResponseHelper.getErrorResponse(500, "An unexpected error occured while responding to an expired authorization token.", "Your user token was expired.  Please login again to get a new token.", t));
         	}
         } catch (Throwable e) {
-    		String msg = "An unexpected error occured while checking your login token.";
+    		String msg = "An unexpected error occured while checking your login token. Please log out and back in.";
     		logger.log(Level.SEVERE, msg, e);	            		
             requestContext.abortWith(ResponseHelper.getErrorResponse(500, msg, "There was an issue with your authentication token.  Please login again to get a new token.", e));
         }
