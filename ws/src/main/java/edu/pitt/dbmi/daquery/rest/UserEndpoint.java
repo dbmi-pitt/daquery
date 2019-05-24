@@ -522,7 +522,7 @@ public class UserEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response authenticateUser(@QueryParam("email") String email,
                                      @QueryParam("password") String password,
-                                     @DefaultValue("") String networkId) throws UnsupportedEncodingException {
+                                     @QueryParam("network") @DefaultValue("") String networkId) throws UnsupportedEncodingException {
 
     	email = java.net.URLDecoder.decode(email, "UTF-8");
     	password = java.net.URLDecoder.decode(password, "UTF-8");
