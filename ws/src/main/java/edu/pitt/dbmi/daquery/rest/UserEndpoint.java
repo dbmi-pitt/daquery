@@ -522,11 +522,24 @@ public class UserEndpoint extends AbstractEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response authenticateUser(@QueryParam("email") String email,
                                      @QueryParam("password") String password,
-                                     @QueryParam("network") @DefaultValue("") String networkId) throws UnsupportedEncodingException {
+                                     @DefaultValue("") String networkId) throws UnsupportedEncodingException {
 
     	email = java.net.URLDecoder.decode(email, "UTF-8");
     	password = java.net.URLDecoder.decode(password, "UTF-8");
     	String netId = (StringHelper.isEmpty(networkId))?null:networkId;
+    	//#TODO Remove THIS.  This is just temporary
+    	if (netId == null) {
+            List<Network> networks = new ArrayList<Network>();
+            try {
+            	networks = NetworkDAO.queryAllNetworks();
+            	netId = networks.get(0).getNetworkId();
+            	
+            } catch (Exception e) {
+            	
+            }
+
+    		
+    	}
     	
     	if (email.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
