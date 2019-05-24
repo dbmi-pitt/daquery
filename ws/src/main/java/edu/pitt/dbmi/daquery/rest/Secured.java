@@ -26,5 +26,7 @@ import javax.ws.rs.NameBinding;
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})
 public @interface Secured {
-	String[] value() default {};	
+	String[] localRoles() default {};
+	String[] remoteRoles() default {};	
+
 }
