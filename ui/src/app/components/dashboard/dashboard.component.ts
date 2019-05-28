@@ -23,12 +23,12 @@ export class DashboardComponent implements OnInit {
   version: String;
 
   constructor(private router: Router,
-              private idle: Idle, 
+              private idle: Idle,
               private keepalive: Keepalive,
               private authenticationService: AuthenticationService,
               private daqueryService: DaqueryService,
               public error: Error,
-              public session: Session) { 
+              public session: Session) {
     // sets an idle timeout of 5 minutes(300 seconds)
     idle.setIdle(900);
     // sets a timeout period of . after 1 minute(60 seconds) of inactivity, the user will be considered timed out.
@@ -63,13 +63,14 @@ export class DashboardComponent implements OnInit {
       $('#myModal').modal('show');
     });
 
-    // sets the ping interval to 15 seconds
-    // keepalive.interval(20);
+    // sets the ping interval to 120 seconds
+    keepalive.interval(120);
 
-    // keepalive.onPing.subscribe(() => {
-    //   this.authenticationService.renewjwt();
-    //   this.lastPing = new Date();
-    // });
+    keepalive.onPing.subscribe(() => {
+      this.authenticationService.renewjwt('').subscribe(() => {      
+      });
+      this.lastPing = new Date();
+    });
 
     this.reset();   
 
