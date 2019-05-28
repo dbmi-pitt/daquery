@@ -535,7 +535,7 @@ public class UserEndpoint extends AbstractEndpoint {
             	netId = networks.get(0).getNetworkId();
             	
             } catch (Exception e) {
-            	
+            	e.printStackTrace();
             }
 
     		

@@ -84,8 +84,7 @@ public class NetworkEndpoint extends AbstractEndpoint {
      * @throws 401 Unauthorized	
      */
     @GET
-    //#TODO: reassert the Secured option on here 
-    //@Secured
+    @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveNetworks() {
