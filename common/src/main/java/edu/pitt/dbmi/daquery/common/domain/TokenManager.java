@@ -233,10 +233,13 @@ public class TokenManager {
 	public String renewToken(String oldTokenString, String networkid) throws IOException, JsonMappingException, TokenException, TokenInvalidException, JsonParseException {
 		while (oldTokenString.startsWith("Bearer ")) {
 			oldTokenString = oldTokenString.substring(6).trim();
-		}		
+		}
 		KeyedJWT kj = getToken(oldTokenString);
 		JsonWebToken jwt = kj.getToken();
-		deleteToken(oldTokenString);		
+		deleteToken(oldTokenString);
+		if(networkid.equalsIgnoreCase("")){
+			networkid = jwt.getNetworkId();
+		}
 		String newToken =  addToken(jwt.getUserId(), jwt.getSiteId(), networkid);		
 		return newToken;
 	}
