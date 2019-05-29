@@ -348,16 +348,6 @@
        <field name='RAW_OBSGEN_UNIT' colName='RAW_OBSGEN_UNIT'/>
     </custom-column-set>
 </outputFile>
-<outputFile name='path_trial.csv' source='path_trial'>
-	<idColumn>PATID</idColumn>
-    <custom-column-set>
-       <field name='COHORTID' colName='COHORTID'/>
-       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
-       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
-       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
-       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
-    </custom-column-set>
-</outputFile>
 <outputFile name='pcornet_trial.csv' source='pcornet_trial'>
 	<idColumn>PATID</idColumn>
     <custom-column-set>
