@@ -52,9 +52,15 @@ while [ $# -gt 0 ]; do
       DAQUERY_CENT_URL="${1#*=}"
       ;;
     *)
-      printf "***************************\n"
-      printf "* Error: Invalid argument.*\n"
-      printf "***************************\n"
+      printf "*************************************\n"
+      printf "* Error: Invalid argument.          *\n"
+      printf "* Valid Arguments:                  *\n" 
+      printf "*   --port=<port no>                *\n" 
+      printf "*   --daquery_home=<home dir>       *\n" 
+      printf "*   --db_home=<db dir>              *\n" 
+      printf "*   --ojdbc_lib_dir=<jar dir>       *\n" 
+      printf "*   --central_url=<cent server url> *\n" 
+      printf "*************************************\n"
       exit 1
   esac
   shift
