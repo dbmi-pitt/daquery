@@ -100,7 +100,7 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   requestData(request: any) {
-    this.authenticationService.renewjwt(request.network.networkId).subscribe(() => {
+    // this.authenticationService.renewjwt(request.network.networkId).subscribe(() => {
       if(confirm("Do you want to request this data?")){
         let dataRequest = {
           requestSite: {
@@ -129,11 +129,11 @@ export class RequestsFromMeListComponent implements OnInit {
                               this.getRequestsFromMe(this.showArchived);
                           });
       }
-    });
+    // });
   }
 
   resubmit(request: any){
-    this.authenticationService.renewjwt(request.network.networkId).subscribe(() => {
+    // this.authenticationService.renewjwt(request.network.networkId).subscribe(() => {
       if(confirm("Do you want to resubmit the request?")){
         let newRequest = Object.assign({}, request);
         delete newRequest.id;
@@ -153,7 +153,7 @@ export class RequestsFromMeListComponent implements OnInit {
                             this.getRequestsFromMe(this.showArchived);
                           });
       }
-    });
+    // });
   }
 
   getRequestResult(response: any){

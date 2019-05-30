@@ -43,7 +43,6 @@ export class DashboardComponent implements OnInit {
       try {
         if ((this.session.serverExpirationTime.getTime() - new Date().getTime()) / 1000 / 60 < 15) {
           this.authenticationService.renewjwt('').subscribe(() => {
-            
           });
         }
       } catch(e) {
@@ -64,7 +63,7 @@ export class DashboardComponent implements OnInit {
     });
 
     // sets the ping interval to 120 seconds
-    keepalive.interval(120);
+    keepalive.interval(60*50);
 
     keepalive.onPing.subscribe(() => {
       this.authenticationService.renewjwt('').subscribe(() => {      
