@@ -231,7 +231,7 @@ public class SQLQuery extends Inquiry
 		{
 			log.log(Level.SEVERE, "Unexpected error while executing an aggregate query: " + code, t);
 			response.setStatusEnum(ResponseStatus.ERROR);
-			response.setErrorMessage("An unexpected error occured. Check the site logs for more information." + t.getMessage());
+			response.setErrorMessage("An unexpected error occurred. Check the site logs for more information." + t.getMessage());
 			response.setStackTrace(StringHelper.stackToString(t));
 			return(response);
 		}

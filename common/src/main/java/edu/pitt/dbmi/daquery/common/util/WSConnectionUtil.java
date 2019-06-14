@@ -452,7 +452,7 @@ public class WSConnectionUtil {
 		
 			if(wsResponse.getStatus() != 200)
 			{
-				String msg = "An error at the site occured while transfering " + outputFilename + " to site " + toSite.getName();
+				String msg = "An error at the site occurred while transfering " + outputFilename + " to site " + toSite.getName();
 				ErrorInfo ei = null;
 				DecodedErrorInfo dei = ResponseHelper.decodeErrorResponse(wsResponse);
 				if(dei != null)
@@ -487,7 +487,7 @@ public class WSConnectionUtil {
 				(t.getCause() != null && t.getCause().getCause() != null && t.getCause().getCause() instanceof SocketException))
 					msg = "Connection to site " + toSite.getName() + " lost during transfer of " + outputFilename + ".";
 			else
-					msg = "An unexpected error occured while transfering " + outputFilename + " to site " + toSite.getName();
+					msg = "An unexpected error occurred while transfering " + outputFilename + " to site " + toSite.getName();
 				ErrorInfo ei = new ErrorInfo();
 				ei.setDisplayMessage(msg);
 				DaqueryErrorException dee = new DaqueryErrorException(msg, t, ei);

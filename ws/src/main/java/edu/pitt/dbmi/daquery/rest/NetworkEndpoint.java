@@ -120,15 +120,15 @@ public class NetworkEndpoint extends AbstractEndpoint {
     		else
     		{
     			logger.log(Level.SEVERE, de.getMessage(), de);
-    			return(ResponseHelper.getErrorResponse(500, "An unhandled error occured while retrieving all network information.", null, de));
+    			return(ResponseHelper.getErrorResponse(500, "An unhandled error occurred while retrieving all network information.", null, de));
     		}    		
     	}
     	catch (HibernateException he) {
-    		String msg = "A database error occured while getting a list of networks.";
+    		String msg = "A database error occurred while getting a list of networks.";
     		logger.log(Level.SEVERE, msg, he);
     		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", "This error usually indicates that the database is down or cannot be accessed.", he));
         } catch (Exception e) {
-    		String msg = "An unexpected error occured while getting a list of networks.";
+    		String msg = "An unexpected error occurred while getting a list of networks.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", null, e));
         }

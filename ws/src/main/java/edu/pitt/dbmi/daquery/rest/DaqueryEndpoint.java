@@ -268,8 +268,8 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 				info.setType("AGGREGATE");
 			return (ResponseHelper.getJsonResponseGen(200, info));
 		} catch (Throwable t) {
-			logger.log(Level.SEVERE, "An unexpeced error occured while checking the sql.", t);
-			return (ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking your SQL code.",
+			logger.log(Level.SEVERE, "An unexpeced error occurred while checking the sql.", t);
+			return (ResponseHelper.getErrorResponse(500, "An unexpected error occurred while checking your SQL code.",
 					null, t));
 		}
 
@@ -396,15 +396,15 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			} else {
 				logger.log(Level.SEVERE, de.getMessage(), de);
 				return (ResponseHelper.getErrorResponse(500,
-						"An unhandled error occured while retrieving available network information.", null, de));
+						"An unhandled error occurred while retrieving available network information.", null, de));
 			}
 
 		} catch (Throwable t) {
 			logger.log(Level.SEVERE,
-					"An unexpeced error occured while obtaining a list of available networks and sites from the central server.",
+					"An unexpeced error occurred while obtaining a list of available networks and sites from the central server.",
 					t);
-			return (ResponseHelper.getErrorResponse(500, "An unexpected error occured.",
-					"An unexpected error occured while obtaining a list of avaiilable networks and sites from the central server.  See the appication logs for more information.",
+			return (ResponseHelper.getErrorResponse(500, "An unexpected error occurred.",
+					"An unexpected error occurred while obtaining a list of avaiilable networks and sites from the central server.  See the appication logs for more information.",
 					t));
 		} finally {
 			if (resp != null)
@@ -517,7 +517,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 							addtionalVal));
 				} else
 					return (ResponseHelper.getErrorResponse(500,
-							"An error occured while initializing the application database.",
+							"An error occurred while initializing the application database.",
 							"The error was unreported. Check the application logs for more information.", null));
 			} else {
 				String msg;
@@ -535,8 +535,8 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 				return (ResponseHelper.getErrorResponse(500, "The database could not be set up.", msg, null));
 			}
 		} catch (Throwable t) {
-			logger.log(Level.SEVERE, "An unexpected error occured while setting up the site.", t);
-			return (ResponseHelper.getErrorResponse(500, "An unexpected error occured while setting up the site.",
+			logger.log(Level.SEVERE, "An unexpected error occurred while setting up the site.", t);
+			return (ResponseHelper.getErrorResponse(500, "An unexpected error occurred while setting up the site.",
 					"More information may be available in the application logs.", t));
 		}
 	}
@@ -731,7 +731,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 				return (rVal);
 			}
 		} catch (Throwable t) {
-			String msg = "An unexpected error occured while trying process an InquiryRequest.";
+			String msg = "An unexpected error occurred while trying process an InquiryRequest.";
 			logger.log(Level.SEVERE, msg, t);
 			return (ResponseHelper.getErrorResponse(500, "An unexpected error occurred",
 					msg + "Check the server logs at site: " + AppProperties.getDBProperty("site.name")
@@ -859,9 +859,9 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			}
 			return ResponseHelper.getJsonResponseGen(200, rVal);
 		} catch (Throwable t) {
-			String msg = "An unhandled exception occured while retrieving a response with id: " + id;
+			String msg = "An unhandled exception occurred while retrieving a response with id: " + id;
 			logger.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getErrorResponse(500, "An unhandled exception occured.",
+			return (ResponseHelper.getErrorResponse(500, "An unhandled exception occurred.",
 					msg + "Check the site server logs for more information.", t));
 		} finally {
 			if (httpResponse != null)
@@ -887,7 +887,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			sqlqueryDAO.save(query);
 			sqlqueryDAO.closeCurrentSessionwithTransaction();
 		} catch (Throwable t) {
-			String msg = "An unhandled exception occured while saving sql query";
+			String msg = "An unhandled exception occurred while saving sql query";
 			logger.log(Level.SEVERE, msg, t);
 			return (ResponseHelper.getErrorResponse(500, msg + "Check the site server logs for more information.", null,
 					t));
@@ -936,7 +936,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		try {
 			return ResponseHelper.getJsonResponseGen(200, RoleDAO.queryAllRoles()); // Response.ok(200).entity(RoleDAO.queryAllRoles().toJson()).build();
 		} catch (Throwable t) {
-			String msg = "An unhandled exception occured while getting roles";
+			String msg = "An unhandled exception occurred while getting roles";
 			logger.log(Level.SEVERE, msg, t);
 			return (ResponseHelper.getErrorResponse(500, msg + "Check the site server logs for more information.", null,
 					t));
@@ -1201,7 +1201,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			String msg = "There was an error at the request site while trying to save some request information.";
 			DaqueryResponse eResp = assembleErrorResponse(msg, t);
 			return (ResponseHelper.getErrorResponse(500, msg,
-					"An error occured while trying to save the requester UserInfo on the local site please contact the site admin.",
+					"An error occurred while trying to save the requester UserInfo on the local site please contact the site admin.",
 					t, eResp));
 		} finally {
 			if (sess != null)
@@ -1259,7 +1259,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			dqResponse.setRequest(request);
 			ResponseDAO.saveOrUpdate(dqResponse);
 			return (ResponseHelper.getErrorResponse(500, "Error while executing a request.",
-					"An unexpected error occured while executing the request with id:" + request.getRequestId(), e,
+					"An unexpected error occurred while executing the request with id:" + request.getRequestId(), e,
 					dqResponse));
 		}
 
@@ -1327,7 +1327,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			dqResponse.setRequest(request);
 			ResponseDAO.saveOrUpdate(dqResponse);
 			return (ResponseHelper.getErrorResponse(500, "Error while executing a request.",
-					"An unexpected error occured while executing the request with id:" + request.getRequestId(), e,
+					"An unexpected error occurred while executing the request with id:" + request.getRequestId(), e,
 					dqResponse));
 		}
 
@@ -1442,7 +1442,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			String msg = "There was an error at the request site while trying to save some request information.";
 			DaqueryResponse eResp = assembleErrorResponse(msg, t);
 			return (ResponseHelper.getErrorResponse(500, msg,
-					"An error occured while trying to save the requester UserInfo on the local site please contact the site admin.",
+					"An error occurred while trying to save the requester UserInfo on the local site please contact the site admin.",
 					t, eResp));
 		} finally {
 			if (sess != null)
@@ -1495,7 +1495,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		} catch (Throwable e) {
 			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
 			return (ResponseHelper.getErrorResponse(500, "Error while saving a data request.",
-					"An unexpected error occured while saving the data request with id:" + request.getRequestId(), e));
+					"An unexpected error occurred while saving the data request with id:" + request.getRequestId(), e));
 		}
 	}
 
@@ -1540,7 +1540,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		} catch (Throwable e) {
 			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
 			return (ResponseHelper.getErrorResponse(500, "Error while saving a data request.",
-					"An unexpected error occured while saving the data request with id:" + request.getRequestId(), e));
+					"An unexpected error occurred while saving the data request with id:" + request.getRequestId(), e));
 		}
 	}
 
@@ -1643,7 +1643,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			String msg = "There was an error at the request site while trying to save some request information.";
 			DaqueryResponse eResp = assembleErrorResponse(msg, t);
 			return (ResponseHelper.getErrorResponse(500, msg,
-					"An error occured while trying to save the requester UserInfo on the local site please contact the site admin.",
+					"An error occurred while trying to save the requester UserInfo on the local site please contact the site admin.",
 					t, eResp));
 		} finally {
 			if (sess != null)
@@ -1698,7 +1698,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		} catch (Throwable e) {
 			logger.log(Level.SEVERE, "Error while executing request with id: " + request.getRequestId(), e);
 			return (ResponseHelper.getErrorResponse(500, "Error while saving a data request.",
-					"An unexpected error occured while saving the data request with id:" + request.getRequestId(), e));
+					"An unexpected error occurred while saving the data request with id:" + request.getRequestId(), e));
 		}
 	}
 
@@ -1746,7 +1746,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		// logger.log(Level.SEVERE, "Error while executing request with id: " +
 		// request.getRequestId(), e);
 		// return(ResponseHelper.getErrorResponse(500, "Error while saving a
-		// data request.", "An unexpected error occured while saving the data
+		// data request.", "An unexpected error occurred while saving the data
 		// request with id:" + request.getRequestId(), e));
 		// }
 
@@ -1773,7 +1773,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			dqResponse.setRequest(request);
 			ResponseDAO.saveOrUpdate(dqResponse);
 			return (ResponseHelper.getErrorResponse(500, "Error while executing a request.",
-					"An unexpected error occured while executing the request with id:" + request.getRequestId(), e,
+					"An unexpected error occurred while executing the request with id:" + request.getRequestId(), e,
 					dqResponse));
 		}
 
@@ -1957,8 +1957,8 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		} catch (Exception e) {
 			AppProperties.setDBProperty("update_status", "failed");
 			AppProperties.setDBProperty("update_message",
-					"An unexpeced error occured while updating the daquery application");
-			logger.log(Level.SEVERE, "An unexpeced error occured while checking is update available", e);
+					"An unexpeced error occurred while updating the daquery application");
+			logger.log(Level.SEVERE, "An unexpeced error occurred while checking is update available", e);
 			return Response.ok(200).entity("{\"updateAvailable\": false}").build();
 
 		} finally {
@@ -2029,10 +2029,10 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		} catch (Throwable t) {
 			AppProperties.setDBProperty("update_status", "failed");
 			AppProperties.setDBProperty("update_message",
-					"An unexpeced error occured while updating the daquery application");
-			logger.log(Level.SEVERE, "An unexpeced error occured while updating the daquery application", t);
-			return (ResponseHelper.getErrorResponse(500, "An unexpected error occured.",
-					"An unexpected error occured while updating the daquery application.  See the appication logs for more information.",
+					"An unexpeced error occurred while updating the daquery application");
+			logger.log(Level.SEVERE, "An unexpeced error occurred while updating the daquery application", t);
+			return (ResponseHelper.getErrorResponse(500, "An unexpected error occurred.",
+					"An unexpected error occurred while updating the daquery application.  See the appication logs for more information.",
 					t));
 		}
 
@@ -2120,10 +2120,10 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		} catch (Throwable t) {
 			AppProperties.setDBProperty("update_status", "failed");
 			AppProperties.setDBProperty("update_message",
-					"An unexpeced error occured while updating the daquery application");
-			logger.log(Level.SEVERE, "An unexpeced error occured while updating the daquery application", t);
-			return (ResponseHelper.getErrorResponse(500, "An unexpected error occured.",
-					"An unexpected error occured while updating the daquery application.  See the appication logs for more information.",
+					"An unexpeced error occurred while updating the daquery application");
+			logger.log(Level.SEVERE, "An unexpeced error occurred while updating the daquery application", t);
+			return (ResponseHelper.getErrorResponse(500, "An unexpected error occurred.",
+					"An unexpected error occurred while updating the daquery application.  See the appication logs for more information.",
 					t));
 		} finally {
 			if (resp != null)

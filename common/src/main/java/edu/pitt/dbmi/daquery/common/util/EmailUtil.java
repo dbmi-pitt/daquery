@@ -79,7 +79,7 @@ public class EmailUtil
 			else
 			{
 				ErrorInfo ei = new ErrorInfo();
-				ei.setDisplayMessage("An error occured while sending an email.");
+				ei.setDisplayMessage("An error occurred while sending an email.");
 				ei.setLongMessage("The central server responded with a status code of " + resp.getStatus() + " on sending an email.");
 			}
 		}
