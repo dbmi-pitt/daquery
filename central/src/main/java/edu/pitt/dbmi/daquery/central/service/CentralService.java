@@ -96,7 +96,7 @@ public class CentralService{
 		}
 		catch(Throwable t)
 		{
-			return(ResponseHelper.getErrorResponse(500, "Unexpected error on the central server.", "An unexpected error occured while checking contacting the central server to find site status for from-site:" + fromSiteId + " to-site:" + toSiteId + " network:" + networkId, t));
+			return(ResponseHelper.getErrorResponse(500, "Unexpected error on the central server.", "An unexpected error occurred while checking contacting the central server to find site status for from-site:" + fromSiteId + " to-site:" + toSiteId + " network:" + networkId, t));
 		}
 	}
 	/**
@@ -143,8 +143,8 @@ public class CentralService{
 		}
 		catch(Throwable dce)
 		{
-			log.log(Level.SEVERE, "An unexpected error occured while authenticating a user.", dce);
-			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while authenticating a site with the central server.", "Occured while authenticating site:" + siteNameOrKey, dce) );
+			log.log(Level.SEVERE, "An unexpected error occurred while authenticating a user.", dce);
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred while authenticating a site with the central server.", "Occurred while authenticating site:" + siteNameOrKey, dce) );
 		}
 	}
 	
@@ -217,13 +217,13 @@ public class CentralService{
 				// eh.sendMail("Daquery Connection Request", "A site is trying to connect you.", "del20@pitt.edu");
 				return ResponseHelper.getJsonResponseGen(200, site);
 			} else {
-				return ResponseHelper.getErrorResponse(500, "Error while saving a connection request",  "An unexpected error occured while authenticating a site.  Check the central server logs for more information.", null);
+				return ResponseHelper.getErrorResponse(500, "Error while saving a connection request",  "An unexpected error occurred while authenticating a site.  Check the central server logs for more information.", null);
 			}
 		} catch (Throwable t) {
 			String msg = "An error occurred while creating a connection request with network_id:" + networkId
 					+ " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to create a connection request.", msg + " Check the central server logs for more information.", t));
+			return (ResponseHelper.getErrorResponse(500, "An error occurred while trying to create a connection request.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -256,13 +256,13 @@ public class CentralService{
 				
 				return ResponseHelper.getJsonResponseGen(200, "{}");
 			} else {
-				return ResponseHelper.getErrorResponse(500, "Error while saving a site contact",  "An unexpected error occured while authenticating a site.  Check the central server logs for more information.", null);
+				return ResponseHelper.getErrorResponse(500, "Error while saving a site contact",  "An unexpected error occurred while authenticating a site.  Check the central server logs for more information.", null);
 			}
 		} catch (Throwable t) {
 			String msg = "An error occurred while creating a site contact with site_id:" + siteId
 					+ " user_id:" + userId + " email:" + email + " real_name:" + realName;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to create a site contact.", msg + " Check the central server logs for more information.", t));
+			return (ResponseHelper.getErrorResponse(500, "An error occurred while trying to create a site contact.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -295,13 +295,13 @@ public class CentralService{
 				
 				return ResponseHelper.getJsonResponseGen(200, "{}");
 			} else {
-				return ResponseHelper.getErrorResponse(500, "Error while deleting a site contact",  "An unexpected error occured while authenticating a site.  Check the central server logs for more information.", null);
+				return ResponseHelper.getErrorResponse(500, "Error while deleting a site contact",  "An unexpected error occurred while authenticating a site.  Check the central server logs for more information.", null);
 			}
 		} catch (Throwable t) {
 			String msg = "An error occurred while deleting a site contact with site_id:" + siteId
 					+ " user_id:" + userId + " email:" + email + " real_name:" + realName;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to delete a site contact.", msg + " Check the central server logs for more information.", t));
+			return (ResponseHelper.getErrorResponse(500, "An error occurred while trying to delete a site contact.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 
@@ -410,7 +410,7 @@ public class CentralService{
 		} catch (Throwable t) {
 			String msg = "An error occurred while getting pending site with site_id:" + siteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getErrorResponse(500, "An error occured while attempting to retrieve pending sites.", msg + " Check the central server logs for more information.", t));
+			return (ResponseHelper.getErrorResponse(500, "An error occurred while attempting to retrieve pending sites.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -434,7 +434,7 @@ public class CentralService{
 		} catch (Throwable t) {
 			String msg = "An error occurred while getting pending site with site_id:" + siteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getErrorResponse(500, "An error occured while trying to retrieve a site definition.", msg + " Check the central server logs for more information.", t));
+			return (ResponseHelper.getErrorResponse(500, "An error occurred while trying to retrieve a site definition.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -458,12 +458,12 @@ public class CentralService{
 			if(DBHelper.updateConnectionRequest(networkId, fromSiteId, toSiteId, "APPROVED"))
 				return ResponseHelper.getBasicResponse(200, "");
 			else
-				return ResponseHelper.getErrorResponse(500, "An error occured while registering a site connection request approval.", 
-						"An unexpected error occured while approving connect request.  Check the central server logs for more information.", null);
+				return ResponseHelper.getErrorResponse(500, "An error occurred while registering a site connection request approval.", 
+						"An unexpected error occurred while approving connect request.  Check the central server logs for more information.", null);
 		} catch (Throwable t) {
 			String msg = "An error occurred while approving connect request network_id:" + networkId + " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getErrorResponse(500, "An error occured while registering a site connection request approval.",  msg + " Check the central server logs for more information.", t));
+			return (ResponseHelper.getErrorResponse(500, "An error occurred while registering a site connection request approval.",  msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -487,12 +487,12 @@ public class CentralService{
 			if(DBHelper.updateConnectionRequest(networkId, fromSiteId, toSiteId, "DENIED"))
 				return ResponseHelper.getBasicResponse(200, "");
 			else
-				return ResponseHelper.getErrorResponse(500, "An error occured while registering a site connection request denial",
-						"An unexpected error occured while marking a connection request as denied. Check the central server logs for more information.", null);
+				return ResponseHelper.getErrorResponse(500, "An error occurred while registering a site connection request denial",
+						"An unexpected error occurred while marking a connection request as denied. Check the central server logs for more information.", null);
 		} catch (Throwable t) {
 			String msg = "An error occurred while approving connect request network_id:" + networkId + " from_site_id:" + fromSiteId + " to_site_id:" + toSiteId;
 			log.log(Level.SEVERE, msg, t);
-			return (ResponseHelper.getErrorResponse(500, "An error occured while registering a site request denial.", msg + " Check the central server logs for more information.", t));
+			return (ResponseHelper.getErrorResponse(500, "An error occurred while registering a site request denial.", msg + " Check the central server logs for more information.", t));
 		}
 	}
 	
@@ -531,7 +531,7 @@ public class CentralService{
 		}
 		catch(Throwable t)
 		{
-			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while on the central server while retrieving a data model", "Error while retrieving data model from network with id " + netId, t));
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred while on the central server while retrieving a data model", "Error while retrieving data model from network with id " + netId, t));
 		}
 		finally
 		{
@@ -561,7 +561,7 @@ public class CentralService{
 			retJson.put("force_update", dv.force_update.toString());
 			return ResponseHelper.getJsonResponseGen(200, retJson);
 		} catch (Throwable t){
-			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while on the central server while retrieving latest build number", "Error while retrieving latest build number", t));
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred while on the central server while retrieving latest build number", "Error while retrieving latest build number", t));
 		}
 			
 	}

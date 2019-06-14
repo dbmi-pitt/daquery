@@ -106,7 +106,7 @@ public class TableExporter extends AbstractExporter implements DataExporter {
 			return(filename);
 
 		} catch (Throwable t) {
-			logger.log(Level.SEVERE, "An error occured during the ", t);
+			logger.log(Level.SEVERE, "An error occurred during the ", t);
 			if(t instanceof DaqueryErrorException)
 			{
 				DaqueryErrorException dee = (DaqueryErrorException) t;

@@ -143,7 +143,7 @@ public class SiteEndpoint extends AbstractEndpoint {
     		else
     		{
     			logger.log(Level.SEVERE, de.getMessage(), de);
-    			return(ResponseHelper.getErrorResponse(500, "An unhandled error occured while retrieving all site information.", null, de));
+    			return(ResponseHelper.getErrorResponse(500, "An unhandled error occurred while retrieving all site information.", null, de));
     		}
     	}
     	catch (HibernateException he) {

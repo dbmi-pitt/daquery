@@ -114,7 +114,7 @@ public class AppProperties
 			return(false);
 		return Boolean.parseBoolean(debugDataExport);
 		} catch (Throwable t) {
-			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the deliver data from the application database.", t);
+			log.log(Level.SEVERE, "An unexpeded error occurred while trying to get the deliver data from the application database.", t);
 			return(false);	
 		}		
 	}
@@ -250,7 +250,7 @@ public class AppProperties
 		}
 		catch(Throwable t)
 		{
-			String msg = "An unexpected error occured while getting the application database property: " + propertyName;
+			String msg = "An unexpected error occurred while getting the application database property: " + propertyName;
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryException(msg + " Check the application logs for further information.", t);
 		}
@@ -272,7 +272,7 @@ public class AppProperties
 		}
 		catch(Throwable t)
 		{
-			String msg = "An unexpected error occured while setting the application database property: " + propertyName;
+			String msg = "An unexpected error occurred while setting the application database property: " + propertyName;
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryException(msg + " Check the application logs for further information.", t);
 		}
@@ -292,7 +292,7 @@ public class AppProperties
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the task queue lenght from the application database.", t);
+			log.log(Level.SEVERE, "An unexpeded error occurred while trying to get the task queue lenght from the application database.", t);
 			return(defaultTaskQueueMaxLength);			
 		}
 		
@@ -319,7 +319,7 @@ public class AppProperties
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the download task queue length from the application database.", t);
+			log.log(Level.SEVERE, "An unexpeded error occurred while trying to get the download task queue length from the application database.", t);
 			return(getDefaultTaskQueueMaxLength());			
 		}		
 	}
@@ -340,7 +340,7 @@ public class AppProperties
 			if(StringHelper.isEmpty(val)) return(defaultDeliverData);
 			return Boolean.parseBoolean(val);
 		} catch (Throwable t) {
-			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the deliver data from the application database.", t);
+			log.log(Level.SEVERE, "An unexpeded error occurred while trying to get the deliver data from the application database.", t);
 			return(defaultDeliverData);	
 		} */
 	}
@@ -355,7 +355,7 @@ public class AppProperties
 			if(StringHelper.isEmpty(val)) return(defaultThreeDigitZip);
 			return Boolean.parseBoolean(val);
 		} catch (Throwable t) {
-			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the three digit zip from the application database.", t);
+			log.log(Level.SEVERE, "An unexpeded error occurred while trying to get the three digit zip from the application database.", t);
 			return(defaultThreeDigitZip);	
 		}
 	}
@@ -370,7 +370,7 @@ public class AppProperties
 			if(StringHelper.isEmpty(val)) return(defaultDateShift);
 			return Boolean.parseBoolean(val);
 		} catch (Throwable t) {
-			log.log(Level.SEVERE, "An unexpeded error occured while trying to get the date shift from the application database.", t);
+			log.log(Level.SEVERE, "An unexpeded error occurred while trying to get the date shift from the application database.", t);
 			return(defaultDateShift);	
 		}
 	}
