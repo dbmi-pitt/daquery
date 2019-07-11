@@ -115,6 +115,7 @@ public class CreateCDM41Model
 		}
 	}
 	private static final String [] TABLES_TO_EXCLUDE = {"REDCAP_ANSWER_MAPPING", "REDCAP_EVENT_MAPPING", "REDCAP_PATIENT_MAPPING", "RUCA_MAPPING"};
+	private static final String [] TABLE_SUFFIXES_TO_EXCLUDE = {"_STG", "_TST", "_RELOAD", "_BKUP", "_TEMP"};
 	private static final String [] FIELDS_TO_EXCLUDE = {"ENCOUNTER.RAW_PAYER_NAME_PRIMARY", "ENCOUNTER.RAW_PAYER_NAME_SECONDARY"};
 	private static boolean inExcludeLists(String tableName, String fieldName)
 	{
@@ -122,6 +123,8 @@ public class CreateCDM41Model
 		String fName = tName + "." + fieldName.toUpperCase().trim();
 		for(String tbl : TABLES_TO_EXCLUDE)
 			if(tbl.equals(tName)) return(true);
+		for(String suffix : TABLE_SUFFIXES_TO_EXCLUDE)
+			if(tName.endsWith(suffix)) return(true);
 		for(String field : FIELDS_TO_EXCLUDE)
 			if(field.equals(fName)) return(true);
 		
@@ -175,7 +178,8 @@ public class CreateCDM41Model
 						da.setBirthDate(true);
 						da.setDateField(true);
 					}
-					if(fieldName.endsWith("ID") || fieldName.contains("_ID_"))							
+					boolean skipID = fieldName.equals("PARTICIPANTID") || fieldName.equals("COHORTID") || fieldName.equals("STUDYID") || fieldName.equals("TRIAL_SITEID") || fieldName.equals("TRIALID");
+					if(! skipID && (fieldName.endsWith("ID") || fieldName.contains("_ID_")))							
 					{
 						da.setAggregatable(true);
 						da.setIdentifier(true);

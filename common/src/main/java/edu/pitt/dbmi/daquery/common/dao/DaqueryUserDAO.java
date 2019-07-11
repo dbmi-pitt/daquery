@@ -417,7 +417,7 @@ public class DaqueryUserDAO extends AbstractDAO {
     	}
     	catch(Throwable t)
     	{
-    		logger.log(Level.SEVERE, "An unexpected exception occured while retrieving the SYSTEM user", t);
+    		logger.log(Level.SEVERE, "An unexpected exception occurred while retrieving the SYSTEM user", t);
     	}
     	return(sysUser);
     }

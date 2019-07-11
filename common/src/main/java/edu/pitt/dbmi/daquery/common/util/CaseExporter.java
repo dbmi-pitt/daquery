@@ -392,7 +392,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			return(filename);
 
 		} catch (Throwable t) {
-			logger.log(Level.SEVERE, "An error occured during the ", t);
+			logger.log(Level.SEVERE, "An error occurred during the ", t);
 			if(t instanceof DaqueryErrorException)
 			{
 				DaqueryErrorException dee = (DaqueryErrorException) t;
@@ -535,7 +535,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		
 		// send finish locally msg to requester site.
 	}
-	
+
 	private void writeCustomCSVFile(Connection conn, OutputStreamWriter writer, DaqueryRequest daqueryRequest, int currentFileNum, int patientsPerFile, OutputFile outputFile, String tempTableName) throws Throwable {
 		ResultSet rs = null;
 		Statement s = null;
@@ -572,14 +572,23 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 				columnSet.add(name);
 			}
 			
+			String colPrefix = "";
+			if(outputFile.source.trim().toUpperCase().equals("PATH_COHORT"))
+				colPrefix = "PATH_COHORT.";
+			else if(outputFile.source.trim().toUpperCase().equals("PATH_STUDY"))
+				colPrefix = "PATH_STUDY.";
+			
 			String columns = "";
+			String columnsNoAs = "";
 			for(Field f : outputFile.custom_column_set.fields){
+				columnsNoAs += colPrefix + f.colName + ", ";
 				if(columnSet.contains(f.colName))
-					columns += f.colName + ", ";
+					columns += colPrefix + f.colName + " AS " + f.colName + ", ";
 				else
 					columns += "'' AS " + f.colName + ", ";
 			}
 			columns = columns.substring(0, columns.length() - 2);
+			columnsNoAs = columnsNoAs.substring(0, columnsNoAs.length() - 2);
 
 			String startPatid = this.idList.get((currentFileNum - 1) * casesPerFile);
 			String endPatid = "";
@@ -588,11 +597,41 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			} else {
 				endPatid = this.idList.get(currentFileNum * casesPerFile - 1);
 			}
-			
+
 			long startTime = System.nanoTime();
-			String entQuery = "select src.patid, " + columns + " from " + outputFile.source + " src , " + tempTableName + 
+			String entQuery;
+			int extraColumns = 1;
+			int fieldOffset = 2;
+			boolean overrideDateShift = false;
+			if(! StringHelper.isBlank(outputFile.idColumn) && outputFile.idColumn.trim().toUpperCase().equals("PATID"))
+			    entQuery = "select src.patid, " + columns + " from " + outputFile.source + " src , " + tempTableName + 
 					" setids where setids.PATID = src.patid and src.patid >= '" + startPatid + 
 					"' and src.patid <= '" + endPatid + "'";
+			else if(outputFile.source.trim().toUpperCase().equals("PATH_COHORT"))
+			{
+				entQuery = "select " + columns + " from path_cohort, path_trial, " + tempTableName + " setids where path_trial.COHORTID = path_cohort.COHORTID" +
+			                 " AND path_trial.patid = setids.patid and setids.patid >= '" + startPatid + 
+			                 "' AND setids.patid <= '" + endPatid + "' group by " +  columnsNoAs ;
+				extraColumns = 0;
+				fieldOffset = 1;
+				overrideDateShift = true;
+			}
+			else if(outputFile.source.trim().toUpperCase().equals("PATH_STUDY"))
+			{
+				entQuery = "select " + columns + " from path_study, path_cohort, path_trial, " + tempTableName + " setids " +
+			             "where " +
+						    "path_trial.COHORTID = path_cohort.COHORTID " +
+			                "AND path_cohort.associated_study = path_study.studyid " +
+		                    "AND path_trial.patid = setids.patid and setids.patid >= '" + startPatid + 
+		                 "' AND setids.patid <= '" + endPatid + "' group by " +  columnsNoAs;
+				extraColumns = 0;
+				fieldOffset = 1;
+				overrideDateShift = true;
+			}
+			else
+				throw new DaqueryException("Unsupported query.  Only tables with PATID or COHORTID are supported.");
+			
+				
 			s = conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
 		              java.sql.ResultSet.CONCUR_READ_ONLY);
 			s.setFetchSize(10);
@@ -605,7 +644,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 					throw ssee;
 				}
 			}
-			String[] outLine = new String[1 + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
+			String[] outLine = new String[extraColumns + outputFile.custom_column_set.fields.size() + (debugDataExport ? 2 : 0)];
 			Arrays.fill(outLine, "");
 			
 			StringBuilder outLine_sb = new StringBuilder();
@@ -628,16 +667,16 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 				}
 				
 				int outLineEnd = debugDataExport ? outLine.length - 2 : outLine.length;
-				for(int j = 2; j <= outLineEnd; j++){
-					if(outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("zip")){
+				for(int j = fieldOffset; j <= outLineEnd; j++){
+					if(outputFile.custom_column_set.fields.get(j-fieldOffset).deid != null && outputFile.custom_column_set.fields.get(j-fieldOffset).deid.equals("zip")){
 						//outLine[j-1] = threeDigitZip(rs.getString(j), threeDigitZip);
 						outLine_sb.append(threeDigitZip(rs.getString(j), threeDigitZip) + ",");
 					}
-					else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("birthday")){
+					else if (outputFile.custom_column_set.fields.get(j-fieldOffset).deid != null && outputFile.custom_column_set.fields.get(j-fieldOffset).deid.equals("birthday")){
 						//outLine[j-1] = csvSafeString(handleBirthday(patientNum, rs.getDate(j)));
 						outLine_sb.append(csvSafeString(handleBirthday(patientNum, rs.getDate(j))) + ",");
 					}
-					else if (outputFile.custom_column_set.fields.get(j-2).deid != null && outputFile.custom_column_set.fields.get(j-2).deid.equals("source")){
+					else if (outputFile.custom_column_set.fields.get(j-fieldOffset).deid != null && outputFile.custom_column_set.fields.get(j-fieldOffset).deid.equals("source")){
 						String SourceSystem = rs.getString(j);
 						//outLine[j-1] = csvSafeString(SourceSystem);
 						outLine_sb.append(csvSafeString(SourceSystem) + ",");
@@ -647,7 +686,10 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 						if(obj instanceof Date){
 							//outLine[j-1] = csvSafeString(dateShift(patientNum, (Date)obj));
 							//outLine_sb.append(csvSafeString(dateShift(patientNum, (Date)obj)) + ",");
-							csvSafeString(dateShift(patientNum, (Date)obj), outLine_sb);
+							if(overrideDateShift)
+								csvSafeString(dateFormat.format((Date)obj), outLine_sb);
+							else
+								csvSafeString(dateShift(patientNum, (Date)obj), outLine_sb);
 							outLine_sb.append(",");
 						}
 						else{

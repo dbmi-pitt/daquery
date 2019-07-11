@@ -51,8 +51,8 @@ public class DBHelper
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An error occured while checking a site authorization when accessing the daquery-central application database.", t);
-			throw new DaqueryException("An unexpected error occured on the central server while trying to authenticate " + siteNameOrId, t);
+			log.log(Level.SEVERE, "An error occurred while checking a site authorization when accessing the daquery-central application database.", t);
+			throw new DaqueryException("An unexpected error occurred on the central server while trying to authenticate " + siteNameOrId, t);
 		}
 		
 		
@@ -74,7 +74,7 @@ public class DBHelper
 		}
 		catch(Throwable t)
 		{
-			String msg = "An error occured while checking if a site key is temporary when accessing the daquery-central application database.  The site name or id being checked " + siteNameOrId;
+			String msg = "An error occurred while checking if a site key is temporary when accessing the daquery-central application database.  The site name or id being checked " + siteNameOrId;
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryCentralException(msg, t);
 		}
@@ -103,7 +103,7 @@ public class DBHelper
 				throw (DaqueryCentralException) t;
 			else
 			{
-				String msg = "An error occured while looking up a site id with name: " + sitename;
+				String msg = "An error occurred while looking up a site id with name: " + sitename;
 				log.log(Level.SEVERE, msg, t);
 				throw new DaqueryCentralException(msg, t);
 			}
@@ -133,7 +133,7 @@ public class DBHelper
 				throw (DaqueryCentralException) t;
 			else
 			{
-				String msg = "An error occured while looking up a site id with siteId: " + siteId;
+				String msg = "An error occurred while looking up a site id with siteId: " + siteId;
 				log.log(Level.SEVERE, msg, t);
 				throw new DaqueryCentralException(msg, t);
 			}
@@ -169,7 +169,7 @@ public class DBHelper
 		}
 		catch(Throwable t)
 		{
-			String msg = "An error occured while generating and setting a site access key.  Site name or id was " + siteName;
+			String msg = "An error occurred while generating and setting a site access key.  Site name or id was " + siteName;
 			log.log(Level.SEVERE, msg, t);
 			throw new DaqueryCentralException(msg, t);
 

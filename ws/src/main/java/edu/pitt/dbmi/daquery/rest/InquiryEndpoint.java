@@ -90,11 +90,11 @@ public class InquiryEndpoint extends AbstractEndpoint {
             return Response.ok(200).entity(jsonString).build();
 
     	} catch (HibernateException he) {
-    		String msg = "A database error occured while getting a list of inquiries.";
+    		String msg = "A database error occurred while getting a list of inquiries.";
     		logger.log(Level.SEVERE, msg, he);
     		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", "This error usually indicates that the database is down or cannot be accessed.", he));
         } catch (Exception e) {
-    		String msg = "An unexpected error occured while getting a list of inquiries.";
+    		String msg = "An unexpected error occurred while getting a list of inquiries.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", null, e));
         } finally {

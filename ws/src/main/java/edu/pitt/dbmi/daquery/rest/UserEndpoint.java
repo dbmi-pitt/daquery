@@ -312,7 +312,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     	catch(Throwable t)
     	{
-    		String msg = "An unexpected error occured while finding remote users.";
+    		String msg = "An unexpected error occurred while finding remote users.";
     		logger.log(Level.SEVERE, msg, t);
     		return(ResponseHelper.getErrorResponse(500, msg + "  Check the server logs for more information.", null, t));
     	}
@@ -497,7 +497,7 @@ public class UserEndpoint extends AbstractEndpoint {
     	}
     	catch(Throwable t)
     	{
-    		String msg = "An error occured while retrieving all users.";
+    		String msg = "An error occurred while retrieving all users.";
     		logger.log(Level.SEVERE, msg, t);
     		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, t));
     	}
@@ -527,6 +527,19 @@ public class UserEndpoint extends AbstractEndpoint {
     	email = java.net.URLDecoder.decode(email, "UTF-8");
     	password = java.net.URLDecoder.decode(password, "UTF-8");
     	String netId = (StringHelper.isEmpty(networkId))?null:networkId;
+    	//#TODO Remove THIS.  This is just temporary
+    	if (netId == null) {
+            List<Network> networks = new ArrayList<Network>();
+            try {
+            	networks = NetworkDAO.queryAllNetworks();
+            	netId = networks.get(0).getNetworkId();
+            	
+            } catch (Exception e) {
+            	e.printStackTrace();
+            }
+
+    		
+    	}
     	
     	if (email.isEmpty() || password.isEmpty()) 
     		return Response.status(BAD_REQUEST).build();
@@ -578,7 +591,7 @@ public class UserEndpoint extends AbstractEndpoint {
             	return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, t));
             }
         } catch (Exception e) {
-    		String msg = "An unexpected error occured while authenticating your login.";
+    		String msg = "An unexpected error occurred while authenticating your login.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(UNAUTHORIZED.getStatusCode(), msg + " Check the server logs for more information.", null, e));
         }
@@ -622,7 +635,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(newUser.getId() + "").build()).build();
         } catch (Exception e) {
-    		String msg = "An unexpected error occured while creating a new account for user [" + login + "].";
+    		String msg = "An unexpected error occurred while creating a new account for user [" + login + "].";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 	    } finally {
@@ -650,13 +663,13 @@ public class UserEndpoint extends AbstractEndpoint {
 			}
 			jwt.validate();
 		} catch (TokenInvalidException e) {
-    		String msg = "An unexpected error occured while creating a new account for token [" + securityToken + "].";
+    		String msg = "An unexpected error occurred while creating a new account for token [" + securityToken + "].";
     		logger.log(Level.SEVERE, msg, e);
 			return(ResponseHelper.getErrorResponse(401, "Not Authorized", e.getMessage(), e));
 		} catch (Throwable t) {
-    		String msg = "An unexpected error occured while creating a new account for token [" + securityToken + "].";
+    		String msg = "An unexpected error occurred while creating a new account for token [" + securityToken + "].";
     		logger.log(Level.SEVERE, msg, t);
-			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking user credentials at a remote site.", null, t));
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred while checking user credentials at a remote site.", null, t));
 		}
 		//return(ResponseHelper.getBasicResponse(200, "valid"));
 		Map<String, String> retMap = new HashMap<>();
@@ -666,9 +679,9 @@ public class UserEndpoint extends AbstractEndpoint {
 		try {
 			return(ResponseHelper.getJsonResponseGen(200, retMap));
 		} catch (Throwable t) {
-    		String msg = "An unexpected error occured while creating a new account for token [" + securityToken + "].";
+    		String msg = "An unexpected error occurred while creating a new account for token [" + securityToken + "].";
     		logger.log(Level.SEVERE, msg, t);
-			return(ResponseHelper.getErrorResponse(500, "An unexpected error occured while checking user credentials at a remote site.", null, t));			
+			return(ResponseHelper.getErrorResponse(500, "An unexpected error occurred while checking user credentials at a remote site.", null, t));			
 		}
     }
     
@@ -717,7 +730,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        
 	        return Response.created(uriInfo.getAbsolutePathBuilder().path(new_user.getId() + "").build()).entity(new_user).build();
         } catch (Exception e) {
-    		String msg = "An unexpected error occured while creating a new user.";
+    		String msg = "An unexpected error occurred while creating a new user.";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 	    } finally {
@@ -749,7 +762,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        String json = user.toJson();	
 	        return Response.ok().entity(json).build();
     	} catch (Exception e) {
-    		String msg = "An unexpected error occured while retrieving account information user [" + id + "].";
+    		String msg = "An unexpected error occurred while retrieving account information user [" + id + "].";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
     	}
@@ -809,7 +822,7 @@ public class UserEndpoint extends AbstractEndpoint {
  
 	        return Response.ok(200).build();
     	} catch (Exception e) {
-    		String msg = "An unexpected error occured while retrieving account information user [" + id + "].";
+    		String msg = "An unexpected error occurred while retrieving account information user [" + id + "].";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 
@@ -944,7 +957,7 @@ public class UserEndpoint extends AbstractEndpoint {
 	        return Response.ok("{}").build();
 	        
     	} catch (Exception e) {
-    		String msg = "An unexpected error occured while updating account information  for user [" + id + "].";
+    		String msg = "An unexpected error occurred while updating account information  for user [" + id + "].";
     		logger.log(Level.SEVERE, msg, e);
     		return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 
@@ -1022,7 +1035,7 @@ public class UserEndpoint extends AbstractEndpoint {
             return rVal;
 	        
 	    } catch (Exception e) {
-			String msg = "An unexpected error occured while force changing password for user [" + id + "].";
+			String msg = "An unexpected error occurred while force changing password for user [" + id + "].";
 			logger.log(Level.SEVERE, msg, e);
 			return(ResponseHelper.getErrorResponse(500, msg + " Check the server logs for more information.", null, e));
 		} finally {

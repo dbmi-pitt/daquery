@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
@@ -27,9 +29,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
 
 import edu.pitt.dbmi.daquery.common.domain.DaqueryObject;
+import edu.pitt.dbmi.daquery.common.domain.DataSource;
 import edu.pitt.dbmi.daquery.common.util.DaqueryException;
 import edu.pitt.dbmi.daquery.common.util.DataExportConfig;
 import edu.pitt.dbmi.daquery.common.util.StringHelper;
@@ -52,6 +56,10 @@ public class DataModelOld extends DaqueryObject implements Serializable
 	@Transient
 	private Hashtable<String, List<DataAttributeOld>> attributesByTableName = null;
 
+	@Transient
+	@JsonIgnore
+	private HashMap<String, String> dataSources = new HashMap<String, String>();
+	
 	@Transient
 	List<DataAttributeOld> aggregatableAttributes = null;
 
@@ -106,6 +114,9 @@ public class DataModelOld extends DaqueryObject implements Serializable
 	public long getId(){return(id);}
 	public void setId(Long id){this.id = id;}
 
+	public HashMap<String, String> getDataSources(){return(dataSources);}
+	public void setDataSources(HashMap<String, String> sources){dataSources = sources;}	
+	
 	public String getName(){return(name);}
 	public void setName(String name){this.name = name;}
 

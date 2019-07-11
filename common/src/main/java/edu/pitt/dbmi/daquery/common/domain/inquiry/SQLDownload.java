@@ -256,7 +256,7 @@ public class SQLDownload extends SQLQuery implements Download
 		{
 			log.log(Level.SEVERE, "Can't load the data export configuration", de);
 			response.setStatusEnum(ResponseStatus.ERROR);
-			response.setErrorMessage("An applicatin error occured during file export.");
+			response.setErrorMessage("An applicatin error occurred during file export.");
 			response.setStackTrace(StringHelper.stackToString(de));
 			return(response);			
 		}
@@ -264,7 +264,7 @@ public class SQLDownload extends SQLQuery implements Download
 		{
 			log.log(Level.SEVERE, "Can't load the data export configuration", ioe);
 			response.setStatusEnum(ResponseStatus.ERROR);
-			response.setErrorMessage("A network or disk access error occured during file export.");
+			response.setErrorMessage("A network or disk access error occurred during file export.");
 			response.setStackTrace(StringHelper.stackToString(ioe));
 			return(response);
 		}
@@ -278,7 +278,7 @@ public class SQLDownload extends SQLQuery implements Download
 		{
 			log.log(Level.SEVERE, "Unhandled error while exporting", e);
 			response.setStatusEnum(ResponseStatus.ERROR);
-			response.setErrorMessage("An unhandled error occured during file export.  Check the server log files.");
+			response.setErrorMessage("An unhandled error occurred during file export.  Check the server log files.");
 			response.setStackTrace(StringHelper.stackToString(e));
 			return(response);			
 		}
