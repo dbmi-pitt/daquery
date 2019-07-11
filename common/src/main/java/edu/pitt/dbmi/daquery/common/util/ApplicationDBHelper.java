@@ -103,7 +103,7 @@ public class ApplicationDBHelper
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An error occured while trying to get the application database table count.", t);
+			log.log(Level.SEVERE, "An error occurred while trying to get the application database table count.", t);
 			return(-1);
 		}
 		finally

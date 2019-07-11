@@ -348,16 +348,6 @@
        <field name='RAW_OBSGEN_UNIT' colName='RAW_OBSGEN_UNIT'/>
     </custom-column-set>
 </outputFile>
-<outputFile name='path_trial.csv' source='path_trial'>
-	<idColumn>PATID</idColumn>
-    <custom-column-set>
-       <field name='COHORTID' colName='COHORTID'/>
-       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
-       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
-       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
-       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
-    </custom-column-set>
-</outputFile>
 <outputFile name='pcornet_trial.csv' source='pcornet_trial'>
 	<idColumn>PATID</idColumn>
     <custom-column-set>
@@ -367,6 +357,43 @@
        <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
        <field name='TRIAL_INVITE_CODE' colName='TRIAL_INVITE_CODE'/>
        <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
+       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='path_cohort.csv' source='path_cohort'>
+    <custom-column-set>
+       <field name='ACCRUAL_TYPE' colName='ACCRUAL_TYPE'/>
+       <field name='ADMIN_NAME' colName='ADMIN_NAME'/>
+       <field name='ASSOCIATED_STUDY' colName='ASSOCIATED_STUDY'/>
+       <field name='COHORTID' colName='COHORTID'/>
+       <field name='COMPUTABLE_PHENO' colName='COMPUTABLE_PHENO'/>
+       <field name='DATE_ASSEMBLED' colName='DATE_ASSEMBLED'/>
+       <field name='REQ_CONSENT' colName='REQ_CONSENT'/>       
+       <field name='SHORT_NAME' colName='SHORT_NAME'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='path_study.csv' source='path_study'>
+    <custom-column-set>
+       <field name='IRB_NUMBER' colName='IRB_NUMBER'/>
+       <field name='PARENT_STUDY' colName='PARENT_STUDY'/>
+       <field name='PI' colName='PI'/>
+       <field name='PI_INSTITUTION' colName='PI_INSTITUTION'/>
+       <field name='PROJECT_MANAGER' colName='PROJECT_MANAGER'/>
+       <field name='START_DATE' colName='START_DATE'/>
+       <field name='START_EVENT' colName='START_EVENT'/>
+       <field name='STUDYID' colName='STUDYID'/>
+       <field name='STUDY_DEFINITION' colName='STUDY_DEFINITION'/>
+       <field name='STUDY_NAME       ' colName='STUDY_NAME       '/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='path_trial.csv' source='path_trial'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+       <field name='COHORTID' colName='COHORTID'/>
+       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
+       <field name='PARTICIPANTID' colName='PARTICIPANTID'/>
+       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
+       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
        <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
     </custom-column-set>
 </outputFile>
@@ -380,31 +407,5 @@
        <field name='RAW_PROVIDER_SPECIALTY_PRIMARY' colName='RAW_PROVIDER_SPECIALTY_PRIMARY'/>
     </custom-column-set>
 </outputFile>
-<outputFile name='path_cohort.csv' source='path_cohort'>
-    <custom-column-set>
-       <field name='ACCRUAL_TYPE' colName='ACCRUAL_TYPE'/>
-       <field name='ADMIN_NAME' colName='ADMIN_NAME'/>
-       <field name='ASSOCIATED_STUDY' colName='ASSOCIATED_STUDY'/>
-       <field name='COHORTID' colName='COHORTID'/>
-       <field name='COMPUTABLE_PHENO' colName='COMPUTABLE_PHENO'/>
-       <field name='DATE_ASSEMBLED' colName='DATE_ASSEMBLED'/>
-       <field name='SHORT_NAME' colName='SHORT_NAME'/>
-       <field name='SHORT_NAME' colName='SHORT_NAME'/>
-    </custom-column-set>
-</outputFile>
-<outputFile name='path_study.csv' source='path_study'>
-    <custom-column-set>
-       <field name='IRB_NUMBER' colName='IRB_NUMBER'/>
-       <field name='PARENT_STUDY' colName='PARENT_STUDY'/>
-       <field name='PI' colName='PI'/>
-       <field name='PI_INSTITUTION' colName='PI_INSTITUTION'/>
-       <field name='PROJECT_MANAGER' colName='PROJECT_MANAGER'/>
-       <field name='REQ_CONSENT' colName='REQ_CONSENT'/>
-       <field name='START_DATE' colName='START_DATE'/>
-       <field name='START_EVENT' colName='START_EVENT'/>
-       <field name='STUDYID' colName='STUDYID'/>
-       <field name='STUDY_DEFINITION' colName='STUDY_DEFINITION'/>
-       <field name='STUDY_NAME       ' colName='STUDY_NAME       '/>
-    </custom-column-set>
-</outputFile> -->
+ -->
 </dataExportConfig>

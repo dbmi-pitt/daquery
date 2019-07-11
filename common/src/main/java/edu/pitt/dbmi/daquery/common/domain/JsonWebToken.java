@@ -139,13 +139,31 @@ public class JsonWebToken extends DaqueryObject
         // Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
     	
+        return JsonWebToken.validateTokenString(this.getTokenString(), this.getSiteId(), this.getUserId());
+     }	
+
+    
+    /**
+     * Validate a JWT token
+     * @return - boolean indicating if the token is valid
+     * @throws TokenInvalidException 
+     * @throws ExpiredJwtException if the token is expired
+     * ClaimJwtException if the validation of an JTW claim failed
+     * MalformedJwtException if the JWT if malformed
+     * SignatureException if either calculating a signature or verifying an existing signature of a JWT failed
+     * UnsupportedJwtException if the JWT version is wrong or the JWT format is incorrect
+     */
+    public static boolean validateTokenString(String tokenString, String currentSiteId, String currentUserId) throws TokenInvalidException {
+        // Check if it was issued by the server and if it's not expired
+        // Throw an Exception if the token is invalid
+    	
         try {
         	TokenManager tm = TokenManager.getTokenManager();
         	//check if this is a valid token
-        	KeyedJWT jwt = tm.getToken(this.getTokenString());
+        	KeyedJWT jwt = tm.getToken(tokenString);
         	Key tokenkey = jwt.getTokenKey();
         	//check the validity of the claims portion
-        	Map<String, Object> claims = WSConnectionUtil.extractClaims(this.getTokenString());
+        	Map<String, Object> claims = WSConnectionUtil.extractClaims(tokenString);
         	String extractedSub = (String)claims.get("sub");
         	String extractedIss = (String)claims.get("iss");
         	String aitTemp = (String)claims.get("iat");
@@ -153,13 +171,15 @@ public class JsonWebToken extends DaqueryObject
         	String expTemp = (String)claims.get("exp");
 	        Long extractedExp = Long.parseLong(expTemp);
 
-	        //check the user and site against the token payload
-	        if(!StringHelper.equalIgnoreCase(extractedIss, getSiteId()))
-	        		throw new TokenInvalidException("The provided site id does not match the claimed site id");
-
-	        if(!StringHelper.equalIgnoreCase(extractedSub, getUserId()))
-	        		throw new TokenInvalidException("The provided user id does not match the claimed userid");
-
+	        if (currentSiteId != null && !currentSiteId.isEmpty()) {
+		        //check the user and site against the token payload
+		        if(!StringHelper.equalIgnoreCase(extractedIss, currentSiteId))
+		        		throw new TokenInvalidException("The provided site id does not match the claimed site id");
+	        }
+	        if (currentUserId != null && !currentUserId.isEmpty()) {
+		        if(!StringHelper.equalIgnoreCase(extractedSub, currentUserId))
+		        		throw new TokenInvalidException("The provided user id does not match the claimed userid");
+	        }
 	        //check if the token is expired.
 	        //NOTE: the parseClaimsJws method doesn't automatically
 	        //check the "exp" attribute.  So check if it is expired 
@@ -185,7 +205,8 @@ public class JsonWebToken extends DaqueryObject
 	    	throw new TokenInvalidException("Unsupported token format", unsupported);
 	    }
      }	
-        
+    
+    
     public String generateDataHash() {
         Map<String, Object> clms = new HashMap<String, Object>();
         clms.put("sub", this.sub);

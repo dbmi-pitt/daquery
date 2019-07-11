@@ -128,8 +128,8 @@ public class ResponseHelper {
 	        return(getJsonResponse(responseCode, subcode, vals));
     	} catch(Exception e)
 		{
-			logger.log(Level.SEVERE, String.format("Error occured while creating token for user %s, network %s, site %s\nError message:%s\n", userId, networkUUID, siteUUID, e.getMessage()));
-			return(getBasicResponse(500, "Error occured while creating a token.  Check the site logs for more information."));
+			logger.log(Level.SEVERE, String.format("Error occurred while creating token for user %s, network %s, site %s\nError message:%s\n", userId, networkUUID, siteUUID, e.getMessage()));
+			return(getBasicResponse(500, "Error occurred while creating a token.  Check the site logs for more information."));
 		}
 
     }
@@ -145,8 +145,8 @@ public class ResponseHelper {
 	        return(getJsonResponse(responseCode, subcode, vals));
     	} catch(Exception e)
 		{
-			logger.log(Level.SEVERE, String.format("Error occured while renewing a token.\nError message:%s\n", e.getMessage()));
-			return(getBasicResponse(500, "Error occured while creating a token.  Check the site logs for more information."));
+			logger.log(Level.SEVERE, String.format("Error occurred while renewing a token.\nError message:%s\n", e.getMessage()));
+			return(getBasicResponse(500, "Error occurred while creating a token.  Check the site logs for more information."));
 		}
 
     }
@@ -220,13 +220,13 @@ public class ResponseHelper {
     			try{return(getJsonResponseGen(resp.getStatus(), info));}
     			catch(Throwable t)
     			{
-    				logger.log(Level.SEVERE, "Error occured while transmiting an error from " + serverName + ".\n\tmessage:" + info.displayMessage + "\n\tlongMessage:" + info.longMessage + "\n\tstackTrace:" + info.stackTrace + "\n", t);
-    				return(getBasicResponse(500, "Error occured while transmiting an error from " + serverName + ".  Check the site logs for more information."));
+    				logger.log(Level.SEVERE, "Error occurred while transmiting an error from " + serverName + ".\n\tmessage:" + info.displayMessage + "\n\tlongMessage:" + info.longMessage + "\n\tstackTrace:" + info.stackTrace + "\n", t);
+    				return(getBasicResponse(500, "Error occurred while transmiting an error from " + serverName + ".  Check the site logs for more information."));
     			}
     		}
     		else if(decodedInfo != null && decodedInfo.getErrorMessage() != null)
     		{
-    			return(getErrorResponse(500, "An unknown error occured on server " + serverName, "Error Information:" + decodedInfo.getErrorMessage(), null));
+    			return(getErrorResponse(500, "An unknown error occurred on server " + serverName, "Error Information:" + decodedInfo.getErrorMessage(), null));
     		}
     		else
     			return(resp);

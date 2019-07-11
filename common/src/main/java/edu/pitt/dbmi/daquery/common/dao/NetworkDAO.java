@@ -279,7 +279,7 @@ public class NetworkDAO extends AbstractDAO {
     	}
     	catch(Throwable t)
     	{
-    		String msg = "An unexpected error occured while trying to retrieve a network with id " + networkId;
+    		String msg = "An unexpected error occurred while trying to retrieve a network with id " + networkId;
     		logger.log(Level.SEVERE, msg, t);
     		throw new DaqueryException(msg + "  Check the local server logs for more information.", t);
     	}
@@ -314,7 +314,7 @@ public class NetworkDAO extends AbstractDAO {
     	}
     	catch(Throwable t)
     	{
-    		String msg = "An unexpected error occured while trying to retrieve a network with id " + networkId;
+    		String msg = "An unexpected error occurred while trying to retrieve a network with id " + networkId;
     		logger.log(Level.SEVERE, msg, t);
     		throw new DaqueryException(msg + "  Check the local server logs for more information.", t);
     	}
@@ -349,7 +349,7 @@ public class NetworkDAO extends AbstractDAO {
         	logger.log(Level.SEVERE, e.getLocalizedMessage());
             throw e;
         } catch(Throwable t) {
-    		String msg = "An unexpected error occured while trying to retrieve SQL Datasource for a network:  " + network.toString();
+    		String msg = "An unexpected error occurred while trying to retrieve SQL Datasource for a network:  " + network.toString();
     		logger.log(Level.SEVERE, msg, t);
     		throw new DaqueryException(msg + "  Check the local server logs for more information.", t);
     	} finally {

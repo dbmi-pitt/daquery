@@ -103,7 +103,7 @@ public class AppSetup
 		try{dbStatus = checkDB();}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An unexpected error occured while check the state of the application database during initialization.", t);
+			log.log(Level.SEVERE, "An unexpected error occurred while check the state of the application database during initialization.", t);
 			setErroredSetup("Unable to determine the state of the application database during initialization.  Check the application logs for more information.");
 			return(false);
 		}
@@ -217,8 +217,8 @@ public class AppSetup
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An error occured while trying to create the first admin user.", t);
-			setErroredSetup("An error occured while trying to create the first admin user.  Check the application logs for more information.");
+			log.log(Level.SEVERE, "An error occurred while trying to create the first admin user.", t);
+			setErroredSetup("An error occurred while trying to create the first admin user.  Check the application logs for more information.");
 			return(false);
 		}
 		finally
@@ -257,8 +257,8 @@ public class AppSetup
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An error occured while trying to create the first admin user.", t);
-			setErroredSetup("An error occured while trying to create the first admin user.  Check the application logs for more information.");
+			log.log(Level.SEVERE, "An error occurred while trying to create the first admin user.", t);
+			setErroredSetup("An error occurred while trying to create the first admin user.  Check the application logs for more information.");
 			return(false);
 		}
 		finally
@@ -294,7 +294,7 @@ public class AppSetup
 		InputStream is = FileHelper.streamFromBaseResource(AppProperties.getInitializationDDL());
 		if(! ApplicationDBHelper.createTables(is))
 		{
-			setErroredSetup("An error occured while trying to initialize the application database.  Check the application logs for more information.");
+			setErroredSetup("An error occurred while trying to initialize the application database.  Check the application logs for more information.");
 			return(false);			
 		}
 		else
@@ -441,7 +441,7 @@ public class AppSetup
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An error occured while checking the application database status", t);
+			log.log(Level.SEVERE, "An error occurred while checking the application database status", t);
 			return(AppSetup.DBSTATUS_INDETERMINATE);
 		}
 		finally
@@ -472,7 +472,7 @@ public class AppSetup
 		}
 		catch(Throwable t)
 		{
-			log.log(Level.SEVERE, "An unexpected error occured while check the state of the application database.", t);
+			log.log(Level.SEVERE, "An unexpected error occurred while check the state of the application database.", t);
 			return(AppSetup.DBSTATUS_UNKNOWN);
 		}
 		
