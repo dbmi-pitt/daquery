@@ -99,7 +99,9 @@ export class RequestService {
   requestData(request: any){
     return this.http.post('/daquery/ws/request', request)
                     .catch(error => {
-                      this.error.error = error;
+                      if(!error.error.displayMessage.includes("Server is not reachable")){
+                        this.error.error = error;
+                      }
                       return Observable.throw(error || 'Server error');
                     })
   }
