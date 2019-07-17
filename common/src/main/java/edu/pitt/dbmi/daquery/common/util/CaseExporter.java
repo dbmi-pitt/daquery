@@ -470,7 +470,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 				outputStreams.put(outputfile, new OutputStreamWriter(ontologyOutputStream));
 				
 			}else{
-				writeCustomCSVFile(conn, new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile, tempTableName);
+				writeCustomCSVFile(conn, new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + appendFileNumber(outputfile.name, currentFileNumber)))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile, tempTableName);
 			}
 		}
 		
