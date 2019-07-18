@@ -2,7 +2,7 @@
 layout: page
 ---
 
-## Running A Query
+## Running a Query
 
 To query any node a SQL query can be submitted via the the Outgoing Requests page, available on the left menu.
 
