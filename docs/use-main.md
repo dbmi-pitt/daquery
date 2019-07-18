@@ -24,7 +24,7 @@ layout: page
 
 ### [Installing and Updating Daquery](install.html): <span class="txt">How to install or upgrade Daquery</span>
 
-<div style="min-height: 300px;"></div>
+<div style="min-height: 100px;"></div>
 
 
 
