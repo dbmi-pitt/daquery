@@ -78,6 +78,15 @@
                 <span class="fa fa-lock form-control-feedback"></span>
                 <div class="help-block" *ngIf="adminpwd.hasError('required') && (adminpwd.dirty || adminpwd.touched)">Please enter a password</div>
                 <div class="help-block" *ngIf="adminpwd.hasError('minlength') && (adminpwd.dirty || adminpwd.touched)">Password at least 8 characters</div>
+                <div class="help-block" *ngIf="adminpwd.hasError('pattern') && (adminpwd.dirty || adminpwd.touched)">
+                  Please enter New Password
+                  <ul>
+                    <li>minimum of 8 characters</li>
+                    <li>contains at least one alphabetic and one numeric character</li>
+                    <li>contains at least one capital letter</li>
+                    <li>contains at least one special character</li>
+                  </ul>
+                </div>
               </div>
             </td>
             <td width="10%" valign="top" style="padding: 6px">

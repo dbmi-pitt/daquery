@@ -11,19 +11,27 @@ import { SavedQueriesComponent } from './saved-queries/saved-queries.component'
 })
 export class QueriesFromMeComponent implements OnInit {
   showNewQuery = false;
+  readOnly = false;
   editingInquiry: any;
 
   @ViewChild(RequestsFromMeListComponent) public requestsFromMeList: RequestsFromMeListComponent;
   @ViewChild(RecentQueryComponent) public recentQuery: RecentQueryComponent;
-  @ViewChild(SavedQueriesComponent) public saveQueries: SavedQueriesComponent;
+  // @ViewChild(SavedQueriesComponent) public saveQueries: SavedQueriesComponent;
 
   constructor(private daqueryService: DaqueryService) { }
 
   ngOnInit() {
   }
 
+  viewInquiry(inquiry: any){
+    this.editingInquiry = inquiry;
+    this.readOnly = true;
+    this.showNewQuery = true;
+  }
+
   editInquiry(inquiry: any){
     this.editingInquiry = inquiry;
+    this.readOnly = false;
     this.showNewQuery = true;
   }
 
@@ -38,7 +46,7 @@ export class QueriesFromMeComponent implements OnInit {
   onRequestSent(value: boolean) {
     this.showNewQuery = false;
     this.requestsFromMeList.notifyMe();
-    this.saveQueries.notifyMe();
+    // this.saveQueries.notifyMe();
   }
 
   onRequests(value: any[]) {

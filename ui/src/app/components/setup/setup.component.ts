@@ -38,7 +38,7 @@ export class SetupComponent implements OnInit {
       sitekey: ['', Validators.required],
       adminemail: ['', [Validators.required, Validators.email]],
       adminemail_confirmation: ['', [Validators.required, Validators.email]],
-      adminpwd: ['', [Validators.required, Validators.minLength(8)]],
+      adminpwd: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&*]))(?=.{8,16}$)/)]],
       adminpwd_confirmation: ['', [Validators.required, Validators.minLength(8)]],
       adminrealname: ['', [Validators.required, Validators.maxLength(20)]]
     })

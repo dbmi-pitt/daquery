@@ -7,6 +7,7 @@ import java.util.Date;
 //import java.time.LocalDateTime;
 //import java.time.ZoneId;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -310,7 +311,7 @@ public class DaqueryUserDAO extends AbstractDAO {
     		//first check the local Roles
     		if(currentUser != null)
     		{
-	    		List<Role> roleList = currentUser.getRoles();
+	    		Set<Role> roleList = currentUser.getRoles();
 	    		List<String> roleNames = new ArrayList<String>();
 	    		if (roleList == null || roleList.isEmpty()) {
 	    			return false;

@@ -1,5 +1,14 @@
 <div>
-  <switch [status]="true" [onColor]="'green'" [offColor]="'blue'" [onText]="'Current'" [offText]="'Archived'" (statusChange)="onSwitchChange($event)"></switch>
+  <!-- <switch [status]="true" [onColor]="'green'" [offColor]="'blue'" [onText]="'Current'" [offText]="'Archived'" (statusChange)="onSwitchChange($event)"></switch> -->
+  <div>
+    <b>Show: </b>
+    <label class="radio-inline">
+      <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="active" (click)="onSwitchChange($event)" checked>Active
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="archived" (click)="onSwitchChange($event)">Archived
+    </label>
+  </div>
   <table *ngIf="requests" class="table">
     <caption>Requests</caption>
     <thead>
@@ -20,7 +29,11 @@
       <tr [ngClass]="{'archived-row' : requestGroup.show != null && !requestGroup.show}"  *ngIf="showArchive || requestGroup.show == null || requestGroup.show">
         <td (click)="requestGroup.active = !requestGroup.active"><i class="fa pointer" [ngClass]="{'fa-plus-square-o': !requestGroup.active, 'fa-minus-square-o': requestGroup.active}"></i> {{ requestGroup.val[0].inquiry.inquiryName }}</td>
         <td>{{ requestGroup.val[0].sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
-        <td><button class="btn btn-default btn-xs" (click)="onArchiveAll(requestGroup, $event)" title="Archive All"><i class="fa fa-archive"></i></button></td>
+        <td>
+          <button class="btn btn-default btn-xs" (click)="onArchiveAll(requestGroup, $event)" title="Archive All"><i class="fa fa-archive"></i></button>
+          <button class="btn btn-success btn-xs" (click)="onViewClick(requestGroup.val[0].inquiry)">View</button>
+          <button *ngIf="requestGroup.val[0].inquiry.queryType !== 'DATA'" class="btn btn-success btn-xs" (click)="onEditClick(requestGroup.val[0].inquiry)">Edit</button>
+        </td>
       </tr>
       <tr *ngIf="requestGroup.active">
         <td colspan="4">
@@ -57,7 +70,8 @@
               <tr>
                 <th>Site</th>
                 <th>Status</th>
-                <th>Date/Time</th>
+                <th>Started</th>
+                <th>Finished</th>
                 <th style="width: 300px">Result</th>
                 <th style="width: 190px">Action</th>
               </tr>
@@ -67,6 +81,7 @@
                 <tr *ngIf="!request.archived">
                   <td>{{ request.requestSite.name }}</td>
                   <td>{{ request.responses[0]?.status }}</td>
+                  <td>{{ request.sentTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
                   <td>{{ request.responses[0]?.replyTimestamp | date:'yyyy-MM-dd h:mm a' }}</td>
                   <td>{{ getRequestResult(request.responses[0]) }}
                       <i *ngIf="request.hasOwnProperty('responses') && !['ERROR', 'COMPLETED', 'STALLED', 'PENDING', 'DENIED'].includes(request.responses[0]?.status) && !request.responses[0]?.hasError" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>

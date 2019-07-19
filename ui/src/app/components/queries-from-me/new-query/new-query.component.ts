@@ -19,8 +19,10 @@ declare var $:any;
 export class NewQueryComponent implements OnInit {
 
   @Input() editingInquiry: any;
+  @Input() readOnly: boolean;
   inquiryForm: FormGroup;
   networks: any[];
+  inquiryNames = new Set();
   selectedNetwork: any;
 
   showNetworkSitePanel = false;
@@ -50,7 +52,9 @@ export class NewQueryComponent implements OnInit {
               private requestService: RequestService,
               private userServier: UserService,
               private authenticationService: AuthenticationService,
-              private router: Router) { }
+              private router: Router) {
+    $('#newQueryModal').modal('show');
+  }
 
   createForm(inquiry) {
     if(inquiry){
@@ -69,13 +73,32 @@ export class NewQueryComponent implements OnInit {
       if(this.sqlDialect.oracle) this.lastAddedTab = "oracle";
       if(this.sqlDialect.ansi) this.lastAddedTab = "ansi";
 
+      // Generate new name with "Copy"
+      let newInquiryName = ""
+      if(!this.readOnly){
+        if(inquiry.inquiryName.startsWith("Copy ")){
+          let strArr = inquiry.inquiryName.split(" ");
+          if(/^\(\d+\)$/.test(strArr[1])){
+            strArr.shift();
+            let num = strArr.shift();
+            newInquiryName = "Copy (" + (parseInt(num.substring(1, num.length - 1)) + 1) + ") " + strArr.join(" ");
+          } else {
+            newInquiryName = "Copy (1) " + strArr.join(" ");
+          }
+        } else {
+          newInquiryName = "Copy " + inquiry.inquiryName;
+        }
+      } else {
+        newInquiryName = inquiry.inquiryName;
+      }
+
       this.inquiryForm = this.fb.group({
         network: ['', Validators.required],
         dataModel: ['', Validators.required],
         sitesToQuery: this.fb.array([]),
         queryType: [inquiry.queryType.toUpperCase()],
         dataType:['SQL_QUERY'],
-        inquiryName: [inquiry.inquiryName, Validators.required],
+        inquiryName: [newInquiryName, Validators.required],
         notDateShift: inquiry.notDateShift === undefined ? false : inquiry.notDateShift,
         studyName: '',
         inquiryDescription: [inquiry.inquiryDescription, Validators.maxLength(500)],
@@ -120,6 +143,7 @@ export class NewQueryComponent implements OnInit {
   get sqlServer() { return this.inquiryForm.get('query').get('sqlServer'); }
 
   ngOnInit() {
+    $('#newQueryModal').modal('show');
     this.createForm(this.editingInquiry);
     this.networkService.getNetworks()
                        .subscribe(networks => {
@@ -132,6 +156,21 @@ export class NewQueryComponent implements OnInit {
                            }
                          }
                        });
+    this.requestService.getSavedInquiries()
+                       .subscribe(inquiries => {
+                          inquiries.map(q => {
+                            this.inquiryNames.add(q.inquiryName);
+                          });
+                       });
+  }
+
+  onInquiryNameChange(name: String) {
+    if(this.inquiryNames.has(name)){
+      this.inquiryForm.get('inquiryName').setErrors({dup: true});
+    } else {
+      this.inquiryForm.get('inquiryName').setErrors({dup: null});
+      this.inquiryForm.get('inquiryName').updateValueAndValidity();
+    }
   }
 
   onSave() {
@@ -172,6 +211,7 @@ export class NewQueryComponent implements OnInit {
                               .subscribe();
           }
         }
+        //$('#newQueryModal').modal('hide');
         $('#myRequestModal').modal('show');
         this.gettingSites = true;
         this.networkService.getNetworks()
@@ -312,6 +352,7 @@ export class NewQueryComponent implements OnInit {
   }
 
   onCancel() {
+    $('#newQueryModal').modal('hide');
     this.requestSent.emit(true);
   }
 
@@ -374,6 +415,8 @@ export class NewQueryComponent implements OnInit {
     });
 
     $('#myRequestModal').modal('hide');
+    
+    $('#newQueryModal').modal('hide');
     this.requestSent.emit(true);
     this.requests.emit(requests.filter(r => { return r != undefined }));
   }

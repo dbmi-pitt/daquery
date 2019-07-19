@@ -1,6 +1,7 @@
 package edu.pitt.dbmi.daquery.common.domain;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -84,7 +85,7 @@ public class DaqueryUser extends UserInfo {
 	           joinColumns={@JoinColumn(name="USER_ID", nullable=false)},
 	           inverseJoinColumns={@JoinColumn(name="ROLE_ID", nullable=false)}
 		      )
-	private List<Role> roles;
+	private Set<Role> roles;
     
     @Expose
     @Column(name="CONTACT")
@@ -199,11 +200,11 @@ public class DaqueryUser extends UserInfo {
     	}
     }
 	
-	public List<Role> getRoles() {
+	public Set<Role> getRoles() {
 		return this.roles;
 	}
 
-	public void setRoles(List<Role> roles) {
+	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
 	
