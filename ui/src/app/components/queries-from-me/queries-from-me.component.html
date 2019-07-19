@@ -2,34 +2,6 @@
   <h1>Requests from me <small>requests sent from me</small></h1>
 </section>
 <section class="content">
-  <!-- <div class="row">
-    <div class="col-lg-3 col-xs-6">
-      <div class="small-box bg-aqua">
-        <div class="inner">
-          <h3>150</h3>
-
-          <p>New Orders</p>
-        </div>
-        <div class="icon">
-          <i class="ion ion-bag"></i>
-        </div>
-        <a class="small-box-footer" (click)="getError()">More info <i class="fa fa-arrow-circle-right"></i></a>
-      </div>
-    </div>
-    <div class="col-lg-3 col-xs-6">
-      <div class="small-box bg-green">
-        <div class="inner">
-          <h3>53<sup style="font-size: 20px">%</sup></h3>
-
-          <p>Bounce Rate</p>
-        </div>
-        <div class="icon">
-          <i class="ion ion-stats-bars"></i>
-        </div>
-        <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-      </div>
-    </div>
-  </div> -->
   <div class="row">
     <div class="col-md-2 placeholder">
         <button class="btn btn-block btn-primary" (click)="showNewQuery=!showNewQuery; editingInquiry = null;">New Inquiry</button>
@@ -37,10 +9,10 @@
   </div>
   <div class="row">
     <div class="col-md-12">
-      <app-new-query *ngIf="showNewQuery" [editingInquiry]="editingInquiry" (requestSent)="onRequestSent($event)" (requests)="onRequests($event)"></app-new-query>
-      <app-saved-queries (editInquiry)="editInquiry($event)"></app-saved-queries>
+      <app-new-query *ngIf="showNewQuery" [editingInquiry]="editingInquiry" [readOnly]="readOnly" (requestSent)="onRequestSent($event)" (requests)="onRequests($event)"></app-new-query>
+      <!-- <app-saved-queries (editInquiry)="editInquiry($event)"></app-saved-queries> -->
       <app-recent-query (requestSent)="onRequestSent($event)"></app-recent-query>
-      <app-requests-from-me-list></app-requests-from-me-list>
+      <app-requests-from-me-list (editInquiry)="editInquiry($event)" (viewInquiry)="viewInquiry($event)"></app-requests-from-me-list>
     </div>
   </div>
 </section>

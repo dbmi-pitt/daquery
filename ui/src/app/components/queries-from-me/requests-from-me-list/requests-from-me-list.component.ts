@@ -15,6 +15,10 @@ import { AuthenticationService } from '../../../services/authentication.service'
 })
 export class RequestsFromMeListComponent implements OnInit {
 
+  @Output()
+  editInquiry = new EventEmitter<any>();
+  @Output()
+  viewInquiry = new EventEmitter<any>();
   requests: any[];
   inquiries: any[];
   requestGroups: Map<String, any[]> = new Map<String, any[]>();
@@ -32,6 +36,14 @@ export class RequestsFromMeListComponent implements OnInit {
 
   ngOnInit() {
     this.getRequestsFromMe(false);
+  }
+
+  onViewClick(inquiry: any){
+    this.viewInquiry.emit(inquiry);
+  }
+
+  onEditClick(inquiry: any){
+    this.editInquiry.emit(inquiry);
   }
 
   getRequestsFromMe(archived: boolean) {
@@ -184,7 +196,10 @@ export class RequestsFromMeListComponent implements OnInit {
   }
 
   onSwitchChange(event: any) {
-    this.showArchived = !this.showArchived;
+    if(event.target.value === 'archived')
+      this.showArchived = true;
+    else
+      this.showArchived = false;
     this.requests = null;
     this.getRequestsFromMe(this.showArchived);
   }

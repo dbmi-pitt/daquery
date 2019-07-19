@@ -1,341 +1,352 @@
-<div *ngIf="networks && networks.length > 0" class="row">
-  <div class="col-md-12">
-    <div class="box box-info">
-      <div class="box-header with-border">
-        <h3 class="box-title">New Inquiry</h3>
+<div class="modal fade" id="newQueryModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
       </div>
-      <div class="box-body">
-        <div class="row">
+      <div class="modal-body">
+        <div *ngIf="networks && networks.length > 0" class="row">
           <div class="col-md-12">
-            <form #f [formGroup]="inquiryForm">
-              <div *ngIf="!showNetworkSitePanel">
-                <div class="form-group">
-                  <div class="form-group  has-feedback" [ngClass]="{'has-error': network.invalid && (network.dirty || network.touched), 'has-success': network.valid && (network.dirty || network.touched) }">
-                    <label for="network">Network</label>
-                    <select *ngIf="networks?.length > 1" formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
-                      <option value="">-Select-</option>
-                      <option *ngFor="let network of networks" value="{{network.networkId}}">
-                        {{ network.name }}
-                      </option>
-                    </select>
-                    <div class="help-block" *ngIf="network.invalid && (network.dirty || network.touched)">Please select a network</div>
-                    <p *ngIf="networks?.length === 1">{{ networks[0]?.name }}</p>
-                  </div>
-                </div>
-                <div *ngIf="selectedNetwork" class="form-group">
-                  <div class="form-group  has-feedback" [ngClass]="{'has-error': dataModel.invalid && (dataModel.dirty || dataModel.touched), 'has-success': dataModel.valid && (dataModel.dirty || dataModel.touched) }">
-                    <label for="dataType">Data Model</label>
-                    <select *ngIf="selectedNetwork.dataModels?.length > 1" formControlName="dataModel" class="form-control">
-                      <option value="">-Select-</option>
-                      <option *ngFor="let dataModel of selectedNetwork.dataModels" [attr.value]="dataModel.dataModelId" selected="{{ selectedNetwork.dataModels.length == 1 ? 'selected' : ''}}">
-                        {{ dataModel.name }}
-                      </option>
-                    </select>
-                    <div class="help-block" *ngIf="dataModel.invalid && (dataModel.dirty || dataModel.touched)">Please select a data model</div>
-                    <p *ngIf="selectedNetwork?.dataModels?.length === 1">{{ selectedNetwork.dataModels[0]?.name }}</p>
-                  </div>
-                </div>
-                <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">
-                  <label for="name">Inquiry Name</label>
-                  <input type="text" class="form-control" id="inquiry-name" formControlName="inquiryName" maxlength="100">
-                  <div class="help-block" *ngIf="inquiryName.invalid && (inquiryName.dirty || inquiryName.touched)">Please enter a inquiry name</div>
-                </div>
-                <!-- <div class="form-group">
-                  <label for="name">Study Name</label>
-                  <input type="text" class="form-control" id="study-name" formControlName="studyName">
-                </div> -->
-                <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryDescription.invalid && (inquiryDescription.dirty || inquiryDescription.touched), 'has-success': inquiryDescription.valid && (inquiryDescription.dirty || inquiryDescription.touched) }">
-                  <label for="name">Inquiry Description</label>
-                  <input type="text" class="form-control" id="inquiry-description" formControlName="inquiryDescription">
-                  <div class="help-block" *ngIf="inquiryDescription.hasError('maxlength') && (inquiryDescription.dirty || inquiryDescription.touched)">Please enter no more than 500 characters</div>
-                </div>
-                <div class="form-group has-feedback" [ngClass]="{'has-error': notDateShift.invalid && (notDateShift.dirty || notDateShift.touched), 'has-success': notDateShift.valid && (notDateShift.dirty || notDateShift.touched) }">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="date-shift" formControlName="notDateShift" name="notDateShift">Do not date shift any data retreived based on this query.
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="query">SQL</label>
-                  <div class="nav-tabs-custom">
-                    <ul class="nav nav-tabs">
-                      <li [ngClass]="{'active': lastAddedTab === 'ansi'}" *ngIf="sqlDialect.ansi">
-                        <div>
-                          <a href="#tab_ansi" data-toggle="tab" aria-expanded="true">ANSI Query</a>
-                          <span *ngIf="ansiSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
-                            <small class="label bg-red">error</small>
-                          </span>
-                          <span *ngIf="ansiSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
-                            <small class="label bg-yellow">warning</small>
-                          </span>
-                          <button type="button" class="close" aria-label="Close" (click)="onANSITabClose()">
-                              <span aria-hidden="true">×</span>
-                            </button>
-                        </div>
-                      </li>
-                      <li [ngClass]="{'active': lastAddedTab === 'oracle'}" *ngIf="sqlDialect.oracle">
-                        <div>
-                          <a href="#tab_oracle" data-toggle="tab" aria-expanded="true">Oracle Query</a>
-                          <span *ngIf="oracleSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
-                            <small class="label bg-red">error</small>
-                          </span>
-                          <span *ngIf="oracleSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
-                            <small class="label bg-yellow">warning</small>
-                          </span>
-                          <button type="button" class="close" aria-label="Close" (click)="onORACLETabClose()">
-                            <span aria-hidden="true">×</span>
-                          </button>
-                        </div>
-                      </li>
-                      <li [ngClass]="{'active': lastAddedTab === 'sql_server'}" *ngIf="sqlDialect.sqlServer">
-                        <div>
-                          <a href="#tab_sqlServer" data-toggle="tab" aria-expanded="true">Sql Server Query</a>
-                          <span *ngIf="sqlServerSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
-                            <small class="label bg-red">error</small>
-                          </span>
-                          <span *ngIf="sqlServerSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
-                            <small class="label bg-yellow">warning</small>
-                          </span>
-                          <button type="button" class="close" aria-label="Close" (click)="onSQLSERVERTabClose()">
-                            <span aria-hidden="true">×</span>
-                          </button>
-                        </div>
-                      </li>
-                      <li>
-                        <div class="btn-group">
-                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-plus"></i>
-                          </button>
-                          <ul class="dropdown-menu">
-                            <li><a [ngClass]="{'greyout': sqlDialect.ansi}" (click)="plusANSIClick()">ANSI Query</a></li>
-                            <li><a [ngClass]="{'greyout': sqlDialect.oracle}" (click)="plusORACLEClick()">Oracle Query</a></li>
-                            <li><a [ngClass]="{'greyout': sqlDialect.sqlServer}" (click)="plusSQLSERVERClick()">SQL Server Query</a></li>
-                          </ul>
-                        </div>
-                      </li>
-                    </ul>
-                    <div class="tab-content" formGroupName="query">
-                      <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'ansi'}" id="tab_ansi" *ngIf="sqlDialect.ansi">
-                        <div class="form-group has-feedback" [ngClass]="{'has-error': ansi.invalid && (ansi.dirty || ansi.touched), 'has-success': ansi.valid && (ansi.dirty || ansi.touched) }">
-                          <textarea class="form-control" rows="5" id="sql_query" formControlName="ansi" placeholder="enter ANSI SQL query" (input)="onQueryEdit()"></textarea>
-                          <div class="help-block" *ngIf="ansi.invalid && (ansi.dirty || ansi.touched)">Please enter a ansi sql query</div>
-                        </div>
-                        <div *ngIf="ansiSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                          <h4><i class="icon fa fa-ban"></i> Error!</h4>
-                          This query was rejected.<br />
-                          <ul>
-                            <li *ngIf="ansiSqlAnalyzerResponse">
-                              {{ ansiSqlAnalyzerResponse.rejectionMessage }}
-                            </li>
-                          </ul>
-                        </div>
-                        <div *ngIf="ansiSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                          <h4><i class="icon fa fa-warning"></i> Warning!</h4>
-                          <p>This query has the following warning(s):</p>
-                          <ul>
-                            <li *ngFor="let msg of ansiSqlAnalyzerResponse?.warningMessages">
-                              {{ msg }}
-                            </li>
-                          </ul>
-                          <p *ngIf="ansiSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
-                        </div>
-                        <div *ngIf="ansiSqlAnalyzerResponse?.deidUnresolved && ansiSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
-                          <div class="box-header with-border">
-                            <h4 class="box-title">
-                                Return Values
-                            </h4>
-                          </div>
-                          <div class="panel-collapse collapse in" aria-expanded="true" style="">
-                            <div class="box-body">
-                              <div *ngIf="ansiSqlAnalyzerResponse?.returnList" class="callout callout-default">
-                                <ul>
-                                  <li *ngFor="let item of ansiSqlAnalyzerResponse?.returnList">
-                                    <p [innerHtml]="item"></p>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'oracle'}" id="tab_oracle" *ngIf="sqlDialect.oracle">
-                        <div class="form-group has-feedback" [ngClass]="{'has-error': oracle.invalid && (oracle.dirty || oracle.touched), 'has-success': oracle.valid && (oracle.dirty || oracle.touched) }">
-                          <textarea class="form-control" rows="5" id="sql_query" formControlName="oracle" placeholder="enter Oracle SQL query" (input)="onQueryEdit()"></textarea>
-                          <div class="help-block" *ngIf="oracle.invalid && (oracle.dirty || oracle.touched)">Please enter a oracle sql query</div>
-                        </div>
-                        <div *ngIf="oracleSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                          <h4><i class="icon fa fa-ban"></i> Error!</h4>
-                          This query was rejected.<br />
-                          <ul>
-                            <li *ngIf="oracleSqlAnalyzerResponse">
-                              {{ oracleSqlAnalyzerResponse.rejectionMessage }}
-                            </li>
-                          </ul>
-                        </div>
-                        <div *ngIf="oracleSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                          <h4><i class="icon fa fa-warning"></i> Warning!</h4>
-                          <p>This query has the following warning(s):</p>
-                          <ul>
-                            <li *ngFor="let msg of oracleSqlAnalyzerResponse?.warningMessages">
-                              {{ msg }}
-                            </li>
-                          </ul>
-                          <p *ngIf="oracleSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
-                        </div>
-                        <div *ngIf="oracleSqlAnalyzerResponse?.deidUnresolved && oracleSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
-                          <div class="box-header with-border">
-                            <h4 class="box-title">
-                                Return Values
-                            </h4>
-                          </div>
-                          <div class="panel-collapse collapse in" aria-expanded="true" style="">
-                            <div class="box-body">
-                              <div *ngIf="oracleSqlAnalyzerResponse?.returnList" class="callout callout-default">
-                                <ul>
-                                  <li *ngFor="let item of oracleSqlAnalyzerResponse?.returnList">
-                                    <p [innerHtml]="item"></p>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'sql_server'}" id="tab_sqlServer" *ngIf="sqlDialect.sqlServer">
-                        <div class="form-group has-feedback" [ngClass]="{'has-error': sqlServer.invalid && (sqlServer.dirty || sqlServer.touched), 'has-success': sqlServer.valid && (sqlServer.dirty || sqlServer.touched) }">
-                          <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlServer" placeholder="enter Sql Server SQL" (input)="onQueryEdit()"></textarea>
-                          <div class="help-block" *ngIf="sqlServer.invalid && (sqlServer.dirty || sqlServer.touched)">Please enter a sql server sql query</div>
-                        </div>
-                        <div *ngIf="sqlServerSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                          <h4><i class="icon fa fa-ban"></i> Error!</h4>
-                          This query was rejected.<br />
-                          <ul>
-                            <li *ngIf="sqlServerSqlAnalyzerResponse">
-                              {{ sqlServerSqlAnalyzerResponse.rejectionMessage }}
-                            </li>
-                          </ul>
-                        </div>
-                        <div *ngIf="sqlServerSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
-                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                          <h4><i class="icon fa fa-warning"></i> Warning!</h4>
-                          <p>This query has the following warning(s):</p>
-                          <ul>
-                            <li *ngFor="let msg of sqlServerSqlAnalyzerResponse?.warningMessages">
-                              {{ msg }}
-                            </li>
-                          </ul>
-                          <p *ngIf="sqlServerSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
-                        </div>
-                        <div *ngIf="sqlServerSqlAnalyzerResponse?.deidUnresolved && sqlServerSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
-                          <div class="box-header with-border">
-                            <h4 class="box-title">
-                                Return Values
-                            </h4>
-                          </div>
-                          <div class="panel-collapse collapse in" aria-expanded="true" style="">
-                            <div class="box-body">
-                              <div *ngIf="sqlServerSqlAnalyzerResponse?.returnList" class="callout callout-default">
-                                <ul>
-                                  <li *ngFor="let item of sqlServerSqlAnalyzerResponse?.returnList">
-                                    <p [innerHtml]="item"></p>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-red" *ngIf="sqlChecked">{{ sqlAnalyzerMsg() }}</p>
-                </div>
-                <button class="btn btn-primary" (click)="onSave()">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
-                                                                      (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
-                                                                      (sqlServerSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.warnings)) ? "Save Anyway" : "Save" }}</button>
-                <button class="btn btn-success" (click)="onRequest()" [disabled]="(ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected) && sqlChecked">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
-                                                                      (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
-                                                                      (sqlServerSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.warnings)) ? "Save and Request Anyway" : "Save and Request" }}</button>
-                <button class="btn btn-link" (click)="onCancel()">Cancel</button>
+            <div class="box box-info">
+              <div class="box-header with-border">
+                <h3 class="box-title">New Inquiry</h3>
               </div>
-              <!-- Modal -->
-              <div class="modal fade" id="myRequestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      <h4 class="modal-title" id="myModalLabel">Please select Network and Site</h4>
-                    </div>
-                    <div *ngIf="error?.error" class="alert alert-danger alert-dismissible">
-                      <button type="button" class="close" data-dismiss="alert" aria-hidden="true" (click)="onAlertDismiss()">×</button>
-                      {{ error?.error?.displayMessage }}
-                    </div>
-                    <div *ngIf="networks" class="modal-body">
-                        <div *ngIf="inquiryForm.controls.network.dirty || networks?.length == 1" formArrayName="sitesToQuery" class="well well-lg">
-                          <div class="form-group">
-                            <label for="sites">Site to Query</label>
-                            <div *ngIf="!gettingSites" class="checkbox">
-                              <ul class="list-unstyled">
-                                <li *ngIf="!gettingSites && inquiryForm.controls.sitesToQuery.controls.length === 0">No Site available.</li>
-                                <li *ngFor="let site of inquiryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
-                                  <label class="checkbox-inline"><input type="checkbox" value="{{site.controls.siteId._value}}" formControlName="check">{{site.controls.name._value}}</label>
-                                </li>
-                              </ul>
-                            </div>
-                            <div *ngIf="gettingSites" class="row">
-                              <div class="col-md-4 col-md-offset-4 text-center">
-                                <span>Loading...</span><br />
-                                <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+              <div class="box-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <form #f [formGroup]="inquiryForm">
+                      <div *ngIf="!showNetworkSitePanel">
+                        <div class="form-group">
+                          <div class="form-group  has-feedback" [ngClass]="{'has-error': network.invalid && (network.dirty || network.touched), 'has-success': network.valid && (network.dirty || network.touched) }">
+                            <label for="network">Network</label>
+                            <select *ngIf="networks?.length > 1" [attr.disabled]="readOnly ? '' : null" formControlName="network" class="form-control" (change)="networkOnChange($event.target.value)">
+                              <option value="">-Select-</option>
+                              <option *ngFor="let network of networks" value="{{network.networkId}}">
+                                {{ network.name }}
+                              </option>
+                            </select>
+                            <div class="help-block" *ngIf="network.invalid && (network.dirty || network.touched)">Please select a network</div>
+                            <p *ngIf="networks?.length === 1">{{ networks[0]?.name }}</p>
+                          </div>
+                        </div>
+                        <div *ngIf="selectedNetwork" class="form-group">
+                          <div class="form-group  has-feedback" [ngClass]="{'has-error': dataModel.invalid && (dataModel.dirty || dataModel.touched), 'has-success': dataModel.valid && (dataModel.dirty || dataModel.touched) }">
+                            <label for="dataType">Data Model</label>
+                            <select *ngIf="selectedNetwork.dataModels?.length > 1" formControlName="dataModel" class="form-control">
+                              <option value="">-Select-</option>
+                              <option *ngFor="let dataModel of selectedNetwork.dataModels" [attr.value]="dataModel.dataModelId" selected="{{ selectedNetwork.dataModels.length == 1 ? 'selected' : ''}}">
+                                {{ dataModel.name }}
+                              </option>
+                            </select>
+                            <div class="help-block" *ngIf="dataModel.invalid && (dataModel.dirty || dataModel.touched)">Please select a data model</div>
+                            <p *ngIf="selectedNetwork?.dataModels?.length === 1">{{ selectedNetwork.dataModels[0]?.name }}</p>
+                          </div>
+                        </div>
+                        <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryName.invalid && (inquiryName.dirty || inquiryName.touched), 'has-success': inquiryName.valid && (inquiryName.dirty || inquiryName.touched) }">
+                          <label for="name">Inquiry Name</label>
+                          <input type="text" [attr.disabled]="readOnly ? '' : null" class="form-control" id="inquiry-name" formControlName="inquiryName" maxlength="100" (input)="onInquiryNameChange($event.target.value)">
+                          <div class="help-block" *ngIf="inquiryName.invalid && inquiryName.errors['required'] &&(inquiryName.dirty || inquiryName.touched)">Please enter a inquiry name</div>
+                          <div class="help-block" *ngIf="inquiryName.invalid && inquiryName.errors['dup']">Inquiry Name exists, please use another name.</div>
+                        </div>
+                        <!-- <div class="form-group">
+                          <label for="name">Study Name</label>
+                          <input type="text" class="form-control" id="study-name" formControlName="studyName">
+                        </div> -->
+                        <div class="form-group has-feedback" [ngClass]="{'has-error': inquiryDescription.invalid && (inquiryDescription.dirty || inquiryDescription.touched), 'has-success': inquiryDescription.valid && (inquiryDescription.dirty || inquiryDescription.touched) }">
+                          <label for="name">Inquiry Description</label>
+                          <input type="text" [attr.disabled]="readOnly ? '' : null" class="form-control" id="inquiry-description" formControlName="inquiryDescription">
+                          <div class="help-block" *ngIf="inquiryDescription.hasError('maxlength') && (inquiryDescription.dirty || inquiryDescription.touched)">Please enter no more than 500 characters</div>
+                        </div>
+                        <div class="form-group has-feedback" [ngClass]="{'has-error': notDateShift.invalid && (notDateShift.dirty || notDateShift.touched), 'has-success': notDateShift.valid && (notDateShift.dirty || notDateShift.touched) }">
+                          <div class="checkbox">
+                            <label>
+                              <input type="checkbox" [attr.disabled]="readOnly ? '' : null" id="date-shift" formControlName="notDateShift" name="notDateShift">Do not date shift any data retreived based on this query.
+                            </label>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="query">SQL</label>
+                          <div class="nav-tabs-custom">
+                            <ul class="nav nav-tabs">
+                              <li [ngClass]="{'active': lastAddedTab === 'ansi'}" *ngIf="sqlDialect.ansi">
+                                <div>
+                                  <a href="#tab_ansi" data-toggle="tab" aria-expanded="true">ANSI Query</a>
+                                  <span *ngIf="ansiSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
+                                    <small class="label bg-red">error</small>
+                                  </span>
+                                  <span *ngIf="ansiSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
+                                    <small class="label bg-yellow">warning</small>
+                                  </span>
+                                  <button type="button" class="close" aria-label="Close" (click)="onANSITabClose()">
+                                      <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                              </li>
+                              <li [ngClass]="{'active': lastAddedTab === 'oracle'}" *ngIf="sqlDialect.oracle">
+                                <div>
+                                  <a href="#tab_oracle" data-toggle="tab" aria-expanded="true">Oracle Query</a>
+                                  <span *ngIf="oracleSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
+                                    <small class="label bg-red">error</small>
+                                  </span>
+                                  <span *ngIf="oracleSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
+                                    <small class="label bg-yellow">warning</small>
+                                  </span>
+                                  <button type="button" class="close" aria-label="Close" (click)="onORACLETabClose()">
+                                    <span aria-hidden="true">×</span>
+                                  </button>
+                                </div>
+                              </li>
+                              <li [ngClass]="{'active': lastAddedTab === 'sql_server'}" *ngIf="sqlDialect.sqlServer">
+                                <div>
+                                  <a href="#tab_sqlServer" data-toggle="tab" aria-expanded="true">Sql Server Query</a>
+                                  <span *ngIf="sqlServerSqlAnalyzerResponse?.rejected" class="pull-right-container m-r-20">
+                                    <small class="label bg-red">error</small>
+                                  </span>
+                                  <span *ngIf="sqlServerSqlAnalyzerResponse?.warnings" class="pull-right-container m-r-20">
+                                    <small class="label bg-yellow">warning</small>
+                                  </span>
+                                  <button type="button" class="close" aria-label="Close" (click)="onSQLSERVERTabClose()">
+                                    <span aria-hidden="true">×</span>
+                                  </button>
+                                </div>
+                              </li>
+                              <li>
+                                <div class="btn-group">
+                                  <button type="button" [attr.disabled]="readOnly ? '' : null" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-plus"></i>
+                                  </button>
+                                  <ul class="dropdown-menu">
+                                    <li><a [ngClass]="{'greyout': sqlDialect.ansi}" (click)="plusANSIClick()">ANSI Query</a></li>
+                                    <li><a [ngClass]="{'greyout': sqlDialect.oracle}" (click)="plusORACLEClick()">Oracle Query</a></li>
+                                    <li><a [ngClass]="{'greyout': sqlDialect.sqlServer}" (click)="plusSQLSERVERClick()">SQL Server Query</a></li>
+                                  </ul>
+                                </div>
+                              </li>
+                            </ul>
+                            <div class="tab-content" formGroupName="query">
+                              <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'ansi'}" id="tab_ansi" *ngIf="sqlDialect.ansi">
+                                <div class="form-group has-feedback" [ngClass]="{'has-error': ansi.invalid && (ansi.dirty || ansi.touched), 'has-success': ansi.valid && (ansi.dirty || ansi.touched) }">
+                                  <textarea [attr.disabled]="readOnly ? '' : null" class="form-control" rows="5" id="sql_query" formControlName="ansi" placeholder="enter ANSI SQL query" (input)="onQueryEdit()"></textarea>
+                                  <div class="help-block" *ngIf="ansi.invalid && (ansi.dirty || ansi.touched)">Please enter a ansi sql query</div>
+                                </div>
+                                <div *ngIf="ansiSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
+                                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                  <h4><i class="icon fa fa-ban"></i> Error!</h4>
+                                  This query was rejected.<br />
+                                  <ul>
+                                    <li *ngIf="ansiSqlAnalyzerResponse">
+                                      {{ ansiSqlAnalyzerResponse.rejectionMessage }}
+                                    </li>
+                                  </ul>
+                                </div>
+                                <div *ngIf="ansiSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
+                                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                  <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+                                  <p>This query has the following warning(s):</p>
+                                  <ul>
+                                    <li *ngFor="let msg of ansiSqlAnalyzerResponse?.warningMessages">
+                                      {{ msg }}
+                                    </li>
+                                  </ul>
+                                  <p *ngIf="ansiSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
+                                </div>
+                                <div *ngIf="ansiSqlAnalyzerResponse?.deidUnresolved && ansiSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
+                                  <div class="box-header with-border">
+                                    <h4 class="box-title">
+                                        Return Values
+                                    </h4>
+                                  </div>
+                                  <div class="panel-collapse collapse in" aria-expanded="true" style="">
+                                    <div class="box-body">
+                                      <div *ngIf="ansiSqlAnalyzerResponse?.returnList" class="callout callout-default">
+                                        <ul>
+                                          <li *ngFor="let item of ansiSqlAnalyzerResponse?.returnList">
+                                            <p [innerHtml]="item"></p>
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'oracle'}" id="tab_oracle" *ngIf="sqlDialect.oracle">
+                                <div class="form-group has-feedback" [ngClass]="{'has-error': oracle.invalid && (oracle.dirty || oracle.touched), 'has-success': oracle.valid && (oracle.dirty || oracle.touched) }">
+                                  <textarea class="form-control" rows="5" id="sql_query" formControlName="oracle" placeholder="enter Oracle SQL query" (input)="onQueryEdit()"></textarea>
+                                  <div class="help-block" *ngIf="oracle.invalid && (oracle.dirty || oracle.touched)">Please enter a oracle sql query</div>
+                                </div>
+                                <div *ngIf="oracleSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
+                                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                  <h4><i class="icon fa fa-ban"></i> Error!</h4>
+                                  This query was rejected.<br />
+                                  <ul>
+                                    <li *ngIf="oracleSqlAnalyzerResponse">
+                                      {{ oracleSqlAnalyzerResponse.rejectionMessage }}
+                                    </li>
+                                  </ul>
+                                </div>
+                                <div *ngIf="oracleSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
+                                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                  <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+                                  <p>This query has the following warning(s):</p>
+                                  <ul>
+                                    <li *ngFor="let msg of oracleSqlAnalyzerResponse?.warningMessages">
+                                      {{ msg }}
+                                    </li>
+                                  </ul>
+                                  <p *ngIf="oracleSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
+                                </div>
+                                <div *ngIf="oracleSqlAnalyzerResponse?.deidUnresolved && oracleSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
+                                  <div class="box-header with-border">
+                                    <h4 class="box-title">
+                                        Return Values
+                                    </h4>
+                                  </div>
+                                  <div class="panel-collapse collapse in" aria-expanded="true" style="">
+                                    <div class="box-body">
+                                      <div *ngIf="oracleSqlAnalyzerResponse?.returnList" class="callout callout-default">
+                                        <ul>
+                                          <li *ngFor="let item of oracleSqlAnalyzerResponse?.returnList">
+                                            <p [innerHtml]="item"></p>
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="tab-pane" [ngClass]="{'active': lastAddedTab === 'sql_server'}" id="tab_sqlServer" *ngIf="sqlDialect.sqlServer">
+                                <div class="form-group has-feedback" [ngClass]="{'has-error': sqlServer.invalid && (sqlServer.dirty || sqlServer.touched), 'has-success': sqlServer.valid && (sqlServer.dirty || sqlServer.touched) }">
+                                  <textarea class="form-control" rows="5" id="sql_query" formControlName="sqlServer" placeholder="enter Sql Server SQL" (input)="onQueryEdit()"></textarea>
+                                  <div class="help-block" *ngIf="sqlServer.invalid && (sqlServer.dirty || sqlServer.touched)">Please enter a sql server sql query</div>
+                                </div>
+                                <div *ngIf="sqlServerSqlAnalyzerResponse?.rejected && sqlChecked" class="alert alert-danger alert-dismissible">
+                                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                  <h4><i class="icon fa fa-ban"></i> Error!</h4>
+                                  This query was rejected.<br />
+                                  <ul>
+                                    <li *ngIf="sqlServerSqlAnalyzerResponse">
+                                      {{ sqlServerSqlAnalyzerResponse.rejectionMessage }}
+                                    </li>
+                                  </ul>
+                                </div>
+                                <div *ngIf="sqlServerSqlAnalyzerResponse?.warnings && sqlChecked" class="alert alert-warning alert-dismissible">
+                                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                  <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+                                  <p>This query has the following warning(s):</p>
+                                  <ul>
+                                    <li *ngFor="let msg of sqlServerSqlAnalyzerResponse?.warningMessages">
+                                      {{ msg }}
+                                    </li>
+                                  </ul>
+                                  <p *ngIf="sqlServerSqlAnalyzerResponse?.deidUnresolved">De-identification information cannot be resolved for all returned values. To provide additional information about de-identifying returned data, see the <a href="https://dbmi-pitt.github.io/daquery/deid-tags.html">deid tag help page</a></p>
+                                </div>
+                                <div *ngIf="sqlServerSqlAnalyzerResponse?.deidUnresolved && sqlServerSqlAnalyzerResponse?.returnList?.length > 0 && sqlChecked" class="panel box box-primary">
+                                  <div class="box-header with-border">
+                                    <h4 class="box-title">
+                                        Return Values
+                                    </h4>
+                                  </div>
+                                  <div class="panel-collapse collapse in" aria-expanded="true" style="">
+                                    <div class="box-body">
+                                      <div *ngIf="sqlServerSqlAnalyzerResponse?.returnList" class="callout callout-default">
+                                        <ul>
+                                          <li *ngFor="let item of sqlServerSqlAnalyzerResponse?.returnList">
+                                            <p [innerHtml]="item"></p>
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <p class="text-red" *ngIf="sqlChecked">{{ sqlAnalyzerMsg() }}</p>
                         </div>
-                    </div>
-                    <div *ngIf="!networks" class="modal-body">
-                      <div class="row">
-                        <div class="col-md-4 col-md-offset-4 text-center">
-                          <span>Loading...</span><br />
-                          <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+                        <!-- <button class="btn btn-primary" (click)="onSave()">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
+                                                                              (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
+                                                                              (sqlServerSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.warnings)) ? "Save Anyway" : "Save" }}</button> -->
+                        <button [class]="readOnly ? 'btn btn-success invisible' : 'btn btn-success'" (click)="onRequest()" [disabled]="(ansiSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.rejected) && sqlChecked">{{ sqlChecked && ((ansiSqlAnalyzerResponse?.rejected || ansiSqlAnalyzerResponse?.warnings) ||
+                                                                              (oracleSqlAnalyzerResponse?.rejected || oracleSqlAnalyzerResponse?.warnings) || 
+                                                                              (sqlServerSqlAnalyzerResponse?.rejected || sqlServerSqlAnalyzerResponse?.warnings)) ? "Request Anyway" : "Request" }}</button>
+                        <button class="btn btn-link" (click)="onCancel()">Cancel</button>
+                      </div>
+                      <!-- Modal -->
+                      <div class="modal fade" id="myRequestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                              <h4 class="modal-title" id="myModalLabel">Please select Network and Site</h4>
+                            </div>
+                            <div *ngIf="error?.error" class="alert alert-danger alert-dismissible">
+                              <button type="button" class="close" data-dismiss="alert" aria-hidden="true" (click)="onAlertDismiss()">×</button>
+                              {{ error?.error?.displayMessage }}
+                            </div>
+                            <div *ngIf="networks" class="modal-body">
+                                <div *ngIf="inquiryForm.controls.network.dirty || networks?.length == 1" formArrayName="sitesToQuery" class="well well-lg">
+                                  <div class="form-group">
+                                    <label for="sites">Site to Query</label>
+                                    <div *ngIf="!gettingSites" class="checkbox">
+                                      <ul class="list-unstyled">
+                                        <li *ngIf="!gettingSites && inquiryForm.controls.sitesToQuery.controls.length === 0">No Site available.</li>
+                                        <li *ngFor="let site of inquiryForm.controls.sitesToQuery.controls; let i=index" [formGroupName]="i">
+                                          <label class="checkbox-inline"><input type="checkbox" value="{{site.controls.siteId._value}}" formControlName="check">{{site.controls.name._value}}</label>
+                                        </li>
+                                      </ul>
+                                    </div>
+                                    <div *ngIf="gettingSites" class="row">
+                                      <div class="col-md-4 col-md-offset-4 text-center">
+                                        <span>Loading...</span><br />
+                                        <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                            <div *ngIf="!networks" class="modal-body">
+                              <div class="row">
+                                <div class="col-md-4 col-md-offset-4 text-center">
+                                  <span>Loading...</span><br />
+                                  <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-default" [disabled]="onSending" (click)="reset()">Cancel</button>
+                              <button class="btn btn-success" [disabled]="!readyToSend()" (click)="onSend()">
+                                <i *ngIf="onSending" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
+                                <span *ngIf="!onSending">Send</span>
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-default" [disabled]="onSending" (click)="reset()">Cancel</button>
-                      <button class="btn btn-success" [disabled]="!readyToSend()" (click)="onSend()">
-                        <i *ngIf="onSending" class="fa fa-circle-o-notch fa-spin fa-1x fa-fw"></i>
-                        <span *ngIf="!onSending">Send</span>
-                      </button>
-                    </div>
+                    </form>
                   </div>
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div *ngIf="networks && networks.length <= 0" class="row">
-  <div class="col-md-12">
-    <div class="box box-info">
-      <div class="box-header with-border">
-        <h3 class="box-title">New Inquiry</h3>
-      </div>
-      <div class="box-body">
-        <div class="callout callout-danger">
-          <h4>No network found!</h4>
+        <div *ngIf="networks && networks.length <= 0" class="row">
+          <div class="col-md-12">
+            <div class="box box-info">
+              <div class="box-header with-border">
+                <h3 class="box-title">New Inquiry</h3>
+              </div>
+              <div class="box-body">
+                <div class="callout callout-danger">
+                  <h4>No network found!</h4>
 
-          <p>Please join a network before sending a request.</p>
+                  <p>Please join a network before sending a request.</p>
+                </div>
+
+                <button class="btn btn-default" (click)="onCancel()">OK</button>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <button class="btn btn-default" (click)="onCancel()">OK</button>
       </div>
     </div>
   </div>
