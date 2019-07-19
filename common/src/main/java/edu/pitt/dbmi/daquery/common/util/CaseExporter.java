@@ -442,6 +442,20 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 			trckFile.write(id + "," + ((patNum == null)?"":patNum.toString()) + "," + ((shiftDays == null)?"":shiftDays.toString()) + "\n");
 		}		
 	}
+
+	
+    private String appendFileNumber(String fileName, int fileNumber)
+    {
+          if(StringHelper.isBlank(fileName)) return(fileName);
+          String fNum = "-" + Integer.toString(fileNumber);
+          String fName = fileName.trim();
+          if(fName.length() <= 4)
+                fName = fName + fNum;
+          else
+                fName = fName.substring(0, fName.length() - 4) + fNum + fName.substring(fName.length() - 4);
+          return(fName);
+    }
+	
 	
 	private File dumpData(Connection conn, File tmpDir, DaqueryRequest daqueryRequest, int currentFileNumber, int pageCount, int patientsPerFile, String tempTableName) throws Throwable
 	{
@@ -450,13 +464,13 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 		for(OutputFile outputfile : model.getExportConfig().outputFiles){
 			if(outputfile.source == null){
 				FileOutputStream ontologyOutputStream = null;
-				String ontologyFilename = filenamePrefix + "-" + outputfile.name;
+				String ontologyFilename = filenamePrefix + "-" + appendFileNumber(outputfile.name, currentFileNumber);
 				ontologyOutputStream = new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + ontologyFilename));
 				
 				outputStreams.put(outputfile, new OutputStreamWriter(ontologyOutputStream));
 				
 			}else{
-				writeCustomCSVFile(conn, new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + outputfile.name))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile, tempTableName);
+				writeCustomCSVFile(conn, new OutputStreamWriter(new FileOutputStream(new File(tmpDir.getAbsolutePath() + File.separator + filenamePrefix + "-" + appendFileNumber(outputfile.name, currentFileNumber)))), daqueryRequest, currentFileNumber, patientsPerFile, outputfile, tempTableName);
 			}
 		}
 		
