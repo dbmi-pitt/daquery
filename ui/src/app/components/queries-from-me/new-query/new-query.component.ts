@@ -203,13 +203,15 @@ export class NewQueryComponent implements OnInit {
         this.sqlCheck('request');
       } else {
         if(this.inquiryForm.valid){
-          if(this.editingInquiry) {
-            this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
+          // if(this.editingInquiry) {
+          //   this.requestService.updateInquiry(this.editingInquiry.inquiryId, this.inquiryForm.value)
+          //                     .subscribe();
+          // } else {
+          //   this.requestService.saveInquires(this.inquiryForm.value)
+          //                     .subscribe();
+          // }
+          this.requestService.saveInquires(this.inquiryForm.value)
                               .subscribe();
-          } else {
-            this.requestService.saveInquires(this.inquiryForm.value)
-                              .subscribe();
-          }
         }
         //$('#newQueryModal').modal('hide');
         $('#myRequestModal').modal('show');
