@@ -178,7 +178,7 @@ public class PopulateDevData
 		user.setRealName("Test User");
 		user.setStatusEnum(UserStatus.ACTIVE);
 		user.setUsername("tester");
-		List<Role> roles = new ArrayList<Role>();
+		Set<Role> roles = new HashSet<Role>();
 		Role role = RoleDAO.queryRoleByName("aggregate_querier");
 		roles.add(role);
 		user.setRoles(roles);
