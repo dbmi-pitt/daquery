@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -716,7 +717,7 @@ public class UserEndpoint extends AbstractEndpoint {
     		if (new_user.getStatusEnum() == null) {
     			new_user.setStatusEnum(UserStatus.ACTIVE);
     		}
-    		new_user.setRoles(new ArrayList<Role>());
+    		new_user.setRoles(new HashSet<Role>());
     		new_user.getRoles().add(RoleDAO.queryRoleByName("viewer"));
     		new_user.setStatus(UserStatus.PWD_EXPIRED.toString());
     		

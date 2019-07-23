@@ -17,7 +17,9 @@ import io.restassured.RestAssured;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -83,7 +85,7 @@ public class RoleTest {
 	    	session = HibernateConfiguration.openSession();
 			DaqueryUser u = DaqueryUserDAO.authenticate(email, password);
 			Role r = RoleDAO.queryRoleByName("admin");
-			List<Role> roles = new ArrayList<Role>();
+			Set<Role> roles = new HashSet<Role>();
 			roles.add(r);
 			u.setRoles(roles);			
 			session.getTransaction().begin();

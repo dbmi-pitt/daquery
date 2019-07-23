@@ -1792,7 +1792,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			String securityToken) throws DaqueryException, JsonParseException, JsonMappingException, IOException {
 		request.setDirection("OUT");
 		request.setSentTimestamp(new Date());
-		DaqueryRequestDAO.updateOrSave(request);
+		DaqueryRequestDAO.saveOrUpdate(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if (response.getStatus() == 201) {
 			String json = response.readEntity(String.class);
