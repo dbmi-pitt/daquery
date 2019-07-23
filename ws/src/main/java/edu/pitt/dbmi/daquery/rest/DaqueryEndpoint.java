@@ -1348,7 +1348,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		request.setSentTimestamp(new Date());
 		SQLCode code = (((SQLQuery)request.getInquiry()).getCode()).iterator().next();
 		code.setQuery((SQLQuery) request.getInquiry());
-		DaqueryRequestDAO.updateOrSave(request);
+		DaqueryRequestDAO.saveOrUpdate(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if (response.getStatus() == 200) {
 			String json = response.readEntity(String.class);
@@ -1550,7 +1550,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 		request.setSentTimestamp(new Date());
 		SQLCode code = (((SQLQuery)request.getInquiry()).getCode()).iterator().next();
 		code.setQuery((SQLQuery) request.getInquiry());
-		DaqueryRequestDAO.updateOrSave(request);
+		DaqueryRequestDAO.saveOrUpdate(request);
 		response = WSConnectionUtil.postJSONToRemoteSite(requestSite, "request", request.toJson(), securityToken);
 		if (response.getStatus() == 201) {
 			String json = response.readEntity(String.class);
