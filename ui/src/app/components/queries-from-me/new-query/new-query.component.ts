@@ -165,7 +165,7 @@ export class NewQueryComponent implements OnInit {
   }
 
   onInquiryNameChange(name: String) {
-    if(this.inquiryNames.has(name)){
+    if(this.inquiryNames.has(name.trim())){
       this.inquiryForm.get('inquiryName').setErrors({dup: true});
     } else {
       this.inquiryForm.get('inquiryName').setErrors({dup: null});
