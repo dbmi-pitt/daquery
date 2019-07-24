@@ -161,6 +161,7 @@ export class NewQueryComponent implements OnInit {
                           inquiries.map(q => {
                             this.inquiryNames.add(q.inquiryName);
                           });
+
                        });
   }
 
@@ -196,6 +197,9 @@ export class NewQueryComponent implements OnInit {
         this.inquiryForm.get('query').get('oracle').value === "" && 
         this.inquiryForm.get('query').get('sqlServer').value === ""){
       this.inquiryForm.get('query').setErrors({atLeastOne: true});
+    }
+    if(this.inquiryNames.has(this.inquiryForm.get('inquiryName').value.trim())){
+      this.inquiryForm.get('inquiryName').setErrors({dup: true});
     }
     //this.showNetworkSitePanel = !this.showNetworkSitePanel;
     if(this.inquiryForm.valid){

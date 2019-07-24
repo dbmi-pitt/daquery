@@ -66,7 +66,7 @@ public class InquiryDAO extends AbstractDAO {
 //				yCount++;
 //				System.out.println("here");
 //			}
-			if(inquiry.getRequests().size() == 0)
+//			if(inquiry.getRequests().size() == 0)
 				if(inquiry.getDataType().equals("SQL_QUERY")) 
 				{
 					ret.add((SQLQuery)inquiry);
