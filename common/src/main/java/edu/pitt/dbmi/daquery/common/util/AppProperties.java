@@ -404,19 +404,19 @@ public class AppProperties
 		setDBProperty("temp.export.dir", dir);
 	}
 	
-	private static final String defaultCasePerFile = "70000";
-	public static String getCasePerFile() throws DaqueryException
+	private static final Integer defaultCasePerFile = 70000;
+	public static Integer getCasePerFile() throws DaqueryException
 	{
 		String val = getDBProperty("case.per.file");
 		if(val == null)
 			return defaultCasePerFile;
 		else
-			return val;
+			return Integer.parseInt(val);
 	}
 	
-	public static void setCasePerFile(String val) throws DaqueryException
+	public static void setCasePerFile(Integer val) throws DaqueryException
 	{
-		setDBProperty("case.per.file", val);
+		setDBProperty("case.per.file", val.toString());
 	}
 	
 	public static String getDefaultCentralServerURL() throws DaqueryException

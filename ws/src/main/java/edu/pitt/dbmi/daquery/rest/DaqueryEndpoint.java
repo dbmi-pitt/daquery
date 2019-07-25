@@ -1021,7 +1021,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			properties.put("localDeliveryDir", AppProperties.getLocalDeliveryDir());
 			properties.put("trackingOutputDir", AppProperties.getTrackingDir());
 			properties.put("tempFileExportDir", AppProperties.getTempFileExportDir());
-			properties.put("casePerFile", AppProperties.getCasePerFile());
+			properties.put("casePerFile", AppProperties.getCasePerFile().toString());
 			properties.put("centralURL", AppProperties.getCentralURL());
 			properties.put("centralURLENVSet",
 					String.valueOf(!StringHelper.isBlank(System.getenv("DAQUERY_CENT_URL"))));
@@ -1142,7 +1142,7 @@ public class DaqueryEndpoint extends AbstractEndpoint {
 			AppProperties.setLocalDeliveryDir((String) properties.get("localDeliveryDir"));
 			AppProperties.setTrackingDir((String) properties.get("trackingOutputDir"));
 			AppProperties.setTempFileExportDir((String) properties.get("tempFileExportDir"));
-			AppProperties.setCasePerFile((String) properties.get("casePerFile"));
+			AppProperties.setCasePerFile((Integer) properties.get("casePerFile"));
 			AppProperties.setCentralURL((String) properties.get("centralURL"));
 			AppProperties.setNotList(properties.get("notList").toString());
 
