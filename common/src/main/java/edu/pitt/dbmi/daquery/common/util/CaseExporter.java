@@ -239,6 +239,7 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 					insertTempTableQuery = sqlFirstPart + "into " + tempTableName + " " + sqlSecondPart;
 				}
 			Statement st = conn.createStatement();
+			st.execute("Delete from " + tempTableName);
 			st.execute(insertTempTableQuery);
 			st.close();
 			return true;
