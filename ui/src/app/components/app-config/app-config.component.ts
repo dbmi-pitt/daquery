@@ -77,7 +77,7 @@ export class AppConfigComponent implements OnInit {
                         this.appConfigForm.get('localDeliveryDir').setValue(res.localDeliveryDir);
                         this.appConfigForm.get('trackingOutputDir').setValue(res.trackingOutputDir);
                         this.appConfigForm.get('tempFileExportDir').setValue(res.tempFileExportDir);
-                        this.appConfigForm.get('casePerFile').setValue(res.casePerFile);
+                        this.appConfigForm.get('casePerFile').setValue(parseInt(res.casePerFile));
                         this.appConfigForm.get('centralURL').setValue(res.centralURL);
                         this.appConfigForm.get('notList').setValue(res.notList === 'true' ? true : false);
                         this.centralURLENVSet = (res.centralURLENVSet === 'true');
