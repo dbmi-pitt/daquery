@@ -92,6 +92,10 @@ public class DataModelOld extends DaqueryObject implements Serializable
 	@Column(name = "REVISION")
 	private Long revision;
 
+	@Expose
+	@Column(name= "NETWORK_ID")
+	private Long networkId;
+	
 	public DataModelOld(){}
 
 	public DataModelOld(boolean createUUID)
@@ -135,6 +139,9 @@ public class DataModelOld extends DaqueryObject implements Serializable
 
 	public Long getRevision(){return(revision);}
 	public void setRevision(Long rev){revision = rev;}
+	
+	public Long getNetworkId(){return(networkId);}
+	public void setNetworkId(Long netId){networkId = netId;}
 	
 	
 	@Transient
