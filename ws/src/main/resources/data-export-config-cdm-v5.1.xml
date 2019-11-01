@@ -1,0 +1,450 @@
+<dataExportConfig cases-per-file='70000'>
+<outputFile name='demographic.csv' source='demographic'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Birth Date' colName='BIRTH_DATE' deid='birthday' />
+	    <field name='Birth Time' colName='BIRTH_TIME' />
+	    <field name='Sex' colName='SEX' />
+	    <field name='Sexual Orientation' colName='SEXUAL_ORIENTATION' />
+	    <field name='Gender Identity' colName='GENDER_IDENTITY' />
+	    <field name='Hispanic' colName='HISPANIC' />
+	    <field name='Race' colName='RACE'/>
+	    <field name='Biobank Flag' colName='BIOBANK_FLAG'/>
+	    <field name='Raw Sex' colName='RAW_SEX'/>
+	    <field name='Raw Sexual Orientation' colName='RAW_SEXUAL_ORIENTATION'/>
+	    <field name='Raw Gender Identity' colName='RAW_GENDER_IDENTITY'/>
+	    <field name='Raw Hispanic' colName='RAW_HISPANIC'/>
+	    <field name='Raw Race' colName='RAW_RACE'/>
+	    <field name = 'PAT_PREF_LANGUAGE_SPOKEN' colName='PAT_PREF_LANGUAGE_SPOKEN'/>
+	    <field name = 'RAW_PAT_PREF_LANGUAGE_SPOKEN' colName='RAW_PAT_PREF_LANGUAGE_SPOKEN'/>
+	    <field name = 'RUCA_CODE' colName='RUCA_CODE'/>
+	    <field name = 'ZIP_CODE' colName='ZIP_CODE' deid='zip'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='immunization.csv' source='immunization'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Immunization Id' colName='IMMUNIZATIONID' />
+	    <field name='Enc Id' colName='ENCOUNTERID' />
+	    <field name='Procedure Id' colName='PROCEDURESID' />
+	    <field name='Provider Id' colName='VX_PROVIDERID' />
+	    <field name='VX Record Data' colName='VX_RECORD_DATE' />
+	    <field name='VX Admin Date' colName='VX_ADMIN_DATE' />
+	    <field name='VX Code Type' colName='VX_CODE_TYPE' />
+	    <field name='VX Code' colName='VX_CODE' />
+	    <field name='VX Status' colName='VX_STATUS' />
+	    <field name='VX Status Reason' colName='VX_STATUS_REASON' />
+	    <field name='VX Source' colName='VX_SOURCE' />
+	    <field name='VX Dose' colName='VX_DOSE' />
+	    <field name='VX Dose Unit' colName='VX_DOSE_UNIT' />
+	    <field name = 'VX Route' colName='VX_ROUTE'/>
+	    <field name = 'VX Body Site' colName='VX_BODY_SITE'/>
+   	    <field name = 'VX Manufacturer' colName='VX_MANUFACTURER'/>
+   	    <field name = 'VX Lot Num' colName='VX_LOT_NUM'/>
+   	    <field name = 'VX Exp Date' colName='VX_EXP_DATE'/>
+   	    <field name = 'RAW VX Name' colName='RAW_VX_NAME'/>
+   	    <field name = 'RAW VX Code' colName='RAW_VX_CODE'/>
+   	    <field name = 'RAW VX Code Type' colName='RAW_VX_CODE_TYPE'/>
+   	    <field name = 'RAW VX Dose' colName='RAW_VX_DOSE'/>
+   	    <field name = 'RAW VX Dose Unit' colName='RAW_VX_DOSE_UNIT'/>
+   	    <field name = 'RAW VX Route' colName='RAW_VX_ROUTE'/>
+   	    <field name = 'RAW VX Body Site' colName='RAW_VX_BODY_SITE'/>
+   	    <field name = 'RAW VX Status' colName='RAW_VX_STATUS'/>
+   	    <field name = 'RAW VX Status Reason' colName='RAW_VX_STATUS_REASON'/>
+   	    <field name = 'RAW VX Manufacturer' colName='RAW_VX_MANUFACTURER'/>
+	</custom-column-set>
+</outputFile>
+<outputFile name='enrollment.csv' source='enrollment'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Enr State Date' colName='ENR_START_DATE' />
+	    <field name='Enr End Date' colName='ENR_END_DATE' />
+	    <field name='Chart' colName='CHART' />
+	    <field name='Enr Basis' colName='ENR_BASIS' />
+	</custom-column-set>
+</outputFile>
+<outputFile name='encounter.csv' source='encounter'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Endcounter Id' colName='ENCOUNTERID' />
+	    <field name='Admit Date' colName='ADMIT_DATE' />
+	    <field name='Admit Time' colName='ADMIT_TIME' />
+	    <field name='Discharge Date' colName='DISCHARGE_DATE' />
+	    <field name='Discharge Time' colName='DISCHARGE_TIME' />
+	    <field name='Provider Id' colName='PROVIDERID' />
+	    <field name='Facility Location' colName='FACILITY_LOCATION' />
+	    <field name='Enc Type' colName='ENC_TYPE' />
+	    <field name='Facility Id' colName='FACILITYID' />	    
+	    <field name='Discharge Disposition' colName='DISCHARGE_DISPOSITION' />
+	    <field name='Discharge Status' colName='DISCHARGE_STATUS' />
+	    <field name='DRG' colName='DRG' />
+	    <field name='DRG Type' colName='DRG_TYPE' />
+	    <field name='Admitting Source' colName='ADMITTING_SOURCE' />
+	    <field name='Raw Site Id' colName='RAW_SITEID' />
+	    <field name='Raw Enc Type' colName='RAW_ENC_TYPE' />
+	    <field name='Raw Discharge Disposition' colName='RAW_DISCHARGE_DISPOSITION' />
+	    <field name='Raw Discharge Status' colName='RAW_DISCHARGE_STATUS' />
+	    <field name='Raw DRG Type' colName='RAW_DRG_TYPE' />
+	    <field name='Raw Admitting Source' colName='RAW_ADMITTING_SOURCE' />
+	    <field name='FACILITY_TYPE' colName='FACILITY_TYPE'/>
+	    <field name='PAYER_TYPE_PRIMARY' colName='PAYER_TYPE_PRIMARY'/>
+	    <field name='PAYER_TYPE_SECONDARY' colName='PAYER_TYPE_SECONDARY'/>
+	    <field name='RAW_FACILITY_TYPE' colName='RAW_FACILITY_TYPE'/>
+	    <field name='RAW_PAYER_ID_PRIMARY' colName='RAW_PAYER_ID_PRIMARY'/>
+	    <field name='RAW_PAYER_ID_SECONDARY' colName='RAW_PAYER_ID_SECONDARY'/>
+	    <field name='RAW_PAYER_TYPE_PRIMARY' colName='RAW_PAYER_TYPE_PRIMARY'/>
+	    <field name='RAW_PAYER_TYPE_SECONDARY' colName='RAW_PAYER_TYPE_SECONDARY'/>
+	</custom-column-set>
+</outputFile>
+<outputFile name='diagnosis.csv' source='diagnosis'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Encounter Id' colName='ENCOUNTERID' />
+	    <field name='Enc Type' colName='ENC_TYPE' />
+	    <field name='Admit Date' colName='ADMIT_DATE' />
+	    <field name='Provider Id' colName='PROVIDERID' />
+	    <field name='DX' colName='DX' />
+	    <field name='DX Type' colName='DX_TYPE' />
+	    <field name='DX Source' colName='DX_SOURCE' />
+	    <field name='DX Origin' colName='DX_ORIGIN' />
+	    <field name='PDX' colName='PDX' />
+	    <field name='Raw DX' colName='RAW_DX' />
+	    <field name='Raw DX Type' colName='RAW_DX_TYPE' />
+	    <field name='Raw DX Source' colName='RAW_DX_SOURCE' />
+	    <field name='Raw PDX' colName='RAW_PDX' />
+	    <field name = 'DX_POA' colName='DX_POA'/>
+	    <field name = 'RAW_DX_POA' colName='RAW_DX_POA'/>
+	</custom-column-set>
+</outputFile>
+<outputFile name='procedures.csv' source='procedures'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Procedures Id' colName='PROCEDURESID' />
+	    <field name='Encounter Id' colName='ENCOUNTERID' />
+	    <field name='Enc Type' colName='ENC_TYPE' />
+	    <field name='Admit Date' colName='ADMIT_DATE' />
+	    <field name='Provider Id' colName='PROVIDERID' />
+	    <field name='PX Date' colName='PX_DATE' />
+	    <field name='PX' colName='PX' />
+	    <field name='PX Type' colName='PX_TYPE' />
+	    <field name='PX Source' colName='PX_SOURCE' />
+	    <field name='Raw PX' colName='RAW_PX' />
+	    <field name='Raw PX Type' colName='RAW_PX_TYPE' />
+	</custom-column-set>
+</outputFile>
+<outputFile name='vital.csv' source='vital'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Encounter Id' colName='ENCOUNTERID' />
+	    <field name='Measure Date' colName='MEASURE_DATE' />
+	    <field name='Measure Time' colName='MEASURE_TIME' />
+	    <field name='Vital Source' colName='VITAL_SOURCE' />
+	    <field name='HT' colName='HT' />
+	    <field name='WT' colName='WT' />
+	    <field name='Diastolic' colName='DIASTOLIC' />
+	    <field name='Systolic' colName='SYSTOLIC' />
+	    <field name='Original BMI' colName='ORIGINAL_BMI' />
+	    <field name='BP Position' colName='BP_POSITION' />
+	    <field name='Smoking' colName='SMOKING' />
+	    <field name='Tobacco' colName='TOBACCO' />
+	    <field name='Tobacco Type' colName='TOBACCO_TYPE' />
+	    <field name='Raw Vital Source' colName='RAW_VITAL_SOURCE' />
+	    <field name='Raw Diastolic' colName='RAW_DIASTOLIC' />
+	    <field name='Raw Systolic' colName='RAW_SYSTOLIC' />
+	    <field name='Raw BP Position' colName='RAW_BP_POSITION' />
+	    <field name='Raw Smoking' colName='RAW_SMOKING' />
+	    <field name='Raw Tobacco' colName='RAW_TOBACCO' />
+	    <field name='Raw Tobacco Type' colName='RAW_TOBACCO_TYPE' />
+	</custom-column-set>
+</outputFile>
+<outputFile name='dispensing.csv' source='dispensing'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Prescribing Id' colName='PRESCRIBINGID' />
+	    <field name='Dispense Date' colName='DISPENSE_DATE' />
+	    <field name='NDC' colName='NDC' />
+	    <field name='Dispense Sup' colName='DISPENSE_SUP' />
+	    <field name='Dispense Amt' colName='DISPENSE_AMT' />
+	    <field name='Raw NDC' colName='RAW_NDC' />
+	    <field name='DISPENSE_DOSE_DISP_UNIT' colName='DISPENSE_DOSE_DISP_UNIT'/>
+	    <field name='DISPENSE_ROUTE' colName='DISPENSE_ROUTE'/>
+	    <field name='DISPENSE_SUP' colName='DISPENSE_SUP'/>
+	    <field name='RAW_DISPENSE_DOSE_DISP' colName='RAW_DISPENSE_DOSE_DISP'/>
+	    <field name='RAW_DISPENSE_DOSE_DISP_UNIT' colName='RAW_DISPENSE_DOSE_DISP_UNIT'/>
+	    <field name='RAW_DISPENSE_ROUTE' colName='RAW_DISPENSE_ROUTE'/>
+	    <field name='DISPENSE_SOURCE' colName='DISPENSE_SOURCE'/>
+	</custom-column-set>
+</outputFile>
+<outputFile name='lab_result_cm.csv' source='lab_result_cm'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Encounter Id' colName='ENCOUNTERID' />
+	    <field name='Specimen Source' colName='SPECIMEN_SOURCE' />
+	    <field name='Lab LOINC' colName='LAB_LOINC' />
+	    <field name='Priority' colName='PRIORITY' />
+	    <field name='Result Loc' colName='RESULT_LOC' />
+	    <field name='Lab PX' colName='LAB_PX' />
+	    <field name='Lab PX Type' colName='LAB_PX_TYPE' />
+	    <field name='Lab Order Date' colName='LAB_ORDER_DATE' />
+	    <field name='Specimen Date' colName='SPECIMEN_DATE' />
+	    <field name='Specimen Time' colName='SPECIMEN_TIME' />
+	    <field name='Result Date' colName='RESULT_DATE' />
+	    <field name='Result Time' colName='RESULT_TIME' />
+	    <field name='Result Qual' colName='RESULT_QUAL' />
+	    <field name='Result Num' colName='RESULT_NUM' />
+	    <field name='Result Modifier' colName='RESULT_MODIFIER' />
+	    <field name='Result Unit' colName='RESULT_UNIT' />
+	    <field name='Norm Range Low' colName='NORM_RANGE_LOW' />
+	    <field name='Norm Modifier Low' colName='NORM_MODIFIER_LOW' />
+	    <field name='Norm Range High' colName='NORM_RANGE_HIGH' />
+	    <field name='Norm Modifier High' colName='NORM_MODIFIER_HIGH' />
+	    <field name='Abn Ind' colName='ABN_IND' />
+	    <field name='Raw Lab Name' colName='RAW_LAB_NAME' />
+	    <field name='Raw Lab Code' colName='RAW_LAB_CODE' />
+	    <field name='Raw Panel' colName='RAW_PANEL' />
+	    <field name='Raw Result' colName='RAW_RESULT' />
+	    <field name='Raw Unit' colName='RAW_UNIT' />
+	    <field name='Raw Order Dept' colName='RAW_ORDER_DEPT' />
+	    <field name='Raw Facility Code' colName='RAW_FACILITY_CODE' />
+	    <field name='RESULT_SNOMED' colName='RESULT_SNOMED'/>
+	    <field name='LAB_RESULT_SOURCE' colName='LAB_RESULT_SOURCE'/>
+	    <field name='LAB_LOINC_SOURCE' colName='LAB_LOINC_SOURCE'/>
+	</custom-column-set>
+</outputFile>
+<outputFile name='condition.csv' source='condition'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Encounter Id' colName='ENCOUNTERID' />
+	    <field name='Report Date' colName='REPORT_DATE' />
+	    <field name='Resolve Date' colName='RESOLVE_DATE' />
+	    <field name='Onset Date' colName='ONSET_DATE' />
+	    <field name='Condition Status' colName='CONDITION_STATUS' />
+	    <field name='Condition' colName='CONDITION' />
+	    <field name='Condition Type' colName='CONDITION_TYPE' />
+	    <field name='Condition Source' colName='CONDITION_SOURCE' />
+	    <field name='Raw Condition Status' colName='RAW_CONDITION_STATUS' />
+	    <field name='Raw Condition' colName='RAW_CONDITION' />
+	    <field name='Raw Condition Type' colName='RAW_CONDITION_TYPE' />
+	    <field name='Raw Condition Source' colName='RAW_CONDITION_SOURCE' />
+	</custom-column-set>
+</outputFile>
+<outputFile name='pro_cm.csv' source='pro_cm'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Encounter Id' colName='ENCOUNTERID' />
+	    <field name='PRO Date' colName='PRO_DATE' />
+	    <field name='PRO Method' colName='PRO_METHOD' />
+	    <field name='PRO Mode' colName='PRO_MODE' />
+	    <field name='PRO CAT' colName='PRO_CAT' />
+	    <field name='Raw PRO Code' colName='RAW_PRO_CODE' />
+	    <field name='Raw PRO Response' colName='RAW_PRO_RESPONSE' />
+	    <field name='EVENT_CODE' colName='EVENT_CODE'/>
+	    <field name='PATH_CODE' colName='PATH_CODE'/>
+	    <field name='PRO_ITEM_FULLNAME' colName='PRO_ITEM_FULLNAME'/>
+	    <field name='PRO_ITEM_LOINC' colName='PRO_ITEM_LOINC'/>
+	    <field name='PRO_ITEM_NAME' colName='PRO_ITEM_NAME'/>
+	    <field name='PRO_ITEM_TEXT' colName='PRO_ITEM_TEXT'/>
+	    <field name='PRO_ITEM_VERSION' colName='PRO_ITEM_VERSION'/>
+	    <field name='PRO_MEASURE_COUNT_SCORED' colName='PRO_MEASURE_COUNT_SCORED'/>
+	    <field name='PRO_MEASURE_FULLNAME' colName='PRO_MEASURE_FULLNAME'/>
+	    <field name='PRO_MEASURE_LOINC' colName='PRO_MEASURE_LOINC'/>
+	    <field name='PRO_MEASURE_NAME' colName='PRO_MEASURE_NAME'/>
+	    <field name='PRO_MEASURE_SCALED_TSCORE' colName='PRO_MEASURE_SCALED_TSCORE'/>
+	    <field name='PRO_MEASURE_SCORE' colName='PRO_MEASURE_SCORE'/>
+	    <field name='PRO_MEASURE_SEQ' colName='PRO_MEASURE_SEQ'/>
+	    <field name='PRO_MEASURE_STANDARD_ERROR' colName='PRO_MEASURE_STANDARD_ERROR'/>
+	    <field name='PRO_MEASURE_THETA' colName='PRO_MEASURE_THETA'/>
+	    <field name='PRO_MEASURE_VERSION' colName='PRO_MEASURE_VERSION'/>
+	    <field name='PRO_RESPONSE_DATE' colName='PRO_RESPONSE_DATE'/>
+	    <field name='PRO_RESPONSE_NUM' colName='PRO_RESPONSE_NUM'/>
+	    <field name='PRO_RESPONSE_TEXT' colName='PRO_RESPONSE_TEXT'/>
+	    <field name='PRO_TYPE' colName='PRO_TYPE'/>
+	    <field name='PRO_SOURCE' colName='PRO_SOURCE'/>
+	</custom-column-set>
+</outputFile>
+<outputFile name='prescribing.csv' source='prescribing'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Prescribing Id' colName='PRESCRIBINGID' />
+	    <field name='Encounter Id' colName='ENCOUNTERID' />
+	    <field name='RX Provider Id' colName='RX_PROVIDERID' />
+	    <field name='RX Order Date' colName='RX_ORDER_DATE' />
+	    <field name='RX Order Time' colName='RX_ORDER_TIME' />
+	    <field name='RX Start Date' colName='RX_START_DATE' />
+	    <field name='RX End Date' colName='RX_END_DATE' />
+	    <field name='RX Quantity' colName='RX_QUANTITY' />
+	    <field name='RX Refills' colName='RX_REFILLS' />
+	    <field name='RX Days Supply' colName='RX_DAYS_SUPPLY' />
+	    <field name='RX Frequency' colName='RX_FREQUENCY' />
+	    <field name='RX Basis' colName='RX_BASIS' />
+	    <field name='RXNORM CUI' colName='RXNORM_CUI' />
+	    <field name='Raw RX Med Name' colName='RAW_RX_MED_NAME' />
+	    <field name='Raw RX Frequency' colName='RAW_RX_FREQUENCY' />
+	    <field name='Raw RXNORM CUI' colName='RAW_RXNORM_CUI' />
+	    <field name='Raw RX Quantity' colName='RAW_RX_QUANTITY' />
+	    <field name='Raw RX NDC' colName='RAW_RX_NDC' />
+	    <field name='RAW_RX_DOSE_ORDERED' colName='RAW_RX_DOSE_ORDERED'/>
+	    <field name='RAW_RX_DOSE_ORDERED_UNIT' colName='RAW_RX_DOSE_ORDERED_UNIT'/>
+	    <field name='RAW_RX_REFILLS' colName='RAW_RX_REFILLS'/>
+	    <field name='RAW_RX_ROUTE' colName='RAW_RX_ROUTE'/>
+	    <field name='RX_DISPENSE_AS_WRITTEN' colName='RX_DISPENSE_AS_WRITTEN'/>
+	    <field name='RX_DOSE_FORM' colName='RX_DOSE_FORM'/>
+	    <field name='RX_DOSE_ORDERED' colName='RX_DOSE_ORDERED'/>
+	    <field name='RX_DOSE_ORDERED_UNIT' colName='RX_DOSE_ORDERED_UNIT'/>
+	    <field name='RX_PRN_FLAG' colName='RX_PRN_FLAG'/>
+	    <field name='RX_ROUTE' colName='RX_ROUTE'/>
+	    <field name='RX_SOURCE' colName='RX_SOURCE'/>
+	</custom-column-set>
+</outputFile>
+<outputFile name='death.csv' source='death'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Death Date' colName='DEATH_DATE' />
+	    <field name='Death Date Impute' colName='DEATH_DATE_IMPUTE' />
+	    <field name='Death Source' colName='DEATH_SOURCE' />
+	    <field name='Death Match Confidence' colName='DEATH_MATCH_CONFIDENCE' />
+	</custom-column-set>
+</outputFile>
+<outputFile name='death_cause.csv' source='death_cause'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+	    <field name='Death Cause' colName='DEATH_CAUSE' />
+	    <field name='Death Cause Code' colName='DEATH_CAUSE_CODE' />
+	    <field name='Death Cause Type' colName='DEATH_CAUSE_TYPE' />
+	    <field name='Death Cause Source' colName='DEATH_CAUSE_SOURCE' />
+	    <field name='Death Cause Confidence' colName='DEATH_CAUSE_CONFIDENCE' />
+	</custom-column-set>
+</outputFile>
+<outputFile name='med_admin.csv' source='med_admin'>
+	<idColumn>PATID</idColumn>
+	<custom-column-set>
+	    <field name='ENCOUNTERID' colName='ENCOUNTERID'/>
+	    <field name='MEDADMIN_CODE' colName='MEDADMIN_CODE'/>
+	    <field name='MEDADMIN_DOSE_ADMIN' colName='MEDADMIN_DOSE_ADMIN'/>
+	    <field name='MEDADMIN_DOSE_ADMIN_UNIT' colName='MEDADMIN_DOSE_ADMIN_UNIT'/>
+	    <field name='MEDADMIN_PROVIDERID' colName='MEDADMIN_PROVIDERID'/>
+	    <field name='MEDADMIN_ROUTE' colName='MEDADMIN_ROUTE'/>
+	    <field name='MEDADMIN_SOURCE' colName='MEDADMIN_SOURCE'/>
+	    <field name='MEDADMIN_START_DATE' colName='MEDADMIN_START_DATE'/>
+	    <field name='MEDADMIN_START_TIME' colName='MEDADMIN_START_TIME'/>
+	    <field name='MEDADMIN_STOP_DATE' colName='MEDADMIN_STOP_DATE'/>
+	    <field name='MEDADMIN_STOP_TIME' colName='MEDADMIN_STOP_TIME'/>
+	    <field name='MEDADMIN_TYPE' colName='MEDADMIN_TYPE'/>
+	    <field name='PRESCRIBINGID' colName='PRESCRIBINGID'/>
+	    <field name='RAW_MEDADMIN_CODE' colName='RAW_MEDADMIN_CODE'/>
+	    <field name='RAW_MEDADMIN_DOSE_ADMIN' colName='RAW_MEDADMIN_DOSE_ADMIN'/>
+	    <field name='RAW_MEDADMIN_DOSE_ADMIN_UNIT' colName='RAW_MEDADMIN_DOSE_ADMIN_UNIT'/>
+	    <field name='RAW_MEDADMIN_MED_NAME' colName='RAW_MEDADMIN_MED_NAME'/>
+	    <field name='RAW_MEDADMIN_ROUTE	' colName='RAW_MEDADMIN_ROUTE	'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='obs_clin.csv' source='obs_clin'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+       <field name='ENCOUNTERID' colName='ENCOUNTERID'/>
+       <field name='OBSCLINID' colName='OBSCLINID'/>
+       <field name='OBSCLIN_CODE' colName='OBSCLIN_CODE'/>
+       <field name='OBSCLIN_DATE' colName='OBSCLIN_DATE'/>
+       <field name='OBSCLIN_PROVIDERID' colName='OBSCLIN_PROVIDERID'/>
+       <field name='OBSCLIN_RESULT_MODIFIER' colName='OBSCLIN_RESULT_MODIFIER'/>
+       <field name='OBSCLIN_RESULT_NUM' colName='OBSCLIN_RESULT_NUM'/>
+       <field name='OBSCLIN_RESULT_QUAL' colName='OBSCLIN_RESULT_QUAL'/>
+       <field name='OBSCLIN_RESULT_SNOMED' colName='OBSCLIN_RESULT_SNOMED'/>
+       <field name='OBSCLIN_RESULT_TEXT' colName='OBSCLIN_RESULT_TEXT'/>
+       <field name='OBSCLIN_RESULT_UNIT' colName='OBSCLIN_RESULT_UNIT'/>
+       <field name='OBSCLIN_TIME' colName='OBSCLIN_TIME'/>
+       <field name='OBSCLIN_TYPE' colName='OBSCLIN_TYPE'/>
+       <field name='RAW_OBSCLIN_CODE' colName='RAW_OBSCLIN_CODE'/>
+       <field name='RAW_OBSCLIN_MODIFIER' colName='RAW_OBSCLIN_MODIFIER'/>
+       <field name='RAW_OBSCLIN_NAME' colName='RAW_OBSCLIN_NAME'/>
+       <field name='RAW_OBSCLIN_RESULT' colName='RAW_OBSCLIN_RESULT'/>
+       <field name='RAW_OBSCLIN_TYPE' colName='RAW_OBSCLIN_TYPE'/>
+       <field name='RAW_OBSCLIN_UNIT' colName='RAW_OBSCLIN_UNIT'/>
+       <field name='OBSCLIN_SOURCE' colName='OBSCLIN_SOURCE'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='obs_gen.csv' source='obs_gen'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+       <field name='ENCOUNTERID' colName='ENCOUNTERID'/>
+       <field name='OBSGENID' colName='OBSGENID'/>
+       <field name='OBSGEN_CODE' colName='OBSGEN_CODE'/>
+       <field name='OBSGEN_DATE' colName='OBSGEN_DATE'/>
+       <field name='OBSGEN_PROVIDERID' colName='OBSGEN_PROVIDERID'/>
+       <field name='OBSGEN_RESULT_MODIFIER' colName='OBSGEN_RESULT_MODIFIER'/>
+       <field name='OBSGEN_RESULT_NUM' colName='OBSGEN_RESULT_NUM'/>
+       <field name='OBSGEN_RESULT_QUAL' colName='OBSGEN_RESULT_QUAL'/>
+       <field name='OBSGEN_RESULT_TEXT' colName='OBSGEN_RESULT_TEXT'/>
+       <field name='OBSGEN_RESULT_UNIT' colName='OBSGEN_RESULT_UNIT'/>
+       <field name='OBSGEN_TABLE_MODIFIED' colName='OBSGEN_TABLE_MODIFIED'/>
+       <field name='OBSGEN_TIME' colName='OBSGEN_TIME'/>
+       <field name='OBSGEN_TYPE' colName='OBSGEN_TYPE'/>
+       <field name='RAW_OBSGEN_CODE' colName='RAW_OBSGEN_CODE'/>
+       <field name='RAW_OBSGEN_NAME' colName='RAW_OBSGEN_NAME'/>
+       <field name='RAW_OBSGEN_RESULT' colName='RAW_OBSGEN_RESULT'/>
+       <field name='RAW_OBSGEN_TYPE' colName='RAW_OBSGEN_TYPE'/>
+       <field name='RAW_OBSGEN_UNIT' colName='RAW_OBSGEN_UNIT'/>
+       <field name='OBSGEN_SOURCE' colName='OBSGEN_SOURCE'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='pcornet_trial.csv' source='pcornet_trial'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+       <field name='PARTICIPANTID' colName='PARTICIPANTID'/>
+       <field name='TRIALID' colName='TRIALID'/>
+       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
+       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
+       <field name='TRIAL_INVITE_CODE' colName='TRIAL_INVITE_CODE'/>
+       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
+       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='path_cohort.csv' source='path_cohort'>
+    <custom-column-set>
+       <field name='ACCRUAL_TYPE' colName='ACCRUAL_TYPE'/>
+       <field name='ADMIN_NAME' colName='ADMIN_NAME'/>
+       <field name='ASSOCIATED_STUDY' colName='ASSOCIATED_STUDY'/>
+       <field name='COHORTID' colName='COHORTID'/>
+       <field name='COMPUTABLE_PHENO' colName='COMPUTABLE_PHENO'/>
+       <field name='DATE_ASSEMBLED' colName='DATE_ASSEMBLED'/>
+       <field name='REQ_CONSENT' colName='REQ_CONSENT'/>       
+       <field name='SHORT_NAME' colName='SHORT_NAME'/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='path_study.csv' source='path_study'>
+    <custom-column-set>
+       <field name='IRB_NUMBER' colName='IRB_NUMBER'/>
+       <field name='PARENT_STUDY' colName='PARENT_STUDY'/>
+       <field name='PI' colName='PI'/>
+       <field name='PI_INSTITUTION' colName='PI_INSTITUTION'/>
+       <field name='PROJECT_MANAGER' colName='PROJECT_MANAGER'/>
+       <field name='START_DATE' colName='START_DATE'/>
+       <field name='START_EVENT' colName='START_EVENT'/>
+       <field name='STUDYID' colName='STUDYID'/>
+       <field name='STUDY_DEFINITION' colName='STUDY_DEFINITION'/>
+       <field name='STUDY_NAME       ' colName='STUDY_NAME       '/>
+    </custom-column-set>
+</outputFile>
+<outputFile name='path_trial.csv' source='path_trial'>
+	<idColumn>PATID</idColumn>
+    <custom-column-set>
+       <field name='COHORTID' colName='COHORTID'/>
+       <field name='TRIAL_SITEID' colName='TRIAL_SITEID'/>
+       <field name='PARTICIPANTID' colName='PARTICIPANTID'/>
+       <field name='TRIAL_ENROLL_DATE' colName='TRIAL_ENROLL_DATE'/>
+       <field name='TRIAL_END_DATE' colName='TRIAL_END_DATE'/>
+       <field name='TRIAL_WITHDRAW_DATE' colName='TRIAL_WITHDRAW_DATE'/>
+    </custom-column-set>
+</outputFile>
+<!-- <outputFile name='provider.csv' source='provider'>
+    <custom-column-set>
+       <field name='PROVIDERID' colName='PROVIDERID'/>
+       <field name='PROVIDER_NPI' colName='PROVIDER_NPI'/>
+       <field name='PROVIDER_NPI_FLAG' colName='PROVIDER_NPI_FLAG'/>
+       <field name='PROVIDER_SEX' colName='PROVIDER_SEX'/>
+       <field name='PROVIDER_SPECIALTY_PRIMARY' colName='PROVIDER_SPECIALTY_PRIMARY'/>
+       <field name='RAW_PROVIDER_SPECIALTY_PRIMARY' colName='RAW_PROVIDER_SPECIALTY_PRIMARY'/>
+    </custom-column-set>
+</outputFile>
+ -->
+</dataExportConfig>
