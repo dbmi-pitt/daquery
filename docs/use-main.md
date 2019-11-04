@@ -14,6 +14,8 @@ layout: page
 
 ### [Joining a Network](join-network.html): <span class="txt">How to become a member of a network</span>
 
+### [Changing a Data Source](changing-data-source.html): <span class="txt">How to change a datas ource</span>
+
 ### [Local Users](edit-user.html): <span class="txt">How to add or edit site users</span>
 
 ### [Remote Users](remote-user-roles.html): <span class="txt">How to grant permission for remote users to submit queries</span>
