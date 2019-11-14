@@ -236,8 +236,6 @@
 	    <field name='PRO Method' colName='PRO_METHOD' />
 	    <field name='PRO Mode' colName='PRO_MODE' />
 	    <field name='PRO CAT' colName='PRO_CAT' />
-	    <field name='Raw PRO Code' colName='RAW_PRO_CODE' />
-	    <field name='Raw PRO Response' colName='RAW_PRO_RESPONSE' />
 	    <field name='EVENT_CODE' colName='EVENT_CODE'/>
 	    <field name='PATH_CODE' colName='PATH_CODE'/>
 	    <field name='PRO_ITEM_FULLNAME' colName='PRO_ITEM_FULLNAME'/>
