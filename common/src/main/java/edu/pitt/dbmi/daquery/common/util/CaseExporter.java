@@ -239,7 +239,15 @@ public class CaseExporter extends AbstractExporter implements DataExporter {
 					insertTempTableQuery = sqlFirstPart + "into " + tempTableName + " " + sqlSecondPart;
 				}
 			Statement st = conn.createStatement();
-			st.execute("Delete from " + tempTableName);
+			if(ds.getDriverClass().contains("oracle"))
+			{
+				st.execute("Delete from " + tempTableName);
+			}
+			else
+			{
+				String tblTest = "IF OBJECT_ID('tempdb.." + tempTableName + "') IS NOT NULL DROP TABLE " + tempTableName;
+				st.execute(tblTest);
+			}
 			st.execute(insertTempTableQuery);
 			st.close();
 			return true;
