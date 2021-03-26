@@ -10,7 +10,7 @@
     <properties>
         <hibernate-validator.version>5.4.1.Final</hibernate-validator.version>
         <hibernate.version>4.3.6.Final</hibernate.version>
-        <mysql-connector.version>5.1.38</mysql-connector.version>
+        <mysql-connector.version>8.0.16</mysql-connector.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
         <jstl.version>1.2</jstl.version>
         <junit.version>4.11</junit.version>
