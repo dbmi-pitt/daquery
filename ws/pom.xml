@@ -26,7 +26,7 @@
         <cdi.version>2.0</cdi.version> 
         <transaction.version>1.2</transaction.version> 
         <entitymanager.version>4.3.6.Final</entitymanager.version>
-        <jackson.version>2.5.2</jackson.version>
+        <jackson.version>2.12.2</jackson.version>
         <gson.version>2.6.2</gson.version>
         <jadira.version>3.1.0.GA</jadira.version>
         <c3p0.version>0.9.1.2</c3p0.version>
